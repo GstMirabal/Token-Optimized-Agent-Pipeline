@@ -1,6 +1,6 @@
 # 🗺️ Roadmap de Configuración del Repositorio `.agents`
 
-Este roadmap está diseñado para configurar Antigravity paso a paso, asegurando que se adapte perfectamente a tu flujo de trabajo y tus repositorios de desarrollo locales en cualquier OS. 
+Este roadmap está diseñado para configurar Universal-Agents paso a paso, asegurando que se adapte perfectamente a tu flujo de trabajo y tus repositorios de desarrollo locales en cualquier OS. 
 
 La idea es ir comprobando cada fase uno a uno.
 
@@ -20,7 +20,7 @@ La idea es ir comprobando cada fase uno a uno.
 - [x] Estándares para el manejo de dependencias (`requirements.txt`, `pyproject.toml`, etc.).
 - [x] Organización de la arquitectura base: ¿Patrones MVC, arquitecturas limpias, o scripts secuenciales? (Especialmente para tus transformadores de datos).
 
-### 1.3 Comportamiento y Comunicación de Antigravity:
+### 1.3 Comportamiento y Comunicación de Universal-Agents:
 - [x] Reglas de Delegación Táctica y Cuarentena de Código: Bloqueo de auto-aprobación y prohibición estricta de generar bloques extensos durante el rol de Mentor.
 - [x] Establecer el Idioma de la Documentación vs. Código (Ej. Código, variables y commits en **Inglés**, explicaciones y comentarios de alto nivel en **Español**).
 - [x] Nivel de detalle en las explicaciones: ¿Respuestas técnicas directas al grano o explicaciones didácticas paso a paso?
@@ -33,7 +33,7 @@ La idea es ir comprobando cada fase uno a uno.
 - [x] ¿Cómo manejamos los datos sensibles o contraseñas en los scripts? (Ej. uso obligatorio de archivos `.env` o gestores de secretos).
 
 ## Fase 2: Mapeo y Topología de Proyectos (Estructura Física)
-**Objetivo:** Enseñar a Antigravity la topología exacta y las fronteras de los repositorios para que opere sin destruir el entorno nativo del Mac.
+**Objetivo:** Enseñar a Universal-Agents la topología exacta y las fronteras de los repositorios para que opere sin destruir el entorno nativo del Mac.
 - [x] Definir la estructura de aislamiento Src-Layout (`/src`, `/tests`, `/data`), separando código de datos pesados (Git LFS).
 - [x] Centralizar comandos con un Orquestador de Atajos (Makefiles en vez de comandos bash ciegos).
 - [x] Establecer la regla del Virtual Environment nativo (`/venv/`) con ejecución binaria estricta (`./venv/bin/python`).

@@ -1,4 +1,4 @@
-# Antigravity Global User Rules
+# Universal-Agents Global User Rules
 Reglas de sintaxis, calidad y comunicación.
 
 ## 1. Código y Dialecto

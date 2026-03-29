@@ -106,7 +106,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 Gustavo Mirabal Suarez - gst.mirabal@gmail.com
 
-- LinkedIn: [@Gustavo-Mirabal](https://www.linkedin.com/in/gustavo-adolfo-mirabal-suarez-ab2738127)
+- LinkedIn: [@Gustavo-Mirabal](https://www.linkedin.com/in/gstmirabal/)
 - GitHub: [@GstMirabal](https://github.com/GstMirabal)
 - Twitter: [@GstMirabal](https://x.com/gst_mirabal)
 
@@ -126,4 +126,4 @@ Project Link: [{{REPO_URL}}]({{REPO_URL}})
 [license-shield]: https://img.shields.io/github/license/GstMirabal/{{REPO_NAME}}.svg?style=for-the-badge
 [license-url]: https://github.com/GstMirabal/{{REPO_NAME}}/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://www.linkedin.com/in/gstmirabal
+[linkedin-url]: https://www.linkedin.com/in/gstmirabal/

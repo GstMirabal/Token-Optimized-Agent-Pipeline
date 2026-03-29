@@ -5,7 +5,7 @@ version: 1.0.0
 
 # 🧠 Workflow: Extractor de Amnesia y Conocimiento
 
-Este es el **Protocolo de Cierre Obligatorio** para todos los Sprints de Antigravity. Dado que nuestra arquitectura dicta que las carpetas de estado temporal (`.agent_state/session_{UID}/`) deben ser destruidas para prevenir alucinaciones cruzadas y ahorro de tokens, este *Workflow* se asegura de destilar las "lecciones aprendidas" empujándolas a la memoria persistente del sistema (`/knowledge/`) antes de ejecutar el borrado físico de la Caché.
+Este es el **Protocolo de Cierre Obligatorio** para todos los Sprints de Universal-Agents. Dado que nuestra arquitectura dicta que las carpetas de estado temporal (`.agent_state/session_{UID}/`) deben ser destruidas para prevenir alucinaciones cruzadas y ahorro de tokens, este *Workflow* se asegura de destilar las "lecciones aprendidas" empujándolas a la memoria persistente del sistema (`/knowledge/`) antes de ejecutar el borrado físico de la Caché.
 
 ## Fase 1: Escaneo Retrospectivo (Brain Drain)
 Cuando el Director ordene `/save_knowledge` o declare el Sprint como terminado, el Orquestador leerá en frío el `task.md` y su historial de comandos, e identificará:
@@ -36,4 +36,4 @@ git add knowledge/
 git commit -m "docs(knowledge): extract bugs and heuristics from active session"
 ```
 
-**Nota para el Enjambre:** Este Workflow garantiza que Antigravity amanezca mañana más inteligente que hoy, reteniendo el conocimiento vital sin arrastrar basura temporal, tokens muertos, ni alucinaciones operacionales a la siguiente sesión.
+**Nota para el Enjambre:** Este Workflow garantiza que Universal-Agents amanezca mañana más inteligente que hoy, reteniendo el conocimiento vital sin arrastrar basura temporal, tokens muertos, ni alucinaciones operacionales a la siguiente sesión.
