@@ -1,0 +1,37 @@
+{
+  "name": "django-expert",
+  "version": "1.0.0",
+  "description": "Comprehensive Django backend development guidelines and best practices for Codex.",
+  "author": {
+    "name": "Vinta Software",
+    "email": "hello@vinta.com.br",
+    "url": "https://www.vinta.com.br/"
+  },
+  "homepage": "https://github.com/vintasoftware/django-ai-plugins",
+  "repository": "https://github.com/vintasoftware/django-ai-plugins",
+  "license": "MIT",
+  "keywords": [
+    "django",
+    "backend",
+    "drf",
+    "python"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Django Expert",
+    "shortDescription": "Django backend guidance for Codex.",
+    "longDescription": "Expert Django backend development guidance covering models, views, DRF, testing, security, performance, and deployment.",
+    "developerName": "Vinta Software",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/vintasoftware/django-ai-plugins",
+    "defaultPrompt": [
+      "Create a Django model for user profiles.",
+      "Build a DRF endpoint with filtering and pagination.",
+      "Review this queryset for N+1 issues."
+    ]
+  }
+}
