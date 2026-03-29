@@ -1,0 +1,27 @@
+{
+  "version": "1.0",
+  "mcp_servers": {
+    "example-postgres-mcp": {
+      "description": "Local PostgreSQL connection via MCP. Example schema.",
+      "status": "disabled",
+      "connection_type": "local_process",
+      "command": "npx -y @modelcontextprotocol/server-postgres postgres://user:pass@localhost:5432/db",
+      "authorized_roles": [
+        "Database Auditor",
+        "Backend Architect"
+      ]
+    },
+    "example-github-mcp": {
+      "description": "GitHub API interactions. Example schema.",
+      "status": "disabled",
+      "connection_type": "remote_api",
+      "command": "npx -y @modelcontextprotocol/server-github",
+      "env_requirements": [
+        "GITHUB_PERSONAL_ACCESS_TOKEN"
+      ],
+      "authorized_roles": [
+        "DevOps Engineer"
+      ]
+    }
+  }
+}
