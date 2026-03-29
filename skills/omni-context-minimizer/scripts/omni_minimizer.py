@@ -2,15 +2,14 @@ import sys
 import re
 
 def parse_file(filepath):
-    """
-    Universal Heuristic Extractor. Scans a file and returns a cognitive "skeleton"
+    """Universal Heuristic Extractor. Scans a file and returns a cognitive "skeleton"
     composed solely of Imports, Function Signatures (Def, Arrow, Func, Fn), and Structures (Classes, Structs).
     Saves 90% of context by not loading the logical blocks of function bodies.
     """
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding='utf-8') as f:
             lines = f.readlines()
-            
+
         # Regex Patterns to hunt main architectures ignoring bodies
         patterns = [
             # 1. Declaration keywords (Python, JS/TS, Go, Rust, Java, C++)
@@ -22,12 +21,12 @@ def parse_file(filepath):
             # 4. Decorators (e.g., @app.route, @Component) excluding JSDoc
             r'^\s*@(?!.*\b(param|returns|type)\b)'
         ]
-        
+
         master_regex = re.compile('|'.join(patterns))
-        
+
         print(f"--- [TOKEN-SAVER MAP] Architectural Skeleton of: {filepath} ---")
         print(f"[Total Physical Lines]: {len(lines)}\n")
-        
+
         matched_lines = 0
         for idx, line in enumerate(lines, 1):
             # Clean newline for processing
@@ -35,9 +34,9 @@ def parse_file(filepath):
             if master_regex.search(stripped):
                 print(f"Line {idx}: {stripped}")
                 matched_lines += 1
-                
+
         print(f"\n--- [OPTIMIZATION]: The file was reduced to {matched_lines} lines of pure structure. ---")
-                
+
     except UnicodeDecodeError:
         print(f"[ERROR]: The file {filepath} appears to be binary or has an incomprehensible encoding.")
     except Exception as e:
@@ -47,6 +46,6 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Critical Usage: python omni_minimizer.py <absolute_file_path>")
         sys.exit(1)
-        
+
     target_file = sys.argv[1]
     parse_file(target_file)
