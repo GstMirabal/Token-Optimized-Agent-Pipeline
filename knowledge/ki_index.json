@@ -1,0 +1,16 @@
+{
+  "version": "1.0",
+  "knowledge_items": [
+    {
+      "id": "ki_001_example",
+      "title": "Example: Handling Docker Compose timeouts in dev",
+      "summary": "Fix for Postgres connection timeout when spinning up the container on a cold start.",
+      "file_path": "ki_001_example.md",
+      "tags": [
+        "docker",
+        "postgres",
+        "timeout"
+      ]
+    }
+  ]
+}

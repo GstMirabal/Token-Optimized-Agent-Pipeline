@@ -59,8 +59,9 @@ The idea is to verify each phase one by one.
 
 ## Phase 5: Knowledge Consolidation (Knowledge Items)
 **Objective:** Cure the "AI Alzheimer's Syndrome" by providing it with a Long-Term Brain external to your user repos.
-- [ ] Automate or order the Orchestrator to extract heuristic lessons, discovered workarounds for exotic libraries, or post-sprint bug fixes.
-- [ ] Dictate format and temporary hosting in `.agents/knowledge/` before the Orchestrator wipes (Total Amnesia) its temporary operational memories at the end of a *Sprint*.
+- [x] Automate or order the Orchestrator to extract heuristic lessons, discovered workarounds for exotic libraries, or post-sprint bug fixes.
+- [x] Dictate format and temporary hosting in `.agents/knowledge/` before the Orchestrator wipes (Total Amnesia) its temporary operational memories at the end of a *Sprint*.
+- [x] Implement the Token-Saver KI Index Architecture: Utilize a `ki_index.json` to store 1-line semantic summaries, routing the Orchestrator to atomic, modular `.md` files without polluting the context window.
 
 ---
 **How to proceed?**
