@@ -48,13 +48,13 @@
 
 ## About The Project
 
-Universal-Agents is a military-grade AI agent governance framework designed to prevent context bloat, secure RCE environments, and ensure long-term knowledge retention. It transforms standard AI agents into a disciplined enjambre of specialized subagents.
+Universal-Agents is a military-grade AI agent governance framework designed to prevent context bloat, secure RCE environments, and ensure long-term knowledge retention. It transforms standard AI agents into a disciplined swarm of specialized subagents.
 
 **Key Features:**
-*   **Zero-Trust Hierarchy:** Segregated Mentor (Debate), Orquestrador (Planning), and Auditor (Validation) roles to prevent autonomous logic failures.
+*   **Zero-Trust Hierarchy:** Segregated Mentor (Debate), Orchestrator (Planning), and Auditor (Validation) roles to prevent autonomous logic failures.
 *   **Token-Saver Auditor:** An economic kill-switch that prevents inefficient plans and reduces API costs by optimizing context windows.
 *   **Omni-Context Minimizer:** Smart AST-based code skeleton extraction that allows AI to understand massive files (1000+ lines) while only consuming 10% of the normal token cost.
-*   **Amnesia Protocol:** Automatic knowledge extraction that distills "lecciones aprendidas" into persistent `/knowledge/` items before purging session caches.
+*   **Amnesia Protocol:** Automatic knowledge extraction that distills "lessons learned" into persistent `/knowledge/` items before purging session caches.
 *   **Modular Scaffolding:** Standardized project initialization ensuring every new repository inherits the same constitutional security and quality rules.
 
 ### Built With
