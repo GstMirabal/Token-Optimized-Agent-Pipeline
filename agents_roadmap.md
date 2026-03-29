@@ -55,6 +55,7 @@ The idea is to verify each phase one by one.
 - [x] Design Workflow 1: Scaffolding (Absolute Scaffolding). Interactive routine or base file to initialize the `src/` base, the `.env`, and the Docker environment all at once under Phase 1 and 2 rules.
 - [x] Design Skill 1: *Omni Context Minimizer*. Tactical substitution of the Data Cleaner to prioritize universal extraction of *Abstract Syntax Trees* and save context bloating in massive repositories. The Data Cleaner is postponed on demand.
 - [x] Define safe technical triggers (Triggers) to use autonomy delegations instantly (`// turbo`) without destroying governance or Base data.
+- [x] Implement MCP Registry: Standardize the indexing of Model Context Protocols (MCP) inside the `.agents/skills/` matrix so the Orchestrator can statically route and assign remote/local server contexts.
 
 ## Phase 5: Knowledge Consolidation (Knowledge Items)
 **Objective:** Cure the "AI Alzheimer's Syndrome" by providing it with a Long-Term Brain external to your user repos.
