@@ -54,7 +54,8 @@ Universal-Agents is a military-grade AI agent governance framework designed to p
 *   **Zero-Trust Hierarchy:** Segregated Mentor (Debate), Orchestrator (Planning), and Auditor (Validation) roles to prevent autonomous logic failures.
 *   **Token-Saver Auditor:** An economic kill-switch that prevents inefficient plans and reduces API costs by optimizing context windows.
 *   **Omni-Context Minimizer:** Smart AST-based code skeleton extraction that allows AI to understand massive files (1000+ lines) while only consuming 10% of the normal token cost.
-*   **Amnesia Protocol:** Automatic knowledge extraction that distills "lessons learned" into persistent `/knowledge/` items before purging session caches.
+*   **MCP Registry & Routing:** Strict Zero-Trust assignment of external Model Context Protocols (MCPs). The Orchestrator queries `.agents/skills/mcp-registry/registry.json` and provisions specific local/remote data sources before unlocking subagent execution.
+*   **Amnesia & Atomic KIs:** Automatic knowledge extraction distilling long-term "lessons learned" into atomic `.md` files indexed by `ki_index.json` under `/knowledge/`, avoiding token bloating in future sessions.
 *   **Modular Scaffolding:** Standardized project initialization ensuring every new repository inherits the same constitutional security and quality rules.
 
 ### Built With
@@ -108,7 +109,15 @@ Once integrated, the framework automatically triggers its auditors during your A
 python .agents/skills/omni-context-minimizer/scripts/omni_minimizer.py path/to/large_file.py
 ```
 
-Check the `/workflows/` directory for automated protocols like project scaffolding and knowledge extraction.
+```json
+// Example: The Orchestrator statically routes external tools using the MCP Registry
+"example-postgres-mcp": {
+  "command": "npx -y @modelcontextprotocol/server-postgres postgres://.../db",
+  "authorized_roles": ["Database Auditor", "Backend Architect"]
+}
+```
+
+Check the `/workflows/` directory for automated protocols like project scaffolding. Explore `/skills/mcp-registry/` for adding external LLM data connections.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
