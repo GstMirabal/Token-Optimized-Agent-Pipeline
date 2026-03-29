@@ -11,7 +11,7 @@
 
 <a name="readme-top"></a>
 
-<h3 align="center">Antigravity Framework (.agents)</h3>
+<h3 align="center">Universal-Agents Framework (.agents)</h3>
 
 <p align="center">
   A hierarchical, zero-trust subagent architecture for context-aware and token-efficient AI software engineering.
@@ -48,7 +48,7 @@
 
 ## About The Project
 
-Antigravity is a military-grade AI agent governance framework designed to prevent context bloat, secure RCE environments, and ensure long-term knowledge retention. It transforms standard AI assistants into a disciplined enjambre of specialized subagents.
+Universal-Agents is a military-grade AI agent governance framework designed to prevent context bloat, secure RCE environments, and ensure long-term knowledge retention. It transforms standard AI agents into a disciplined enjambre of specialized subagents.
 
 **Key Features:**
 *   **Zero-Trust Hierarchy:** Segregated Mentor (Debate), Orquestrador (Planning), and Auditor (Validation) roles to prevent autonomous logic failures.
@@ -134,7 +134,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 Gustavo Mirabal Suarez - gst.mirabal@gmail.com
 
-- LinkedIn: [@Gustavo-Mirabal](https://www.linkedin.com/in/gustavo-adolfo-mirabal-suarez-ab2738127)
+- LinkedIn: [@Gustavo-Mirabal](https://www.linkedin.com/in/gstmirabal/)
 - GitHub: [@GstMirabal](https://github.com/GstMirabal)
 - Twitter: [@GstMirabal](https://x.com/gst_mirabal)
 
@@ -154,4 +154,4 @@ Project Link: [https://github.com/GstMirabal/.agents](https://github.com/GstMira
 [license-shield]: https://img.shields.io/github/license/GstMirabal/.agents.svg?style=for-the-badge
 [license-url]: https://github.com/GstMirabal/.agents/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://www.linkedin.com/in/gstmirabal
+[linkedin-url]: https://www.linkedin.com/in/gstmirabal/
