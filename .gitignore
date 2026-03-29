@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+
+# Agent Temporal Execution States
+.agent_state/
+
+# IDE and OS Temp files
+*~
+*.swp
+*.tmp
+.idea/
+.vscode/
