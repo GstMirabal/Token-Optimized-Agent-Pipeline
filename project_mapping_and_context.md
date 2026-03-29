@@ -1,30 +1,30 @@
-# Mapeo y Contexto de Proyectos
-Reglas exclusivas del sistema de archivos y topología local del SO.
+# Project Mapping and Context
+Exclusive Rules for Filesystem and Local OS Topology.
 
-## 1. Ubicación y Espacio Base
-- **Raíz Única:** Todos los repositorios deben residir forzosamente bajo un único directorio raíz u organizativo definido por el humano (ej. `$HOME/Developer/`).
-- **Propagación del Repositorio `.agents` (Copia Bloqueada):** El directorio maestro de la IA (este repositorio) debe tratarse como el origen de verdad. Todo nuevo proyecto requiere integrar esta matriz obligatoriamente como **Submódulo de Git** (`git submodule add <url_o_path_del_repo_maestro>`). **LEY ABSOLUTA:** Queda rotundamente prohibido usar copia plana (`cp -R`); si se usa copia, los proyectos quedan desconectados de las mejoras globales.
-- **Automejora y Centralización (Git):** Toda refactorización de estas reglas y manuales por parte del agente Auditor **ESTÁ ESTRICTAMENTE PROHIBIDA** sobre las copias locales de cada proyecto. Cualquier automejora a la constitución o habilidades debe ejecutarse y versionarse obligatoriamente sobre el repositorio maestro original para garantizar su herencia global.
+## 1. Location and Base Space
+- **Single Root:** All repositories must forcibly reside under a single root or organizational directory defined by the human (e.g., `$HOME/Developer/`).
+- **Propagation of the `.agents` Repository (Copying Blocked):** The master AI directory (this repository) must be treated as the source of truth. Every new project requires integrating this matrix mandatory as a **Git Submodule** (`git submodule add <url_or_path_to_master_repo>`). **ABSOLUTE LAW:** It is strictly prohibited to use flat copying (`cp -R`); if copying is used, projects become disconnected from global improvements.
+- **Self-Improvement and Centralization (Git):** Any refactoring of these rules and manuals by the Auditor agent **IS STRICTLY PROHIBITED** on the local copies of each project. Any self-improvement to the constitution or skills must be executed and versioned mandatory on the original master repository to ensure global inheritance.
 
-## 2. Entornos Virtuales (venv)
-- **Aislamiento:** Cada proyecto aloja su propio directorio `./venv/` en la raíz. Prohibida toda instalación global (`pip install`).
-- **Path Anchor:** Los agentes deben posicionarse obligatoriamente con `cd` en la raíz del proyecto antes de ejecutar cualquier herramienta.
-- **Ejecución Binaria:** Prohibido usar comandos globales (`python`, `pip`). Llamar imperativamente a los binarios locales (ej. `./venv/bin/python`, o `./node_modules/.bin/`).
+## 2. Virtual Environments (venv)
+- **Isolation:** Each project hosts its own `./venv/` directory at the root. All global installations (`pip install`) are prohibited.
+- **Path Anchor:** Agents must forcibly position themselves with `cd` at the project root before executing any tools.
+- **Binary Execution:** Prohibited to use global commands (`python`, `pip`). Imperatively call local binaries (e.g., `./venv/bin/python`, or `./node_modules/.bin/`).
 
-## 3. Disposición del Código (Src Layout)
-- **Lógica Central:** `/src/`
-- **Framework de Pruebas:** `/tests/`
-- **Componentes Web:** En arquitecturas web: `/static/` (recursos públicos) y `/media/` (archivos subidos de clientes, prohibidos en control de versiones).
-- **Jupyter Notebooks:** Pruebas computacionales en Jupyter deben aislarse en `/notebooks/`.
+## 3. Code Layout (Src Layout)
+- **Central Logic:** `/src/`
+- **Testing Framework:** `/tests/`
+- **Web Components:** In web architectures: `/static/` (public resources) and `/media/` (customer-uploaded files, prohibited in version control).
+- **Jupyter Notebooks:** Computational tests in Jupyter must be isolated in `/notebooks/`.
 
-## 4. Persistencia y Bases de Datos
-- **Motor Exclusivo:** Despliegue de infraestructura (ej. PostgreSQL, Redis) mandatoriamente blindado a través de `docker-compose.yml`. Queda rotundamente prohibida la instalación de motores físicos de bases de datos en la capa del SO macOS.
-- **Bind Mounts:** Mapeo de volúmenes de Bases de Datos obligatorio hacia directorios locales ocultos (ej. `./.docker-db-data`) para garantizar la persistencia de datos.
-- **Archivos Temporales/Reportes:** La generación de archivos en masa (ETLs, PDFs) debe aislarse en `./data/output/` o `./tmp/`.
-- **Git LFS:** Archivos pesados (>50MB, ej. modelos, grandes datasets CSV) deben forzosamente rastrearse mediante `git lfs track`.
+## 4. Persistence and Databases
+- **Exclusive Engine:** Infrastructure deployment (e.g., PostgreSQL, Redis) mandatory shielded through `docker-compose.yml`. Installation of physical database engines on the macOS OS layer is strictly prohibited.
+- **Bind Mounts:** Mandatory mapping of database volumes to hidden local directories (e.g., `./.docker-db-data`) to ensure data persistence.
+- **Temporary Files/Reports:** Mass file generation (ETLs, PDFs) must be isolated in `./data/output/` or `./tmp/`.
+- **Git LFS:** Heavy files (>50MB, e.g., models, large CSV datasets) must forcibly be tracked using `git lfs track`.
 
-## 5. Gobernanza de Repositorio
-- `.python-version` anclado a la raíz del proyecto, especificando la versión base de Pyenv.
-- `.gitignore` estricto, excluyendo inherentemente: `/venv/`, `.env`, `.agent_state/`, temporales, logs, y datasets (`/data/`).
-- `Makefile` (u orquestador homólogo como `Taskfile`) es mandatorio para centralizar flujos repetitivos (`make test`, `make db-up`).
-- Directorio `/logs/` exclusivo para volcar trazas de ejecución en producción.
+## 5. Repository Governance
+- `.python-version` anchored to the project root, specifying the base Pyenv version.
+- Strict `.gitignore`, inherently excluding: `/venv/`, `.env`, `.agent_state/`, temporals, logs, and datasets (`/data/`).
+- `Makefile` (or similar orchestrator like `Taskfile`) is mandatory to centralize repetitive workflows (`make test`, `make db-up`).
+- Exclusive `/logs/` directory for dumping production execution traces.

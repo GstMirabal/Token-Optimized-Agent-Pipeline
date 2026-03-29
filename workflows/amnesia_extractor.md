@@ -1,39 +1,39 @@
 ---
-description: "Protocolo Post-Sprint de Purga y Extracción de Memoria a Largo Plazo"
+description: "Post-Sprint Purgatory and Long-Term Memory Extraction Protocol"
 version: 1.0.0
 ---
 
-# 🧠 Workflow: Extractor de Amnesia y Conocimiento
+# 🧠 Workflow: Amnesia and Knowledge Extractor
 
-Este es el **Protocolo de Cierre Obligatorio** para todos los Sprints de Universal-Agents. Dado que nuestra arquitectura dicta que las carpetas de estado temporal (`.agent_state/session_{UID}/`) deben ser destruidas para prevenir alucinaciones cruzadas y ahorro de tokens, este *Workflow* se asegura de destilar las "lecciones aprendidas" empujándolas a la memoria persistente del sistema (`/knowledge/`) antes de ejecutar el borrado físico de la Caché.
+This is the **Mandatory Closing Protocol** for all Universal-Agents Sprints. Since our architecture dictates that temporary state folders (`.agent_state/session_{UID}/`) must be destroyed to prevent cross-hallucinations and save tokens, this *Workflow* ensures "lessons learned" are distilled and pushed to the system's persistent memory (`/knowledge/`) before executing the physical deletion of the Cache.
 
-## Fase 1: Escaneo Retrospectivo (Brain Drain)
-Cuando el Director ordene `/save_knowledge` o declare el Sprint como terminado, el Orquestador leerá en frío el `task.md` y su historial de comandos, e identificará:
-1.  **Workarounds Críticos:** Soluciones creativas a librerías rebeldes (ej. "FastAPI chocó con Pydantic V2, se arregló haciendo X").
-2.  **Arquitectura Asentada:** (ej. "Se decidió usar `envtoml` en lugar de `dotenv` por X motivo").
-3.  **Bugs Complejos:** Errores de Linters o de Tipado que costaron más de 2 intentos solucionar en la sesión.
+## Phase 1: Retrospective Scanning (Brain Drain)
+When the Director orders `/save_knowledge` or declares the Sprint as finished, the Orchestrator will read `task.md` and its command history cold, identifying:
+1.  **Critical Workarounds:** Creative solutions to rebellious libraries (e.g., "FastAPI crashed with Pydantic V2, fixed by doing X").
+2.  **Established Architecture:** (e.g., "Decided to use `envtoml` instead of `dotenv` for X reason").
+3.  **Complex Bugs:** Linter or Typing errors that took more than 2 attempts to solve in the session.
 
-## Fase 2: Destilación en Markdown
-El Orquestador creará o actualizará un archivo en la ruta del submódulo `.agents/knowledge/<tema_del_sprint>.md`.
-El formato exigido por el *Agente Constitucional* es implacable:
-- **Título:** Breve y descriptivo.
-- **Contexto (1 párrafo):** ¿Qué estábamos intentando hacer?
-- **El Bloqueo:** ¿Qué falló o qué obstáculo surgió (incluir error del traceback si aplica)?
-- **La Solución (Snippets):** El código puro que lo arregló.
+## Phase 2: Markdown Distillation
+The Orchestrator will create or update a file in the submodule path `.agents/knowledge/<sprint_topic>.md`.
+The format demanded by the *Constitutional Agent* is implacable:
+- **Title:** Brief and descriptive.
+- **Context (1 paragraph):** What were we trying to do?
+- **The Blockage:** What failed or what obstacle arose (include traceback error if applicable)?
+- **The Solution (Snippets):** The pure code that fixed it.
 
-## Fase 3: La Purga de Sesión (Amnesia)
-Una vez validados y guardados los archivos en `/knowledge/`, el Orquestador borrará implacablemente los archivos temporales (su propia mente a corto plazo):
+## Phase 3: Session Purge (Amnesia)
+Once validated and files are saved in `/knowledge/`, the Orchestrator will implacably delete temporary files (its own short-term mind):
 ```bash
 rm -rf .agent_state/session_{UID}/
 ```
-**Regla de Hierro:** Queda estrictamente prohibido mantener carpetas de sesión operativas de días anteriores. El proyecto debe quedar inmaculado.
+**Iron Rule:** It is strictly forbidden to maintain operational session folders from previous days. The project must remain immaculate.
 
-## Fase 4: Actualización de la Matriz Central
-Dado que `.agents/` funciona distribuyéndose a través de Submódulos Git, el Orquestador armará el comando final para que el Director consolide el nuevo conocimiento globalmente y todos los otros repositorios lo hereden:
+## Phase 4: Central Matrix Update
+Since `.agents/` works by distributing through Git Submodules, the Orchestrator will assemble the final command for the Director to consolidate the new knowledge globally so all other repositories inherit it:
 ```bash
 cd .agents
 git add knowledge/
 git commit -m "docs(knowledge): extract bugs and heuristics from active session"
 ```
 
-**Nota para el Enjambre:** Este Workflow garantiza que Universal-Agents amanezca mañana más inteligente que hoy, reteniendo el conocimiento vital sin arrastrar basura temporal, tokens muertos, ni alucinaciones operacionales a la siguiente sesión.
+**Note for the Swarm:** This Workflow ensures that Universal-Agents wakes up tomorrow smarter than today, retaining vital knowledge without carrying temporary garbage, dead tokens, or operational hallucinations into the next session.

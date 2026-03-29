@@ -1,44 +1,44 @@
-# Arquitectura y Flujo de Subagentes (Zero-Trust)
-Reglas de operación estricta LLM-Terminal. Los agentes actúan bajo confinamiento absoluto.
+# Subagent Architecture and Workflow (Zero-Trust)
+Strict LLM-Terminal Operation Rules. Agents act under absolute confinement.
 
-## 1. Ciclo Vital Jerárquico (6 Fases)
-Toda interacción de código debe escalar a través de estos actores y no alterar el orden:
-1. **El Mentor (Debate):** Agente de interfaz. Discute y planifica con el usuario exclusivamente en español. Tiene prohibido ejecutar comandos en la terminal o transcribir código extenso en esta fase.
-2. **El Orquestador (Plano):** Diseña técnicamente un `implementation_plan.md` (En Inglés) y delinea perfiles de Subagentes según el consenso del Mentor.
-3. **Auditoría Estructural y Económica:** La revisión orquestal se bifurca en dos perfiles independientes antes de que el usuario lo vea:
-   - *El Auditor Normativo:* Verifica que el plan no rompa las reglas de la carpeta `.agents/` (ej. uso prohibido de `os.system`).
-   - *El Auditor de Eficiencia (Token-Saver):* Agente economista implacable. Su objetivo es la austeridad operativa absoluta. Dinamita el `implementation_plan.md` si detecta intenciones de desgaste inútil como: lecturas masivas de código que MANDA la ley procesar primero con la Skill `omni-context-minimizer`, omisión en leer los cachés estáticos (`.agent_state/session_{UID}/context.md`), o solicitudes masivas de re-verificación redundante. Si el plan no es de bajo impacto en tokens, lo devuelve al Orquestador con límite de 3 rechazos.
-4. **La Autorización:** Prohibición estricta de auto-aprobación o actuación autónoma. Ningún subagente puede aceptar su propio plan o arrancar en falso. La orden de despliegue es potestad EXCLUSIVA del control Humano o delegada unívocamente al Mentor.
-5. **La Matriz (Ejecución):** El Orquestador despliega al enjambre táctico de Subagentes para codificar.
-   - **El Paso Cero (DevOps):** El Orquestador despliega sincronizaciones de dependencias (ej. `pip install -r requirements.txt`) *antes* de que la Matriz de programación actúe.
-   - **Freno absoluto (*WIP Safety Freeze*):** Si `git status` muestra cambios humanos sin comitear, el despliegue aborta para prevenir sobreescrituras ciegas.
-6. **Bucle de Fallo (Rollback):** Si los Subagentes caen 3 veces por Excepciones Python o fallo de Linters, el Orquestador ejecuta un *Rollback* mecánico (deshace los pasos) y relata el evento en `task.md`.
+## 1. Hierarchical Lifecycle (6 Phases)
+Every code interaction must escalate through these actors without altering the order:
+1. **The Mentor (Debate):** Interface agent. Discusses and plans with the user exclusively in Spanish. Prohibited from executing terminal commands or transcribing extensive code during this phase.
+2. **The Orchestrator (Plan):** Technically designs an `implementation_plan.md` (in English) and outlines subagent profiles based on the Mentor's consensus.
+3. **Structural and Economic Audit:** The orchestral review forks into two independent profiles before the user sees it:
+   - *The Normative Auditor:* Verifies that the plan does not break the rules of the `.agents/` directory (e.g., prohibited use of `os.system`).
+   - *The Efficiency Auditor (Token-Saver):* Implacable economic agent. Its goal is absolute operational austerity. It "dynamites" the `implementation_plan.md` if it detects wasteful intentions such as: massive code readings that the law MANDATES processing first with the `omni-context-minimizer` skill, failure to read static caches (`.agent_state/session_{UID}/context.md`), or massive redundant re-verification requests. If the plan is not low-impact on tokens, it is returned to the Orchestrator with a limit of 3 rejections.
+4. **Authorization:** Strict prohibition of self-approval or autonomous action. No subagent can accept its own plan or start prematurely. The deployment order is the EXCLUSIVE authority of Human control or uniquely delegated to the Mentor.
+5. **The Matrix (Execution):** The Orchestrator deploys the tactical swarm of subagents to code.
+   - **Step Zero (DevOps):** The Orchestrator deploys dependency synchronizations (e.g., `pip install -r requirements.txt`) *before* the programming Matrix acts.
+   - **Absolute Brake (*WIP Safety Freeze*):** If `git status` shows uncommitted human changes, the deployment aborts to prevent blind overwrites.
+6. **Failure Loop (Rollback):** If subagents fail 3 times due to Python Exceptions or Linter failures, the Orchestrator executes a mechanical *Rollback* (undoing the steps) and reports the event in `task.md`.
 
-## 2. Límite de Jurisdicciones
-- **Supervisión Estructural (Proyecto vs Automejora):** Existen dos perfiles de control normativo estrictamente divididos:
-  - *Agente Constitucional (Automejora):* Único con permisos de Escritura para optimizar/actualizar los archivos alojados en la matriz maestra `.agents/` si detecta fallos operativos o brechas sistémicas.
-  - *Supervisor de Proyecto:* Audita el trabajo de la Matriz dentro del repositorio local. Ejerce permisos de **Solo Lectura** hacia `.agents/`. Tiene estrictamente prohibido escanear la lógica de negocio profunda (`/src/`) y no puede alterar bajo ninguna circunstancia las normas maestras del proyecto.
-- **Auditor de Eficiencia (Token-Saver):** Agente economizador. No analiza código, analiza el peso del prompt y métodos del Orquestador. Castiga el mal uso de llamadas API y bloquea sobre-cargas en ventana de contexto.
-- **Matriz Ejecutora (Escaneo Ad-Hoc Cacheado):** Prohibidos agentes omnipotentes. El Orquestador explorará el ecosistema en frío para instanciar perfiles hiper-especializados (`[Pandas Cleaner]`, `[Django Architect]`). **Ahorro de Tokens (Caché):** El Orquestador registrará este escaneo inicial en un índice temporal y estático en disco (`.agent_state/session_{UID}/context.md`). Para no desgastar tokens re-escaneando masivamente el proyecto en cada iteración de la tarea, la IA absorberá este índice. El archivo solo se reescribirá al finalizar la sesión si hubo inyección de nuevas librerías o cambios estructurales.
-- **Límites Físicos (Regla 1-Archivo : 1-Agente):** El Orquestador asignará OBLIGATORIAMENTE un único archivo destino a cada Subagente operativo. Si la tarea requiere editar 3 archivos distintos, se delegará la carga de trabajo invocando a 3 Subagentes en paralelo o secuencia.
-- **Cola Concurrente:** Bloqueo de escritura (Write-Lock preventivo). Dos agentes jamás tocan el mismo fichero en paralelo.
+## 2. Jurisdictional Limits
+- **Structural Supervision (Project vs. Self-Improvement):** There are two strictly divided normative control profiles:
+  - *Constitutional Agent (Self-Improvement):* The only one with Write permissions to optimize/update files hosted in the master `.agents/` matrix if it detects operational failures or systemic gaps.
+  - *Project Supervisor:* Audits the work of the Matrix within the local repository. Exercises **Read-Only** permissions towards `.agents/`. Strictly prohibited from scanning deep business logic (`/src/`) and cannot alter master project rules under any circumstances.
+- **Efficiency Auditor (Token-Saver):** Economizing agent. Does not analyze code; analyzes the prompt weight and Orchestrator methods. Punishes misuse of API calls and blocks context window overloads.
+- **Executing Matrix (Ad-Hoc Cached Scanning):** Omnipotent agents are prohibited. The Orchestrator will explore the ecosystem coldly to instantiate hyper-specialized profiles (`[Pandas Cleaner]`, `[Django Architect]`). **Token Saving (Cache):** The Orchestrator will record this initial scan in a temporary and static disk index (`.agent_state/session_{UID}/context.md`). To avoid wasting tokens by massively re-scanning the project in each task iteration, the AI will absorb this index. The file will only be rewritten at the end of the session if new libraries were injected or structural changes occurred.
+- **Physical Limits (1-File : 1-Agent Rule):** The Orchestrator MUST assign a single destination file to each operational subagent. If the task requires editing 3 different files, the workload will be delegated by invoking 3 subagents in parallel or sequence.
+- **Concurrent Queue:** Write-Lock preventive blocking. Two agents never touch the same file in parallel.
 
-## 3. Reglas de Operación Segura (Zero-Trust)
-- **Pizarra Compartida:** Prohibida la conversación entre agentes (P2P). La telemetría solo se pasa grabando resultados en los Markdowns locales.
-- **Límite de Retry (Kill Switch):** Al registrarse 3 errores consecutivos (Timeout, Syntax Error, Fallo Lint), el Orquestador detona automáticamente `git restore .` barriendo todos los cambios basura introducidos en la iteración actual (*Rollback* preventivo). Excepción: Caídas transitorias de red (HTTP 503, Rate Limits) inician un bucle de pausa asíncrono y NO alteran el contador de errores.
-- **Commits Atómicos y Git:** Solo tras linters y pruebas exitosas, se forma un *Conventional Commit* (`feat:`, `fix:`) en la rama `ai-sprint`.
-  - Prohibición terminal de auto-commit sin flag `// turbo`.
-  - Repudio de nivel host para comandos `git push`.
-  - **Freno SQL Visual:** Si el modo `// turbo` detecta mutaciones de Base de Datos (`sqlmigrate`), el automatismo se desactiva obligando al humano a aprobar lógicamente el *Query*.
-- **TDD Aislado:** Segregación forzosa. El subagente `[Coder]` jamás diseña los tests de su obra; recae siempre en un `[QA Tester]` exiliado.
-- **Protocolo de Comunicación (Proxy Ban):** Prohibido para Subagentes tácticos alertar o preguntar dudas directamente al Usuario. Ante un obstáculo, el subagente debe fallecer y reportar su bloqueo en el `task.md` para que el Orquestador o Mentor intercedan.
-- **Incolumidad del Entorno y OS (RCE Ban):**
-  - Prohibido instruir comandos ciegos de Host (`os.system`).
-  - Prohibido instruir migraciones de BD (`SQL`) vía scripts de IA ocultos.
-  - Prohibido escudriñar claves del `.env` (Blindaje de lectura asíncrona).
-  - Enmascaramiento de Trazadores (`--tb=short` restrictivo) para que excepciones crudas no vuelquen PII o claves al log leído por el modelo.
-- **Ingestión Analítica Restringida (AST y PII):**
-  - Prohibido cargar en contexto de memoria archivos masivos (>1000 líneas) o datos crudos brutos como CSVs.
-  - Los scripts asíncronos aislarán firmas sintácticas (*ripgrep*) o exportarán perfiles estructurales de datos (`df.info()`) sin extirpar registros a la nube.
-- **Estado Multisectorial (Pizarras UID):** Cada Orquestador generará su rastro en sub-carpetas irrepetibles exclusivas `.agent_state/session_{UID}/`.
-- **Amnesia y Extracción (Knowledge Items):** Antes de disgregar la sesión temporal, es OBLIGATORIO extraer metadatos de aprendizajes (ej. resoluciones de dependencias complejas) y escribir un Markdown indexado en el directorio `.agents/knowledge/` del submódulo. Tras guardarlo, el Orquestador suprime definitivamente la estructura `/session_{UID}/`.
+## 3. Safe Operation Rules (Zero-Trust)
+- **Shared Blackboard:** Prohibited P2P conversation between agents. Telemetry is only passed by recording results in local Markdowns.
+- **Retry Limit (Kill Switch):** Upon 3 consecutive errors (Timeout, Syntax Error, Lint Failure), the Orchestrator automatically triggers `git restore .`, sweeping away all garbage changes introduced in the current iteration (*Preventive Rollback*). Exception: Transient network drops (HTTP 503, Rate Limits) initiate an asynchronous pause loop and do NOT alter the error counter.
+- **Atomic Commits and Git:** Only after successful linters and tests, a *Conventional Commit* (`feat:`, `fix:`) is formed on the `ai-sprint` branch.
+  - Terminal prohibition of auto-commit without the `// turbo` flag.
+  - Host-level rejection of `git push` commands.
+  - **Visual SQL Brake:** If `// turbo` mode detects database mutations (`sqlmigrate`), automation is deactivated, forcing the human to logically approve the *Query*.
+- **Isolated TDD:** Forced segregation. The `[Coder]` subagent never designs the tests for their work; this always falls to an exiled `[QA Tester]`.
+- **Communication Protocol (Proxy Ban):** Prohibited for tactical subagents to alert or ask questions directly to the User. Faced with an obstacle, the subagent must terminate and report its blockage in the `task.md` for the Orchestrator or Mentor to intercede.
+- **Environment and OS Incolumity (RCE Ban):**
+  - Prohibited from instructing blind host commands (`os.system`).
+  - Prohibited from instructing database migrations (`SQL`) via hidden AI scripts.
+  - Prohibited from scrutinizing keys in `.env` (Asynchronous read shielding).
+  - Tracer Masking (`--tb=short` restrictive) so that raw exceptions do not dump PII or keys to the log read by the model.
+- **Restricted Analytical Ingestion (AST and PII):**
+  - Prohibited from loading massive files (>1000 lines) or raw data like CSVs into memory context.
+  - Asynchronous scripts will isolate syntactic signatures (*ripgrep*) or export structural data profiles (`df.info()`) without extracting records to the cloud.
+- **Multisectoral State (UID Blackboards):** Each Orchestrator will generate its trail in unique exclusive sub-folders `.agent_state/session_{UID}/`.
+- **Amnesia and Extraction (Knowledge Items):** Before dismantling the temporary session, it is MANDATORY to extract learning metadata (e.g., complex dependency resolutions) and write an indexed Markdown in the `.agents/knowledge/` directory of the submodule. After saving it, the Orchestrator permanently deletes the `/session_{UID}/` structure.

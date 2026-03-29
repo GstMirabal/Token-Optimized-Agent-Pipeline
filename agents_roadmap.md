@@ -1,66 +1,66 @@
-# 🗺️ Roadmap de Configuración del Repositorio `.agents`
+# 🗺️ Configuration Roadmap for the `.agents` Repository
 
-Este roadmap está diseñado para configurar Universal-Agents paso a paso, asegurando que se adapte perfectamente a tu flujo de trabajo y tus repositorios de desarrollo locales en cualquier OS. 
+This roadmap is designed to configure Universal-Agents step-by-step, ensuring it perfectly adapts to your workflow and local development repositories on any OS.
 
-La idea es ir comprobando cada fase uno a uno.
+The idea is to verify each phase one by one.
 
-## Fase 1: Reglas Globales y de Comportamiento (User Rules)
-**Objetivo:** Establecer una base hiper-personalizada de cómo quieres que trabaje, me comunique y qué estándares arquitectónicos y de desarrollo prefieres que utilice siempre. Esto actúa como el "cerebro principal" de nuestras interacciones.
+## Phase 1: Global and Behavioral Rules (User Rules)
+**Objective:** Establish a hyper-personalized foundation of how you want me to work, communicate, and which architectural and development standards you prefer me to always use. This acts as the "main brain" of our interactions.
 
-### 1.1 Estándares de Codificación y Calidad:
-- [x] Definir convenciones de nombres (Snake case, Camel case, Pascal case) para variables, clases, módulos y constantes.
-- [x] Seleccionar linters o formateadores por defecto para cada lenguaje (Ej. Python: `black`, `ruff`, o `flake8`; JS/TS: `eslint`, `prettier`).
-- [x] Definir expectativas sobre el tipado estricto (Ej. ¿Obligamos el uso de `typing` en Python o TypeScript estricto?).
-- [x] Establecer umbrales de complejidad cognitiva: ¿Cuándo debo sugerirte refactorizar una función grande?
-- [x] Preferencias sobre el manejo de errores (Try/Except agresivo, custom exceptions, patrones Option/Result).
+### 1.1 Coding and Quality Standards:
+- [x] Define naming conventions (Snake case, Camel case, Pascal case) for variables, classes, modules, and constants.
+- [x] Select default linters or formatters for each language (e.g., Python: `black`, `ruff`, or `flake8`; JS/TS: `eslint`, `prettier`).
+- [x] Define expectations for strict typing (e.g., Do we force the use of `typing` in Python or strict TypeScript?).
+- [x] Establish cognitive complexity thresholds: When should I suggest refactoring a large function?
+- [x] Preferences on error handling (Aggressive Try/Except, custom exceptions, Option/Result patterns).
 
-### 1.2 Reglas de Entorno y Arquitectura:
-- [x] Definir rutas o convenciones estándar donde sueles guardar proyectos y scripts (Ej. todo en `~/Developer`).
-- [x] Normativas para entornos virtuales: ¿Usamos siempre `venv`, `poetry`, `pipenv` o `conda`? ¿Dónde se guardan (dentro del proyecto o de forma centralizada)?
-- [x] Estándares para el manejo de dependencias (`requirements.txt`, `pyproject.toml`, etc.).
-- [x] Organización de la arquitectura base: ¿Patrones MVC, arquitecturas limpias, o scripts secuenciales? (Especialmente para tus transformadores de datos).
+### 1.2 Environment and Architecture Rules:
+- [x] Define standard paths or conventions where you usually save projects and scripts (e.g., everything in `~/Developer`).
+- [x] Regulations for virtual environments: Do we always use `venv`, `poetry`, `pipenv`, or `conda`? Where are they saved (inside the project or centrally)?
+- [x] Standards for dependency management (`requirements.txt`, `pyproject.toml`, etc.).
+- [x] Base architecture organization: MVC patterns, clean architectures, or sequential scripts? (Especially for your data transformers).
 
-### 1.3 Comportamiento y Comunicación de Universal-Agents:
-- [x] Reglas de Delegación Táctica y Cuarentena de Código: Bloqueo de auto-aprobación y prohibición estricta de generar bloques extensos durante el rol de Mentor.
-- [x] Establecer el Idioma de la Documentación vs. Código (Ej. Código, variables y commits en **Inglés**, explicaciones y comentarios de alto nivel en **Español**).
-- [x] Nivel de detalle en las explicaciones: ¿Respuestas técnicas directas al grano o explicaciones didácticas paso a paso?
-- [x] Formato de las respuestas: ¿Uso extensivo de diagramas Mermaid, tablas comparativas, o listas Markdown simples?
-- [x] Limitar el uso de librerías de terceros (Ej. preferir siempre la biblioteca estándar de Python antes que sugerir una dependencia nueva a menos que haya una buena razón).
+### 1.3 Universal-Agents Behavior and Communication:
+- [x] Tactical Delegation and Code Quarantine Rules: Self-approval blocking and strict prohibition of generating extensive blocks during the Mentor role.
+- [x] Establish Documentation vs. Code Language (e.g., Code, variables, and commits in **English**, explanations and high-level comments in **Spanish**).
+- [x] Level of detail in explanations: Direct technical answers or step-by-step didactic explanations?
+- [x] Response format: Extensive use of Mermaid diagrams, comparative tables, or simple Markdown lists?
+- [x] Limit the use of third-party libraries (e.g., always prefer the Python standard library before suggesting a new dependency unless there is a good reason).
 
-### 1.4 Testeo, Git y Despliegue:
-- [x] Convenciones de commits: (Ej. Usar Conventional Commits como `feat:`, `fix:`, `chore:`).
-- [x] Estándares de Testing: ¿Usamos `pytest`, `unittest`? ¿Exigimos un % mínimo de cobertura antes de dar un módulo por cerrado?
-- [x] ¿Cómo manejamos los datos sensibles o contraseñas en los scripts? (Ej. uso obligatorio de archivos `.env` o gestores de secretos).
+### 1.4 Testing, Git, and Deployment:
+- [x] Commit conventions: (e.g., Use Conventional Commits like `feat:`, `fix:`, `chore:`).
+- [x] Testing Standards: Do we use `pytest`, `unittest`? Do we require a minimum % of coverage before closing a module?
+- [x] How do we handle sensitive data or passwords in scripts? (e.g., Mandatory use of `.env` files or secret managers).
 
-## Fase 2: Mapeo y Topología de Proyectos (Estructura Física)
-**Objetivo:** Enseñar a Universal-Agents la topología exacta y las fronteras de los repositorios para que opere sin destruir el entorno nativo del Mac.
-- [x] Definir la estructura de aislamiento Src-Layout (`/src`, `/tests`, `/data`), separando código de datos pesados (Git LFS).
-- [x] Centralizar comandos con un Orquestador de Atajos (Makefiles en vez de comandos bash ciegos).
-- [x] Establecer la regla del Virtual Environment nativo (`/venv/`) con ejecución binaria estricta (`./venv/bin/python`).
-- [x] Blindaje de contenedores: Obligar al uso de Docker-Compose para Bases de Datos (PostgreSQL) con retención local en `.docker-db-data`.
-- [x] Aislar la base de datos de los Tests Unitarios (Test DB Segregation in-memory) para que el QA de la IA no borre tus datos reales.
+## Phase 2: Project Mapping and Topology (Physical Structure)
+**Objective:** Teach Universal-Agents the exact topology and repository boundaries so it operates without destroying the Mac's native environment.
+- [x] Define the Src-Layout isolation structure (`/src`, `/tests`, `/data`), separating code from heavy data (Git LFS).
+- [x] Centralize commands with a Shortcut Orchestrator (Makefiles instead of blind bash commands).
+- [x] Establish the native Virtual Environment rule (`/venv/`) with strict binary execution (`./venv/bin/python`).
+- [x] Container Shielding: Force the use of Docker-Compose for Databases (PostgreSQL) with local retention in `.docker-db-data`.
+- [x] Isolate the database from Unit Tests (in-memory Test DB Segregation) so that the AI's QA does not delete your real data.
 
-## Fase 3: Arquitectura Suprema de Subagentes (Zero-Trust Framework)
-**Objetivo:** Construir una IA multi-agente militarizada que opere autónomamente sobre tu código usando fronteras físicas inquebrantables, impidiendo Bucles API y colisiones.
-- [x] Diseñar el Flujo Operativo de 6 Pasos (Mentor > Orquestador > Auditor > Autorización Humana > Matriz Ejecutora > Rollback).
-- [x] Matriz Ejecutora (Escaneo Ad-Hoc Cacheado): Instanciación dinámica de sub-agentes basada en escaneo local pre-cacheado (`.agent_state/context.md`) y segregación física (1 archivo = 1 agente).
-- [x] Supervisión Dual (Automejora vs Local): Segregación del agente Auditor en un perfil de actualización constitucional maestra vs un supervisor de proyecto de solo-lectura.
-- [x] Auditoría Token-Saver (Economista): Despliegue de un "Auditor de Eficiencia" en la Fase 3, estandarizado para derribar planes que causen desgastes innecesarios de tokens y ventana de contexto.
-- [x] Control Transaccional: Atomic Commits manuales tas éxito, combinados con Git Branch Isolation (`ai-sprint/tarea`), o Rollback absoluto preservando humanos no trackeados (WIP Safety Freeze).
-- [x] Seguridad RCE y PII: Prohibición LLM de ingestión cruda de datos sensibles (`view_file CSV`) o librerías del OS (`os.system`). Obligación de scripting enmascarado (Traceback Sanitization).
-- [x] Supremacía Constitucional: Aislamiento por Sesiones UID de orquestadores (`.agent_state/uid/`) imposibilitando mentes cruzadas, y supremacía inquebrantable de las reglas base frente a futuros *Skills*. Límite cognitivo AST contra facturas masivas.
+## Phase 3: Supreme Subagent Architecture (Zero-Trust Framework)
+**Objective:** Build a militarized multi-agent AI that operates autonomously over your code using unbreakable physical boundaries, preventing API Loops and collisions.
+- [x] Design the 6-Step Operational Flow (Mentor > Orchestrator > Auditor > Human Authorization > Executing Matrix > Rollback).
+- [x] Executing Matrix (Ad-Hoc Cached Scanning): Dynamic instantiation of sub-agents based on pre-cached local scanning (`.agent_state/context.md`) and physical segregation (1 file = 1 agent).
+- [x] Dual Supervision (Self-Improvement vs. Local): Segregation of the Auditor agent into a master constitutional update profile vs. a read-only project supervisor.
+- [x] Token-Saver Audit (Economist): Deployment of an "Efficiency Auditor" in Phase 3, standardized to tear down plans that cause unnecessary waste of tokens and context window.
+- [x] Transactional Control: Manual Atomic Commits upon success, combined with Git Branch Isolation (`ai-sprint/task`), or absolute Rollback preserving untracked humans (WIP Safety Freeze).
+- [x] RCE and PII Security: LLM prohibition of raw ingestion of sensitive data (`view_file CSV`) or OS libraries (`os.system`). Mandatory masked scripting (Traceback Sanitization).
+- [x] Constitutional Supremacy: Session UID isolation of orchestrators (`.agent_state/uid/`) making cross-minds impossible, and unbreakable supremacy of base rules over future *Skills*. AST cognitive limit against massive files.
 
-## Fase 4: Creación de Workflows y Habilidades (Skills)
-**Objetivo:** Tras fabricar un motor irrompible (Fases 1-3), ahora construimos sus *Manuales Tácticos*. El Director invoca comandos personalizados y el Orquestador ejecuta bajo reglas pre-aprobadas acelerando las tareas semanales.
-- [x] Diseñar Workflow 1: Andamiaje (*Scaffolding* absoluto). Rutina interactiva o archivo base para inicializar de golpe la base `src/`, el `.env` y el entorno Docker bajo normas Fase 1 y 2.
-- [x] Diseñar Skill 1: *Omni Context Minimizer*. Sustitución táctica del Data Cleaner para priorizar la extracción universal de *Abstract Syntax Trees* y ahorrar context bloating en repositorios masivos. El Data Cleaner se post-pone a demanda.
-- [x] Definir desencadenantes técnicos (Triggers) seguros para usar delegaciones de autonomía al instante (`// turbo`) sin destruir la gobernanza o los datos Base.
+## Phase 4: Creation of Workflows and Skills (Skills)
+**Objective:** After building an unbreakable engine (Phases 1-3), we now build its *Tactical Manuals*. The Director invokes custom commands and the Orchestrator executes under pre-approved rules accelerating weekly tasks.
+- [x] Design Workflow 1: Scaffolding (Absolute Scaffolding). Interactive routine or base file to initialize the `src/` base, the `.env`, and the Docker environment all at once under Phase 1 and 2 rules.
+- [x] Design Skill 1: *Omni Context Minimizer*. Tactical substitution of the Data Cleaner to prioritize universal extraction of *Abstract Syntax Trees* and save context bloating in massive repositories. The Data Cleaner is postponed on demand.
+- [x] Define safe technical triggers (Triggers) to use autonomy delegations instantly (`// turbo`) without destroying governance or Base data.
 
-## Fase 5: Consolidación del Conocimiento (Knowledge Items)
-**Objetivo:** Curar el "Síndrome de Alzheimer de la IA" dotándola de un Cerebro a Largo Plazo externo a tus repos de usuario.
-- [ ] Automatizar u ordenar al Orquestador para extraer lecciones heurísticas, *workarounds* descubiertos de librerías exóticas o *fixes* de bugs post-sprint.
-- [ ] Dictaminar formato y alojamiento temporal en `.agents/knowledge/` antes de que el Orquestador limpie (Amnesia Total) sus memorias operativas temporales al terminar un *Sprint*.
+## Phase 5: Knowledge Consolidation (Knowledge Items)
+**Objective:** Cure the "AI Alzheimer's Syndrome" by providing it with a Long-Term Brain external to your user repos.
+- [ ] Automate or order the Orchestrator to extract heuristic lessons, discovered workarounds for exotic libraries, or post-sprint bug fixes.
+- [ ] Dictate format and temporary hosting in `.agents/knowledge/` before the Orchestrator wipes (Total Amnesia) its temporary operational memories at the end of a *Sprint*.
 
 ---
-**¿Cómo proceder?**
-Con 4/5 fases blindadas aplicando el framework *Zero-Ambiguity* y el arsenal táctico en línea, empezamos oficialmente la recta final: **Consolidación del Conocimiento (Fase 5)**.
+**How to proceed?**
+With 4/5 phases shielded applying the *Zero-Ambiguity* framework and the tactical arsenal online, we officially begin the final stretch: **Knowledge Consolidation (Phase 5)**.

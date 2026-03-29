@@ -1,47 +1,47 @@
 ---
-description: "Andamiaje Modular Múltiple (Generación y Configuración Dinámica de Proyectos)"
+description: "Multiple Modular Scaffolding (Dynamic Generation and Configuration of Projects)"
 version: 1.0.0
 ---
 
-# 🏗️ Workflow: Andamiaje Modular (Scaffolding Dinámico)
+# 🏗️ Workflow: Modular Scaffolding (Dynamic Scaffolding)
 
-Este es el **Protocolo Maestro** para inicializar cualquier repositorio nuevo. Asegura que los requisitos del proyecto queden grabados permanentemente en caché, cumpliendo con la exigencia de ahorro del [Token-Saver], e instala la topología física bajo las leyes de la Constitución [Fases 1 y 2].
+This is the **Master Protocol** for initializing any new repository. It ensures that project requirements are permanently recorded in cache, complying with the [Token-Saver] savings requirement, and installs the physical topology under the laws of the Constitution [Phases 1 and 2].
 
-El agente encargado OBLIGATORIAMENTE seguirá esta secuencia en orden:
+The assigned agent MUST follow this sequence in order:
 
-## Fase 1: Interrogatorio del Ecosistema (Mentor Mode)
+## Phase 1: Ecosystem Interrogation (Mentor Mode)
 
-El Mentor interroga al Director (el usuario) para definir 4 pilares tecnológicos:
-1.  **Tecnología Base:** ¿Python (Data/Backend) o Node/JS (Frontend/Fullstack)? ¿Qué Framework exacto (ej. Django, FastAPI, React, NextJS)?
-2.  **Manejador de Dependencias:** ¿Para Python (`venv` + `requirements.txt`, `poetry`, o `uv`)? ¿Para JS (`npm`, `yarn`, `pnpm`)?
-3.  **Persistencia / Docker:** ¿Se levantará base de datos en `docker-compose.yml` (ej. PostgreSQL, Redis)?
-4.  **Formatters/Linters:** (ej. `ruff`, `black`, `eslint`).
+The Mentor interrogates the Director (the user) to define 4 technological pillars:
+1.  **Base Technology:** Python (Data/Backend) or Node/JS (Frontend/Fullstack)? Which exact framework (e.g., Django, FastAPI, React, NextJS)?
+2.  **Dependency Manager:** For Python (`venv` + `requirements.txt`, `poetry`, or `uv`)? For JS (`npm`, `yarn`, `pnpm`)?
+3.  **Persistence / Docker:** Will a database be set up in `docker-compose.yml` (e.g., PostgreSQL, Redis)?
+4.  **Formatters/Linters:** (e.g., `ruff`, `black`, `eslint`).
 
-## Fase 2: Blindaje de Caché (Ahorro de Tokens)
+## Phase 2: Cache Shielding (Token Saving)
 
-Cualquier proyecto nacido de este Workflow DEBE blindar sus dependencias inmediatas para que futuros agentes tácticos no escaneen ciegamente el proyecto gastando cientos de miles de tokens:
-- **Acción:** El Orquestador crea un archivo `project_stack.md` (o lo inyecta directamente en la caché obligatoria `.agent_state/session_{UID}/context.md`) detallando el Ecosistema, la Ruta Raíz, la BD instalada, y los Comandos de Testeo elegidos en la Fase 1.
-- *Nota del Token-Saver:* Nadie lee este repositorio desde cero nunca más. Se consulta la caché.
+Any project born from this Workflow MUST shield its immediate dependencies so that future tactical agents do not blindly scan the project wasting hundreds of thousands of tokens:
+- **Action:** The Orchestrator creates a `project_stack.md` file (or injects it directly into the mandatory cache `.agent_state/session_{UID}/context.md`) detailing the Ecosystem, the Root Path, the installed DB, and the Testing Commands chosen in Phase 1.
+- *Token-Saver Note:* No one reads this repository from scratch anymore. The cache is consulted.
 
-## Fase 3: Despliegue Físico de Topología
+## Phase 3: Physical Topology Deployment
 
-Basándose en la Fase 1 y en el archivo `project_mapping_and_context.md`, el Orquestador ejecuta de manera secuencial (*usando comandos de terminal atómicos en bash separados por SafeToAutoRun* si corresponde):
+Based on Phase 1 and the `project_mapping_and_context.md` file, the Orchestrator executes sequentially (*using atomic terminal commands in bash separated by SafeToAutoRun* if applicable):
 
-1.  **Directorio y Propagación:**
-    - Hacer `mkdir` de la subcarpeta del proyecto y moverse `cd`.
-    - **LEY ABSOLUTA (Git Submodules):** Ejecutar `git init` inicial, seguido inmediatamente de `git submodule add <URL_O_RUTA_RAIZ_DEL_SISTEMA>/.agents .agents` para vincular el marco constitucional sin romper la cadena de actualizaciones globales.
-2.  **Topología (Src Layout):**
-    - Crear `/src`, `/tests`, `/data/output`.
-    - Crear `/logs` (Trazas puras) y `.gitignore` (bloqueando obligatoriamente `.DS_Store`, `.agent_state/`, `/venv/`, `.env` y `/data/`).
-3.  **Caja de Arena (Sandbox Virtual):**
-    - Python: Instanciar `./venv/` y blindarlo. Configurar archivo `.python-version`.
-    - Node: Ejecutar `npm init -y` o el equivalente blindado, dejando el directorio `node_modules`.
-4.  **El Orquestador Humano (Makefile):**
-    - Redactar un `Makefile` (o `taskfile`) instanciando dependencias comunes (`test`, `lint`, `db-up`) y, **obligatoriamente**, agregar el alias `make sync-ai` que invoque asíncronamente a `git submodule update --remote` para que el humano actualice el marco lógico de la IA con un clic.
-5.  **Blindaje de Datos (Docker):**
-    - Si se eligió BD, inyectar el archivo `docker-compose.yml` con el mapeo del volumen forzado a `./.docker-db-data`.
+1.  **Directory and Propagation:**
+    - Perform `mkdir` for the project subfolder and `cd` into it.
+    - **ABSOLUTE LAW (Git Submodules):** Execute initial `git init`, followed immediately by `git submodule add <URL_OR_ROOT_SYSTEM_PATH>/.agents .agents` to link the constitutional framework without breaking the chain of global updates.
+2.  **Topology (Src Layout):**
+    - Create `/src`, `/tests`, `/data/output`.
+    - Create `/logs` (Pure traces) and `.gitignore` (mandatory blocking of `.DS_Store`, `.agent_state/`, `/venv/`, `.env`, and `/data/`).
+3.  **Sandbox (Virtual Sandbox):**
+    - Python: Instantiate `./venv/` and shield it. Configure the `.python-version` file.
+    - Node: Execute `npm init -y` or the shielded equivalent, leaving the `node_modules` directory.
+4.  **The Human Orchestrator (Makefile):**
+    - Draft a `Makefile` (or `Taskfile`) instantiating common dependencies (`test`, `lint`, `db-up`) and **mandatory** add the `make sync-ai` alias that asynchronously invokes `git submodule update --remote` so the human can update the AI's logical framework with one click.
+5.  **Data Shielding (Docker):**
+    - If a DB was chosen, inject the `docker-compose.yml` file with the volume mapping forced to `./.docker-db-data`.
 
-## Fase 4: Cierre con Auditoría
+## Phase 4: Closing with Audit
 
-- El Orquestador pide a los 3 Auditores (Dual Constitucional + Proyecto, y Token-Saver) que verifiquen el árbol generado sin gastar contexto, únicamente revisando `project_stack.md`.
-- Presenta el comando final de instanciación Git (`git init && git add . && git commit -m "chore: init modular scaffolding"`) para que el humano pulse el Botón Final de Aprobación.
+- The Orchestrator asks the 3 Auditors (Dual Constitutional + Project, and Token-Saver) to verify the generated tree without consuming context, only reviewing `project_stack.md`.
+- Present the final Git instantiation command (`git init && git add . && git commit -m "chore: init modular scaffolding"`) for the human to press the Final Approval Button.
