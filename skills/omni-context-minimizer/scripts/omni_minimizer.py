@@ -3,49 +3,49 @@ import re
 
 def parse_file(filepath):
     """
-    Extrator Heurístico Universal. Escanea un archivo y devuelve un "esqueleto" cognitivo
-    compuesto únicamente de Imports, Firmas de Funciones (Def, Arrow, Func, Fn) y Estructuras (Classes, Structs).
-    Ahorra el 90% del contexto al no cargar los bloques lógicos de los cuerpos de las funciones.
+    Universal Heuristic Extractor. Scans a file and returns a cognitive "skeleton"
+    composed solely of Imports, Function Signatures (Def, Arrow, Func, Fn), and Structures (Classes, Structs).
+    Saves 90% of context by not loading the logical blocks of function bodies.
     """
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
             lines = f.readlines()
             
-        # Patrones Regex para cazar las arquitecturas principales ignorando los cuerpos
+        # Regex Patterns to hunt main architectures ignoring bodies
         patterns = [
-            # 1. Palabras clave de declaración (Python, JS/TS, Go, Rust, Java, C++)
+            # 1. Declaration keywords (Python, JS/TS, Go, Rust, Java, C++)
             r'^\s*(export\s+|default\s+)*(public\s+|private\s+|protected\s+)*(static\s+)*(async\s+)*(class|def|function|func|fn|struct|interface|type|enum)\s+\w+',
-            # 2. Funciones Flecha / Arrow Functions (JS/TS) e.g., const myFunction = async (args) => {
+            # 2. Arrow Functions (JS/TS) e.g., const myFunction = async (args) => {
             r'^\s*(export\s+)*(const|let|var)\s+\w+\s*=\s*(async\s*)?(\([^)]*\)|\w+)\s*=>',
-            # 3. Importaciones / Dependencias
+            # 3. Imports / Dependencies
             r'^\s*(import|from|require|#include|using|package)\b',
-            # 4. Decoradores (ej. @app.route, @Component) excluyendo JSDoc
+            # 4. Decorators (e.g., @app.route, @Component) excluding JSDoc
             r'^\s*@(?!.*\b(param|returns|type)\b)'
         ]
         
         master_regex = re.compile('|'.join(patterns))
         
-        print(f"--- [TOKEN-SAVER MAP] Esqueleto Arquitectónico de: {filepath} ---")
-        print(f"[Total Líneas Físicas]: {len(lines)}\n")
+        print(f"--- [TOKEN-SAVER MAP] Architectural Skeleton of: {filepath} ---")
+        print(f"[Total Physical Lines]: {len(lines)}\n")
         
         matched_lines = 0
         for idx, line in enumerate(lines, 1):
-            # Limpiamos el salto de línea para procesar
+            # Clean newline for processing
             stripped = line.rstrip()
             if master_regex.search(stripped):
-                print(f"Línea {idx}: {stripped}")
+                print(f"Line {idx}: {stripped}")
                 matched_lines += 1
                 
-        print(f"\n--- [OPTIMIZACIÓN]: Se redujo el archivo a {matched_lines} líneas de estructura pura. ---")
+        print(f"\n--- [OPTIMIZATION]: The file was reduced to {matched_lines} lines of pure structure. ---")
                 
     except UnicodeDecodeError:
-        print(f"[ERROR]: El archivo {filepath} parece ser binario o tener una codificación incomprensible.")
+        print(f"[ERROR]: The file {filepath} appears to be binary or has an incomprehensible encoding.")
     except Exception as e:
-        print(f"[ERROR]: Fallo en la lectura del archivo {filepath} - {str(e)}")
+        print(f"[ERROR]: Failed to read file {filepath} - {str(e)}")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Uso Crítico: python omni_minimizer.py <ruta_absoluta_del_archivo>")
+        print("Critical Usage: python omni_minimizer.py <absolute_file_path>")
         sys.exit(1)
         
     target_file = sys.argv[1]
