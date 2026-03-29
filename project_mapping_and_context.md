@@ -2,9 +2,9 @@
 Reglas exclusivas del sistema de archivos y topología local del SO.
 
 ## 1. Ubicación y Espacio Base
-- **Raíz Única:** Todos los repositorios residen forzosamente en `/Users/gstmirabal/Developer/`.
-- **Propagación del Repositorio `.agents`:** El directorio maestro de la IA es `/Users/gstmirabal/Developer/.agents`. Todo nuevo proyecto requiere que esta matriz se integre estructuralmente en su raíz (vía copia mecánica local `cp -R` o anexado como `git submodule`).
-- **Automejora y Centralización (Git):** Toda refactorización de estas reglas y manuales por parte del agente Auditor **ESTÁ ESTRICTAMENTE PROHIBIDA** sobre las copias locales de cada proyecto. Cualquier automejora a la constitución o habilidades debe ejecutarse y versionarse obligatoriamente sobre el repositorio maestro original (`/Users/gstmirabal/Developer/.agents`) para garantizar su herencia global.
+- **Raíz Única:** Todos los repositorios deben residir forzosamente bajo un único directorio raíz u organizativo definido por el humano (ej. `$HOME/Developer/`).
+- **Propagación del Repositorio `.agents` (Copia Bloqueada):** El directorio maestro de la IA (este repositorio) debe tratarse como el origen de verdad. Todo nuevo proyecto requiere integrar esta matriz obligatoriamente como **Submódulo de Git** (`git submodule add <url_o_path_del_repo_maestro>`). **LEY ABSOLUTA:** Queda rotundamente prohibido usar copia plana (`cp -R`); si se usa copia, los proyectos quedan desconectados de las mejoras globales.
+- **Automejora y Centralización (Git):** Toda refactorización de estas reglas y manuales por parte del agente Auditor **ESTÁ ESTRICTAMENTE PROHIBIDA** sobre las copias locales de cada proyecto. Cualquier automejora a la constitución o habilidades debe ejecutarse y versionarse obligatoriamente sobre el repositorio maestro original para garantizar su herencia global.
 
 ## 2. Entornos Virtuales (venv)
 - **Aislamiento:** Cada proyecto aloja su propio directorio `./venv/` en la raíz. Prohibida toda instalación global (`pip install`).
