@@ -6,16 +6,16 @@ All detailed logs and plans are stored in the `/sprints` directory.
 ---
 
 ## 📅 Active Sprint
-- **Current Task**: [ ] Sprint 002: Global Certification Audit (100% SCORE) 🏆
-    - [ ] Global Linting (Ruff): 0 issues (Clean)
-    - [ ] Type Safety (Mypy): 0 issues (Certified)
-    - [ ] Security Hardening: Axes & DJANGO_SETTINGS confirmed
-    - [ ] Codebase Sanitization: No leaks, Technical English enforced
+- **Current Task**: [x] Sprint 002: Global Certification Audit (100% SCORE) 🏆
+    - [x] Global Linting (Ruff): 0 issues (Clean)
+    - [x] Type Safety (Mypy): 0 issues (Certified)
+    - [x] Security Hardening: Axes & DJANGO_SETTINGS confirmed
+    - [x] Codebase Sanitization: No leaks, Technical English enforced
 
 ---
 
 ## 📜 Sprint History
 | ID | Sprint Name | Status | Ended |
 | :--- | :--- | :---: | :--- |
-| `002` | **Global Certification** | 🏗️ | *In Progress* |
+| `002` | **Global Certification** | ✅ | 2026-03-30 |
 | `001` | **Stabilization & I18n** | ✅ | 2026-03-30 |
