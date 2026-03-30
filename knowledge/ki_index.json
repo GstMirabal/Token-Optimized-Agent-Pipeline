@@ -11,6 +11,18 @@
         "postgres",
         "timeout"
       ]
+    },
+    {
+      "id": "ki_002_certification_audit",
+      "title": "Python 3.13 & Django-Stubs Stability vs. Mypy",
+      "summary": "Workaround for Mypy internal error on Python 3.13 with django-stubs and envtoml integration.",
+      "file_path": "ki_002_certification_audit.md",
+      "tags": [
+        "mypy",
+        "python3.13",
+        "django-stubs",
+        "envtoml"
+      ]
     }
   ]
 }
