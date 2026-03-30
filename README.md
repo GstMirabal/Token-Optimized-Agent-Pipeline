@@ -57,6 +57,8 @@ Universal-Agents is a military-grade AI agent governance framework designed to p
 *   **MCP Registry & Routing:** Strict Zero-Trust assignment of external Model Context Protocols (MCPs). The Orchestrator queries `.agents/skills/mcp-registry/registry.json` and provisions specific local/remote data sources before unlocking subagent execution.
 *   **Amnesia & Atomic KIs:** Automatic knowledge extraction distilling long-term "lessons learned" into atomic `.md` files indexed by `ki_index.json` under `/knowledge/`, avoiding token bloating in future sessions.
 *   **Modular Scaffolding:** Standardized project initialization ensuring every new repository inherits the same constitutional security and quality rules.
+*   **Agnostic Certification Audit:** A framework-neutral validator that ensures 100% Core compliance across any stack (Django, Prisma, SQLAlchemy, etc.). It prioritizes **Incremental Auditing**, identifying implemented modules vs. boilerplate to avoid redundant checks.
+*   **Persistent Compliance Roadmap:** Integrated tracking via `docs/CERTIFICATION_ROADMAP.md`, providing a verifiable history of security, quality, and logic status.
 
 ### Built With
 
@@ -112,7 +114,7 @@ python .agents/skills/omni-context-minimizer/scripts/omni_minimizer.py path/to/l
 ### 🛠️ AI-Ops: Session Initialization
 To ensure the AI follows the constitutional rules and architectural standards from the very first message:
 > **Protocol**: Start any new conversation or context window by referencing the `.agents` path and the `governance/global_user_rules.md`.
-> **Trigger Phrase**: *"Initialize session using framework protocols in `.agents/`. Audit my requests against `governance/global_user_rules.md` and keep the `task.md` indexed."*
+> **Trigger Phrase**: *"Initialize session using framework protocols in `.agents/` and keep the `task.md` indexed."*
 
 ### 🤖 AI-Ops: Core Commands (Slash Commands)
 The framework supports automated workflows via standardized Markdown protocols. Use these to trigger complex engineering tasks:
@@ -121,6 +123,7 @@ The framework supports automated workflows via standardized Markdown protocols. 
 | :--- | :--- | :--- |
 | **`/amnesia_extractor`** | **Post-Sprint Purgatory**: Extracts LTM Lessons into Knowledge Items. | `workflows/amnesia_extractor.md` |
 | **`/scaffolding_modular`** | **Project Scaffolding**: Initializes a new repo with Modular Architecture. | `workflows/scaffolding_modular.md` |
+| **`/certification_audit`** | **Global Audit**: Agnostic, incremental certification of implemented logic. | `workflows/certification_audit.md` |
 
 > [!TIP]
 > Any `.md` file added to the `workflows/` directory becomes an executable "slash command" that you can request from the AI.

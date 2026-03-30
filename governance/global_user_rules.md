@@ -29,6 +29,7 @@ Syntax, Quality, and Communication Rules.
 
 ## 3. Governance and Directory Structure
 - **Persistent Metadata (`.agents/governance/`):** All persistent files related to agent behavior, roadmaps, project context, and long-term rules MUST be stored here.
+- **Audit Exclusion:** The `.agents/governance/` directory is **EXCLUDED** from automated code audits (linting, typing, etc.) as it contains only markdown-based policies and behavioral metadata. These files must be audited manually for logical consistency and English accuracy, not via code linters.
 - **Ephemeral Sprint Records (`.agents/sprints/`):** Detailed task logs and implementation plans for specific sprints MUST be stored here.
 - **Sprint Naming Convention:** Use `XXX-sprint-name.md` (e.g., `001-stabilization-sprint.md`).
 - **High-Value Deliverables (`docs/`):** Strategic documentation such as Audit Reports, Architecture Flows, and User Guides MUST be stored in the `docs/` folder (standardized by language, e.g., `docs/EN/`). These are the final "resulting products" of the agent's work.
