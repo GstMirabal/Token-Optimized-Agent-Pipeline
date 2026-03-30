@@ -26,6 +26,11 @@ Syntax, Quality, and Communication Rules.
 - **Dependencies and Secrets:** IMPERATIVE use of the native *"Standard Library"* of the language as the first and only initial option. It is prohibited to add third-party external libraries unless it is justified that manual refactoring exceeds the cost of the dependency. Prohibited to code keys or tokens in plain text (*hardcoded*). Exclusive use of `.env` or secret managers (`envtoml`). **MANDATORY:** Always export the `.env` file during all terminal or automated operations. **MANDATORY:** Any update or installation of a dependency MUST be immediately followed by a `pip freeze` to synchronize the `requirements.txt` and `requirements-dev.txt` files to ensure environment consistency.
 - **Implementation Artifacts:** All `implementation_plan.md` and `task.md` MUST be written in professional Technical English. They are stored in the `.agents/sprints/` directory following the naming convention `XXX-sprint-name.md`.
 - **Master Task Index:** The root `.agents/task.md` MUST remain a clean Table of Contents (TOC) pointing to the active sprint.
+- **Sprint Initialization Audit (Arsenal Check):** Every time a new sprint is initialized, after creating the mandatory root `.agents/task.md` entry and the corresponding `.agents/sprints/XXX-sprint-name.md` file, the Agent **MUST** perform a "Pre-Flight Arsenal Audit":
+    1. **Skills Analysis:** Scan the `/skills/` directory and analyze if current tools are sufficient for the task.
+    2. **Missing Skills Identification:** Identify if any specialized skill from the master repository or third-party is required to optimize performance.
+    3. **Skill Assignment:** Formally assign the corresponding skills to the subagents in the `implementation_plan.md`.
+    4. **MCP Provisioning:** Determine if a Model Context Protocol (MCP) server must be downloaded, started, or connected to provide extended context (DB schema, specialized APIs).
 
 ## 3. Governance and Directory Structure
 - **Persistent Metadata (`.agents/governance/`):** All persistent files related to agent behavior, roadmaps, project context, and long-term rules MUST be stored here.
@@ -33,4 +38,3 @@ Syntax, Quality, and Communication Rules.
 - **Ephemeral Sprint Records (`.agents/sprints/`):** Detailed task logs and implementation plans for specific sprints MUST be stored here.
 - **Sprint Naming Convention:** Use `XXX-sprint-name.md` (e.g., `001-stabilization-sprint.md`).
 - **High-Value Deliverables (`docs/`):** Strategic documentation such as Audit Reports, Architecture Flows, and User Guides MUST be stored in the `docs/` folder (standardized by language, e.g., `docs/EN/`). These are the final "resulting products" of the agent's work.
-
