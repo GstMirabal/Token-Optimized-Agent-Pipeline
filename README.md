@@ -96,7 +96,7 @@ Universal-Agents is a military-grade AI agent governance framework designed to p
    ```
 
 4. **Audit & Configure**
-   Review `global_user_rules.md` to ensure your local environment variables and paths are correctly mapped within the framework.
+   Review `governance/global_user_rules.md` to ensure your local environment variables and paths are correctly mapped within the framework.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -108,6 +108,22 @@ Once integrated, the framework automatically triggers its auditors during your A
 # Example: Extracting the skeleton of a large class to save tokens
 python .agents/skills/omni-context-minimizer/scripts/omni_minimizer.py path/to/large_file.py
 ```
+
+### 🛠️ AI-Ops: Session Initialization
+To ensure the AI follows the constitutional rules and architectural standards from the very first message:
+> **Protocol**: Start any new conversation or context window by referencing the `.agents` path and the `governance/global_user_rules.md`.
+> **Trigger Phrase**: *"Initialize session using framework protocols in `.agents/`. Audit my requests against `governance/global_user_rules.md` and keep the `task.md` indexed."*
+
+### 🤖 AI-Ops: Core Commands (Slash Commands)
+The framework supports automated workflows via standardized Markdown protocols. Use these to trigger complex engineering tasks:
+
+| Command | Purpose | Location |
+| :--- | :--- | :--- |
+| **`/amnesia_extractor`** | **Post-Sprint Purgatory**: Extracts LTM Lessons into Knowledge Items. | `workflows/amnesia_extractor.md` |
+| **`/scaffolding_modular`** | **Project Scaffolding**: Initializes a new repo with Modular Architecture. | `workflows/scaffolding_modular.md` |
+
+> [!TIP]
+> Any `.md` file added to the `workflows/` directory becomes an executable "slash command" that you can request from the AI.
 
 ```json
 // Example: The Orchestrator statically routes external tools using the MCP Registry
