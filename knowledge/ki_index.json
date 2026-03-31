@@ -94,6 +94,42 @@
         "cleanliness",
         "hygiene"
       ]
+    },
+    {
+      "id": "ki_009_aes_gcm_argon2id",
+      "title": "AES-256-GCM & Argon2id Hardening",
+      "summary": "Implementation of military-grade authenticated encryption and key derivation for the CryptoBot vault.",
+      "file_path": "ki_009_aes_gcm_argon2id.md",
+      "tags": [
+        "crypto",
+        "security",
+        "argon2id",
+        "aes-gcm"
+      ]
+    },
+    {
+      "id": "ki_010_prioritized_comms",
+      "title": "Prioritized Asynchronous Communications",
+      "summary": "System for routing notifications via critical vs informational Celery queues with anti-spam squelching.",
+      "file_path": "ki_010_prioritized_comms.md",
+      "tags": [
+        "celery",
+        "comms",
+        "prioritization",
+        "notifications"
+      ]
+    },
+    {
+      "id": "ki_011_custom_root_identity",
+      "title": "Custom User Model Root Identity Provisioning",
+      "summary": "Bootstrap protocol for creating full superusers in custom Django models with Email-based authentication.",
+      "file_path": "ki_011_custom_root_identity.md",
+      "tags": [
+        "identity",
+        "superuser",
+        "bootstrap",
+        "users-app"
+      ]
     }
   ]
 }
