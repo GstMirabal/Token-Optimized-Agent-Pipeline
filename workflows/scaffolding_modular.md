@@ -16,6 +16,9 @@ The Mentor interrogates the Director (the user) to define 4 technological pillar
 2.  **Dependency Manager:** For Python (`venv` + `requirements.txt`, `poetry`, or `uv`)? For JS (`npm`, `yarn`, `pnpm`)?
 3.  **Persistence / Docker:** Will a database be set up in `docker-compose.yml` (e.g., PostgreSQL, Redis)?
 4.  **Formatters/Linters:** (e.g., `ruff`, `black`, `eslint`).
+7.  **Task Index:** Initialize `.agents/task.md` as the local Master TOC.
+8.  **Strategic Sprint:** Create `.agents/task/sprints/001-base-initialization.md`.
+9.  **Subagent Mode:** Transition to **Orchestrator Mode** for Phase 1.
 
 ## Phase 2: Cache Shielding & Phase 0 Baseline (Token Saving)
 

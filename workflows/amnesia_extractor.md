@@ -8,7 +8,7 @@ version: 1.1.0
 This is the **Mandatory Closing Protocol** for all Universal-Agents sessions. To prevent cross-session hallucinations and save tokens, temporary state folders (`.agent_state/session_{UID}/`) must be destroyed. This workflow ensures that "lessons learned" are distilled into the system's persistent memory (`/knowledge/`) before the physical deletion of the cache.
 
 ## Phase 1: Retrospective Scanning (Brain Drain)
-When the session is declared finished or `/save_knowledge` is triggered, the Orchestrator reads the local `task.md` and `sprints/` (Local Context) to identify:
+When the session is declared finished or `/save_knowledge` is triggered, the Orchestrator reads the local `task.md` and `task/sprints/` (Local Context) to identify:
 1.  **Critical Workarounds:** Creative solutions to rebellious libraries or exotic environments.
 2.  **Architectural Decisions:** Rationale for choosing specific patterns or tools (e.g., `uv` vs `pip`).
 3.  **Resolved Complex Bugs:** Linter, Typing, or Logic errors that required multiple attempts to solve.

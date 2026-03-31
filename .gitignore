@@ -3,9 +3,11 @@
 
 # Local Project-Specific Records (Ignored by Global Submodule)
 task.md
-sprints/
-.agent_state/
 task/
+task/sprints/
+task/roadmaps/
+.agent_state/
+knowledge/governance/
 implementation_plan.md
 implementation_plan_*.md
 implementation_plan_*.json
