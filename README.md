@@ -121,18 +121,23 @@ The framework supports automated workflows via standardized Markdown protocols. 
 
 | Command | Purpose | Location |
 | :--- | :--- | :--- |
-| **`/amnesia_extractor`** | **Post-Sprint Purgatory**: Extracts LTM Lessons into Knowledge Items. | `workflows/amnesia_extractor.md` |
-| **`/scaffolding_modular`** | **Project Scaffolding**: Initializes a new repo with Modular Architecture. | `workflows/scaffolding_modular.md` |
+| **`/amnesia_extractor`** | **Post-Sprint Purgatory**: Extracts LTM Lessons into Knowledge Items with Semantic Indexing. | `workflows/amnesia_extractor.md` |
+| **`/scaffolding_modular`** | **Project Scaffolding**: Initializes a new repo with Modular Architecture (Phase 0). | `workflows/scaffolding_modular.md` |
+| **`/scaffolding_retrofitting`**| **Retrofitting & Roadmap**: Aligns existing projects, discovers phases, and plans the roadmap. | `workflows/scaffolding_retrofitting.md` |
 | **`/certification_audit`** | **Global Audit**: Agnostic, incremental certification of implemented logic. | `workflows/certification_audit.md` |
 
 > [!TIP]
-> Any `.md` file added to the `workflows/` directory becomes an executable "slash command" that you can request from the AI.
+> **Submodule Isolation Policy:** All task tracking (`task.md`), sprint logs (`sprints/`), and local roadmaps (`roadmaps/`) are strictly ignored by Git. You can manage your project-specific tasks inside the `.agents/` folder without polluting the global framework repository.
+
+> [!IMPORTANT]
+> **Orchestration Manifest:** The Orchestrator now uses `.agents/skills/manifest.json` to statically route tools, drastically reducing token consumption and discovery time during sessions.
 
 ```json
-// Example: The Orchestrator statically routes external tools using the MCP Registry
-"example-postgres-mcp": {
-  "command": "npx -y @modelcontextprotocol/server-postgres postgres://.../db",
-  "authorized_roles": ["Database Auditor", "Backend Architect"]
+// Example: The Orchestrator statically routes external tools using the Skills Manifest
+{
+  "name": "omni-context-minimizer",
+  "category": "Efficiency",
+  "tags": ["token-saver", "ast", "scan"]
 }
 ```
 
