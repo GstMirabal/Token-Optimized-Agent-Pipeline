@@ -70,6 +70,30 @@
         "architecture",
         "governance"
       ]
+    },
+    {
+      "id": "ki_007_roadmap_maturity_lock",
+      "title": "Roadmap Maturity Protocol (Safety Lock)",
+      "summary": "Prohibits sprint initialization before roadmap discovery is finalized and the safety lock is released.",
+      "file_path": "ki_007_roadmap_maturity_lock.md",
+      "tags": [
+        "governance",
+        "lock",
+        "planning",
+        "discovery"
+      ]
+    },
+    {
+      "id": "ki_008_docs_sanitization_protocol",
+      "title": "Docs Sanitization & Mirroring Protocol",
+      "summary": "Rules for avoiding duplication between .agents and docs/ folder while archiving legacy implementation plans.",
+      "file_path": "ki_008_docs_sanitization_protocol.md",
+      "tags": [
+        "docs",
+        "mirrored-truth",
+        "cleanliness",
+        "hygiene"
+      ]
     }
   ]
 }

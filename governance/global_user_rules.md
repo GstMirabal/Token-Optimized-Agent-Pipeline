@@ -45,3 +45,8 @@ Syntax, Quality, and Communication Rules.
     - **`task/logs/`**: Ephemeral trace and debug logs.
 - **Sprint Naming Convention:** Use `XXX-sprint-name.md` (e.g., `001-retrofitting-and-alignment.md`).
 - **High-Value Deliverables (`docs/roadmaps/`):** While strategic roadmaps are kept in the local `roadmaps/` folder for AI tracking, the final architecturally-relevant documents MUST be mirrored or moved to the project's root `docs/` folder (outside the submodule) for permanent versioning in the main repository.
+
+## 4. Roadmap Maturity and Execution Control
+- **Roadmap Maturity Protocol (Safety Lock):** It is **FORBIDDEN** for the Agent to initialize a new Sprint (creating files in `task/sprints/` or entries in `task.md`) if the roadmap of the current Phase (within `task/roadmaps/`) is not finalized or is marked with a `safety_lock: LOCKED`.
+- **Discovery First:** Before moving to execution, the Agent MUST ensure that all Milestones (M0, M1, etc.) of the current phase are fully defined, including their specific deliverables and technical constraints.
+- **Lock Override:** The `safety_lock` can only be changed to `READY_FOR_EXECUTION` after a full Discovery Audit and explicit user agreement on the tactical scope.
