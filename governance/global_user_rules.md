@@ -38,10 +38,10 @@ Syntax, Quality, and Communication Rules.
 ## 3. Governance and Directory Structure (Submodule Separation)
 - **Persistent Global Metadata (`.agents/governance/`):** All persistent files related to agent behavior, roadmaps, project context, and long-term rules MUST be stored here. This is the **Shared Framework** (Read-Only for local projects).
 - **Audit Exclusion:** The `.agents/governance/` directory is **EXCLUDED** from automated code audits.
-- **Local Project-Specific Records (Ignored by Git):** To prevent polluting the global submodule repository, all project-specific task tracking and sprint data MUST be stored in the following files/folders within the submodule directory, which are strictly ignored by Git:
+- **Local Project-Specific Records (Ignored by Git):** To prevent polluting the global submodule repository, all project-specific task tracking and data MUST be stored in the following directory, which is strictly ignored by Git:
     - **`task.md`**: Master Task TOC (Local Index).
-    - **`sprints/`**: Detailed tactical plans (`XXX-sprint-name.md`).
-    - **`task/`**: Additional modular task details or task-specific metadata.
-    - **`roadmaps/`**: Strategic roadmap history (Discovery & Ultimate Phases).
+    - **`task/sprints/`**: Detailed tactical plans (`XXX-sprint-name.md`).
+    - **`task/roadmaps/`**: Strategic roadmap history (Discovery & Ultimate Phases).
+    - **`task/logs/`**: Ephemeral trace and debug logs.
 - **Sprint Naming Convention:** Use `XXX-sprint-name.md` (e.g., `001-retrofitting-and-alignment.md`).
 - **High-Value Deliverables (`docs/roadmaps/`):** While strategic roadmaps are kept in the local `roadmaps/` folder for AI tracking, the final architecturally-relevant documents MUST be mirrored or moved to the project's root `docs/` folder (outside the submodule) for permanent versioning in the main repository.

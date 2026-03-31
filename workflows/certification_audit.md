@@ -41,7 +41,7 @@ This workflow performs a comprehensive health check of the repository, ensuring 
 
 ## 🏁 Certification Report
 The result of this workflow MUST be recorded in:
-1.  **`docs/roadmaps/certification_roadmap.md`**: Permanent, versioned architectural record.
+1.  **`task/roadmaps/certification_roadmap.md`**: Permanent, versioned architectural record.
 2.  **`task.md` (Local)**: Ephemeral session status (Ignored by Git).
 
 ---

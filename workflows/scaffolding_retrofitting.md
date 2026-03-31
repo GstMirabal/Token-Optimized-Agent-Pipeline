@@ -16,10 +16,10 @@ This workflow is optimized for maximum token economy. It mandates a "Context Re-
 *   **Ultimate Phase Definition:** Define the final destination and intermediate steps.
 
 ## Phase 2: Governance & Roadmap Documentation (Orchestrator) 📋
-1.  **Storage Policy (High-Value Deliverables):** All Roadmap definitions and Phase historical records MUST be stored in the local **`.agents/roadmaps/`** folder (Ignored by Git).
+1.  **Storage Policy (High-Value Deliverables):** All Roadmap definitions and Phase historical records MUST be stored in the local **`task/roadmaps/`** folder (Ignored by Git).
     *   **Final Handover:** Mirror architecturally-relevant summaries to the project's root `docs/` folder for permanent versioning.
-2.  **Task Index:** Update `.agents/task.md` as the local Master TOC. It MUST clearly state the **Discovery Status** (e.g., `Status: Continuing from PHASE 2`).
-3.  **Strategic Sprint:** Create/Update `.agents/sprints/XXX-sprint-name.md`.
+2.  **Task Index:** Update `task/task.md` as the local Master TOC. It MUST clearly state the **Discovery Status** (e.g., `Status: Continuing from PHASE 2`).
+3.  **Strategic Sprint:** Create/Update `task/sprints/XXX-sprint-name.md`.
 4.  **Context Mapping:** Update `.agent_state/context.md` static cache.
 
 ## Phase 3: Arsenal, MCP Audit & WIP Safety Freeze 🛠️
