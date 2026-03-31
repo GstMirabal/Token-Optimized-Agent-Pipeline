@@ -111,28 +111,39 @@ Once integrated, the framework automatically triggers its auditors during your A
 python .agents/skills/omni-context-minimizer/scripts/omni_minimizer.py path/to/large_file.py
 ```
 
-### 🛠️ AI-Ops: Session Initialization
-To ensure the AI follows the constitutional rules and architectural standards from the very first message:
-> **Protocol**: Start any new conversation or context window by referencing the `.agents` path and the `governance/global_user_rules.md`.
-> **Trigger Phrase**: *"Initialize session using framework protocols in `.agents/` and keep the `task.md` indexed."*
+### 🛡️ Scenario: Retrofitting Existing Projects
+If you are adding the framework to an **already established repository**, follow this 3-step sequence to align your architectural roadmap:
+
+1.  **Submodule Insertion:** In your root folder: `git submodule add https://github.com/GstMirabal/.agents .agents`
+2.  **AI Session Trigger:** Tell the AI: *"Initialize session using governance protocols in `.agents/` and keep the `task.md` indexed."*
+3.  **Roadmap Discovery:** Run the command: **`/scaffolding_retrofitting`**.
+
+The Orchestrator will automatically scan your source code, identify your project's current **Phase**, and initialize your local context (`task.md` and `task/sprints/`) while generating persistent architectural records in `docs/roadmaps/`.
+
+---
 
 ### 🤖 AI-Ops: Core Commands (Slash Commands)
 The framework supports automated workflows via standardized Markdown protocols. Use these to trigger complex engineering tasks:
 
 | Command | Purpose | Location |
 | :--- | :--- | :--- |
-| **`/amnesia_extractor`** | **Post-Sprint Purgatory**: Extracts LTM Lessons into Knowledge Items. | `workflows/amnesia_extractor.md` |
-| **`/scaffolding_modular`** | **Project Scaffolding**: Initializes a new repo with Modular Architecture. | `workflows/scaffolding_modular.md` |
+| **`/amnesia_extractor`** | **Post-Sprint Purgatory**: Extracts LTM Lessons into Knowledge Items with Semantic Indexing. | `workflows/amnesia_extractor.md` |
+| **`/scaffolding_modular`** | **Project Scaffolding**: Initializes a new repo with Modular Architecture (Phase 0). | `workflows/scaffolding_modular.md` |
+| **`/scaffolding_retrofitting`**| **Retrofitting & Roadmap**: Aligns existing projects, discovers phases, and plans the roadmap. | `workflows/scaffolding_retrofitting.md` |
 | **`/certification_audit`** | **Global Audit**: Agnostic, incremental certification of implemented logic. | `workflows/certification_audit.md` |
 
 > [!TIP]
-> Any `.md` file added to the `workflows/` directory becomes an executable "slash command" that you can request from the AI.
+> **Submodule Isolation Policy:** All task tracking (`task.md`), sprint logs (`sprints/`), and local roadmaps (`roadmaps/`) are strictly ignored by Git. You can manage your project-specific tasks inside the `.agents/` folder without polluting the global framework repository.
+
+> [!IMPORTANT]
+> **Orchestration Manifest:** The Orchestrator now uses `.agents/skills/manifest.json` to statically route tools, drastically reducing token consumption and discovery time during sessions.
 
 ```json
-// Example: The Orchestrator statically routes external tools using the MCP Registry
-"example-postgres-mcp": {
-  "command": "npx -y @modelcontextprotocol/server-postgres postgres://.../db",
-  "authorized_roles": ["Database Auditor", "Backend Architect"]
+// Example: The Orchestrator statically routes external tools using the Skills Manifest
+{
+  "name": "omni-context-minimizer",
+  "category": "Efficiency",
+  "tags": ["token-saver", "ast", "scan"]
 }
 ```
 

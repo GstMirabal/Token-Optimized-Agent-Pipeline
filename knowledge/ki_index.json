@@ -23,6 +23,53 @@
         "django-stubs",
         "envtoml"
       ]
+    },
+    {
+      "id": "ki_003_framework_shielding",
+      "title": "Shared Submodule Isolation (Local-Only State)",
+      "summary": "Protocol for using .agents as a shared submodule while keeping project-specific tasks locally ignored by Git.",
+      "file_path": "ki_003_framework_shielding.md",
+      "tags": [
+        "git",
+        "submodule",
+        "governance",
+        "shielding"
+      ]
+    },
+    {
+      "id": "ki_004_skills_manifestation",
+      "title": "Skills Manifestation (Static AI Orchestration)",
+      "summary": "Introduction of a manifest.json in the skills/ directory to eliminate recursive directory scanning and reduce token consumption.",
+      "file_path": "ki_004_skills_manifestation.md",
+      "tags": [
+        "skills",
+        "orchestration",
+        "token-saver",
+        "efficiency"
+      ]
+    },
+    {
+      "id": "ki_005_search_before_build",
+      "title": "Search-Before-Build Protocol (Efficiency Rule 21.1)",
+      "summary": "Mandatory prospecting of skills.sh/trending before creating new native skills to minimize token expenditure.",
+      "file_path": "ki_005_006_sprint_cleanup.md",
+      "tags": [
+        "governance",
+        "efficiency",
+        "skills.sh",
+        "reuse"
+      ]
+    },
+    {
+      "id": "ki_006_native_vs_3rd_party",
+      "title": "Native vs 3rd-Party Naming Standard (Rule 22)",
+      "summary": "Strict naming convention for clear auditability of code origins within the skills matrix.",
+      "file_path": "ki_005_006_sprint_cleanup.md",
+      "tags": [
+        "nomenclatura",
+        "architecture",
+        "governance"
+      ]
     }
   ]
 }
