@@ -51,3 +51,9 @@ Syntax, Quality, and Communication Rules.
 - **Roadmap Maturity Protocol (Safety Lock):** It is **FORBIDDEN** for the Agent to initialize a new Sprint (creating files in `task/sprints/` or entries in `task.md`) if the roadmap of the current Phase (within `task/roadmaps/`) is not finalized or is marked with a `safety_lock: LOCKED`.
 - **Discovery First:** Before moving to execution, the Agent MUST ensure that all Milestones (M0, M1, etc.) of the current phase are fully defined, including their specific deliverables and technical constraints.
 - **Lock Override:** The `safety_lock` can only be changed to `READY_FOR_EXECUTION` after a full Discovery Audit and explicit user agreement on the tactical scope.
+
+## 5. Session Closing and Atomic Commit Protocol (Transactional Integrity)
+- **Rule 55: Atomic Close Requirement:** It is **MANDATORY** for the Agent, before concluding any session, to perform an Atomic Commit of all validated changes.
+- **Rule 55.1: Dual Synchronization:** Commits MUST be made both in the **Parent Repository** and the **Submodule (`.agents/`)** if governance rules, roadmaps, or knowledge items have been updated.
+- **Rule 55.2: Traceability:** All commits must follow the **Conventional Commits** standard (e.g., `roadmap: update phase 1 milestones`, `feat: promote KI-012 to global rules`).
+- **Rule 55.3: Amnesia Check:** Before the final commit, the Agent MUST execute the `amnesia_extractor` workflow to ensure no "ephemeral memory" is lost before wiping the session cache.
