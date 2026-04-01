@@ -130,6 +130,19 @@
         "bootstrap",
         "users-app"
       ]
+    },
+    {
+      "id": "ki_012_tool_hang_remediation",
+      "title": "Remediation for Agent Tool Hangs during File I/O",
+      "summary": "Protocol for using Atomic CLI fallbacks (cat << 'EOF') when standard file tools experience high latency or hangs.",
+      "file_path": "ki_012_tool_hang_remediation.md",
+      "tags": [
+        "cli",
+        "filesystem",
+        "hang",
+        "blockage",
+        "remediation"
+      ]
     }
   ]
 }

@@ -53,7 +53,10 @@ Syntax, Quality, and Communication Rules.
 - **Lock Override:** The `safety_lock` can only be changed to `READY_FOR_EXECUTION` after a full Discovery Audit and explicit user agreement on the tactical scope.
 
 ## 5. Session Closing and Atomic Commit Protocol (Transactional Integrity)
-- **Rule 55: Atomic Close Requirement:** It is **MANDATORY** for the Agent, before concluding any session, to perform an Atomic Commit of all validated changes.
-- **Rule 55.1: Dual Synchronization:** Commits MUST be made both in the **Parent Repository** and the **Submodule (`.agents/`)** if governance rules, roadmaps, or knowledge items have been updated.
-- **Rule 55.2: Traceability:** All commits must follow the **Conventional Commits** standard (e.g., `roadmap: update phase 1 milestones`, `feat: promote KI-012 to global rules`).
-- **Rule 55.3: Amnesia Check:** Before the final commit, the Agent MUST execute the `amnesia_extractor` workflow to ensure no "ephemeral memory" is lost before wiping the session cache.
+- **Rule 55: Atomic Close Requirement:** It is **MANDATORY** for the Agent, before concluding any session, to perform an Atomic Commit of all validated changes following a strict order of operations.
+- **Rule 55.1: Order of Operations:**
+    1.  **Amnesia Extraction:** Execute the `amnesia_extractor` workflow to distill heuristics into `/knowledge/`.
+    2.  **Indexing:** Update the local and global knowledge indexes.
+    3.  **Final Commit:** Perform the commit(s) including all rules, roadmap updates, and new knowledge items.
+- **Rule 55.2: Dual Synchronization:** Commits MUST be made both in the **Parent Repository** and the **Submodule (`.agents/`)** if governance rules, roadmaps, or knowledge items have been updated.
+- **Rule 55.3: Traceability:** All commits must follow the **Conventional Commits** standard (e.g., `feature: add amnesia extraction protocol`).
