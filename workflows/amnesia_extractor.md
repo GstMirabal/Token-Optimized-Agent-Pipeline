@@ -5,7 +5,13 @@ version: 1.1.0
 
 # 🧠 Workflow: Amnesia and Knowledge Extractor (V1.1)
 
-This is the **Mandatory Closing Protocol** for all Universal-Agents sessions. To prevent cross-session hallucinations and save tokens, temporary state folders (`.agent_state/session_{UID}/`) must be destroyed. This workflow ensures that "lessons learned" are distilled into the system's persistent memory (`/knowledge/`) before the physical deletion of the cache.
+This is the **Mandatory Closing Protocol** for all Universal-Agents sessions. To prevent cross-session hallucinations and save tokens, temporary state folders (`.agent_state/session_{UID}/`) must be destroyed. ## Phase 0: Transactional Integrity Cycle (Master Protocol)
+Before concluding any session, the Orchestrator MUST execute the following atomic sequence to ensure data integrity and knowledge preservation:
+1.  **Amnesia Extraction:** Run this workflow (Phases 1-4) to distill learning heuristics into persistent memory.
+2.  **Indexing:** Update both global and local knowledge indexes to enable semantic search for future agents.
+3.  **Final Atomic Commit:** Consolidate all changes (governance, roadmaps, and knowledge) into a single transactional commit in both the parent repository and the submodule.
+
+This workflow ensures that "lessons learned" are distilled into the system's persistent memory before the session terminates.
 
 ## Phase 1: Retrospective Scanning (Brain Drain)
 When the session is declared finished or `/save_knowledge` is triggered, the Orchestrator reads the local `task.md` and `task/sprints/` (Local Context) to identify:
