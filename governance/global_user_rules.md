@@ -38,8 +38,9 @@ Syntax, Quality, and Communication Rules.
 ## 3. Governance and Directory Structure (Submodule Separation)
 - **Persistent Global Metadata (`.agents/governance/`):** All persistent files related to agent behavior, roadmaps, project context, and long-term rules MUST be stored here. This is the **Shared Framework** (Read-Only for local projects).
 - **Audit Exclusion:** The `.agents/governance/` directory is **EXCLUDED** from automated code audits.
-- **Local Project-Specific Records (Ignored by Git):** To prevent polluting the global submodule repository, all project-specific task tracking and data MUST be stored in the following directory, which is strictly ignored by Git:
+- **Local Project-Specific Records (Ignored by Git):** To prevent polluting the global submodule repository, all project-specific task tracking and data MUST be stored in the following list of locations (strictly ignored by Git):
     - **`task.md`**: Master Task TOC (Local Index).
+    - **`.agent_state/`**: Mandatory ephemeral session cache (AST, context, trace).
     - **`task/sprints/`**: Detailed tactical plans (`XXX-sprint-name.md`).
     - **`task/roadmaps/`**: Strategic roadmap history (Discovery & Ultimate Phases).
     - **`task/logs/`**: Ephemeral trace and debug logs.
