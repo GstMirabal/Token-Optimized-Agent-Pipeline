@@ -1,26 +1,57 @@
 {
   "version": "1.0",
   "mcp_servers": {
-    "example-postgres-mcp": {
-      "description": "Local PostgreSQL connection via MCP. Example schema.",
-      "status": "disabled",
-      "connection_type": "local_process",
-      "command": "npx -y @modelcontextprotocol/server-postgres postgres://user:pass@localhost:5432/db",
-      "authorized_roles": [
-        "Database Auditor",
-        "Backend Architect"
-      ]
-    },
-    "example-github-mcp": {
-      "description": "GitHub API interactions. Example schema.",
+    "cmc-official-mcp": {
+      "description": "Official CoinMarketCap MCP Server for LLM Reasoning. (M1/M4).",
       "status": "disabled",
       "connection_type": "remote_api",
-      "command": "npx -y @modelcontextprotocol/server-github",
+      "url": "https://mcp.coinmarketcap.com/mcp",
       "env_requirements": [
-        "GITHUB_PERSONAL_ACCESS_TOKEN"
+        "CMC_PRO_API_KEY"
       ],
       "authorized_roles": [
-        "DevOps Engineer"
+        "Datafeed Architect",
+        "Market Analyst"
+      ]
+    },
+    "coingecko-official-mcp": {
+      "description": "Official CoinGecko MCP Server for GitHub/Dev Audit. (M3).",
+      "status": "disabled",
+      "connection_type": "remote_api",
+      "url": "https://mcp.coingecko.com/mcp",
+      "authorized_roles": [
+        "Auditor",
+        "Datafeed Architect"
+      ]
+    },
+    "fred-macro-mcp": {
+      "description": "Federal Reserve Economic Data (FRED) for DXY/Interest Rates. (M4).",
+      "status": "disabled",
+      "connection_type": "local_process",
+      "command": "npx -y mcp-fred-api",
+      "env_requirements": [
+        "FRED_API_KEY"
+      ],
+      "authorized_roles": [
+        "Market Analyst"
+      ]
+    },
+    "yfinance-mcp": {
+      "description": "Yahoo Finance MCP for SPX, IBIT/FBTC ETFs and Gold. (M4).",
+      "status": "disabled",
+      "connection_type": "local_process",
+      "command": "npx -y mcp-yahoo-finance",
+      "authorized_roles": [
+        "Market Analyst"
+      ]
+    },
+    "ccxt-connector-mcp": {
+      "description": "Community CCXT MCP for multi-exchange public data access. (M1.8/M2).",
+      "status": "disabled",
+      "connection_type": "local_process",
+      "command": "npx -y mcp-server-ccxt",
+      "authorized_roles": [
+        "Trading Engine Architect"
       ]
     }
   }
