@@ -7,7 +7,7 @@ task/
 task/sprints/
 task/roadmaps/
 .agent_state/
-knowledge/governance/
+knowledge/
 implementation_plan.md
 implementation_plan_*.md
 implementation_plan_*.json
