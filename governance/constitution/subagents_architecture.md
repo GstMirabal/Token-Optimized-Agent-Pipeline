@@ -1,4 +1,4 @@
-# Subagent Architecture and Matrix Governance (Rules 57-77)
+# Subagent Architecture and Matrix Governance (Rules 57-79)
 Strict Zero-Trust LLM-Terminal execution standards. Continuation of Global User Rules (1-56).
 
 ## 1. Hierarchical Lifecycle & Actor Roles
@@ -28,3 +28,5 @@ Strict Zero-Trust LLM-Terminal execution standards. Continuation of Global User 
 - **Rule 76: The 90% Coverage Mandate:** Mandatory 90% unit test coverage for any tactical module before closure. The Matrix is PROHIBITED from committing modules without Auditor Level: QA PASSED (>90%).
 - **Rule 77: Rollback Brake & Topology Compliance:** Automated `git restore .` triggered after 3 strikes (Rule 67). Verification of Rule 23 (Project Topology) compliance before every Matrix instantiation.
 - **Rule 78: Institutional Identity & Template Guard (Refined):** All public-facing documentation (e.g., README.md, manifest.json) MUST follow the official templates stored in `./skills/core/readme-standardizer/assets/`. **Mandatory Execution:** Usage of the `readme-standardizer` skill is a **BLOCKING** requirement. The Agent is **PROHIBITED** from manual structural generation. Before execution, the Agent MUST announce the skill usage and certify the 4-step rendering process (Brain Drain, Read, Fusion, Injection).
+
+- **Rule 79: 3rd-Party Documentation Immutability:** The Agent is strictly **PROHIBITED** from modifying, standardizing, or refactoring README files, manuals, or auxiliary documentation within the `skills/3rd/` directory or any identified 3rd-party submodule. These assets MUST remain in their original state to maintain upstream integrity and preserve vendor-specific technical instructions. Rule 78 applies exclusively to **Core** and **Internal** documentation.

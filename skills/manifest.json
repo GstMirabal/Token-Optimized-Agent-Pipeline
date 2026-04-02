@@ -54,7 +54,7 @@
     {
       "name": "skill-creator",
       "path": "core/skill-creator",
-      "description": "Assists in the creation of new atomic skills following global governance rules.",
+      "description": "Assists in the creation of new atomic skills following global governance rules (Rule 71).",
       "category": "Development",
       "tags": ["automation", "internal", "scaffolding"]
     },
@@ -68,7 +68,7 @@
     {
       "name": "readme-standardizer",
       "path": "core/readme-standardizer",
-      "description": "Ensures all documentation files follow the official Technical English standards.",
+      "description": "Ensures all documentation files follow the official Technical English and Institutional Identity standards.",
       "category": "Documentation",
       "tags": ["i18n", "docs", "lint"]
     },
@@ -96,7 +96,7 @@
     {
       "name": "autoskills-bridge",
       "path": "core/autoskills-bridge",
-      "description": "Rule 70 Gatekeeper: Bridge for dynamic tool discovery via npx autoskills.",
+      "description": "Rule 70 Gatekeeper: Bridge for dynamic tool discovery and on-the-fly arsenal orchestration.",
       "category": "Infrastructure",
       "tags": ["discovery", "autoskills", "automation", "npx"]
     }
