@@ -54,7 +54,7 @@ Universal-Agents is a military-grade AI agent governance framework designed to p
 *   **Zero-Trust Hierarchy:** Segregated Mentor (Debate), Orchestrator (Planning), and Auditor (Validation) roles to prevent autonomous logic failures.
 *   **Token-Saver Auditor:** An economic kill-switch that prevents inefficient plans and reduces API costs by optimizing context windows.
 *   **Omni-Context Minimizer:** Smart AST-based code skeleton extraction that allows AI to understand massive files (1000+ lines) while only consuming 10% of the normal token cost.
-*   **MCP Registry & Routing:** Strict Zero-Trust assignment of external Model Context Protocols (MCPs). The Orchestrator queries `.agents/skills/mcp-registry/registry.json` and provisions specific local/remote data sources before unlocking subagent execution.
+*   **MCP Registry & Routing:** Strict Zero-Trust assignment of external Model Context Protocols (MCPs). The Orchestrator queries `.agents/skills/core/mcp-registry/registry.json` and provisions specific local/remote data sources before unlocking subagent execution.
 *   **Amnesia & Atomic KIs:** Automatic knowledge extraction distilling long-term "lessons learned" into atomic `.md` files indexed by `ki_index.json` under `/knowledge/`, avoiding token bloating in future sessions.
 *   **Modular Scaffolding:** Standardized project initialization ensuring every new repository inherits the same constitutional security and quality rules.
 *   **Agnostic Certification Audit:** A framework-neutral validator that ensures 100% Core compliance across any stack (Django, Prisma, SQLAlchemy, etc.). It prioritizes **Incremental Auditing**, identifying implemented modules vs. boilerplate to avoid redundant checks.
@@ -108,7 +108,7 @@ Once integrated, the framework automatically triggers its auditors during your A
 
 ```bash
 # Example: Extracting the skeleton of a large class to save tokens
-python .agents/skills/omni-context-minimizer/scripts/omni_minimizer.py path/to/large_file.py
+python .agents/skills/core/omni-context-minimizer/scripts/omni_minimizer.py path/to/large_file.py
 ```
 
 ### 🛡️ Scenario: Retrofitting Existing Projects
@@ -147,7 +147,7 @@ The framework supports automated workflows via standardized Markdown protocols. 
 }
 ```
 
-Check the `/workflows/` directory for automated protocols like project scaffolding. Explore `/skills/mcp-registry/` for adding external LLM data connections.
+Check the `/workflows/` directory for automated protocols like project scaffolding. Explore `/skills/core/mcp-registry/` for adding external LLM data connections.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

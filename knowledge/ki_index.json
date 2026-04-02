@@ -24,6 +24,12 @@
       "summary": "Operational procedure to remediate tool-hangs and IDE-freezes during long sessions.",
       "path": "knowledge/utility/ki_012_tool_hang_remediation.md",
       "tags": ["utility", "crash", "survival"]
+    },
+    {
+      "id": "ki-013",
+      "summary": "Post-relocation global grep protocol to certify path integrity and eliminate dead links in core submodules (Rules 21, 78).",
+      "path": "knowledge/utility/ki_013_broken_link_audit_protocol.md",
+      "tags": ["navigation", "integrity", "audit"]
     }
   ]
 }
