@@ -94,6 +94,14 @@
       "tags": ["js", "ts", "lint", "jsdoc"]
     },
     {
+      "name": "autoskills-bridge",
+      "path": "core/autoskills-bridge",
+      "description": "Rule 70 Gatekeeper: Bridge for dynamic tool discovery via npx autoskills.",
+      "category": "Infrastructure",
+      "tags": ["discovery", "autoskills", "automation", "npx"]
+    }
+,
+    {
       "name": "skills-samples",
       "path": "3rd/skills-samples",
       "description": "Example reference skills for learning framework-agnostic modularity.",
