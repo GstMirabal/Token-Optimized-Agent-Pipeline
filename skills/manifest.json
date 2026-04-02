@@ -1,84 +1,104 @@
 {
-  "version": "1.0.0",
-  "updated_at": "2026-03-31",
+  "version": "1.1.0",
+  "updated_at": "2026-04-02",
   "skills": [
     {
       "name": "omni-context-minimizer",
+      "path": "core/omni-context-minimizer",
       "description": "Extracts the structural skeleton (AST) of any codebase to avoid massive context bloating.",
       "category": "Efficiency",
       "tags": ["token-saver", "ast", "scan"]
     },
     {
       "name": "token-saver-auditor",
+      "path": "core/token-saver-auditor",
       "description": "Audits the economic efficiency of agent plans and execution logs.",
       "category": "Governance",
       "tags": ["cost-control", "audit", "optimization"]
     },
     {
-      "name": "3rd-django-security",
+      "name": "django-security",
+      "path": "3rd/django-security",
       "description": "Specialized security audit and hardening for Django applications.",
       "category": "Security",
       "tags": ["django", "hardening", "verification"]
     },
     {
-      "name": "3rd-django-patterns",
+      "name": "django-patterns",
+      "path": "3rd/django-patterns",
       "description": "Enforces best practices and design patterns for Django projects.",
       "category": "Architecture",
       "tags": ["django", "best-practices", "refactor"]
     },
     {
-      "name": "3rd-django-verification",
+      "name": "django-verification",
+      "path": "3rd/django-verification",
       "description": "Automated verification of Django model logic and API contracts.",
       "category": "QA",
       "tags": ["django", "api", "validation"]
     },
     {
-      "name": "3rd-django-tdd",
+      "name": "django-tdd",
+      "path": "3rd/django-tdd",
       "description": "Generates and maintains a robust Test-Driven Development flow for Django.",
       "category": "QA",
       "tags": ["django", "tests", "pytest"]
     },
     {
-      "name": "3rd-django-expert",
+      "name": "django-expert",
+      "path": "3rd/django-expert",
       "description": "General domain expert for complex Django logic resolution.",
       "category": "Expertise",
       "tags": ["django", "complex-logic", "architecture"]
     },
     {
       "name": "skill-creator",
+      "path": "core/skill-creator",
       "description": "Assists in the creation of new atomic skills following global governance rules.",
       "category": "Development",
       "tags": ["automation", "internal", "scaffolding"]
     },
     {
       "name": "mcp-registry",
+      "path": "core/mcp-registry",
       "description": "Registry and configuration manager for Model Context Protocol servers.",
       "category": "Infrastructure",
       "tags": ["mcp", "context", "remote-api"]
     },
     {
       "name": "readme-standardizer",
+      "path": "core/readme-standardizer",
       "description": "Ensures all documentation files follow the official Technical English standards.",
       "category": "Documentation",
       "tags": ["i18n", "docs", "lint"]
     },
     {
       "name": "python-quality-auditor",
+      "path": "core/python-quality-auditor",
       "description": "Agnostic Python health-check (Ruff, Mypy, Bandit) to ensure compliance with framework standards.",
       "category": "Quality",
       "tags": ["python", "lint", "mypy", "audit"]
     },
     {
       "name": "env-shielding-auditor",
+      "path": "core/env-shielding-auditor",
       "description": "Scans for hardcoded secrets (API keys, tokens) and validates .env security via Gitignore.",
       "category": "Security",
       "tags": ["secrets", "env", "shielding", "pii"]
     },
     {
       "name": "js-standardizer",
+      "path": "core/js-standardizer",
       "description": "Universal alignment for JS/TS projects (ESLint, Prettier, JSDoc) ensuring legal governance compliance.",
       "category": "Quality",
       "tags": ["js", "ts", "lint", "jsdoc"]
+    },
+    {
+      "name": "skills-samples",
+      "path": "3rd/skills-samples",
+      "description": "Example reference skills for learning framework-agnostic modularity.",
+      "category": "Documentation",
+      "tags": ["examples", "core", "guidance"]
     }
   ]
 }
