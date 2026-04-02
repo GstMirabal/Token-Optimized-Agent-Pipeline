@@ -10,7 +10,7 @@ Master entry protocol to ensure Matrix integrity before any tactical deployment.
 ## 0. Black Box & Crash Detection (MANDATORY)
 Before any interaction, the Agent MUST read **`.agents/.agent_state/session_metadata.json`**:
 - **Condition:** If `status == "IN_PROGRESS"` or `intelligence_certified != "PASSED"`, a session crash is detected.
-- **Action:** The Agent MUST ABORT normal initialization and trigger **`knowledge_extractor.md --forensic`** to recover or purge orphaned state.
+- **Action:** The Agent MUST ABORT normal initialization and trigger **`workflow_knowledge_extractor.md --forensic`** to recover or purge orphaned state.
 - **Lock:** No new session is permitted until the metadata reports `status: "CLOSED_SUCCESSFULLY"`.
 
 ## 1. UID Signature Validation (Rule 63)
@@ -49,12 +49,15 @@ Once initial checks pass, the DevOps Agent takes control for physical provisioni
 ## 7. Handover to Agente Principal (Rule 57 - Lock 1)
 Following successful DevOps certification:
 - **Strategic Leadership:** The Agente Principal takes command as the Constitutional Guardian of the Roadmap.
-- **Lock 1 Opening:** The Principal MUST verify and refine the Strategic Roadmap, issuing the **`ROADMAP_UNLOCKED`** signal.
-- **Execution Hierarchy:** No tactical designs or execution permitted without Principal authorization.
+- **Lock 1 Opening:** The Principal MUST verify and refine the Strategic Roadmap.
+- **7.1 MANDATORY HUMAN AUTHORIZATION (Rule 59 - Lock 3):**
+  - The Agent is **STRICTLY PROHIBITED** from issuing the **`ROADMAP_UNLOCKED`** signal or creating tactical branches autonomously.
+  - The Agent MUST present the current roadmap status and explicitly ask: **"Do you authorize the unlocking of this roadmap and the transition to tactical planning?"**
+  - **Terminal Block:** Execution terminates here until word-for-word human authorization is received.
 
-## 8. Git Sovereignty and Tracer Safety (Rules 68-69)
-- **Branch Check:** Enforce **`ai-sprint/taskID`** branch. The DevOps Agent MUST handle automated checkouts or creation.
-- **Tracer Masking (PII Shielding):** Configure execution parameters to use **`--tb=short`** by default to prevent leakage of sensitive data in error logs.
+## 8. Git Sovereignty (Rule 68 - POST-AUTHORIZATION ONLY)
+- **Branch Check:** Once (and only once) human authorization is granted, the DevOps Agent executes the checkout/creation of the **`ai-sprint/taskID`** branch.
+- **Tracer Masking (PII Shielding):** Configure execution parameters to use **`--tb=short`** by default.
 
 ## 9. Amnesia Integrity & KI-Preloading (Rules 74-75)
 - **Purge Check (Matrix Hygiene):** Inspect `.agent_state/session_{UID}/`. Destroy orphaned or unpurged session folders from previous runs (Rule 74).
