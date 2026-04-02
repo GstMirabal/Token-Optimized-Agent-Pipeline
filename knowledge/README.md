@@ -1,6 +1,6 @@
 ---
-description: "Standardized Knowledge Matrix Architecture Manual (V 1.1.0)"
-version: 1.1.0
+description: "Knowledge Matrix Architecture Manual (Standardized V 1.2.0)"
+version: 1.2.0
 ---
 
 <div align="center">
@@ -19,7 +19,7 @@ version: 1.1.0
 <h3 align="center">🧠 Knowledge Matrix</h3>
 
 <p align="center">
-  Long-Term Memory (LTM) and Intelligence Distillation Layer for Universal-Agents.
+  Long-Term Memory (LTM) Architecture for the Universal-Agents Framework.
 <br /><br />
 <a href="https://github.com/GstMirabal/.agents"><strong>Explore the docs »</strong></a>
 <br />
@@ -64,14 +64,14 @@ This directory stores **Exotic Heuristics** and non-obvious technical solutions 
 
 ## Domain Architecture
 
-Knowledge Items (KIs) MUST be categorized into domain-specific subdirectories to ensure structural scalability and token-saving during discovery phases (Rule 75).
+Knowledge Items (KIs) MUST be categorized into domain-specific subdirectories to ensure search scalability and token-saving during discovery phases (Rule 75).
 
 ### Directory Logic
 
 | Domain | Tactical Scope |
 | :--- | :--- |
 | **`/crypto/`** | Advanced security workarounds, cryptographic hash implementations, and ARM64-specific bug-fixes. |
-| **`/visuals/`** | Premium communication assets following Rule 11 (Mermaid, Table layouts, UI standards). |
+| **`/visuals/`** | Premium communication assets following Rule 11 (Mermaid strategies, comparative table layouts, and UX standards). |
 | **`/utility/`** | Survival heuristics for environment hangs, tool remediation, and IDE/API freezes. |
 
 ### Semantic Indexing
@@ -82,18 +82,18 @@ The `ki_index.json` file acts as the **Orchestrator's Quick-Reference Map**. Bef
 
 ## Usage
 
-Agents and Human users should follow these steps to manage the Knowledge Matrix:
+Agents and Human users should follow these steps to manage the Knowledge Matrix effectively:
 
-1. **Extraction:** Identify a project-agnostic heuristic during a session closure.
-2. **Standardization:** Document the finding in a modular Markdown following the Knowledge Item template.
+1. **Extraction:** Identify a project-agnostic heuristic during an active session closure.
+2. **Standardization:** Document the finding in a modular Markdown format.
 3. **Categorization:** Place the file in the correct `/knowledge/{domain}/` subdirectory.
-4. **Indexing:** Atomically update `ki_index.json` with the new KI description.
+4. **Indexing:** Perform an atomic update of `ki_index.json` with the new metadata entry.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Amnesia and Purge
 
-The Matrix prioritizes **High-Signal Knowledge over Archival Noise**. To prevent cross-session context pollution, Rule 74 (Pt 4) mandates the purge of Project items if:
+The Matrix prioritizes **High-Signal Knowledge over Archival Noise**. To prevent cross-session context pollution, Rule 74 (Pt 4) mandates the purge of Knowledge items if:
 
 1. The discovery is successfully codified into the Constitutional Rules (Rules 1-78).
 2. The finding refers to obsolete or deprecated infrastructures.
