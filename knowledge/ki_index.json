@@ -1,148 +1,29 @@
 {
-  "version": "1.0",
+  "version": "1.2.0",
   "knowledge_items": [
     {
-      "id": "ki_001_example",
-      "title": "Example: Handling Docker Compose timeouts in dev",
-      "summary": "Fix for Postgres connection timeout when spinning up the container on a cold start.",
-      "file_path": "ki_001_example.md",
-      "tags": [
-        "docker",
-        "postgres",
-        "timeout"
-      ]
+      "id": "KI-001",
+      "summary": "Token-saving protocol via matrix_topology_map.md with SYNC_LOCK_SIG to block recursive structural discovery.",
+      "path": "task/topology/matrix_topology_map.md",
+      "tags": ["topology", "efficiency", "lock"]
     },
     {
-      "id": "ki_002_certification_audit",
-      "title": "Python 3.13 & Django-Stubs Stability vs. Mypy",
-      "summary": "Workaround for Mypy internal error on Python 3.13 with django-stubs and envtoml integration.",
-      "file_path": "ki_002_certification_audit.md",
-      "tags": [
-        "mypy",
-        "python3.13",
-        "django-stubs",
-        "envtoml"
-      ]
+      "id": "ki-009",
+      "summary": "ARM64 cryptography workaround for AES-GCM and Argon2id specific library errors.",
+      "path": "knowledge/crypto/ki_009_aes_gcm_argon2id.md",
+      "tags": ["crypto", "arm64", "bugfix"]
     },
     {
-      "id": "ki_003_framework_shielding",
-      "title": "Shared Submodule Isolation (Local-Only State)",
-      "summary": "Protocol for using .agents as a shared submodule while keeping project-specific tasks locally ignored by Git.",
-      "file_path": "ki_003_framework_shielding.md",
-      "tags": [
-        "git",
-        "submodule",
-        "governance",
-        "shielding"
-      ]
+      "id": "ki-010",
+      "summary": "Policy for premium technical communication (Mermaid and Comparative Tables usage strategy).",
+      "path": "knowledge/visuals/ki_010_prioritized_comms.md",
+      "tags": ["visuals", "communication", "rule-11"]
     },
     {
-      "id": "ki_004_skills_manifestation",
-      "title": "Skills Manifestation (Static AI Orchestration)",
-      "summary": "Introduction of a manifest.json in the skills/ directory to eliminate recursive directory scanning and reduce token consumption.",
-      "file_path": "ki_004_skills_manifestation.md",
-      "tags": [
-        "skills",
-        "orchestration",
-        "token-saver",
-        "efficiency"
-      ]
-    },
-    {
-      "id": "ki_005_search_before_build",
-      "title": "Search-Before-Build Protocol (Efficiency Rule 21.1)",
-      "summary": "Mandatory prospecting of skills.sh/trending before creating new native skills to minimize token expenditure.",
-      "file_path": "ki_005_006_sprint_cleanup.md",
-      "tags": [
-        "governance",
-        "efficiency",
-        "skills.sh",
-        "reuse"
-      ]
-    },
-    {
-      "id": "ki_006_native_vs_3rd_party",
-      "title": "Native vs 3rd-Party Naming Standard (Rule 22)",
-      "summary": "Strict naming convention for clear auditability of code origins within the skills matrix.",
-      "file_path": "ki_005_006_sprint_cleanup.md",
-      "tags": [
-        "nomenclatura",
-        "architecture",
-        "governance"
-      ]
-    },
-    {
-      "id": "ki_007_roadmap_maturity_lock",
-      "title": "Roadmap Maturity Protocol (Safety Lock)",
-      "summary": "Prohibits sprint initialization before roadmap discovery is finalized and the safety lock is released.",
-      "file_path": "ki_007_roadmap_maturity_lock.md",
-      "tags": [
-        "governance",
-        "lock",
-        "planning",
-        "discovery"
-      ]
-    },
-    {
-      "id": "ki_008_docs_sanitization_protocol",
-      "title": "Docs Sanitization & Mirroring Protocol",
-      "summary": "Rules for avoiding duplication between .agents and docs/ folder while archiving legacy implementation plans.",
-      "file_path": "ki_008_docs_sanitization_protocol.md",
-      "tags": [
-        "docs",
-        "mirrored-truth",
-        "cleanliness",
-        "hygiene"
-      ]
-    },
-    {
-      "id": "ki_009_aes_gcm_argon2id",
-      "title": "AES-256-GCM & Argon2id Hardening",
-      "summary": "Implementation of military-grade authenticated encryption and key derivation for the CryptoBot vault.",
-      "file_path": "ki_009_aes_gcm_argon2id.md",
-      "tags": [
-        "crypto",
-        "security",
-        "argon2id",
-        "aes-gcm"
-      ]
-    },
-    {
-      "id": "ki_010_prioritized_comms",
-      "title": "Prioritized Asynchronous Communications",
-      "summary": "System for routing notifications via critical vs informational Celery queues with anti-spam squelching.",
-      "file_path": "ki_010_prioritized_comms.md",
-      "tags": [
-        "celery",
-        "comms",
-        "prioritization",
-        "notifications"
-      ]
-    },
-    {
-      "id": "ki_011_custom_root_identity",
-      "title": "Custom User Model Root Identity Provisioning",
-      "summary": "Bootstrap protocol for creating full superusers in custom Django models with Email-based authentication.",
-      "file_path": "ki_011_custom_root_identity.md",
-      "tags": [
-        "identity",
-        "superuser",
-        "bootstrap",
-        "users-app"
-      ]
-    },
-    {
-      "id": "ki_012_tool_hang_remediation",
-      "title": "Remediation for Agent Tool Hangs during File I/O",
-      "summary": "Protocol for using Atomic CLI fallbacks (cat << 'EOF') when standard file tools experience high latency or hangs.",
-      "file_path": "ki_012_tool_hang_remediation.md",
-      "tags": [
-        "cli",
-        "filesystem",
-        "hang",
-        "blockage",
-        "remediation"
-      ]
+      "id": "ki-012",
+      "summary": "Operational procedure to remediate tool-hangs and IDE-freezes during long sessions.",
+      "path": "knowledge/utility/ki_012_tool_hang_remediation.md",
+      "tags": ["utility", "crash", "survival"]
     }
   ]
 }

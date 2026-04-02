@@ -22,7 +22,7 @@ Syntax, Quality, and Communication Rules.
 - **Rule 16: Token Efficiency:** Prohibited raw reading of files > 200 lines. Mandatory `omni-context-minimizer` skeleton extraction. Mandatory reporting of % tokens saved.
 - **Rule 17: Mandatory Certification:** Sprints/phases require Audit Workflow certification before closure. Agent MUST select and deploy context-appropriate audit tools.
 - **Rule 18: Standards & Secrets:** Mandatory use of **Native Standard Libraries** over 3rd-party dependencies unless technically justified. Mandatory use of `.env` for secrets. Guessing missing variables is prohibited; manual user input is mandatory.
-- **Rule 19: Artifacts & Scalability:** Root: `.agents/task/`. Mandatory hierarchical sub-folders (Phase/Module) for large-scale projects to avoid flat-file pollution.
+- **Rule 19: Hierarchical Sub-folders:** Root `.agents/task/` and `.agents/knowledge/` MUST follow a Phase/Module or Domain-based sub-folder strategy. Flat-file pollution in these directories is strictly forbidden to ensure scalability and token-saving during directory listings.
 - **Rule 20: Master Index:** Root `task.md` MUST remain a clean TOC pointing to the active sprint.
 
 ## 3. Governance & Directory Structure
@@ -40,6 +40,6 @@ Syntax, Quality, and Communication Rules.
 
 ## 5. Session Closing & Atomic Commit Protocol
 - **Rule 30: Atomic Close:** Mandatory atomic commit of all validated changes before session conclusion.
-- **Rule 31: Closing Cycle:** Follow complete cycle (Amnesia Extraction, Indexing, and Final Commit) as defined in the global closing workflow.
+- **Rule 31: Roadmap Liquidation & Atomic Close (Refined):** Follow complete cycle (Amnesia Extraction, Indexing, and Final Commit) as defined in the global closing workflow. **Mandatory:** At 100% milestone completion, the Agent MUST set roadmap status to `COMPLETED (100%)`, issue a final UID signature, and update the Master Index (`task.md`) before mirroring to `/docs/` (Rule 55).
 - **Rule 32: Dual Synchronization:** Mandatory Parent/Submodule dual-sync if governance, roadmaps, or knowledge items are updated.
 - **Rule 33: Traceability:** Conventional Commits standard mandatory. Every commit message MUST include the Task or Sprint ID (Ref: #XXX).

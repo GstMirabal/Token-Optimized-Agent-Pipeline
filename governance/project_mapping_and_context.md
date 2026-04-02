@@ -3,7 +3,7 @@ Strategic Topology, Environmental Isolation, and Architectural Hierarchy.
 
 ## 1. Submodule Integrity & Global Inheritance
 - **Rule 34: Federated Architecture:** The `.agents` directory MUST be treated exclusively as a **Git Submodule**. Repositories can reside anywhere in the filesystem (no single-root restriction); the project root is the submodule's parent.
-- **Rule 35: Inheritance Lock:** (1) Strict veto on flat-copying (`cp -R`). (2) Prohibited local architecture/rule edits; all governance improvements MUST be versioned in the master submodule repository for global propagation via `git submodule update`.
+- **Rule 35: Inheritance Lock & Matrix Sovereignty:** (1) Strict veto on flat-copying (`cp -R`). (2) Prohibited local architecture/rule edits; all governance improvements MUST be versioned in the master submodule repository for global propagation via `git submodule update`. (3) **Sovereignty:** Any local copy of `.agents/` that diverges from the constitutional master is invalid.
 - **Rule 36: Source of Truth:** Any divergence between local rules and the master governance is a terminal failure. Compliance with the latest global hash is mandatory.
 
 ## 2. Environmental Purity & Deterministic Execution
