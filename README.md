@@ -98,7 +98,7 @@ Universal-Agents is a military-grade AI agent governance framework designed to p
    ```
 
 4. **Audit & Configure**
-   Review `governance/global_user_rules.md` to ensure your local environment variables and paths are correctly mapped within the framework.
+   Review `governance/constitution/global_user_rules.md` to ensure your local environment variables and paths are correctly mapped within the framework.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
