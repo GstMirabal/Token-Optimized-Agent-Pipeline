@@ -16,7 +16,7 @@ Strategic Topology, Environmental Isolation, and Architectural Hierarchy.
 To prevent navigational drift and ensure multi-agent synchronization, all repositories MUST follow this hierarchical topology:
 
 ### 3.1: Application Layer (Logic & Tests)
-- **Rule 41: Code Hierarchy:** Central logic MUST reside in `/src/`, and testing frameworks in `/tests/`. Computational experiments isolated in `/notebooks/`. Public resources in `/static/`. Customer/media uploads in `/media/` (ignored by Git).
+- **Rule 41: Project Hierarchy:** Central logic MUST reside in the primary application directory (e.g., `/backend/` or `/src/`), and testing frameworks in root `/tests/` or module-specific `/tests/`. Computational experiments isolated in `/notebooks/`. Public resources in `/static/`. Customer/media uploads in `/media/` (ignored by Git).
 
 ### 3.2: Infrastructure & Persistence (Docker & Data)
 - **Rule 42: Infrastructure Lock:** All services (Postgres, Redis) MUST be shielded via `docker-compose.yml`. Physical engine installation on host OS layer is prohibited.

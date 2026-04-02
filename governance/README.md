@@ -42,15 +42,15 @@
 
 ## About The Project
 
-This directory contains the **Permanent Thinking Rules** (LTM) governing the Universal-Agents framework. It operates under a **Federated Governance Model** (Rules 1-78) designed for Zero-Trust execution and high-integrity tactical deployment in any repository.
+This directory contains the **Permanent Thinking Rules** (LTM) governing the Universal-Agents framework. It operates under a **Federated Governance Model** (Rules 1-81) designed for Zero-Trust execution and high-integrity tactical deployment in any repository.
 
-### Federated Architecture (Rules 1-78)
+### Federated Architecture (V3 Methodology: Rules 1-81)
 
 | Section | Rules | Purpose | Roles Involved |
 | :--- | :--- | :--- | :--- |
-| **`constitution/global_user_rules.md`** | **1-33** | **Global Behavioral Standards**: Coding, naming, security, and token efficiency. | Agente Principal (Master) |
-| **`constitution/project_mapping_and_context.md`** | **34-56** | **Topological Boundaries**: Repository structure, Docker, binary paths, and environment shielding. | Scope Guardian |
-| **`constitution/subagents_architecture.md`** | **57-78** | **Matrix Operational Manual**: Hierarchical lifecycle, AI DevOps, Signature protocols, and Amnesia mechanisms. | Orchestrator & Matrix |
+| **`constitution/global_user_rules.md`** | **1-33** | **Global Behavioral Standards**: Coding, naming, security, and token efficiency. | Master & Orchestrator |
+| **`constitution/project_mapping_and_context.md`** | **34-56** | **Topological Boundaries**: Repository structure, Docker, and environment shielding. | DevOps & Matrix |
+| **`constitution/subagents_architecture.md`** | **57-81** | **Matrix Operational Manual**: Hierarchical lifecycle, AI DevOps, and Signature protocols. | All Subagents |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -58,9 +58,8 @@ This directory contains the **Permanent Thinking Rules** (LTM) governing the Uni
 
 *   **Agente Principal (Master):** Constitutional authority. Responsible for Strategic Roadmap design & Lock 1 (Roadmap Lock).
 *   **Agente DevOps:** Mandatory Sprint Gateway. Responsible for **WIP Safety Freeze** (`git status`), Skill provisioning, and Infra-Certification.
-*   **Scope Guardian (Supervisor):** Tactical Boundary Guard. Prevents unauthorized file access, "Scope Creep", and PII leakage in tabular data.
+*   **Active Sensors:** Implementation of **Kill Switch (Rule 67)** and **Coverage Blocker (Rule 76)** to ensure matrix survival.
 *   **UID Signature Protocol:** Mandatory universal signing (Rule 63) in `task.md`, implementation plans, and sprint markdown files for full auditability.
-*   **Visual SQL Brake:** Automation deactivation upon detection of database mutations, forcing human logical approval.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -72,7 +71,7 @@ Upon initialization, all agents MUST execute the **Reading Protocol** (Rules 1, 
 
 ### Maintenance
 
-Any architectural evolution MUST be mediated by the **Governance Learner** (Rule 60) for human certification. After sprint completion, the **Amnesia Protocol** (Rule 74) extracts heuristic learning into the Master Knowledge base.
+Any architectural evolution MUST be mediated by the **Governance Learner** (Rule 60) for human certification. After sprint completion, the **Amnesia Protocol** (Rule 74) extracts heuristic learning into the Master Knowledge base (V3).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -88,7 +87,7 @@ Project Link: [https://github.com/GstMirabal/.agents](https://github.com/GstMira
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ---
-**Historical Reference:** For the closed design blueprints of Phases 1-5, refer to `docs/governance/agents_roadmap.md`.
+**Core Knowledge**: All tactical wisdom is stored in `.agents/knowledge/` (V3 Institutional Memory).
 
 <!-- MARKDOWN LINKS & IMAGES -->
 [contributors-shield]: https://img.shields.io/github/contributors/GstMirabal/.agents.svg?style=for-the-badge

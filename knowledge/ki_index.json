@@ -5,38 +5,87 @@
       "id": "KI-001",
       "summary": "Token-saving protocol via matrix_topology_map.md with SYNC_LOCK_SIG to block recursive structural discovery.",
       "path": "task/topology/matrix_topology_map.md",
-      "tags": ["topology", "efficiency", "lock"]
+      "tags": ["topology", "efficiency", "lock"  ,
+    {
+      "id": "ki-015",
+      "summary": "Domain Memory: CryptoBot Master Mapping (V3). Architectural scaffolding and logic status of the 11 Django apps.",
+      "path": "knowledge/crypto/domain_mapping_v3.md",
+      "tags": ["architecture", "domain", "inventory"]
+    }
+  ]
     },
     {
       "id": "ki-009",
       "summary": "ARM64 cryptography workaround for AES-GCM and Argon2id specific library errors.",
       "path": "knowledge/crypto/ki_009_aes_gcm_argon2id.md",
-      "tags": ["crypto", "arm64", "bugfix"]
+      "tags": ["crypto", "arm64", "bugfix"  ,
+    {
+      "id": "ki-015",
+      "summary": "Domain Memory: CryptoBot Master Mapping (V3). Architectural scaffolding and logic status of the 11 Django apps.",
+      "path": "knowledge/crypto/domain_mapping_v3.md",
+      "tags": ["architecture", "domain", "inventory"]
+    }
+  ]
     },
     {
       "id": "ki-010",
       "summary": "Policy for premium technical communication (Mermaid and Comparative Tables usage strategy).",
       "path": "knowledge/visuals/ki_010_prioritized_comms.md",
-      "tags": ["visuals", "communication", "rule-11"]
+      "tags": ["visuals", "communication", "rule-11"  ,
+    {
+      "id": "ki-015",
+      "summary": "Domain Memory: CryptoBot Master Mapping (V3). Architectural scaffolding and logic status of the 11 Django apps.",
+      "path": "knowledge/crypto/domain_mapping_v3.md",
+      "tags": ["architecture", "domain", "inventory"]
+    }
+  ]
     },
     {
       "id": "ki-012",
       "summary": "Operational procedure to remediate tool-hangs and IDE-freezes during long sessions.",
       "path": "knowledge/utility/ki_012_tool_hang_remediation.md",
-      "tags": ["utility", "crash", "survival"]
+      "tags": ["utility", "crash", "survival"  ,
+    {
+      "id": "ki-015",
+      "summary": "Domain Memory: CryptoBot Master Mapping (V3). Architectural scaffolding and logic status of the 11 Django apps.",
+      "path": "knowledge/crypto/domain_mapping_v3.md",
+      "tags": ["architecture", "domain", "inventory"]
+    }
+  ]
     },
     {
       "id": "ki-013",
       "summary": "Post-relocation global grep protocol to certify path integrity and eliminate dead links in core submodules (Rules 21, 78).",
       "path": "knowledge/utility/ki_013_broken_link_audit_protocol.md",
-      "tags": ["navigation", "integrity", "audit"]
+      "tags": ["navigation", "integrity", "audit"  ,
+    {
+      "id": "ki-015",
+      "summary": "Domain Memory: CryptoBot Master Mapping (V3). Architectural scaffolding and logic status of the 11 Django apps.",
+      "path": "knowledge/crypto/domain_mapping_v3.md",
+      "tags": ["architecture", "domain", "inventory"]
+    }
+  ]
     },
     {
       "id": "ki-014",
       "summary": "Unified State Architecture: Consolidation of ephemeral metadata in .agent_state/ for topological compliance (Rules 23, 52).",
       "path": "knowledge/utility/ki_014_unified_state_architecture.md",
-      "tags": ["topology", "persistence", "rule-52"]
+      "tags": ["topology", "persistence", "rule-52"  ,
+    {
+      "id": "ki-015",
+      "summary": "Domain Memory: CryptoBot Master Mapping (V3). Architectural scaffolding and logic status of the 11 Django apps.",
+      "path": "knowledge/crypto/domain_mapping_v3.md",
+      "tags": ["architecture", "domain", "inventory"]
+    }
+  ]
     }
 
+    ,
+    {
+      "id": "ki-015",
+      "summary": "Domain Memory: CryptoBot Master Mapping (V3). Architectural scaffolding and logic status of the 11 Django apps.",
+      "path": "knowledge/crypto/domain_mapping_v3.md",
+      "tags": ["architecture", "domain", "inventory"]
+    }
   ]
 }
