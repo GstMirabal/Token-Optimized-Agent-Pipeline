@@ -41,3 +41,6 @@ All tactical and architectural metadata MUST reside in these ignored locations:
 - **Rule 54: Bidirectional Sync:** ALL tactical architectural shifts during a Phase MUST be propagated back to the Global Roadmap (Blueprint).
 - **Rule 55: High-Value Mirroring:** Finalized architectural designs and roadmaps MUST be mirrored to the project's root `/docs/` for permanent repository history.
 - **Rule 56: Topology Audit:** The Agent MUST verify compliance with Rules 34-55 at the start of every session.
+
+## 3.6: Excepciones de Soberanía (Core Matrix)
+- **Rule 82: Governance Matrix Exemption:** El repositorio `.agents/`, en su función de núcleo global de gobernanza (Master Submodule), queda estrictamente **EXENTO** del mandato de `Makefile` (Regla 47) y Entorno Local (Regla 37). Esta exclusión previene la contaminación recursiva del núcleo constitucional con artefactos de orquestación de proyectos.
