@@ -44,7 +44,7 @@ The Orchestrator executes the physical deployment following the **Hierarchy Laws
       # Matrix Internal Records
       .agents/task.md
       .agents/task/
-      .agents/state/session_metadata.json
+      .agents/.agent_state/session_metadata.json
       .agents/.agent_state/
       # Project Dev files
       .env

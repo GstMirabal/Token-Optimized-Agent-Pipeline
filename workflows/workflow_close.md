@@ -31,7 +31,7 @@ Finalize the session's transactional record:
 
 ## 5. Black Box Closure & Physical Amnesia (Rule 74)
 Termination of the session's physical presence:
-- **Metadata Update:** Atomically update **`.agents/state/session_metadata.json`** to:
+- **Metadata Update:** Atomically update **`.agents/.agent_state/session_metadata.json`** to:
   - `status: "CLOSED_SUCCESSFULLY"`
   - `intelligence_certified: "PASSED"`
 - **The Great Purge:** Physically destroy the ephemeral directory **`.agent_state/session_{UID}/`**. All session-specific context MUST be annihilated.

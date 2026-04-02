@@ -7,7 +7,7 @@ task/
 task/sprints/
 task/roadmaps/
 .agent_state/
-state/session_metadata.json
+.agent_state/session_metadata.json
 implementation_plan*.md
 implementation_plan*.json
 implementation_plan*.yaml
