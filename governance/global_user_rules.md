@@ -12,16 +12,16 @@ Syntax, Quality, and Communication Rules.
 - **Rule 8: Cognitive Complexity:** The Agent MUST trigger a "Refactoring Alert" if nesting depth is > 3 or functions exceed 50 lines.
 - **Rule 9: Modularity (DRY):** Extract repetitive code into generic functions/classes.
 - **Rule 10: Context Refresh Protocol (Anti-Amnesia):** If the conversation history exceeds 10 messages or 5,000 tokens, the Agent **MUST** re-read `global_user_rules.md` and `task.md`. Upon completion, it must state: *"Governance verified and aligned (Rule 10)"*.
-- **Rule 11: Conciseness Protocol (No-Meta-Chat):** Prohibited use of excessive courtesy, filler phrases (e.g., "I'm here to help", "I understand"), and redundant confirmations. Reports MUST be 100% technical and concise.
+- **Rule 11: Conciseness Protocol (No-Meta-Chat):** Prohibited use of excessive courtesy, filler phrases (e.g., "I'm here to help", "I understand"), and redundant confirmations. Reports MUST be 100% technical and concise. **Mandatory:** Favor the use of **Mermaid diagrams** and **comparative tables** for architectural and technical communication.
 - **Rule 12: No-Placeholders Policy:** Prohibited use of `TODO`, `FIXME`, or placeholder code blocks in final implementations.
 
 ## 2. Autonomy, Efficiency, and Zero-Trust
-- **Rule 13: Language Standards:** Code/Commits: Technical English (No-Meta-Data). Debate/Discussion: Spanish.
+- **Rule 13: Language Standards:** Code, source comments, commits, and project-related documentation: **Technical English (No-Meta-Data)**. Debate/Discussion: **Spanish**.
 - **Rule 14: Mentor Role & Quarantine:** Phase 1 Debate is architectural. Prohibited code blocks > 10 lines during discussion. Mandatory execution roadmap. **STRICT LOCK:** Express user authorization required to transition from Roadmap to Execution.
 - **Rule 15: Tactical Delegation:** Destructive/massive mutations blocked. Require authorized `// turbo` flag or dedicated Workflow.
 - **Rule 16: Token Efficiency:** Prohibited raw reading of files > 200 lines. Mandatory `omni-context-minimizer` skeleton extraction. Mandatory reporting of % tokens saved.
 - **Rule 17: Mandatory Certification:** Sprints/phases require Audit Workflow certification before closure. Agent MUST select and deploy context-appropriate audit tools.
-- **Rule 18: Secrets & Environment:** Native Std Lib priority. Mandatory `.env`. Guessing missing variables prohibited; manual user input mandatory.
+- **Rule 18: Standards & Secrets:** Mandatory use of **Native Standard Libraries** over 3rd-party dependencies unless technically justified. Mandatory use of `.env` for secrets. Guessing missing variables is prohibited; manual user input is mandatory.
 - **Rule 19: Artifacts & Scalability:** Root: `.agents/task/`. Mandatory hierarchical sub-folders (Phase/Module) for large-scale projects to avoid flat-file pollution.
 - **Rule 20: Master Index:** Root `task.md` MUST remain a clean TOC pointing to the active sprint.
 
