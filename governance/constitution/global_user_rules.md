@@ -29,7 +29,7 @@ Syntax, Quality, and Communication Rules.
 - **Rule 21: Persistent Metadata:** Global Framework Roadmaps and constitutional rules MUST be stored in `.agents/governance/constitution/`. Operational project roadmaps reside in the local task directory.
 - **Rule 22: Audit Exclusion:** The `.agents/governance/constitution/` directory is EXCLUDED from automated code audits.
 - **Rule 23: Project Topology:** Mandatory compliance with directory taxonomy defined in `constitution/project_mapping_and_context.md`. Prohibited usage of non-authorized paths for state persistence.
-- **Rule 24: Sprint Nomenclature:** Mandatory naming: `XXX-sprint-name.md` (e.g., `001-retrofitting.md`).
+- **Rule 24: Sprint & Subagent Nomenclature (Refined):** Mandatory 1:1 relationship between agent and sprint. Naming convention: **`00x-00y-agent-task.md`** (where `x` is the Sprint ID and `y` is the Sub-Task ID). This ensures tactical isolation and granular traceability.
 - **Rule 25: Deliverable Persistence:** Mandatory mirroring of finalized architectural designs and strategic roadmaps to the primary versioning areas defined in the project topology.
 
 ## 4. Roadmap Maturity & Execution Control
