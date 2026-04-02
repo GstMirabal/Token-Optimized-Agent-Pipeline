@@ -11,10 +11,10 @@
 
 <a name="readme-top"></a>
 
-<h3 align="center">Omni Context Minimizer</h3>
+<h3 align="center">Autoskills Bridge</h3>
 
 <p align="center">
-  Extracts the structural skeleton (AST) of any codebase to avoid massive context bloating.
+  Rule 70 Gatekeeper: Bridge for dynamic tool discovery and on-the-fly arsenal orchestration.
 <br /><br />
 <a href="https://github.com/GstMirabal/.agents"><strong>Explore the docs »</strong></a>
 <br />
@@ -48,17 +48,18 @@
 
 ## About The Project
 
-El **Omni Context Minimizer** es la herramienta nuclear de eficiencia del Matrix. Resuelve el problema del **Context Bloat** extrayendo el esqueleto estructural de archivos de código fuente extensos (más de 200 líneas) mediante un enfoque de **Abstract Syntax Tree (AST)**. Esto permite que la IA comprenda la topología del proyecto sin consumir una cantidad masiva de tokens.
+El **Autoskills Bridge** es un componente del Matrix diseñado para cumplir con la **Regla 70** de gobernanza. Actúa como el punto de anclaje para herramientas externas que no residen permanentemente en el disco, permitiendo a los subagentes descubrir y ejecutar nuevos skills efímeramente vía `npx`.
 
 **Key Features:**
-*   **AST Analysis:** Extracción de firmas de funciones, clases y métodos sin el peso del cuerpo del código.
-*   **Token Optimization:** Reduce el consumo de tokens en un 70-90% para archivos grandes.
-*   **Cross-Language Support:** Motor extensible para múltiples lenguajes (Soporte nativo para Python).
+*   **Discovery Automation:** Orquestación dinámica de herramientas mediante `npx autoskills`.
+*   **Arsenal Hardening:** Mantiene el submódulo ligero al evitar dependencias locales redundantes.
+*   **Governance Bridge:** Sincronización automática de resultados externos con la jerarquía local.
 
 ### Built With
 
-![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
-![AST](https://img.shields.io/badge/AST-logic-lightgrey)
+![Bash](https://img.shields.io/badge/bash-%23121011.svg?style=for-the-badge&logo=gnu-bash&logoColor=white)
+![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
+![Markdown](https://img.shields.io/badge/markdown-%23000000.svg?style=for-the-badge&logo=markdown&logoColor=white)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -66,34 +67,38 @@ El **Omni Context Minimizer** es la herramienta nuclear de eficiencia del Matrix
 
 ### Prerequisites
 
-*   **Python 3.x**: El motor principal de extracción (`omni_minimizer.py`) requiere un intérprete Python funcional (Rule 37).
+*   **Node.js / npm / npx**: Requisito nuclear para la ejecución efímera del arsenal externo.
 
 ### Installation & Configuration
 
-1. **Clone/Submodule**
-   Esta skill forma parte del arsenal central en `.agents/skills/core/omni-context-minimizer/`.
+1. **Integrated in Core**
+   Este bridge ya se encuentra pre-configurado dentro de `skills/core/autoskills-bridge/`. 
 
-2. **Setup**
-   No requiere dependencias externas pesadas, utiliza la librería estándar `ast` de Python.
+2. **Verification**
+   Asegúrese de que su entorno permite la ejecución de binarios `npx` (Rule 37).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Usage
 
-Esta skill se activa automáticamente por el **Token-Saver Auditor** cuando un archivo excede el umbral de las 200 líneas. También puede invocarse manualmente para exploraciones rápidas:
+Esta herramienta se invoca automáticamente por el **Orchestrator** cuando el `manifest.json` local no contiene el skill necesario para cumplir una tarea específica:
 
 ```bash
-# Invocación manual para extraer el esqueleto de un archivo grande
-python .agents/skills/core/omni-context-minimizer/scripts/omni_minimizer.py ruta/al/archivo.py
+# Ejemplo: Escaneo dinámico de arsenal para hallar un validador de prisma
+npx -y autoskills@latest --scan . --query "prisma validator"
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Contributing
 
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
 1. Fork the Project
-2. Create your Feature Branch
-3. Pull Request
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'feat: Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -106,6 +111,10 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 ## Contact
 
 Gustavo Mirabal Suarez - gst.mirabal@gmail.com
+
+- LinkedIn: [@Gustavo-Mirabal](https://www.linkedin.com/in/gstmirabal/)
+- GitHub: [@GstMirabal](https://github.com/GstMirabal)
+- Twitter: [@GstMirabal](https://x.com/gst_mirabal)
 
 Project Link: [https://github.com/GstMirabal/.agents](https://github.com/GstMirabal/.agents)
 

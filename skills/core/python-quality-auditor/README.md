@@ -11,10 +11,10 @@
 
 <a name="readme-top"></a>
 
-<h3 align="center">Omni Context Minimizer</h3>
+<h3 align="center">Python Quality Auditor</h3>
 
 <p align="center">
-  Extracts the structural skeleton (AST) of any codebase to avoid massive context bloating.
+  Agnostic Python health-check (Ruff, Mypy, Bandit) to ensure compliance with framework standards.
 <br /><br />
 <a href="https://github.com/GstMirabal/.agents"><strong>Explore the docs »</strong></a>
 <br />
@@ -48,17 +48,18 @@
 
 ## About The Project
 
-El **Omni Context Minimizer** es la herramienta nuclear de eficiencia del Matrix. Resuelve el problema del **Context Bloat** extrayendo el esqueleto estructural de archivos de código fuente extensos (más de 200 líneas) mediante un enfoque de **Abstract Syntax Tree (AST)**. Esto permite que la IA comprenda la topología del proyecto sin consumir una cantidad masiva de tokens.
+El **Python Quality Auditor** es la herramienta de certificación de salud para proyectos Python dentro del Matrix. Proporciona una auditoría agnóstica e incremental mediante herramientas modernas (Ruff para linting/formato, Mypy para tipado estático y Bandit para seguridad), asegurando que el código cumpla con los estándares de producción de la **Regla 35**.
 
 **Key Features:**
-*   **AST Analysis:** Extracción de firmas de funciones, clases y métodos sin el peso del cuerpo del código.
-*   **Token Optimization:** Reduce el consumo de tokens en un 70-90% para archivos grandes.
-*   **Cross-Language Support:** Motor extensible para múltiples lenguajes (Soporte nativo para Python).
+*   **Agnostic Linting:** Integración con Ruff para unificar más de 10 herramientas de linting en una ejecución rápida.
+*   **Type Certification:** Auditoría de tipos mediante Mypy para prevenir errores lógicos en tiempo de ejecución.
+*   **Security Scanning:** Identificación de vulnerabilidades conocidas en paquetes y código fuente mediante Bandit.
 
 ### Built With
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
-![AST](https://img.shields.io/badge/AST-logic-lightgrey)
+![Ruff](https://img.shields.io/badge/Ruff-Linter-black)
+![Mypy](https://img.shields.io/badge/Mypy-Types-orange)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -66,25 +67,26 @@ El **Omni Context Minimizer** es la herramienta nuclear de eficiencia del Matrix
 
 ### Prerequisites
 
-*   **Python 3.x**: El motor principal de extracción (`omni_minimizer.py`) requiere un intérprete Python funcional (Rule 37).
+*   **Python 3.x**: El auditor se ejecuta sobre el intérprete de sistema o un entorno virtual designado (Rule 37).
+*   **Pip Dependencies**: Requiere la instalación de `ruff`, `mypy` y `bandit` en el entorno de ejecución.
 
 ### Installation & Configuration
 
-1. **Clone/Submodule**
-   Esta skill forma parte del arsenal central en `.agents/skills/core/omni-context-minimizer/`.
+1. **Submodule Integration**
+   Ubicado en `.agents/skills/core/python-quality-auditor/`.
 
-2. **Setup**
-   No requiere dependencias externas pesadas, utiliza la librería estándar `ast` de Python.
+2. **Run Certification**
+   Puede ser invocado manualmente o mediante el workflow `/certification_audit`.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Usage
 
-Esta skill se activa automáticamente por el **Token-Saver Auditor** cuando un archivo excede el umbral de las 200 líneas. También puede invocarse manualmente para exploraciones rápidas:
+Invocado durante la fase de **Hardenning** de cada Sprint para certificar que el incremento de código es conforme a los estándares institucionales:
 
 ```bash
-# Invocación manual para extraer el esqueleto de un archivo grande
-python .agents/skills/core/omni-context-minimizer/scripts/omni_minimizer.py ruta/al/archivo.py
+# Ejemplo: Ejecución del auditor sobre un módulo específico
+python .agents/skills/core/python-quality-auditor/scripts/python_quality_auditor.py path/to/module/
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

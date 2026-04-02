@@ -11,10 +11,10 @@
 
 <a name="readme-top"></a>
 
-<h3 align="center">Omni Context Minimizer</h3>
+<h3 align="center">MCP Registry & Manager</h3>
 
 <p align="center">
-  Extracts the structural skeleton (AST) of any codebase to avoid massive context bloating.
+  Registry and configuration manager for Model Context Protocol servers to maximize data utility.
 <br /><br />
 <a href="https://github.com/GstMirabal/.agents"><strong>Explore the docs »</strong></a>
 <br />
@@ -48,17 +48,17 @@
 
 ## About The Project
 
-El **Omni Context Minimizer** es la herramienta nuclear de eficiencia del Matrix. Resuelve el problema del **Context Bloat** extrayendo el esqueleto estructural de archivos de código fuente extensos (más de 200 líneas) mediante un enfoque de **Abstract Syntax Tree (AST)**. Esto permite que la IA comprenda la topología del proyecto sin consumir una cantidad masiva de tokens.
+El **MCP Registry & Manager** es el sistema de descubrimiento de datos externos del Matrix. Gestiona la configuración y el enrutamiento de servidores Model Context Protocol (MCP) locales y remotos (e.g. CoinGecko, FRED, Yahoo Finance), permitiendo a los subagentes expandir su frontera de conocimiento de forma segura y auditada.
 
 **Key Features:**
-*   **AST Analysis:** Extracción de firmas de funciones, clases y métodos sin el peso del cuerpo del código.
-*   **Token Optimization:** Reduce el consumo de tokens en un 70-90% para archivos grandes.
-*   **Cross-Language Support:** Motor extensible para múltiples lenguajes (Soporte nativo para Python).
+*   **Centralized Registry:** Un único punto de verdad en `registry.json` para todas las conexiones externas.
+*   **Zero-Trust Routing:** Asegura que solo los MCPs autorizados en el registro puedan ser invocados por el Orchestrator.
+*   **Dynamic Provisioning:** Capacidad de inyectar variables de entorno y secretos de API de forma segura.
 
 ### Built With
 
-![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
-![AST](https://img.shields.io/badge/AST-logic-lightgrey)
+![JSON](https://img.shields.io/badge/json-5E5E5E?style=for-the-badge&logo=json&logoColor=white)
+![MCP](https://img.shields.io/badge/MCP-Registry-brightgreen)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -66,25 +66,26 @@ El **Omni Context Minimizer** es la herramienta nuclear de eficiencia del Matrix
 
 ### Prerequisites
 
-*   **Python 3.x**: El motor principal de extracción (`omni_minimizer.py`) requiere un intérprete Python funcional (Rule 37).
+*   **Claude / Gemini / LLM Platform**: Capacidad del modelo para interactuar con servidores MCP.
+*   **MCP Server Configuration**: Ubicación persistente de sus binarios en `.env` o el archivo de configuración global.
 
 ### Installation & Configuration
 
-1. **Clone/Submodule**
-   Esta skill forma parte del arsenal central en `.agents/skills/core/omni-context-minimizer/`.
+1. **Integrated in Core**
+   Ubicado en `.agents/skills/core/mcp-registry/`.
 
-2. **Setup**
-   No requiere dependencias externas pesadas, utiliza la librería estándar `ast` de Python.
+2. **Register a Server**
+   Añada su nuevo servidor a `registry.json` siguiendo el esquema de metadatos oficial.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Usage
 
-Esta skill se activa automáticamente por el **Token-Saver Auditor** cuando un archivo excede el umbral de las 200 líneas. También puede invocarse manualmente para exploraciones rápidas:
+El **Orchestrator** consulta el registro antes de cada tarea que requiera datos en tiempo real (Trading, Macro, Sentiment). Si el servidor no está en el `registry.json`, se bloquea el acceso externo. De conformidad con las reglas de **Survival Mode**, prioriza el uso de créditos gratuitos de APIs externas.
 
 ```bash
-# Invocación manual para extraer el esqueleto de un archivo grande
-python .agents/skills/core/omni-context-minimizer/scripts/omni_minimizer.py ruta/al/archivo.py
+# Ejemplo: Visualización de servidores activos en el registro
+cat .agents/skills/core/mcp-registry/registry.json
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

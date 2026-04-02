@@ -11,10 +11,10 @@
 
 <a name="readme-top"></a>
 
-<h3 align="center">Omni Context Minimizer</h3>
+<h3 align="center">JS-Standardizer</h3>
 
 <p align="center">
-  Extracts the structural skeleton (AST) of any codebase to avoid massive context bloating.
+  Universal alignment for JS/TS projects (ESLint, Prettier, JSDoc) ensuring legal governance compliance.
 <br /><br />
 <a href="https://github.com/GstMirabal/.agents"><strong>Explore the docs »</strong></a>
 <br />
@@ -48,17 +48,18 @@
 
 ## About The Project
 
-El **Omni Context Minimizer** es la herramienta nuclear de eficiencia del Matrix. Resuelve el problema del **Context Bloat** extrayendo el esqueleto estructural de archivos de código fuente extensos (más de 200 líneas) mediante un enfoque de **Abstract Syntax Tree (AST)**. Esto permite que la IA comprenda la topología del proyecto sin consumir una cantidad masiva de tokens.
+El **JS-Standardizer** es la herramienta de alineación universal para proyectos Javascript y Typescript del Matrix. Asegura que el código cumpla con los estándares de calidad del framework (ESLint, Prettier) y que la documentación interna mantenga la coherencia legal mediante JSDoc obligatorios.
 
 **Key Features:**
-*   **AST Analysis:** Extracción de firmas de funciones, clases y métodos sin el peso del cuerpo del código.
-*   **Token Optimization:** Reduce el consumo de tokens en un 70-90% para archivos grandes.
-*   **Cross-Language Support:** Motor extensible para múltiples lenguajes (Soporte nativo para Python).
+*   **Linter Automation:** Configuración lista para usar de ESLint y Prettier alineada con la **Regla 35**.
+*   **TS Support:** Integración nativa con Typescript para arquitecturas modernas.
+*   **JSDoc Guard:** Valida la presencia de firmas de documentación en todas las funciones nucleares.
 
 ### Built With
 
-![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
-![AST](https://img.shields.io/badge/AST-logic-lightgrey)
+![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+![ESLint](https://img.shields.io/badge/eslint-3A33D1?style=for-the-badge&logo=eslint&logoColor=white)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -66,25 +67,25 @@ El **Omni Context Minimizer** es la herramienta nuclear de eficiencia del Matrix
 
 ### Prerequisites
 
-*   **Python 3.x**: El motor principal de extracción (`omni_minimizer.py`) requiere un intérprete Python funcional (Rule 37).
+*   **Node.js**: Requerido para ejecutar los linters y standardizers.
 
 ### Installation & Configuration
 
-1. **Clone/Submodule**
-   Esta skill forma parte del arsenal central en `.agents/skills/core/omni-context-minimizer/`.
+1. **Integrated in Core**
+   Ubicado en `.agents/skills/core/js-standardizer/`.
 
-2. **Setup**
-   No requiere dependencias externas pesadas, utiliza la librería estándar `ast` de Python.
+2. **Link local project**
+   Asegúrese de que el proyecto raíz tenga un `package.json` para facilitar la inyección de reglas.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Usage
 
-Esta skill se activa automáticamente por el **Token-Saver Auditor** cuando un archivo excede el umbral de las 200 líneas. También puede invocarse manualmente para exploraciones rápidas:
+Invocado automáticamente durante las fases de auditoría incremental (`/certification_audit`):
 
 ```bash
-# Invocación manual para extraer el esqueleto de un archivo grande
-python .agents/skills/core/omni-context-minimizer/scripts/omni_minimizer.py ruta/al/archivo.py
+# Ejemplo: Estandarización de archivos en src/
+npx eslint src/ --fix
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

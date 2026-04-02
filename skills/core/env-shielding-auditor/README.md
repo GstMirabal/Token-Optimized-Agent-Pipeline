@@ -11,10 +11,10 @@
 
 <a name="readme-top"></a>
 
-<h3 align="center">Omni Context Minimizer</h3>
+<h3 align="center">Env-Shielding Auditor</h3>
 
 <p align="center">
-  Extracts the structural skeleton (AST) of any codebase to avoid massive context bloating.
+  Scans for hardcoded secrets (API keys, tokens) and validates .env security via Gitignore.
 <br /><br />
 <a href="https://github.com/GstMirabal/.agents"><strong>Explore the docs »</strong></a>
 <br />
@@ -48,17 +48,17 @@
 
 ## About The Project
 
-El **Omni Context Minimizer** es la herramienta nuclear de eficiencia del Matrix. Resuelve el problema del **Context Bloat** extrayendo el esqueleto estructural de archivos de código fuente extensos (más de 200 líneas) mediante un enfoque de **Abstract Syntax Tree (AST)**. Esto permite que la IA comprenda la topología del proyecto sin consumir una cantidad masiva de tokens.
+El **Env-Shielding Auditor** es la guardia de seguridad del Matrix para la prevención de fugas de información sensible. Escanea el código fuente en busca de secretos hardcodeados (API keys, tokens de acceso, PII) y valida que el archivo `.env` esté correctamente ignorado por Git en el root y submódulos.
 
 **Key Features:**
-*   **AST Analysis:** Extracción de firmas de funciones, clases y métodos sin el peso del cuerpo del código.
-*   **Token Optimization:** Reduce el consumo de tokens en un 70-90% para archivos grandes.
-*   **Cross-Language Support:** Motor extensible para múltiples lenguajes (Soporte nativo para Python).
+*   **Leak Detection:** Búsqueda recursiva mediante patrones regex de claves de proveedores (OpenAI, AWS, GCP, CCXT).
+*   **Gitignore Compliance:** Verifica que `.env` y archivos sensibles estén en la lista negra de Git.
+*   **PII Masking:** Sugiere el enmascaramiento de trazas de datos personales en logs de subagentes.
 
 ### Built With
 
-![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
-![AST](https://img.shields.io/badge/AST-logic-lightgrey)
+![Bash](https://img.shields.io/badge/bash-%23121011.svg?style=for-the-badge&logo=gnu-bash&logoColor=white)
+![Security](https://img.shields.io/badge/Security-Shield-red)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -66,25 +66,25 @@ El **Omni Context Minimizer** es la herramienta nuclear de eficiencia del Matrix
 
 ### Prerequisites
 
-*   **Python 3.x**: El motor principal de extracción (`omni_minimizer.py`) requiere un intérprete Python funcional (Rule 37).
+*   **Ripgrep (rg)**: Recomendado para escaneos de alta velocidad en repositorios grandes.
 
 ### Installation & Configuration
 
-1. **Clone/Submodule**
-   Esta skill forma parte del arsenal central en `.agents/skills/core/omni-context-minimizer/`.
+1. **Submodule Access**
+   Ubicado en `.agents/skills/core/env-shielding-auditor/`.
 
 2. **Setup**
-   No requiere dependencias externas pesadas, utiliza la librería estándar `ast` de Python.
+   No requiere dependencias externas pesadas adicionales.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Usage
 
-Esta skill se activa automáticamente por el **Token-Saver Auditor** cuando un archivo excede el umbral de las 200 líneas. También puede invocarse manualmente para exploraciones rápidas:
+Invocado manualmente o por el **Agente DevOps** antes de cada commit atómico (`git freeze` protocol):
 
 ```bash
-# Invocación manual para extraer el esqueleto de un archivo grande
-python .agents/skills/core/omni-context-minimizer/scripts/omni_minimizer.py ruta/al/archivo.py
+# Ejemplo: Escaneo preventivo de secretos en el directorio actual
+bash .agents/skills/core/env-shielding-auditor/scripts/shield_audit.sh
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

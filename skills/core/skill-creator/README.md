@@ -11,10 +11,10 @@
 
 <a name="readme-top"></a>
 
-<h3 align="center">Omni Context Minimizer</h3>
+<h3 align="center">Skill Creator</h3>
 
 <p align="center">
-  Extracts the structural skeleton (AST) of any codebase to avoid massive context bloating.
+  Assists in the creation of new atomic skills following global governance rules (Rule 71).
 <br /><br />
 <a href="https://github.com/GstMirabal/.agents"><strong>Explore the docs »</strong></a>
 <br />
@@ -48,17 +48,17 @@
 
 ## About The Project
 
-El **Omni Context Minimizer** es la herramienta nuclear de eficiencia del Matrix. Resuelve el problema del **Context Bloat** extrayendo el esqueleto estructural de archivos de código fuente extensos (más de 200 líneas) mediante un enfoque de **Abstract Syntax Tree (AST)**. Esto permite que la IA comprenda la topología del proyecto sin consumir una cantidad masiva de tokens.
+El **Skill Creator** es la herramienta de andamiaje y automatización para la expansión del arsenal del Matrix. Asegura que cada nueva habilidad atómica herede los protocolos de seguridad, eficiencia y documentación institucional, de conformidad con la bisección obligatoria en `/core/` o `/3rd/` (**Regla 71**).
 
 **Key Features:**
-*   **AST Analysis:** Extracción de firmas de funciones, clases y métodos sin el peso del cuerpo del código.
-*   **Token Optimization:** Reduce el consumo de tokens en un 70-90% para archivos grandes.
-*   **Cross-Language Support:** Motor extensible para múltiples lenguajes (Soporte nativo para Python).
+*   **Atomic Scaffolding:** Generación automática de directorios `scripts/` y archivos `SKILL.md` / `README.md`.
+*   **Audit Integration:** Vincula automáticamente la nueva herramienta con el `python-quality-auditor`.
+*   **Governance Guard:** Valida que el nombre y la categoría de la skill cumplan con la taxonomía oficial del framework.
 
 ### Built With
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
-![AST](https://img.shields.io/badge/AST-logic-lightgrey)
+![Automation](https://img.shields.io/badge/Automation-Project-blue)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -66,25 +66,25 @@ El **Omni Context Minimizer** es la herramienta nuclear de eficiencia del Matrix
 
 ### Prerequisites
 
-*   **Python 3.x**: El motor principal de extracción (`omni_minimizer.py`) requiere un intérprete Python funcional (Rule 37).
+*   **Universal-Agents Submodule**: Se requiere acceso a las plantillas de andamiaje globales del framework.
 
 ### Installation & Configuration
 
-1. **Clone/Submodule**
-   Esta skill forma parte del arsenal central en `.agents/skills/core/omni-context-minimizer/`.
+1. **Integrated in Core**
+   Ubicado en `.agents/skills/core/skill-creator/`.
 
-2. **Setup**
-   No requiere dependencias externas pesadas, utiliza la librería estándar `ast` de Python.
+2. **Template access**
+   Utiliza las plantillas maestras definidas en los assets del framework para inyectar las reglas atomizadas en cada nueva skill.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Usage
 
-Esta skill se activa automáticamente por el **Token-Saver Auditor** cuando un archivo excede el umbral de las 200 líneas. También puede invocarse manualmente para exploraciones rápidas:
+Invocado cuando el **Orchestrator** o el usuario detecta la necesidad de una nueva capacidad técnica que debe ser persistida en el Matrix:
 
 ```bash
-# Invocación manual para extraer el esqueleto de un archivo grande
-python .agents/skills/core/omni-context-minimizer/scripts/omni_minimizer.py ruta/al/archivo.py
+# Ejemplo: Creación de una nueva skill atómica de scraping
+python .agents/skills/core/skill-creator/scripts/create_skill.py "web-scraper" "Expertise"
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
