@@ -14,7 +14,7 @@ Before any interaction, the Agent MUST read **`.agents/.agent_state/session_meta
 - **Lock:** No new session is permitted until the metadata reports `status: "CLOSED_SUCCESSFULLY"`.
 
 ## 1. UID Signature Validation (Rule 63)
-The Agent MUST update `task.md` with the unique session identifier and confirm the current operational role:
+The Agent MUST update `task/task.md` with the unique session identifier and confirm the current operational role:
 - **Principal:** Strategic Roadmap Design (Lock 1).
 - **Orchestrator:** Tactical Implementation Planning (Lock 2).
 - **DevOps/Matrix:** Technical Execution and Structural Audit.

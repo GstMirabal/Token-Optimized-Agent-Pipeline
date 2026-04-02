@@ -9,7 +9,7 @@ Master operational protocol ensuring total identity segregation and explicit aut
 
 ## 1. Identity & Memory Audit (Mentor Mode)
 *   **Identity & Memory Audit (Rule 57):** Call the **Agente Principal (Mentor)**. Terminal execution is **STRICTLY PROHIBITED** during this phase.
-*   **Memory Seal:** The Agent **MUST** re-read `.agents/governance/constitution/` and `task.md` (Rule 10).
+*   **Memory Seal:** The Agent **MUST** re-read `.agents/governance/constitution/` and `task/task.md` (Rule 10).
 *   **Discovery Block:** Analyze the current strategic roadmap phase.
 *   **Gap Analysis (Isolated Question):** Before progressing, ask: *"Is there any additional technical detail or objective that should be integrated into the Roadmap?"*
 
@@ -40,7 +40,7 @@ Master operational protocol ensuring total identity segregation and explicit aut
 
 ## 6. Liquidation & Context Refresh
 *   **Amnesia Extraction:** Run **`workflow_knowledge_extractor.md`**.
-*   **Roadmap Liquidation (Rule 31):** Update active Roadmap status to **`COMPLETED (100%)`** and reflect in `task.md` before closure.
+*   **Roadmap Liquidation (Rule 31):** Update active Roadmap status to **`COMPLETED (100%)`** and reflect in `task/task.md` before closure.
 *   **Full Context Reset:** Call the **Principal (Mentor)** to re-read governance to prevent memory drift before the next mission.
 
 ---

@@ -17,8 +17,8 @@ The Agent MUST fulfill the knowledge distillation cycle before state destruction
 Strategic settlement of the current phase:
 - **Milestone Audit:** Check if the active Sprint or Phase has reached 100% completion.
 - **Liquidation:** If criteria met, update the Roadmap status to **`COMPLETED (100%)`** and apply the final Principal UID signature.
-- **Master Index Sync:** Reflect the completion in the root **`task.md`**.
-- **2.1 Strategic Freeze:** Set `Strategic Lock: LOCKED` in `task.md` to ensure the next session requires fresh authorization (Rule 29).
+- **Master Index Sync:** Reflect the completion in the root **`task/task.md`**.
+- **2.1 Strategic Freeze:** Set `Strategic Lock: LOCKED` in `task/task.md` to ensure the next session requires fresh authorization (Rule 29).
 
 ## 3. High-Value Mirroring (Rule 55)
 Ensure historical traceability for human users:
