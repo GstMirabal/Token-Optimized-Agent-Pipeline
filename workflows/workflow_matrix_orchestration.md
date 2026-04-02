@@ -1,0 +1,47 @@
+---
+description: "Universal Identity & Matrix Orchestration Protocol (Hardened)"
+version: 1.0.0
+---
+
+# 🛡️ Workflow: Matrix Orchestration & Dual-Lock Execution
+
+Master operational protocol ensuring total identity segregation and explicit authorization locks.
+
+## 1. Identity & Memory Audit (Mentor Mode)
+*   **Identity & Memory Audit (Rule 57):** Call the **Agente Principal (Mentor)**. Terminal execution is **STRICTLY PROHIBITED** during this phase.
+*   **Memory Seal:** The Agent **MUST** re-read `.agents/governance/constitution/` and `task.md` (Rule 10).
+*   **Discovery Block:** Analyze the current strategic roadmap phase.
+*   **Gap Analysis (Isolated Question):** Before progressing, ask: *"Is there any additional technical detail or objective that should be integrated into the Roadmap?"*
+
+## 2. Strategic Unlock & Sprint Design (Orchestrator)
+*   **Lock 1 (Strategic Unlock):** Once the roadmap is aligned, request: *"Do you authorize the unlocking of Phase [X] for tactical design?"*
+*   **Sprint 1:1 Architecture:** Create a dedicated sprint file for each agent/task following **Rule 24 (00x-00y-agent.md)**.
+*   **No-Automation Arsenal (Lock 2):** 
+    - If tool not in **`manifest_skills.json`**, the agent **MUST** request permission to search.
+    - Present search options using **Comparative Tables or Mermaid Diagrams (Rule 11)** with technical justifications.
+    - **Debate -> Select -> Explicit Authorize.**
+*   **Implementation Plan:** Present `xxx-implementation_plan.md` for signature: **"PLAN_AUTHORIZED"**.
+
+## 3. DevOps Provisioning & Visual Proof (DevOps Agent)
+*   **WIP Safety Freeze (Rule 65):** The Agent **MUST** execute `git status --porcelain`. If uncommitted human changes exist in the root, the session **MUST ABORT** or require a commit before any provisioning.
+*   **Environment Certification:** Verify task-specific dependencies and environment health.
+*   **Visual Proof (Step 3.2):** Present a **Visual Diff or `cat`** of the target file to certify its clean state before handover.
+*   **Lock 3 (Deployment Hold):** Emit: **"DEPLOYMENT_READY: [SprintID-AgenteID] PASSED"**.
+
+## 4. Matrix Tactical Execution (The Matrix)
+*   **Jurisdictional Isolation (Rule 66):** One subagent per file. Concurrent access requires queuing.
+*   **Identity Signature:** Every terminal request must be tagged: `[Agente_ID] requests authorization for [SprintID] on [Path]`.
+*   **Subagent Logic:** Execute authorized logic with minimal token waste.
+
+## 5. Audit & QA Architect (The Auditor)
+*   **Test Generation:** The **Matrix_QA_Architect** (Rule 80) MUST generate or update a test suite to ensure **100% Coverage (Rule 76)**.
+*   **Kill Switch Monitoring (Rule 67):** Activate automated rollback (`git restore .`) after 3 consecutive linter, syntax, or logical errors.
+*   **Audit Lock:** Final validation of lints and architectural compliance.
+
+## 6. Liquidation & Context Refresh
+*   **Amnesia Extraction:** Run **`workflow_knowledge_extractor.md`**.
+*   **Roadmap Liquidation (Rule 31):** Update active Roadmap status to **`COMPLETED (100%)`** and reflect in `task.md` before closure.
+*   **Full Context Reset:** Call the **Principal (Mentor)** to re-read governance to prevent memory drift before the next mission.
+
+---
+*Certified under Roadmap 011 - Universal Orchestration Protocol*

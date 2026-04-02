@@ -9,7 +9,7 @@ Master closure protocol to ensure intelligence distillation, state purge, and go
 
 ## 1. Intelligence Extraction (Rule 74 & 75)
 The Agent MUST fulfill the knowledge distillation cycle before state destruction:
-- **Action:** Mandatory execution of **`knowledge_extractor.md`**.
+- **Action:** Mandatory execution of **`workflow_knowledge_extractor.md`**.
 - **Certification:** Must receive the signature **`EXTRACTION_COMPLETE: INTELLIGENCE_DESTILLED`**.
 - **Intelligence Guard:** If the extractor triggers a "Governance Reform Debate" (Rule 35), the Agente Principal must resolve it before proceeding.
 
@@ -18,6 +18,7 @@ Strategic settlement of the current phase:
 - **Milestone Audit:** Check if the active Sprint or Phase has reached 100% completion.
 - **Liquidation:** If criteria met, update the Roadmap status to **`COMPLETED (100%)`** and apply the final Principal UID signature.
 - **Master Index Sync:** Reflect the completion in the root **`task.md`**.
+- **2.1 Strategic Freeze:** Set `Strategic Lock: LOCKED` in `task.md` to ensure the next session requires fresh authorization (Rule 29).
 
 ## 3. High-Value Mirroring (Rule 55)
 Ensure historical traceability for human users:

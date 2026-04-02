@@ -51,14 +51,14 @@
 Universal-Agents is a military-grade AI agent governance framework designed to prevent context bloat, secure RCE environments, and ensure long-term knowledge retention. It transforms standard AI agents into a disciplined swarm of specialized subagents.
 
 **Key Features:**
-*   **Zero-Trust Hierarchy:** Segregated Mentor (Debate), Orchestrator (Planning), and Auditor (Validation) roles to prevent autonomous logic failures.
+*   **Zero-Trust Identity Hierarchy:** Segregated Mentor (Principal), Orchestrator (Planning), DevOps (Provisioning), Matrix (Execution), and Auditor (Validation) roles to prevent autonomous logic failures.
+*   **Universal Matrix Orchestration:** A single, hardened protocol (`workflow_matrix_orchestration.md`) that governs all tactical actions through the **Triple Lock** authorization architecture.
+*   **100% Coverage Mandate:** Strategic requirement (Rule 76) enforced by the **Matrix_QA_Architect**, ensuring zero-defect integration before any code commitment.
 *   **Token-Saver Auditor:** An economic kill-switch that prevents inefficient plans and reduces API costs by optimizing context windows.
 *   **Omni-Context Minimizer:** Smart AST-based code skeleton extraction that allows AI to understand massive files (1000+ lines) while only consuming 10% of the normal token cost.
-*   **MCP Registry & Routing:** Strict Zero-Trust assignment of external Model Context Protocols (MCPs). The Orchestrator queries `.agents/skills/core/mcp-registry/registry.json` and provisions specific local/remote data sources before unlocking subagent execution.
-*   **Amnesia & Atomic KIs:** Automatic knowledge extraction distilling long-term "lessons learned" into atomic `.md` files indexed by `ki_index.json` under `/knowledge/`, avoiding token bloating in future sessions.
-*   **Modular Scaffolding:** Standardized project initialization ensuring every new repository inherits the same constitutional security and quality rules.
-*   **Agnostic Certification Audit:** A framework-neutral validator that ensures 100% Core compliance across any stack (Django, Prisma, SQLAlchemy, etc.). It prioritizes **Incremental Auditing**, identifying implemented modules vs. boilerplate to avoid redundant checks.
-*   **Persistent Compliance Roadmap:** Integrated tracking via `docs/CERTIFICATION_ROADMAP.md`, providing a verifiable history of security, quality, and logic status.
+*   **MCP Registry & Routing:** Strict Zero-Trust assignment of external Model Context Protocols (MCPs) via `mcp-registry/registry.json`.
+*   **Knowledge Extraction & Memory:** Automatic knowledge distillation via `workflow_knowledge_extractor.md`, indexing lessons into atomic Knowledge Items (KIs).
+*   **Persistent Compliance Roadmap:** Integrated tracking via `task/roadmaps/`, providing a verifiable history of security, quality, and logic status.
 
 ### Built With
 
@@ -116,9 +116,9 @@ If you are adding the framework to an **already established repository**, follow
 
 1.  **Submodule Insertion:** In your root folder: `git submodule add https://github.com/GstMirabal/.agents .agents`
 2.  **AI Session Trigger:** Tell the AI: *"Initialize session using governance protocols in `.agents/` and keep the `task.md` indexed."*
-3.  **Roadmap Discovery:** Run the command: **`/scaffolding_retrofitting`**.
+3.  **Roadmap Discovery:** Run the command: **`/workflow_matrix_orchestration`**.
 
-The Orchestrator will automatically scan your source code, identify your project's current **Phase**, and initialize your local context (`task.md` and `task/sprints/`) while generating persistent architectural records in `docs/roadmaps/`.
+The Orchestrator will automatically scan your source code, identify your project's current **Phase**, and initialize your local context using the **00x-00y** nomenclature while generating persistent architectural records in `task/roadmaps/`.
 
 ---
 
@@ -127,16 +127,16 @@ The framework supports automated workflows via standardized Markdown protocols. 
 
 | Command | Purpose | Location |
 | :--- | :--- | :--- |
-| **`/amnesia_extractor`** | **Post-Sprint Purgatory**: Extracts LTM Lessons into Knowledge Items with Semantic Indexing. | `workflows/amnesia_extractor.md` |
-| **`/scaffolding_modular`** | **Project Scaffolding**: Initializes a new repo with Modular Architecture (Phase 0). | `workflows/scaffolding_modular.md` |
-| **`/scaffolding_retrofitting`**| **Retrofitting & Roadmap**: Aligns existing projects, discovers phases, and plans the roadmap. | `workflows/scaffolding_retrofitting.md` |
+| **`/workflow_knowledge_extractor`** | **Post-Sprint Purgatory**: Extracts LTM Lessons into Knowledge Items with Semantic Indexing. | `workflows/workflow_knowledge_extractor.md` |
+| **`/workflow_matrix_orchestration`** | **Universal Orchestration**: Governs Identity, Scaffolding, and Execution via Triple Lock. | `workflows/workflow_matrix_orchestration.md` |
 | **`/certification_audit`** | **Global Audit**: Agnostic, incremental certification of implemented logic. | `workflows/certification_audit.md` |
+| **`/workflow_close`** | **Atomic Session Close**: Destroys context and sets Strategic Lock to LOCKED. | `workflows/workflow_close.md` |
 
 > [!TIP]
 > **Submodule Isolation Policy:** All task tracking (`task.md`), sprint logs (`sprints/`), and local roadmaps (`roadmaps/`) are strictly ignored by Git. You can manage your project-specific tasks inside the `.agents/` folder without polluting the global framework repository.
 
 > [!IMPORTANT]
-> **Orchestration Manifest:** The Orchestrator now uses `.agents/skills/manifest.json` to statically route tools, drastically reducing token consumption and discovery time during sessions.
+> **Orchestration Manifest:** The Orchestrator now uses **`.agents/skills/manifest_skills.json`** to statically route tools, drastically reducing token consumption and discovery time during sessions.
 
 ```json
 // Example: The Orchestrator statically routes external tools using the Skills Manifest
