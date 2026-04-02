@@ -30,7 +30,7 @@ Any project born from this Workflow MUST shield its immediate dependencies so th
 
 ## Phase 3: Physical Topology Deployment (Phase 0 Completion)
 
-Based on Phase 1 and the `project_mapping_and_context.md` file, the Orchestrator executes sequentially (*using atomic terminal commands in bash separated by SafeToAutoRun* if applicable):
+Based on Phase 1 and the `constitution/project_mapping_and_context.md` file, the Orchestrator executes sequentially (*using atomic terminal commands in bash separated by SafeToAutoRun* if applicable):
 
 1.  **Directory and Propagation:**
     - Perform `mkdir` for the project subfolder and `cd` into it.

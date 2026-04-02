@@ -26,9 +26,9 @@ Syntax, Quality, and Communication Rules.
 - **Rule 20: Master Index:** Root `task.md` MUST remain a clean TOC pointing to the active sprint.
 
 ## 3. Governance & Directory Structure
-- **Rule 21: Persistent Metadata:** Global Framework Roadmaps and constitutional rules MUST be stored in `.agents/governance/`. Operational project roadmaps reside in the local task directory.
-- **Rule 22: Audit Exclusion:** The `.agents/governance/` directory is EXCLUDED from automated code audits.
-- **Rule 23: Project Topology:** Mandatory compliance with directory taxonomy defined in `@project_mapping_and_context.md`. Prohibited usage of non-authorized paths for state persistence.
+- **Rule 21: Persistent Metadata:** Global Framework Roadmaps and constitutional rules MUST be stored in `.agents/governance/constitution/`. Operational project roadmaps reside in the local task directory.
+- **Rule 22: Audit Exclusion:** The `.agents/governance/constitution/` directory is EXCLUDED from automated code audits.
+- **Rule 23: Project Topology:** Mandatory compliance with directory taxonomy defined in `constitution/project_mapping_and_context.md`. Prohibited usage of non-authorized paths for state persistence.
 - **Rule 24: Sprint Nomenclature:** Mandatory naming: `XXX-sprint-name.md` (e.g., `001-retrofitting.md`).
 - **Rule 25: Deliverable Persistence:** Mandatory mirroring of finalized architectural designs and strategic roadmaps to the primary versioning areas defined in the project topology.
 

@@ -13,4 +13,4 @@
 
 ---
 > [!IMPORTANT]
-> **Rule Update:** This lesson catalyzed the creation of [Rule 41.1](file:///Users/gstmirabal/Developer/.agents/governance/global_user_rules.md) regarding session state cache and CLI-first diagnostics.
+> **Rule Update:** This lesson catalyzed the creation of [Rule 41.1](file:///Users/gstmirabal/Developer/.agents/governance/constitution/global_user_rules.md) regarding session state cache and CLI-first diagnostics.
