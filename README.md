@@ -115,7 +115,7 @@ python .agents/skills/core/omni-context-minimizer/scripts/omni_minimizer.py path
 If you are adding the framework to an **already established repository**, follow this 3-step sequence to align your architectural roadmap:
 
 1.  **Submodule Insertion:** In your root folder: `git submodule add https://github.com/GstMirabal/.agents .agents`
-2.  **AI Session Trigger:** Tell the AI: *"Initialize session using governance protocols in `.agents/` and keep the `task.md` indexed."*
+2.  **AI Session Trigger:** Tell the AI: *"Initialize session using governance protocols in `.agents/` and keep the `task/task.md` indexed."*
 3.  **Roadmap Discovery:** Run the command: **`/workflow_matrix_orchestration`**.
 
 The Orchestrator will automatically scan your source code, identify your project's current **Phase**, and initialize your local context using the **00x-00y** nomenclature while generating persistent architectural records in `task/roadmaps/`.
@@ -133,7 +133,7 @@ The framework supports automated workflows via standardized Markdown protocols. 
 | **`/workflow_close`** | **Atomic Session Close**: Destroys context and sets Strategic Lock to LOCKED. | `workflows/workflow_close.md` |
 
 > [!TIP]
-> **Submodule Isolation Policy:** All task tracking (`task.md`), sprint logs (`sprints/`), and local roadmaps (`roadmaps/`) are strictly ignored by Git. You can manage your project-specific tasks inside the `.agents/` folder without polluting the global framework repository.
+> **Submodule Isolation Policy:** All task tracking (`task/task.md`), sprint logs (`sprints/`), and local roadmaps (`roadmaps/`) are strictly ignored by Git. You can manage your project-specific tasks inside the `.agents/` folder without polluting the global framework repository.
 
 > [!IMPORTANT]
 > **Orchestration Manifest:** The Orchestrator now uses **`.agents/skills/manifest_skills.json`** to statically route tools, drastically reducing token consumption and discovery time during sessions.

@@ -11,7 +11,7 @@ Syntax, Quality, and Communication Rules.
 - **Rule 7: Native Output:** Use native `logging` (`INFO`, `ERROR`). Prohibited use of `print()` in production or automated operations.
 - **Rule 8: Cognitive Complexity:** The Agent MUST trigger a "Refactoring Alert" if nesting depth is > 3 or functions exceed 50 lines.
 - **Rule 9: Modularity (DRY):** Extract repetitive code into generic functions/classes.
-- **Rule 10: Context Refresh Protocol (Anti-Amnesia):** If the conversation history exceeds 10 messages or 5,000 tokens, the Agent **MUST** re-read `global_user_rules.md` and `task.md`. Upon completion, it must state: *"Governance verified and aligned (Rule 10)"*.
+- **Rule 10: Context Refresh Protocol (Anti-Amnesia):** If the conversation history exceeds 10 messages or 5,000 tokens, the Agent **MUST** re-read `global_user_rules.md` and `task/task.md`. Upon completion, it must state: *"Governance verified and aligned (Rule 10)"*.
 - **Rule 11: Conciseness Protocol (No-Meta-Chat):** Prohibited use of excessive courtesy, filler phrases (e.g., "I'm here to help", "I understand"), and redundant confirmations. Reports MUST be 100% technical and concise. **Mandatory:** Favor the use of **Mermaid diagrams** and **comparative tables** for architectural and technical communication.
 - **Rule 12: No-Placeholders Policy:** Prohibited use of `TODO`, `FIXME`, or placeholder code blocks in final implementations.
 
@@ -23,23 +23,23 @@ Syntax, Quality, and Communication Rules.
 - **Rule 17: Mandatory Certification:** Sprints/phases require Audit Workflow certification before closure. Agent MUST select and deploy context-appropriate audit tools.
 - **Rule 18: Standards & Secrets:** Mandatory use of **Native Standard Libraries** over 3rd-party dependencies unless technically justified. Mandatory use of `.env` for secrets. Guessing missing variables is prohibited; manual user input is mandatory.
 - **Rule 19: Hierarchical Sub-folders:** Root `.agents/task/` and `.agents/knowledge/` MUST follow a Phase/Module or Domain-based sub-folder strategy. Flat-file pollution in these directories is strictly forbidden to ensure scalability and token-saving during directory listings.
-- **Rule 20: Master Index:** Root `task.md` MUST remain a clean TOC pointing to the active sprint.
+- **Rule 20: Master Index:** Root `task/task.md` MUST remain a clean TOC pointing to the active sprint.
 
 ## 3. Governance & Directory Structure
 - **Rule 21: Persistent Metadata:** Global Framework Roadmaps and constitutional rules MUST be stored in `.agents/governance/constitution/`. Operational project roadmaps reside in the local task directory.
 - **Rule 22: Audit Exclusion:** The `.agents/governance/constitution/` directory is EXCLUDED from automated code audits.
 - **Rule 23: Project Topology:** Mandatory compliance with directory taxonomy defined in `constitution/project_mapping_and_context.md`. Prohibited usage of non-authorized paths for state persistence.
-- **Rule 24: Sprint & Subagent Nomenclature (Refined):** Mandatory 1:1 relationship between agent and sprint. Naming convention: **`00x-00y-agent-task.md`** (where `x` is the Sprint ID and `y` is the Sub-Task ID). This ensures tactical isolation and granular traceability.
+- **Rule 24: Sprint & Subagent Nomenclature (Refined):** Mandatory 1:1 relationship between agent and sprint. Naming convention: **`00x-00y-agent-task/task.md`** (where `x` is the Sprint ID and `y` is the Sub-Task ID). This ensures tactical isolation and granular traceability.
 - **Rule 25: Deliverable Persistence:** Mandatory mirroring of finalized architectural designs and strategic roadmaps to the primary versioning areas defined in the project topology.
 
 ## 4. Roadmap Maturity & Execution Control
 - **Rule 26: Triple Security Lock:** Mandatory execution block until: (1) Phase Roadmap is finalized/unlocked, (2) Discovery Audit is complete, and (3) Technical Workflow is human-authorized.
-- **Rule 27: Tech-Debt Tracking:** Mandatory tagging of workarounds/architectural deviations as `:tech-debt:` in `task.md`.
+- **Rule 27: Tech-Debt Tracking:** Mandatory tagging of workarounds/architectural deviations as `:tech-debt:` in `task/task.md`.
 - **Rule 28: Discovery Requirement:** Phase execution prohibited until all Milestones (M0, M1, etc.) and deliverables are fully defined in `.agents/task/roadmaps/`.
 - **Rule 29: Lock Override:** Roadmap safety lock transition to `READY_FOR_EXECUTION` requires comprehensive High-Integrity Audit and explicit user authorization.
 
 ## 5. Session Closing & Atomic Commit Protocol
 - **Rule 30: Atomic Close:** Mandatory atomic commit of all validated changes before session conclusion.
-- **Rule 31: Roadmap Liquidation & Atomic Close (Refined):** Follow complete cycle (Amnesia Extraction, Indexing, and Final Commit) as defined in the global closing workflow. **Mandatory:** At 100% milestone completion, the Agent MUST set roadmap status to `COMPLETED (100%)`, issue a final UID signature, and update the Master Index (`task.md`) before mirroring to `/docs/` (Rule 55).
+- **Rule 31: Roadmap Liquidation & Atomic Close (Refined):** Follow complete cycle (Amnesia Extraction, Indexing, and Final Commit) as defined in the global closing workflow. **Mandatory:** At 100% milestone completion, the Agent MUST set roadmap status to `COMPLETED (100%)`, issue a final UID signature, and update the Master Index (`task/task.md`) before mirroring to `/docs/` (Rule 55).
 - **Rule 32: Dual Synchronization:** Mandatory Parent/Submodule dual-sync if governance, roadmaps, or knowledge items are updated.
 - **Rule 33: Traceability:** Conventional Commits standard mandatory. Every commit message MUST include the Task or Sprint ID (Ref: #XXX).

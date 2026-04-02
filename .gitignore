@@ -2,7 +2,7 @@
 .DS_Store
 
 # Local Project-Specific Records (Ignored by Global Submodule)
-task.md
+task/task.md
 task/
 task/sprints/
 task/roadmaps/

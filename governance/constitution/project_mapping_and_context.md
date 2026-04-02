@@ -31,7 +31,7 @@ To prevent navigational drift and ensure multi-agent synchronization, all reposi
 
 ### 3.4: Internal Agent Geography (Matrix Tracking)
 All tactical and architectural metadata MUST reside in these ignored locations:
-- **Rule 49: Master Local Index:** Located in `.agents/task.md`.
+- **Rule 49: Master Local Index:** Located in `.agents/task/task.md`.
 - **Rule 50: Planning Repository:** Sprints and Roadmaps stored in `.agents/task/`.
 - **Rule 51: Infrastructure Registry:** Mandatory JSON manifest (`.agents/topology/infra_registry.json`) for automated subagent infra-discovery.
 - **Rule 52: Ephemeral Cache:** Mandatory `.agent_state/` for session AST and context traces.
