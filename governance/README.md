@@ -14,7 +14,7 @@
 <h3 align="center">⚖️ Universal-Agents Governance Constitution</h3>
 
 <p align="center">
-  Federated Long-Term Memory (LTM) and Architectural Rules (1-77) for Zero-Trust AI Execution.
+  Federated Long-Term Memory (LTM) and Architectural Rules (1-78) for Zero-Trust AI Execution.
 <br /><br />
 <a href="https://github.com/GstMirabal/.agents"><strong>Explore the docs »</strong></a>
 <br />
@@ -42,15 +42,15 @@
 
 ## About The Project
 
-This directory contains the **Permanent Thinking Rules** (LTM) governing the Universal-Agents framework. It operates under a **Federated Governance Model** (Rules 1-77) designed for Zero-Trust execution and high-integrity tactical deployment in any repository.
+This directory contains the **Permanent Thinking Rules** (LTM) governing the Universal-Agents framework. It operates under a **Federated Governance Model** (Rules 1-78) designed for Zero-Trust execution and high-integrity tactical deployment in any repository.
 
-### Federated Architecture (Rules 1-77)
+### Federated Architecture (Rules 1-78)
 
 | Section | Rules | Purpose | Roles Involved |
 | :--- | :--- | :--- | :--- |
-| **`global_user_rules.md`** | **1-33** | **Global Behavioral Standards**: Coding, naming, security, and token efficiency. | Agente Principal (Master) |
-| **`project_mapping_and_context.md`** | **34-56** | **Topological Boundaries**: Repository structure, Docker, binary paths, and environment shielding. | Scope Guardian |
-| **`subagents_architecture.md`** | **57-77** | **Matrix Operational Manual**: Hierarchical lifecycle, AI DevOps, Signature protocols, and Amnesia mechanisms. | Orchestrator & Matrix |
+| **`constitution/global_user_rules.md`** | **1-33** | **Global Behavioral Standards**: Coding, naming, security, and token efficiency. | Agente Principal (Master) |
+| **`constitution/project_mapping_and_context.md`** | **34-56** | **Topological Boundaries**: Repository structure, Docker, binary paths, and environment shielding. | Scope Guardian |
+| **`constitution/subagents_architecture.md`** | **57-78** | **Matrix Operational Manual**: Hierarchical lifecycle, AI DevOps, Signature protocols, and Amnesia mechanisms. | Orchestrator & Matrix |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
