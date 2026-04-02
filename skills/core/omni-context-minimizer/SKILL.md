@@ -19,7 +19,7 @@ This repository contains a Python script called `omni_minimizer.py` in the `scri
 
 **Step 2:** Run the minimizer passing that path as an argument (the Python script must be executed from the Skill's path in the submodule):
 ```bash
-python .agents/skills/omni-context-minimizer/scripts/omni_minimizer.py /path/to/heavy/file
+python .agents/skills/core/omni-context-minimizer/scripts/omni_minimizer.py /path/to/heavy/file
 ```
 
 **Step 3:** The console will return the skeleton. For example:
