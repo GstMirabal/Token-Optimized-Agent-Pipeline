@@ -1,23 +1,28 @@
-# ⚖️ Universal-Agents Governance (LTM Constitution)
+# ⚖️ Universal-Agents Governance Constitution (Rules 1-77)
 
-This directory contains the **Permanent Thinking Rules** (Long-Term Memory) of the Universal-Agents framework. These files define the behavioral and architectural boundaries that all AI agents MUST respect.
+This directory contains the **Permanent Thinking Rules** (LTM) governing the Universal-Agents framework. It operates under a **Federated Governance Model** (Rules 1-77) designed for Zero-Trust execution and high-integrity tactical deployment.
 
-## 📁 Core Governance Components
+## 📁 Federated Architecture (Rules 1-77)
 
-| Component | Purpose | Use Case |
-| :--- | :--- | :--- |
-| **`global_user_rules.md`** | **The Constitution**: Standards for coding, naming, security, and token efficiency. | Mandatory for EVERY session initialization. |
-| **`subagents_architecture.md`** | **The Operational Manual**: Defines the 6-Step Hierarchy (Mentor > Orchestrator > Auditor...). | Defines HOW subagents are deployed and rolled back. |
-| **`agents_roadmap.md`** | **The Strategy**: Step-by-step master roadmap for configuring any repository. | Used to track structural configuration phases. |
-| **`project_mapping_and_context.md`**| **The Topology**: Records the physical boundaries (Src-Layout, Docker, etc.). | Prevents agents from scanning the entire OS. |
+| Section | Rules | Purpose | Roles Involved |
+| :--- | :--- | :--- | :--- |
+| **`global_user_rules.md`** | **1-33** | **Global Behavioral Standards**: Coding, naming, security, and token efficiency. | Agente Principal (Master) |
+| **`project_mapping_and_context.md`** | **34-56** | **Topological Boundaries**: Repository structure, Docker, binary paths, and environment shielding. | Scope Guardian |
+| **`subagents_architecture.md`** | **57-77** | **Matrix Operational Manual**: Hierarchical lifecycle, AI DevOps, Signature protocols, and Amnesia mechanisms. | Orchestrator & Matrix |
 
-## 🛡️ Zero-Trust Design Policy
+## 🛡️ Role Jurisdictions & Safeguards
 
-*   **Immutable Metadata:** These files are Read-Only for standard tactical subagents. Only the **Constitutional Agent** has write permissions to modify global rules.
-*   **Audit Exclusion:** Governance files are markdown-based and excluded from automated code linters to prevent API waste.
+*   **Agente Principal (Master):** Constitutional authority. Responsible for Strategic Roadmap design & Lock 1 (Roadmap Lock).
+*   **Agente DevOps:** Mandatory Sprint Gateway. Responsible for **WIP Safety Freeze** (`git status`), Skill provisioning, and Infra-Certification.
+*   **Scope Guardian (Supervisor):** Tactical Boundary Guard. Prevents unauthorized file access, "Scope Creep", and PII leakage in tabular data.
+*   **UID Signature Protocol:** Mandatory universal signing (Rule 63) in `task.md`, implementation plans, and sprint markdown files for full auditability.
+*   **Visual SQL Brake:** Automation deactivation upon detection of database mutations, forcing human logical approval.
 
-## 🚀 How to use this directory
+## 🚀 Governance Activation & Maintenance
 
-When starting a new project or context window, the AI Orchestrator uses these files to "bootstrap" its reasoning. If a conflict arises between a specific user request and these rules, the framework defaults to the **Constitutional Supremacy** defined in `global_user_rules.md`.
+Upon initialization, all agents MUST execute the **Reading Protocol** (Rules 1, 34, 57). If a conflict arises between a user request and these rules, the framework defaults to the **Constitutional Supremacy** defined in the Federated Rules.
 
-Use the `/certification_audit` workflow to verify if a project adheres to these strategic standards.
+Any architectural evolution MUST be mediated by the **Governance Learner** (Rule 60) for human certification. After sprint completion, the **Amnesia Protocol** (Rule 74) extracts heuristic learning into the Master Knowledge base.
+
+---
+**Historical Reference:** For the closed design blueprints of Phases 1-5, refer to `docs/governance/agents_roadmap.md`.
