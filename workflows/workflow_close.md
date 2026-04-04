@@ -7,6 +7,9 @@ version: 1.0.0
 
 Master closure protocol to ensure intelligence distillation, state purge, and governance sovereignty.
 
+## 0. Governance & Constitutional Audit (Rule 1, 34, 57 - MANDATORY)
+Before any transactional settlement, the Agent MUST read **ALL files** in `governance/constitution/` to ensure the final mirroring and commit logic is 100% compliant with Federated Governance constraints (Rule 55).
+
 ## 1. Intelligence Extraction (Rule 74 & 75)
 The Agent MUST fulfill the knowledge distillation cycle before state destruction:
 - **Action:** Mandatory execution of **`workflow_knowledge_extractor.md`**.
