@@ -20,10 +20,10 @@ Strategic settlement of the current phase:
 - **Master Index Sync:** Reflect the completion in the root **`task/task.md`**.
 - **2.1 Strategic Freeze:** Set `Strategic Lock: LOCKED` in `task/task.md` to ensure the next session requires fresh authorization (Rule 29).
 
-## 3. High-Value Mirroring (Rule 55)
-Ensure historical traceability for human users:
-- **Synchronization:** Transfer finalized roadmaps, architecture plans, and audit reports to the project's root **`/docs/`** folder.
-- **Sanitization:** Ensure no ephemeral context or internal agent meta-data is mirrored.
+## 3. High-Value Mirroring (Rule 55 - EXCLUSIVE)
+Ensure historical traceability for human users by mirroring only high-level strategic assets:
+- **Synchronization:** Transfer only the **Master Index**, **Topology Map**, and **Finalized Strategic Roadmaps** to the root `/docs/` folder.
+- **Sanitization (MANDATORY):** Prohibited mirroring of the `sprints/` folder, individual implementation plans, or ephemeral agent-state context. These tactical artifacts MUST reside only in the `.agents/task/` internal repository.
 
 ## 4. Atomic Commitment & Git Sovereignty (Rules 32, 33 & 68)
 Finalize the session's transactional record:
