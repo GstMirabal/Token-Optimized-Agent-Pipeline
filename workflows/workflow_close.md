@@ -29,10 +29,14 @@ Ensure historical traceability for human users by mirroring only high-level stra
 - **Sanitization (MANDATORY):** Prohibited mirroring of the `sprints/` folder, individual implementation plans, or ephemeral agent-state context. These tactical artifacts MUST reside only in the `.agents/task/` internal repository.
 
 ## 4. Atomic Commitment & Git Sovereignty (Rules 32, 33 & 68)
-Finalize the session's transactional record:
-- **Verification:** Confirm the current branch is **`ai-sprint/taskID`**.
-- **Dual Synchronization (Rule 32 - MANDATORY):** Execute atomic commits in BOTH the submodule and the parent repository if governance, roadmaps, or knowledge items are updated.
-- **Commit Standard (Rule 33):** Execute the final commit using the conventional standard: `feat(id): session distillation and roadmap liquidation #XXX`.
+Finalize the session's transactional record by ensuring total synchronization:
+- **Verification:** Confirm the current branch is **`ai-sprint/taskID`** or the active strategic branch.
+- **Dual Synchronization (Rule 32 - TOTAL SYNC):** 
+    1. **Submodule Commit:** Execute `git add .` and `git commit` inside `.agents/` first.
+    2. **Parent Update:** Return to root and execute `git add .agents` to update the submodule pointer.
+    3. **Parent Mirroring:** Execute `git add docs/` to include mirrored strategic assets.
+    4. **Final Consolidation:** Execute the parent commit using the conventional standard: `feat(id): session distillation and roadmap liquidation #XXX`.
+- **Certification:** The Agent MUST report the final commit hashes for BOTH the submodule and the parent repository to certify closure.
 
 ## 5. Black Box Closure & Physical Amnesia (Rule 74)
 Termination of the session's physical presence:
