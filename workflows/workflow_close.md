@@ -25,10 +25,11 @@ Ensure historical traceability for human users:
 - **Synchronization:** Transfer finalized roadmaps, architecture plans, and audit reports to the project's root **`/docs/`** folder.
 - **Sanitization:** Ensure no ephemeral context or internal agent meta-data is mirrored.
 
-## 4. Atomic Commitment & Git Sovereignty (Rule 33 & 68)
+## 4. Atomic Commitment & Git Sovereignty (Rules 32, 33 & 68)
 Finalize the session's transactional record:
 - **Verification:** Confirm the current branch is **`ai-sprint/taskID`**.
-- **Atomic Commit:** Execute the final commit using the conventional standard: `feat(id): session distillation and roadmap liquidation #XXX`.
+- **Dual Synchronization (Rule 32 - MANDATORY):** Execute atomic commits in BOTH the submodule and the parent repository if governance, roadmaps, or knowledge items are updated.
+- **Commit Standard (Rule 33):** Execute the final commit using the conventional standard: `feat(id): session distillation and roadmap liquidation #XXX`.
 
 ## 5. Black Box Closure & Physical Amnesia (Rule 74)
 Termination of the session's physical presence:

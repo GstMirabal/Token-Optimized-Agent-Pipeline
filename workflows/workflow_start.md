@@ -7,7 +7,11 @@ version: 2.6.1
 
 Master entry protocol to ensure Matrix integrity before any tactical deployment.
 
-## 0. Black Box & Crash Detection (MANDATORY)
+## 0. Governance & Constitutional Consultation (Rule 1 - MANDATORY)
+Before any operational logic, the Agent MUST read **`governance/constitution/global_user_rules.md`** to ensure full alignment with the Matrix Constitution.
+- **Action:** Align all subsequent decisions with the standard nomenclature, documentation, and efficiency rules defined.
+
+## 0.1 Black Box & Crash Detection (MANDATORY)
 Before any interaction, the Agent MUST read **`.agents/.agent_state/session_metadata.json`**:
 - **Condition:** If `status == "IN_PROGRESS"` or `intelligence_certified != "PASSED"`, a session crash is detected.
 - **Action:** The Agent MUST ABORT normal initialization and trigger **`workflow_knowledge_extractor.md --forensic`** to recover or purge orphaned state.
