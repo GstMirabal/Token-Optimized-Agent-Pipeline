@@ -8,11 +8,12 @@ All detailed logs and plans are stored in the `sprints/` directory.
 ## 🏛️ CryptoBot Master Index & Task Sovereignty
 
 > [!IMPORTANT]
-> **Status**: PHASE 1.1 COMPLETED - AUDIT 100% PASSED  
+> **Status**: PHASE 2.7 COMPLETED - INGESTION RESILIENCE ACTIVE
 > **Strategic Lock**: LOCKED (Rule 29 Enforcement)
 
 - [x] **PHASE 0: SOVEREIGN ARCHITECTURE RE-ALIGNMENT** (Status: ✅ **LIQUIDATED**)
 - [x] **PHASE 1.1: SOVEREIGN HARDENING & SCAFFOLDING** (Status: ✅ **LIQUIDATED**)
+- [x] **PHASE 2: MARKET DATA INTELLIGENCE (INGESTION)** (Status: ✅ **LIQUIDATED**)
 
     - Target: Decentralize Documentation & Consolidate Sources of Truth.
     - [x] **Hito 0.1/0.2:** Purge root `/docs/` and consolidate wisdom.
@@ -25,6 +26,8 @@ All detailed logs and plans are stored in the `sprints/` directory.
 ## 📜 Sprint History
 | Sprint | Title | Status | Completion |
 | :--- | :--- | :--- | :--- |
+| `017` | **Ingestion Resilience (M2.7)** | ✅ | 2026-04-04 |
+| `016` | **Market Ingestion Hardening** | ✅ | 2026-04-04 |
 | `015` | **Deep Audit & Scaffolding (Rule 10)** | ✅ | 2026-04-03 |
 | `014` | **Tactical App Scaffolding (Rule 10)** | ✅ | 2026-04-03 |
 
@@ -47,8 +50,8 @@ All detailed logs and plans are stored in the `sprints/` directory.
 
 ---
 ---
-**Current Status**: ⚡ PHASE 1.1 LIQUIDATED. Ready for Phase 2 (Market Data).
-**Session ID**: a55385c5-0cfd-4218-b3a5-f4e19ac9e71f
+**Current Status**: ⚡ PHASE 2 LIQUIDATED. Ready for Phase 3 (Quant Engine).
+**Session ID**: 3b33bf5d-42a7-4800-827e-04fc6b26a523
 **Operational Role**: DevOps/Matrix (Current) -> Principal (Next)
 **DEPLOYMENT_READY**: PASSED (Rule 65 Compliance)
 
