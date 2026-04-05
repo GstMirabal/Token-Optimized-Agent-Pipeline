@@ -94,11 +94,11 @@
       "tags": ["js", "ts", "lint", "jsdoc"]
     },
     {
-      "name": "autoskills-bridge",
-      "path": "core/autoskills-bridge",
-      "description": "Rule 70 Gatekeeper: Bridge for dynamic tool discovery and on-the-fly arsenal orchestration.",
+      "name": "autoskills",
+      "path": "3rd/autoskills",
+      "description": "Rule 70 Mandatory Discovery: Local arsenal discovery and dynamic tool orchestration.",
       "category": "Infrastructure",
-      "tags": ["discovery", "autoskills", "automation", "npx"]
+      "tags": ["discovery", "autoskills", "automation", "local"]
     }
 ,
     {

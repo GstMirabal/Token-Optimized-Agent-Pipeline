@@ -127,10 +127,10 @@ The framework supports automated workflows via standardized Markdown protocols. 
 
 | Command | Purpose | Location |
 | :--- | :--- | :--- |
-| **`/workflow_knowledge_extractor`** | **Post-Sprint Purgatory**: Extracts LTM Lessons into Knowledge Items with Semantic Indexing. | `workflows/workflow_knowledge_extractor.md` |
-| **`/workflow_matrix_orchestration`** | **Universal Orchestration**: Governs Identity, Scaffolding, and Execution via Triple Lock. | `workflows/workflow_matrix_orchestration.md` |
+| **`start`** | **Session Gateway**: Initial health check, UID validation, and environment provisioning. | `workflows/workflow_start.md` |
+| **`matrix`** | **Universal Orchestration**: Governs Identity, Scaffolding, and Execution via Triple Lock. | `workflows/workflow_matrix_orchestration.md` |
+| **`close`** | **Atomic Session Close**: Destroys context, set Strategic Lock to LOCKED, and triggers amnesia. | `workflows/workflow_close.md` |
 | **`/certification_audit`** | **Global Audit**: Agnostic, incremental certification of implemented logic. | `workflows/certification_audit.md` |
-| **`/workflow_close`** | **Atomic Session Close**: Destroys context and sets Strategic Lock to LOCKED. | `workflows/workflow_close.md` |
 
 > [!TIP]
 > **Submodule Isolation Policy:** All task tracking (`task/task.md`), sprint logs (`sprints/`), and local roadmaps (`roadmaps/`) are strictly ignored by Git. You can manage your project-specific tasks inside the `.agents/` folder without polluting the global framework repository.

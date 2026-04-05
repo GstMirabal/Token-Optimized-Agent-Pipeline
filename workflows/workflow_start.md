@@ -1,9 +1,9 @@
 ---
-description: "Session-Start Gatekeeper and Environment Health Protocol (Hardened)"
-version: 2.6.1
+description: "Session-Start Protocol (Keyword: start)"
+version: 2.6.2
 ---
 
-# 🛡️ Workflow: Session Start and Gatekeeper (MANDATORY)
+# 🛡️ Workflow: Start (Session Gateway)
 
 Master entry protocol to ensure Matrix integrity before any tactical deployment.
 

@@ -1,9 +1,9 @@
 ---
-description: "Master Session Close and Transactional Settlement Protocol (V 1.0.0)"
-version: 1.0.0
+description: "Session-Close Protocol (Keyword: close)"
+version: 1.1.0
 ---
 
-# 🛡️ Workflow: Session Close and Transactional Settlement (MANDATORY)
+# 🛡️ Workflow: Close (Atomic Liquidation)
 
 Master closure protocol to ensure intelligence distillation, state purge, and governance sovereignty.
 
