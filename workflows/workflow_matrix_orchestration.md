@@ -16,11 +16,13 @@ Master operational protocol ensuring total identity segregation and explicit aut
 ## 2. Strategic Unlock & Sprint Design (Orchestrator)
 *   **Lock 1 (Strategic Unlock):** Once the roadmap is aligned, request: *"Do you authorize the unlocking of Phase [X] for tactical design?"*
 *   **Sprint 1:1 Architecture:** Create a dedicated sprint file for each agent/task following **Rule 24 (00x-00y-agent.md)**.
-*   **Skill Search & Representation (Rule 70 - Lock 2):** 
-    - If tool not in **`manifest_skills.json`**, escalate to **locally installed `autoskills`** (`skills/3rd/autoskills/`). Final backup: **`skill.sh`**.
-    - Use of ephemeral `npx` bridges is strictly **PROHIBITED**.
-    - Present search options using **Comparative Tables or Mermaid Diagrams (Rule 11)** with technical justifications.
-    - **Mermaid Representation:** The selected tool MUST be explicitly represented in the Implementation Plan architectural diagrams.
+*   **Sprint Artillery (Rules 58/70/81 - Lock 2):** Before generating the implementation plan, the Orchestrator **MUST** present the technical arsenal:
+    - **Internal Skills:** List skills from `manifest_skills.json` that will be used and explain WHY.
+    - **External Skills:** If tool not in the manifest, escalate to **locally installed `autoskills`** (`skills/3rd/autoskills/`). Final backup: **`skill.sh`**.
+    - **MCP/APIs:** Declare remote context dependencies.
+    - **Sovereignty Guard:** Use of ephemeral `npx` bridges is strictly **PROHIBITED**.
+    - **Mermaid Representation:** The selected tool MUST be explicitly represented in the Implementation Plan architectural diagrams (Rule 70).
+    - **Debate -> Select -> Explicit Authorize.**
     - **Debate -> Select -> Explicit Authorize.**
 *   **Implementation Plan:** Present `xxx-implementation_plan.md` for signature: **"PLAN_AUTHORIZED"**.
 
