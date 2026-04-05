@@ -18,6 +18,12 @@
       "summary": "Domain Memory: CryptoBot Master Mapping (V3). Architectural scaffolding and logic status of the 11 Django apps.",
       "path": "knowledge/crypto/domain_mapping_v3.md",
       "tags": ["architecture", "domain", "inventory"]
+    },
+    {
+      "id": "KI-016",
+      "summary": "Sovereign Skill Infrastructure: Hardening of internal discovery protocols and local tool installation (autoskills).",
+      "path": "knowledge/devops/ki_016_sovereign_skill_infra.md",
+      "tags": ["governance", "infrastructure", "hardened"]
     }
   ]
 }

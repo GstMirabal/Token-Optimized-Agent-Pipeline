@@ -1,24 +1,26 @@
 ---
-description: "Universal Identity & Matrix Orchestration Protocol (Hardened)"
-version: 1.0.0
+description: "Universal Matrix Orchestration Protocol (Keyword: matrix)"
+version: 1.1.0
 ---
 
-# 🛡️ Workflow: Matrix Orchestration & Dual-Lock Execution
+# 🛡️ Workflow: Matrix (Universal Orchestration)
 
 Master operational protocol ensuring total identity segregation and explicit authorization locks.
 
 ## 1. Identity & Memory Audit (Mentor Mode)
 *   **Identity & Memory Audit (Rule 57):** Call the **Agente Principal (Mentor)**. Terminal execution is **STRICTLY PROHIBITED** during this phase.
-*   **Memory Seal:** The Agent **MUST** re-read `.agents/governance/constitution/` and `task/task.md` (Rule 10).
+*   **Memory Seal (Rule 57):** **ALL** subagents (Principal, Orchestrator, DevOps, Matrix) **MUST** perform the full Reading Protocol of `.agents/governance/constitution/` and `task/task.md` upon role-switch to ensure total constitutional alignment (Rule 10).
 *   **Discovery Block:** Analyze the current strategic roadmap phase.
 *   **Gap Analysis (Isolated Question):** Before progressing, ask: *"Is there any additional technical detail or objective that should be integrated into the Roadmap?"*
 
 ## 2. Strategic Unlock & Sprint Design (Orchestrator)
 *   **Lock 1 (Strategic Unlock):** Once the roadmap is aligned, request: *"Do you authorize the unlocking of Phase [X] for tactical design?"*
 *   **Sprint 1:1 Architecture:** Create a dedicated sprint file for each agent/task following **Rule 24 (00x-00y-agent.md)**.
-*   **No-Automation Arsenal (Lock 2):** 
-    - If tool not in **`manifest_skills.json`**, the agent **MUST** request permission to search.
+*   **Skill Search & Representation (Rule 70 - Lock 2):** 
+    - If tool not in **`manifest_skills.json`**, escalate to **locally installed `autoskills`** (`skills/3rd/autoskills/`). Final backup: **`skill.sh`**.
+    - Use of ephemeral `npx` bridges is strictly **PROHIBITED**.
     - Present search options using **Comparative Tables or Mermaid Diagrams (Rule 11)** with technical justifications.
+    - **Mermaid Representation:** The selected tool MUST be explicitly represented in the Implementation Plan architectural diagrams.
     - **Debate -> Select -> Explicit Authorize.**
 *   **Implementation Plan:** Present `xxx-implementation_plan.md` for signature: **"PLAN_AUTHORIZED"**.
 
