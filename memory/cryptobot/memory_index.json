@@ -1,0 +1,15 @@
+{
+  "version": "1.3.0",
+  "knowledge_items": [
+    {
+      "id": "KI-015",
+      "summary": "Domain Memory: CryptoBot Master Mapping (V3). Architectural scaffolding and logic status of the 11 Django apps.",
+      "path": "memory/cryptobot/domain_mapping_v3.md",
+      "tags": [
+        "architecture",
+        "domain",
+        "inventory"
+      ]
+    }
+  ]
+}

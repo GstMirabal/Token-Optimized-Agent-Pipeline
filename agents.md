@@ -1,0 +1,91 @@
+# .agents Global Context & Governance Rules
+
+This is the constitutional matrix of Universal-Agents (`.agents`).
+It dictates in an absolute and transversal manner the behavior of subagents, code quality, and topological design.
+
+## 1. Code, Dialect, and Style
+
+### Nomenclature and Linters
+- **Python**: Validate against PEP 8: `snake_case` for variables/functions, `PascalCase` for classes.
+- **JS/TS**: Validate strict use of `camelCase`.
+- **Tools**: Execute `ruff check .` (Python) or `npm run lint` (JS/TS). Reject if the *exit code* > 0.
+
+### Typing and Documentation
+- **Types**: Demand *type hints* on every argument and return value of added or manipulated functions.
+- **Documentation**: Document using *Google Style* (`Args:`, `Returns:`) in Python and *JSDoc* (`@param`, `@returns`) in JS/TS.
+- **Ephemeral Markers**: Check regex for `TODO` or `FIXME`. Reject final implementations if matches are found.
+
+### Complexity and Structure
+- **Cognitive Limits**: Reject logical blocks with > 3 levels of nested indentation or > 50 total lines per function.
+- **Paths**: Reject absolute disk paths; demand the use of relative paths or dynamic libraries.
+- **Error Trapping**: Prohibit `except Exception:` block followed by `pass`. Demand explicit logging of the caught exception.
+
+### Language, Communication, and Restrictions
+- **Language Isolation**: Prohibit the use of Spanish in variables, code logic, terminal commands, or commit messages. Its rendering is strictly blocked and confined exclusively to the textual chat in the prompt.
+- **Technical Clarity**: Avoid redundant greetings. Prioritize Markdown Tables formatting for mapping data and logical variables. Restrict invocations of complex graphics (Mermaid) or flows (ASCII Tree) strictly to what is indicated and enabled by the `.md` regulations of each subagent.
+- **Negative Restrictions**: Define explicitly and solely what is prohibited to the LLM. Avoid requesting vague positive actions.
+
+## 2. Autonomy, Efficiency, and Execution
+
+### Triple Lock Security
+Total blockade of local operations and deployments until simultaneously validating:
+1. Roadmap in `ACTIVE` state.
+2. Logging of the `DEPLOYMENT_READY: PASSED` token.
+3. Explicit user authorization in the prompt.
+
+### Context Optimization
+- **Limited Reading**: Files evaluated with `wc -l` > 200 lines must not be dumped entirely. Demand reading using AST, `head`, `tail`, or `grep`.
+- **Anti-Amnesia Rule (Rule 10)**: After 10 interactions or surpassing 5,000 processed tokens, execute mandatory re-reading of this base document and the central index.
+
+### WIP Safety Freeze
+- **Pre-Shielding**: Abort the editing process early if executing `git status --porcelain` returns unresolved local differences.
+- **Destructive Flags**: Condition and reject massive modifications or general deletions unless textual verification of the `// turbo` token is provided in the context request.
+
+### Agent Isolation
+- **Jurisdictional Lock**: Limit and strictly cap structural editing to `1` single physical file per instantiated subagent task.
+- **No Interference**: Avoid logical access in parallel, aborting the operation if the index (`task.md`) shows the file listed by another subtask in a progress state.
+
+## 3. Architecture and Topology of the Project
+
+### The `.agents` Matrix
+- **Federation**: Check `git remote`; isolate `.agents` by managing it purely as a *Git Submodule*.
+- **Strict Rule**: Prohibited to alter the internal architecture of this governance submodule from tactical injections of the parent project.
+
+### Isolated Environment
+- **No Global Variables**: Cap or reject global injections in the main OS binary.
+- **Dependency Containment**: Force explicit prefix syntax by invoking commands through an isolated local development environment.
+
+### Infrastructure
+- **Service Management**: Require that external local databases or services run via `docker-compose.yml`, forcing the mapping of the engine to the hidden folder `./.docker-db-data`.
+- **QA Framework**: Overwrite the native URLs of local testing to instantiate in RAM, purifying between tests using `sqlite:///:memory:`. Reject DB connection.
+
+## 4. Memory Management and Feedback Loop
+
+### Amnesia Protocol
+- **Ephemeral Memory**: Write a `.md` log strictly in the project's *namespace* subdirectory (e.g., `.agents/memory/core/`) documenting bug resolutions, prior to the end-of-session wipe.
+- **Pre-Wipe**: Physically check the existence of the referenced `.md` file in said namespace prior to altering metadata to `CLOSED_SUCCESSFULLY`.
+
+### Feedback Loop (Jurisprudence vs Constitution)
+- **Constitutional Escalation**: Demand the execution of the *Governance Learner* to uniquely audit the *namespace* of the Sprint (e.g., `/memory/cryptobot/`). Propose formal updates to `agents.md` if systemic patterns emerge.
+- **Definitive Amnesia**: Permanently delete the temporary logs of the audited *namespace* at the exact moment its unified rule is successfully inserted into `agents.md`.
+
+### Memory Index Routing
+- **INDEX Files**: Parse exclusively and dynamically the `memory_index.json` descriptor nested locally to the active *namespace*. Reject listing directories or mass reading raw `.md` content.
+- **Single Line Breakdown**: Reject JSON insertions in the descriptors that break the dictatorial limit of one (1) literal sentence without a carriage return (`\n`).
+
+## 5. Central Base (Project Master Index)
+
+### Hook Protocol (Initialization)
+- **Mandatory Topology**: Reject initialization in a project if the standardized `/docs/` tree does not exist. The Principal Agent will throw a _Halt_ and summon the *Matrix Mapper* to instantiate its dictatorial `[layer]/[app]/` hierarchy.
+- **Sovereignty and Overwrite**: If a host project presents dissident documentary tracking nomenclatures, the *Matrix Mapper* must exhaustively migrate and homologate the existing information towards the new standard without omissions before eradicating the legacy formats.
+
+### Zero Coordinate and Traceability
+- **State Focus (The Anchor)**: Every subagent will unconditionally extract its scope by exclusively reading the `/docs/active_state.json` file.
+- **Historical Log**: Reject pushes whose commit messages lack the hashtag suffix `#02x` (Sprint ID obtained from the respective active `.json`), rigidly applying *Conventional Commits*.
+
+## 6. Chain of Command
+
+- **Principal Agent**: Strategic authority. Sole entity empowered to sanction the master **Roadmap**.
+- **Orchestrator**: Tactical authority. Translates the approved Roadmap into a detailed **Implementation Plan** (which defines and constitutes the active **Sprint**).
+- **Agent Orchestrator**: Meta-Governance authority. Responsible for **Staffing** the Implementation Plan by designating existing agents or **creating** new subagent profiles as required.
+- **Workflow Lock**: No secondary or tertiary agent may initialize or execute if the Principal Agent has not sanctioned the Roadmap, and if the Orchestrator has not finalized the Implementation Plan. The Agent Orchestrator must certify the "Agent Ecosystem" readiness before execution begins.
