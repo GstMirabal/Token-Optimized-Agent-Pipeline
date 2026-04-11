@@ -69,7 +69,8 @@
       "ephemeral_wipe_execution"
     ],
     "primary_tools": [
-      "governance-sentinel"
+      "governance-sentinel",
+      "matrix-monitor"
     ]
   },
   "agent_orchestrator": {
@@ -84,12 +85,48 @@
       "behavior_injection",
       "overlapping_check",
       "registry_sentinel",
-      "prompt_engineering",
-      "skill_architect",
-      "tool_benchmarking"
+      "prompt_engineering"
     ],
     "primary_tools": [
-      "autoskills"
+      "agent-factory"
+    ]
+  },
+  "principal_agent": {
+    "node_id": "principal_agent_01",
+    "role": "Strategic Authority (Vision & Logic Guardian)",
+    "jurisdiction": [
+      "agents.md",
+      "/docs/roadmaps/",
+      "/docs/active_state.json"
+    ],
+    "capabilities": [
+      "roadmap_sanctioning",
+      "strategic_authority",
+      "constitutional_interpretation",
+      "crisis_resolution"
+    ],
+    "primary_tools": [
+      "governance-sentinel",
+      "matrix-monitor"
+    ]
+  },
+  "skill_architect": {
+    "node_id": "skill_arch_01",
+    "role": "Technical Researcher & Tool Synthesizer",
+    "jurisdiction": [
+      ".agents/skills/"
+    ],
+    "capabilities": [
+      "technical_research",
+      "tool_benchmarking",
+      "skill_synthesis",
+      "directory_governance",
+      "armory_management"
+    ],
+    "primary_tools": [
+      "autoskills",
+      "skill-creator",
+      "mass-standardizer"
     ]
   }
 }

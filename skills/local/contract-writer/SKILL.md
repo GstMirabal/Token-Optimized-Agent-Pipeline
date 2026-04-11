@@ -4,6 +4,7 @@
 - **Category:** Documentation / Reverse Engineering
 - **Origin:** Custom synthesis for AI-driven API contract generation.
 - **Status:** `ACTIVE_LOCAL`
+- **Sovereignty:** `local` (Project-Specific)
 
 ## Technical Logic
 This skill provides the procedural protocol for **Documentary Reverse Engineering**. It enables a subagent to extract structured technical agreements (I/O, Payloads, Auth) directly from operated code files (`.py`, `.ts`, `.go`, etc.) without human intervention.

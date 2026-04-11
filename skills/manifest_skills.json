@@ -99,14 +99,55 @@
       "description": "Rule 70 Mandatory Discovery: Local arsenal discovery and dynamic tool orchestration.",
       "category": "Infrastructure",
       "tags": ["discovery", "autoskills", "automation", "local"]
-    }
-,
+    },
+    {
+      "name": "contract-writer",
+      "path": "local/contract-writer",
+      "description": "Custom synthesis for AI-driven API contract generation and documentary reverse engineering.",
+      "category": "Documentation",
+      "tags": ["api", "contract", "docs"]
+    },
+    {
+      "name": "governance-sentinel",
+      "path": "core/governance-sentinel",
+      "description": "Monitors rule compliance and ensures constitutional alignment across the matrix.",
+      "category": "Governance",
+      "tags": ["audit", "compliance", "constitution"]
+    },
+    {
+      "name": "sprint-architect",
+      "path": "core/sprint-architect",
+      "description": "Translates high-level roadmaps into tactical sprint definitions and task structures.",
+      "category": "Planning",
+      "tags": ["sprint", "planning", "tasks"]
+    },
+    {
+      "name": "topology-scaffolder",
+      "path": "core/topology-scaffolder",
+      "description": "Enforces standardized project structures and instantiates initial layer hierarchies.",
+      "category": "Architecture",
+      "tags": ["topology", "scaffolding", "structure"]
+    },
     {
       "name": "skills-samples",
       "path": "3rd/skills-samples",
       "description": "Example reference skills for learning framework-agnostic modularity.",
       "category": "Documentation",
       "tags": ["examples", "core", "guidance"]
+    },
+    {
+      "name": "mass-standardizer",
+      "path": "core/mass-standardizer",
+      "description": "Automated engine for the batch normalization of the matrix arsenal following the skill-creator standard.",
+      "category": "Infrastructure",
+      "tags": ["automation", "normalization", "cleaning"]
+    },
+    {
+      "name": "matrix-monitor",
+      "path": "core/matrix-monitor",
+      "description": "Consolidated tool for monitoring matrix health, task progress, and legacy code audit.",
+      "category": "Governance",
+      "tags": ["monitoring", "audit", "coverage", "legacy"]
     }
   ]
 }

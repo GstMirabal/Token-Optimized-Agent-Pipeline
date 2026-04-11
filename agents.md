@@ -55,9 +55,16 @@ Total blockade of local operations and deployments until simultaneously validati
 - **No Global Variables**: Cap or reject global injections in the main OS binary.
 - **Dependency Containment**: Force explicit prefix syntax by invoking commands through an isolated local development environment.
 
-### Infrastructure
-- **Service Management**: Require that external local databases or services run via `docker-compose.yml`, forcing the mapping of the engine to the hidden folder `./.docker-db-data`.
-- **QA Framework**: Overwrite the native URLs of local testing to instantiate in RAM, purifying between tests using `sqlite:///:memory:`. Reject DB connection.
+### Infrastructure (Rule 71)
+- **Arsenal Sovereignty & Trinity Standard**: Every skill registered in the matrix MUST strictly adhere to the Trinity Standard:
+    1. **`README.md`**: Institutional overview.
+    2. **`SKILL.md`**: Procedural logic and YAML frontmatter.
+    3. **`/scripts/`**: Executable logic with `__init__.py`.
+- **Topological Order**: Skills must be isolated in `core/`, `local/`, or `3rd/`. Zero-tolerance for root-level contamination.
+- **Enforcement**: The `mass-standardizer` tool is the official auditor for this standard.
+
+### QA Framework
+- Overwrite the native URLs of local testing to instantiate in RAM, purifying between tests using `sqlite:///:memory:`. Reject DB connection.
 
 ## 4. Memory Management and Feedback Loop
 
@@ -66,7 +73,7 @@ Total blockade of local operations and deployments until simultaneously validati
 - **Pre-Wipe**: Physically check the existence of the referenced `.md` file in said namespace prior to altering metadata to `CLOSED_SUCCESSFULLY`.
 
 ### Feedback Loop (Jurisprudence vs Constitution)
-- **Constitutional Escalation**: Demand the execution of the *Governance Learner* to uniquely audit the *namespace* of the Sprint (e.g., `/memory/cryptobot/`). Propose formal updates to `agents.md` if systemic patterns emerge.
+- **Constitutional Escalation**: Demand the execution of the [Governance Learner](agents/governance_learner.md) to uniquely audit the *namespace* of the Sprint (e.g., `/memory/cryptobot/`). Propose formal updates to `agents.md` if systemic patterns emerge.
 - **Definitive Amnesia**: Permanently delete the temporary logs of the audited *namespace* at the exact moment its unified rule is successfully inserted into `agents.md`.
 
 ### Memory Index Routing
@@ -76,16 +83,22 @@ Total blockade of local operations and deployments until simultaneously validati
 ## 5. Central Base (Project Master Index)
 
 ### Hook Protocol (Initialization)
-- **Mandatory Topology**: Reject initialization in a project if the standardized `/docs/` tree does not exist. The Principal Agent will throw a _Halt_ and summon the *Matrix Mapper* to instantiate its dictatorial `[layer]/[app]/` hierarchy.
-- **Sovereignty and Overwrite**: If a host project presents dissident documentary tracking nomenclatures, the *Matrix Mapper* must exhaustively migrate and homologate the existing information towards the new standard without omissions before eradicating the legacy formats.
+- **Mandatory Topology**: Reject initialization in a project if the standardized `/docs/` tree does not exist. The [Principal Agent](agents/principal_agent.md) will throw a _Halt_ and summon the [Matrix Mapper](agents/matrix_mapper.md) to instantiate its dictatorial `[layer]/[app]/` hierarchy.
+- **Sovereignty and Overwrite**: If a host project presents dissident documentary tracking nomenclatures, the [Matrix Mapper](agents/matrix_mapper.md) must exhaustively migrate and homologate the existing information towards the new standard without omissions before eradicating the legacy formats.
 
-### Zero Coordinate and Traceability
+### Nucleus Guard (Rule 81)
+- **Nucleus Neutrality**: Automatic structural scaffolding and Hook Protocol procedures are strictly prohibited if the current workspace is the `.agents` Matrix core.
+- **Isolation Constraint**: Agents must verify they are not in the governance nucleus before attempting to instantiate a `/docs/` tree in the parent directory.
+
+### Zero Coordinate and Traceability (Rule 84)
 - **State Focus (The Anchor)**: Every subagent will unconditionally extract its scope by exclusively reading the `/docs/active_state.json` file.
-- **Historical Log**: Reject pushes whose commit messages lack the hashtag suffix `#02x` (Sprint ID obtained from the respective active `.json`), rigidly applying *Conventional Commits*.
+- **Rule 84 (State Homologation)**: The creation of any state-tracking file, directory, or telemetry log outside the constitutional `/docs/active_state.json` anchor is strictly PROHIBITED.
+- **Historical Log**: Reject pushes whose commit messages lack the hashtag suffix `#02x` (Sprint ID obtained from the respective active `.json`), rigidly applying *Conventional Commits*. All changes in this submodule MUST be indexed to the active Sprint.
 
 ## 6. Chain of Command
 
-- **Principal Agent**: Strategic authority. Sole entity empowered to sanction the master **Roadmap**.
-- **Orchestrator**: Tactical authority. Translates the approved Roadmap into a detailed **Implementation Plan** (which defines and constitutes the active **Sprint**).
-- **Agent Orchestrator**: Meta-Governance authority. Responsible for **Staffing** the Implementation Plan by designating existing agents or **creating** new subagent profiles as required.
-- **Workflow Lock**: No secondary or tertiary agent may initialize or execute if the Principal Agent has not sanctioned the Roadmap, and if the Orchestrator has not finalized the Implementation Plan. The Agent Orchestrator must certify the "Agent Ecosystem" readiness before execution begins.
+- **[Principal Agent](agents/principal_agent.md)**: Strategic authority. Sole entity empowered to sanction the master **Roadmap**.
+- **[Orchestrator](agents/orchestrator.md)**: Tactical authority. Translates the approved Roadmap into a detailed **Implementation Plan** (which defines and constitutes the active **Sprint**).
+- **[Agent Orchestrator](agents/agent_orchestrator.md)**: Meta-Governance authority. Responsible for **Staffing** the Implementation Plan by designating existing agents or **creating** new subagent profiles as required.
+- **[Skill Architect](agents/skill_architect.md)**: Technical researcher and tool synthesizer. Responsible for the **Triangle of Sovereignty** (core/local/3rd) and tool benchmarking.
+- **Workflow Lock**: No secondary or tertiary agent may initialize or execute if the [Principal Agent](agents/principal_agent.md) has not sanctioned the Roadmap, and if the [Orchestrator](agents/orchestrator.md) has not finalized the Implementation Plan. The [Agent Orchestrator](agents/agent_orchestrator.md) must certify the "Agent Ecosystem" readiness before execution begins.
