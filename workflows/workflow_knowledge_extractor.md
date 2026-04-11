@@ -10,7 +10,7 @@ Master protocol for heuristic extraction, Matrix memory update, and ephemeral st
 ## 1. Phase 1: Brain Drain & Forensic Audit
 Retrospectively audit the session logs to identify high-value intelligence:
 - **Normal Close:** Scan the current session's terminal outputs and implementation logs.
-- **Forensic Mode:** If orphaned `.agent_state/` folders are found at session-start, the agent MUST perform an emergency extraction scan of the remaining assets.
+- **Forensic Mode:** If orphaned `docs/sprints/` folders are found at session-start, the agent MUST perform an emergency extraction scan of the remaining assets.
 - **Targets:** Exotic workarounds (e.g., environment-specific library hangs), non-obvious logic bug-fixes, and strategic orchestration heuristics.
 
 ## 2. Phase 2: Knowledge Hardening & Redundancy Filter (Rule 74 Pt 4)

@@ -12,7 +12,7 @@ Before any operational logic, the Agent MUST read **ALL files** in `governance/c
 - **Action:** Perform the Federated Reading Protocol and align all subsequent decisions with the standard nomenclature, documentation, and efficiency rules defined.
 
 ## 0.1 Black Box & Crash Detection (MANDATORY)
-Before any interaction, the Agent MUST read **`.agents/.agent_state/session_metadata.json`**:
+Before any interaction, the Agent MUST read **`docs/active_state.json`**:
 - **Condition:** If `status == "IN_PROGRESS"` or `intelligence_certified != "PASSED"`, a session crash is detected.
 - **Action:** The Agent MUST ABORT normal initialization and trigger **`workflow_knowledge_extractor.md --forensic`** to recover or purge orphaned state.
 - **Lock:** No new session is permitted until the metadata reports `status: "CLOSED_SUCCESSFULLY"`.
@@ -64,8 +64,8 @@ Following successful DevOps certification:
 - **Tracer Masking (PII Shielding):** Configure execution parameters to use **`--tb=short`** by default.
 
 ## 9. Amnesia Integrity & KI-Preloading (Rules 74-75)
-- **Purge Check (Matrix Hygiene):** Inspect `.agent_state/session_{UID}/`. Destroy orphaned or unpurged session folders from previous runs (Rule 74).
-- **Knowledge Pre-ingestion:** Perform semantic consultation of **`ki_index.json`** based on Sprint ID and task keywords before the tactical phase (Rule 75).
+- **Purge Check (Matrix Hygiene):** Inspect `docs/sprints/` for orphaned session data. Destroy unpurged session folders from previous runs (Rule 74).
+- **Knowledge Pre-ingestion:** Perform semantic consultation of **`knowledge/ki_index.json`** based on Sprint ID and task keywords before the tactical phase (Rule 75).
 
 ## 10. Immunity Seal and Source of Truth (Rule 35-36)
 The Agent MUST recognize this `.agents/` Matrix as the **Single Source of Truth** for governance and operational procedures:

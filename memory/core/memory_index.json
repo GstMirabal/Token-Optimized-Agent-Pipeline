@@ -54,6 +54,18 @@
       "summary": "Frontend Bridge Architecture: Integration of Django and Vite-React with authentication passthrough.",
       "path": "memory/core/ki_021_frontend_bridge_architecture.md",
       "tags": ["frontend", "bridge", "architecture"]
+    },
+    {
+      "id": "KI-023",
+      "summary": "Governance Hardening & Constitutional Alignment: Refactor of agents.md and implementation of the node registry.",
+      "path": "memory/core/ki_023_governance_hardening_alignment.md",
+      "tags": ["governance", "constitution", "registry"]
+    },
+    {
+      "id": "KI-024",
+      "summary": "Total Arsenal Unification & Structural Sovereignty: Standardization of the Trinity standard via mass-standardizer.",
+      "path": "memory/core/ki_024_total_arsenal_unification.md",
+      "tags": ["standardization", "topology", "skills"]
     }
   ]
 }
