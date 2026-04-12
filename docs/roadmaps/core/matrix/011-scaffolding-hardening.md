@@ -17,7 +17,7 @@ Unify all operational procedures (Initialization, Alignment, and Coding) into a 
 - [x] **Task 2: Heuristic Harvest** - Preserve key initialization commands (git, npx) into a technical scratchpad for the new protocol.
 
 ## 🏁 Phase 2: Matrix Protocol Design (The Universal Workflow)
-- [x] **Task 3: Creation of `workflow_matrix_orchestration.md`** - A role-based manual integrating:
+- [x] **Task 3: Creation of `matrix_workflow.md`** - A role-based manual integrating:
   - **Identity Switching Gate:** Mandatory declaration of active role (`Principal`, `Orchestrator`, `DevOps`, `Matrix`).
   - **Scaffolding-as-a-Service:** Project birth as a tactical DevOps task.
   - **Triple Lock Injection:** Mandatory manual authorization tokens before any `git` or terminal execution.

@@ -1,6 +1,6 @@
 ---
 description: "Session-Start Protocol (Keyword: start)"
-version: 3.3.1
+version: 3.4.0
 ---
 
 # 🛡️ Workflow: Start (Inicio)
@@ -12,13 +12,20 @@ Before any operational logic, the Agent **MUST** read the **Constitution of Univ
 - **Action:** Perform the Federated Reading Protocol focusing on the Matrix Operating Manual (`Section 3: Architecture and Topology of the Project`, `Section 6: Chain of Command`).
 - **Halt Condition:** If, upon assimilating `agents.md`, the Agent determines that constitutional dependencies cannot be validated, the gateway remains **LOCKED**.
 
+## 0.3 Constitutional Symlink (Submodule Sovereignty)
+When operating as a Git submodule inside a parent project:
+- **Requirement:** The project root MUST have a visible reference to the Matrix Constitution.
+- **Action:** If the Agent detects it is in a subdirectory (e.g., `.agents/`) and `../AGENTS.md` does not exist:
+    - **Execution:** Create a relative symlink: `ln -s .agents/AGENTS.md AGENTS.md` in the parent root.
+    - **Certification:** Log the action: "GOVERNANCE: Constitutional symlink instantiated at project root."
+
 ## 0.1 Zero Coordinate and Collision Detection
 Before any interaction, the Agent **MUST** read the anchor point **`docs/active_state.json`**:
 - **Extraction:** Unconditionally extract scope, App, Layer, and Sprint ID (#02x).
 - **Nucleus Guard**: Initialization is prohibited if the workspace is the `.agents` nucleus.
 - **Task 0.1.1: Nuclear Recovery:** If `docs/active_state.json` is missing or corrupted, search for **`.agent_state/mirror.json`**.
     - **Action**: If the mirror exists, restore the state to `docs/active_state.json` and issue a **Manual Correction Alert** stating "RECOVERY: State restored from Mirror".
-- **Action:** If a session collision is detected (`status == "IN_PROGRESS"`), trigger **`workflow_knowledge_extractor.md --forensic`** and abort.
+- **Action:** If a session collision is detected (`status == "IN_PROGRESS"`), trigger **`extract_workflow.md --forensic`** and abort.
 
 ## 0.2 Synchronization Audit (Sentinel Gateway)
 Before mapping tools, the Agent **MUST** invoke the **[GitHub Sentinel](../agents/github_sentinel.md)**:

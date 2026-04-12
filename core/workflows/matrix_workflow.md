@@ -1,9 +1,8 @@
----
-description: "Universal Matrix Orchestration Protocol (Keyword: matrix)"
-version: 1.1.0
+description: "Universal Matrix Orchestration Protocol (V 1.2.0)"
+version: 1.2.0
 ---
 
-# 🛡️ Workflow: Matrix (Universal Orchestration)
+# 🛡️ Workflow: Matrix (Orchestration)
 
 Master operational protocol ensuring total identity segregation and explicit authorization locks.
 
@@ -28,6 +27,9 @@ Master operational protocol ensuring total identity segregation and explicit aut
 
 ## 3. DevOps Provisioning & Visual Proof (DevOps Agent)
 *   **WIP Safety Freeze (Rule 65):** The Agent **MUST** execute `git status --porcelain`. If uncommitted human changes exist in the root, the session **MUST ABORT** or require a commit before any provisioning.
+*   **Mirror Consistency Audit (Rule 52 - Phase 13):** 
+    - Verify that `docs/active_state.json` is perfectly synchronized with `.agent_state/mirror.json`.
+    - **Mismatch Halt:** If a desynchronization is detected, the Agent **MUST ABORT** orchestration and request a **Nuclear Recovery** from the Mirror before proceeding.
 *   **Environment Certification:** Verify task-specific dependencies and environment health.
 *   **Visual Proof (Step 3.2):** Present a **Visual Diff or `cat`** of the target file to certify its clean state before handover.
 *   **Lock 3 (Deployment Hold):** Emit: **"DEPLOYMENT_READY: [SprintID-AgenteID] PASSED"**.
@@ -43,7 +45,8 @@ Master operational protocol ensuring total identity segregation and explicit aut
 *   **Audit Lock:** Final validation of lints and architectural compliance.
 
 ## 6. Liquidation & Context Refresh
-*   **Amnesia Extraction:** Run **`workflow_knowledge_extractor.md`**.
+*   **Amnesia Extraction:** Run **`extract_workflow.md`**.
+*   **Heuristic Pulse Certification (Phase 13):** Ensure that the blocking telemetry gate in `close_workflow.md` has been successfully traversed.
 *   **Roadmap Liquidation (Rule 31):** Update active Roadmap status to **`COMPLETED (100%)`** and reflect in `task/task.md` before closure.
 *   **Full Context Reset:** Call the **Principal (Mentor)** to re-read governance to prevent memory drift before the next mission.
 
