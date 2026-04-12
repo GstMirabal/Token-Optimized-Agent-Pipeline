@@ -1,7 +1,7 @@
-<div align="center">
-  <img src="../../assets/logo/institutional_banner.png" alt="Banner" width="100%">
+![Banner](../../assets/logo/institutional_banner.png)
 
-  <h3 align="center">⚖️ Universal-Agents: {{PROJECT_NAME}}</h3>
+<div align="center">
+  <h3>⚖️ Universal-Agents: {{PROJECT_NAME}}</h3>
 
   <p align="center">
     <strong>High-Integrity Governance & Federated Agentic Engineering</strong>
