@@ -1,28 +1,22 @@
-# Task: Hook-Driven DevOps Automation (Sprint #027)
+# Task: Governance Hardening & Phase 13 Preparation (Sprint #031)
 
-- [x] Create `hooks/` directory at the project root.
-- [x] Create empty `__init__.py`, `on_init.py`, and `on_commit.py`.
+## Phase 1: Session Initialization Ritual 🛡️
+- [x] Commit closure of Sprint #030 (WIP Safety Freeze).
+- [x] Synchronize `active_state.json` (Sprint #031, Phase 12).
+- [x] Open `sprint_031_matrix_log.md`.
+- [x] Update `active_task.md` for current session.
 
-## Phase 2: Logic Implementation 🧠
-- [x] **Develop `on_init.py`**:
-    - [x] Logic to check `.env` existence.
-    - [x] Logic to trigger `skills/core/slash-commander/scripts/generate_commands.py`.
-- [x] **Develop `on_commit.py`**:
-    - [x] Logic for pre-commit integrity audit.
-    - [x] Integration with `git` to allow/block commits.
+## Phase 2: Structural Integrity & Sync Audit 🚦
+- [ ] Review `hooks/on_init.py` for environment consistency.
+- [ ] Audit `core/memory/core/memory_index.json` for orphaned KIs.
+- [ ] Verify `mcp-config.json` against current server registrations.
 
-## Phase 3: Constitutional & Sentinel Alignment ⚖️
-- [x] Inject **Rule 114 (Hook Sovereignty)** into `agents.md`.
-- [x] Update `core/agents/devops_sentinel.md` jurisdictions and cycles.
-- [x] Refactor `close_workflow.md` with Heuristic Pulse handshake.
-
-- [x] Phase 1: Telemetry Foundation (Node setup)
-- [x] Phase 2: Hook Instrumentation (Error logging in py hooks)
-- [x] Phase 3: Governance Learner Activation (Logic implementation)
-- [x] Phase 4: Final Validation (Dummy telemetry & proposal generation)
+## Phase 3: Strategic Blueprinting (Phase 13) 🧭
+- [ ] Drafting Roadmap `013-refined-telemetry-and-redundancy.md`.
+- [ ] Define mandatory human-in-the-loop gates for telemetry distillation.
 
 ---
-**Status**: `COMPLETED (100%)`
-**Strategic Lock**: `LOCKED`
-**Sprint ID**: `#030`
-**Final UID Seal**: `#742f12dd-c8de-4f94-a0b8-da9dc3b06758`
+**Status**: `IN_PROGRESS (25%)`
+**Strategic Goal**: Phase 12 Certification & Blueprinting Phase 13.
+**Sprint ID**: `#031`
+**Session Tracker**: `99bf8006-bce9-4c27-a572-5f93fa234d89`
