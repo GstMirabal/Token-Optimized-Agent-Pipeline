@@ -57,7 +57,7 @@ Universal-Agents is a military-grade AI agent governance framework designed to p
 *   **Token-Saver Auditor:** An economic kill-switch that prevents inefficient plans and reduces API costs by optimizing context windows.
 *   **Omni-Context Minimizer:** Smart AST-based code skeleton extraction that allows AI to understand massive files (1000+ lines) while only consuming 10% of the normal token cost.
 *   **MCP Registry & Routing:** Strict Zero-Trust assignment of external Model Context Protocols (MCPs) via `mcp-registry/registry.json`.
-*   **Knowledge Extraction & Memory:** Automatic knowledge distillation via `workflow_knowledge_extractor.md`, indexing lessons into atomic Knowledge Items (KIs).
+*   **Knowledge Extraction & Memory:** Automatic knowledge distillation via `extract_workflow.md`, indexing lessons into atomic Knowledge Items (KIs).
 *   **Persistent Compliance Roadmap:** Integrated tracking via `task/roadmaps/`, providing a verifiable history of security, quality, and logic status.
 
 ### Built With

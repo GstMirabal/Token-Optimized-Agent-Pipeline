@@ -18,7 +18,7 @@ Before any interaction, the Agent **MUST** read the anchor point **`docs/active_
 - **Nucleus Guard**: Initialization is prohibited if the workspace is the `.agents` nucleus.
 - **Task 0.1.1: Nuclear Recovery:** If `docs/active_state.json` is missing or corrupted, search for **`.agent_state/mirror.json`**.
     - **Action**: If the mirror exists, restore the state to `docs/active_state.json` and issue a **Manual Correction Alert** stating "RECOVERY: State restored from Mirror".
-- **Action:** If a session collision is detected (`status == "IN_PROGRESS"`), trigger **`workflow_knowledge_extractor.md --forensic`** and abort.
+- **Action:** If a session collision is detected (`status == "IN_PROGRESS"`), trigger **`extract_workflow.md --forensic`** and abort.
 
 ## 0.2 Synchronization Audit (Sentinel Gateway)
 Before mapping tools, the Agent **MUST** invoke the **[GitHub Sentinel](../agents/github_sentinel.md)**:

@@ -3,7 +3,7 @@ description: "Knowledge Extractor and Intelligence Distillation Protocol (V 3.4.
 version: 3.4.0
 ---
 
-# 🧠 Workflow: Knowledge Extractor & Intelligence Distillation
+# 🧠 Workflow: Extract (Intelligence Distillation)
 
 Master protocol for heuristic extraction, Matrix memory update, and ephemeral state purge before session destruction. Aligned with Phase 13.
 

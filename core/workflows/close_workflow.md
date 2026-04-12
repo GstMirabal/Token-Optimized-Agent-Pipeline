@@ -12,7 +12,7 @@ Before any transactional settlement, the Agent MUST read **`agents.md`** to ensu
 
 ## 1. Intelligence Extraction (Rule 74 & 75)
 The Agent MUST fulfill the knowledge distillation cycle before state destruction:
-- **Action:** Mandatory execution of **`workflow_knowledge_extractor.md`**.
+- **Action:** Mandatory execution of **`extract_workflow.md`**.
 - **Certification:** Must receive the signature **`EXTRACTION_COMPLETE: INTELLIGENCE_DESTILLED`**.
 
 ### 1.1 Heuristic Pulse Audit (Rule 114 - LEARNING - BLOCKING)

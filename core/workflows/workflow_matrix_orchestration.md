@@ -43,7 +43,7 @@ Master operational protocol ensuring total identity segregation and explicit aut
 *   **Audit Lock:** Final validation of lints and architectural compliance.
 
 ## 6. Liquidation & Context Refresh
-*   **Amnesia Extraction:** Run **`workflow_knowledge_extractor.md`**.
+*   **Amnesia Extraction:** Run **`extract_workflow.md`**.
 *   **Roadmap Liquidation (Rule 31):** Update active Roadmap status to **`COMPLETED (100%)`** and reflect in `task/task.md` before closure.
 *   **Full Context Reset:** Call the **Principal (Mentor)** to re-read governance to prevent memory drift before the next mission.
 
