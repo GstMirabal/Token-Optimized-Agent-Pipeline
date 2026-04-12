@@ -15,9 +15,10 @@ The Agent MUST fulfill the knowledge distillation cycle before state destruction
 - **Action:** Mandatory execution of **`workflow_knowledge_extractor.md`**.
 - **Certification:** Must receive the signature **`EXTRACTION_COMPLETE: INTELLIGENCE_DESTILLED`**.
 
-### 1.1 Heuristic Pulse Audit (Rule 114 - LEARNING)
+### 1.1 Heuristic Pulse Audit (Rule 114 - LEARNING - BLOCKING)
 Ensure the Matrix learns from this session's friction points:
 - **Handshake:** The Agent **MUST** ask: *"¿Deseas realizar la destilación de telemetría de esta sesión para la base de conocimientos de gobernanza?"*
+- **Rigorous Gate:** If the user denies or if distillation is skipped, the session is considered **FAILED_CONSTITUTIONAL_AUDIT** and cannot be closed as successful.
 - **Execution:** Upon approval, invoke **`skills/local/governance-sentinel/scripts/distill.py`**.
 - **Promotion:** If `proposals.md` contains formal clauses, prompt for constitutional update via **`apply_jurisprudence.py`**.
 
@@ -44,6 +45,7 @@ Finalize the session's transactional record:
 ## 5. Black Box Closure & Physical Amnesia (Rule 74)
 Termination of the session's physical presence:
 - **Metadata Update:** Update **`docs/active_state.json`** to `status: "CLOSED_SUCCESSFULLY"`.
+- **Nuclear Mirroring (Rule 52):** Immediately synchronize the finalized state to **`.agent_state/mirror.json`**.
 - **The Great Purge (Rule 79):** Clear session-specific ephemeral telemetry in `core/memory/telemetry/raw_errors.json` IF jurisprudence was applied.
 
 ## 6. Final Lock Handover
