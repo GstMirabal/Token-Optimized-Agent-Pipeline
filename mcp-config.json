@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "github-sentinel": {
+      "command": "/bin/bash",
+      "args": [
+        "mcp_servers/github_mcp/scripts/start_mcp.sh"
+      ],
+      "env": {},
+      "description": "Filtro de Seguridad y Auditoría Git - GitHub Sentinel"
+    }
+  }
+}

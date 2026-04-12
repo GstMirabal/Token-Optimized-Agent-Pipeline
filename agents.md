@@ -95,6 +95,10 @@ Total blockade of local operations and deployments until simultaneously validati
 - **State Homologation**: The creation of any state-tracking file, directory, or telemetry log outside the constitutional `/docs/active_state.json` anchor is strictly PROHIBITED.
 - **Historical Log**: Reject pushes whose commit messages lack the hashtag suffix `#02x` (Sprint ID obtained from the respective active `.json`), rigidly applying *Conventional Commits*. All changes in this submodule MUST be indexed to the active Sprint.
 
+### MCP Configuration Registry
+- **Discovery Manifest**: The `mcp-config.json` file in the root acts as the official registry for all Model Context Protocol servers. It is the single point of discovery for AI clients (Claude, Cursor, etc.) to interface with the Matrix's technical skills.
+- **Sync Rule**: Any new server added to `mcp_servers/` MUST be reflected in this manifest to maintain operational capability.
+
 ## 6. Chain of Command
 
 - **[Principal Agent](agents/principal_agent.md)**: Strategic authority. Sole entity empowered to sanction the master **Roadmap**.
