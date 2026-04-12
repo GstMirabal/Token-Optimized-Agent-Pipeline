@@ -111,3 +111,17 @@ Total blockade of local operations and deployments until simultaneously validati
 - **Workflow Lock**: No secondary or tertiary agent may initialize or execute if the [Principal Agent](agents/principal_agent.md) has not sanctioned the Roadmap, and if the [Orchestrator](agents/orchestrator.md) has not finalized the Implementation Plan. The [Agent Orchestrator](agents/agent_orchestrator.md) must certify the "Agent Ecosystem" readiness before execution begins.
 - **Rule 113: Slash Sovereignty**: Every high-integrity operational workflow defined in `core/workflows/` MUST have a corresponding registered slash command alias for friction-less 'Instruction-to-Action' parity. The `slash-commander` skill is the authoritative engine for this synchronization.
 - **Rule 114: Hook Sovereignty**: Critical automation via Claude Hooks MUST be registered in the `hooks/` layer. It defines Hooks as the "Enforcement Arm" of the Matrix during session initiation and commit phases.
+
+## 7. Jurisprudence (Heuristic Amendments)
+
+This section contains rules automatically promoted from the Heuristic Governance Loop. These rules have been vetted by operational frequency and are binding for all agents until formally integrated into the core constitution.
+
+### 7.1 Historical Amendments
+> [!NOTE]
+> No amendments have been promoted yet. The Matrix is currently in a state of constitutional purity.
+
+#### Clause J-01: ENVIRONMENT_VIOLATION
+- **Heuristic Rule**: The agent MUST attempt autonomous remediation before reporting failure.
+- **Manual Override**: The user HAS PROHIBITED autonomous remediation for this violation. Remediation MUST be a **Manual Correction Alert**.
+- **Original Source**: `on_init`
+- **Vetted Date**: 1775991625.0121827

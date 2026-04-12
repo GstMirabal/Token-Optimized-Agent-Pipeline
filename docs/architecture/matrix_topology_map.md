@@ -25,7 +25,7 @@ Version: 1.1.0 | **VERIFIED_TOPOLOGY_SIG:** ef3c429d-matrix-v3.0-verified
 
 ## 3. Workflow Function Mapping
 - **`start_workflow.md`**: Initial session protocol and crash detection (Rule 0.1).
-- **`workflow_close.md`**: Intelligence distillation and atomic liquidation (Rule 5).
+- **`close_workflow.md`**: Intelligence distillation and atomic liquidation (Rule 5).
 - **`workflow_knowledge_extractor.md`**: Heuristic distillation and memory update.
 
 ## 4. Discovery Lock (Sync-Lock)
