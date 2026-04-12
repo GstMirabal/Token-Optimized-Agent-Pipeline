@@ -1,7 +1,5 @@
-<a name="readme-top"></a>
-
 <div align="center">
-  <img src="https://raw.githubusercontent.com/GstMirabal/.agents/main/docs/architecture/assets/matrix_logo.png" alt="Logo" width="80" height="80">
+  <img src="https://raw.githubusercontent.com/GstMirabal/.agents/main/docs/architecture/assets/signature_logo.png" alt="Logo" width="200">
 
   <h3 align="center">⚖️ Universal-Agents: {{PROJECT_NAME}}</h3>
 
