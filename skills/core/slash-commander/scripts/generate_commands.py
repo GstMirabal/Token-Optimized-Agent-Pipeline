@@ -4,7 +4,7 @@ from pathlib import Path
 
 # Configuration
 WORKFLOW_DIR = Path("core/workflows")
-OUTPUT_DIR = Path("skills/core/slash-commander/output")
+OUTPUT_DIR = Path("skills/commands")
 METADATA_REGEX = r"description:\s*\"([^\"]+)\""
 
 def generate_skill_content(cmd_name: str, description: str, workflow_path: str) -> str:
