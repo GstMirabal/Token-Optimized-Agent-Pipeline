@@ -1,4 +1,6 @@
-![Banner](../../assets/logo/institutional_banner.png)
+<p align="center">
+  <img src="../../assets/logo/institutional_banner.png" width="100%" height="200">
+</p>
 
 <div align="center">
   <h3>⚖️ Universal-Agents: {{PROJECT_NAME}}</h3>
