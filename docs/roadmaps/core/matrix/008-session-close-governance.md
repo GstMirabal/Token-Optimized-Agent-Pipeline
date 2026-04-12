@@ -26,7 +26,7 @@ Refactorizar el protocolo de cierre de sesión (`knowledge_extractor.md`) para t
 ### M3: The Absolute Purge & Forensic Execution (Evolutionary Governance)
 - [x] **M3.1: Rule Integration Logic:** If knowledge is "almost" a rule, trigger a governance reform instead of a new KI.
 - [x] **M3.2: Session State Metadata (Black Box):** Implement `.agents/state/session_metadata.json` for transaction tracking.
-- [x] **M3.3: Atomic Forensic Guard:** Re-refactor `workflow_start.md` to detect crashes and enforce blocking extraction.
+- [x] **M3.3: Atomic Forensic Guard:** Re-refactor `start_workflow.md` to detect crashes and enforce blocking extraction.
 - [x] **M3.4: Certification Master Switch:** Integrate `intelligence_certified: PASSED` flag in metadata as a mandatory condition for physical state destruction.
 - [x] Operationalize Rule 74 (4): Mandatory deletion of redundant KIs.
 

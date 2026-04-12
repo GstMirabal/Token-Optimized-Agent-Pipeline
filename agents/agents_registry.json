@@ -148,5 +148,30 @@
     "primary_tools": [
       "github-mcp"
     ]
+  },
+  "devops_sentinel": {
+    "node_id": "devops_sentinel_01",
+    "role": "Infrastructure Guardian & Trinity Standard Auditor",
+    "jurisdiction": [
+      ".agents/skills/",
+      ".agents/mcp_servers/",
+      "manifest_skills.json",
+      "mcp-config.json",
+      ".env"
+    ],
+    "capabilities": [
+      "infrastructure_auditing",
+      "trinity_standard_enforcement",
+      "secure_environment_export",
+      "manual_correction_alerting",
+      "manifest_skill_validation",
+      "mcp_registry_audit",
+      "habitability_certification"
+    ],
+    "primary_tools": [
+      "mass-standardizer",
+      "env-shielding-auditor",
+      "matrix-monitor"
+    ]
   }
 }

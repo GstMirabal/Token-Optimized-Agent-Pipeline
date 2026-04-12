@@ -16,7 +16,7 @@ Fragmented session metadata across multiple directories (e.g., `state/` and `.ag
 
 ## Verification
 - Confirm that `.agents/state/` no longer exists.
-- Verify `workflow_start.md` points to `.agents/.agent_state/session_metadata.json`.
+- Verify `start_workflow.md` points to `.agents/.agent_state/session_metadata.json`.
 
 ## Implementation History
 - **Case #35d5e5a9:** Migration of legacy `state/` metadata to `.agent_state/` resolved structural drift and unified the LTM architecture for the Hardened Matrix.
