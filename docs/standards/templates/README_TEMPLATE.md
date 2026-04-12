@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/GstMirabal/.agents/main/docs/assets/logo/signature_logo.png" alt="Logo" width="200">
+  <img src="../../assets/logo/signature_logo.png" alt="Logo" width="200">
 
   <h3 align="center">⚖️ Universal-Agents: {{PROJECT_NAME}}</h3>
 
