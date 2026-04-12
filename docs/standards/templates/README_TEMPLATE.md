@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="../../assets/logo/signature_logo.png" alt="Logo" width="200">
+  <img src="../../assets/logo/institutional_banner.png" alt="Banner" width="100%">
 
   <h3 align="center">⚖️ Universal-Agents: {{PROJECT_NAME}}</h3>
 
