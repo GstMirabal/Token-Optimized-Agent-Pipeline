@@ -121,12 +121,32 @@
       "tool_benchmarking",
       "skill_synthesis",
       "directory_governance",
-      "armory_management"
+      "armory_management",
+      "mcp_server_discovery",
+      "mcp_integration"
     ],
     "primary_tools": [
       "autoskills",
       "skill-creator",
       "mass-standardizer"
+    ]
+  },
+  "github_sentinel": {
+    "node_id": "github_sentinel_01",
+    "role": "Repository Synchronization & Version Sentinel",
+    "jurisdiction": [
+      ".git/",
+      ".github/",
+      "github_sentinel.md"
+    ],
+    "capabilities": [
+      "upstream_sync_audit",
+      "version_drift_detection",
+      "pr_review_routing",
+      "mcp_github_interfacing"
+    ],
+    "primary_tools": [
+      "github-mcp"
     ]
   }
 }

@@ -35,7 +35,7 @@ Total blockade of local operations and deployments until simultaneously validati
 
 ### Context Optimization
 - **Limited Reading**: Files evaluated with `wc -l` > 200 lines must not be dumped entirely. Demand reading using AST, `head`, `tail`, or `grep`.
-- **Anti-Amnesia Rule (Rule 10)**: After 10 interactions or surpassing 5,000 processed tokens, execute mandatory re-reading of this base document and the central index.
+- **Anti-Amnesia**: After 10 interactions or surpassing 5,000 processed tokens, execute mandatory re-reading of this base document and the central index.
 
 ### WIP Safety Freeze
 - **Pre-Shielding**: Abort the editing process early if executing `git status --porcelain` returns unresolved local differences.
@@ -55,12 +55,12 @@ Total blockade of local operations and deployments until simultaneously validati
 - **No Global Variables**: Cap or reject global injections in the main OS binary.
 - **Dependency Containment**: Force explicit prefix syntax by invoking commands through an isolated local development environment.
 
-### Infrastructure (Rule 71)
+### Infrastructure
 - **Arsenal Sovereignty & Trinity Standard**: Every skill registered in the matrix MUST strictly adhere to the Trinity Standard:
     1. **`README.md`**: Institutional overview.
     2. **`SKILL.md`**: Procedural logic and YAML frontmatter.
     3. **`/scripts/`**: Executable logic with `__init__.py`.
-- **Topological Order**: Skills must be isolated in `core/`, `local/`, or `3rd/`. Zero-tolerance for root-level contamination.
+- **Topological Order**: Skills and system interfaces MUST be isolated into exactly four regulated layers: `core/`, `local/`, `3rd/`, and `mcp_servers/` (reserved explicitly for Model Context Protocol bridged architectures). Zero-tolerance for root-layer contamination outside these bounds.
 - **Enforcement**: The `mass-standardizer` tool is the official auditor for this standard.
 
 ### QA Framework
@@ -86,13 +86,13 @@ Total blockade of local operations and deployments until simultaneously validati
 - **Mandatory Topology**: Reject initialization in a project if the standardized `/docs/` tree does not exist. The [Principal Agent](agents/principal_agent.md) will throw a _Halt_ and summon the [Matrix Mapper](agents/matrix_mapper.md) to instantiate its dictatorial `[layer]/[app]/` hierarchy.
 - **Sovereignty and Overwrite**: If a host project presents dissident documentary tracking nomenclatures, the [Matrix Mapper](agents/matrix_mapper.md) must exhaustively migrate and homologate the existing information towards the new standard without omissions before eradicating the legacy formats.
 
-### Nucleus Guard (Rule 81)
+### Nucleus Guard
 - **Nucleus Neutrality**: Automatic structural scaffolding and Hook Protocol procedures are strictly prohibited if the current workspace is the `.agents` Matrix core.
 - **Isolation Constraint**: Agents must verify they are not in the governance nucleus before attempting to instantiate a `/docs/` tree in the parent directory.
 
-### Zero Coordinate and Traceability (Rule 84)
+### Zero Coordinate and Traceability
 - **State Focus (The Anchor)**: Every subagent will unconditionally extract its scope by exclusively reading the `/docs/active_state.json` file.
-- **Rule 84 (State Homologation)**: The creation of any state-tracking file, directory, or telemetry log outside the constitutional `/docs/active_state.json` anchor is strictly PROHIBITED.
+- **State Homologation**: The creation of any state-tracking file, directory, or telemetry log outside the constitutional `/docs/active_state.json` anchor is strictly PROHIBITED.
 - **Historical Log**: Reject pushes whose commit messages lack the hashtag suffix `#02x` (Sprint ID obtained from the respective active `.json`), rigidly applying *Conventional Commits*. All changes in this submodule MUST be indexed to the active Sprint.
 
 ## 6. Chain of Command
