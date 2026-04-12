@@ -44,6 +44,12 @@
       "tags": ["architecture", "state-management", "v4"]
     },
     {
+      "id": "KI-015",
+      "summary": "Secure Secret Sovereignty & Constitutional Birthright: Mandatory secret export protocol and Cycle 0 initiation for all nodes.",
+      "path": "memory/core/ki_015_sprint_024_governance_hardening.md",
+      "tags": ["security", "governance", "secrets"]
+    },
+    {
       "id": "KI-016",
       "summary": "Sovereign Skill Infrastructure: Hardening of internal discovery protocols and local tool installation (autoskills).",
       "path": "memory/core/ki_016_sovereign_skill_infra.md",

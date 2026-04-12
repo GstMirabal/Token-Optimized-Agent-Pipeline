@@ -24,6 +24,7 @@ It dictates in an absolute and transversal manner the behavior of subagents, cod
 - **Language Isolation**: Prohibit the use of Spanish in variables, code logic, terminal commands, or commit messages. Its rendering is strictly blocked and confined exclusively to the textual chat in the prompt.
 - **Technical Clarity**: Avoid redundant greetings. Prioritize Markdown Tables formatting for mapping data and logical variables. Restrict invocations of complex graphics (Mermaid) or flows (ASCII Tree) strictly to what is indicated and enabled by the `.md` regulations of each subagent.
 - **Negative Restrictions**: Define explicitly and solely what is prohibited to the LLM. Avoid requesting vague positive actions.
+- **Technical Language Sovereignty**: Technical artifacts, workflow protocols, and agent profiles MUST be written in **Technical English** to ensure cross-node interoperability and linguistic precision. Spanish is strictly confined to the human-agent textual chat.
 
 ## 2. Autonomy, Efficiency, and Execution
 
@@ -62,6 +63,7 @@ Total blockade of local operations and deployments until simultaneously validati
     3. **`/scripts/`**: Executable logic with `__init__.py`.
 - **Topological Order**: Skills and system interfaces MUST be isolated into exactly four regulated layers: `core/`, `local/`, `3rd/`, and `mcp_servers/` (reserved explicitly for Model Context Protocol bridged architectures). Zero-tolerance for root-layer contamination outside these bounds.
 - **Enforcement**: The `mass-standardizer` tool is the official auditor for this standard.
+- **Secure Secret Sovereignty**: Agents are strictly prohibited from reading or parsing secret-holding files (e.g., `.env`) into their contextual memory. Their interaction is limited exclusively to invoking **environment export** commands. Any missing secret MUST trigger a **Manual Correction Alert** to the user, prohibiting autonomous deduction or bypass.
 
 ### QA Framework
 - Overwrite the native URLs of local testing to instantiate in RAM, purifying between tests using `sqlite:///:memory:`. Reject DB connection.
@@ -105,4 +107,5 @@ Total blockade of local operations and deployments until simultaneously validati
 - **[Orchestrator](agents/orchestrator.md)**: Tactical authority. Translates the approved Roadmap into a detailed **Implementation Plan** (which defines and constitutes the active **Sprint**).
 - **[Agent Orchestrator](agents/agent_orchestrator.md)**: Meta-Governance authority. Responsible for **Staffing** the Implementation Plan by designating existing agents or **creating** new subagent profiles as required.
 - **[Skill Architect](agents/skill_architect.md)**: Technical researcher and tool synthesizer. Responsible for the **Triangle of Sovereignty** (core/local/3rd) and tool benchmarking.
+- **Constitutional Birthright**: Every subagent profile (`.md`) MUST include a **Mandatory Initiation Cycle** (Cycle 0) that forces the reading of `agents.md` before any operational logic is executed. No agent is valid or authorized to act without this constitutional anchor.
 - **Workflow Lock**: No secondary or tertiary agent may initialize or execute if the [Principal Agent](agents/principal_agent.md) has not sanctioned the Roadmap, and if the [Orchestrator](agents/orchestrator.md) has not finalized the Implementation Plan. The [Agent Orchestrator](agents/agent_orchestrator.md) must certify the "Agent Ecosystem" readiness before execution begins.
