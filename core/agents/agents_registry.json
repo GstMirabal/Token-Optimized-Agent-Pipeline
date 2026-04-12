@@ -1,0 +1,177 @@
+{
+  "matrix_mapper": {
+    "node_id": "mtx_mapper_01",
+    "role": "Time Manager and Seed Architect",
+    "jurisdiction": [
+      "/docs/roadmaps/",
+      "/docs/sprints/",
+      "/docs/active_state.json"
+    ],
+    "capabilities": [
+      "initial_scaffolding",
+      "state_tracking",
+      "topology_audit",
+      "ascii_tree_mapping"
+    ],
+    "primary_tools": [
+      "topology-scaffolder"
+    ]
+  },
+  "orchestrator": {
+    "node_id": "orch_01",
+    "role": "Tactical Planner & Sprint Architect",
+    "jurisdiction": [
+      "implementation_plan.md",
+      "/docs/sprints/"
+    ],
+    "capabilities": [
+      "tactical_translation",
+      "sprint_definition",
+      "mermaid_flowcharts",
+      "markdown_task_tables"
+    ],
+    "primary_tools": [
+      "mermaid_js",
+      "sprint-architect"
+    ]
+  },
+  "doc_orchestrator": {
+    "node_id": "doc_orch_01",
+    "role": "Contractual Writer (Documentary Reverse Engineering)",
+    "jurisdiction": [
+      "/docs/contracts/",
+      "/docs/architecture/",
+      "PROJECT_MANIFEST.md"
+    ],
+    "capabilities": [
+      "api_contract_writing",
+      "reverse_engineering",
+      "mermaid_topology",
+      "markdown_tables_standardization"
+    ],
+    "primary_tools": [
+      "mermaid_js",
+      "markdown_tables",
+      "contract-writer"
+    ]
+  },
+  "governance_learner": {
+    "node_id": "gov_learner_01",
+    "role": "Scope Guardian & Constitution Archiver",
+    "jurisdiction": [
+      ".agents/core/memory/",
+      "agents.md"
+    ],
+    "capabilities": [
+      "scope_creep_monitoring",
+      "jurisprudence_extraction",
+      "constitutional_amendment_proposals",
+      "ephemeral_wipe_execution"
+    ],
+    "primary_tools": [
+      "governance-sentinel",
+      "matrix-monitor"
+    ]
+  },
+  "agent_orchestrator": {
+    "node_id": "agent_orchestrator_01",
+    "role": "Static Meta-Governance (Configuration & Prompt Manager)",
+    "jurisdiction": [
+      ".agents/core/agents/"
+    ],
+    "capabilities": [
+      "agent_staffing",
+      "agent_factory",
+      "behavior_injection",
+      "overlapping_check",
+      "registry_sentinel",
+      "prompt_engineering"
+    ],
+    "primary_tools": [
+      "agent-factory"
+    ]
+  },
+  "principal_agent": {
+    "node_id": "principal_agent_01",
+    "role": "Strategic Authority (Vision & Logic Guardian)",
+    "jurisdiction": [
+      "agents.md",
+      "/docs/roadmaps/",
+      "/docs/active_state.json"
+    ],
+    "capabilities": [
+      "roadmap_sanctioning",
+      "strategic_authority",
+      "constitutional_interpretation",
+      "crisis_resolution"
+    ],
+    "primary_tools": [
+      "governance-sentinel",
+      "matrix-monitor"
+    ]
+  },
+  "skill_architect": {
+    "node_id": "skill_arch_01",
+    "role": "Technical Researcher & Tool Synthesizer",
+    "jurisdiction": [
+      ".agents/skills/"
+    ],
+    "capabilities": [
+      "technical_research",
+      "tool_benchmarking",
+      "skill_synthesis",
+      "directory_governance",
+      "armory_management",
+      "mcp_server_discovery",
+      "mcp_integration"
+    ],
+    "primary_tools": [
+      "autoskills",
+      "skill-creator",
+      "mass-standardizer"
+    ]
+  },
+  "github_sentinel": {
+    "node_id": "github_sentinel_01",
+    "role": "Repository Synchronization & Version Sentinel",
+    "jurisdiction": [
+      ".git/",
+      ".github/",
+      "github_sentinel.md"
+    ],
+    "capabilities": [
+      "upstream_sync_audit",
+      "version_drift_detection",
+      "pr_review_routing",
+      "mcp_github_interfacing"
+    ],
+    "primary_tools": [
+      "github-mcp"
+    ]
+  },
+  "devops_sentinel": {
+    "node_id": "devops_sentinel_01",
+    "role": "Infrastructure Guardian & Trinity Standard Auditor",
+    "jurisdiction": [
+      ".agents/skills/",
+      ".agents/mcp_servers/",
+      "manifest_skills.json",
+      "mcp-config.json",
+      ".env"
+    ],
+    "capabilities": [
+      "infrastructure_auditing",
+      "trinity_standard_enforcement",
+      "secure_environment_export",
+      "manual_correction_alerting",
+      "manifest_skill_validation",
+      "mcp_registry_audit",
+      "habitability_certification"
+    ],
+    "primary_tools": [
+      "mass-standardizer",
+      "env-shielding-auditor",
+      "matrix-monitor"
+    ]
+  }
+}

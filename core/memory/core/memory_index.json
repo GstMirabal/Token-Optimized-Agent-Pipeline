@@ -1,0 +1,83 @@
+{
+  "version": "1.4.1",
+  "knowledge_items": [
+    {
+      "id": "KI-001",
+      "summary": "Survival Mode for Market Ingestion: Debug strategy filtering Tier 1 assets only.",
+      "path": "memory/core/ki_001_survival_mode_ingestion.md",
+      "tags": ["django", "debug", "efficiency"]
+    },
+    {
+      "id": "KI-002",
+      "summary": "Ingestion Resilience with Circuit Breakers: Persistent monitor for external API stability.",
+      "path": "memory/core/ki_002_ingestion_resilience.md",
+      "tags": ["resilience", "circuit-breaker", "api"]
+    },
+    {
+      "id": "KI-010",
+      "summary": "Prioritized Communication Protocol: Standardized markdown formatting for technical agency.",
+      "path": "memory/core/ki_010_prioritized_comms.md",
+      "tags": ["governance", "visuals", "clarity"]
+    },
+    {
+      "id": "KI-011",
+      "summary": "Identity Matrix Orchestration: Implementation of JWT-based cross-agent validation patterns.",
+      "path": "memory/core/ki_011_identity_matrix_orchestration.md",
+      "tags": ["security", "identity", "jwt"]
+    },
+    {
+      "id": "KI-012",
+      "summary": "Tool Hang Remediation: Strategies for identifying and breaking background process lockups.",
+      "path": "memory/core/ki_012_tool_hang_remediation.md",
+      "tags": ["debug", "background-process", "reliability"]
+    },
+    {
+      "id": "KI-013",
+      "summary": "Broken Link Audit Protocol: Systematic verification of internal file references across submodules.",
+      "path": "memory/core/ki_013_broken_link_audit_protocol.md",
+      "tags": ["maintenance", "audit", "topology"]
+    },
+    {
+      "id": "KI-014",
+      "summary": "Unified State Architecture: Anchoring of active_state.json as the single source of truth.",
+      "path": "memory/core/ki_014_unified_state_architecture.md",
+      "tags": ["architecture", "state-management", "v4"]
+    },
+    {
+      "id": "KI-015",
+      "summary": "Secure Secret Sovereignty & Constitutional Birthright: Mandatory secret export protocol and Cycle 0 initiation for all nodes.",
+      "path": "memory/core/ki_015_sprint_024_governance_hardening.md",
+      "tags": ["security", "governance", "secrets"]
+    },
+    {
+      "id": "KI-016",
+      "summary": "Sovereign Skill Infrastructure: Hardening of internal discovery protocols and local tool installation (autoskills).",
+      "path": "memory/core/ki_016_sovereign_skill_infra.md",
+      "tags": ["governance", "infrastructure", "hardened"]
+    },
+    {
+      "id": "KI-017",
+      "summary": "Telemetry Distillation Summary: Results and patterns from Sprints 015-017.",
+      "path": "memory/core/ki_015_016_017_distillation.md",
+      "tags": ["telemetry", "distillation", "heuristics"]
+    },
+    {
+      "id": "KI-021",
+      "summary": "Frontend Bridge Architecture: Integration of Django and Vite-React with authentication passthrough.",
+      "path": "memory/core/ki_021_frontend_bridge_architecture.md",
+      "tags": ["frontend", "bridge", "architecture"]
+    },
+    {
+      "id": "KI-023",
+      "summary": "Governance Hardening & Constitutional Alignment: Refactor of agents.md and implementation of the node registry.",
+      "path": "memory/core/ki_023_governance_hardening_alignment.md",
+      "tags": ["governance", "constitution", "registry"]
+    },
+    {
+      "id": "KI-024",
+      "summary": "Total Arsenal Unification & Structural Sovereignty: Standardization of the Trinity standard via mass-standardizer.",
+      "path": "memory/core/ki_024_total_arsenal_unification.md",
+      "tags": ["standardization", "topology", "skills"]
+    }
+  ]
+}

@@ -1,11 +1,15 @@
 # macOS
 .DS_Store
+.env
 
 # Local Project-Specific Records (Ignored by Global Submodule)
 task/task.md
 task/
 task/sprints/
 task/roadmaps/
+docs/active_state.json
+docs/active_task.md
+docs/sprints/
 .agent_state/
 .agent_state/session_metadata.json
 implementation_plan*.md
