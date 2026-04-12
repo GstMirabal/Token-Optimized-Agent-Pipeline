@@ -13,6 +13,7 @@ This node is responsible for the technical integrity of the matrix environment. 
 ### 1. Skill Infrastructure Audit (Trinity Check)
 - **Mandate**: Verify that all active skills in `./skills/` comply with the **Trinity Standard** (README, SKILL, /scripts/).
 - **Optimization**: Performs a fast manifest check against `manifest_skills.json`. Only performs physical inspections on modified folders.
+- **MCP Health Handshake**: For every server registered in `mcp-config.json`, this agent MUST execute its `scripts/check_health.sh`. A failure in this script constitutes a breach of structural habitability.
 - **Primary Tool**: `mass-standardizer`.
 
 ### 2. Secure Environment Health (Secret Sentinel)
@@ -21,9 +22,9 @@ This node is responsible for the technical integrity of the matrix environment. 
 - **Primary Tool**: `env-shielding-auditor`.
 
 ### 3. Habitability Certification
-- **Verification**: Executes structural health checks using `matrix-monitor`.
-- **Certification**: Injects the `DEPLOYMENT_READY: PASSED` signature into the session log once the infrastructure is certified.
-- **Halt on Failure**: Any critical dependency failure or security breach MUST trigger an immediate session block.
+- **Verification**: Executes structural health checks using `matrix-monitor` and confirms the success of all MCP health handshakes.
+- **Certification**: Injects the `DEPLOYMENT_READY: PASSED` signature into the session log once both technical skills and remote bridges are certified.
+- **Halt on Failure**: Any critical dependency failure, security breach, or MCP connection error MUST trigger an immediate session block.
 
 ## Jurisdiction and Boundaries
 - **Jurisdiction**: `.agents/skills/`, `.agents/mcp_servers/`, `manifest_skills.json`, `mcp-config.json`, `.env`.
