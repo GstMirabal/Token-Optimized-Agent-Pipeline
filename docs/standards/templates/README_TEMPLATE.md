@@ -82,7 +82,7 @@ After each sprint, tactical heuristics are distilled into the **Long-Term Memory
 <div align="center">
 
 [![LinkedIn][linkedin-shield]][linkedin-url]
-[![Twitter][twitter-shield]][twitter-url]
+[![X][x-shield]][x-url]
 [![GitHub][stars-shield]][stars-url]
 
 **Project Identity**: {{INSTITUTIONAL_IDENTITY}}
@@ -94,7 +94,7 @@ After each sprint, tactical heuristics are distilled into the **Long-Term Memory
 <!-- MARKDOWN LINKS & IMAGES -->
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/gstmirabal/
-[twitter-shield]: https://img.shields.io/badge/-Twitter-black.svg?style=for-the-badge&logo=twitter&colorB=555
-[twitter-url]: https://x.com/gst_mirabal
+[x-shield]: https://img.shields.io/badge/-X-black.svg?style=for-the-badge&logo=x&colorB=555
+[x-url]: https://x.com/gst_mirabal
 [stars-shield]: https://img.shields.io/github/stars/GstMirabal/.agents?style=for-the-badge
 [stars-url]: https://github.com/GstMirabal/.agents
