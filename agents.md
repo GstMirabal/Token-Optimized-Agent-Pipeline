@@ -93,7 +93,7 @@ Total blockade of local operations and deployments until simultaneously validati
 - **Isolation Constraint**: Agents must verify they are not in the governance nucleus before attempting to instantiate a `/docs/` tree in the parent directory.
 
 ### Zero Coordinate and Traceability
-- **State Focus (The Anchor)**: Every subagent will unconditionally extract its scope by exclusively reading the `/docs/active_state.json` file.
+- **State Focus (The Anchor)**: Every subagent will unconditionally extract its scope by exclusively reading the `/docs/active_state.json` file **at the workspace root**. Any secondary state files nested within submodules (e.g., `.agents/docs/`) MUST be treated as internal governance metadata and ignored for tactical execution.
 - **State Homologation**: The creation of any state-tracking file, directory, or telemetry log outside the constitutional `/docs/active_state.json` anchor is strictly PROHIBITED.
 - **Historical Log**: Reject pushes whose commit messages lack the hashtag suffix `#02x` (Sprint ID obtained from the respective active `.json`), rigidly applying *Conventional Commits*. All changes in this submodule MUST be indexed to the active Sprint.
 
