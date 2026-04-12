@@ -31,7 +31,7 @@ Refactorizar el protocolo de cierre de sesión (`knowledge_extractor.md`) para t
 - [x] Operationalize Rule 74 (4): Mandatory deletion of redundant KIs.
 
 ### M4: Closure Certification & Atomic Commit
-- [x] **M4.0: The Master Closer:** Create `workflow_close.md` as the session orchestrator.
+- [x] **M4.0: The Master Closer:** Create `close_workflow.md` as the session orchestrator.
 - [x] **M4.1: Roadmap Liquidation Protocol:** Enforce status update to `COMPLETED (100%)` and final UID signature upon milestone fulfillment.
 - [x] Define the final handshake between DevOps (Execution) and Principal (Verification).
 - [x] Ensure full compliance with Conventional Commits (Rule 33).

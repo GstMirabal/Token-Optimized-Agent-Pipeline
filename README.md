@@ -129,7 +129,7 @@ The framework supports automated workflows via standardized Markdown protocols. 
 | :--- | :--- | :--- |
 | **`start`** | **Session Gateway**: Initial health check, UID validation, and environment provisioning. | `workflows/start_workflow.md` |
 | **`matrix`** | **Universal Orchestration**: Governs Identity, Scaffolding, and Execution via Triple Lock. | `workflows/workflow_matrix_orchestration.md` |
-| **`close`** | **Atomic Session Close**: Destroys context, set Strategic Lock to LOCKED, and triggers amnesia. | `workflows/workflow_close.md` |
+| **`close`** | **Atomic Session Close**: Destroys context, set Strategic Lock to LOCKED, and triggers amnesia. | `workflows/close_workflow.md` |
 | **`/certification_audit`** | **Global Audit**: Agnostic, incremental certification of implemented logic. | `workflows/certification_audit.md` |
 
 > [!TIP]
