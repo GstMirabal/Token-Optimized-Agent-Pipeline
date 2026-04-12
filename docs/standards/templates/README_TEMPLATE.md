@@ -78,6 +78,21 @@ After each sprint, tactical heuristics are distilled into the **Long-Term Memory
 
 ## 📬 Institutional Contact
 **Owner**: Gustavo Mirabal Suarez - [gst.mirabal@gmail.com](mailto:gst.mirabal@gmail.com)
+
+<div align="center">
+
+[![LinkedIn][linkedin-shield]][linkedin-url]
+[![GitHub][stars-shield]][stars-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
+
 **Project Identity**: {{INSTITUTIONAL_IDENTITY}}
 
+</div>
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- MARKDOWN LINKS & IMAGES -->
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-url]: https://www.linkedin.com/in/gstmirabal/
+[stars-shield]: https://img.shields.io/github/stars/GstMirabal/.agents?style=for-the-badge
+[stars-url]: https://github.com/GstMirabal/.agents
