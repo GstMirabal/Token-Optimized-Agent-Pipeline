@@ -1,104 +1,83 @@
-<div align="center">
-
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
-
-</div>
-
 <a name="readme-top"></a>
 
-<h3 align="center">⚖️ Universal-Agents Governance Constitution</h3>
+<div align="center">
+  <img src="https://raw.githubusercontent.com/GstMirabal/.agents/main/docs/architecture/assets/matrix_logo.png" alt="Logo" width="80" height="80">
 
-<p align="center">
-  Federated Long-Term Memory (LTM) and Architectural Rules (1-78) for Zero-Trust AI Execution.
-<br /><br />
-<a href="https://github.com/GstMirabal/.agents"><strong>Explore the docs »</strong></a>
-<br />
-·
-<a href="https://github.com/GstMirabal/.agents/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
-·
-<a href="https://github.com/GstMirabal/.agents/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
-</p>
+  <h3 align="center">⚖️ Universal-Agents: {{PROJECT_NAME}}</h3>
 
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-      <ul><li><a href="#federated-architecture">Federated Architecture</a></li></ul>
-    </li>
-    <li>
-      <a href="#role-jurisdictions">Role Jurisdictions & Safeguards</a>
-    </li>
-    <li><a href="#usage">Governance Activation</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ol>
-</details>
-
-## About The Project
-
-This directory contains the **Permanent Thinking Rules** (LTM) governing the Universal-Agents framework. It operates under a **Federated Governance Model** (Rules 1-81) designed for Zero-Trust execution and high-integrity tactical deployment in any repository.
-
-### Federated Architecture (V3 Methodology: Rules 1-81)
-
-| Section | Rules | Purpose | Roles Involved |
-| :--- | :--- | :--- | :--- |
-| **`constitution/global_user_rules.md`** | **1-33** | **Global Behavioral Standards**: Coding, naming, security, and token efficiency. | Master & Orchestrator |
-| **`constitution/project_mapping_and_context.md`** | **34-56** | **Topological Boundaries**: Repository structure, Docker, and environment shielding. | DevOps & Matrix |
-| **`constitution/subagents_architecture.md`** | **57-81** | **Matrix Operational Manual**: Hierarchical lifecycle, AI DevOps, and Signature protocols. | All Subagents |
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Role Jurisdictions & Safeguards
-
-*   **Agente Principal (Master):** Constitutional authority. Responsible for Strategic Roadmap design & Lock 1 (Roadmap Lock).
-*   **Agente DevOps:** Mandatory Sprint Gateway. Responsible for **WIP Safety Freeze** (`git status`), Skill provisioning, and Infra-Certification.
-*   **Active Sensors:** Implementation of **Kill Switch (Rule 67)** and **Coverage Blocker (Rule 76)** to ensure matrix survival.
-*   **UID Signature Protocol:** Mandatory universal signing (Rule 63) in `task.md`, implementation plans, and sprint markdown files for full auditability.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Usage
-
-### Governance Activation
-
-Upon initialization, all agents MUST execute the **Reading Protocol** (Rules 1, 34, 57). If a conflict arises between a user request and these rules, the framework defaults to the **Constitutional Supremacy** defined in the Federated Rules.
-
-### Maintenance
-
-Any architectural evolution MUST be mediated by the **Governance Learner** (Rule 60) for human certification. After sprint completion, the **Amnesia Protocol** (Rule 74) extracts heuristic learning into the Master Knowledge base (V3).
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Contact
-
-Gustavo Mirabal Suarez - gst.mirabal@gmail.com
-
-- LinkedIn: [@Gustavo-Mirabal](https://www.linkedin.com/in/gstmirabal/)
-- GitHub: [@GstMirabal](https://github.com/GstMirabal)
-
-Project Link: [https://github.com/GstMirabal/.agents](https://github.com/GstMirabal/.agents)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+  <p align="center">
+    <strong>High-Integrity Governance & Federated Agentic Engineering</strong>
+    <br />
+    Strategic Matrix for Zero-Trust Execution and Architectural Sovereignty.
+    <br />
+    <a href="{{REPO_URL}}/issues">Report Bug</a>
+    ·
+    <a href="{{REPO_URL}}/issues">Request Feature</a>
+  </p>
+</div>
 
 ---
-**Core Knowledge**: All tactical wisdom is stored in `.agents/knowledge/` (V3 Institutional Memory).
 
-<!-- MARKDOWN LINKS & IMAGES -->
-[contributors-shield]: https://img.shields.io/github/contributors/GstMirabal/.agents.svg?style=for-the-badge
-[contributors-url]: https://github.com/GstMirabal/.agents/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/GstMirabal/.agents.svg?style=for-the-badge
-[forks-url]: https://github.com/GstMirabal/.agents/network/members
-[stars-shield]: https://img.shields.io/github/stars/GstMirabal/.agents.svg?style=for-the-badge
-[stars-url]: https://github.com/GstMirabal/.agents/stargazers
-[issues-shield]: https://img.shields.io/github/issues/GstMirabal/.agents.svg?style=for-the-badge
-[issues-url]: https://github.com/GstMirabal/.agents/issues
-[license-shield]: https://img.shields.io/github/license/GstMirabal/.agents.svg?style=for-the-badge
-[license-url]: https://github.com/GstMirabal/.agents/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://www.linkedin.com/in/gstmirabal/
+## 🎯 Strategic Objective
+{{PROJECT_DESCRIPTION}}
+
+> [!IMPORTANT]
+> This project operates under the **Universal-Agents Constitution**. Every interaction is governed by the **Triple-Lock Security Protocol** and is subject to the **Sentinel Audiences** defined in the `.agents` matrix.
+
+---
+
+## 🏗️ Technical Architecture & Topography
+The following layers define the jurisdictional boundaries of the project, ensuring absolute decoupling and environment shielding.
+
+| Layer | Namespace | Purpose | Primary Auditor |
+| :--- | :--- | :--- | :--- |
+| **`core/`** | Institutional Brain | Strategic logic and permanent rules. | Principal Agent |
+| **`local/`** | Project Assets | Tactics, scripts, and local skills. | Orchestrator |
+| **`3rd/`** | External Tools | Standardizers, linters, and libraries. | Skill Architect |
+| **`mcp_servers/`** | Bridge Registry | Model Context Protocol servers. | Sentinel Gateway |
+
+---
+
+## 🛡️ Governance Status (Sentinel Check)
+Before any tactical planning, the following gates must be certified:
+
+- [ ] **GitHub Sentinel**: Branch Synchronization & Drift Audit.
+- [ ] **DevOps Sentinel**: Habitability Certification & Secret Shielding.
+- [ ] **Matrix Mapper**: Topological Integrity & Hook Protocol.
+
+---
+
+## ⚖️ Federated Registry (The Matrix Laws)
+This project is governed by the universal rules (1-112+) established in the `.agents` matrix.
+
+| Section | Domain | Mandate |
+| :--- | :--- | :--- |
+| **Section 1** | Code & Language | PEP 8, camelCase, Type Hints, and Technical English Sovereignty. |
+| **Section 2** | Autonomy | Triple Lock Security and human authorization gates. |
+| **Section 3** | Topology | Trinity Standard (README, SKILL, scripts) and Layer Isolation. |
+| **Section 6** | Command | Constitutional Birthright (Cycle 0) for all subagents. |
+
+---
+
+## 🚀 Execution & Usage
+
+### 1. Mandatory Initiation
+Upon opening a session, the following command is required to synchronize the agentic memory:
+```bash
+# Keyword: start
+@[workflows/start_workflow.md]
+```
+
+### 2. Secret Shielding
+This project strictly follows the **Secure Secret Sovereignty** law. Agents MUST NOT read `.env` files. Access is limited to environment exports verified by the **DevOps Sentinel**.
+
+### 3. Amnesia & Knowledge Purge
+After each sprint, tactical heuristics are distilled into the **Long-Term Memory (LTM)** located in `.agents/memory/` prior to the session context wipe.
+
+---
+
+## 📬 Institutional Contact
+**Owner**: Gustavo Mirabal Suarez - [gst.mirabal@gmail.com](mailto:gst.mirabal@gmail.com)
+**Project Identity**: {{INSTITUTIONAL_IDENTITY}}
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>

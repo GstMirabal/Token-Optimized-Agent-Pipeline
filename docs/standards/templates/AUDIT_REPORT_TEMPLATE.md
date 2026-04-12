@@ -1,26 +1,39 @@
-# 🏛️ Matrix Audit Report: [Module Name]
-
-## 🎯 Scope
-Detection and rectification of architectural violations in the [Module] cluster.
+# 🏛️ Matrix Audit Report: {{MODULE_NAME}}
+**Audit ID**: #A{{SPRINT_ID}}-{{RANDOM_ID}}
+**Auditor**: {{AGENT_ID}}
 
 ---
 
-## 📊 Governance Scorecard
-| Rule | Requirement | Status | Score |
+## 🚦 Executive Summary
+Detection and rectification of architectural violations in the **{{LAYER}}** layer.
+
+| Metric | Score | Status |
+| :--- | :--- | :--- |
+| **Architectural Purity** | {{PURITY_SCORE}}/100 | {{STATUS_ICON}} |
+| **Constitutional Compliance** | {{COMPLIANCE_SCORE}}/100 | {{STATUS_ICON}} |
+| **Unit Coverage** | {{COVERAGE_SCORE}}% | {{STATUS_ICON}} |
+
+---
+
+## 🔍 Structural Findings & Jurisprudence
+
+| Found Violation | Root Cause | Atomic Rectification | Law Applied |
 | :--- | :--- | :--- | :--- |
-| **Rule 10** | Architectural Decoupling | ✅ | 100/100 |
-| **Rule 42** | Encryption at Rest (AES-256) | ✅ | 100/100 |
-| **Rule 71** | Localization & Purity | ✅ | 100/100 |
-| **Rule 76** | Quality Coverage (>90%) | ✅ | 100/100 |
+| {{SYMPTOM}} | {{CAUSE}} | {{ACTION_TAKEN}} | Rule {{RULE_NUMBER}} |
+| ... | ... | ... | ... |
 
 ---
 
-## 🚨 Critical Findings
-- [X] [Symptom 1] -> [Rectification 1]
-- [ ] [Symptom 2] -> [Pending]
+## 🛠️ Trinity Standard Verification
+Status of the skill infrastructure within the module.
+
+- [ ] **README.md**: Institutional Overview certified.
+- [ ] **SKILL.md**: Procedural logic and YAML manifest verified.
+- [ ] **scripts/**: Executable logic and `__init__.py` present.
 
 ---
 
 ## 🛡️ Certification
-**Certified by [Agente Principal] under Metodología V3.**
-*Timestamp: [ISO Date]*
+**Certified by the Doc Orchestrator under Metodología Matrix v4.0.**
+*Timestamp: {{ISO_DATE}}*
+*Signature ID: {{UID_SIGNATURE}}*

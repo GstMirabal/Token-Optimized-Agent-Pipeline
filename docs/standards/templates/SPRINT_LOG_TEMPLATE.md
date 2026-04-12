@@ -1,27 +1,42 @@
-# 🚀 Sprint [ID]: [Sprint Title]
-
-## 🎯 Objective
-[Strategic goal for the 24-48h window]
-
----
-
-## 📋 Task Tracking
-| ID | Task Description | Status | Completion |
-| :--- | :--- | :--- | :--- |
-| **P1** | Implementation Plan [Sprint]-001 | ✅ | 2026-XX-YY |
-| **S1.1** | [Subtask Name] | ✅ | 2026-XX-YY |
-| **S2.1** | [Subtask Name] | 🚀 | ACTIVE |
-| **S3.1** | [Subtask Name] | 🕒 | PENDING |
+# 📝 Sprint Log: #{{SPRINT_ID}}
+**Session Tracker**: {{SESSION_ID}}
+**Role Active**: {{ACTIVE_ROLE}}
 
 ---
 
-## 🛡️ Governance Record
-- **Rule [X]**: [Compliance Evidence]
-- **Rule [Y]**: [Compliance Evidence]
+## 🚦 Session Metadata
+| Parameter | Value |
+| :--- | :--- |
+| **Active Layer** | {{LAYER}} |
+| **Strategic Goal** | {{GOAL}} |
+| **Intelligence State** | {{INTEL_STATUS}} |
+| **Start Time** | {{ISO_START}} |
 
 ---
 
-## 📈 Evidence of Success
-- [ ] Task Auditor [Sprint] Certified.
-- [ ] Pytest [Module] ISO-Passed.
-- [ ] Matrix Topology Map Updated.
+## 🏁 Tactical Progression
+Tracking of atomic goals achieved during the session.
+
+- [ ] **Objective 1**: {{DESCRIPTION}}
+    - `[x]` Action A
+    - `[ ]` Action B (Pending)
+- [ ] **Objective 2**: {{DESCRIPTION}}
+
+---
+
+## 🧠 Jurisprudence & Heuristic Harvest
+Extraction of knowledge for the **Amnesia Protocol**.
+
+| Friction Point | Resolution / Workaround | KI ID |
+| :--- | :--- | :--- |
+| {{FRICTION}} | {{RESOLUTION}} | {{KI_ID}} |
+
+---
+
+## ⚓ Zero Coordinate Seal
+Closing the session state and certifying traceability.
+
+**Strategic Lock**: {{LOCK_STATE}}
+**Next Phase**: {{NEXT_OBJECTIVE}}
+
+*Certified under conventional commit standard: feat(scope): message #{{SPRINT_ID}}*
