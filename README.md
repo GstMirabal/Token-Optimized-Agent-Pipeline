@@ -116,7 +116,7 @@ If you are adding the framework to an **already established repository**, follow
 
 1.  **Submodule Insertion:** In your root folder: `git submodule add https://github.com/GstMirabal/.agents .agents`
 2.  **AI Session Trigger:** Tell the AI: *"Initialize session using governance protocols in `.agents/` and keep the `task/task.md` indexed."*
-3.  **Roadmap Discovery:** Run the command: **`/workflow_matrix_orchestration`**.
+3.  **Roadmap Discovery:** Run the command: **`/matrix_workflow`**.
 
 The Orchestrator will automatically scan your source code, identify your project's current **Phase**, and initialize your local context using the **00x-00y** nomenclature while generating persistent architectural records in `task/roadmaps/`.
 
@@ -128,7 +128,7 @@ The framework supports automated workflows via standardized Markdown protocols. 
 | Command | Purpose | Location |
 | :--- | :--- | :--- |
 | **`start`** | **Session Gateway**: Initial health check, UID validation, and environment provisioning. | `workflows/start_workflow.md` |
-| **`matrix`** | **Universal Orchestration**: Governs Identity, Scaffolding, and Execution via Triple Lock. | `workflows/workflow_matrix_orchestration.md` |
+| **`matrix`** | **Universal Orchestration**: Governs Identity, Scaffolding, and Execution via Triple Lock. | `workflows/matrix_workflow.md` |
 | **`close`** | **Atomic Session Close**: Destroys context, set Strategic Lock to LOCKED, and triggers amnesia. | `workflows/close_workflow.md` |
 | **`/certification_audit`** | **Global Audit**: Agnostic, incremental certification of implemented logic. | `workflows/certification_audit.md` |
 
