@@ -78,6 +78,12 @@
       "summary": "Total Arsenal Unification & Structural Sovereignty: Standardization of the Trinity standard via mass-standardizer.",
       "path": "memory/core/ki_024_total_arsenal_unification.md",
       "tags": ["standardization", "topology", "skills"]
+    },
+    {
+      "id": "KI-026",
+      "summary": "Standardized Hierarchy Parity & Task Migration: Implementation of the official /docs/ hierarchy and submodule task migration logic.",
+      "path": "memory/core/ki_026_standardized_hierarchy_parity.md",
+      "tags": ["standardization", "topology", "governance"]
     }
   ]
 }

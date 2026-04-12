@@ -37,8 +37,8 @@ Update `task/task.md` with the unique session identifier.
 
 ## 2. Hook Protocol (Documentation Mapping)
 - Verify the existence of the `/docs/` tree.
-- **Action:** If structural support is missing, summon the **[Matrix Mapper](../agents/matrix_mapper.md)** to instantiate the hierarchy.
-- **Additional Action**: Summon the **[Doc Orchestrator](../agents/doc_orchestrator.md)** to ensure synchronization of contracts, architecture maps, and sprint logs.
+- **Action:** If structural support is missing (e.g., `docs/architecture/` or `docs/contracts/` absent), trigger **`standardization_workflow.md`** to instantiate the hierarchy and migrate submodule tasks.
+- **Additional Action**: Summon the **[Doc Orchestrator](../agents/doc_orchestrator.md)** to ensure synchronization of contracts and architecture maps.
 
 ## 3. Skill Efficiency and Manifest Validation
 Avoid unnecessary token waste on recursive physical inspections:
