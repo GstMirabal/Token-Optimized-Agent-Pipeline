@@ -19,7 +19,7 @@ Before any interaction, the Agent **MUST** read the anchor point **`docs/active_
 - **Action:** If a session collision is detected (`status == "IN_PROGRESS"`), trigger **`workflow_knowledge_extractor.md --forensic`** and abort.
 
 ## 0.2 Synchronization Audit (Sentinel Gateway)
-Before mapping tools, the Agent **MUST** invoke the **[GitHub Sentinel](agents/github_sentinel.md)**:
+Before mapping tools, the Agent **MUST** invoke the **[GitHub Sentinel](../agents/github_sentinel.md)**:
 - **Sync Audit**: Compare local vs. remote state via MCP. Block initiation if there is *drift* (local behind remote).
 - **Offline Mode**: Permitted during network failures, but with a **strict prohibition** on creating tactical branches. Reconnection triggers a mandatory re-audit.
 
@@ -28,17 +28,17 @@ Update `task/task.md` with the unique session identifier.
 
 ## 2. Hook Protocol (Documentation Mapping)
 - Verify the existence of the `/docs/` tree.
-- **Action:** If structural support is missing, summon the **[Matrix Mapper](agents/matrix_mapper.md)** to instantiate the hierarchy.
-- **Additional Action**: Summon the **[Doc Orchestrator](agents/doc_orchestrator.md)** to ensure synchronization of contracts, architecture maps, and sprint logs.
+- **Action:** If structural support is missing, summon the **[Matrix Mapper](../agents/matrix_mapper.md)** to instantiate the hierarchy.
+- **Additional Action**: Summon the **[Doc Orchestrator](../agents/doc_orchestrator.md)** to ensure synchronization of contracts, architecture maps, and sprint logs.
 
 ## 3. Skill Efficiency and Manifest Validation
 Avoid unnecessary token waste on recursive physical inspections:
-- **Fast Validation:** The **[DevOps Sentinel](agents/devops_sentinel.md)** will verify the integrity and update date of the `manifest_skills.json` file.
+- **Fast Validation:** The **[DevOps Sentinel](../agents/devops_sentinel.md)** will verify the integrity and update date of the `manifest_skills.json` file.
 - **Trinity Check:** Physical auditing of Trinity Standard compliance (`README`, `SKILL`, `/scripts/`) is perform only on skills that have been recently modified or added.
-- **MCP Check:** The **[DevOps Sentinel](agents/devops_sentinel.md)** will validate the health registry in `mcp-config.json`.
+- **MCP Check:** The **[DevOps Sentinel](../agents/devops_sentinel.md)** will validate the health registry in `mcp-config.json`.
 
 ## 4. Environment Health and Secrets (Shielding Protocol)
-The **[DevOps Sentinel](agents/devops_sentinel.md)** will verify the habitability of the sandbox:
+The **[DevOps Sentinel](../agents/devops_sentinel.md)** will verify the habitability of the sandbox:
 - **Action**: Execute environment validation via `Makefile` (`make setup`, `make check-env`).
 - **Secrets Protocol**: The Sentinel MUST **export** the `.env` file to the session. It is strictly prohibited for the agent to read or parse the secret's content into its contextual memory.
 - **Halt on Absence**: If `.env` does not exist, the Sentinel MUST abort and issue a **Manual Correction Alert** for the user (referencing `.env.template`).
@@ -51,15 +51,15 @@ The **[DevOps Sentinel](agents/devops_sentinel.md)** will verify the habitabilit
 - **Memory Routing:** Exclusively analyze the `memory_index.json` descriptor of the active namespace.
 
 ## 7. DevOps Certification (Habitability)
-The **[DevOps Sentinel](agents/devops_sentinel.md)** must certify that the environment is suitable for operation:
+The **[DevOps Sentinel](../agents/devops_sentinel.md)** must certify that the environment is suitable for operation:
 - **Certification**: Inject the signature `DEPLOYMENT_READY: PASSED` into the log.
 - **Note**: Deep structural auditing of code folders is delegated to the tactical planning phase (Implementation Plan).
 
 ## 8. Principal Agent Activation
-Command is strictly transferred to the **[Principal Agent](agents/principal_agent.md)**:
+Command is strictly transferred to the **[Principal Agent](../agents/principal_agent.md)**:
 - **8.1 MANDATORY HUMAN AUTHORIZATION (Triple Lock Security):**
-  - The Principal Agent is **STRICTLY PROHIBITED** from issuing the **`ROADMAP_UNLOCKED`** signal autonomously.
-  - The Agent MUST present the current roadmap state and explicitly ask: **"Do you authorize the unlocking of this roadmap and the transition to tactical planning?"**
+- The Principal Agent is **STRICTLY PROHIBITED** from issuing the **`ROADMAP_UNLOCKED`** signal autonomously.
+- The Agent MUST present the current roadmap state and explicitly ask: **"Do you authorize the unlocking of this roadmap and the transition to tactical planning?"**
 
 ## 9. Git Sovereignty
 Checkout/creation of the **`ai-sprint/taskID`** branch and application of Conventional Commits with the Sprint ID (#02x).

@@ -59,7 +59,7 @@
     "node_id": "gov_learner_01",
     "role": "Scope Guardian & Constitution Archiver",
     "jurisdiction": [
-      ".agents/memory/",
+      ".agents/core/memory/",
       "agents.md"
     ],
     "capabilities": [
@@ -77,7 +77,7 @@
     "node_id": "agent_orchestrator_01",
     "role": "Static Meta-Governance (Configuration & Prompt Manager)",
     "jurisdiction": [
-      ".agents/agents/"
+      ".agents/core/agents/"
     ],
     "capabilities": [
       "agent_staffing",

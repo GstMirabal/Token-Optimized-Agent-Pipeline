@@ -71,11 +71,11 @@ Total blockade of local operations and deployments until simultaneously validati
 ## 4. Memory Management and Feedback Loop
 
 ### Amnesia Protocol
-- **Ephemeral Memory**: Write a `.md` log strictly in the project's *namespace* subdirectory (e.g., `.agents/memory/core/`) documenting bug resolutions, prior to the end-of-session wipe.
+- **Ephemeral Memory**: Write a `.md` log strictly in the project's *namespace* subdirectory (e.g., `.agents/core/memory/core/`) documenting bug resolutions, prior to the end-of-session wipe.
 - **Pre-Wipe**: Physically check the existence of the referenced `.md` file in said namespace prior to altering metadata to `CLOSED_SUCCESSFULLY`.
 
 ### Feedback Loop (Jurisprudence vs Constitution)
-- **Constitutional Escalation**: Demand the execution of the [Governance Learner](agents/governance_learner.md) to uniquely audit the *namespace* of the Sprint (e.g., `/memory/cryptobot/`). Propose formal updates to `agents.md` if systemic patterns emerge.
+- **Constitutional Escalation**: Demand the execution of the [Governance Learner](core/agents/governance_learner.md) to uniquely audit the *namespace* of the Sprint (e.g., `/core/memory/cryptobot/`). Propose formal updates to `agents.md` if systemic patterns emerge.
 - **Definitive Amnesia**: Permanently delete the temporary logs of the audited *namespace* at the exact moment its unified rule is successfully inserted into `agents.md`.
 
 ### Memory Index Routing
@@ -103,9 +103,9 @@ Total blockade of local operations and deployments until simultaneously validati
 
 ## 6. Chain of Command
 
-- **[Principal Agent](agents/principal_agent.md)**: Strategic authority. Sole entity empowered to sanction the master **Roadmap**.
-- **[Orchestrator](agents/orchestrator.md)**: Tactical authority. Translates the approved Roadmap into a detailed **Implementation Plan** (which defines and constitutes the active **Sprint**).
-- **[Agent Orchestrator](agents/agent_orchestrator.md)**: Meta-Governance authority. Responsible for **Staffing** the Implementation Plan by designating existing agents or **creating** new subagent profiles as required.
-- **[Skill Architect](agents/skill_architect.md)**: Technical researcher and tool synthesizer. Responsible for the **Triangle of Sovereignty** (core/local/3rd) and tool benchmarking.
+- **[Principal Agent](core/agents/principal_agent.md)**: Strategic authority. Sole entity empowered to sanction the master **Roadmap**.
+- **[Orchestrator](core/agents/orchestrator.md)**: Tactical authority. Translates the approved Roadmap into a detailed **Implementation Plan** (which defines and constitutes the active **Sprint**).
+- **[Agent Orchestrator](core/agents/agent_orchestrator.md)**: Meta-Governance authority. Responsible for **Staffing** the Implementation Plan by designating existing agents or **creating** new subagent profiles as required.
+- **[Skill Architect](core/agents/skill_architect.md)**: Technical researcher and tool synthesizer. Responsible for the **Triangle of Sovereignty** (core/local/3rd) and tool benchmarking.
 - **Constitutional Birthright**: Every subagent profile (`.md`) MUST include a **Mandatory Initiation Cycle** (Cycle 0) that forces the reading of `agents.md` before any operational logic is executed. No agent is valid or authorized to act without this constitutional anchor.
 - **Workflow Lock**: No secondary or tertiary agent may initialize or execute if the [Principal Agent](agents/principal_agent.md) has not sanctioned the Roadmap, and if the [Orchestrator](agents/orchestrator.md) has not finalized the Implementation Plan. The [Agent Orchestrator](agents/agent_orchestrator.md) must certify the "Agent Ecosystem" readiness before execution begins.
