@@ -47,7 +47,7 @@ Termination of the session's physical presence:
 
 ## 6. Final Lock Handover
 Formal declaration of session termination:
-- **Sovereignty Seal:** Declare the Matrix as **LOCKED**. No further actions are permitted without a new **`workflow_start.md`** gatekeeper validation.
+- **Sovereignty Seal:** Declare the Matrix as **LOCKED**. No further actions are permitted without a new **`start_workflow.md`** gatekeeper validation.
 
 ---
 *Certified under Roadmap 008 - Matrix Strategic Intelligence*

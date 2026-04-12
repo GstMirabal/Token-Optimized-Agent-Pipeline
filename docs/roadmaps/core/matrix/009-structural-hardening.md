@@ -14,7 +14,7 @@ version: 1.0.0
 ## 🏁 Phase 1: Unificación de Persistencia (Rule 52)
 - [x] **Task 1: Migración de Metadata** - Traslado de `session_metadata.json` a `.agent_state/`.
 - [x] **Task 2: Depuración Topológica** - Eliminación de la carpeta `state/` (No autorizada).
-- [x] **Task 3: Alineación de Workflows** - Corrección de rutas en `workflow_start.md`.
+- [x] **Task 3: Alineación de Workflows** - Corrección de rutas en `start_workflow.md`.
 - [x] **Task 4: Sincronización de Git** - Actualización de `.gitignore`.
 
 ## 🏁 Phase 2: Nuclear Integrity Audit

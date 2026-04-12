@@ -24,7 +24,7 @@ Version: 1.1.0 | **VERIFIED_TOPOLOGY_SIG:** ef3c429d-matrix-v3.0-verified
 - **`contracts/`**: Formal technical agreements and I/O specifications.
 
 ## 3. Workflow Function Mapping
-- **`workflow_start.md`**: Initial session protocol and crash detection (Rule 0.1).
+- **`start_workflow.md`**: Initial session protocol and crash detection (Rule 0.1).
 - **`workflow_close.md`**: Intelligence distillation and atomic liquidation (Rule 5).
 - **`workflow_knowledge_extractor.md`**: Heuristic distillation and memory update.
 

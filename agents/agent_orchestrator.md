@@ -29,6 +29,7 @@ This node is the administrator and guardian of the `.agents/agents/` directory e
 ### 4. Staffing Director & Agent Factory
 - **Agent Designation**: Responsible for reading the **Implementation Plan** provided by the Orchestrator and assigning the most suitable subagents from the `agents_registry.json`.
 - **Ecosystem Expansion (Agent Creation)**: If a specific technical skill or jurisdiction required by the Implementation Plan is not covered by the current registry, this agent must **design and create** a new subagent profile (`.md`).
+- **Constitutional Injection (Rule of Iron)**: Every created agent profile **MUST** include a **Cycle 0: Mandatory Initiation** that forces the reading of `agents.md` before any other local logic. No subagent is valid without this constitutional anchor.
 - **Technical Delegation**: For every new agent creation or equipment request, this agent **MUST** summon the [Skill Architect](skill_architect.md) to perform technical benchmarking and select the optimal technical stack.
 - **Human Approval Gate**: Every new agent creation or assignment proposal must be presented to the User for explicit approval before writing to disk or updating the registry.
 - **Bootstrapping**: Once approved, it performs the initial "prompt injection", while the [Skill Architect](skill_architect.md) certifies the "Armory" is correctly equipped for the deployment phase.
