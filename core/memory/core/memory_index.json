@@ -1,5 +1,5 @@
 {
-  "version": "1.4.0",
+  "version": "1.4.1",
   "knowledge_items": [
     {
       "id": "KI-001",
@@ -54,6 +54,12 @@
       "summary": "Sovereign Skill Infrastructure: Hardening of internal discovery protocols and local tool installation (autoskills).",
       "path": "memory/core/ki_016_sovereign_skill_infra.md",
       "tags": ["governance", "infrastructure", "hardened"]
+    },
+    {
+      "id": "KI-017",
+      "summary": "Telemetry Distillation Summary: Results and patterns from Sprints 015-017.",
+      "path": "memory/core/ki_015_016_017_distillation.md",
+      "tags": ["telemetry", "distillation", "heuristics"]
     },
     {
       "id": "KI-021",
