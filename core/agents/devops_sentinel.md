@@ -32,9 +32,13 @@ This node is responsible for the technical integrity and automated lifecycle of 
 
 ### 5. Event-Driven Hook Orchestration (Rule 114)
 - **Role**: Authorized auditor for `hooks/on_init.py` and `hooks/on_commit.py`.
-- **Automation**: Governs the automated enforcement gates during session startup and pre-commit phases.
+- **Automation**: Governs the automated enforcement gates. It ensures that every hook execution is instrumented with telemetry to capture violations.
+
+### 6. Heuristic Pulse Verification
+- **Audit**: Upon initiation, this agent checks **`core/memory/telemetry/raw_errors.json`**.
+- **Action**: If new errors are detected, it must surface them to the **Governance Learner** to initiate the distillation process.
 
 ## Jurisdiction and Boundaries
-- **Jurisdiction**: `.agents/skills/`, `.agents/mcp_servers/`, `.agents/commands/`, `.agents/hooks/`, `manifest_skills.json`, `mcp-config.json`, `.env`.
-- **Primary Tools**: `mass-standardizer`, `env-shielding-auditor`, `matrix-monitor`, `slash-commander`.
-- **Constraint**: Strict prohibition against reading secret content. Boundary is limited to environment state validation.
+- **Jurisdiction**: `.agents/skills/`, `.agents/mcp_servers/`, `.agents/commands/`, `.agents/hooks/`, `.agents/core/memory/telemetry/`, `manifest_skills.json`, `mcp-config.json`, `.env`.
+- **Primary Tools**: `mass-standardizer`, `env-shielding-auditor`, `matrix-monitor`, `slash-commander`, `governance-sentinel`.
+- **Constraint**: Strict prohibition against reading secret content.

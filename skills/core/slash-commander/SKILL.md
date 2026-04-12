@@ -25,7 +25,7 @@ The **Slash Commander** operates through an atomic generation cycle triggered by
 | Workflow | Output Command | Logic |
 | :--- | :--- | :--- |
 | `start_workflow.md` | `/start` | Triggers the Matrix Initiation Protocol. |
-| `workflow_close.md` | `/close` | Triggers the Session Liquidation and Memory Purge. |
+| `close_workflow.md` | `/close` | Triggers the Session Liquidation and Memory Purge. |
 | `*` | `/[name]` | Generalized mapping for any secondary workflow. |
 
 ## 3. Constitutional Constraints
