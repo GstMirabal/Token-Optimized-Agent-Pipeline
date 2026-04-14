@@ -10,6 +10,16 @@
         "domain",
         "inventory"
       ]
+    },
+    {
+      "id": "KI-034",
+      "summary": "Sprint 034 Distillation: Verbatim syntax compliance and hardening of catch blocks (Rule 2.1) across identity flows.",
+      "path": "memory/cryptobot/sprint_034_distillation.md",
+      "tags": [
+        "governance",
+        "typescript",
+        "security"
+      ]
     }
   ]
 }
