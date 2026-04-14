@@ -173,5 +173,38 @@
       "env-shielding-auditor",
       "matrix-monitor"
     ]
+  },
+  "backend_identity_specialist": {
+    "node_id": "be_ident_spec_01",
+    "role": "Backend Identity & Audit Specialist",
+    "jurisdiction": [
+      "backend/apps/users/"
+    ],
+    "capabilities": [
+      "drf_serialization_expert",
+      "security_signals_logic",
+      "model_parity_auditing"
+    ],
+    "primary_tools": [
+      "pytest",
+      "django-admin"
+    ]
+  },
+  "frontend_ux_hardener": {
+    "node_id": "fe_ux_hard_01",
+    "role": "Frontend Identity & UX Hardener",
+    "jurisdiction": [
+      "frontend/src/"
+    ],
+    "capabilities": [
+      "institutional_ui_design",
+      "zod_schema_validation",
+      "secure_onboarding_flows"
+    ],
+    "primary_tools": [
+      "vite",
+      "npm",
+      "zod"
+    ]
   }
 }
