@@ -85,7 +85,8 @@ Total blockade of local operations and deployments until simultaneously validati
 ## 5. Central Base (Project Master Index)
 
 ### Hook Protocol (Initialization)
-- **Mandatory Topology**: Reject initialization in a project if the standardized `/docs/` tree does not exist. The [Principal Agent](agents/principal_agent.md) will throw a _Halt_ and summon the [Matrix Mapper](agents/matrix_mapper.md) to instantiate its dictatorial `[layer]/[app]/` hierarchy.
+- **Mandatory Topology**: Reject initialization if the standardized `/docs/` tree does not exist. The [Principal Agent](agents/principal_agent.md) will summon the [Matrix Mapper](agents/matrix_mapper.md) to instantiate its dictatorial `[layer]/[app]/` hierarchy.
+    - **Governance Exemption**: Sprints, Roadmaps, and the Active State MUST remain in unified root folders (`/docs/sprints/` and `/docs/roadmaps/`) to preserve project-wide strategic sovereignty, avoiding partitioning by mission (backend/frontend).
 - **Sovereignty and Overwrite**: If a host project presents dissident documentary tracking nomenclatures, the [Matrix Mapper](agents/matrix_mapper.md) must exhaustively migrate and homologate the existing information towards the new standard without omissions before eradicating the legacy formats.
 
 ### Nucleus Guard
@@ -125,3 +126,8 @@ This section contains rules automatically promoted from the Heuristic Governance
 - **Manual Override**: The user HAS PROHIBITED autonomous remediation for this violation. Remediation MUST be a **Manual Correction Alert**.
 - **Original Source**: `on_init`
 - **Vetted Date**: 1775991625.0121827
+
+#### Clause J-02: LAZY_SIGNAL_PARADIGM
+- **Heuristic Rule**: To prevent circular dependencies in Django `signals.py`, model imports MUST be performed locally inside the receiver functions. Signal decorators MUST use lazy string references for the `sender` argument (e.g., `@receiver(post_save, sender='users.User')`).
+- **Original Source**: `Sprint 028: Identity Hardening`
+- **Vetted Date**: 1713091200.0 (2026-04-14)
