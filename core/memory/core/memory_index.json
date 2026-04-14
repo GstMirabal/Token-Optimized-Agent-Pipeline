@@ -84,6 +84,12 @@
       "summary": "Standardized Hierarchy Parity & Task Migration: Implementation of the official /docs/ hierarchy and submodule task migration logic.",
       "path": "memory/core/ki_026_standardized_hierarchy_parity.md",
       "tags": ["standardization", "topology", "governance"]
+    },
+    {
+      "id": "KI-027",
+      "summary": "Lazy Signal Paradigm: Defensive implementation to prevent circular imports in Python/Django backend systems.",
+      "path": "memory/core/ki_027_lazy_signal_resolution.md",
+      "tags": ["django", "python", "architecture", "defensive-coding"]
     }
   ]
 }
