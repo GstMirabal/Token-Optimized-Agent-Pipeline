@@ -20,6 +20,16 @@
         "typescript",
         "security"
       ]
+    },
+    {
+      "id": "KI-037",
+      "summary": "Sprint 037 Distillation: Identity Command Center restoration, API synchronization, and backend model relaxation for partial updates.",
+      "path": "memory/cryptobot/sprint_037_distillation.md",
+      "tags": [
+        "identity",
+        "infrastructure",
+        "serialization"
+      ]
     }
   ]
 }
