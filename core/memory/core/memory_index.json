@@ -90,6 +90,12 @@
       "summary": "Lazy Signal Paradigm: Defensive implementation to prevent circular imports in Python/Django backend systems.",
       "path": "memory/core/ki_027_lazy_signal_resolution.md",
       "tags": ["django", "python", "architecture", "defensive-coding"]
+    },
+    {
+      "id": "KI-039",
+      "summary": "Profile Identity Hardening & Media Sovereignty: Implementation of the unified master drawer, dynamic address de-duplication, and backend media serving.",
+      "path": "memory/core/ki_039_profile_identity_hardening.md",
+      "tags": ["frontend", "identity", "ux", "media"]
     }
   ]
 }
