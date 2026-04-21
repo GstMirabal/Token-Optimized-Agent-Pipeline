@@ -4,31 +4,10 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-# Configuration
-TELEMETRY_PATH = Path("core/memory/telemetry/raw_errors.json")
-
-def log_error(error_type: str, details: str):
-    """Logs errors for heuristic distillation (Sprint #028)."""
-    if not TELEMETRY_PATH.exists():
-        TELEMETRY_PATH.parent.mkdir(parents=True, exist_ok=True)
-        with open(TELEMETRY_PATH, "w") as f:
-            json.dump([], f)
-    
-    try:
-        with open(TELEMETRY_PATH, "r") as f:
-            data = json.load(f)
-        
-        data.append({
-            "timestamp": datetime.now().isoformat(),
-            "hook": "on_commit",
-            "type": error_type,
-            "details": details
-        })
-        
-        with open(TELEMETRY_PATH, "w") as f:
-            json.dump(data, f, indent=2)
-    except Exception as e:
-        print(f"⚠️ [TELEMETRY] Failed to log error: {e}")
+import sys
+# Add parent directory to path so 'hooks' module can be found if run directly
+sys.path.append(str(Path(__file__).parent.parent))
+from hooks.telemetry import log_error
 
 def get_staged_files() -> list[str]:
     """Retrieves the list of files staged for the current commit."""
@@ -131,13 +110,18 @@ def main():
     
     trinity_ok = audit_trinity_standard()
     if not trinity_ok:
-        log_error("TRINITY_VIOLATION", "Rule 60 compliance check failed")
+        log_error("on_commit", "TRINITY_VIOLATION", "Rule 60 compliance check failed")
 
     secrets_ok = audit_secret_shielding()
     if not secrets_ok:
-        log_error("SECRET_VIOLATION", "Rule 66 scrutiny detected vulnerabilities")
+        log_error("on_commit", "SECRET_VIOLATION", "Rule 66 scrutiny detected vulnerabilities")
     
     if trinity_ok and secrets_ok:
+        try:
+            from hooks.state_mirror import mirror_active_state
+            mirror_active_state()
+        except ImportError:
+            pass
         print("✅ [DEVOPS SENTINEL] PR_COMMIT_UNLOCKED: PASSED.")
         sys.exit(0)
     else:

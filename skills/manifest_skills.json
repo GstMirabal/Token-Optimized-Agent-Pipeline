@@ -7,147 +7,236 @@
       "path": "core/omni-context-minimizer",
       "description": "Extracts the structural skeleton (AST) of any codebase to avoid massive context bloating.",
       "category": "Efficiency",
-      "tags": ["token-saver", "ast", "scan"]
+      "tags": [
+        "token-saver",
+        "ast",
+        "scan"
+      ]
     },
     {
       "name": "token-saver-auditor",
       "path": "core/token-saver-auditor",
       "description": "Audits the economic efficiency of agent plans and execution logs.",
       "category": "Governance",
-      "tags": ["cost-control", "audit", "optimization"]
+      "tags": [
+        "cost-control",
+        "audit",
+        "optimization"
+      ]
     },
     {
-      "name": "django-security",
-      "path": "3rd/django-security",
+      "name": "django-security-3rd",
+      "path": "3rd/django-security-3rd",
       "description": "Specialized security audit and hardening for Django applications.",
       "category": "Security",
-      "tags": ["django", "hardening", "verification"]
+      "tags": [
+        "django",
+        "hardening",
+        "verification"
+      ]
     },
     {
-      "name": "django-patterns",
-      "path": "3rd/django-patterns",
+      "name": "django-patterns-3rd",
+      "path": "3rd/django-patterns-3rd",
       "description": "Enforces best practices and design patterns for Django projects.",
       "category": "Architecture",
-      "tags": ["django", "best-practices", "refactor"]
+      "tags": [
+        "django",
+        "best-practices",
+        "refactor"
+      ]
     },
     {
-      "name": "django-verification",
-      "path": "3rd/django-verification",
+      "name": "django-verification-3rd",
+      "path": "3rd/django-verification-3rd",
       "description": "Automated verification of Django model logic and API contracts.",
       "category": "QA",
-      "tags": ["django", "api", "validation"]
+      "tags": [
+        "django",
+        "api",
+        "validation"
+      ]
     },
     {
-      "name": "django-tdd",
-      "path": "3rd/django-tdd",
+      "name": "django-tdd-3rd",
+      "path": "3rd/django-tdd-3rd",
       "description": "Generates and maintains a robust Test-Driven Development flow for Django.",
       "category": "QA",
-      "tags": ["django", "tests", "pytest"]
+      "tags": [
+        "django",
+        "tests",
+        "pytest"
+      ]
     },
     {
-      "name": "django-expert",
-      "path": "3rd/django-expert",
+      "name": "django-expert-3rd",
+      "path": "3rd/django-expert-3rd",
       "description": "General domain expert for complex Django logic resolution.",
       "category": "Expertise",
-      "tags": ["django", "complex-logic", "architecture"]
+      "tags": [
+        "django",
+        "complex-logic",
+        "architecture"
+      ]
     },
     {
-      "name": "skill-creator",
-      "path": "core/skill-creator",
+      "name": "skill-creator-3rd",
+      "path": "core/skill-creator-3rd",
       "description": "Assists in the creation of new atomic skills following global governance rules (Rule 71).",
       "category": "Development",
-      "tags": ["automation", "internal", "scaffolding"]
+      "tags": [
+        "automation",
+        "internal",
+        "scaffolding"
+      ]
     },
     {
       "name": "mcp-registry",
       "path": "core/mcp-registry",
       "description": "Registry and configuration manager for Model Context Protocol servers.",
       "category": "Infrastructure",
-      "tags": ["mcp", "context", "remote-api"]
+      "tags": [
+        "mcp",
+        "context",
+        "remote-api"
+      ]
     },
     {
       "name": "readme-standardizer",
       "path": "core/readme-standardizer",
       "description": "Ensures all documentation files follow the official Technical English and Institutional Identity standards.",
       "category": "Documentation",
-      "tags": ["i18n", "docs", "lint"]
+      "tags": [
+        "i18n",
+        "docs",
+        "lint"
+      ]
     },
     {
       "name": "python-quality-auditor",
       "path": "core/python-quality-auditor",
       "description": "Agnostic Python health-check (Ruff, Mypy, Bandit) to ensure compliance with framework standards.",
       "category": "Quality",
-      "tags": ["python", "lint", "mypy", "audit"]
+      "tags": [
+        "python",
+        "lint",
+        "mypy",
+        "audit"
+      ]
     },
     {
       "name": "env-shielding-auditor",
       "path": "core/env-shielding-auditor",
       "description": "Scans for hardcoded secrets (API keys, tokens) and validates .env security via Gitignore.",
       "category": "Security",
-      "tags": ["secrets", "env", "shielding", "pii"]
+      "tags": [
+        "secrets",
+        "env",
+        "shielding",
+        "pii"
+      ]
     },
     {
       "name": "js-standardizer",
       "path": "core/js-standardizer",
       "description": "Universal alignment for JS/TS projects (ESLint, Prettier, JSDoc) ensuring legal governance compliance.",
       "category": "Quality",
-      "tags": ["js", "ts", "lint", "jsdoc"]
+      "tags": [
+        "js",
+        "ts",
+        "lint",
+        "jsdoc"
+      ]
     },
     {
-      "name": "autoskills",
-      "path": "3rd/autoskills",
+      "name": "autoskills-3rd",
+      "path": "3rd/autoskills-3rd",
       "description": "Rule 70 Mandatory Discovery: Local arsenal discovery and dynamic tool orchestration.",
       "category": "Infrastructure",
-      "tags": ["discovery", "autoskills", "automation", "local"]
+      "tags": [
+        "discovery",
+        "autoskills",
+        "automation",
+        "local"
+      ]
     },
     {
       "name": "contract-writer",
       "path": "local/contract-writer",
       "description": "Custom synthesis for AI-driven API contract generation and documentary reverse engineering.",
       "category": "Documentation",
-      "tags": ["api", "contract", "docs"]
+      "tags": [
+        "api",
+        "contract",
+        "docs"
+      ]
     },
     {
       "name": "governance-sentinel",
       "path": "core/governance-sentinel",
       "description": "Monitors rule compliance and ensures constitutional alignment across the matrix.",
       "category": "Governance",
-      "tags": ["audit", "compliance", "constitution"]
+      "tags": [
+        "audit",
+        "compliance",
+        "constitution"
+      ]
     },
     {
       "name": "sprint-architect",
       "path": "core/sprint-architect",
       "description": "Translates high-level roadmaps into tactical sprint definitions and task structures.",
       "category": "Planning",
-      "tags": ["sprint", "planning", "tasks"]
+      "tags": [
+        "sprint",
+        "planning",
+        "tasks"
+      ]
     },
     {
       "name": "topology-scaffolder",
       "path": "core/topology-scaffolder",
       "description": "Enforces standardized project structures and instantiates initial layer hierarchies.",
       "category": "Architecture",
-      "tags": ["topology", "scaffolding", "structure"]
+      "tags": [
+        "topology",
+        "scaffolding",
+        "structure"
+      ]
     },
     {
-      "name": "skills-samples",
-      "path": "3rd/skills-samples",
+      "name": "skills-samples-3rd",
+      "path": "3rd/skills-samples-3rd",
       "description": "Example reference skills for learning framework-agnostic modularity.",
       "category": "Documentation",
-      "tags": ["examples", "core", "guidance"]
+      "tags": [
+        "examples",
+        "core",
+        "guidance"
+      ]
     },
     {
       "name": "mass-standardizer",
       "path": "core/mass-standardizer",
       "description": "Automated engine for the batch normalization of the matrix arsenal following the skill-creator standard.",
       "category": "Infrastructure",
-      "tags": ["automation", "normalization", "cleaning"]
+      "tags": [
+        "automation",
+        "normalization",
+        "cleaning"
+      ]
     },
     {
       "name": "matrix-monitor",
       "path": "core/matrix-monitor",
       "description": "Consolidated tool for monitoring matrix health, task progress, and legacy code audit.",
       "category": "Governance",
-      "tags": ["monitoring", "audit", "coverage", "legacy"]
+      "tags": [
+        "monitoring",
+        "audit",
+        "coverage",
+        "legacy"
+      ]
     }
   ]
 }

@@ -10,7 +10,7 @@ export default defineSkill({
         "matrix_orchestration": {
             description: "Universal Matrix Orchestration Protocol (Keyword: matrix)",
             handler: async (args, { say }) => {
-                await say(`Executing Matrix Workflow: matrix_orchestration\nReference: .agents/core/workflows/workflow_matrix_orchestration.md`);
+                await say(`Executing Matrix Workflow: matrix_orchestration\nReference: .agents/workflows/workflow_matrix_orchestration.md`);
                 // In a real Claude Code environment, this would trigger the agent to read the file.
                 // For now, it acts as an architectural pointer.
             },

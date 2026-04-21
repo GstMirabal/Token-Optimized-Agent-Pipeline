@@ -25,7 +25,7 @@ flowchart TD
 
     subgraph Memory_Buffer [Sovereign Memory]
         project -- Distills --> extractor[Knowledge Extractor]
-        extractor -- Persists --> knowledge[knowledge/]
+        extractor -- Persists --> memory[memory/]
     end
 
     %% Interconnections

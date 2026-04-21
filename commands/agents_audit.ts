@@ -5,12 +5,12 @@ import { defineSkill } from "@claudecode/skills";
  * Origin: agents_matrix
  */
 export default defineSkill({
-    id: "agents-start",
+    id: "agents-audit",
     commands: {
-        "start": {
-            description: "Session-Start Protocol (Keyword: start)",
+        "audit": {
+            description: "Constitutional Matrix Audit Protocol (Keyword: audit)",
             handler: async (args, { say }) => {
-                await say(`Executing Matrix Workflow: start\nReference: .agents/workflows/start_workflow.md`);
+                await say(`Executing Matrix Workflow: audit\nReference: .agents/workflows/audit_workflow.md`);
                 // In a real Claude Code environment, this would trigger the agent to read the file.
                 // For now, it acts as an architectural pointer.
             },

@@ -16,7 +16,7 @@ Establish a rigorous "Heuristic Pulse" gate for session closures to ensure high-
 
 ## 🏁 Phase 1: Heuristic Pulse (Rigorous Handshake)
 - [ ] **Task 1: Heuristic Gate Definition** - Refactor `close_workflow.md` to include a mandatory user confirmation step for any extracted KIs.
-- [ ] **Task 2: Telemetry Node Hardening** - Implementation of a unified error harvester in `core/memory/telemetry/`.
+- [ ] **Task 2: Telemetry Node Hardening** - Implementation of a unified error harvester in `memory/telemetry/`.
 
 ## 🏁 Phase 2: Local Redundancy (Mirror Protocol)
 - [ ] **Task 3: State Mirroring** - Create a shadow copy of `active_state.json` in `.agent_state/mirror.json` after every successful state change.
