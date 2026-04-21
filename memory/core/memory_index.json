@@ -96,6 +96,12 @@
       "summary": "Profile Identity Hardening & Media Sovereignty: Implementation of the unified master drawer, dynamic address de-duplication, and backend media serving.",
       "path": "memory/core/ki_039_profile_identity_hardening.md",
       "tags": ["frontend", "identity", "ux", "media"]
+    },
+    {
+      "id": "KI-040",
+      "summary": "Antigravity Monorepo Module Resolution: Strategies for satisfying root-bound linters via symlinks and relative parent imports.",
+      "path": "memory/core/ki_040_antigravity_monorepo_resolution.md",
+      "tags": ["antigravity", "tooling", "architecture", "monorepo"]
     }
   ]
 }
