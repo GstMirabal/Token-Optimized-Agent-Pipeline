@@ -4,33 +4,14 @@ import json
 from datetime import datetime
 from pathlib import Path
 
+import sys
+# Add parent directory to path so 'hooks' module can be found if run directly
+sys.path.append(str(Path(__file__).parent.parent))
+from hooks.telemetry import log_error
+
 # Configuration
 CONFIG_PATH = Path(".env")
 SYNC_SCRIPT = Path("skills/core/slash-commander/scripts/generate_commands.py")
-TELEMETRY_PATH = Path("core/memory/telemetry/raw_errors.json")
-
-def log_error(error_type: str, details: str):
-    """Logs errors for heuristic distillation (Sprint #028)."""
-    if not TELEMETRY_PATH.exists():
-        TELEMETRY_PATH.parent.mkdir(parents=True, exist_ok=True)
-        with open(TELEMETRY_PATH, "w") as f:
-            json.dump([], f)
-    
-    try:
-        with open(TELEMETRY_PATH, "r") as f:
-            data = json.load(f)
-        
-        data.append({
-            "timestamp": datetime.now().isoformat(),
-            "hook": "on_init",
-            "type": error_type,
-            "details": details
-        })
-        
-        with open(TELEMETRY_PATH, "w") as f:
-            json.dump(data, f, indent=2)
-    except Exception as e:
-        print(f"⚠️ [TELEMETRY] Failed to log error: {e}")
 
 def check_environment() -> bool:
     """Verifies that the .env file exists for secret sovereignty."""
@@ -57,11 +38,11 @@ def main():
     
     env_ok = check_environment()
     if not env_ok:
-        log_error("ENVIRONMENT_VIOLATION", ".env file missing")
+        log_error("on_init", "ENVIRONMENT_VIOLATION", ".env file missing")
 
     sync_ok = sync_commands()
     if not sync_ok:
-        log_error("SYNC_VIOLATION", "Slash Command sync failed")
+        log_error("on_init", "SYNC_VIOLATION", "Slash Command sync failed")
     
     if env_ok and sync_ok:
         print("✅ [DEVOPS SENTINEL] DEPLOYMENT_READY: PASSED. Matrix integrity certified.")

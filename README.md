@@ -51,14 +51,14 @@
 Universal-Agents is a military-grade AI agent governance framework designed to prevent context bloat, secure RCE environments, and ensure long-term knowledge retention. It transforms standard AI agents into a disciplined swarm of specialized subagents.
 
 **Key Features:**
-*   **Zero-Trust Identity Hierarchy:** Segregated Mentor (Principal), Orchestrator (Planning), DevOps (Provisioning), Matrix (Execution), and Auditor (Validation) roles to prevent autonomous logic failures.
-*   **Universal Matrix Orchestration:** A single, hardened protocol (`workflow_matrix_orchestration.md`) that governs all tactical actions through the **Triple Lock** authorization architecture.
-*   **100% Coverage Mandate:** Strategic requirement (Rule 76) enforced by the **Matrix_QA_Architect**, ensuring zero-defect integration before any code commitment.
+*   **Zero-Trust Identity Hierarchy:** Segregated Principal, Orchestrator, QA Agent, Tester Agent, and Skill Architect roles to prevent autonomous logic failures.
+*   **Matrix V2 Execution Pipeline:** A strict Double-Gate Review protocol ensuring structural and functional verification before user handoffs.
+*   **100% Coverage Mandate:** Strategic requirement enforced by the **Tester Agent**, ensuring zero-defect integration before any code commitment.
 *   **Token-Saver Auditor:** An economic kill-switch that prevents inefficient plans and reduces API costs by optimizing context windows.
 *   **Omni-Context Minimizer:** Smart AST-based code skeleton extraction that allows AI to understand massive files (1000+ lines) while only consuming 10% of the normal token cost.
-*   **MCP Registry & Routing:** Strict Zero-Trust assignment of external Model Context Protocols (MCPs) via `mcp-registry/registry.json`.
-*   **Knowledge Extraction & Memory:** Automatic knowledge distillation via `extract_workflow.md`, indexing lessons into atomic Knowledge Items (KIs).
-*   **Persistent Compliance Roadmap:** Integrated tracking via `task/roadmaps/`, providing a verifiable history of security, quality, and logic status.
+*   **Skill Forge & Arsenal Flat Mapping:** Universal, deterministic tooling governed by the Trinity Standard and external nomenclature (`-3rd`), natively hooked to Claude via `slash-commander`.
+*   **Knowledge Extraction & Memory:** Automatic heuristic distillation via `extract_workflow.md`, indexing lessons into atomic Knowledge Items (KIs) inside `/memory/`.
+*   **Persistent Compliance Roadmap:** Integrated topology via `docs/roadmaps/`, anchored by the unbreakable `docs/active_state.json`.
 
 ### Built With
 
@@ -108,32 +108,38 @@ Once integrated, the framework automatically triggers its auditors during your A
 
 ```bash
 # Example: Extracting the skeleton of a large class to save tokens
-python .agents/skills/core/omni-context-minimizer/scripts/omni_minimizer.py path/to/large_file.py
+python .agents/skills/omni-context-minimizer/scripts/omni_minimizer.py path/to/large_file.py
 ```
 
 ### 🛡️ Scenario: Retrofitting Existing Projects
 If you are adding the framework to an **already established repository**, follow this 3-step sequence to align your architectural roadmap:
 
 1.  **Submodule Insertion:** In your root folder: `git submodule add https://github.com/GstMirabal/.agents .agents`
-2.  **AI Session Trigger:** Tell the AI: *"Initialize session using governance protocols in `.agents/` and keep the `task/task.md` indexed."*
-3.  **Roadmap Discovery:** Run the command: **`/matrix_workflow`**.
+2.  **AI Session Trigger:** Tell the AI: *"Initialize session using governance protocols in `.agents/` and execute `/start`."*
+3.  **Roadmap Discovery:** The matrix will map `docs/active_state.json`. Run the command: **`/matrix`**.
 
-The Orchestrator will automatically scan your source code, identify your project's current **Phase**, and initialize your local context using the **00x-00y** nomenclature while generating persistent architectural records in `task/roadmaps/`.
+The Orchestrator will automatically scan your source code, identify your project's current Phase, initialize your local context using the `task_scope.md` payload, and generate persistent architectural tracking in `docs/roadmaps/`.
 
 ---
 
 ### 🤖 AI-Ops: Core Commands (Slash Commands)
-The framework supports automated workflows via standardized Markdown protocols. Use these to trigger complex engineering tasks:
+The framework supports automated workflows via standardized TypeScript bridges inside `commands/`. Use these native slash commands locally in Claude Code:
 
-| Command | Purpose | Location |
-| :--- | :--- | :--- |
-| **`start`** | **Session Gateway**: Initial health check, UID validation, and environment provisioning. | `workflows/start_workflow.md` |
-| **`matrix`** | **Universal Orchestration**: Governs Identity, Scaffolding, and Execution via Triple Lock. | `workflows/matrix_workflow.md` |
-| **`close`** | **Atomic Session Close**: Destroys context, set Strategic Lock to LOCKED, and triggers amnesia. | `workflows/close_workflow.md` |
-| **`/certification_audit`** | **Global Audit**: Agnostic, incremental certification of implemented logic. | `workflows/certification_audit.md` |
+| Command | Purpose |
+| :--- | :--- |
+| **`/start`** | **Entry Gate**: Initializes Cero-Memory, syncs DevOps/Git Sentinels, and prepares execution limits. |
+| **`/matrix`** | **Orchestration**: The V2 Double-Gate execution pipeline. Distributes tasks across subagents. |
+| **`/close`** | **Exit Gate**: Extracts heuristics, updates roadmaps, mirrors state, and seals the repo securely. |
+| **`/audit`** | **Inquisitor**: Proactive structural maintenance to purge logic drifts and missing `.md` rules. |
+| **`/skill_forge`** | **Quartermaster**: Creates, tests, and natively registers new Matrix tools without mutating production logic. |
+| **`/remediation`** | **Panic Button**: Halts infinite hallucination loops, nukes git to pristine state, and logs negative knowledge. |
+| **`/standardization`** | **Structural**: Enforces the `[layer]/[app]/` dictionary and Technical English purity. |
+| **`/extract`** | **Distillation**: Memory indexer handling the "Jurisprudence Loop". |
+| **`/deployment`** | **Vanguard**: Merges code to upstream branches and operates CI/CD boundaries. |
+| **`/skeleton`** | **Context Compression**: Forces the Omni-Minimizer to carve AST summaries of massive codefiles to protect token limits. |
 
 > [!TIP]
-> **Submodule Isolation Policy:** All task tracking (`task/task.md`), sprint logs (`sprints/`), and local roadmaps (`roadmaps/`) are strictly ignored by Git. You can manage your project-specific tasks inside the `.agents/` folder without polluting the global framework repository.
+> **Documentation Sovereignty:** All technical docs, implementation plans (`docs/sprints/`), and local roadmaps (`docs/roadmaps/`) are tightly bound directly to Matrix V2 tracking under `/docs/`.
 
 > [!IMPORTANT]
 > **Orchestration Manifest:** The Orchestrator now uses **`.agents/skills/manifest_skills.json`** to statically route tools, drastically reducing token consumption and discovery time during sessions.
@@ -147,7 +153,7 @@ The framework supports automated workflows via standardized Markdown protocols. 
 }
 ```
 
-Check the `/workflows/` directory for automated protocols like project scaffolding. Explore `/skills/core/mcp-registry/` for adding external LLM data connections.
+Check the `/workflows/` directory for automated protocols like project scaffolding. Explore `/mcp_servers/` for bridging external LLM data nodes.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

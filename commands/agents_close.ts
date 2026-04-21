@@ -10,7 +10,7 @@ export default defineSkill({
         "close": {
             description: "Session-Close Protocol (Keyword: close)",
             handler: async (args, { say }) => {
-                await say(`Executing Matrix Workflow: close\nReference: .agents/core/workflows/close_workflow.md`);
+                await say(`Executing Matrix Workflow: close\nReference: .agents/workflows/close_workflow.md`);
                 // In a real Claude Code environment, this would trigger the agent to read the file.
                 // For now, it acts as an architectural pointer.
             },

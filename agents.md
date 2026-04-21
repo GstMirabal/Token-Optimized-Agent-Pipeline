@@ -34,9 +34,10 @@ Total blockade of local operations and deployments until simultaneously validati
 2. Logging of the `DEPLOYMENT_READY: PASSED` token.
 3. Explicit user authorization in the prompt.
 
-### Context Optimization
-- **Limited Reading**: Files evaluated with `wc -l` > 200 lines must not be dumped entirely. Demand reading using AST, `head`, `tail`, or `grep`.
-- **Anti-Amnesia**: After 10 interactions or surpassing 5,000 processed tokens, execute mandatory re-reading of this base document and the central index.
+### Context Optimization & Compression
+- **Token-Saver Mandate**: Files evaluated with a size greater than 200 lines MUST NOT be dumped entirely into active LLM context. Agents are **CONSTITUTIONALLY BANNED** from using native standard file-read functions on massive targets.
+- **AST Skeleton Enforcement**: To interpret large architectures, the Agent MUST exclusively invoke `skills/omni-context-minimizer/scripts/omni_minimizer.py` to extract structural classes and headers before any other tactical operation.
+- **Anti-Amnesia**: After 10 interactions or surpassing 5,000 processed tokens, execute mandatory re-reading of this base document and the active state anchor.
 
 ### WIP Safety Freeze
 - **Pre-Shielding**: Abort the editing process early if executing `git status --porcelain` returns unresolved local differences.
@@ -44,7 +45,7 @@ Total blockade of local operations and deployments until simultaneously validati
 
 ### Agent Isolation
 - **Jurisdictional Lock**: Limit and strictly cap structural editing to `1` single physical file per instantiated subagent task.
-- **No Interference**: Avoid logical access in parallel, aborting the operation if the index (`task.md`) shows the file listed by another subtask in a progress state.
+- **No Interference**: Avoid logical access in parallel, aborting the operation if the index (`task_scope.md`) shows the file listed by another subtask in a progress state.
 
 ## 3. Architecture and Topology of the Project
 
@@ -61,7 +62,7 @@ Total blockade of local operations and deployments until simultaneously validati
     1. **`README.md`**: Institutional overview.
     2. **`SKILL.md`**: Procedural logic and YAML frontmatter.
     3. **`/scripts/`**: Executable logic with `__init__.py`.
-- **Topological Order**: Skills and system interfaces MUST be isolated into exactly four regulated layers: `core/`, `local/`, `3rd/`, and `mcp_servers/` (reserved explicitly for Model Context Protocol bridged architectures). Zero-tolerance for root-layer contamination outside these bounds.
+- **Topological Order**: The Arsenal (Skills) MUST be mapped directly inside the `skills/` umbrella as a flat hierarchy. Sub-layers mapping origin (like core/ or local/) are strictly **PROHIBITED**. However, maintaining source transparency is legally binding: ANY skill or tool originating from a third-party, vendor, or external fork MUST possess the `-3rd` suffix in its directory name (e.g., `skill-creator-3rd`). System interfaces (`agents/`, `memory/`, `workflows/`, `rules/`) and bridging infrastructure (`mcp_servers/`, `hooks/`, `commands/`, `docs/`) reside directly at the active root.
 - **Enforcement**: The `mass-standardizer` tool is the official auditor for this standard.
 - **Secure Secret Sovereignty**: Agents are strictly prohibited from reading or parsing secret-holding files (e.g., `.env`) into their contextual memory. Their interaction is limited exclusively to invoking **environment export** commands. Any missing secret MUST trigger a **Manual Correction Alert** to the user, prohibiting autonomous deduction or bypass.
 
@@ -71,11 +72,11 @@ Total blockade of local operations and deployments until simultaneously validati
 ## 4. Memory Management and Feedback Loop
 
 ### Amnesia Protocol
-- **Ephemeral Memory**: Write a `.md` log strictly in the project's *namespace* subdirectory (e.g., `.agents/core/memory/core/`) documenting bug resolutions, prior to the end-of-session wipe.
+- **Ephemeral Memory**: Write a `.md` log strictly in the project's *namespace* subdirectory (e.g., `.agents/memory/core/`) documenting bug resolutions, prior to the end-of-session wipe.
 - **Pre-Wipe**: Physically check the existence of the referenced `.md` file in said namespace prior to altering metadata to `CLOSED_SUCCESSFULLY`.
 
 ### Feedback Loop (Jurisprudence vs Constitution)
-- **Constitutional Escalation**: Demand the execution of the [Governance Learner](core/agents/governance_learner.md) to uniquely audit the *namespace* of the Sprint (e.g., `/core/memory/cryptobot/`). Propose formal updates to `agents.md` if systemic patterns emerge.
+- **Constitutional Escalation**: Demand the execution of the [Governance Learner](agents/governance_learner.md) to uniquely audit the *namespace* of the Sprint (e.g., `/memory/cryptobot/`). Propose formal updates to `agents.md` if systemic patterns emerge.
 - **Definitive Amnesia**: Permanently delete the temporary logs of the audited *namespace* at the exact moment its unified rule is successfully inserted into `agents.md`.
 
 ### Memory Index Routing
@@ -102,15 +103,45 @@ Total blockade of local operations and deployments until simultaneously validati
 - **Discovery Manifest**: The `mcp-config.json` file in the root acts as the official registry for all Model Context Protocol servers. It is the single point of discovery for AI clients (Claude, Cursor, etc.) to interface with the Matrix's technical skills.
 - **Sync Rule**: Any new server added to `mcp_servers/` MUST be reflected in this manifest to maintain operational capability.
 
-## 6. Chain of Command
+## 6. Chain of Command & Core Workflow (Matrix V2)
 
-- **[Principal Agent](core/agents/principal_agent.md)**: Strategic authority. Sole entity empowered to sanction the master **Roadmap**.
-- **[Orchestrator](core/agents/orchestrator.md)**: Tactical authority. Translates the approved Roadmap into a detailed **Implementation Plan** (which defines and constitutes the active **Sprint**).
-- **[Agent Orchestrator](core/agents/agent_orchestrator.md)**: Meta-Governance authority. Responsible for **Staffing** the Implementation Plan by designating existing agents or **creating** new subagent profiles as required.
-- **[Skill Architect](core/agents/skill_architect.md)**: Technical researcher and tool synthesizer. Responsible for the **Triangle of Sovereignty** (core/local/3rd) and tool benchmarking.
-- **Constitutional Birthright**: Every subagent profile (`.md`) MUST include a **Mandatory Initiation Cycle** (Cycle 0) that forces the reading of `agents.md` before any operational logic is executed. No agent is valid or authorized to act without this constitutional anchor.
-- **Workflow Lock**: No secondary or tertiary agent may initialize or execute if the [Principal Agent](agents/principal_agent.md) has not sanctioned the Roadmap, and if the [Orchestrator](agents/orchestrator.md) has not finalized the Implementation Plan. The [Agent Orchestrator](agents/agent_orchestrator.md) must certify the "Agent Ecosystem" readiness before execution begins.
-- **Rule 113: Slash Sovereignty**: Every high-integrity operational workflow defined in `core/workflows/` MUST have a corresponding registered slash command alias for friction-less 'Instruction-to-Action' parity. The `slash-commander` skill is the authoritative engine for this synchronization.
+The Matrix operates under a rigid, highly militarized sequential pipeline. Role usurpation is strictly prohibited. Subagents cannot bypass the Principal Agent.
+
+### 6.1. Subagent Roles (The Council)
+- **[Principal Agent](agents/principal_agent.md)**: Supreme Coordinator. Does NOT code or execute. Reviews and validates macro-states, manages the Golden Gate (Human Authorization), and orchestrates the handoffs.
+- **[Orchestrator](agents/orchestrator.md)**: Tactical Architect. Responsible exclusively for analyzing the workspace and drafting the initial **Sprint Roadmap**.
+- **[Agent Orchestrator](agents/agent_orchestrator.md)**: Human Resources/Staffing. Assigns specific specialized subagents to the steps inside the Sprint Roadmap.
+- **[Skill Architect](agents/skill_architect.md)**: Tool Synthesizer. Prepares and injects the executable skills/scripts needed for the sprint.
+- **[Rule Validator](agents/rule_validator.md)**: Governance Sentinel. Audits `/rules`; creates and indexes missing topological or structural norms.
+- **[QA Agent](agents/qa_agent.md)**: Structural Verifier. Validates code standards, syntax, and constitutional adherence post-execution.
+- **[Tester Agent](agents/tester_agent.md)**: Functional Verifier. Writes and runs tests, ensuring logic stability and regression absence post-execution.
+
+### 6.2. The Standard Execution Pipeline
+**Phase 0: Amnestic Anchor (Cycle 0)**:
+- Subagents MUST initialize with **Zero-Memory**. They will read `agents.md` as their absolute first operation.
+- They operate inside a strict **Context Package** (`task_scope.md`) delivered by the Principal Agent.
+
+**Phase 1: Tactical Blueprint**:
+- The **Orchestrator** drafts the initial unassigned `Sprint Roadmap` and delivers it to the Principal Agent.
+
+**Phase 2: Master Assembly**:
+- The **Principal Agent** summons the auxiliary council (in isolated sessions) to harden the plan:
+  1. `Agent Orchestrator` assigns the subagents contextually.
+  2. `Skill Architect` defines/creates the tools required.
+  3. `Rule Validator` creates any missing rules in `/rules`.
+- The Principal Agent compiles these into a physical, unified `sprint_blueprint.md`.
+
+**Phase 3: The Golden Gate**:
+- The **Principal Agent** delivers the `sprint_blueprint.md` to the Human User and holds operations until explicit OK is granted.
+
+**Phase 4: Monitored Execution & Remediation Loop**:
+- The **Principal Agent** calls the executing subagent, delivering the isolated `task_scope.md`.
+- Upon task completion, the artifact undergoes the **Double-Gate Review**: `QA Agent` checks standards, `Tester Agent` evaluates functionality.
+- *Remediation Loop*: If rejected, the Principal Agent bounces the code back to the executing subagent for patching without bothering the Human.
+- *Approval*: Only upon successful, bug-free closure does the Principal Agent request Human authorization to mark the step as completed.
+
+### 6.3. System Bridges (Hooks & Commands)
+- **Rule 113: Slash Sovereignty**: Every high-integrity operational workflow defined in `workflows/` MUST have a corresponding registered slash command alias for friction-less 'Instruction-to-Action' parity. The `slash-commander` skill is the authoritative engine for this synchronization.
 - **Rule 114: Hook Sovereignty**: Critical automation via Claude Hooks MUST be registered in the `hooks/` layer. It defines Hooks as the "Enforcement Arm" of the Matrix during session initiation and commit phases.
 
 ## 7. Jurisprudence (Heuristic Amendments)

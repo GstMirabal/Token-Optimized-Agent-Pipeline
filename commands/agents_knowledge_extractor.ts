@@ -10,7 +10,7 @@ export default defineSkill({
         "knowledge_extractor": {
             description: "Knowledge Extractor and Intelligence Distillation Protocol (V 3.1.0)",
             handler: async (args, { say }) => {
-                await say(`Executing Matrix Workflow: knowledge_extractor\nReference: .agents/core/workflows/workflow_knowledge_extractor.md`);
+                await say(`Executing Matrix Workflow: knowledge_extractor\nReference: .agents/workflows/workflow_knowledge_extractor.md`);
                 // In a real Claude Code environment, this would trigger the agent to read the file.
                 // For now, it acts as an architectural pointer.
             },
