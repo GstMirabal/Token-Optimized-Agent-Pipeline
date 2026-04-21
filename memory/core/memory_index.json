@@ -102,6 +102,12 @@
       "summary": "Antigravity Monorepo Module Resolution: Strategies for satisfying root-bound linters via symlinks and relative parent imports.",
       "path": "memory/core/ki_040_antigravity_monorepo_resolution.md",
       "tags": ["antigravity", "tooling", "architecture", "monorepo"]
+    },
+    {
+      "id": "KI-041",
+      "summary": "Sovereign Visibility Closure: Hardening of Profile.tsx, deployment of Market Intelligence terminal, and environmental verification protocols.",
+      "path": "memory/core/ki_040_sovereign_visibility_closure.md",
+      "tags": ["frontend", "identity", "ux", "market-intelligence", "qa", "sprint-040"]
     }
   ]
 }
