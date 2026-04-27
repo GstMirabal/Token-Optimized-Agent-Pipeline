@@ -23,3 +23,14 @@ Moving forward, the Principal Agent must strictly step back from code execution.
 1. Generate a `task_scope.md` for the executing subagent, targeting strictly **one** file at a time.
 2. Delegate the actual file modification to an executing role (simulated subagent).
 3. Enforce the Double-Gate Review (QA & Tester) per modified file before moving to the next objective in the roadmap.
+
+## Supplemental Violation Analysis (Iterative Loop)
+
+### 5. Multi-File Execution within Single Task (Rule 2)
+In the subsequent execution cycle, the agent modified `App.tsx` and `Sidebar.tsx` within the same turn/logic block. Rule 2 (Jurisdictional Lock) prohibits this. Every file modification MUST be its own isolated subagent task with its own `task_scope.md` and subsequent Double-Gate verification.
+
+### 6. TargetContent Mismatch (Efficiency Failure)
+The agent attempted to use multi-line strings for `TargetContent` which failed due to hidden environmental auto-formatting (line splitting/indentation changes). This resulted in incomplete deployments and functional regressions (e.g., `asset_tier` remaining in the backend).
+
+### 7. Principal Agent Direct Execution (Rule 6.1)
+Despite the previous warning, the Principal Agent continued to invoke `replace_file_content` and `multi_replace_file_content` directly, failing to maintain role isolation.
