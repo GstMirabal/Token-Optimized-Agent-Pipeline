@@ -1,22 +1,20 @@
 ---
 description: "Context Compression and AST Skeleton Extraction (Keyword: skeleton)"
-version: 1.0.0
+version: 2.0.0
 ---
 
 # 🛡️ Workflow: Skeleton (Context Optimizer)
 
 Master protocol for reducing token consumption by extracting high-level architectural summaries from massive source files (>200 lines).
 
-## 0. Trigger Condition
-- **Efficiency Override:** Automatically invoked by the **Orchestrator** or manually by the **Human User** when facing files that threaten the active context window.
+## Execution Flow
 
-## 1. Physical Extraction (@skill_architect)
-- **Tool Invocation:** The Agent MUST execute the native command: `python3 .agents/skills/omni-context-minimizer/scripts/omni_minimizer.py [target_path]`.
-- **Output Handling:** The resulting AST skeleton (classes, function signatures, and decorators) is captured while stripping out the implementation logic.
-
-## 2. Context Ingestion
-- **Verification:** The Agent replaces the full-file read attempt with the extracted skeleton.
-- **Goal:** Ensure the AI understands the **What** (Interfaces/API) without wasting tokens on the **How** (Logic Bloat).
+| Phase | Step | Action / Constraint |
+| :--- | :--- | :--- |
+| **0. Trigger** | `efficiency_override`| Invoked automatically by Orchestrator or manually when facing files >200 lines. |
+| **1. Extraction**| `omni_minimizer` | `Skill Architect` MUST execute `omni_minimizer.py [target_path]`. |
+| **1. Extraction**| `output_handling` | AST skeleton (classes, function signatures, decorators) is captured; logic is stripped. |
+| **2. Ingestion** | `context_swap` | Replace full-file read attempts with the extracted skeleton to save tokens. |
 
 ---
-*Certified under Matrix V2 Efficiency Standards*
+*Optimized for Matrix V2 Efficiency Standards & Tabular Density (v2.0.0).*

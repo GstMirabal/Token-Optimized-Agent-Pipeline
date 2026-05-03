@@ -1,29 +1,22 @@
 ---
 description: "Emergency Rollback and Remediation Protocol (Keyword: remediation)"
-version: 1.0.0
+version: 2.0.0
 ---
 
 # 🛡️ Workflow: Remediation (The Panic Button)
 
-A critical emergency protocol designed to intercept infinite hallucination loops, cascading logic failures, or Double-Gate stalemates. Its sole purpose is to nuke corrupted state, extract negative-heuristics natively, and return the system to safety without Human intervention.
+A critical emergency protocol designed to intercept infinite hallucination loops or Double-Gate stalemates. Its sole purpose is to nuke corrupted state, extract negative-heuristics natively, and return the system to safety.
 
-## 0. Trigger Conditions (Automatic or Manual)
-- **Automatic Invocation (Rule 67):** Triggered automatically by the `matrix_workflow.md` if the `QA Agent` or `Tester Agent` forcefully reject the exact same logic execution block **more than 3 consecutive times** (The Kill Switch).
-- **Manual Invocation:** Triggered explicitly by the Human User detecting an Agent spinning out of context.
+## Execution Flow
 
-## 1. Deadlock Termination (The Kill Switch)
-- **Immediate Execution Halt:** All active tactical design (`Orchestrator`) and physical implementations (`Executing Node`) are rigorously terminated. The `task_scope.md` is locked.
-- **State Nuke:** The workspace is forcibly sanitized via `git restore . && git clean -fd`. The environment is returned identically to its Pre-Sprint pristine status.
-
-## 2. Negative-Heuristic Extraction (The Post-Mortem)
-- **Error Mining:** The terminal telemetry regarding WHY the cycle failed (e.g. Circular import, incorrect standard library assumption, syntax mismatch) is scraped from `memory/telemetry/raw_errors.json`.
-- **Negative Knowledge Item (N-KI):** An explicit ephemeral file is created within the namespace memory (`/memory/[namespace]/ki_FAILED_...`).
-- **Logic Tagging:** The N-KI explicitly logs: *"Attempting [X] with pattern [Y] systematically collapsed the Double-Gate review. DO NOT ATTEMPT THIS PATTERN AGAIN in current context."*
-
-## 3. Sprint Rollback & Notification
-- **Roadmap Tagging:** The active roadmap in `docs/active_state.json` is updated with a `BLOCKED: TERMINAL_REMEDIATION_LOOP` signature instead of `COMPLETED`.
-- **Human Handshake:** The system must definitively alert the user: *"CRITICAL: Remediation Protocol was triggered. Deadlock achieved on execution. Negative-heuristic logged. Branch returned to zero-state. Awaiting strategic human pivot."*
-- Exit and **SESSION LOCKED**.
+| Phase | Step | Action / Constraint |
+| :--- | :--- | :--- |
+| **0. Trigger** | `auto_invocation`| Triggered automatically if QA or Tester forcefully reject the exact same logic block **>3 consecutive times**. |
+| **1. Deadlock Term**| `state_nuke` | Immediate execution halt. Workspace is forcibly sanitized (`git restore . && git clean -fd`) to Pre-Sprint pristine status. |
+| **2. Extraction** | `error_mining` | Scrape telemetry for the failure origin (e.g. Circular import, syntax mismatch). |
+| **2. Extraction** | `negative_ki` | Inject logic tag into `agents.md` via `Governance Learner` banning the failed pattern. No memory logs are kept. |
+| **3. Rollback** | `roadmap_tag` | Update `docs/active_state.json` with `BLOCKED: TERMINAL_REMEDIATION_LOOP`. |
+| **3. Rollback** | `session_lock` | Explicitly alert human user of deadlock. Exit and enforce **SESSION LOCKED**. |
 
 ---
-*Optimized for Matrix V2 Failsafe Constraints*
+*Optimized for Matrix V2 Failsafe Constraints & Tabular Density (v2.0.0).*
