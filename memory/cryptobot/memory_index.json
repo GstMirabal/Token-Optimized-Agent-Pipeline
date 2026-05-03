@@ -40,6 +40,17 @@
         "technical_analysis",
         "testing"
       ]
+    },
+    {
+      "id": "KI-047",
+      "summary": "Market Intelligence Ingestion & Resiliency Protocol: Hardening of macro-indicator correlation, derivatives tracking, and CCXT circuit breaker patterns.",
+      "path": "memory/cryptobot/ki_047_market_intelligence_sync.md",
+      "tags": [
+        "quant",
+        "market-intelligence",
+        "resilience",
+        "binance"
+      ]
     }
   ]
 }
