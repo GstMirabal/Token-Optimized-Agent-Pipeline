@@ -5,160 +5,104 @@ It dictates in an absolute and transversal manner the behavior of subagents, cod
 
 ## 1. Code, Dialect, and Style
 
-### Nomenclature and Linters
-- **Python**: Validate against PEP 8: `snake_case` for variables/functions, `PascalCase` for classes.
-- **JS/TS**: Validate strict use of `camelCase`.
-- **Tools**: Execute `ruff check .` (Python) or `npm run lint` (JS/TS). Reject if the *exit code* > 0.
-
-### Typing and Documentation
-- **Types**: Demand *type hints* on every argument and return value of added or manipulated functions.
-- **Documentation**: Document using *Google Style* (`Args:`, `Returns:`) in Python and *JSDoc* (`@param`, `@returns`) in JS/TS.
-- **Ephemeral Markers**: Check regex for `TODO` or `FIXME`. Reject final implementations if matches are found.
-
-### Complexity and Structure
-- **Cognitive Limits**: Reject logical blocks with > 3 levels of nested indentation or > 50 total lines per function.
-- **Paths**: Reject absolute disk paths; demand the use of relative paths or dynamic libraries.
-- **Error Trapping**: Prohibit `except Exception:` block followed by `pass`. Demand explicit logging of the caught exception.
-
-### Language, Communication, and Restrictions
-- **Language Isolation**: Prohibit the use of Spanish in variables, code logic, terminal commands, or commit messages. Its rendering is strictly blocked and confined exclusively to the textual chat in the prompt.
-- **Technical Clarity**: Avoid redundant greetings. Prioritize Markdown Tables formatting for mapping data and logical variables. Restrict invocations of complex graphics (Mermaid) or flows (ASCII Tree) strictly to what is indicated and enabled by the `.md` regulations of each subagent.
-- **Negative Restrictions**: Define explicitly and solely what is prohibited to the LLM. Avoid requesting vague positive actions.
-- **Technical Language Sovereignty**: Technical artifacts, workflow protocols, and agent profiles MUST be written in **Technical English** to ensure cross-node interoperability and linguistic precision. Spanish is strictly confined to the human-agent textual chat.
+| Category | Rule (Key) | Value / Constraint (Value) |
+| :--- | :--- | :--- |
+| **Python** | `naming_convention` | `snake_case` (vars/funcs), `PascalCase` (classes) |
+| **Python** | `linter_command` | `ruff check .` (Reject if exit code > 0) |
+| **JS/TS** | `naming_convention` | `camelCase` |
+| **JS/TS** | `linter_command` | `npm run lint` (Reject if exit code > 0) |
+| **Documentation**| `python_style` | Google Style (`Args:`, `Returns:`) |
+| **Documentation**| `js_ts_style` | JSDoc (`@param`, `@returns`) |
+| **Types** | `requirement` | Mandatory type hints on all args and return values |
+| **Complexity** | `max_indentation` | 3 levels |
+| **Complexity** | `max_lines_per_func` | 50 lines |
+| **Errors** | `exception_handling` | No `pass` in except. Explicit logging required. |
+| **Storage** | `path_type` | Relative only. No absolute paths. |
+| **Markers** | `ephemeral` | Check regex for `TODO` or `FIXME`. Reject if found. |
+| **Language** | `code_logic` | Strictly English (No Spanish in code/logs/commits/artifacts) |
+| **Language** | `user_chat` | Spanish strictly confined to human-agent chat and Implementation Plans. |
+| **Language** | `technical_clarity` | Avoid redundant greetings. Prioritize Markdown Tables. Restrict Mermaid/ASCII. |
+| **Language** | `restrictions` | Define explicitly what is prohibited. Avoid vague positive actions. |
 
 ## 2. Autonomy, Efficiency, and Execution
 
-### Triple Lock Security
-Total blockade of local operations and deployments until simultaneously validating:
-1. Roadmap in `ACTIVE` state.
-2. Logging of the `DEPLOYMENT_READY: PASSED` token.
-3. Explicit user authorization in the prompt.
-
-### Context Optimization & Compression
-- **Token-Saver Mandate**: Files evaluated with a size greater than 200 lines MUST NOT be dumped entirely into active LLM context. Agents are **CONSTITUTIONALLY BANNED** from using native standard file-read functions on massive targets.
-- **AST Skeleton Enforcement**: To interpret large architectures, the Agent MUST exclusively invoke `skills/omni-context-minimizer/scripts/omni_minimizer.py` to extract structural classes and headers before any other tactical operation.
-- **Anti-Amnesia**: After 10 interactions or surpassing 5,000 processed tokens, execute mandatory re-reading of this base document and the active state anchor.
-
-### WIP Safety Freeze
-- **Pre-Shielding**: Abort the editing process early if executing `git status --porcelain` returns unresolved local differences.
-- **Destructive Flags**: Condition and reject massive modifications or general deletions unless textual verification of the `// turbo` token is provided in the context request.
-
-### Agent Isolation
-- **Jurisdictional Lock**: Limit and strictly cap structural editing to `1` single physical file per instantiated subagent task.
-- **No Interference**: Avoid logical access in parallel, aborting the operation if the index (`task_scope.md`) shows the file listed by another subtask in a progress state.
+| Category | Rule (Key) | Value / Constraint (Value) |
+| :--- | :--- | :--- |
+| **Security** | `triple_lock` | Adaptable blockade requiring: 1. Approved Implementation Plan, 2. `ACTIVE` Definitive Sprints, 3. QA/Tester Approval, 4. Explicit user authorization. |
+| **Context** | `token_saver` | >200 lines files MUST NOT be fully dumped. Native file-read functions BANNED for massive targets. |
+| **Context** | `ast_skeleton` | For large architectures, exclusively invoke `omni_minimizer.py` (ensure JS/TS parser support for front-end) to extract classes/headers. |
+| **Context** | `anti_amnesia` | To prevent context loss, mandate re-reading `agents.md` and `active_state.json` at the conclusion of every execution action. |
+| **WIP Safety** | `pre_shielding` | Abort if `git status --porcelain` returns unresolved differences. |
+| **WIP Safety** | `destructive_flags` | Condition/reject massive modifications/deletions unless `// turbo` token is in the prompt. |
+| **Isolation** | `jurisdictional_lock` | Limit structural editing to `1` single physical file per instantiated subagent task. |
+| **Isolation** | `no_interference` | Abort operation if `task_scope.md` shows the target file listed by another subtask in progress. |
 
 ## 3. Architecture and Topology of the Project
 
-### The `.agents` Matrix
-- **Federation**: Check `git remote`; isolate `.agents` by managing it purely as a *Git Submodule*.
-- **Strict Rule**: Prohibited to alter the internal architecture of this governance submodule from tactical injections of the parent project.
-
-### Isolated Environment
-- **No Global Variables**: Cap or reject global injections in the main OS binary.
-- **Dependency Containment**: Force explicit prefix syntax by invoking commands through an isolated local development environment.
-
-### Infrastructure
-- **Arsenal Sovereignty & Trinity Standard**: Every skill registered in the matrix MUST strictly adhere to the Trinity Standard:
-    1. **`README.md`**: Institutional overview.
-    2. **`SKILL.md`**: Procedural logic and YAML frontmatter.
-    3. **`/scripts/`**: Executable logic with `__init__.py`.
-- **Topological Order**: The Arsenal (Skills) MUST be mapped directly inside the `skills/` umbrella as a flat hierarchy. Sub-layers mapping origin (like core/ or local/) are strictly **PROHIBITED**. However, maintaining source transparency is legally binding: ANY skill or tool originating from a third-party, vendor, or external fork MUST possess the `-3rd` suffix in its directory name (e.g., `skill-creator-3rd`). System interfaces (`agents/`, `memory/`, `workflows/`, `rules/`) and bridging infrastructure (`mcp_servers/`, `hooks/`, `commands/`, `docs/`) reside directly at the active root.
-- **Enforcement**: The `mass-standardizer` tool is the official auditor for this standard.
-- **Secure Secret Sovereignty**: Agents are strictly prohibited from reading or parsing secret-holding files (e.g., `.env`) into their contextual memory. Their interaction is limited exclusively to invoking **environment export** commands. Any missing secret MUST trigger a **Manual Correction Alert** to the user, prohibiting autonomous deduction or bypass.
-
-### QA Framework
-- Overwrite the native URLs of local testing to instantiate in RAM, purifying between tests using `sqlite:///:memory:`. Reject DB connection.
+| Category | Rule (Key) | Value / Constraint (Value) |
+| :--- | :--- | :--- |
+| **Matrix** | `federation` | Check `git remote`; isolate `.agents` purely as a *Git Submodule*. |
+| **Matrix** | `strict_rule` | Prohibited to alter internal architecture of this submodule from tactical injections. |
+| **Environment** | `no_globals` | Cap or reject global injections in the main OS binary. |
+| **Environment** | `dependencies` | Force explicit prefix syntax by invoking commands through isolated local dev environment. |
+| **Infrastructure**| `trinity_standard` | Skills MUST adhere to: 1. `README.md`, 2. `SKILL.md`, 3. `/scripts/` with `__init__.py`. |
+| **Infrastructure**| `topological_order`| Skills flat inside `skills/`. Sub-layers (`core/`, `local/`) PROHIBITED. External skills MUST use `-3rd` suffix. System interfaces & bridges reside at active root. |
+| **Infrastructure**| `enforcement` | `mass-standardizer` tool is the official auditor for this standard. |
+| **Infrastructure**| `secret_sovereignty`| BANNED from reading `.env` into memory. Use environment export commands. Throw Manual Correction Alert if missing. |
+| **QA Framework** | `local_testing` | Overwrite native URLs to instantiate in RAM (`sqlite:///:memory:`). Reject DB connection. |
 
 ## 4. Memory Management and Feedback Loop
 
-### Amnesia Protocol
-- **Ephemeral Memory**: Write a `.md` log strictly in the project's *namespace* subdirectory (e.g., `.agents/memory/core/`) documenting bug resolutions, prior to the end-of-session wipe.
-- **Pre-Wipe**: Physically check the existence of the referenced `.md` file in said namespace prior to altering metadata to `CLOSED_SUCCESSFULLY`.
-
-### Feedback Loop (Jurisprudence vs Constitution)
-- **Constitutional Escalation**: Demand the execution of the [Governance Learner](agents/governance_learner.md) to uniquely audit the *namespace* of the Sprint (e.g., `/memory/cryptobot/`). Propose formal updates to `agents.md` if systemic patterns emerge.
-- **Definitive Amnesia**: Permanently delete the temporary logs of the audited *namespace* at the exact moment its unified rule is successfully inserted into `agents.md`.
-
-### Memory Index Routing
-- **INDEX Files**: Parse exclusively and dynamically the `memory_index.json` descriptor nested locally to the active *namespace*. Reject listing directories or mass reading raw `.md` content.
-- **Single Line Breakdown**: Reject JSON insertions in the descriptors that break the dictatorial limit of one (1) literal sentence without a carriage return (`\n`).
+| Category | Rule (Key) | Value / Constraint (Value) |
+| :--- | :--- | :--- |
+| **Amnesia** | `zero_tolerance` | Zero-Tolerance Accumulation. Bug resolutions MUST be immediately injected into project code/docs, then the temporary memory log is purged. |
+| **Amnesia** | `ephemeral_memory` | The `memory` directory is strictly ephemeral for temporary use during the sprint. MUST be completely emptied upon sprint closure. |
+| **Feedback Loop** | `constitutional_escalation`| If a resolved bug represents a systemic Matrix improvement, `Rule Validator` MUST formally index it into `agents.md` BEFORE purging the log. |
+| **Feedback Loop** | `definitive_amnesia` | Temporary logs are permanently deleted the exact moment the fix is applied to the project or inserted into `agents.md`. |
+| **Index Routing** | `index_files` | Parse exclusively `memory_index.json` locally. Reject listing directories or mass reading raw `.md`. |
+| **Index Routing** | `single_line_breakdown`| Reject JSON insertions that break the 1-sentence limit without a carriage return (`\n`). |
 
 ## 5. Central Base (Project Master Index)
 
-### Hook Protocol (Initialization)
-- **Mandatory Topology**: Reject initialization if the standardized `/docs/` tree does not exist. The [Principal Agent](agents/principal_agent.md) will summon the [Matrix Mapper](agents/matrix_mapper.md) to instantiate its dictatorial `[layer]/[app]/` hierarchy.
-    - **Governance Exemption**: Sprints, Roadmaps, and the Active State MUST remain in unified root folders (`/docs/sprints/` and `/docs/roadmaps/`) to preserve project-wide strategic sovereignty, avoiding partitioning by mission (backend/frontend).
-- **Sovereignty and Overwrite**: If a host project presents dissident documentary tracking nomenclatures, the [Matrix Mapper](agents/matrix_mapper.md) must exhaustively migrate and homologate the existing information towards the new standard without omissions before eradicating the legacy formats.
-
-### Nucleus Guard
-- **Nucleus Neutrality**: Automatic structural scaffolding and Hook Protocol procedures are strictly prohibited if the current workspace is the `.agents` Matrix core.
-- **Isolation Constraint**: Agents must verify they are not in the governance nucleus before attempting to instantiate a `/docs/` tree in the parent directory.
-
-### Zero Coordinate and Traceability
-- **State Focus (The Anchor)**: Every subagent will unconditionally extract its scope by exclusively reading the `/docs/active_state.json` file **at the workspace root**. Any secondary state files nested within submodules (e.g., `.agents/docs/`) MUST be treated as internal governance metadata and ignored for tactical execution.
-- **State Homologation**: The creation of any state-tracking file, directory, or telemetry log outside the constitutional `/docs/active_state.json` anchor is strictly PROHIBITED.
-- **Historical Log**: Reject pushes whose commit messages lack the hashtag suffix `#02x` (Sprint ID obtained from the respective active `.json`), rigidly applying *Conventional Commits*. All changes in this submodule MUST be indexed to the active Sprint.
-
-### MCP Configuration Registry
-- **Discovery Manifest**: The `mcp-config.json` file in the root acts as the official registry for all Model Context Protocol servers. It is the single point of discovery for AI clients (Claude, Cursor, etc.) to interface with the Matrix's technical skills.
-- **Sync Rule**: Any new server added to `mcp_servers/` MUST be reflected in this manifest to maintain operational capability.
+| Category | Rule (Key) | Value / Constraint (Value) |
+| :--- | :--- | :--- |
+| **Initialization** | `mandatory_topology` | Reject init if `/docs/` missing. Instantiate hierarchy `[Stack]/[Layer]/[Sprint_ID]/` (folders: implementation_plan, roadmap, sprints) and register the tree in the `topology_map` of `active_state.json`. |
+| **Initialization** | `legacy_onboarding` | If mature project without Matrix topology: Execute **Full Reverse Engineering**. `Orchestrator` and `Matrix Mapper` audit all code, extract architecture, and retroactively draft Implementation Plans/Roadmaps, integrating them into the `[Stack]/[Layer]/` hierarchy as consolidated Sprints. |
+| **Nucleus Guard** | `nucleus_neutrality` | Automatic structural scaffolding / Hook Protocol PROHIBITED if workspace is `.agents` core. |
+| **Nucleus Guard** | `isolation_constraint` | Verify not in governance nucleus before instantiating `/docs/` tree in parent dir. |
+| **Traceability** | `state_anchor` | Tactical scope and topology map MUST be extracted exclusively by reading `/docs/active_state.json` at the root (Zero Coordinate). Zero recursive directory reading to save tokens. |
+| **Traceability** | `state_homologation` | Creating state-tracking files/dirs/logs outside `/docs/active_state.json` is PROHIBITED. |
+| **Traceability** | `historical_log` | Reject pushes without `#02x` suffix (Sprint ID) in commits. Apply Conventional Commits. |
+| **MCP Registry** | `discovery_manifest` | `mcp-config.json` is the single point of discovery for MCP servers. |
+| **MCP Registry** | `sync_rule` | Any new server in `mcp_servers/` MUST be reflected in `mcp-config.json`. |
 
 ## 6. Chain of Command & Core Workflow (Matrix V2)
 
 The Matrix operates under a rigid, highly militarized sequential pipeline. Role usurpation is strictly prohibited. Subagents cannot bypass the Principal Agent.
 
-### 6.1. Subagent Roles (The Council)
-- **[Principal Agent](agents/principal_agent.md)**: Supreme Coordinator. Does NOT code or execute. Reviews and validates macro-states, manages the Golden Gate (Human Authorization), and orchestrates the handoffs.
-- **[Orchestrator](agents/orchestrator.md)**: Tactical Architect. Responsible exclusively for analyzing the workspace and drafting the initial **Sprint Roadmap**.
-- **[Agent Orchestrator](agents/agent_orchestrator.md)**: Human Resources/Staffing. Assigns specific specialized subagents to the steps inside the Sprint Roadmap.
-- **[Skill Architect](agents/skill_architect.md)**: Tool Synthesizer. Prepares and injects the executable skills/scripts needed for the sprint.
-- **[Rule Validator](agents/rule_validator.md)**: Governance Sentinel. Audits `/rules`; creates and indexes missing topological or structural norms.
-- **[QA Agent](agents/qa_agent.md)**: Structural Verifier. Validates code standards, syntax, and constitutional adherence post-execution.
-- **[Tester Agent](agents/tester_agent.md)**: Functional Verifier. Writes and runs tests, ensuring logic stability and regression absence post-execution.
-
-### 6.2. The Standard Execution Pipeline
-**Phase 0: Amnestic Anchor (Cycle 0)**:
-- Subagents MUST initialize with **Zero-Memory**. They will read `agents.md` as their absolute first operation.
-- They operate inside a strict **Context Package** (`task_scope.md`) delivered by the Principal Agent.
-
-**Phase 1: Tactical Blueprint**:
-- The **Orchestrator** drafts the initial unassigned `Sprint Roadmap` and delivers it to the Principal Agent.
-
-**Phase 2: Master Assembly**:
-- The **Principal Agent** summons the auxiliary council (in isolated sessions) to harden the plan:
-  1. `Agent Orchestrator` assigns the subagents contextually.
-  2. `Skill Architect` defines/creates the tools required.
-  3. `Rule Validator` creates any missing rules in `/rules`.
-- The Principal Agent compiles these into a physical, unified `sprint_blueprint.md`.
-
-**Phase 3: The Golden Gate**:
-- The **Principal Agent** delivers the `sprint_blueprint.md` to the Human User and holds operations until explicit OK is granted.
-
-**Phase 4: Monitored Execution & Remediation Loop**:
-- The **Principal Agent** calls the executing subagent, delivering the isolated `task_scope.md`.
-- Upon task completion, the artifact undergoes the **Double-Gate Review**: `QA Agent` checks standards, `Tester Agent` evaluates functionality.
-- *Remediation Loop*: If rejected, the Principal Agent bounces the code back to the executing subagent for patching without bothering the Human.
-- *Approval*: Only upon successful, bug-free closure does the Principal Agent request Human authorization to mark the step as completed.
-
-### 6.3. System Bridges (Hooks & Commands)
-- **Rule 113: Slash Sovereignty**: Every high-integrity operational workflow defined in `workflows/` MUST have a corresponding registered slash command alias for friction-less 'Instruction-to-Action' parity. The `slash-commander` skill is the authoritative engine for this synchronization.
-- **Rule 114: Hook Sovereignty**: Critical automation via Claude Hooks MUST be registered in the `hooks/` layer. It defines Hooks as the "Enforcement Arm" of the Matrix during session initiation and commit phases.
+| Category | Rule (Key) | Value / Constraint (Value) |
+| :--- | :--- | :--- |
+| **Subagent Roles** | `principal_agent` | Supreme Coordinator. Does NOT code. Creates Implementation Plan, manages Golden Gate, orchestrates handoffs. |
+| **Subagent Roles** | `orchestrator` | Tactical Architect. Analyzes Implementation Plan, drafts Initial Roadmap, and subsequently creates Definitive Sprints. |
+| **Subagent Roles** | `agent_orchestrator`| HR/Staffing. Assigns specific subagents to the Initial Roadmap steps. |
+| **Subagent Roles** | `skill_architect` | Tool Synthesizer. Uses `autoskills` or `skill.sh` first. Prepares/injects skills for the agents assigned in the Initial Roadmap. |
+| **Subagent Roles** | `rule_validator` | Governance Sentinel. Audits `/rules` over the Initial Roadmap, creates/indexes structural norms. |
+| **Subagent Roles** | `qa_agent` | Structural Verifier. Validates code standards/adherence. ALWAYS executes after Definitive Sprints finish. |
+| **Subagent Roles** | `tester_agent` | Functional Verifier. Ensures logic stability/zero regression. ALWAYS executes after QA Agent. |
+| **Execution Phase**| `0_implementation_consensus` | Any structural decision MUST be iteratively debated in an Implementation Plan. PROHIBITED to alter master files or code without prior human consensus and approval. |
+| **Execution Phase**| `1_amnestic_anchor` | Subagents initialize with Zero-Memory. MUST read `agents.md` and `topology_map` (`active_state.json`) first, operating strictly inside `task_scope.md`. |
+| **Execution Phase**| `2_tactical_blueprint` | Orchestrator drafts Initial Roadmap based on Principal Agent's Implementation Plan -> delivers to Principal Agent. |
+| **Execution Phase**| `3_master_assembly` | Principal Agent summons council (Agent Orch, Skill Arch, Rule Val) over Initial Roadmap. Returns Roadmap to Orchestrator to compile Definitive Sprints. |
+| **Execution Phase**| `4_golden_gate` | Principal Agent requests explicit Human OK before execution of Definitive Sprints. |
+| **Execution Phase**| `5_monitored_execution`| Execution. At finish, MANDATORY Double-Gate Review (QA Agent -> Tester Agent). Internal remediation loop. Completed on success. |
+| **System Bridges** | `slash_sovereignty` | Workflows in `workflows/` MUST have slash command alias via `slash-commander`. |
+| **System Bridges** | `hook_sovereignty` | Critical automation via Claude Hooks MUST be registered in `hooks/` layer. |
 
 ## 7. Jurisprudence (Heuristic Amendments)
 
 This section contains rules automatically promoted from the Heuristic Governance Loop. These rules have been vetted by operational frequency and are binding for all agents until formally integrated into the core constitution.
 
-### 7.1 Historical Amendments
-> [!NOTE]
-> No amendments have been promoted yet. The Matrix is currently in a state of constitutional purity.
-
-#### Clause J-01: ENVIRONMENT_VIOLATION
-- **Heuristic Rule**: The agent MUST attempt autonomous remediation before reporting failure.
-- **Manual Override**: The user HAS PROHIBITED autonomous remediation for this violation. Remediation MUST be a **Manual Correction Alert**.
-- **Original Source**: `on_init`
-- **Vetted Date**: 1775991625.0121827
-
-#### Clause J-02: LAZY_SIGNAL_PARADIGM
-- **Heuristic Rule**: To prevent circular dependencies in Django `signals.py`, model imports MUST be performed locally inside the receiver functions. Signal decorators MUST use lazy string references for the `sender` argument (e.g., `@receiver(post_save, sender='users.User')`).
-- **Original Source**: `Sprint 028: Identity Hardening`
-- **Vetted Date**: 1713091200.0 (2026-04-14)
+| Category | Rule (Key) | Value / Constraint (Value) |
+| :--- | :--- | :--- |
+| **Amendment** | `J-01: ENVIRONMENT_VIOLATION`| Agent MUST attempt autonomous remediation EXCEPT if prohibited (Manual Correction Alert). Source: `on_init`. |
+| **Amendment** | `J-02: LAZY_SIGNAL_PARADIGM` | Prevent circular deps in Django `signals.py`: local imports in receiver, lazy sender string. Source: Sprint 028. |
