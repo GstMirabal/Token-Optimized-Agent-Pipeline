@@ -94,7 +94,9 @@ The Matrix operates under a rigid, highly militarized sequential pipeline. Role 
 | **Execution Phase**| `2_tactical_blueprint` | Orchestrator drafts Initial Roadmap based on Principal Agent's Implementation Plan -> delivers to Principal Agent. |
 | **Execution Phase**| `3_master_assembly` | Principal Agent summons council (Agent Orch, Skill Arch, Rule Val) over Initial Roadmap. Returns Roadmap to Orchestrator to compile Definitive Sprints. |
 | **Execution Phase**| `4_golden_gate` | Principal Agent requests explicit Human OK before execution of Definitive Sprints. |
-| **Execution Phase**| `5_monitored_execution`| Execution. At finish, MANDATORY Double-Gate Review (QA Agent -> Tester Agent). Internal remediation loop. Completed on success. |
+| **Execution Phase**| `5_monitored_execution`| Execution. At finish, MANDATORY Double-Gate Review (QA Agent -> Tester Agent). Internal remediation loop. |
+| **Execution Phase**| `6_certification_lock` | PROHIBITED to execute `/close` workflow if `active_state.json` certification is not `SUCCESS`. |
+| **Execution Phase**| `7_mandatory_sprints`  | Orchestrator MUST include dedicated Sprints for "QA Audit" and "Functional Testing" in every Roadmap. |
 | **System Bridges** | `slash_sovereignty` | Workflows in `workflows/` MUST have slash command alias via `slash-commander`. |
 | **System Bridges** | `hook_sovereignty` | Critical automation via Claude Hooks MUST be registered in `hooks/` layer. |
 
