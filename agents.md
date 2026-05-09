@@ -105,9 +105,9 @@ The Matrix operates under a rigid, highly militarized sequential pipeline. Role 
 3.  **Tactical Blueprint**: Orchestrator drafts Initial Roadmap and instantiates `docs/sprints/[ID]/`.
 4.  **Master Assembly**: Principal Agent summons the Council (Agent Orch, Skill Arch, Rule Val) to finalize the plan.
 5.  **Golden Gate**: Principal Agent requests explicit Human OK before execution.
-6.  **Monitored Execution**: Subagents perform tasks with atomic commits referencing the Sprint ID.
+6.  **Monitored Execution**: Subagents perform tasks with atomic LOCAL commits (no remote push) referencing the Sprint ID.
 7.  **Quality Gate**: QA Agent and Tester Agent perform structural and functional verification.
-8.  **Tactical Liquidation**: Closing process: Update Blueprints, Global Roadmap, Walkthroughs, and Master Ledger.
+8.  **Tactical Liquidation**: Closing process: Squash local commits into logical blocks, PUSH to remote, update Blueprints, Global Roadmap, Walkthroughs, and Master Ledger.
 
 ## 7. Jurisprudence (Heuristic Amendments)
 
@@ -120,3 +120,4 @@ The Matrix operates under a rigid, highly militarized sequential pipeline. Role 
 | **Amendment** | `J-05: TACTICAL_LIQUIDATION` | Mandatory update of Blueprints, Global Roadmap, Walkthroughs, and Ledger before closing. |
 | **Amendment** | `J-06: IDENTITY_NAMING` | Standard Option B: All docs must be named `[MODULE]_[TYPE].md` (e.g. `USERS_BLUEPRINT.md`). |
 | **Amendment** | `J-07: ARCHIVE_PURGE` | Prohibited to keep empty `archive/` folders. Purge immediately if found. |
+| **Amendment** | `J-08: COMMIT_SQUASH` | Mandatory atomic local commits; mandatory squash & push only during Tactical Liquidation. |
