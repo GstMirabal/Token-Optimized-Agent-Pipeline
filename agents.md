@@ -3,6 +3,16 @@
 This is the constitutional matrix of Universal-Agents (`.agents`).
 It dictates in an absolute and transversal manner the behavior of subagents, code quality, and topological design.
 
+## 0. Zero Coordinate Protocol (Documentation Matrix)
+
+| Rule | Value / Constraint |
+| :--- | :--- |
+| **Matrix Entry** | Every session MUST start by reading `docs/0_SYSTEM_OVERVIEW.md`. |
+| **Hierarchy** | Documentation is divided by **Intent**: `arch/` (Law), `roadmaps/` (Future), `sprints/` (History). |
+| **Traceability** | New features MUST have a `0_BLUEPRINT.md` in `arch/` before coding. |
+| **Execution** | Every task must be recorded in the current Sprint folder. |
+| **Certification** | Closing a Sprint requires updating `docs/sprints/MASTER_LEDGER.md`. |
+
 ## 1. Code, Dialect, and Style
 
 | Category | Rule (Key) | Value / Constraint (Value) |
@@ -66,7 +76,7 @@ It dictates in an absolute and transversal manner the behavior of subagents, cod
 
 | Category | Rule (Key) | Value / Constraint (Value) |
 | :--- | :--- | :--- |
-| **Initialization** | `mandatory_topology` | Reject init if `/docs/` missing. Instantiate hierarchy `[Stack]/[Layer]/[Sprint_ID]/` (folders: implementation_plan, roadmap, sprints) and register the tree in the `topology_map` of `active_state.json`. |
+| **Initialization** | `mandatory_topology` | Reject init if `/docs/` missing. Instantiate flat hierarchy `docs/[Sprint_ID]-[Stack]-[Layer]/` (Files: `0_implementation_plan.md`, `1_roadmap.md`. Folder: `tasks/`) and register in `active_state.json`. |
 | **Initialization** | `legacy_onboarding` | If mature project without Matrix topology: Execute **Full Reverse Engineering**. `Orchestrator` and `Matrix Mapper` audit all code, extract architecture, and retroactively draft Implementation Plans/Roadmaps, integrating them into the `[Stack]/[Layer]/` hierarchy as consolidated Sprints. |
 | **Nucleus Guard** | `nucleus_neutrality` | Automatic structural scaffolding / Hook Protocol PROHIBITED if workspace is `.agents` core. |
 | **Nucleus Guard** | `isolation_constraint` | Verify not in governance nucleus before instantiating `/docs/` tree in parent dir. |
@@ -99,6 +109,7 @@ The Matrix operates under a rigid, highly militarized sequential pipeline. Role 
 | **Execution Phase**| `7_mandatory_sprints`  | Orchestrator MUST include dedicated Sprints for "QA Audit" and "Functional Testing" in every Roadmap. |
 | **System Bridges** | `slash_sovereignty` | Workflows in `workflows/` MUST have slash command alias via `slash-commander`. |
 | **System Bridges** | `hook_sovereignty` | Critical automation via Claude Hooks MUST be registered in `hooks/` layer. |
+| **Governance** | `human_sovereignty` | The User decides the operational mode (`STANDARD` / `HOTFIX`). The Principal Agent has NO bypass autonomy. |
 
 ## 7. Jurisprudence (Heuristic Amendments)
 
@@ -109,3 +120,6 @@ This section contains rules automatically promoted from the Heuristic Governance
 | :--- | :--- | :--- |
 | **Amendment** | `J-01: ENVIRONMENT_VIOLATION`| Agent MUST attempt autonomous remediation EXCEPT if prohibited (Manual Correction Alert). Source: `on_init`. |
 | **Amendment** | `J-02: LAZY_SIGNAL_PARADIGM` | Prevent circular deps in Django `signals.py`: local imports in receiver, lazy sender string. Source: Sprint 028. |
+| **Amendment** | `J-03: HOTFIX_FLAT` | For critical bugs, use `docs/hotfixes/[H-ID]-[Layer].md`. Bypasses roadmap/tasks. Requires explicit User OK and commit suffix `#H[ID]`. |
+| **Amendment** | `J-04: FULL_TACTICAL_DEPLOYMENT` | The Orchestrator MUST deploy the COMPLETE physical task hierarchy (`task_scope`) derived from the Roadmap in a single, uninterrupted atomic action. Partial instantiation or fragmentation to save tokens is PROHIBITED. Source: Sprint 049. |
+| **Amendment** | `J-05: TACTICAL_LIQUIDATION` | Before closing a sprint, the Principal Agent MUST: 1. Edit `1_roadmap.md` (check all boxes `[x]`, set status COMPLETED). 2. Modify frontmatter of all `tasks/` to `status: "COMPLETED"`. 3. Register the sprint as `DONE` in `MASTER_LEDGER.md`. 4. Set `active_state.json` to `SUCCESS`. Abandoning these bureaucratic closures is a governance violation. Source: Sprint 049. |
