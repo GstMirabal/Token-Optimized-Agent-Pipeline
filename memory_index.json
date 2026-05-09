@@ -1,12 +1,5 @@
 {
-  "index_version": "1.0.0",
   "last_update": "2026-05-09",
-  "items": [
-    {
-      "id": "M-051-001",
-      "topic": "Pipeline V3 Procedural Compliance",
-      "file": "memory/PROCEDURAL_DEVIATION_051.md",
-      "lesson": "DevOps Readiness check is mandatory before Roadmap finalization; Council data must be integrated into Roadmaps."
-    }
-  ]
+  "sprint_id": "051",
+  "items": []
 }
