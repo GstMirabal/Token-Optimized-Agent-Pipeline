@@ -8,10 +8,10 @@ It dictates in an absolute and transversal manner the behavior of subagents, cod
 | Rule | Value / Constraint |
 | :--- | :--- |
 | **Matrix Entry** | Every session MUST start by reading `docs/0_SYSTEM_OVERVIEW.md`. |
-| **Hierarchy** | Documentation is divided by **Intent**: `arch/` (Law), `roadmaps/` (Future), `sprints/` (History). |
-| **Traceability** | New features MUST have a `0_BLUEPRINT.md` in `arch/` before coding. |
+| **Hierarchy** | `arch/` (Law), `roadmaps/` (Future), `walkthroughs/` (Achievements), `sprints/` (History). |
+| **Traceability** | Every module MUST have a `[MODULE]_BLUEPRINT.md` in `arch/` before coding. |
 | **Execution** | Every task must be recorded in the current Sprint folder. |
-| **Certification** | Closing a Sprint requires updating `docs/sprints/MASTER_LEDGER.md`. |
+| **Certification** | Closing a Sprint requires updating Blueprints, Global Roadmap, and Walkthroughs. |
 
 ## 1. Code, Dialect, and Style
 
@@ -38,14 +38,14 @@ It dictates in an absolute and transversal manner the behavior of subagents, cod
 
 | Category | Rule (Key) | Value / Constraint (Value) |
 | :--- | :--- | :--- |
-| **Security** | `triple_lock` | Adaptable blockade requiring: 1. Approved Implementation Plan, 2. `ACTIVE` Definitive Sprints, 3. QA/Tester Approval, 4. Explicit user authorization. |
-| **Context** | `token_saver` | >200 lines files MUST NOT be fully dumped. Native file-read functions BANNED for massive targets. |
-| **Context** | `ast_skeleton` | For large architectures, exclusively invoke `omni_minimizer.py` (ensure JS/TS parser support for front-end) to extract classes/headers. |
-| **Context** | `anti_amnesia` | To prevent context loss, mandate re-reading `agents.md` and `active_state.json` at the conclusion of every execution action. |
+| **Security** | `triple_lock` | Approved Implementation Plan + Active Sprint + QA/Tester Approval + Human OK. |
+| **Context** | `token_saver` | >200 lines files MUST NOT be fully dumped. Native file-read functions BANNED. |
+| **Context** | `ast_skeleton` | For large architectures, exclusively invoke `omni_minimizer.py` to extract classes. |
+| **Context** | `anti_amnesia` | Mandate re-reading `agents.md` and `active_state.json` at every execution conclusion. |
 | **WIP Safety** | `pre_shielding` | Abort if `git status --porcelain` returns unresolved differences. |
-| **WIP Safety** | `destructive_flags` | Condition/reject massive modifications/deletions unless `// turbo` token is in the prompt. |
+| **WIP Safety** | `destructive_flags` | Reject massive modifications/deletions unless `// turbo` token is in the prompt. |
 | **Isolation** | `jurisdictional_lock` | Limit structural editing to `1` single physical file per instantiated subagent task. |
-| **Isolation** | `no_interference` | Abort operation if `task_scope.md` shows the target file listed by another subtask in progress. |
+| **Isolation** | `no_interference` | Abort if `task_scope.md` shows the target file listed by another subtask in progress. |
 
 ## 3. Architecture and Topology of the Project
 
@@ -56,70 +56,67 @@ It dictates in an absolute and transversal manner the behavior of subagents, cod
 | **Environment** | `no_globals` | Cap or reject global injections in the main OS binary. |
 | **Environment** | `dependencies` | Force explicit prefix syntax by invoking commands through isolated local dev environment. |
 | **Infrastructure**| `trinity_standard` | Skills MUST adhere to: 1. `README.md`, 2. `SKILL.md`, 3. `/scripts/` with `__init__.py`. |
-| **Infrastructure**| `topological_order`| Skills flat inside `skills/`. Sub-layers (`core/`, `local/`) PROHIBITED. External skills MUST use `-3rd` suffix. System interfaces & bridges reside at active root. |
+| **Infrastructure**| `topological_order`| Skills flat inside `skills/`. Sub-layers (`core/`, `local/`) PROHIBITED. |
 | **Infrastructure**| `enforcement` | `mass-standardizer` tool is the official auditor for this standard. |
-| **Infrastructure**| `secret_sovereignty`| BANNED from reading `.env` into memory. Use environment export commands. Throw Manual Correction Alert if missing. |
-| **QA Framework** | `local_testing` | Overwrite native URLs to instantiate in RAM (`sqlite:///:memory:`). Reject DB connection. |
+| **Infrastructure**| `secret_sovereignty`| BANNED from reading `.env` into memory. Use environment export commands. |
+| **QA Framework** | `local_testing` | Overwrite native URLs to instantiate in RAM (`sqlite:///:memory:`). |
 
 ## 4. Memory Management and Feedback Loop
 
 | Category | Rule (Key) | Value / Constraint (Value) |
 | :--- | :--- | :--- |
-| **Amnesia** | `zero_tolerance` | Zero-Tolerance Accumulation. Bug resolutions MUST be immediately injected into project code/docs, then the temporary memory log is purged. |
-| **Amnesia** | `ephemeral_memory` | The `memory` directory is strictly ephemeral for temporary use during the sprint. MUST be completely emptied upon sprint closure. |
-| **Feedback Loop** | `constitutional_escalation`| If a resolved bug represents a systemic Matrix improvement, `Rule Validator` MUST formally index it into `agents.md` BEFORE purging the log. |
-| **Feedback Loop** | `definitive_amnesia` | Temporary logs are permanently deleted the exact moment the fix is applied to the project or inserted into `agents.md`. |
-| **Index Routing** | `index_files` | Parse exclusively `memory_index.json` locally. Reject listing directories or mass reading raw `.md`. |
-| **Index Routing** | `single_line_breakdown`| Reject JSON insertions that break the 1-sentence limit without a carriage return (`\n`). |
+| **Amnesia** | `zero_tolerance` | Zero-Tolerance Accumulation. Bug resolutions MUST be immediately injected. |
+| **Amnesia** | `ephemeral_memory` | The `memory` directory is strictly ephemeral. MUST be emptied upon sprint closure. |
+| **Feedback Loop** | `constitutional_escalation`| Systemic improvements MUST be formally indexed into `agents.md` before purging logs. |
+| **Feedback Loop** | `definitive_amnesia` | Temporary logs are permanently deleted the moment the fix is applied. |
+| **Index Routing** | `index_files` | Parse exclusively `memory_index.json` locally. |
+| **Index Routing** | `single_line_breakdown`| Reject JSON insertions that break the 1-sentence limit without a carriage return. |
 
 ## 5. Central Base (Project Master Index)
 
 | Category | Rule (Key) | Value / Constraint (Value) |
 | :--- | :--- | :--- |
-| **Initialization** | `mandatory_topology` | Reject init if `/docs/` missing. Instantiate flat hierarchy `docs/[Sprint_ID]-[Stack]-[Layer]/` (Files: `0_implementation_plan.md`, `1_roadmap.md`. Folder: `tasks/`) and register in `active_state.json`. |
-| **Initialization** | `legacy_onboarding` | If mature project without Matrix topology: Execute **Full Reverse Engineering**. `Orchestrator` and `Matrix Mapper` audit all code, extract architecture, and retroactively draft Implementation Plans/Roadmaps, integrating them into the `[Stack]/[Layer]/` hierarchy as consolidated Sprints. |
-| **Nucleus Guard** | `nucleus_neutrality` | Automatic structural scaffolding / Hook Protocol PROHIBITED if workspace is `.agents` core. |
-| **Nucleus Guard** | `isolation_constraint` | Verify not in governance nucleus before instantiating `/docs/` tree in parent dir. |
-| **Traceability** | `state_anchor` | Tactical scope and topology map MUST be extracted exclusively by reading `/docs/active_state.json` at the root (Zero Coordinate). Zero recursive directory reading to save tokens. |
-| **Traceability** | `state_homologation` | Creating state-tracking files/dirs/logs outside `/docs/active_state.json` is PROHIBITED. |
-| **Traceability** | `historical_log` | Reject pushes without `#02x` suffix (Sprint ID) in commits. Apply Conventional Commits. |
+| **Initialization** | `mandatory_topology` | Reject init if `/docs/` missing. Instantiate `docs/[Sprint_ID]-[Stack]-[Layer]/`. |
+| **Initialization** | `legacy_onboarding` | If mature project: Execute **Full Reverse Engineering** and generate Walkthroughs. |
+| **Nucleus Guard** | `nucleus_neutrality` | Automatic structural scaffolding PROHIBITED if workspace is `.agents` core. |
+| **Traceability** | `state_anchor` | Context MUST be extracted from `docs/active_state.json` (Zero Coordinate). |
+| **Traceability** | `state_homologation` | Creating state-tracking files outside `docs/active_state.json` is PROHIBITED. |
+| **Traceability** | `historical_log` | Reject pushes without `#02x` suffix. Apply Conventional Commits. |
 | **MCP Registry** | `discovery_manifest` | `mcp-config.json` is the single point of discovery for MCP servers. |
-| **MCP Registry** | `sync_rule` | Any new server in `mcp_servers/` MUST be reflected in `mcp-config.json`. |
 
-## 6. Chain of Command & Core Workflow (Matrix V2)
+## 6. Chain of Command & Core Workflow (Matrix V3)
 
-The Matrix operates under a rigid, highly militarized sequential pipeline. Role usurpation is strictly prohibited. Subagents cannot bypass the Principal Agent.
+The Matrix operates under a rigid, highly militarized sequential pipeline. Role usurpation is strictly prohibited.
 
 | Category | Rule (Key) | Value / Constraint (Value) |
 | :--- | :--- | :--- |
-| **Subagent Roles** | `principal_agent` | Supreme Coordinator. Does NOT code. Creates Implementation Plan, manages Golden Gate, orchestrates handoffs. |
-| **Subagent Roles** | `orchestrator` | Tactical Architect. Analyzes Implementation Plan, drafts Initial Roadmap, and subsequently creates Definitive Sprints. |
+| **Subagent Roles** | `principal_agent` | Supreme Coordinator. Creates Implementation Plan, manages Golden Gate. |
+| **Subagent Roles** | `devops_agent` | Environment Guardian. Manages venv, .env export, and Docker health. |
+| **Subagent Roles** | `orchestrator` | Tactical Architect. Drafts Initial Roadmap and instantiates Sprint Hierarchy. |
 | **Subagent Roles** | `agent_orchestrator`| HR/Staffing. Assigns specific subagents to the Initial Roadmap steps. |
-| **Subagent Roles** | `skill_architect` | Tool Synthesizer. Uses `autoskills` or `skill.sh` first. Prepares/injects skills for the agents assigned in the Initial Roadmap. |
-| **Subagent Roles** | `rule_validator` | Governance Sentinel. Audits `/rules` over the Initial Roadmap, creates/indexes structural norms. |
-| **Subagent Roles** | `qa_agent` | Structural Verifier. Validates code standards/adherence. ALWAYS executes after Definitive Sprints finish. |
-| **Subagent Roles** | `tester_agent` | Functional Verifier. Ensures logic stability/zero regression. ALWAYS executes after QA Agent. |
-| **Execution Phase**| `0_implementation_consensus` | Any structural decision MUST be iteratively debated in an Implementation Plan. PROHIBITED to alter master files or code without prior human consensus and approval. |
-| **Execution Phase**| `1_amnestic_anchor` | Subagents initialize with Zero-Memory. MUST read `agents.md` and `topology_map` (`active_state.json`) first, operating strictly inside `task_scope.md`. |
-| **Execution Phase**| `2_tactical_blueprint` | Orchestrator drafts Initial Roadmap based on Principal Agent's Implementation Plan -> delivers to Principal Agent. |
-| **Execution Phase**| `3_master_assembly` | Principal Agent summons council (Agent Orch, Skill Arch, Rule Val) over Initial Roadmap. Returns Roadmap to Orchestrator to compile Definitive Sprints. |
-| **Execution Phase**| `4_golden_gate` | Principal Agent requests explicit Human OK before execution of Definitive Sprints. |
-| **Execution Phase**| `5_monitored_execution`| Execution. At finish, MANDATORY Double-Gate Review (QA Agent -> Tester Agent). Internal remediation loop. |
-| **Execution Phase**| `6_certification_lock` | PROHIBITED to execute `/close` workflow if `active_state.json` certification is not `SUCCESS`. |
-| **Execution Phase**| `7_mandatory_sprints`  | Orchestrator MUST include dedicated Sprints for "QA Audit" and "Functional Testing" in every Roadmap. |
-| **System Bridges** | `slash_sovereignty` | Workflows in `workflows/` MUST have slash command alias via `slash-commander`. |
-| **System Bridges** | `hook_sovereignty` | Critical automation via Claude Hooks MUST be registered in `hooks/` layer. |
-| **Governance** | `human_sovereignty` | The User decides the operational mode (`STANDARD` / `HOTFIX`). The Principal Agent has NO bypass autonomy. |
+| **Subagent Roles** | `skill_architect` | Tool Synthesizer. Prepares/injects skills for the assigned subagents. |
+| **Subagent Roles** | `rule_validator` | Governance Sentinel. Audits Roadmap and generates the `task_scope.md`. |
+| **Subagent Roles** | `qa_agent` | Structural Verifier. Validates code standards (Ruff, ESLint). |
+| **Subagent Roles** | `tester_agent` | Functional Verifier. Ensures logic stability and zero regression. |
+
+### 🚀 The Execution Pipeline (Matrix V3)
+1.  **Strategic Genesis**: Principal Agent drafts Implementation Plan -> Human Consensus.
+2.  **Environment Readiness**: DevOps Agent activates `venv`, exports `.env`, and checks Docker/DB health.
+3.  **Tactical Blueprint**: Orchestrator drafts Initial Roadmap and instantiates `docs/sprints/[ID]/`.
+4.  **Master Assembly**: Principal Agent summons the Council (Agent Orch, Skill Arch, Rule Val) to finalize the plan.
+5.  **Golden Gate**: Principal Agent requests explicit Human OK before execution.
+6.  **Monitored Execution**: Subagents perform tasks with atomic commits referencing the Sprint ID.
+7.  **Quality Gate**: QA Agent and Tester Agent perform structural and functional verification.
+8.  **Tactical Liquidation**: Closing process: Update Blueprints, Global Roadmap, Walkthroughs, and Master Ledger.
 
 ## 7. Jurisprudence (Heuristic Amendments)
 
-This section contains rules automatically promoted from the Heuristic Governance Loop. These rules have been vetted by operational frequency and are binding for all agents until formally integrated into the core constitution.
-
-
 | Category | Rule (Key) | Value / Constraint (Value) |
 | :--- | :--- | :--- |
-| **Amendment** | `J-01: ENVIRONMENT_VIOLATION`| Agent MUST attempt autonomous remediation EXCEPT if prohibited (Manual Correction Alert). Source: `on_init`. |
-| **Amendment** | `J-02: LAZY_SIGNAL_PARADIGM` | Prevent circular deps in Django `signals.py`: local imports in receiver, lazy sender string. Source: Sprint 028. |
-| **Amendment** | `J-03: HOTFIX_FLAT` | For critical bugs, use `docs/hotfixes/[H-ID]-[Layer].md`. Bypasses roadmap/tasks. Requires explicit User OK and commit suffix `#H[ID]`. |
-| **Amendment** | `J-04: FULL_TACTICAL_DEPLOYMENT` | The Orchestrator MUST deploy the COMPLETE physical task hierarchy (`task_scope`) derived from the Roadmap in a single, uninterrupted atomic action. Partial instantiation or fragmentation to save tokens is PROHIBITED. Source: Sprint 049. |
-| **Amendment** | `J-05: TACTICAL_LIQUIDATION` | Before closing a sprint, the Principal Agent MUST: 1. Edit `1_roadmap.md` (check all boxes `[x]`, set status COMPLETED). 2. Modify frontmatter of all `tasks/` to `status: "COMPLETED"`. 3. Register the sprint as `DONE` in `MASTER_LEDGER.md`. 4. Set `active_state.json` to `SUCCESS`. Abandoning these bureaucratic closures is a governance violation. Source: Sprint 049. |
+| **Amendment** | `J-01: ENVIRONMENT_VIOLATION`| Agent MUST attempt autonomous remediation EXCEPT if prohibited. |
+| **Amendment** | `J-02: LAZY_SIGNAL_PARADIGM` | Prevent circular deps in Django `signals.py`: local imports in receiver. |
+| **Amendment** | `J-03: HOTFIX_FLAT` | For critical bugs, use `docs/hotfixes/[H-ID]-[Layer].md`. |
+| **Amendment** | `J-04: FULL_DEPLOYMENT` | Orchestrator MUST deploy the COMPLETE task hierarchy in a single atomic action. |
+| **Amendment** | `J-05: TACTICAL_LIQUIDATION` | Mandatory update of Blueprints, Global Roadmap, Walkthroughs, and Ledger before closing. |
+| **Amendment** | `J-06: IDENTITY_NAMING` | Standard Option B: All docs must be named `[MODULE]_[TYPE].md` (e.g. `USERS_BLUEPRINT.md`). |
+| **Amendment** | `J-07: ARCHIVE_PURGE` | Prohibited to keep empty `archive/` folders. Purge immediately if found. |
