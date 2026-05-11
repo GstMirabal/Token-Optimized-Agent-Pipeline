@@ -121,3 +121,4 @@ The Matrix operates under a rigid, highly militarized sequential pipeline. Role 
 | **Amendment** | `J-06: IDENTITY_NAMING` | Standard Option B: All docs must be named `[MODULE]_[TYPE].md` (e.g. `USERS_BLUEPRINT.md`). |
 | **Amendment** | `J-07: ARCHIVE_PURGE` | Prohibited to keep empty `archive/` folders. Purge immediately if found. |
 | **Amendment** | `J-08: COMMIT_SQUASH` | Mandatory atomic local commits; mandatory squash & push only during Tactical Liquidation. |
+| **Amendment** | `J-09: SECRET_SOVEREIGNTY`| Prohibited from reading `.env` into thought context. Use `Makefile` or `source .env` in a subshell. |
