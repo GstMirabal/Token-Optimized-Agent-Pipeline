@@ -122,3 +122,13 @@ The Matrix operates under a rigid, highly militarized sequential pipeline. Role 
 | **Amendment** | `J-07: ARCHIVE_PURGE` | Prohibited to keep empty `archive/` folders. Purge immediately if found. |
 | **Amendment** | `J-08: COMMIT_SQUASH` | Mandatory atomic local commits; mandatory squash & push only during Tactical Liquidation. |
 | **Amendment** | `J-09: SECRET_SOVEREIGNTY`| Prohibited from reading `.env` into thought context. Use `Makefile` or `source .env` in a subshell. |
+| **Amendment** | `J-10: SUPPLY_CHAIN_SHIELD`| Mandate `pnpm 11+`, `ignore-scripts=true`, and `minimum-release-age=1440`. |
+
+## 8. Supply Chain Security
+
+| Category | Rule (Key) | Value / Constraint (Value) |
+| :--- | :--- | :--- |
+| **Package Manager** | `requirement` | Mandatory use of `pnpm 11+`. `npm` and `yarn` are prohibited for installation. |
+| **Installation** | `ignore_scripts` | `ignore-scripts=true` MUST be active in `.npmrc`. |
+| **Release Safety** | `min_release_age` | `minimum-release-age=1440` (24 hours) MUST be enforced to avoid zero-day compromised packages. |
+| **Audit** | `only_built_deps` | All dependencies requiring build scripts MUST be explicitly whitelisted in `onlyBuiltDependencies`. |
