@@ -237,6 +237,76 @@
         "coverage",
         "legacy"
       ]
+    },
+    {
+      "name": "accessibility",
+      "path": "frontend/accessibility",
+      "description": "Standardized accessibility audit and optimization for web interfaces (WCAG 2.1 compliance).",
+      "category": "Quality",
+      "tags": ["a11y", "wcag", "audit", "frontend"]
+    },
+    {
+      "name": "frontend-design",
+      "path": "frontend/frontend-design",
+      "description": "Guides the creation of distinctive, production-grade frontend interfaces with high design quality.",
+      "category": "Design",
+      "tags": ["ui", "ux", "aesthetics", "frontend"]
+    },
+    {
+      "name": "nodejs-backend-patterns",
+      "path": "backend/nodejs-backend-patterns",
+      "description": "Enterprise-grade design patterns for Node.js backend development.",
+      "category": "Architecture",
+      "tags": ["node", "backend", "patterns"]
+    },
+    {
+      "name": "nodejs-best-practices",
+      "path": "backend/nodejs-best-practices",
+      "description": "Security, performance, and maintainability best practices for Node.js.",
+      "category": "Quality",
+      "tags": ["node", "security", "best-practices"]
+    },
+    {
+      "name": "seo",
+      "path": "frontend/seo",
+      "description": "Search Engine Optimization best practices for modern web applications.",
+      "category": "Marketing",
+      "tags": ["seo", "indexing", "frontend"]
+    },
+    {
+      "name": "tailwind-css-patterns",
+      "path": "frontend/tailwind-css-patterns",
+      "description": "Advanced patterns and design systems using Tailwind CSS.",
+      "category": "Design",
+      "tags": ["tailwind", "css", "styles"]
+    },
+    {
+      "name": "typescript-advanced-types",
+      "path": "frontend/typescript-advanced-types",
+      "description": "Leverages advanced TypeScript features for type-safe application development.",
+      "category": "Quality",
+      "tags": ["typescript", "types", "safe"]
+    },
+    {
+      "name": "vercel-composition-patterns",
+      "path": "frontend/vercel-composition-patterns",
+      "description": "Architecture patterns for modern web apps on Vercel/Next.js.",
+      "category": "Architecture",
+      "tags": ["vercel", "nextjs", "composition"]
+    },
+    {
+      "name": "vercel-react-best-practices",
+      "path": "frontend/vercel-react-best-practices",
+      "description": "Standardized React patterns optimized for the Vercel ecosystem.",
+      "category": "Quality",
+      "tags": ["react", "vercel", "best-practices"]
+    },
+    {
+      "name": "vite",
+      "path": "frontend/vite",
+      "description": "Vite build tool configuration, plugin API, and Rolldown migration.",
+      "category": "Infrastructure",
+      "tags": ["vite", "build", "bundler"]
     }
   ]
 }
