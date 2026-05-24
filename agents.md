@@ -42,8 +42,10 @@ It dictates in an absolute and transversal manner the behavior of subagents, cod
 | **Context** | `token_saver` | >200 lines files MUST NOT be fully dumped. Native file-read functions BANNED. |
 | **Context** | `ast_skeleton` | For large architectures, exclusively invoke `omni_minimizer.py` to extract classes. |
 | **Context** | `anti_amnesia` | Mandate re-reading `agents.md` and `active_state.json` at every execution conclusion. |
+| **Context** | `graph_sovereignty`| Query `graph.json` via MCP or CLI before any full codebase research or recursive grep operations. |
 | **WIP Safety** | `pre_shielding` | Abort if `git status --porcelain` returns unresolved differences. |
 | **WIP Safety** | `destructive_flags` | Reject massive modifications/deletions unless `// turbo` token is in the prompt. |
+| **WIP Safety** | `graph_sync` | Mandate running `graphify update` post-changes during quality check or commit phase. |
 | **Isolation** | `jurisdictional_lock` | Limit structural editing to `1` single physical file per instantiated subagent task. |
 | **Isolation** | `no_interference` | Abort if `task_scope.md` shows the target file listed by another subtask in progress. |
 
@@ -90,15 +92,15 @@ The Matrix operates under a rigid, highly militarized sequential pipeline. Role 
 
 | Category | Rule (Key) | Value / Constraint (Value) |
 | :--- | :--- | :--- |
-| **Subagent Roles** | `principal_agent` | Supreme Coordinator. Creates Implementation Plan, manages Golden Gate. |
+| **Subagent Roles** | `principal_agent` | Supreme Coordinator. Creates Implementation Plan (informed by graphify), manages Golden Gate. |
 | **Subagent Roles** | `devops_agent` | Environment Guardian. Manages venv, .env export, and Docker health. |
 | **Subagent Roles** | `orchestrator` | Tactical Architect. Drafts Initial Roadmap and instantiates Sprint Hierarchy. |
 | **Subagent Roles** | `agent_orchestrator`| HR/Staffing. Assigns specific subagents to the Initial Roadmap steps. |
 | **Subagent Roles** | `skill_architect` | Tool Synthesizer. Prepares/injects skills for the assigned subagents. |
-| **Subagent Roles** | `rule_validator` | Governance Sentinel. Audits Roadmap and generates the `task_scope.md`. |
-| **Subagent Roles** | `qa_agent` | Structural Verifier. Validates code standards (Ruff, ESLint). |
+| **Subagent Roles** | `rule_validator` | Governance Sentinel. Audits Roadmap using graphify dependency graph to generate the `task_scope.md`. |
+| **Subagent Roles** | `qa_agent` | Structural Verifier. Validates code standards and checks graphify AST graph integrity. |
 | **Subagent Roles** | `tester_agent` | Functional Verifier. Ensures logic stability and zero regression. |
-
+ 
 ### 🚀 The Execution Pipeline (Matrix V3)
 1.  **Strategic Genesis**: Principal Agent drafts Implementation Plan -> Human Consensus.
 2.  **Environment Readiness**: DevOps Agent activates `venv`, exports `.env`, and checks Docker/DB health.
@@ -106,8 +108,8 @@ The Matrix operates under a rigid, highly militarized sequential pipeline. Role 
 4.  **Master Assembly**: Principal Agent summons the Council (Agent Orch, Skill Arch, Rule Val) to finalize the plan.
 5.  **Golden Gate**: Principal Agent requests explicit Human OK before execution.
 6.  **Monitored Execution**: Subagents perform tasks with atomic LOCAL commits (no remote push) referencing the Sprint ID.
-7.  **Quality Gate**: QA Agent and Tester Agent perform structural and functional verification.
-8.  **Tactical Liquidation**: Closing process: Squash local commits into logical blocks, PUSH to remote, update Blueprints, Global Roadmap, Walkthroughs, and Master Ledger.
+7.  **Quality Gate**: QA Agent (verifies graphify AST graph) and Tester Agent perform structural and functional verification.
+8.  **Tactical Liquidation**: Closing process: Run final graph update/rebuild, squash local commits into logical blocks, PUSH to remote, update Blueprints, Global Roadmap, Walkthroughs, and Master Ledger.
 
 ## 7. Jurisprudence (Heuristic Amendments)
 
