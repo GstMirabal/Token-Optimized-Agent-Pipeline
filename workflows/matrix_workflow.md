@@ -18,7 +18,7 @@ Master operational protocol ensuring rigid task delegation, automated Double-Gat
 | **5. Golden Gate** | Principal | Request explicit Human OK before starting execution. |
 | **6. Monitored Execution** | Subagents | Perform atomic tasks with commits referencing the Sprint ID. |
 | **7. Quality Gate** | QA & Tester | Gate 1 (Structural Audit & Graph Integrity Check) -> Gate 2 (Functional Verification). |
-| **8. Tactical Liquidation**| Principal | Update Blueprints, Global Roadmap, Walkthroughs, and Master Ledger (including final Graph Rebuild). |
+| **8. Tactical Liquidation**| Principal | Update Blueprints, Global Roadmap, Walkthroughs, and Master Ledger (including final Graph Rebuild via `make graphify-rebuild`). |
 
 ## 📐 Standards & Rules
 - **Amnestic Anchor**: All subagents start with zero memory; read `active_state.json` and `agents.md` first.
