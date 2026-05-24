@@ -17,11 +17,12 @@ Master operational protocol ensuring rigid task delegation, automated Double-Gat
 | **4. Master Assembly** | Concilio | Summon Agent Orch, Skill Arch, and Rule Val to finalize IP and skills. |
 | **5. Golden Gate** | Principal | Request explicit Human OK before starting execution. |
 | **6. Monitored Execution** | Subagents | Perform atomic tasks with commits referencing the Sprint ID. |
-| **7. Quality Gate** | QA & Tester | Gate 1 (Structural Audit) -> Gate 2 (Functional Verification). |
-| **8. Tactical Liquidation**| Principal | Update Blueprints, Global Roadmap, Walkthroughs, and Master Ledger. |
+| **7. Quality Gate** | QA & Tester | Gate 1 (Structural Audit & Graph Integrity Check) -> Gate 2 (Functional Verification). |
+| **8. Tactical Liquidation**| Principal | Update Blueprints, Global Roadmap, Walkthroughs, and Master Ledger (including final Graph Rebuild). |
 
 ## 📐 Standards & Rules
 - **Amnestic Anchor**: All subagents start with zero memory; read `active_state.json` and `agents.md` first.
+- **Graph Sovereignty**: Query `graph.json` via MCP or CLI before any recursive grep codebase research.
 - **Topographic Purity**: Prohibited to leave empty folders. Purge noise before closing.
 - **Unique Naming**: All artifacts must follow the `[MODULE]_[TYPE].md` standard (Option B).
 - **Context Limit**: Mandatory use of `omni_minimizer.py` for files >200 lines.
