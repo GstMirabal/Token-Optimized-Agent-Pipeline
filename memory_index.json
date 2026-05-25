@@ -1,11 +1,16 @@
 {
-  "last_update": "2026-05-09",
-  "sprint_id": "052",
+  "last_update": "2026-05-25",
+  "sprint_id": "073",
   "items": [
     {
       "id": "F-20260509-96AD",
       "file": "memory/FAILURE_20260509_SESSION.md",
       "summary": "Language violations and tool failures in Session 96AD."
+    },
+    {
+      "id": "F-20260525-2426",
+      "file": "memory/FAILURE_20260525_SESSION.md",
+      "summary": "Global interpreter execution violation: failed to prefix python script with venv/bin."
     }
   ]
 }
