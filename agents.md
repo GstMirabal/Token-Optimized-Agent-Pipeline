@@ -18,9 +18,9 @@ It dictates in an absolute and transversal manner the behavior of subagents, cod
 | Category | Rule (Key) | Value / Constraint (Value) |
 | :--- | :--- | :--- |
 | **Python** | `naming_convention` | `snake_case` (vars/funcs), `PascalCase` (classes) |
-| **Python** | `linter_command` | `ruff check .` (Reject if exit code > 0) |
+| **Python** | `linter_command` | `ruff check .` (Reject if exit code > 0) + `python-doctor check --diff` (Warning if score < 95) |
 | **JS/TS** | `naming_convention` | `camelCase` |
-| **JS/TS** | `linter_command` | `npm run lint` (Reject if exit code > 0) |
+| **JS/TS** | `linter_command` | `npm run lint` (Reject if exit code > 0) + `pnpm run react-doctor` (Warning if score < 95) |
 | **Documentation**| `python_style` | Google Style (`Args:`, `Returns:`) |
 | **Documentation**| `js_ts_style` | JSDoc (`@param`, `@returns`) |
 | **Types** | `requirement` | Mandatory type hints on all args and return values |
