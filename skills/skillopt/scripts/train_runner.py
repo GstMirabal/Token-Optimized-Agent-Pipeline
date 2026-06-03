@@ -10,12 +10,17 @@ import argparse
 import os
 import sys
 from typing import Any
+from dotenv import load_dotenv
 
 # Ensure parent and package paths are accessible
 _SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 _SKILLOPT_DIR = os.path.dirname(_SCRIPT_DIR)
 _SKILLS_DIR = os.path.dirname(_SKILLOPT_DIR)
 _AGENTS_DIR = os.path.dirname(_SKILLS_DIR)
+_ROOT_DIR = os.path.dirname(_AGENTS_DIR)
+
+# Load root .env variables automatically
+load_dotenv(os.path.join(_ROOT_DIR, ".env"))
 
 if _AGENTS_DIR not in sys.path:
     sys.path.insert(0, _AGENTS_DIR)
