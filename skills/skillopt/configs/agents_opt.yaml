@@ -1,0 +1,40 @@
+# Configuration file for Agents rule optimization under SkillOpt.
+
+model:
+  backend: azure_openai
+  optimizer: gemini-2.5-flash
+  target: gemini-2.5-flash
+
+train:
+  num_epochs: 3
+  train_size: 5
+  batch_size: 5
+  seed: 42
+
+gradient:
+  minibatch_size: 5
+  analyst_workers: 4
+  failure_only: true
+
+optimizer:
+  learning_rate: 2
+  min_learning_rate: 1
+  lr_scheduler: constant
+  skill_update_mode: patch
+  use_slow_update: false
+  use_meta_skill: false
+
+evaluation:
+  use_gate: true
+  sel_env_num: 2
+  test_env_num: 3
+  eval_test: true
+
+env:
+  name: agents_opt
+  skill_init: .agents/agents.md
+  data_path: .agents/skills/skillopt/data/scenarios.json
+  split_mode: ratio
+  split_ratio: "5:2:3"
+  split_seed: 42
+  out_root: outputs/agents_opt

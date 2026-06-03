@@ -13,6 +13,7 @@ Master closure protocol enforcing the Zero-Tolerance Amnesia rule, Absolute Topo
 | :--- | :--- | :--- |
 | **0. Constitutional Invocation** | `read_constitution` | Subagents MUST zero memory and read `agents.md`. Closure actions omitting explicit constitutional compliance are invalid. |
 | **1. Topographic Audit** | `noise_purge` | **MANDATORY**: Delete all empty folders (J-07). Validate all new files follow **Option B Naming** (`[MODULE]_[TYPE].md`). |
+| **1. Topographic Audit** | `rules_optimization` | Optimize rules via `train_runner.py` if failures or constitutional changes occur (requires explicit authorization). |
 | **1. Topographic Audit** | `graph_rebuild` | Run `venv/bin/graphify update .` to sync AST changes. Run semantic rebuild (Opción C) via `make graphify-rebuild` if documentation has been modified. |
 | **2. Tactical Liquidation** | `history_sync` | Update **Master Ledger**, **Global Roadmap**, and **Module Walkthroughs** based on sprint achievements. |
 | **3. Zero-Tolerance Purge** | `memory_wipe` | Execute forced physical deletion (`rm`) of all temporary logs within the `/memory/` sprint directory. |
