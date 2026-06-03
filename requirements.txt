@@ -1,0 +1,3 @@
+graphifyy
+skillopt[webui,claude]
+google-generativeai

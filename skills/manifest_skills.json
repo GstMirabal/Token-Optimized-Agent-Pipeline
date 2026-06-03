@@ -307,6 +307,13 @@
       "description": "Vite build tool configuration, plugin API, and Rolldown migration.",
       "category": "Infrastructure",
       "tags": ["vite", "build", "bundler"]
+    },
+    {
+      "name": "skillopt",
+      "path": "skillopt",
+      "description": "Microsoft SkillOpt text-space optimizer integration for self-evolving agent rules.",
+      "category": "Infrastructure",
+      "tags": ["optimization", "rules", "self-evolution"]
     }
   ]
 }
