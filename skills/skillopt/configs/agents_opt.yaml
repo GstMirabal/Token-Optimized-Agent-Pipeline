@@ -2,19 +2,21 @@
 
 model:
   backend: azure_openai
-  optimizer: gemini-2.5-flash
-  target: gemini-2.5-flash
+  optimizer: gemini-flash-latest
+  target: gemini-flash-latest
 
 train:
-  num_epochs: 3
-  train_size: 5
-  batch_size: 5
+  num_epochs: 1
+  train_size: 2
+  batch_size: 2
   seed: 42
+  accumulation: 1
 
 gradient:
-  minibatch_size: 5
+  minibatch_size: 2
   analyst_workers: 4
   failure_only: true
+  merge_batch_size: 2
 
 optimizer:
   learning_rate: 2
@@ -26,8 +28,8 @@ optimizer:
 
 evaluation:
   use_gate: true
-  sel_env_num: 2
-  test_env_num: 3
+  sel_env_num: 1
+  test_env_num: 1
   eval_test: true
 
 env:
@@ -35,6 +37,6 @@ env:
   skill_init: .agents/agents.md
   data_path: .agents/skills/skillopt/data/scenarios.json
   split_mode: ratio
-  split_ratio: "5:2:3"
+  split_ratio: "2:1:7"
   split_seed: 42
   out_root: outputs/agents_opt

@@ -61,19 +61,42 @@ def _call_gemini(
     Returns:
         A tuple of the response text and the token usage dict.
     """
-    model = genai.GenerativeModel(
-        model_name=model_name or "gemini-2.5-flash",
-        system_instruction=system_instruction
-    )
+    import time
+    
     contents = _format_messages(messages)
+    max_retries = 5
+    response = None
     
-    response = model.generate_content(
-        contents=contents,
-        generation_config={"temperature": 0.0}
-    )
-    
+    for attempt in range(max_retries):
+        try:
+            model = genai.GenerativeModel(
+                model_name=model_name or "gemini-2.5-flash",
+                system_instruction=system_instruction
+            )
+            response = model.generate_content(
+                contents=contents,
+                generation_config={"temperature": 0.0}
+            )
+            break
+        except Exception as e:
+            err_str = str(e)
+            if "429" in err_str or "Quota exceeded" in err_str or "limit" in err_str or "ResourceExhausted" in err_str:
+                sleep_time = 62
+                logging.warning(
+                    "Gemini API rate limit (429) hit. Retrying in %d seconds... (Attempt %d/%d). Error: %s",
+                    sleep_time,
+                    attempt + 1,
+                    max_retries,
+                    err_str
+                )
+                time.sleep(sleep_time)
+            else:
+                raise e
+    else:
+        raise Exception("Max retries exceeded for Gemini API call due to rate limits.")
+
     # Extract token usage
-    usage = response.usage_metadata
+    usage = response.usage_metadata if response else None
     prompt_tokens = usage.prompt_token_count if usage else 0
     completion_tokens = usage.candidates_token_count if usage else 0
     
@@ -82,7 +105,7 @@ def _call_gemini(
         "completion_tokens": completion_tokens,
         "total_tokens": prompt_tokens + completion_tokens
     }
-    return response.text or "", meta
+    return (response.text if response else "") or "", meta
 
 
 def chat_optimizer(
