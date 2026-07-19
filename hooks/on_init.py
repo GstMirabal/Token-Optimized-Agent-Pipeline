@@ -16,7 +16,7 @@ BRIDGE_LOCK = Path(".agents/.claude_bridge.lock")
 INSTALL_SCRIPT = Path(".agents/scripts/install_claude.py")
 
 def check_environment() -> bool:
-    """Secret sovereignty (Rule 66) governs *not reading* .env into context —
+    """Secret sovereignty (agents.md §3 secret_sovereignty) governs *not reading* .env into context —
     it does not require every host to have one. Only warn when the project
     declares it needs secrets (an .env.template exists) but .env is missing."""
     if ENV_TEMPLATE.exists() and not CONFIG_PATH.exists():
@@ -25,12 +25,28 @@ def check_environment() -> bool:
         return False
     return True
 
+def current_submodule_commit() -> str:
+    """HEAD of the .agents submodule, or "unknown" outside a git context."""
+    try:
+        return subprocess.run(
+            ["git", "-C", ".agents", "rev-parse", "HEAD"],
+            capture_output=True, text=True, check=True,
+        ).stdout.strip()
+    except (subprocess.CalledProcessError, OSError):
+        return "unknown"
+
+
 def sync_commands() -> bool:
     """Ensures the Claude Code bridge (.claude/agents, commands, skills, hooks,
-    MCP) is installed. Runs install_claude.sh once; a no-op on later sessions
-    once .agents/.claude_bridge.lock exists."""
+    MCP) is installed AND current. Re-runs the (idempotent) installer when the
+    lock is missing or the submodule commit changed since the last install —
+    a deliberate `.agents` update ships new assets that need linking."""
     if BRIDGE_LOCK.exists():
-        return True
+        recorded = BRIDGE_LOCK.read_text().strip()
+        current = current_submodule_commit()
+        if current == "unknown" or recorded == current:
+            return True
+        print(f"🔄 [ON_INIT] .agents updated ({recorded[:12]} -> {current[:12]}). Re-linking bridge...")
 
     if not INSTALL_SCRIPT.exists():
         print(f"⚠️ [ON_INIT] Warning: {INSTALL_SCRIPT} not found. Skipping bridge install.")

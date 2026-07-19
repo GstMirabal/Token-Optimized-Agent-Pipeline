@@ -16,11 +16,10 @@ This skill implements a **Template-Driven Scaffolding** pattern. It scans the ma
 ## Procedures
 
 ### 1. Gap Analysis (Arsenal Audit)
-- **Scanning**: Iterate through `core/` and `local/` directories.
-- **Detection**: Identify folders that lack the mandatory "Trinity":
-    - `README.md`
-    - `SKILL.md`
-    - `/scripts/` folder + `__init__.py`
+- **Scanning**: Iterate through the flat `skills/` directory (and `profiles/*/skills/` when auditing profiles).
+- **Detection**: Apply the dual Trinity Standard (`agents.md §3 trinity_standard`):
+    - Every skill: `SKILL.md` with `name`/`description` frontmatter.
+    - Executable skills (those shipping `/scripts/`): additionally `README.md` and `scripts/__init__.py`.
 
 ### 2. Context Extraction
 - **Meta-Harvesting**: Read the corresponding entry in `manifest_skills.json` to extract the skill's official name, description, category, and tags.

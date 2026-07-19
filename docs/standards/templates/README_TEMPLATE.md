@@ -48,14 +48,15 @@ Before any tactical planning, the following gates must be certified:
 ---
 
 ## ⚖️ Federated Registry (The Matrix Laws)
-This project is governed by the universal rules (1-112+) established in the `.agents` matrix.
+This project is governed by the keyed constitution in `.agents/agents.md` (numbered "Rule NN" citations are legacy — resolve them via `rules/LEGACY_RULE_CONCORDANCE.md`).
 
 | Section | Domain | Mandate |
 | :--- | :--- | :--- |
-| **Section 1** | Code & Language | PEP 8, camelCase, Type Hints, and Technical English Sovereignty. |
-| **Section 2** | Autonomy | Triple Lock Security and human authorization gates. |
-| **Section 3** | Topology | Trinity Standard (README, SKILL, scripts) and Layer Isolation. |
-| **Section 6** | Command | Constitutional Birthright (Cycle 0) for all subagents. |
+| **§1** | Code & Language | `snake_case`+ruff / `camelCase`+pnpm lint, mandatory type hints, Technical English Sovereignty. |
+| **§2** | Autonomy | Triple Lock Security, token economy ladder, human authorization gates. |
+| **§3** | Topology | Dual Trinity Standard, flat `skills/`, profiles for project packs. |
+| **§6** | Command | Matrix V3 chain of command; pipeline defined in `matrix_workflow.md`. |
+| **§7** | Jurisprudence | `J-01`…`J-12` amendments, including Branch Discipline (J-12). |
 
 ---
 

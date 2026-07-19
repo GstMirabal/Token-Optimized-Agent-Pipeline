@@ -25,8 +25,9 @@ Run `/agents:start`. It will:
 
 ## 4. Where state lives
 - `docs/active_state.json` — this project's own session anchor (git-ignored, host-specific, never committed to `.agents`).
+- `CHANGELOG.md` (root) — the **Master Ledger**: sprint entries at close, version seals at deployment.
 - `docs/roadmaps/`, `docs/sprints/` — this project's own tactical history.
-- `.agents/docs/` — the framework's own (separate) self-documentation; not this project's.
+- `.agents/docs/` — the framework's own (separate) self-documentation; not this project's (its changelog is `.agents/CHANGELOG.md`, a different jurisdiction).
 
 ## 5. Full inventory
 For the detailed component-by-component map (what lives where inside `.agents/`, current status of each piece), read `.agents/docs/architecture/matrix_topology_map.md`.

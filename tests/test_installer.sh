@@ -58,5 +58,6 @@ bash .agents/scripts/install_claude.sh --profile crypto-django > /dev/null
 [ "$(grep -cxF "@.agents/agents.md" CLAUDE.md)" = "1" ] || fail "duplicate import on re-run"
 
 [ -f .agents/.claude_bridge.lock ] || fail "bridge lock not created"
+[ -s .agents/.claude_bridge.lock ] || fail "bridge lock is empty (must record the submodule commit)"
 
 echo "✅ installer sandbox test PASSED"

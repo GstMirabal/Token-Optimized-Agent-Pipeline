@@ -20,6 +20,7 @@ What it does:
 """
 import argparse
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -127,8 +128,18 @@ def main() -> int:
             print(f"ℹ️  Profile MCP servers listed in profiles/{args.profile}/mcp/registry.json "
                   "— add the ones you need to .mcp.json manually (they may require API keys).")
 
-    (AGENTS_DIR / ".claude_bridge.lock").touch()
-    print(f"🔒 Bridge installed. Marked {AGENTS_DIR / '.claude_bridge.lock'}")
+    # Record the installed submodule commit so hooks/on_init.py (and the
+    # start_workflow bridge_check) can detect a deliberate submodule update
+    # and re-link any new agents/commands/skills automatically.
+    try:
+        commit = subprocess.run(
+            ["git", "-C", str(AGENTS_DIR), "rev-parse", "HEAD"],
+            capture_output=True, text=True, check=True,
+        ).stdout.strip()
+    except (subprocess.CalledProcessError, OSError):
+        commit = "unknown"
+    (AGENTS_DIR / ".claude_bridge.lock").write_text(commit + "\n")
+    print(f"🔒 Bridge installed at commit {commit[:12]}. Marked {AGENTS_DIR / '.claude_bridge.lock'}")
     return 0
 
 
