@@ -48,12 +48,12 @@
 
 ## About The Project
 
-El **JS-Standardizer** es la herramienta de alineación universal para proyectos Javascript y Typescript del Matrix. Asegura que el código cumpla con los estándares de calidad del framework (ESLint, Prettier) y que la documentación interna mantenga la coherencia legal mediante JSDoc obligatorios.
+The **JS-Standardizer** is the Matrix's universal alignment tool for JavaScript and TypeScript projects. It ensures code complies with the framework's quality standards (ESLint, Prettier) and that internal documentation stays legally coherent through mandatory JSDoc.
 
 **Key Features:**
-*   **Linter Automation:** Configuración lista para usar de ESLint y Prettier alineada con la **Regla 35**.
-*   **TS Support:** Integración nativa con Typescript para arquitecturas modernas.
-*   **JSDoc Guard:** Valida la presencia de firmas de documentación en todas las funciones nucleares.
+*   **Linter Automation:** Ready-to-use ESLint and Prettier configuration aligned with **Rule 35**.
+*   **TS Support:** Native TypeScript integration for modern architectures.
+*   **JSDoc Guard:** Validates the presence of documentation signatures on all core functions.
 
 ### Built With
 
@@ -67,25 +67,25 @@ El **JS-Standardizer** es la herramienta de alineación universal para proyectos
 
 ### Prerequisites
 
-*   **Node.js**: Requerido para ejecutar los linters y standardizers.
+*   **Node.js**: Required to run the linters and standardizers.
 
 ### Installation & Configuration
 
 1. **Integrated in Core**
-   Ubicado en `.agents/skills/core/js-standardizer/`.
+   Located at `.agents/skills/js-standardizer/`.
 
 2. **Link local project**
-   Asegúrese de que el proyecto raíz tenga un `package.json` para facilitar la inyección de reglas.
+   Make sure the host project root has a `package.json` so rule injection can take place.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Usage
 
-Invocado automáticamente durante las fases de auditoría incremental (`/certification_audit`):
+Invoked automatically during incremental audit phases (`/agents:audit`):
 
 ```bash
-# Ejemplo: Estandarización de archivos en src/
-npx eslint src/ --fix
+# Example: standardizing files under src/
+pnpm run lint --fix
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

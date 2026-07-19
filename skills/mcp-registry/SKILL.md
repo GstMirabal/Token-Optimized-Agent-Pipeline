@@ -12,7 +12,7 @@ During the Technical Design phase (Plan) and Step Zero (DevOps), the Orchestrato
 ## 🛠️ How it Works (Instructions)
 
 **Step 1: Context Discovery (Plan Phase)**
-Before finalizing the `implementation_plan.md`, you must read `.agents/skills/mcp-registry/registry.json` using the `view_file` tool. Identify if there is an active/available MCP server that matches the task requirements. If the MCP does not exist, you must propose adding it to the human.
+Before finalizing the `implementation_plan.md`, read `.agents/skills/mcp-registry/registry.json` (and the active profile's `profiles/[name]/mcp/registry.json`, if one is installed). Identify if there is an active/available MCP server that matches the task requirements. If the MCP does not exist, you must propose adding it to the human.
 
 **Step 2: Subagent Routing**
 If an MCP is required, explicitly state in your `implementation_plan.md` which subagent gets authorization for which MCP. 
@@ -20,7 +20,7 @@ If an MCP is required, explicitly state in your `implementation_plan.md` which s
 Remember: Subagents cannot auto-discover MCPs. If it is not in the plan, they cannot use it.
 
 **Step 3: Provisioning (Step Zero - DevOps)**
-During execution Step Zero, prior to the subagents acting, the Orchestrator must verify that the designated MCP servers are provisioned. If an MCP server requires initialization (e.g., via an `npx` command or a script), the Orchestrator must execute its startup command dynamically.
+During execution Step Zero, prior to the subagents acting, the Orchestrator must verify that the designated MCP servers are provisioned. If an MCP server requires initialization, the Orchestrator must execute its startup command dynamically — local-process servers MUST launch via `pnpm dlx` (never `npx -y`, per agents.md §8).
 
 ## 🔴 Security and Zero-Trust Authorization
-No external API or Model Context Protocol may be added to `registry.json` without the explicit approval of the Human User. The Orchestrator can propose the JSON structure, but it must wait for human `// turbo` or explicit chat authorization to commit the new tool to the registry.
+No external API or Model Context Protocol may be added to `registry.json` without the explicit approval of the Human User. The Orchestrator can propose the JSON structure, but it must wait for explicit human authorization (chat confirmation or Claude Code permission prompt) to commit the new tool to the registry.

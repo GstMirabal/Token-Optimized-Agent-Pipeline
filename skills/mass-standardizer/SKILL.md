@@ -1,3 +1,8 @@
+---
+name: mass-standardizer
+description: Batch-normalizes the flat skills/ arsenal — detects skills missing the Trinity Standard (README.md, SKILL.md, /scripts/) and injects the missing artifacts from templates, keeping manifest_skills.json in sync.
+---
+
 # Sub-Role Skill: Mass Standardizer
 
 ## Base Profile

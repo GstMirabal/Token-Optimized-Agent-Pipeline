@@ -18,3 +18,8 @@ def mirror_active_state():
             pass # Keep it silent to not interrupt workflows unnecessarily unless debugging
     else:
         pass
+
+
+if __name__ == "__main__":
+    # Invoked directly as a Claude Code Stop hook (see claude/settings.hooks.json).
+    mirror_active_state()

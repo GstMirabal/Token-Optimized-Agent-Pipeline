@@ -8,32 +8,32 @@
   <p align="center">
     <strong>Workflows-as-Commands Orchestration</strong>
     <br />
-    Bridging the .agents Matrix with the Claude Code Skill Ecosystem.
+    Bridging the .agents Matrix with real Claude Code slash commands.
   </p>
 </div>
 
 ---
 
 ## 🎯 Strategic Objective
-The **Slash Commander** is a specialized core skill that synchronizes Markdown-based workflows with the native Slash Command system of the AI client. It ensures that every high-integrity protocol defined in `workflows/` is invokable via standard `/cmd` syntax.
+The **Slash Commander** is the core skill that keeps every high-integrity protocol defined in `workflows/` invokable via a real, namespaced `/agents:<cmd>` slash command in the host project.
 
 ---
 
 ## 🏗️ Technical Architecture
 | Layer | Namespace | Purpose |
 | :--- | :--- | :--- |
-| **`core/`** | `slash-commander` | Strategic bridge for command registration. |
+| `skills/slash-commander/` | flat, no sub-layers | Documents and audits the command↔workflow bridge. |
 
 ### Component Breakdown
-- **`SKILL.md`**: The procedural logic governing the translation of workflows to `.ts` skills.
-- **`scripts/generate_commands.py`**: The engine responsible for parsing workflows and generating the shadow skill infrastructure.
+- **`SKILL.md`**: The procedural logic governing how `commands/*.md` map to `/agents:*` and how the link is installed/verified.
+- **`scripts/verify_commands.py`**: Lint check — confirms every `commands/*.md` references a workflow file that actually exists. It does **not** generate anything; commands are hand-authored `.md` files, not generated `.ts` stubs.
 
 ---
 
 ## 🛡️ Governance Sentinel Handshake
 - **Standard**: Trinity Standard (README, SKILL, /scripts/).
-- **Jurisdiction**: `workflows/`, `.claude.code/skills/`.
-- **Status**: `DEVELOPMENT_PHASE`
+- **Jurisdiction**: `workflows/`, `commands/`, host `.claude/commands/agents/` (via the installer).
+- **Status**: `ACTIVE`
 
 ---
 
@@ -44,9 +44,14 @@ The **Slash Commander** is a specialized core skill that synchronizes Markdown-b
 ---
 
 ## 🚀 Usage & Integration
-Trigger the synchronization using the following command (orchestrated by the **DevOps Sentinel**):
+Install/repair the bridge for a host project (run once after `git submodule add`, and again any time `.agents` updates):
 ```bash
-python3 skills/core/slash-commander/scripts/generate_commands.py --sync
+.agents/scripts/install_claude.sh
+```
+
+Check for orphaned command→workflow references:
+```bash
+python3 .agents/skills/slash-commander/scripts/verify_commands.py
 ```
 
 ---

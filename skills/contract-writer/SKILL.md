@@ -1,3 +1,8 @@
+---
+name: contract-writer
+description: Documentary reverse engineering — extracts structured API contracts (I/O payloads, headers, status codes, auth) directly from implementation code into standardized Markdown tables under docs/contracts/.
+---
+
 # 🛠️ Local Skill: Contract Writer (v1.0.0)
 
 ## Domain

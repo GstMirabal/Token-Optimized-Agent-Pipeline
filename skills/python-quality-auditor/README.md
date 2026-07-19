@@ -48,12 +48,12 @@
 
 ## About The Project
 
-El **Python Quality Auditor** es la herramienta de certificación de salud para proyectos Python dentro del Matrix. Proporciona una auditoría agnóstica e incremental mediante herramientas modernas (Ruff para linting/formato, Mypy para tipado estático y Bandit para seguridad), asegurando que el código cumpla con los estándares de producción de la **Regla 35**.
+The **Python Quality Auditor** is the health-certification tool for Python projects inside the Matrix. It provides an agnostic, incremental audit through modern tooling (Ruff for linting/formatting, Mypy for static typing, and Bandit for security), ensuring code meets the production standards of **Rule 35**.
 
 **Key Features:**
-*   **Agnostic Linting:** Integración con Ruff para unificar más de 10 herramientas de linting en una ejecución rápida.
-*   **Type Certification:** Auditoría de tipos mediante Mypy para prevenir errores lógicos en tiempo de ejecución.
-*   **Security Scanning:** Identificación de vulnerabilidades conocidas en paquetes y código fuente mediante Bandit.
+*   **Agnostic Linting:** Ruff integration unifying 10+ linting tools into one fast run.
+*   **Type Certification:** Mypy type auditing to prevent runtime logic errors.
+*   **Security Scanning:** Bandit-based detection of known vulnerabilities in packages and source code.
 
 ### Built With
 
@@ -67,26 +67,26 @@ El **Python Quality Auditor** es la herramienta de certificación de salud para 
 
 ### Prerequisites
 
-*   **Python 3.x**: El auditor se ejecuta sobre el intérprete de sistema o un entorno virtual designado (Rule 37).
-*   **Pip Dependencies**: Requiere la instalación de `ruff`, `mypy` y `bandit` en el entorno de ejecución.
+*   **Python 3.x**: The auditor runs on a designated virtual environment interpreter (Rule 37).
+*   **Pip Dependencies**: Requires `ruff`, `mypy`, and `bandit` installed in the execution environment.
 
 ### Installation & Configuration
 
 1. **Submodule Integration**
-   Ubicado en `.agents/skills/core/python-quality-auditor/`.
+   Located at `.agents/skills/python-quality-auditor/`.
 
 2. **Run Certification**
-   Puede ser invocado manualmente o mediante el workflow `/certification_audit`.
+   Can be invoked manually or through the `/agents:audit` workflow.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Usage
 
-Invocado durante la fase de **Hardenning** de cada Sprint para certificar que el incremento de código es conforme a los estándares institucionales:
+Invoked during each Sprint's **Hardening** phase to certify that the code increment complies with institutional standards:
 
 ```bash
-# Ejemplo: Ejecución del auditor sobre un módulo específico
-python .agents/skills/core/python-quality-auditor/scripts/python_quality_auditor.py path/to/module/
+# Example: running the auditor on a specific module
+python .agents/skills/python-quality-auditor/scripts/python_quality_auditor.py path/to/module/
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

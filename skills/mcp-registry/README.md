@@ -48,12 +48,12 @@
 
 ## About The Project
 
-El **MCP Registry & Manager** es el sistema de descubrimiento de datos externos del Matrix. Gestiona la configuración y el enrutamiento de servidores Model Context Protocol (MCP) locales y remotos (e.g. CoinGecko, FRED, Yahoo Finance), permitiendo a los subagentes expandir su frontera de conocimiento de forma segura y auditada.
+The **MCP Registry & Manager** is the Matrix's external-data discovery system. It manages the configuration and routing of local and remote Model Context Protocol (MCP) servers, letting subagents expand their knowledge frontier in a safe, audited way. Project-specific servers (e.g. market-data feeds) live in `profiles/[name]/mcp/registry.json`.
 
 **Key Features:**
-*   **Centralized Registry:** Un único punto de verdad en `registry.json` para todas las conexiones externas.
-*   **Zero-Trust Routing:** Asegura que solo los MCPs autorizados en el registro puedan ser invocados por el Orchestrator.
-*   **Dynamic Provisioning:** Capacidad de inyectar variables de entorno y secretos de API de forma segura.
+*   **Centralized Registry:** A single source of truth in `registry.json` for all external connections.
+*   **Zero-Trust Routing:** Ensures only registry-authorized MCPs can be invoked by the Orchestrator.
+*   **Dynamic Provisioning:** Safely injects environment variables and API secrets.
 
 ### Built With
 
@@ -66,26 +66,26 @@ El **MCP Registry & Manager** es el sistema de descubrimiento de datos externos 
 
 ### Prerequisites
 
-*   **Claude / Gemini / LLM Platform**: Capacidad del modelo para interactuar con servidores MCP.
-*   **MCP Server Configuration**: Ubicación persistente de sus binarios en `.env` o el archivo de configuración global.
+*   **Claude / LLM Platform**: Model capability to interact with MCP servers.
+*   **MCP Server Configuration**: Persistent location of server credentials in `.env` or the global configuration file.
 
 ### Installation & Configuration
 
 1. **Integrated in Core**
-   Ubicado en `.agents/skills/core/mcp-registry/`.
+   Located at `.agents/skills/mcp-registry/`.
 
 2. **Register a Server**
-   Añada su nuevo servidor a `registry.json` siguiendo el esquema de metadatos oficial.
+   Add your new server to `registry.json` following the official metadata schema (local-process commands must use `pnpm dlx`, per agents.md §8).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Usage
 
-El **Orchestrator** consulta el registro antes de cada tarea que requiera datos en tiempo real (Trading, Macro, Sentiment). Si el servidor no está en el `registry.json`, se bloquea el acceso externo. De conformidad con las reglas de **Survival Mode**, prioriza el uso de créditos gratuitos de APIs externas.
+The **Orchestrator** consults the registry before any task requiring real-time external data. If a server is not in `registry.json` (or the active profile's registry), external access is blocked. Free-tier API credits are prioritized over paid calls.
 
 ```bash
-# Ejemplo: Visualización de servidores activos en el registro
-cat .agents/skills/core/mcp-registry/registry.json
+# Example: viewing active servers in the registry
+cat .agents/skills/mcp-registry/registry.json
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

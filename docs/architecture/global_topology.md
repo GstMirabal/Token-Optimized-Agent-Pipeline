@@ -49,5 +49,8 @@ The Tactical Logic. Controlled by the **Orchestrator** and **Doc Orchestrator**,
 ### 🛠️ Layer 4: Execution (The Arsenal)
 The Physical Impact. Highly specialized **Skills** (local and 3rd party) perform the actual code manipulation and quality audits under the command of Layer 3.
 
+### 🌉 Layer 5: Claude Code Bridge (The Interface)
+The only layer that crosses the submodule boundary. `scripts/install_claude.sh` symlinks `agents/`, `commands/`, and `skills/` into the host's `.claude/` tree and non-destructively merges `claude/settings.hooks.json` / `claude/mcp.json` into the host's `.claude/settings.json` / `.mcp.json`. Without this layer, Claude Code cannot see any of Layers 1-4 — they live inside a submodule path it never scans.
+
 ## 3. Communication Bridge
 Inter-agent communication is managed through **Contracts** located in `docs/contracts/`. These files define the technical interfaces and I/O expectations for every functional handoff.

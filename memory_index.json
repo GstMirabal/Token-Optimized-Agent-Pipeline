@@ -1,15 +1,14 @@
 {
-  "last_update": "2026-05-25",
-  "sprint_id": "073",
+  "last_update": "2026-07-19",
+  "sprint_id": "078",
+  "_schema": "Entries are summary-only Knowledge Items. The 'file' field is omitted once the raw log has been purged (agents.md §4 definitive_amnesia) — the 1-line summary IS the retained knowledge.",
   "items": [
     {
       "id": "F-20260509-96AD",
-      "file": "memory/FAILURE_20260509_SESSION.md",
       "summary": "Language violations and tool failures in Session 96AD."
     },
     {
       "id": "F-20260525-2426",
-      "file": "memory/FAILURE_20260525_SESSION.md",
       "summary": "Global interpreter execution violation: failed to prefix python script with venv/bin."
     }
   ]
