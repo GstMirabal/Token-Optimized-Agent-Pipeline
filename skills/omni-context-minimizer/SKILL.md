@@ -36,4 +36,4 @@ Line 45: class DatabaseService {
 
 ## 🔴 Token-Saver Authorization
 If you are sending an `implementation_plan.md` to the Orchestrator and it includes the heuristic scanning of an entire `/src` folder, you **MUST** specify in your MD: *"The `omni-context-minimizer` will be used to map the 5 base files, preventing context drowning"*.
-Otherwise, the Auditor Agent will reject the plan.
+Otherwise, the Token-Saver Auditor will reject the plan.
