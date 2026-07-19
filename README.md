@@ -56,7 +56,7 @@ Universal-Agents is a military-grade AI agent governance framework designed to p
 *   **100% Coverage Mandate:** Strategic requirement enforced by the **Tester Agent**, ensuring zero-defect integration before any code commitment.
 *   **Token-Saver Auditor:** An economic kill-switch that prevents inefficient plans and reduces API costs by optimizing context windows.
 *   **Omni-Context Minimizer:** Smart AST-based code skeleton extraction that allows AI to understand massive files (1000+ lines) while only consuming 10% of the normal token cost.
-*   **Skill Forge & Arsenal Flat Mapping:** Universal, deterministic tooling governed by the Trinity Standard and external nomenclature (`-3rd`), natively hooked to Claude via `slash-commander`.
+*   **Skill Forge & Arsenal Flat Mapping:** Universal, deterministic tooling governed by the Trinity Standard and external nomenclature (`-3rd`), bridged to real Claude Code slash commands via `scripts/install_claude.sh` + the `slash-commander` skill.
 *   **Knowledge Extraction & Memory:** Automatic heuristic distillation via `extract_workflow.md`, indexing lessons into atomic Knowledge Items (KIs) inside `/memory/`.
 *   **Persistent Compliance Roadmap:** Integrated topology via `docs/roadmaps/`, anchored by the unbreakable `docs/active_state.json`.
 
@@ -91,14 +91,32 @@ Universal-Agents is a military-grade AI agent governance framework designed to p
    git submodule add https://github.com/GstMirabal/.agents .agents
    ```
 
-3. **Sync AI Intelligence**
-   Update the framework to the latest global version to inherit new patterns and skills:
+3. **Install the Claude Code bridge**
+   Claude Code only auto-discovers agents/commands/skills/hooks from `.claude/` and `.mcp.json` at your **project root** — it never reads inside a submodule. Run the installer once (idempotent, safe to re-run):
    ```bash
-   git submodule update --remote --merge
+   .agents/scripts/install_claude.sh
+   ```
+   This symlinks `.agents/agents/*.md` → `.claude/agents/`, `.agents/commands/*.md` → `.claude/commands/agents/` (exposed as `/agents:*`), `.agents/skills/*/` → `.claude/skills/`, merges hooks + MCP servers into your `.claude/settings.json` / `.mcp.json`, and adds the `@.agents/agents.md` import to your `CLAUDE.md` so the constitution auto-loads every session. It never overwrites non-symlinked host content.
+
+   **Project profiles (opt-in)**: project-family packs (extra rules, specialist agents, domain skills) live under `profiles/` and are only linked when explicitly requested:
+   ```bash
+   .agents/scripts/install_claude.sh --profile crypto-django
    ```
 
-4. **Audit & Configure**
-   Review `governance/constitution/global_user_rules.md` to ensure your local environment variables and paths are correctly mapped within the framework.
+4. **Pin a release (recommended) or track main**
+   Pin the submodule to a tagged release for reproducible governance — updates then happen deliberately, not by drift (same supply-chain reasoning as J-10):
+   ```bash
+   cd .agents && git fetch --tags && git checkout v3.0.0 && cd ..
+   git add .agents && git commit -m "chore(deps): pin .agents to v3.0.0 #[Sprint_ID]"
+   ```
+   To upgrade later: check the [CHANGELOG](CHANGELOG.md), check out the new tag, and re-run the installer to pick up new agents/commands/skills:
+   ```bash
+   git submodule update --remote --merge   # only if you deliberately track main
+   .agents/scripts/install_claude.sh
+   ```
+
+5. **Audit & Configure**
+   Review `agents.md` (the constitution) to ensure your local environment variables and paths are correctly mapped within the framework.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -112,31 +130,33 @@ python .agents/skills/omni-context-minimizer/scripts/omni_minimizer.py path/to/l
 ```
 
 ### 🛡️ Scenario: Retrofitting Existing Projects
-If you are adding the framework to an **already established repository**, follow this 3-step sequence to align your architectural roadmap:
+If you are adding the framework to an **already established repository**, follow this sequence to align your architectural roadmap:
 
 1.  **Submodule Insertion:** In your root folder: `git submodule add https://github.com/GstMirabal/.agents .agents`
-2.  **AI Session Trigger:** Tell the AI: *"Initialize session using governance protocols in `.agents/` and execute `/start`."*
-3.  **Roadmap Discovery:** The matrix will map `docs/active_state.json`. Run the command: **`/matrix`**.
+2.  **Bridge Installation:** `.agents/scripts/install_claude.sh` (creates `.claude/agents`, `.claude/commands/agents`, `.claude/skills`, and merges hooks/MCP config).
+3.  **AI Session Trigger:** Tell the AI: *"Initialize session using governance protocols in `.agents/` and execute `/agents:start`."*
+4.  **Roadmap Discovery:** The matrix will map `docs/active_state.json` (scaffolding it on first run — see `start_workflow.md`). Run the command: **`/agents:matrix`**.
 
-The Orchestrator will automatically scan your source code, identify your project's current Phase, initialize your local context using the `task_scope.md` payload, and generate persistent architectural tracking in `docs/roadmaps/`.
+The Orchestrator will automatically scan your source code, identify your project's current Phase, initialize your local context, and generate persistent architectural tracking in `docs/roadmaps/`.
 
 ---
 
 ### 🤖 AI-Ops: Core Commands (Slash Commands)
-The framework supports automated workflows via standardized TypeScript bridges inside `commands/`. Use these native slash commands locally in Claude Code:
+The framework maps every `workflows/*.md` protocol to a real Claude Code slash command in `commands/*.md`, installed under the `/agents:*` namespace so they never collide with commands your host project defines:
 
 | Command | Purpose |
 | :--- | :--- |
-| **`/start`** | **Entry Gate**: Initializes Cero-Memory, syncs DevOps/Git Sentinels, and prepares execution limits. |
-| **`/matrix`** | **Orchestration**: The V2 Double-Gate execution pipeline. Distributes tasks across subagents. |
-| **`/close`** | **Exit Gate**: Extracts heuristics, updates roadmaps, mirrors state, and seals the repo securely. |
-| **`/audit`** | **Inquisitor**: Proactive structural maintenance to purge logic drifts and missing `.md` rules. |
-| **`/skill_forge`** | **Quartermaster**: Creates, tests, and natively registers new Matrix tools without mutating production logic. |
-| **`/remediation`** | **Panic Button**: Halts infinite hallucination loops, nukes git to pristine state, and logs negative knowledge. |
-| **`/standardization`** | **Structural**: Enforces the `[layer]/[app]/` dictionary and Technical English purity. |
-| **`/extract`** | **Distillation**: Memory indexer handling the "Jurisprudence Loop". |
-| **`/deployment`** | **Vanguard**: Merges code to upstream branches and operates CI/CD boundaries. |
-| **`/skeleton`** | **Context Compression**: Forces the Omni-Minimizer to carve AST summaries of massive codefiles to protect token limits. |
+| **`/agents:start`** | **Entry Gate**: Initializes Zero-Memory, installs the Claude bridge on first run, syncs DevOps/Git Sentinels, and prepares execution limits. |
+| **`/agents:matrix`** | **Orchestration**: The V3 Double-Gate execution pipeline. Distributes tasks across subagents. |
+| **`/agents:close`** | **Exit Gate**: Extracts heuristics, updates roadmaps, mirrors state, and seals the repo securely. |
+| **`/agents:audit`** | **Inquisitor**: Proactive structural maintenance to purge logic drifts and missing `.md` rules. |
+| **`/agents:skill-forge`** | **Quartermaster**: Creates, tests, and natively registers new Matrix tools without mutating production logic. |
+| **`/agents:remediation`** | **Panic Button**: Halts infinite hallucination loops, nukes git to pristine state, and logs negative knowledge. |
+| **`/agents:standardization`** | **Structural**: Enforces the `[layer]/[app]/` dictionary and Technical English purity. |
+| **`/agents:extract`** | **Distillation**: Memory indexer handling the "Jurisprudence Loop" (see `agents.md §4`). |
+| **`/agents:deployment`** | **Vanguard**: Merges the sprint branch to upstream branches and operates CI/CD boundaries. |
+| **`/agents:skeleton`** | **Context Compression**: Forces the Omni-Minimizer to carve AST summaries of massive codefiles to protect token limits. |
+| **`/agents:graphify`** | **Knowledge Graph**: Runs the graphify pipeline over the current project into `graphify-out/`. |
 
 > [!TIP]
 > **Documentation Sovereignty:** All technical docs, implementation plans (`docs/sprints/`), and local roadmaps (`docs/roadmaps/`) are tightly bound directly to Matrix V2 tracking under `/docs/`.

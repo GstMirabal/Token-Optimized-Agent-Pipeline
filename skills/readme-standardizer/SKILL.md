@@ -20,7 +20,7 @@ Before blindly generating text, analyze the context of the current repository:
 
 **Step 2: Read Master Template**
 Open and read the static template file using your base tool:
-`[submodule-root-directory]/.agents/skills/core/readme-standardizer/assets/template.md`
+`[submodule-root-directory]/.agents/skills/readme-standardizer/assets/template.md`
 
 **Step 3: Fusion and Overwriting (Render)**
 Mentally replace all `{{UPPERCASE_VARIABLES}}` delimiters in the template with the actual project information you extracted in Step 1.

@@ -1,0 +1,58 @@
+{
+  "version": "1.0",
+  "mcp_servers": {
+    "cmc-official-mcp": {
+      "description": "Official CoinMarketCap MCP Server for LLM Reasoning. (M1/M4).",
+      "status": "enabled",
+      "connection_type": "remote_api",
+      "url": "https://mcp.coinmarketcap.com/mcp",
+      "env_requirements": [
+        "CMC_PRO_API_KEY"
+      ],
+      "authorized_roles": [
+        "Datafeed Architect",
+        "Market Analyst"
+      ]
+    },
+    "coingecko-official-mcp": {
+      "description": "Official CoinGecko MCP Server for GitHub/Dev Audit. (M3).",
+      "status": "enabled",
+      "connection_type": "remote_api",
+      "url": "https://mcp.coingecko.com/mcp",
+      "authorized_roles": [
+        "Auditor",
+        "Datafeed Architect"
+      ]
+    },
+    "fred-macro-mcp": {
+      "description": "Federal Reserve Economic Data (FRED) for DXY/Interest Rates. (M4).",
+      "status": "disabled",
+      "connection_type": "local_process",
+      "command": "pnpm dlx mcp-fred-api",
+      "env_requirements": [
+        "FRED_API_KEY"
+      ],
+      "authorized_roles": [
+        "Market Analyst"
+      ]
+    },
+    "yfinance-mcp": {
+      "description": "Yahoo Finance MCP for SPX, IBIT/FBTC ETFs and Gold. (M4).",
+      "status": "disabled",
+      "connection_type": "local_process",
+      "command": "pnpm dlx mcp-yahoo-finance",
+      "authorized_roles": [
+        "Market Analyst"
+      ]
+    },
+    "ccxt-connector-mcp": {
+      "description": "Community CCXT MCP for multi-exchange public data access. (M1.8/M2).",
+      "status": "enabled",
+      "connection_type": "local_process",
+      "command": "pnpm dlx mcp-server-ccxt",
+      "authorized_roles": [
+        "Trading Engine Architect"
+      ]
+    }
+  }
+}

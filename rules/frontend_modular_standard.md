@@ -1,22 +1,22 @@
 # 🛡️ Rule 041: Frontend Modular Standard (Matrix V2)
 
 ## 1. Directory Anatomy (Rule 41.1)
-Todo módulo dentro de `frontend/src/modules/` debe adherirse a la siguiente estructura mínima para garantizar la interoperabilidad y el aislamiento:
-- `pages/`: Contiene exclusivamente las vistas de nivel de ruta (Sufijo: `View.tsx`).
-- `components/`: Componentes atómicos o moleculares específicos del dominio del módulo.
-- `api/`: Definiciones de interfaces y servicios de comunicación con el backend.
-- `hooks/`: Lógica de estado y efectos encapsulada.
-- `store/`: (Opcional) Definiciones de estado global específicas del módulo (Zustand/Redux).
-- `index.ts`: La **Public API** del módulo. Solo lo exportado aquí es accesible desde fuera del módulo.
+Every module inside `frontend/src/modules/` must adhere to the following minimum structure to guarantee interoperability and isolation:
+- `pages/`: Contains route-level views exclusively (suffix: `View.tsx`).
+- `components/`: Atomic or molecular components specific to the module's domain.
+- `api/`: Interface definitions and backend communication services.
+- `hooks/`: Encapsulated state and effect logic.
+- `store/`: (Optional) Module-specific global state definitions (Zustand/Redux).
+- `index.ts`: The module's **Public API**. Only what is exported here is accessible from outside the module.
 
 ## 2. Cross-Module Communication (Rule 41.2)
-- **Zero-Leaking**: Está estrictamente **PROHIBIDO** importar archivos directamente desde las subcarpetas de otro módulo (ej. `import { UserCard } from "@/modules/users/components/UserCard"` es ILEGAL).
-- **Public Access**: Las importaciones entre módulos deben realizarse a través del punto de entrada raíz del módulo (ej. `import { UserCard } from "@/modules/users"`).
+- **Zero-Leaking**: Importing files directly from another module's subfolders is strictly **PROHIBITED** (e.g. `import { UserCard } from "@/modules/users/components/UserCard"` is ILLEGAL).
+- **Public Access**: Cross-module imports must go through the module's root entry point (e.g. `import { UserCard } from "@/modules/users"`).
 
 ## 3. UI Consistency (Rule 41.3)
-- **Sovereign Aesthetic**: Todos los componentes del módulo deben heredar los tokens de diseño definidos en `SovereignLayout` y utilizar `framer-motion` para transiciones de estado de vista.
-- **Loading States**: Toda `View.tsx` debe implementar un estado de carga (Skeleton o Loader premium) mientras se resuelven las promesas de la API.
+- **Sovereign Aesthetic**: All module components must inherit the design tokens defined in `SovereignLayout` and use `framer-motion` for view-state transitions.
+- **Loading States**: Every `View.tsx` must implement a loading state (Skeleton or premium Loader) while API promises resolve.
 
 ---
-*Vigente desde: 2026-05-07*
-*Estado: ACTIVE*
+*Effective since: 2026-05-07*
+*Status: ACTIVE*

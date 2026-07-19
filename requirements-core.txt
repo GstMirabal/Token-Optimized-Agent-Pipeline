@@ -1,0 +1,3 @@
+# Core runtime for the .agents framework — installed by start_workflow pip_setup.
+# Keep this minimal: only what every host session actually needs.
+graphifyy==0.8.30

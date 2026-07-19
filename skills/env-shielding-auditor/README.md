@@ -48,12 +48,12 @@
 
 ## About The Project
 
-El **Env-Shielding Auditor** es la guardia de seguridad del Matrix para la prevención de fugas de información sensible. Escanea el código fuente en busca de secretos hardcodeados (API keys, tokens de acceso, PII) y valida que el archivo `.env` esté correctamente ignorado por Git en el root y submódulos.
+The **Env-Shielding Auditor** is the Matrix's security guard against sensitive-information leaks. It scans source code for hardcoded secrets (API keys, access tokens, PII) and validates that the `.env` file is correctly git-ignored at the root and in submodules.
 
 **Key Features:**
-*   **Leak Detection:** Búsqueda recursiva mediante patrones regex de claves de proveedores (OpenAI, AWS, GCP, CCXT).
-*   **Gitignore Compliance:** Verifica que `.env` y archivos sensibles estén en la lista negra de Git.
-*   **PII Masking:** Sugiere el enmascaramiento de trazas de datos personales en logs de subagentes.
+*   **Leak Detection:** Recursive regex-pattern search for provider keys (OpenAI, AWS, GCP, CCXT).
+*   **Gitignore Compliance:** Verifies that `.env` and sensitive files are on Git's blacklist.
+*   **PII Masking:** Suggests masking personal-data traces in subagent logs.
 
 ### Built With
 
@@ -66,25 +66,25 @@ El **Env-Shielding Auditor** es la guardia de seguridad del Matrix para la preve
 
 ### Prerequisites
 
-*   **Ripgrep (rg)**: Recomendado para escaneos de alta velocidad en repositorios grandes.
+*   **Ripgrep (rg)**: Recommended for high-speed scans on large repositories.
 
 ### Installation & Configuration
 
 1. **Submodule Access**
-   Ubicado en `.agents/skills/core/env-shielding-auditor/`.
+   Located at `.agents/skills/env-shielding-auditor/`.
 
 2. **Setup**
-   No requiere dependencias externas pesadas adicionales.
+   No additional heavy external dependencies required.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Usage
 
-Invocado manualmente o por el **Agente DevOps** antes de cada commit atómico (`git freeze` protocol):
+Invoked manually or by the **DevOps Sentinel** before every atomic commit:
 
 ```bash
-# Ejemplo: Escaneo preventivo de secretos en el directorio actual
-bash .agents/skills/core/env-shielding-auditor/scripts/shield_audit.sh
+# Example: preventive secret scan of the current directory
+bash .agents/skills/env-shielding-auditor/scripts/shield_audit.sh
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

@@ -1,3 +1,8 @@
+---
+name: topology-scaffolder
+description: Scaffolds the mandatory docs/ tree (roadmaps, sprints, architecture, contracts) and keeps active_state.json's Zero Coordinate topology in sync. The only skill authorized to physically write project topology, on behalf of the Matrix Mapper agent.
+---
+
 # 🛠️ Local Skill: Topology Scaffolder (v1.0.0)
 
 ## Domain
@@ -16,6 +21,7 @@ This skill provides the **Blueprint Engine** for the framework. It handles the s
   - `/docs/roadmaps/[layer]/[app]/`
   - `/docs/sprints/[layer]/[app]/`
   - `/docs/architecture/`
+  - `/docs/walkthroughs/`
   - `/docs/contracts/`
 - **Sovereignty**: Overwrites or migrates legacy documentation structures to comply with the `.agents` standard.
 

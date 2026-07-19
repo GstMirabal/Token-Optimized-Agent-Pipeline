@@ -1,6 +1,6 @@
 ---
 description: "Session-Close Protocol (Keyword: close)"
-version: 6.0.0
+version: 6.1.0
 ---
 
 # 🛡️ Workflow: Close (Atomic Liquidation V3)
@@ -14,12 +14,13 @@ Master closure protocol enforcing the Zero-Tolerance Amnesia rule, Absolute Topo
 | **0. Constitutional Invocation** | `read_constitution` | Subagents MUST zero memory and read `agents.md`. Closure actions omitting explicit constitutional compliance are invalid. |
 | **1. Topographic Audit** | `noise_purge` | **MANDATORY**: Delete all empty folders (J-07). Validate all new files follow **Option B Naming** (`[MODULE]_[TYPE].md`). |
 | **1. Topographic Audit** | `rules_optimization` | Optimize rules via `train_runner.py` if failures or constitutional changes occur (requires explicit authorization). |
-| **1. Topographic Audit** | `graph_rebuild` | Run `venv/bin/graphify update .` to sync AST changes. Run semantic rebuild (Opción C) via `make graphify-rebuild` if documentation has been modified. |
+| **1. Topographic Audit** | `graph_rebuild` | Run `make -f .agents/Makefile graphify-update` to sync AST changes. Run the semantic rebuild via `make -f .agents/Makefile graphify-rebuild` if documentation has been modified. |
 | **2. Tactical Liquidation** | `history_sync` | Update **Master Ledger**, **Global Roadmap**, and **Module Walkthroughs** based on sprint achievements. |
+| **2. Tactical Liquidation** | `extract_handoff` | Run `/agents:extract` (see `extract_workflow.md`) to decide what survives into `memory_index.json` before the purge below destroys the raw logs. |
 | **3. Zero-Tolerance Purge** | `memory_wipe` | Execute forced physical deletion (`rm`) of all temporary logs within the `/memory/` sprint directory. |
 | **4. Roadmap Liquidation** | `state_sync` | Update `docs/active_state.json` with current sprint status and session ID. |
-| **5. Git Sovereignty** | `atomic_commit` | Execute atomic `git commit` and `push` on BOTH the main project repository and the `.agents` submodule sequentially. |
+| **5. Git Sovereignty** | `atomic_commit` | Execute atomic `git commit` and `git push origin ai-sprint/[ID]` — **never `main`/upstream directly** (J-12 Branch Discipline). Do the same for the `.agents` submodule if it was modified. Merging `ai-sprint/[ID]` into `main` is exclusively `deployment_workflow.md`'s job. |
 | **6. Golden Gate Lock** | `session_lock` | Output the official seal: **`SESSION LOCKED`**. The Matrix enters suspended animation. |
 
 ---
-*Optimized for Matrix V3 Topographic Purity & Symmetric Documentation (v6.0.0).*
+*Optimized for Matrix V3 Topographic Purity & Symmetric Documentation (v6.1.0) — fixes the graphify venv path and anchors the push target to the sprint branch (J-12).*

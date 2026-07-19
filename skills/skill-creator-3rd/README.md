@@ -48,12 +48,12 @@
 
 ## About The Project
 
-El **Skill Creator** es la herramienta de andamiaje y automatización para la expansión del arsenal del Matrix. Asegura que cada nueva habilidad atómica herede los protocolos de seguridad, eficiencia y documentación institucional, de conformidad con la bisección obligatoria en `/core/` o `/3rd/` (**Regla 71**).
+The **Skill Creator** is the scaffolding and automation tool for expanding the Matrix arsenal. It ensures every new atomic skill inherits the institutional security, efficiency, and documentation protocols, in compliance with the flat `skills/` topology and the `-3rd` external-origin suffix (**Rule 71**, agents.md §3).
 
 **Key Features:**
-*   **Atomic Scaffolding:** Generación automática de directorios `scripts/` y archivos `SKILL.md` / `README.md`.
-*   **Audit Integration:** Vincula automáticamente la nueva herramienta con el `python-quality-auditor`.
-*   **Governance Guard:** Valida que el nombre y la categoría de la skill cumplan con la taxonomía oficial del framework.
+*   **Atomic Scaffolding:** Automatic generation of `scripts/` directories and `SKILL.md` / `README.md` files.
+*   **Audit Integration:** Automatically links the new tool with the `python-quality-auditor`.
+*   **Governance Guard:** Validates that the skill's name and category comply with the framework's official taxonomy.
 
 ### Built With
 
@@ -66,25 +66,25 @@ El **Skill Creator** es la herramienta de andamiaje y automatización para la ex
 
 ### Prerequisites
 
-*   **Universal-Agents Submodule**: Se requiere acceso a las plantillas de andamiaje globales del framework.
+*   **Universal-Agents Submodule**: Access to the framework's global scaffolding templates is required.
 
 ### Installation & Configuration
 
 1. **Integrated in Core**
-   Ubicado en `.agents/skills/core/skill-creator/`.
+   Located at `.agents/skills/skill-creator-3rd/`.
 
 2. **Template access**
-   Utiliza las plantillas maestras definidas en los assets del framework para inyectar las reglas atomizadas en cada nueva skill.
+   Uses the master templates defined in the framework assets to inject the atomized rules into each new skill.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Usage
 
-Invocado cuando el **Orchestrator** o el usuario detecta la necesidad de una nueva capacidad técnica que debe ser persistida en el Matrix:
+Invoked when the **Orchestrator** or the user identifies the need for a new technical capability that must be persisted into the Matrix:
 
 ```bash
-# Ejemplo: Creación de una nueva skill atómica de scraping
-python .agents/skills/core/skill-creator/scripts/create_skill.py "web-scraper" "Expertise"
+# Example: creating a new atomic scraping skill
+python .agents/skills/skill-creator-3rd/scripts/create_skill.py "web-scraper" "Expertise"
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

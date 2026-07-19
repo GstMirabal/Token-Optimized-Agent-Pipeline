@@ -28,6 +28,22 @@ implementation_plan*.log
 .idea/
 .vscode/
 
+# Session artifacts (never versioned)
+task_scope.md
+
+# Machine-local install markers and environments
+installed.lock
+.claude_bridge.lock
+.deploy_unlock
+venv_skillopt/
+venv/
+
+# Generated knowledge graph output
+graphify-out/
+
+# Dependencies (install at runtime, never commit)
+node_modules/
+
 # Project Temp directory
 tmp/
 
@@ -38,3 +54,6 @@ __pycache__/
 .mypy_cache/
 .pytest_cache/
 .ruff_cache/
+
+# Ephemeral memory (agents.md §4) — purged at close, never versioned
+memory/

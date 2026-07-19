@@ -3,7 +3,7 @@ description: "Standardized Hierarchy Alignment Protocol (SHAP)"
 version: 4.0.0
 ---
 
-# 🛡️ Workflow: Standardization (Alineación V3)
+# 🛡️ Workflow: Standardization (Alignment V3)
 
 Governance protocol to enforce structural sovereignty, unique naming, and symmetric documentation.
 
