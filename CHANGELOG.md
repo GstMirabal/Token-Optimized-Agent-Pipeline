@@ -4,6 +4,8 @@ All notable changes to the Universal-Agents framework. Format: [Keep a Changelog
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-07-19
+
 ### Added
 - **Master Ledger doctrine**: the previously-undefined "Master Ledger" is now the host root `CHANGELOG.md` (agents.md §0, `CHANGELOG_TEMPLATE.md`) — sprint entries appended at close (`history_sync`), sealed as `[vX.Y.Z]` at deployment (`ledger_seal`), jurisdiction strictly separate from this file.
 - **Onboarding Scenario Matrix** in `start_workflow` (`first_run_scaffold`): greenfield / prior-agents / mature-no-agents detection and routing, including submodule identity verification for pre-existing `.agents` checkouts.
