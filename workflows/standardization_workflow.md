@@ -43,5 +43,15 @@ Invoked by `start_workflow first_run_scaffold` when prior agent-generated docume
 | `violation_log.md`, `PROCEDURAL_DEVIATION_*.md` | `memory/telemetry/` → distillation → purge | Normal jurisprudence cycle. |
 | Other frameworks' files (`.cursor/rules`, `.windsurfrules`, …) | Proposed for archive in the snapshot | Never deleted without explicit human OK — they may contain learning worth triaging. |
 
+## Phase 6: Onboarding Scenario Matrix (`start_workflow first_run_scaffold` routing)
+
+Loaded only on a host's FIRST Matrix session (token economy: one-time routing does not belong in the every-session start protocol). All scenarios end with: `docs/` tree instantiated, `docs/0_SYSTEM_OVERVIEW.md` materialized from its template, initial `docs/active_state.json`, and the **Master Ledger** (`CHANGELOG.md`) present at the host root (created from `CHANGELOG_TEMPLATE.md` only if absent — an existing changelog is adopted as-is, never reformatted).
+
+| Scenario | Detection signals | Route |
+| :--- | :--- | :--- |
+| **A. Greenfield** | Short/empty git history, no `docs/`, no substantial source code. | Full scaffold from templates + Master Ledger seeded ("Adopted Universal-Agents vX.Y.Z"). Verify default branch is `main` and a baseline `.gitignore` exists. |
+| **B. Prior agent interactions** | Pre-existing `CLAUDE.md`/`.claude/`, legacy `.agents` artifacts (`task/`, `implementation_plan*.md`, `knowledge/`, `docs/active_task.md`, `.agent_state/`), or other frameworks' files (`.cursor/rules`, `.windsurfrules`, `copilot-instructions.md`). | Execute the **Legacy Absorption Protocol** (Phase 5 above). If an old `.agents` submodule exists, verify its `git remote` points to the official repo first (a divergent fork HALTS onboarding with an alert). Adopt the existing `CLAUDE.md` (append imports only). Then scaffold whatever is still missing. |
+| **C. Mature project, no agents** | Substantial codebase, zero agentic traces. | `agents.md §5 legacy_onboarding`: Full Reverse Engineering (`sprint-architect` Legacy Onboarding Protocol) → Blueprints + Walkthroughs. Adopt an existing `CHANGELOG.md` as the Master Ledger untouched; if none, seed one whose first entry documents the audited inherited state. |
+
 ---
 *Optimized for Matrix V3 Unique Naming, Symmetric Observability & Reversible Legacy Absorption (v5.0.0).*

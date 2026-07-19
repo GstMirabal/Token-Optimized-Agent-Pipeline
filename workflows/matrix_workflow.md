@@ -21,7 +21,7 @@ Master operational protocol ensuring rigid task delegation, automated Double-Gat
 | **8. Tactical Liquidation**| Principal | Update Blueprints, Global Roadmap, Walkthroughs, and the Master Ledger (host `CHANGELOG.md` `[Unreleased]` entry), including final Graph Rebuild via `make -f .agents/Makefile graphify-rebuild`. |
 
 ## 📐 Standards & Rules
-- **Amnestic Anchor**: All subagents start with zero memory; read `active_state.json` and `agents.md` first.
+- **Amnestic Anchor**: All subagents start with zero memory; read `active_state.json` first. The constitution is auto-imported via the host `CLAUDE.md` — verify presence, re-read only after compaction (`anti_amnesia`).
 - **Graph Sovereignty**: Query `graph.json` via MCP or CLI before any recursive grep codebase research.
 - **Topographic Purity**: Prohibited to leave empty folders. Purge noise before closing.
 - **Unique Naming**: All artifacts must follow the `[MODULE]_[TYPE].md` standard (Option B).

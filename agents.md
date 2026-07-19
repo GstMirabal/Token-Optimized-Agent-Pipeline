@@ -87,6 +87,7 @@ Domain rules live in `rules/` and are loaded **on demand** at these triggers —
 | **Feedback Loop** | `definitive_amnesia` | Temporary logs are permanently deleted the moment the fix is applied. |
 | **Index Routing** | `index_files` | Parse exclusively `memory_index.json` locally. |
 | **Index Routing** | `single_line_breakdown`| Reject JSON insertions that break the 1-sentence limit without a carriage return. |
+| **Feedback Loop** | `feedback_upstream` | Learning is a LIVING three-tier flow, never a dead end: **host-class** findings stay in the host's `memory_index.json`; **project-family-class** findings route to `profiles/[name]/` (rules/skills/docs); **framework-class** findings (would improve every host) MUST be drafted as a nucleus contribution — a J-amendment proposal or fix PR to the `.agents` repo — during `extract_workflow`. Every host session is a sensor for the shared brain; letting a framework-class lesson die in a local index is a governance violation. |
 
 ## 5. Central Base (Project Master Index)
 
