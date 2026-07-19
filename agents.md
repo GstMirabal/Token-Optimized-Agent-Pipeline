@@ -11,7 +11,21 @@ It dictates in an absolute and transversal manner the behavior of subagents, cod
 | **Hierarchy** | `architecture/` (Law), `roadmaps/` (Future), `walkthroughs/` (Achievements), `sprints/` (History). |
 | **Traceability** | Every module MUST have a `[MODULE]_BLUEPRINT.md` in `architecture/` before coding (template: `docs/standards/templates/BLUEPRINT_TEMPLATE.md`). |
 | **Execution** | Every task must be recorded in the current Sprint folder. |
-| **Certification** | Closing a Sprint requires updating Blueprints, Global Roadmap, and Walkthroughs. |
+| **Master Ledger** | The host root `CHANGELOG.md` (Keep a Changelog format; template: `docs/standards/templates/CHANGELOG_TEMPLATE.md`). Every Tactical Liquidation appends its sprint entry under `[Unreleased]`; every deployment seals it as `[vX.Y.Z]` before tagging. Strictly separate jurisdiction from `.agents/CHANGELOG.md` (framework evolution) — the only crossover allowed is a pin-bump entry (`chore(deps): pin .agents to vX.Y.Z`). |
+| **Certification** | Closing a Sprint requires updating Blueprints, Global Roadmap, Walkthroughs, and the Master Ledger. |
+
+### Rule Contexts (lazy-load index)
+Domain rules live in `rules/` and are loaded **on demand** at these triggers — never preloaded (token economy):
+
+| Rule file | Load when… |
+| :--- | :--- |
+| `rules/token_economy.md` | Reading source files, planning subagent context, or auditing a plan's cost. |
+| `rules/qa_and_testing.md` | Writing/running tests, entering the Quality Gate, or after 3 consecutive failures. |
+| `rules/project_topology.md` | Running local commands, choosing interpreters/paths, or touching DB containers. |
+| `rules/skills_and_integrations.md` | Searching, registering, or forging skills/tools. |
+| `rules/frontend_modular_standard.md` | Touching `frontend/src/modules/`. |
+| `rules/graphify.md` | Querying or rebuilding the knowledge graph. |
+| `rules/LEGACY_RULE_CONCORDANCE.md` | Encountering a numbered `Rule NN` citation in any document. |
 
 ## 1. Code, Dialect, and Style
 
@@ -113,7 +127,7 @@ The normative 8-phase pipeline (Strategic Genesis → Tactical Liquidation) is d
 | :--- | :--- | :--- |
 | **Amendment** | `J-01: ENVIRONMENT_VIOLATION`| Agent MUST attempt autonomous remediation EXCEPT if prohibited. |
 | **Amendment** | `J-02: LAZY_SIGNAL_PARADIGM` | Prevent circular deps in Django `signals.py`: local imports in receiver. |
-| **Amendment** | `J-03: HOTFIX_FLAT` | For critical bugs, use `docs/hotfixes/[H-ID]-[Layer].md`. |
+| **Amendment** | `J-03: HOTFIX_FLAT` | For critical bugs, use `docs/hotfixes/[H-ID]-[Layer].md` (template: `HOTFIX_TEMPLATE.md`). **Sanctioned exception to J-06 naming** — emergency speed wins over Option B; the deviation is deliberate, not drift. |
 | **Amendment** | `J-04: FULL_DEPLOYMENT` | Orchestrator MUST deploy the COMPLETE task hierarchy in a single atomic action. |
 | **Amendment** | `J-05: TACTICAL_LIQUIDATION` | Mandatory update of Blueprints, Global Roadmap, Walkthroughs, and Ledger before closing. |
 | **Amendment** | `J-06: IDENTITY_NAMING` | Standard Option B: All docs must be named `[MODULE]_[TYPE].md` (e.g. `USERS_BLUEPRINT.md`). |

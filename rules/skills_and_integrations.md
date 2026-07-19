@@ -7,7 +7,7 @@ Agents requiring functions not natively available in standard language libraries
 - **Priority 1 (Manifest Check)**: Query `skills/manifest_skills.json` locally to check if a previously approved script exists.
 - **Priority 2 (The Local Bridge)**: Evaluate the locally downloaded bridge `skills/autoskills-3rd/` before going outside the workspace.
 - **Priority 3 (External Discovery)**: If local tools fail, agents must query `https://skills.sh/`. Explicit human authorization under technical debate is mandatory before registering any new external elements.
-- **Priority 4 (Creation Protocol)**: If the required function is fundamentally untraceable across the first three steps, the `Skill Architect` MUST forge the skill natively and place it natively inside the flat `/skills` directory under the strict **Trinity Standard** (`README.md`, `SKILL.md`, `/scripts/`).
+- **Priority 4 (Creation Protocol)**: If the required function is fundamentally untraceable across the first three steps, the `Skill Architect` MUST forge the skill under the dual **Trinity Standard**, choosing the destination per `skill_forge_workflow.md` (`forge_destination`): host `.claude/skills/` for project-specific tools (default), `profiles/[name]/skills/` for project-family tools, or the flat `.agents/skills/` for framework-wide tools — the latter two only through the nucleus branch→PR→tag flow.
 
 ## 2. Contamination Safeguards
 - **Prohibited Installations**: Utilizing volatile dependency bridges at the root (e.g., executing `npx -y` outside isolated environments) is radically **PROHIBITED** to preserve deterministic operations and prevent root contamination. 

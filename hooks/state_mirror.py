@@ -6,7 +6,7 @@ ACTIVE_STATE = Path("docs/active_state.json")
 MIRROR_STATE = Path(".agent_state/mirror.json")
 
 def mirror_active_state():
-    """Rule 52 / Sprint #031: Creates a shadow copy of the active state to prevent data loss."""
+    """State redundancy (agents.md §5 state_anchor, Sprint #031): shadow copy of the active state to prevent data loss."""
     if ACTIVE_STATE.exists():
         MIRROR_STATE.parent.mkdir(parents=True, exist_ok=True)
         # Verify valid JSON before mirroring

@@ -16,7 +16,7 @@ You are not interested in business logic or code style; your only focus is **con
 You must ABORT and return the Orchestrator's plan if you detect any of the following "wastes":
 
 1. **Massive Useless Reading (Cache Amnesia):**
-   - The Orchestrator attempts to scan directories or re-read complete dependencies when it IS MANDATED to extract that weight from `.agent_state/session_{UID}/context.md`.
+   - The Orchestrator attempts to scan directories or re-read complete dependencies when that knowledge is already recorded in `docs/active_state.json` (topology map) or the graphify knowledge graph (`graphify-out/graph.json`) — re-deriving recorded state is a violation, not diligence (`rules/token_economy.md §3`).
 2. **Abuse of File Reader (full-file `Read` or `cat`):**
    - The plan suggests reading massive files (+1000 lines) entirely.
    - **Forced Correction:** Demand the Orchestrator replace it with AST (Abstract Syntax Trees) in Python, or searches with `ripgrep` (`grep_search`) strictly focused on the affected function.

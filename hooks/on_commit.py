@@ -25,7 +25,7 @@ def get_staged_files() -> list[str]:
         return []
 
 def audit_trinity_standard() -> bool:
-    """Certifies Rule 60 (Trinity Standard) for modified skills."""
+    """Certifies the dual Trinity Standard (agents.md §3 trinity_standard) for modified skills."""
     staged_files = get_staged_files()
     if not staged_files:
         return True
@@ -73,7 +73,7 @@ def audit_trinity_standard() -> bool:
     return True
 
 def audit_secret_shielding() -> bool:
-    """Certifies Rule 66 (Secret Shielding)."""
+    """Certifies secret shielding (agents.md §3 secret_sovereignty / J-09)."""
     staged_files = get_staged_files()
     
     forbidden_extensions = [".env", ".pem", ".key"]
@@ -195,11 +195,11 @@ def main():
 
     trinity_ok = audit_trinity_standard()
     if not trinity_ok:
-        log_error("on_commit", "TRINITY_VIOLATION", "Rule 60 compliance check failed")
+        log_error("on_commit", "TRINITY_VIOLATION", "trinity_standard compliance check failed")
 
     secrets_ok = audit_secret_shielding()
     if not secrets_ok:
-        log_error("on_commit", "SECRET_VIOLATION", "Rule 66 scrutiny detected vulnerabilities")
+        log_error("on_commit", "SECRET_VIOLATION", "secret_sovereignty scrutiny detected vulnerabilities")
 
     if trinity_ok and secrets_ok:
         try:

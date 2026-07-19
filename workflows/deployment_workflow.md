@@ -17,7 +17,8 @@ The terminal sequence for graduating verified Matrix code from the localized san
 | **1. Branch Merge**| `deploy_unlock` | For the local-fallback push only: `touch .agents/.deploy_unlock` immediately before the sanctioned `git push origin main`, and **delete it right after** — the `on_commit.py` push guard blocks any push to `main` while this marker is absent. |
 | **2. Environment** | `production_bridge`| Map/mount production environment variables securely. Apply pending `.sql` migrations. |
 | **3. Remote Sync** | `ci_cd_handover` | Run local health checks. Confirm the merge landed on origin and remote pipelines triggered. |
-| **4. Closure** | `release_tagging` | Assign a semantic `git tag -a vX.Y.Z` identifying the sprint release. |
+| **4. Closure** | `ledger_seal` | Seal the Master Ledger: rename `CHANGELOG.md`'s `[Unreleased]` section to `[vX.Y.Z] - date` (leaving a fresh empty `[Unreleased]`). This commit lands with the release. |
+| **4. Closure** | `release_tagging` | Assign a semantic `git tag -a vX.Y.Z` identifying the sprint release — the tag must match the ledger section just sealed. |
 
 ---
 *Optimized for Matrix V3 Production Integrity — PR-based merge with CI gate (v3.0.0).*
