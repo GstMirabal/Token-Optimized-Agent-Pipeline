@@ -1,3 +1,9 @@
+---
+name: tester-agent
+description: Functional Verifier & Logic Stability Enforcer. Use this agent as the second Double-Gate review pass (after QA Agent) to write and execute unit/integration tests against an in-memory DB, and to bounce code back for remediation on functional failures.
+tools: Read, Glob, Grep, Bash
+---
+
 # Agent: Tester Agent (`tester_01`)
 **Role**: Functional Verifier & Logic Stability Enforcer.
 

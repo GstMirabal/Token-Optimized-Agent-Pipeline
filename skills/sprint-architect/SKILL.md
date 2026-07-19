@@ -1,3 +1,8 @@
+---
+name: sprint-architect
+description: Breaks a strategic Roadmap into a Work Breakdown Structure (components, dependencies, verification gates) and drafts the Implementation Plan before any code changes. Also runs the Legacy Onboarding Protocol for mature, pre-Matrix projects.
+---
+
 # 🛠️ Local Skill: Sprint Architect (v2.0.0)
 
 ## Domain

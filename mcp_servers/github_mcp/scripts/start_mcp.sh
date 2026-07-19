@@ -10,4 +10,5 @@ if [ -z "$GITHUB_PERSONAL_ACCESS_TOKEN" ]; then
 fi
 
 echo "Starting @modelcontextprotocol/server-github proxy..."
-npx -y @modelcontextprotocol/server-github
+# pnpm dlx per agents.md §8 (npm/npx prohibited; supply-chain shield).
+pnpm dlx @modelcontextprotocol/server-github

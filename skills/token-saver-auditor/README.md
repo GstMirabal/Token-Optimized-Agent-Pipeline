@@ -48,12 +48,12 @@
 
 ## About The Project
 
-El **Token-Saver Auditor (CFO)** actúa como el supervisor financiero del Matrix. Es un "Kill Switch" económico que analiza los planes de implementación para asegurar el consumo mínimo de tokens, priorizando el uso del `omni-context-minimizer` y evitando escaneos de contexto redundantes.
+The **Token-Saver Auditor (CFO)** acts as the Matrix's financial supervisor. It is an economic "Kill Switch" that analyzes implementation plans to guarantee minimal token consumption, prioritizing the `omni-context-minimizer` and preventing redundant context scans (enforces `rules/token_economy.md`).
 
 **Key Features:**
-*   **Economic Oversight:** Análisis de costos previo a la ejecución masiva de tareas.
-*   **Context Optimization:** Obliga al uso de esqueletos AST en archivos grandes.
-*   **Budget Guard:** Previene bucles de razonamiento infinitos que agotan cuotas de API.
+*   **Economic Oversight:** Cost analysis before any massive task execution.
+*   **Context Optimization:** Forces AST skeletons on large files.
+*   **Budget Guard:** Prevents infinite reasoning loops that drain API quotas.
 
 ### Built With
 
@@ -66,25 +66,25 @@ El **Token-Saver Auditor (CFO)** actúa como el supervisor financiero del Matrix
 
 ### Prerequisites
 
-*   **Universal-Agents Core**: Requiere que las reglas de gobernanza (Rules 1-78) estén activas.
+*   **Universal-Agents Core**: Requires the governance rules (`agents.md` + `rules/`) to be active.
 
 ### Installation & Configuration
 
 1. **Submodule Integration**
-   Ubicado en `.agents/skills/core/token-saver-auditor/`.
+   Located at `.agents/skills/token-saver-auditor/`.
 
 2. **Activation**
-   Se activa automáticamente durante la fase de planificación táctica (Orchestration Phase).
+   Activates automatically during the tactical planning phase (Orchestration Phase).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Usage
 
-El Auditor revisa cada propuesta del **Orchestrator** antes de que el **Agente DevOps** pueda ejecutar cambios físicos. Si el plan es ineficiente (e.g. escaneo recursivo sin minimizer), el Auditor bloquea la ejecución.
+The Auditor reviews every **Orchestrator** proposal before the **DevOps Sentinel** may execute physical changes. If the plan is inefficient (e.g. recursive scan without the minimizer), the Auditor blocks execution.
 
 ```bash
-# Ejemplo: Activación del Auditor durante la fase de debate
-Agente Principal: "El Auditor debe certificar este plan de Phase 2 antes de proceder."
+# Example: activating the Auditor during the debate phase
+Principal Agent: "The Auditor must certify this Phase 2 plan before proceeding."
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

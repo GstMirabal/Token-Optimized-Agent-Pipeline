@@ -1,157 +1,24 @@
 {
-  "version": "1.1.0",
-  "updated_at": "2026-04-02",
+  "version": "1.3.0",
+  "updated_at": "2026-07-19",
+  "_generated_by": "skills/mass-standardizer/scripts/generate_manifest.py — do not edit by hand",
   "skills": [
     {
-      "name": "omni-context-minimizer",
-      "path": "core/omni-context-minimizer",
-      "description": "Extracts the structural skeleton (AST) of any codebase to avoid massive context bloating.",
-      "category": "Efficiency",
+      "name": "accessibility",
+      "path": "accessibility",
+      "description": "Audit and improve web accessibility following WCAG 2.2 guidelines. Use when asked to \"improve accessibility\", \"a11y audit\", \"WCAG compliance\", \"screen reader support\", \"keyboard navigation\", or \"make accessible\".",
+      "category": "Quality",
       "tags": [
-        "token-saver",
-        "ast",
-        "scan"
-      ]
-    },
-    {
-      "name": "token-saver-auditor",
-      "path": "core/token-saver-auditor",
-      "description": "Audits the economic efficiency of agent plans and execution logs.",
-      "category": "Governance",
-      "tags": [
-        "cost-control",
+        "a11y",
+        "wcag",
         "audit",
-        "optimization"
+        "frontend"
       ]
     },
     {
-      "name": "django-security-3rd",
-      "path": "3rd/django-security-3rd",
-      "description": "Specialized security audit and hardening for Django applications.",
-      "category": "Security",
-      "tags": [
-        "django",
-        "hardening",
-        "verification"
-      ]
-    },
-    {
-      "name": "django-patterns-3rd",
-      "path": "3rd/django-patterns-3rd",
-      "description": "Enforces best practices and design patterns for Django projects.",
-      "category": "Architecture",
-      "tags": [
-        "django",
-        "best-practices",
-        "refactor"
-      ]
-    },
-    {
-      "name": "django-verification-3rd",
-      "path": "3rd/django-verification-3rd",
-      "description": "Automated verification of Django model logic and API contracts.",
-      "category": "QA",
-      "tags": [
-        "django",
-        "api",
-        "validation"
-      ]
-    },
-    {
-      "name": "django-tdd-3rd",
-      "path": "3rd/django-tdd-3rd",
-      "description": "Generates and maintains a robust Test-Driven Development flow for Django.",
-      "category": "QA",
-      "tags": [
-        "django",
-        "tests",
-        "pytest"
-      ]
-    },
-    {
-      "name": "django-expert-3rd",
-      "path": "3rd/django-expert-3rd",
-      "description": "General domain expert for complex Django logic resolution.",
-      "category": "Expertise",
-      "tags": [
-        "django",
-        "complex-logic",
-        "architecture"
-      ]
-    },
-    {
-      "name": "skill-creator-3rd",
-      "path": "core/skill-creator-3rd",
-      "description": "Assists in the creation of new atomic skills following global governance rules (Rule 71).",
-      "category": "Development",
-      "tags": [
-        "automation",
-        "internal",
-        "scaffolding"
-      ]
-    },
-    {
-      "name": "mcp-registry",
-      "path": "core/mcp-registry",
-      "description": "Registry and configuration manager for Model Context Protocol servers.",
-      "category": "Infrastructure",
-      "tags": [
-        "mcp",
-        "context",
-        "remote-api"
-      ]
-    },
-    {
-      "name": "readme-standardizer",
-      "path": "core/readme-standardizer",
-      "description": "Ensures all documentation files follow the official Technical English and Institutional Identity standards.",
-      "category": "Documentation",
-      "tags": [
-        "i18n",
-        "docs",
-        "lint"
-      ]
-    },
-    {
-      "name": "python-quality-auditor",
-      "path": "core/python-quality-auditor",
-      "description": "Agnostic Python health-check (Ruff, Mypy, Bandit) to ensure compliance with framework standards.",
-      "category": "Quality",
-      "tags": [
-        "python",
-        "lint",
-        "mypy",
-        "audit"
-      ]
-    },
-    {
-      "name": "env-shielding-auditor",
-      "path": "core/env-shielding-auditor",
-      "description": "Scans for hardcoded secrets (API keys, tokens) and validates .env security via Gitignore.",
-      "category": "Security",
-      "tags": [
-        "secrets",
-        "env",
-        "shielding",
-        "pii"
-      ]
-    },
-    {
-      "name": "js-standardizer",
-      "path": "core/js-standardizer",
-      "description": "Universal alignment for JS/TS projects (ESLint, Prettier, JSDoc) ensuring legal governance compliance.",
-      "category": "Quality",
-      "tags": [
-        "js",
-        "ts",
-        "lint",
-        "jsdoc"
-      ]
-    },
-    {
-      "name": "autoskills-3rd",
-      "path": "3rd/autoskills-3rd",
-      "description": "Rule 70 Mandatory Discovery: Local arsenal discovery and dynamic tool orchestration.",
+      "name": "autoskills",
+      "path": "autoskills-3rd",
+      "description": "Third-party dynamic skill-discovery engine (Priority #2 escalation after skills/manifest_skills.json) — scans the local Arsenal Bridge for existing tools before a new skill is forged from scratch.",
       "category": "Infrastructure",
       "tags": [
         "discovery",
@@ -162,8 +29,8 @@
     },
     {
       "name": "contract-writer",
-      "path": "local/contract-writer",
-      "description": "Custom synthesis for AI-driven API contract generation and documentary reverse engineering.",
+      "path": "contract-writer",
+      "description": "Documentary reverse engineering — extracts structured API contracts (I/O payloads, headers, status codes, auth) directly from implementation code into standardized Markdown tables under docs/contracts/.",
       "category": "Documentation",
       "tags": [
         "api",
@@ -172,9 +39,88 @@
       ]
     },
     {
+      "name": "django-expert",
+      "path": "django-expert-3rd",
+      "description": "General domain expert for complex Django logic resolution.",
+      "category": "Expertise",
+      "tags": [
+        "django",
+        "complex-logic",
+        "architecture"
+      ]
+    },
+    {
+      "name": "django-patterns",
+      "path": "django-patterns-3rd",
+      "description": "Django architecture patterns, REST API design with DRF, ORM best practices, caching, signals, middleware, and production-grade Django apps.",
+      "category": "Architecture",
+      "tags": [
+        "django",
+        "best-practices",
+        "refactor"
+      ]
+    },
+    {
+      "name": "django-security",
+      "path": "django-security-3rd",
+      "description": "Django security best practices, authentication, authorization, CSRF protection, SQL injection prevention, XSS prevention, and secure deployment configurations.",
+      "category": "Security",
+      "tags": [
+        "django",
+        "hardening",
+        "verification"
+      ]
+    },
+    {
+      "name": "django-tdd",
+      "path": "django-tdd-3rd",
+      "description": "Django testing strategies with pytest-django, TDD methodology, factory_boy, mocking, coverage, and testing Django REST Framework APIs.",
+      "category": "QA",
+      "tags": [
+        "django",
+        "tests",
+        "pytest"
+      ]
+    },
+    {
+      "name": "django-verification",
+      "path": "django-verification-3rd",
+      "description": "Verification loop for Django projects: migrations, linting, tests with coverage, security scans, and deployment readiness checks before release or PR.",
+      "category": "QA",
+      "tags": [
+        "django",
+        "api",
+        "validation"
+      ]
+    },
+    {
+      "name": "env-shielding-auditor",
+      "path": "env-shielding-auditor",
+      "description": "Scans for hardcoded secrets (API keys, tokens) and validates .env security via Gitignore.",
+      "category": "Security",
+      "tags": [
+        "secrets",
+        "env",
+        "shielding",
+        "pii"
+      ]
+    },
+    {
+      "name": "frontend-design",
+      "path": "frontend-design",
+      "description": "Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications (examples include websites, landing pages, dashboards, React components, HTML/CSS layouts, or when styling/beautifying any web UI). Generates creative, polished code and UI design that avoids generic AI aesthetics.",
+      "category": "Design",
+      "tags": [
+        "ui",
+        "ux",
+        "aesthetics",
+        "frontend"
+      ]
+    },
+    {
       "name": "governance-sentinel",
-      "path": "core/governance-sentinel",
-      "description": "Monitors rule compliance and ensures constitutional alignment across the matrix.",
+      "path": "governance-sentinel",
+      "description": "Compliance engine that scans plans, roadmaps, and code for constitutional violations before they reach execution, and synthesizes jurisprudence amendments to agents.md from recurring friction found in /memory/ logs.",
       "category": "Governance",
       "tags": [
         "audit",
@@ -183,42 +129,32 @@
       ]
     },
     {
-      "name": "sprint-architect",
-      "path": "core/sprint-architect",
-      "description": "Translates high-level roadmaps into tactical sprint definitions and task structures.",
-      "category": "Planning",
+      "name": "graphify",
+      "path": "graphify",
+      "description": "any input (code, docs, papers, images, videos) to knowledge graph. Use when user asks any question about a codebase, documents, or project content - especially if graphify-out/ exists, treat the question as a /graphify query.",
+      "category": "Efficiency",
       "tags": [
-        "sprint",
-        "planning",
-        "tasks"
+        "graph",
+        "knowledge",
+        "codebase-map"
       ]
     },
     {
-      "name": "topology-scaffolder",
-      "path": "core/topology-scaffolder",
-      "description": "Enforces standardized project structures and instantiates initial layer hierarchies.",
-      "category": "Architecture",
+      "name": "js-standardizer",
+      "path": "js-standardizer",
+      "description": "Universal alignment for JS/TS projects (ESLint, Prettier, JSDoc) ensuring legal governance compliance.",
+      "category": "Quality",
       "tags": [
-        "topology",
-        "scaffolding",
-        "structure"
-      ]
-    },
-    {
-      "name": "skills-samples-3rd",
-      "path": "3rd/skills-samples-3rd",
-      "description": "Example reference skills for learning framework-agnostic modularity.",
-      "category": "Documentation",
-      "tags": [
-        "examples",
-        "core",
-        "guidance"
+        "js",
+        "ts",
+        "lint",
+        "jsdoc"
       ]
     },
     {
       "name": "mass-standardizer",
-      "path": "core/mass-standardizer",
-      "description": "Automated engine for the batch normalization of the matrix arsenal following the skill-creator standard.",
+      "path": "mass-standardizer",
+      "description": "Batch-normalizes the flat skills/ arsenal — detects skills missing the Trinity Standard (README.md, SKILL.md, /scripts/) and injects the missing artifacts from templates, keeping manifest_skills.json in sync.",
       "category": "Infrastructure",
       "tags": [
         "automation",
@@ -228,7 +164,7 @@
     },
     {
       "name": "matrix-monitor",
-      "path": "core/matrix-monitor",
+      "path": "matrix-monitor",
       "description": "Consolidated tool for monitoring matrix health, task progress, and legacy code audit.",
       "category": "Governance",
       "tags": [
@@ -239,81 +175,214 @@
       ]
     },
     {
-      "name": "accessibility",
-      "path": "frontend/accessibility",
-      "description": "Standardized accessibility audit and optimization for web interfaces (WCAG 2.1 compliance).",
-      "category": "Quality",
-      "tags": ["a11y", "wcag", "audit", "frontend"]
-    },
-    {
-      "name": "frontend-design",
-      "path": "frontend/frontend-design",
-      "description": "Guides the creation of distinctive, production-grade frontend interfaces with high design quality.",
-      "category": "Design",
-      "tags": ["ui", "ux", "aesthetics", "frontend"]
+      "name": "mcp-registry",
+      "path": "mcp-registry",
+      "description": "Mandatory skill for the Orchestrator. Defines the standard registry and routing protocol for local and remote Model Context Protocol (MCP) servers. Use this to bind subagents to specific external contexts.",
+      "category": "Infrastructure",
+      "tags": [
+        "mcp",
+        "context",
+        "remote-api"
+      ]
     },
     {
       "name": "nodejs-backend-patterns",
-      "path": "backend/nodejs-backend-patterns",
-      "description": "Enterprise-grade design patterns for Node.js backend development.",
+      "path": "nodejs-backend-patterns",
+      "description": "Build production-ready Node.js backend services with Express/Fastify, implementing middleware patterns, error handling, authentication, database integration, and API design best practices. Use when creating Node.js servers, REST APIs, GraphQL backends, or microservices architectures.",
       "category": "Architecture",
-      "tags": ["node", "backend", "patterns"]
+      "tags": [
+        "node",
+        "backend",
+        "patterns"
+      ]
     },
     {
       "name": "nodejs-best-practices",
-      "path": "backend/nodejs-best-practices",
-      "description": "Security, performance, and maintainability best practices for Node.js.",
+      "path": "nodejs-best-practices",
+      "description": "Node.js development principles and decision-making. Framework selection, async patterns, security, and architecture. Teaches thinking, not copying.",
       "category": "Quality",
-      "tags": ["node", "security", "best-practices"]
+      "tags": [
+        "node",
+        "security",
+        "best-practices"
+      ]
+    },
+    {
+      "name": "omni-context-minimizer",
+      "path": "omni-context-minimizer",
+      "description": "Use this Skill imperatively BEFORE reading any code file containing more than 200 lines. This script extracts and returns a tactical skeleton (Imports, Class Names, and Function Signatures) discarding all internal logic, thus preventing massive context window consumption. Works for NodeJS, Python, Go, Rust, and Java.",
+      "category": "Efficiency",
+      "tags": [
+        "token-saver",
+        "ast",
+        "scan"
+      ]
+    },
+    {
+      "name": "python-quality-auditor",
+      "path": "python-quality-auditor",
+      "description": "Agnostic Python health-check (Ruff, Mypy, Bandit) to ensure compliance with framework standards.",
+      "category": "Quality",
+      "tags": [
+        "python",
+        "lint",
+        "mypy",
+        "audit"
+      ]
+    },
+    {
+      "name": "readme-standardizer",
+      "path": "readme-standardizer",
+      "description": "Use this Skill ALWAYS whenever you are asked to create, generate, standardize, or update a project's README.md. Never generate a README from scratch with an improvised structure.",
+      "category": "Documentation",
+      "tags": [
+        "i18n",
+        "docs",
+        "lint"
+      ]
     },
     {
       "name": "seo",
-      "path": "frontend/seo",
-      "description": "Search Engine Optimization best practices for modern web applications.",
+      "path": "seo",
+      "description": "Optimize for search engine visibility and ranking. Use when asked to \"improve SEO\", \"optimize for search\", \"fix meta tags\", \"add structured data\", \"sitemap optimization\", or \"search engine optimization\".",
       "category": "Marketing",
-      "tags": ["seo", "indexing", "frontend"]
+      "tags": [
+        "seo",
+        "indexing",
+        "frontend"
+      ]
     },
     {
-      "name": "tailwind-css-patterns",
-      "path": "frontend/tailwind-css-patterns",
-      "description": "Advanced patterns and design systems using Tailwind CSS.",
-      "category": "Design",
-      "tags": ["tailwind", "css", "styles"]
-    },
-    {
-      "name": "typescript-advanced-types",
-      "path": "frontend/typescript-advanced-types",
-      "description": "Leverages advanced TypeScript features for type-safe application development.",
-      "category": "Quality",
-      "tags": ["typescript", "types", "safe"]
-    },
-    {
-      "name": "vercel-composition-patterns",
-      "path": "frontend/vercel-composition-patterns",
-      "description": "Architecture patterns for modern web apps on Vercel/Next.js.",
-      "category": "Architecture",
-      "tags": ["vercel", "nextjs", "composition"]
-    },
-    {
-      "name": "vercel-react-best-practices",
-      "path": "frontend/vercel-react-best-practices",
-      "description": "Standardized React patterns optimized for the Vercel ecosystem.",
-      "category": "Quality",
-      "tags": ["react", "vercel", "best-practices"]
-    },
-    {
-      "name": "vite",
-      "path": "frontend/vite",
-      "description": "Vite build tool configuration, plugin API, and Rolldown migration.",
-      "category": "Infrastructure",
-      "tags": ["vite", "build", "bundler"]
+      "name": "skill-creator",
+      "path": "skill-creator-3rd",
+      "description": "Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy.",
+      "category": "Development",
+      "tags": [
+        "automation",
+        "internal",
+        "scaffolding"
+      ]
     },
     {
       "name": "skillopt",
       "path": "skillopt",
-      "description": "Microsoft SkillOpt text-space optimizer integration for self-evolving agent rules.",
+      "description": "Runs Microsoft SkillOpt training/optimization for agent skill prompts inside the isolated .agents/venv_skillopt/ environment. Every optimizer run requires explicit human authorization.",
       "category": "Infrastructure",
-      "tags": ["optimization", "rules", "self-evolution"]
+      "tags": [
+        "optimization",
+        "rules",
+        "self-evolution"
+      ]
+    },
+    {
+      "name": "skills-samples",
+      "path": "skills-samples-3rd",
+      "description": "Example reference skills for learning framework-agnostic modularity.",
+      "category": "Documentation",
+      "tags": [
+        "examples",
+        "core",
+        "guidance"
+      ]
+    },
+    {
+      "name": "slash-commander",
+      "path": "slash-commander",
+      "description": "Bridges .agents workflows to real Claude Code slash commands and audits that the link between commands/*.md and workflows/*.md never drifts.",
+      "category": "Infrastructure",
+      "tags": [
+        "commands",
+        "bridge",
+        "governance"
+      ]
+    },
+    {
+      "name": "sprint-architect",
+      "path": "sprint-architect",
+      "description": "Breaks a strategic Roadmap into a Work Breakdown Structure (components, dependencies, verification gates) and drafts the Implementation Plan before any code changes. Also runs the Legacy Onboarding Protocol for mature, pre-Matrix projects.",
+      "category": "Planning",
+      "tags": [
+        "sprint",
+        "planning",
+        "tasks"
+      ]
+    },
+    {
+      "name": "tailwind-css-patterns",
+      "path": "tailwind-css-patterns",
+      "description": "Provides comprehensive Tailwind CSS utility-first styling patterns including responsive design, layout utilities, flexbox, grid, spacing, typography, colors, and modern CSS best practices. Use when styling React/Vue/Svelte components, building responsive layouts, implementing design systems, or optimizing CSS workflow.",
+      "category": "Design",
+      "tags": [
+        "tailwind",
+        "css",
+        "styles"
+      ]
+    },
+    {
+      "name": "token-saver-auditor",
+      "path": "token-saver-auditor",
+      "description": "Implacable Economizer Agent. Responsible for auditing tactical plans or executions to eradicate redundant or unnecessary Token consumption (API Cost).",
+      "category": "Governance",
+      "tags": [
+        "cost-control",
+        "audit",
+        "optimization"
+      ]
+    },
+    {
+      "name": "topology-scaffolder",
+      "path": "topology-scaffolder",
+      "description": "Scaffolds the mandatory docs/ tree (roadmaps, sprints, architecture, contracts) and keeps active_state.json's Zero Coordinate topology in sync. The only skill authorized to physically write project topology, on behalf of the Matrix Mapper agent.",
+      "category": "Architecture",
+      "tags": [
+        "topology",
+        "scaffolding",
+        "structure"
+      ]
+    },
+    {
+      "name": "typescript-advanced-types",
+      "path": "typescript-advanced-types",
+      "description": "Master TypeScript's advanced type system including generics, conditional types, mapped types, template literals, and utility types for building type-safe applications. Use when implementing complex type logic, creating reusable type utilities, or ensuring compile-time type safety in TypeScript projects.",
+      "category": "Quality",
+      "tags": [
+        "typescript",
+        "types",
+        "safe"
+      ]
+    },
+    {
+      "name": "vercel-composition-patterns",
+      "path": "vercel-composition-patterns",
+      "description": "React composition patterns that scale. Use when refactoring components with boolean prop proliferation, building flexible component libraries, or designing reusable APIs. Triggers on tasks involving compound components, render props, context providers, or component architecture. Includes React 19 API changes.",
+      "category": "Architecture",
+      "tags": [
+        "vercel",
+        "nextjs",
+        "composition"
+      ]
+    },
+    {
+      "name": "vercel-react-best-practices",
+      "path": "vercel-react-best-practices",
+      "description": "React and Next.js performance optimization guidelines from Vercel Engineering. This skill should be used when writing, reviewing, or refactoring React/Next.js code to ensure optimal performance patterns. Triggers on tasks involving React components, Next.js pages, data fetching, bundle optimization, or performance improvements.",
+      "category": "Quality",
+      "tags": [
+        "react",
+        "vercel",
+        "best-practices"
+      ]
+    },
+    {
+      "name": "vite",
+      "path": "vite",
+      "description": "Vite build tool configuration, plugin API, SSR, and Vite 8 Rolldown migration. Use when working with Vite projects, vite.config.ts, Vite plugins, or building libraries/SSR apps with Vite.",
+      "category": "Infrastructure",
+      "tags": [
+        "vite",
+        "build",
+        "bundler"
+      ]
     }
   ]
 }

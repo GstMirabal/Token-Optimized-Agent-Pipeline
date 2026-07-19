@@ -11,26 +11,36 @@ from hooks.telemetry import log_error
 
 # Configuration
 CONFIG_PATH = Path(".env")
-SYNC_SCRIPT = Path("skills/core/slash-commander/scripts/generate_commands.py")
+ENV_TEMPLATE = Path(".env.template")
+BRIDGE_LOCK = Path(".agents/.claude_bridge.lock")
+INSTALL_SCRIPT = Path(".agents/scripts/install_claude.py")
 
 def check_environment() -> bool:
-    """Verifies that the .env file exists for secret sovereignty."""
-    if not CONFIG_PATH.exists():
-        print(f"❌ [ON_INIT] Fatal: {CONFIG_PATH} not found. Security Rule 66 violated.")
+    """Secret sovereignty (Rule 66) governs *not reading* .env into context —
+    it does not require every host to have one. Only warn when the project
+    declares it needs secrets (an .env.template exists) but .env is missing."""
+    if ENV_TEMPLATE.exists() and not CONFIG_PATH.exists():
+        print(f"⚠️ [ON_INIT] {ENV_TEMPLATE} exists but {CONFIG_PATH} is missing — "
+              "copy the template and export your secrets before running workflows that need them.")
         return False
     return True
 
 def sync_commands() -> bool:
-    """Invokes slash-commander to synchronize workflows with Claude Code."""
-    if not SYNC_SCRIPT.exists():
-        print(f"⚠️ [ON_INIT] Warning: {SYNC_SCRIPT} not found. Skipping command sync.")
+    """Ensures the Claude Code bridge (.claude/agents, commands, skills, hooks,
+    MCP) is installed. Runs install_claude.sh once; a no-op on later sessions
+    once .agents/.claude_bridge.lock exists."""
+    if BRIDGE_LOCK.exists():
         return True
-    
+
+    if not INSTALL_SCRIPT.exists():
+        print(f"⚠️ [ON_INIT] Warning: {INSTALL_SCRIPT} not found. Skipping bridge install.")
+        return True
+
     try:
-        subprocess.run(["python3", str(SYNC_SCRIPT)], check=True)
+        subprocess.run([sys.executable, str(INSTALL_SCRIPT)], check=True)
         return True
     except subprocess.CalledProcessError:
-        print("❌ [ON_INIT] Failed to synchronize slash commands.")
+        print("❌ [ON_INIT] Failed to install the Claude Code bridge.")
         return False
 
 def main():

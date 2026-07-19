@@ -16,7 +16,7 @@ An isolated protocol for manufacturing, benchmarking, and registering native too
 | **2. Benchmarking**| `sterile_dev` | Develop deterministic logic locally bounded. No global OS modules. |
 | **2. Benchmarking**| `skillopt_run` | Optimize new `SKILL.md` via `train_runner.py` (requires explicit authorization). |
 | **2. Benchmarking**| `smoke_test` | `Tester Agent` executes isolated test in `/tmp/` or `:memory:`. Must return exit code 0. |
-| **3. Registration**| `manifest_update` | Update `skills/manifest_skills.json` or `mcp-config.json` with new tool path and capabilities. |
+| **3. Registration**| `manifest_update` | Update `skills/manifest_skills.json` or `.agents/claude/mcp.json` with new tool path and capabilities. |
 | **4. Golden Gate** | `authorization` | Explicitly prompt human: *"Do you authorize the formal integration of this tool?"* |
 
 ---

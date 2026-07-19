@@ -48,12 +48,12 @@
 
 ## About The Project
 
-El **README Standardizer** es la herramienta de alineación de identidad institucional del Matrix. Asegura que todos los archivos de documentación (README.md, SKILL.md) mantengan una apariencia profesional y coherente mediante el uso de plantillas maestras ("Gold Standard"), de conformidad con la **Regla 78**.
+The **README Standardizer** is the Matrix's institutional-identity alignment tool. It ensures every documentation file (README.md, SKILL.md) keeps a professional, coherent appearance through master templates ("Gold Standard"), in compliance with **Rule 78**.
 
 **Key Features:**
-*   **Gold Standard Template:** Inyección de plantillas institucionales con placeholders dinámicos.
-*   **Institutional Badges:** Gestión centralizada de escudos de estado, licencia y conexiones profesionales.
-*   **Atomic Navigation:** Automatización de secciones críticas como Table of Contents y Back to Top.
+*   **Gold Standard Template:** Injects institutional templates with dynamic placeholders.
+*   **Institutional Badges:** Centralized management of status, license, and professional-profile shields.
+*   **Atomic Navigation:** Automates critical sections such as Table of Contents and Back to Top.
 
 ### Built With
 
@@ -66,25 +66,25 @@ El **README Standardizer** es la herramienta de alineación de identidad institu
 
 ### Prerequisites
 
-*   **Universal-Agents Submodule**: Se requiere acceso a la carpeta de assets para recuperar las plantillas maestras.
+*   **Universal-Agents Submodule**: Access to the assets folder is required to retrieve the master templates.
 
 ### Installation & Configuration
 
 1. **Integrated in Core**
-   Ubicado en `.agents/skills/core/readme-standardizer/`.
+   Located at `.agents/skills/readme-standardizer/`.
 
 2. **Template access**
-   Las plantillas maestras residen en `./assets/template.md`.
+   Master templates live in `./assets/template.md`.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Usage
 
-Invocado cuando se requiere estandarizar el arsenal o se detecta una violación de la Regla 78 en la documentación del proyecto raíz o sus submódulos:
+Invoked when the arsenal needs standardizing or a Rule 78 violation is detected in the documentation of the root project or its submodules:
 
 ```bash
-# Ejemplo: Aplicación de la plantilla maestra sobre un README específico
-Agente Principal: "Estandariza este repositorio basándote en la Regla 78."
+# Example: applying the master template to a specific README
+Principal Agent: "Standardize this repository based on Rule 78."
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

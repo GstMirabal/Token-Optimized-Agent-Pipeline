@@ -1,3 +1,8 @@
+---
+name: skillopt
+description: Runs Microsoft SkillOpt training/optimization for agent skill prompts inside the isolated .agents/venv_skillopt/ environment. Every optimizer run requires explicit human authorization.
+---
+
 # 🛠️ Skill: SkillOpt (Rule 71 Compliance)
 
 ## Domain
@@ -7,6 +12,12 @@
 
 ## Technical Logic
 This tool integrates Microsoft's SkillOpt using a separate isolated virtual environment (`.agents/venv_skillopt/`) and runtime monkeypatching. It registers the `agents_opt` benchmark adapter and routes model generation to `gemini_backend.py` without mutating PyPI package binaries.
+
+## Provisioning (on demand)
+The session bootstrap only installs the lean core (`requirements-core.txt`). Before the FIRST training run in an environment, install this skill's heavy stack:
+```bash
+.agents/venv_skillopt/bin/pip install -r .agents/requirements-skillopt.txt
+```
 
 ## Commands
 ```bash

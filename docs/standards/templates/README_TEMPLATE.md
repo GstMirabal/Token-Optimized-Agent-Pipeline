@@ -31,9 +31,9 @@ The following layers define the jurisdictional boundaries of the project, ensuri
 
 | Layer | Namespace | Purpose | Primary Auditor |
 | :--- | :--- | :--- | :--- |
-| **`core/`** | Institutional Brain | Strategic logic and permanent rules. | Principal Agent |
-| **`local/`** | Project Assets | Tactics, scripts, and local skills. | Orchestrator |
-| **`3rd/`** | External Tools | Standardizers, linters, and libraries. | Skill Architect |
+| **`agents.md` + `rules/`** | Institutional Brain | Strategic logic and permanent rules. | Principal Agent |
+| **`skills/`** (flat) | Unified Arsenal | Native tools and `-3rd` suffixed external imports. | Skill Architect |
+| **`profiles/`** | Project Packs | Opt-in project-specific rules/agents/skills. | Orchestrator |
 | **`mcp_servers/`** | Bridge Registry | Model Context Protocol servers. | Sentinel Gateway |
 
 ---
