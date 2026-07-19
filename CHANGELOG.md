@@ -4,6 +4,19 @@ All notable changes to the Universal-Agents framework. Format: [Keep a Changelog
 
 ## [Unreleased]
 
+## [3.2.0] - 2026-07-19
+
+### Added
+- `agents.md §4 feedback_upstream` + `extract_workflow upstream_feedback`: learning codified as a LIVING three-tier flow (host → profile → nucleus) — every host session is a sensor for the shared brain; framework-class lessons must be drafted as nucleus contributions, never left to die in a local index.
+- `remediation_workflow reversibility`: mandatory `git stash push -u` snapshot before the state nuke (Reversibility Gate doctrine now covers the Panic Button too).
+
+### Changed
+- Token-economy pass over all workflows (live-fire tested): constitution re-read replaced with presence-verification in `close`/`extract`/`matrix`/`audit` (auto-imported via `CLAUDE.md`; re-read only after compaction); Onboarding Scenario Matrix moved from the every-session `start_workflow` to `standardization_workflow` Phase 6 (one-time routing, lazy-loaded); `verify_references.py` excludes generated/vendored runtime dirs (`venv_skillopt/`, `graphify-out/`, `.claude/`).
+
+### Fixed
+- Live-fire findings from running `/agents:start` in nucleus mode: `habitability_check` prohibition narrowed to Phase 1.5 only (Phase 0 + `lightweight_sync` are legal in the nucleus, with `.agents/`-prefixed paths resolving to the repo root); `lightweight_sync` nucleus nuance (commit offset past a tag is not drift); `pip_setup` lock content specified; `close_workflow state_sync` explicitly applies in nucleus mode (stale-anchor prevention).
+- Live-fire findings from executing every workflow: `federation_audit` gains nucleus-mode skip (was unconditionally failing in the nucleus); empty `mass-standardizer/assets/` purged (J-07 violation in our own tree); `remediation` extraction order documented (git-ignored telemetry survives the nuke by design).
+
 ## [3.1.0] - 2026-07-19
 
 ### Added

@@ -19,7 +19,10 @@ CONCORDANCE = Path("rules/LEGACY_RULE_CONCORDANCE.md")
 TEMPLATES_DIR = Path("docs/standards/templates")
 
 # History is never rewritten — legacy logs keep their citations un-audited.
+# Generated/vendored runtime dirs are not normative material (absent in CI
+# checkouts, but present locally: venvs, graph output, linked .claude trees).
 SCAN_EXCLUDE = ("docs/roadmaps/", "docs/sprints/", "node_modules/", ".git/",
+                "venv_skillopt/", "venv/", "graphify-out/", ".claude/",
                 "CHANGELOG.md", str(CONCORDANCE))
 
 LOADABLE = [Path("agents.md"), *Path("workflows").glob("*.md"), *Path("commands").glob("*.md")]

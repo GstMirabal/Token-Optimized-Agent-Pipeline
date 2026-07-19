@@ -12,8 +12,9 @@ A critical emergency protocol designed to intercept infinite hallucination loops
 | Phase | Step | Action / Constraint |
 | :--- | :--- | :--- |
 | **0. Trigger** | `auto_invocation`| Triggered automatically if QA or Tester forcefully reject the exact same logic block **>3 consecutive times**. |
-| **1. Deadlock Term**| `state_nuke` | Immediate execution halt. Workspace is forcibly sanitized (`git restore . && git clean -fd`) to Pre-Sprint pristine status. |
-| **2. Extraction** | `error_mining` | Scrape telemetry for the failure origin (e.g. Circular import, syntax mismatch). |
+| **1. Deadlock Term**| `reversibility` | **Before any destruction**: snapshot the corrupted state with `git stash push -u -m "remediation-[date]"` (captures untracked files too). Forensics may need what the nuke erases; without the snapshot, `state_nuke` is PROHIBITED — same Reversibility Gate doctrine as Legacy Absorption. |
+| **1. Deadlock Term**| `state_nuke` | Immediate execution halt. Workspace is forcibly sanitized (`git restore . && git clean -fd`) to Pre-Sprint pristine status. (Git-ignored files — `memory/`, `venv_skillopt/`, graph output — survive: no `-x` flag, by design.) |
+| **2. Extraction** | `error_mining` | Scrape telemetry (`memory/telemetry/raw_errors.json`, which survived the nuke) and the stash snapshot for the failure origin (e.g. Circular import, syntax mismatch). |
 | **2. Extraction** | `negative_ki` | Inject logic tag into `agents.md` via `Governance Learner` banning the failed pattern. No memory logs are kept. |
 | **3. Rollback** | `roadmap_tag` | Update `docs/active_state.json` with `BLOCKED: TERMINAL_REMEDIATION_LOOP`. |
 | **3. Rollback** | `session_lock` | Explicitly alert human user of deadlock. Exit and enforce **SESSION LOCKED**. |
