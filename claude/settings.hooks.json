@@ -11,7 +11,7 @@
     "SessionStart": [
       {
         "hooks": [
-          { "type": "command", "command": "python3 .agents/hooks/on_init.py" }
+          { "type": "command", "command": "if [ -f .agents/hooks/on_init.py ]; then python3 .agents/hooks/on_init.py; else echo '⚠️ [.agents] hooks unavailable — initialize the submodule: git submodule update --init .agents && .agents/scripts/install_claude.sh'; fi" }
         ]
       }
     ],
@@ -19,14 +19,14 @@
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "command": "python3 .agents/hooks/on_commit.py" }
+          { "type": "command", "command": "if [ -f .agents/hooks/on_commit.py ]; then python3 .agents/hooks/on_commit.py; fi" }
         ]
       }
     ],
     "Stop": [
       {
         "hooks": [
-          { "type": "command", "command": "python3 .agents/hooks/state_mirror.py" }
+          { "type": "command", "command": "if [ -f .agents/hooks/state_mirror.py ]; then python3 .agents/hooks/state_mirror.py; fi" }
         ]
       }
     ]
