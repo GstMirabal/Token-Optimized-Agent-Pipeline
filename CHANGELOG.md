@@ -4,6 +4,11 @@ All notable changes to the Universal-Agents framework. Format: [Keep a Changelog
 
 ## [Unreleased]
 
+## [3.2.1] - 2026-07-20
+
+### Fixed
+- Field report from a fresh host session (living feedback loop in action): hook commands in `claude/settings.hooks.json` are now guarded — an uninitialized `.agents` submodule degrades to a clear instruction (`git submodule update --init`) instead of a cryptic "file not found"; `merge_json.py` prunes deprecated hook commands on re-install so template upgrades replace instead of duplicating (host-owned hooks untouched, covered by 3 new tests); stale `.agent_state/mirror.json` no longer reads as a collision — `start_workflow read_anchor` documents mirror reconciliation (anchor wins, resync, continue; mirror is only authoritative for crash recovery) and `close_workflow state_sync` refreshes the mirror at every close.
+
 ## [3.2.0] - 2026-07-19
 
 ### Added
