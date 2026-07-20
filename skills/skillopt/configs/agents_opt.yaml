@@ -1,6 +1,17 @@
 # Configuration file for Agents rule optimization under SkillOpt.
 
+# Actual model routing is controlled by the flat `model_backend` key below,
+# read directly by train_runner.py's apply_monkeypatches(). Default (unset,
+# or any value without "claude") -> Gemini via gemini_backend.py. Set to
+# "claude" to route through the Claude Agent SDK instead.
+model_backend: gemini
+
 model:
+  # NOT a live backend selector — this names the vendor module
+  # (skillopt.model.azure_openai) that apply_monkeypatches() imports and
+  # patches in place, per SKILL.md's "runtime monkeypatching without
+  # mutating PyPI package binaries." Leave as azure_openai regardless of
+  # model_backend above; renaming it breaks the import.
   backend: azure_openai
   optimizer: gemini-flash-latest
   target: gemini-flash-latest

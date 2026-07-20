@@ -4,6 +4,14 @@ All notable changes to the Universal-Agents framework. Format: [Keep a Changelog
 
 ## [Unreleased]
 
+## [3.3.1] - 2026-07-20
+
+### Fixed
+- **Phantom config**: `skillopt/configs/agents_opt.yaml` declared `model.backend: azure_openai` but `train_runner.py` read the flat key `model_backend` (never present) — the config's stated intent was silently ignored, always defaulting to Gemini. Added the real flat `model_backend` selector (documented, now reaches the existing Claude-optimizer code path too) and clarified in-file why `model.backend: azure_openai` must stay as-is (vendor monkeypatch anchor, not a live selector). Documented in `skillopt/SKILL.md` why `requirements-freeze.txt` carries unused `azure-*` transitive deps.
+
+### Added
+- `rules/graphify.md`: documented graph coverage gaps found during a full audit (`.yaml`/`.yml` never indexed; one observed extractor anomaly on a specific `.md` file) so "absent from the graph" is never read as "doesn't exist."
+
 ## [3.3.0] - 2026-07-20
 
 ### Added
