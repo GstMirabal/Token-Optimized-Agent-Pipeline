@@ -138,6 +138,7 @@ The normative 8-phase pipeline (Strategic Genesis → Tactical Liquidation) is d
 | **Amendment** | `J-10: SUPPLY_CHAIN_SHIELD`| Mandate `pnpm 11+`, `ignore-scripts=true`, and `minimum-release-age=1440`. |
 | **Amendment** | `J-11: HOOK_BLOCKING_SEMANTICS`| Claude Code `PreToolUse` hooks only block a tool call on exit code `2` (stderr fed back to the model); exit `1` is a non-blocking warning. Every hook in `hooks/` that must halt execution MUST `sys.exit(2)`, never `1`. |
 | **Amendment** | `J-12: BRANCH_DISCIPLINE`| Every sprint lives on `ai-sprint/[ID]`, created in `matrix_workflow.md` Phase 3 before the first commit and pushed (never to `main`) in `close_workflow.md` Phase 5. Only `deployment_workflow.md` Phase 1 may merge a sprint branch into `main`/upstream. Direct commits or pushes to `main` during `Monitored Execution` are PROHIBITED. |
+| **Amendment** | `J-13: SEQUENTIAL_GATES`| A verification gate and the irreversible action it guards MUST be separate invocations: the gate's result is OBSERVED before the action is issued. Chaining them in one script/command (e.g. `sleep && merge`) voids the gate — that is how a red CI reached `main` in Sprint #081. |
 
 ## 8. Supply Chain Security
 

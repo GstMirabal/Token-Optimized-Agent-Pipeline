@@ -4,6 +4,10 @@ All notable changes to the Universal-Agents framework. Format: [Keep a Changelog
 
 ## [Unreleased]
 
+### Fixed
+- **Hotfix H-001**: `generate_manifest.py` stamped `updated_at` with the current date unconditionally, turning CI's regenerate-and-diff check into a midnight time bomb (first red CI on `main`, sprint #081 merge). Now deterministic: the date only advances when the skill payload changes.
+- **J-13 SEQUENTIAL_GATES** (new jurisprudence from the same incident): a verification gate and the irreversible action it guards must be separate observed invocations — the #081 merge chained `sleep && merge` in one script, voiding the CI gate. `deployment_workflow pr_flow` now mandates `gh pr checks --watch` as its own step before `gh pr merge`.
+
 ## [3.2.1] - 2026-07-20
 
 ### Fixed

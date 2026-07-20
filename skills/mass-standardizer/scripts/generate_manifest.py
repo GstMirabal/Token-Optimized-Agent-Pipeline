@@ -68,9 +68,14 @@ def main() -> int:
             "tags": old.get("tags", []),
         })
 
+    # updated_at must be DETERMINISTIC: it only advances when the skill payload
+    # actually changes. Stamping today's date unconditionally turns the CI
+    # regenerate-and-diff check into a time bomb that fails at midnight.
+    existing = json.loads(MANIFEST.read_text()) if MANIFEST.exists() else {}
+    unchanged = existing.get("skills") == skills
     manifest = {
-        "version": json.loads(MANIFEST.read_text())["version"] if MANIFEST.exists() else "1.0.0",
-        "updated_at": str(date.today()),
+        "version": existing.get("version", "1.0.0"),
+        "updated_at": existing.get("updated_at", str(date.today())) if unchanged else str(date.today()),
         "_generated_by": "skills/mass-standardizer/scripts/generate_manifest.py — do not edit by hand",
         "skills": skills,
     }
