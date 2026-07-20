@@ -9,6 +9,32 @@ import json
 import sys
 from pathlib import Path
 
+# Hook command strings shipped by PREVIOUS template versions. Pruned from the
+# destination before merging so a re-install upgrades them instead of leaving
+# a stale duplicate alongside the new guarded variant (list-merge only appends).
+DEPRECATED_HOOK_COMMANDS = {
+    "python3 .agents/hooks/on_init.py",
+    "python3 .agents/hooks/on_commit.py",
+    "python3 .agents/hooks/state_mirror.py",
+}
+
+
+def prune_deprecated_hooks(dest: dict) -> None:
+    """Removes hook entries owned by older .agents templates from a settings dict."""
+    for event, matchers in list(dest.get("hooks", {}).items()):
+        if not isinstance(matchers, list):
+            continue
+        for matcher in matchers:
+            hooks = matcher.get("hooks")
+            if isinstance(hooks, list):
+                matcher["hooks"] = [
+                    h for h in hooks
+                    if h.get("command") not in DEPRECATED_HOOK_COMMANDS
+                ]
+        dest["hooks"][event] = [m for m in matchers if m.get("hooks")]
+        if not dest["hooks"][event]:
+            del dest["hooks"][event]
+
 
 def merge(dest: dict, template: dict) -> dict:
     for key, value in template.items():
@@ -28,6 +54,8 @@ def main() -> None:
     template_path, dest_path = Path(sys.argv[1]), Path(sys.argv[2])
     template = json.loads(template_path.read_text())
     dest = json.loads(dest_path.read_text()) if dest_path.exists() else {}
+    if "hooks" in template:
+        prune_deprecated_hooks(dest)
     merged = merge(dest, template)
     dest_path.parent.mkdir(parents=True, exist_ok=True)
     dest_path.write_text(json.dumps(merged, indent=2) + "\n")
