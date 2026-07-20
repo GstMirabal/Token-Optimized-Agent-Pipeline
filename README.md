@@ -181,6 +181,18 @@ Check the `/workflows/` directory for automated protocols like project scaffoldi
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make to the core framework are **greatly appreciated**.
 
+### 🧬 Developing the Framework Itself (Nucleus Mode)
+
+Working *inside* this repo (not a host project) is a different case: the full host bridge is refused (`agents.md §5 nucleus_neutrality` — this repo is the law, not a project it governs), so `/agents:*` commands don't exist here until you run the installer's **minimal self-bridge**:
+
+```bash
+git clone https://github.com/GstMirabal/.agents.git
+cd .agents
+python3 scripts/install_claude.py
+```
+
+This links `.claude/commands/agents/*` and `.claude/agents/*` (so `/agents:start`, `/agents:close`, etc. work while you develop) and adds `@agents.md` to a nucleus-local `CLAUDE.md` — no hooks, skills, MCP, or scaffolding (those assume a host root; `.claude/` here is git-ignored, regenerate anytime by re-running the script). **Restart your Claude Code session** afterward — commands are discovered at session start, not live.
+
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
 3. Commit your Changes (`git commit -m 'feat: Add some AmazingFeature'`)
