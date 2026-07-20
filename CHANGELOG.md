@@ -4,6 +4,11 @@ All notable changes to the Universal-Agents framework. Format: [Keep a Changelog
 
 ## [Unreleased]
 
+## [3.3.0] - 2026-07-20
+
+### Added
+- **Nucleus self-bridge**: running the installer inside the nucleus repo no longer refuses — it installs a minimal bridge (`.claude/commands/agents/*` + `.claude/agents/*` symlinks + `@agents.md` import in a nucleus `CLAUDE.md`) so `/agents:*` commands work while developing the framework itself. No hooks/skills/MCP/scaffolding (`nucleus_neutrality` governs structure, not tooling access); profile installs into the nucleus remain refused. Covered by a new sandbox test scenario.
+
 ### Fixed
 - **Hotfix H-001**: `generate_manifest.py` stamped `updated_at` with the current date unconditionally, turning CI's regenerate-and-diff check into a midnight time bomb (first red CI on `main`, sprint #081 merge). Now deterministic: the date only advances when the skill payload changes.
 - **J-13 SEQUENTIAL_GATES** (new jurisprudence from the same incident): a verification gate and the irreversible action it guards must be separate observed invocations — the #081 merge chained `sleep && merge` in one script, voiding the CI gate. `deployment_workflow pr_flow` now mandates `gh pr checks --watch` as its own step before `gh pr merge`.

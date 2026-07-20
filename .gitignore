@@ -57,3 +57,6 @@ __pycache__/
 
 # Ephemeral memory (agents.md §4) — purged at close, never versioned
 memory/
+
+# Nucleus self-bridge (regenerable via scripts/install_claude.sh)
+.claude/
