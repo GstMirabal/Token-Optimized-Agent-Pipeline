@@ -61,3 +61,19 @@ bash .agents/scripts/install_claude.sh --profile crypto-django > /dev/null
 [ -s .agents/.claude_bridge.lock ] || fail "bridge lock is empty (must record the submodule commit)"
 
 echo "✅ installer sandbox test PASSED"
+
+# ── Nucleus mode: a real .git directory must produce the minimal self-bridge ──
+NUCLEUS="$WORK/nucleus"
+mkdir -p "$NUCLEUS"
+rsync -a --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
+      --exclude='graphify-out' --exclude='.claude' "$AGENTS_SRC/" "$NUCLEUS/"
+mkdir -p "$NUCLEUS/.git"   # real dir -> nucleus detection
+rm -f "$NUCLEUS/.claude_bridge.lock" "$NUCLEUS/CLAUDE.md"
+( cd "$NUCLEUS" && python3 scripts/install_claude.py > /dev/null )
+[ -e "$NUCLEUS/.claude/commands/agents/start.md" ] || fail "nucleus: /agents:start not linked"
+[ -e "$NUCLEUS/.claude/agents/principal_agent.md" ] || fail "nucleus: agents not linked"
+grep -qx "@agents.md" "$NUCLEUS/CLAUDE.md" || fail "nucleus: constitution import missing"
+[ ! -e "$NUCLEUS/.claude/skills" ] || fail "nucleus: skills must NOT be linked (minimal bridge)"
+( cd "$NUCLEUS" && python3 scripts/install_claude.py --profile crypto-django > /dev/null 2>&1 ) \
+  && fail "nucleus: profile install must be refused" || true
+echo "✅ nucleus self-bridge test PASSED"

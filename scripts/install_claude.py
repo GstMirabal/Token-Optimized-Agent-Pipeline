@@ -78,16 +78,40 @@ def add_claude_import(import_line: str) -> None:
         print(f"✅ Added import to CLAUDE.md: {import_line}")
 
 
+def install_nucleus_bridge() -> int:
+    """Minimal self-bridge for the nucleus repo itself: commands + agents +
+    constitution import, so `/agents:*` works while developing the framework.
+    No hooks (paths are host-relative), no skills links, no MCP, no scaffolding
+    — nucleus_neutrality governs structure, not tooling access."""
+    print(f"🧬 Nucleus detected — installing minimal self-bridge into {AGENTS_DIR / '.claude'} ...")
+    for f in sorted((AGENTS_DIR / "commands").glob("*.md")):
+        link_one(f"../../../commands/{f.name}",
+                 AGENTS_DIR / ".claude" / "commands" / "agents" / f.name)
+    for f in sorted((AGENTS_DIR / "agents").glob("*.md")):
+        link_one(f"../../agents/{f.name}", AGENTS_DIR / ".claude" / "agents" / f.name)
+    claude_md = AGENTS_DIR / "CLAUDE.md"
+    existing = claude_md.read_text() if claude_md.exists() else ""
+    if "@agents.md" not in existing.splitlines():
+        with claude_md.open("a") as f:
+            f.write("@agents.md\n")
+        print("✅ Added constitution import to nucleus CLAUDE.md")
+    print("🔒 Nucleus self-bridge installed. Restart the Claude Code session to load it.")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Install the .agents Claude Code bridge.")
     parser.add_argument("--profile", help="Optional project profile to install (profiles/<name>)")
     args = parser.parse_args()
 
-    # nucleus_neutrality (agents.md §5): refuse when .agents is the core repo itself.
+    # Nucleus mode (agents.md §5 nucleus_neutrality): the full host bridge is
+    # refused, but the minimal self-bridge (commands/agents/constitution) is
+    # installed so the framework's own workflows are invocable while developing it.
     if (AGENTS_DIR / ".git").is_dir():
-        print(f"🛑 Refusing to install: {AGENTS_DIR} is the .agents core repo itself, "
-              "not a host project submodule.", file=sys.stderr)
-        return 1
+        if args.profile:
+            print("🛑 Profiles cannot be installed into the nucleus.", file=sys.stderr)
+            return 1
+        return install_nucleus_bridge()
 
     print(f"🌉 Installing Claude Code bridge for .agents into {HOST_DIR} ...")
 
