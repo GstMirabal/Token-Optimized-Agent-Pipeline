@@ -27,7 +27,7 @@ Real Claude Code discovers slash commands by scanning `.claude/commands/**/*.md`
 
 ## 4. Error Handling
 - **Broken reference**: `verify_commands.py` exits non-zero and lists every command pointing at a missing workflow.
-- **Bridge not installed**: if `.agents/.claude_bridge.lock` is missing, `hooks/on_init.py` triggers `install_claude.sh` automatically at session start.
+- **Bridge not installed / desynced**: `hooks/on_init.py` triggers `install_claude.sh` automatically at session start whenever `.agents/.claude_bridge.lock` is missing, its recorded commit is stale, **or** the linked `.claude/` artifacts are missing despite a matching lock (`bridge_intact` sentinel check — catches a `git clean -fd`/manual deletion of the host's untracked bridge, which the lock alone can't detect).
 
 ---
 *Optimized for Universal-Agents Rule 113.*
