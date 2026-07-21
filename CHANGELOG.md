@@ -4,6 +4,9 @@ All notable changes to the Universal-Agents framework. Format: [Keep a Changelog
 
 ## [Unreleased]
 
+### Fixed
+- **Stale bridge lock desync**: `hooks/on_init.py sync_commands` trusted `.claude_bridge.lock` matching the submodule's commit hash as proof the linked `.claude/` bridge (commands/agents/skills) still existed on disk. A `git clean -fd` or manual deletion of the host's untracked `.claude/` tree — `git clean` skips submodules by default, so the lock (inside `.agents`) survives untouched — desynced the lock from reality, leaving `/agents:*` commands silently unrecognized until someone noticed and manually re-ran the installer. Added a cheap sentinel-file existence check (`bridge_intact`, two `Path.exists()` calls) before trusting the lock; missing artifacts now force a re-link regardless of commit-hash match. Field report from a host session where the bridge had to be diagnosed and manually reinstalled.
+
 ## [3.3.1] - 2026-07-20
 
 ### Fixed

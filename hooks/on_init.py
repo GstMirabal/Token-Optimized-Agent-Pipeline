@@ -15,6 +15,13 @@ ENV_TEMPLATE = Path(".env.template")
 BRIDGE_LOCK = Path(".agents/.claude_bridge.lock")
 INSTALL_SCRIPT = Path(".agents/scripts/install_claude.py")
 
+# A small, representative sample of the artifacts install_claude.py links into
+# the host. Cheap enough to stat on every session start.
+BRIDGE_SENTINELS = [
+    Path(".claude/commands/agents/start.md"),
+    Path(".claude/agents/principal_agent.md"),
+]
+
 def check_environment() -> bool:
     """Secret sovereignty (agents.md §3 secret_sovereignty) governs *not reading* .env into context —
     it does not require every host to have one. Only warn when the project
@@ -36,17 +43,31 @@ def current_submodule_commit() -> str:
         return "unknown"
 
 
+def bridge_intact() -> bool:
+    """Confirms the linked artifacts actually survive on disk, independent of
+    the commit-hash lock. A `git clean -fd` (or manual `rm`) wipes the host's
+    untracked `.claude/` bridge without touching `.claude_bridge.lock` — the
+    lock lives inside the `.agents` submodule, which `git clean` skips by
+    default — leaving the lock trusting a bridge that no longer exists."""
+    return all(p.exists() for p in BRIDGE_SENTINELS)
+
+
 def sync_commands() -> bool:
     """Ensures the Claude Code bridge (.claude/agents, commands, skills, hooks,
     MCP) is installed AND current. Re-runs the (idempotent) installer when the
-    lock is missing or the submodule commit changed since the last install —
-    a deliberate `.agents` update ships new assets that need linking."""
+    lock is missing, its linked artifacts are gone, or the submodule commit
+    changed since the last install — a deliberate `.agents` update ships new
+    assets that need linking."""
     if BRIDGE_LOCK.exists():
-        recorded = BRIDGE_LOCK.read_text().strip()
-        current = current_submodule_commit()
-        if current == "unknown" or recorded == current:
-            return True
-        print(f"🔄 [ON_INIT] .agents updated ({recorded[:12]} -> {current[:12]}). Re-linking bridge...")
+        if not bridge_intact():
+            print("🔄 [ON_INIT] Bridge lock present but linked artifacts are missing "
+                  "(likely wiped by `git clean` or a manual deletion). Re-linking bridge...")
+        else:
+            recorded = BRIDGE_LOCK.read_text().strip()
+            current = current_submodule_commit()
+            if current == "unknown" or recorded == current:
+                return True
+            print(f"🔄 [ON_INIT] .agents updated ({recorded[:12]} -> {current[:12]}). Re-linking bridge...")
 
     if not INSTALL_SCRIPT.exists():
         print(f"⚠️ [ON_INIT] Warning: {INSTALL_SCRIPT} not found. Skipping bridge install.")
