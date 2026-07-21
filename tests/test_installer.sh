@@ -23,6 +23,7 @@ rm -f "$WORK/host/.agents/.claude_bridge.lock"
 mkdir -p "$WORK/host/.claude/agents"
 echo "host content" > "$WORK/host/.claude/agents/principal_agent.md"
 echo '{"model": "opus"}' > "$WORK/host/.claude/settings.json"
+printf 'node_modules/\n*.pyc\n' > "$WORK/host/.gitignore"
 
 cd "$WORK/host"
 
@@ -53,9 +54,19 @@ grep -qxF "@.agents/agents.md" CLAUDE.md || fail "constitution import missing"
 [ -L .claude/skills/polymarket-gamma-3rd ] || fail "profile skill not linked"
 grep -q "crowd_intelligence_standards" CLAUDE.md || fail "profile rule import missing"
 
+grep -qxF "node_modules/" .gitignore || fail ".gitignore: pre-existing host entry was lost"
+grep -qxF "*.pyc" .gitignore || fail ".gitignore: pre-existing host entry was lost"
+for entry in "/CLAUDE.md" "/.claude/agents/" "/.claude/commands/" "/.claude/skills/" \
+             "/.claude/settings.local.json" "/graphify-out/"; do
+  grep -qxF "$entry" .gitignore || fail ".gitignore: missing bridge entry '$entry'"
+done
+grep -qxF "/.claude/settings.json" .gitignore \
+  && fail ".gitignore: settings.json must stay trackable, not ignored"
+
 # Idempotency: re-run must not duplicate imports nor error out.
 bash .agents/scripts/install_claude.sh --profile crypto-django > /dev/null
 [ "$(grep -cxF "@.agents/agents.md" CLAUDE.md)" = "1" ] || fail "duplicate import on re-run"
+[ "$(grep -cxF "/graphify-out/" .gitignore)" = "1" ] || fail "duplicate .gitignore entry on re-run"
 
 [ -f .agents/.claude_bridge.lock ] || fail "bridge lock not created"
 [ -s .agents/.claude_bridge.lock ] || fail "bridge lock is empty (must record the submodule commit)"
