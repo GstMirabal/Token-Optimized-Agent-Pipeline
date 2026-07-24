@@ -4,6 +4,21 @@ All notable changes to the Universal-Agents framework. Format: [Keep a Changelog
 
 ## [Unreleased]
 
+### Added
+- **`rules/documentation_standard.md`**: new framework-class rule consolidating Diátaxis (reader-intent classification), C4 (architecture zoom levels, with a per-stack density formula for Level 3 eligibility), ADR (decision records with trigger-based Nygard/MADR scaling), and a deterministic freshness gate (`make docs-freshness-check`) that replaces trust-based doc updates with scripted verification at sprint close — including five documentation-integrity sub-checks and the C4 density computation. Root cause: a host's Zero Coordinate anchors went stale for 34 sprints because `close_workflow.md`'s `history_sync` step never named them explicitly and nothing verified it happened.
+- **`token_economy_agent`**: new auxiliary agent, owns Filter 5 (`token-saver-auditor`) and a structural `make verify` scanner that flags recurring mechanisms delegated to agent judgment where a deterministic script would do.
+- **`ADR_TEMPLATE.md`**, **`GUIDE_TEMPLATE.md`**: new templates (`docs/standards/templates/`).
+- **J-14 PATCH_PROPAGATION** (`agents.md §7`): a long-lived planning document revised across sessions must be grepped in full for other mentions of a term before a patch is considered closed.
+
+### Changed
+- **`BLUEPRINT_TEMPLATE.md`**: restructured to arc42-lite (Introduction & Goals / Context & Scope / Building Block View / Runtime View / Crosscutting Concepts / Constraints / Decisions-links-ADRs / Glossary); adds the freshness-gate metadata block.
+- **`SYSTEM_OVERVIEW_TEMPLATE.md`**: adds a metadata block (had none) and a C4 Level 1-2 diagram slot.
+- **`WALKTHROUGH_TEMPLATE.md`**, **`HOTFIX_TEMPLATE.md`**: link ADRs instead of restating rationale inline.
+- **`close_workflow.md`**: Phase 1 wires the freshness gate; Phase 2 (`history_sync`) now names the Zero Coordinate anchors explicitly.
+- **`standardization_workflow.md`**: routes pre-arc42-lite Blueprints as migration candidates (never auto-rewritten); Scenario A and C both prompt for `code_containers`.
+- **`start_workflow.md`**: `lightweight_sync` surfaces a one-time notice when an authorized pin-bump introduces a new rule.
+- **`docs/contracts/core/matrix_mapper_contract.md`**: documents that unknown `active_state.json` root keys (e.g. `code_containers`, `adr_autoescalate_triggers`) must be preserved by any writer.
+
 ## [3.3.2] - 2026-07-21
 
 ### Fixed

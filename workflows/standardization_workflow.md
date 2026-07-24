@@ -42,6 +42,7 @@ Invoked by `start_workflow first_run_scaffold` when prior agent-generated docume
 | Numbered roadmaps (`NNN-title.md`) | Untouched if closed history; Option B rename (`[MODULE]_ROADMAP.md`) only for ACTIVE ones | History is never rewritten. |
 | `violation_log.md`, `PROCEDURAL_DEVIATION_*.md` | `memory/telemetry/` → distillation → purge | Normal jurisprudence cycle. |
 | Other frameworks' files (`.cursor/rules`, `.windsurfrules`, …) | Proposed for archive in the snapshot | Never deleted without explicit human OK — they may contain learning worth triaging. |
+| Pre-arc42-lite `*_BLUEPRINT.md` (missing Runtime View/Crosscutting Concepts/Glossary, or with rationale inlined instead of an ADR link) | Inventoried in the reconciliation report as a migration candidate | **Never auto-rewritten** — same "touch it, fix it" policy as any other gradual migration (`rules/documentation_standard.md §5`). Flagging visibility, not forced conversion. |
 
 ## Phase 6: Onboarding Scenario Matrix (`start_workflow first_run_scaffold` routing)
 
@@ -49,9 +50,9 @@ Loaded only on a host's FIRST Matrix session (token economy: one-time routing do
 
 | Scenario | Detection signals | Route |
 | :--- | :--- | :--- |
-| **A. Greenfield** | Short/empty git history, no `docs/`, no substantial source code. | Full scaffold from templates + Master Ledger seeded ("Adopted Universal-Agents vX.Y.Z"). Verify default branch is `main` and a baseline `.gitignore` exists. |
+| **A. Greenfield** | Short/empty git history, no `docs/`, no substantial source code. | Full scaffold from templates + Master Ledger seeded ("Adopted Universal-Agents vX.Y.Z"). Verify default branch is `main` and a baseline `.gitignore` exists. Prompt (optional) for `code_containers` in `docs/active_state.json` (`rules/documentation_standard.md §2.1`) — if skipped, C4 Level 3 stays advisory, not an error. |
 | **B. Prior agent interactions** | Pre-existing `CLAUDE.md`/`.claude/`, legacy `.agents` artifacts (`task/`, `implementation_plan*.md`, `knowledge/`, `docs/active_task.md`, `.agent_state/`), or other frameworks' files (`.cursor/rules`, `.windsurfrules`, `copilot-instructions.md`). | Execute the **Legacy Absorption Protocol** (Phase 5 above). If an old `.agents` submodule exists, verify its `git remote` points to the official repo first (a divergent fork HALTS onboarding with an alert). Adopt the existing `CLAUDE.md` (append imports only). Then scaffold whatever is still missing. |
-| **C. Mature project, no agents** | Substantial codebase, zero agentic traces. | `agents.md §5 legacy_onboarding`: Full Reverse Engineering (`sprint-architect` Legacy Onboarding Protocol) → Blueprints + Walkthroughs. Adopt an existing `CHANGELOG.md` as the Master Ledger untouched; if none, seed one whose first entry documents the audited inherited state. |
+| **C. Mature project, no agents** | Substantial codebase, zero agentic traces. | `agents.md §5 legacy_onboarding`: Full Reverse Engineering (`sprint-architect` Legacy Onboarding Protocol) → Blueprints + Walkthroughs, generated directly in arc42-lite (`rules/documentation_standard.md §5`) since there is nothing pre-existing to migrate. Adopt an existing `CHANGELOG.md` as the Master Ledger untouched; if none, seed one whose first entry documents the audited inherited state. Same `code_containers` prompt as Scenario A — this is the scenario with the most code, and thus the most to gain from Level 3, yet the one previously *not* offering the prompt at all. |
 
 ---
 *Optimized for Matrix V3 Unique Naming, Symmetric Observability & Reversible Legacy Absorption (v5.0.0).*
