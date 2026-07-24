@@ -47,7 +47,7 @@ Every document is exactly one of four types. A document that needs content from 
 
 ## 3. ADR — Architecture Decision Records
 
-Immutable once accepted; a changed decision gets a new, numbered ADR that supersedes the old one — never an in-place edit.
+Immutable once accepted; a changed decision gets a new, numbered ADR that supersedes the old one — never an in-place edit. Files live at `docs/decisions/ADR-XXXX-[slug].md` (four-digit zero-padded number, e.g. `docs/decisions/ADR-0007-jwt-signing-key-separation.md`), created from `ADR_TEMPLATE.md`.
 
 ### 3.1 Triggers
 
