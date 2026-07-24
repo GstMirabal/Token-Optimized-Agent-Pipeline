@@ -25,6 +25,7 @@ Domain rules live in `rules/` and are loaded **on demand** at these triggers —
 | `rules/skills_and_integrations.md` | Searching, registering, or forging skills/tools. |
 | `rules/frontend_modular_standard.md` | Touching `frontend/src/modules/`. |
 | `rules/graphify.md` | Querying or rebuilding the knowledge graph. |
+| `rules/documentation_standard.md` | Creating/updating any document under `docs/`, authoring an ADR, or running `docs-freshness-check`. |
 | `rules/LEGACY_RULE_CONCORDANCE.md` | Encountering a numbered `Rule NN` citation in any document. |
 
 ## 1. Code, Dialect, and Style
@@ -117,7 +118,7 @@ The Matrix operates under a rigid, highly militarized sequential pipeline. Role 
 | **Subagent Roles** | `tester_agent` | Functional Verifier. Ensures logic stability and zero regression. |
 
 > [!NOTE]
-> **Core vs. Auxiliary.** The 8 roles above are the *Núcleo del Pipeline V3* (mandatory in every Strategic Genesis → Tactical Liquidation cycle). `governance_learner`, `doc_orchestrator`, `matrix_mapper`, and `github_sentinel` (see `agents/*.md`) are **Agentes Auxiliares** — invoked as needed (knowledge distillation, documentation, topology, upstream sync) but not a mandatory stop on every pipeline pass. **Project-specific specialists** (e.g. `backend_identity_specialist`, `frontend_ux_hardener`) live in `profiles/[name]/agents/` and only join the Matrix when their profile is installed. Their absence from this table is intentional, not an omission.
+> **Core vs. Auxiliary.** The 8 roles above are the *Núcleo del Pipeline V3* (mandatory in every Strategic Genesis → Tactical Liquidation cycle). `governance_learner`, `doc_orchestrator`, `matrix_mapper`, `github_sentinel`, and `token_economy_agent` (see `agents/*.md`) are **Agentes Auxiliares** — invoked as needed (knowledge distillation, documentation, topology, upstream sync) but not a mandatory stop on every pipeline pass. **Project-specific specialists** (e.g. `backend_identity_specialist`, `frontend_ux_hardener`) live in `profiles/[name]/agents/` and only join the Matrix when their profile is installed. Their absence from this table is intentional, not an omission.
 
 ### 🚀 The Execution Pipeline (Matrix V3)
 The normative 8-phase pipeline (Strategic Genesis → Tactical Liquidation) is defined **exclusively** in `workflows/matrix_workflow.md`, loaded on demand via `/agents:matrix`. It is not duplicated here to keep the always-loaded constitution lean and drift-free. Non-negotiables enforced at this level: the Golden Gate (Phase 5) is a single attended human authorization — never wrapped in an unattended `/loop` — and all execution happens on `ai-sprint/[ID]` (J-12).
@@ -139,6 +140,7 @@ The normative 8-phase pipeline (Strategic Genesis → Tactical Liquidation) is d
 | **Amendment** | `J-11: HOOK_BLOCKING_SEMANTICS`| Claude Code `PreToolUse` hooks only block a tool call on exit code `2` (stderr fed back to the model); exit `1` is a non-blocking warning. Every hook in `hooks/` that must halt execution MUST `sys.exit(2)`, never `1`. |
 | **Amendment** | `J-12: BRANCH_DISCIPLINE`| Every sprint lives on `ai-sprint/[ID]`, created in `matrix_workflow.md` Phase 3 before the first commit and pushed (never to `main`) in `close_workflow.md` Phase 5. Only `deployment_workflow.md` Phase 1 may merge a sprint branch into `main`/upstream. Direct commits or pushes to `main` during `Monitored Execution` are PROHIBITED. |
 | **Amendment** | `J-13: SEQUENTIAL_GATES`| A verification gate and the irreversible action it guards MUST be separate invocations: the gate's result is OBSERVED before the action is issued. Chaining them in one script/command (e.g. `sleep && merge`) voids the gate — that is how a red CI reached `main` in Sprint #081. |
+| **Amendment** | `J-14: PATCH_PROPAGATION`| A long-lived planning/design document revised across multiple sessions or review rounds MUST, at each patch, be grepped in full for other mentions of the same term/field before the patch is considered closed. A fix applied only where a reviewer looked, while the same reference drifts uncorrected elsewhere in the same artifact, is not a correction — it is a new inconsistency. |
 
 ## 8. Supply Chain Security
 
