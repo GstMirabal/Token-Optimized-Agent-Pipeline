@@ -17,6 +17,8 @@ One short paragraph: what works today, verified how (tests, manual run). Link th
 | :--- | :--- | :--- |
 | {{LIMITATION}} | `:tech-debt:` | {{SPRINT_OR_HOTFIX_DOC}} |
 
+If a limitation exists *because* of a deliberate decision (not just unfinished work), link the ADR that made that call instead of re-explaining it here: `docs/decisions/ADR-{{NUMBER}}-{{slug}}.md` (`rules/documentation_standard.md §1`).
+
 ## 4. How to operate it
 Minimum commands to run/verify the module (deterministic, prefixed paths per agents.md §3):
 

@@ -22,5 +22,6 @@ Branch/commit: `hotfix/{{H-ID}}` → `{{COMMIT}}` (hotfixes may merge outside th
 Exact commands/tests proving the fix, and the regression test added (mandatory — a hotfix without a pinning test WILL recur).
 
 ## 5. Jurisprudence Check
-- [ ] Is this failure class systemic? If yes → draft a `J-XX` amendment via `constitutional_escalation` and link it here: {{J_REF_OR_N/A}}
+- [ ] Is this failure class systemic (a process pattern, not a one-off)? If yes → draft a `J-XX` amendment via `constitutional_escalation` and link it here: {{J_REF_OR_N/A}}
+- [ ] Does the root cause reveal a design decision worth recording (not a process pattern — a specific architectural choice)? If yes → draft an ADR (`rules/documentation_standard.md §3.1`, trigger criteria apply) and link it here: {{ADR_REF_OR_N/A}}
 - [ ] Master Ledger entry added under `[Unreleased]`.

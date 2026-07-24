@@ -1,0 +1,26 @@
+# JS/TS builtin/primitive types excluded from C4 density scoring.
+# rules/documentation_standard.md §2.1.3
+string
+number
+boolean
+object
+any
+unknown
+never
+void
+undefined
+null
+Array
+Promise
+Function
+Map
+Set
+Date
+RegExp
+Error
+Symbol
+Record
+Partial
+Readonly
+Pick
+Omit

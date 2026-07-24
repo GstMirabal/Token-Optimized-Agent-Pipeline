@@ -26,6 +26,9 @@ You must ABORT and return the Orchestrator's plan if you detect any of the follo
 4. **Expensive Asynchronous Data Analysis:**
    - Attempts to inject complete CSV sheets into the chat or raw JSON dumps.
    - **Forced Correction:** Demand that the matrix generates a temporary iterator script in `.tmp/` using Pandas' `.head()` or `.info()` without contaminating the prompt.
+5. **Recurring Mechanism Delegated to Agent Judgment (Determinism Bypass):**
+   - A per-sprint/per-commit step relies on LLM judgment where a deterministic script/make-target suffices.
+   - **Forced Correction:** Reject and force a script — but you MUST first name a concrete deterministic alternative; a mechanism with no reasonable script equivalent (genuine semantic judgment, e.g. the memory-handoff step in `extract_workflow.md` that decides what survives into `memory_index.json`) is exempt by default. Owned and maintained by `token_economy_agent`.
 
 ## 🟢 Approval Procedure
 

@@ -70,3 +70,9 @@ jobs:
 
       - name: Reference integrity (rules reachable, templates exist, Rule NN concordance)
         run: python3 scripts/verify_references.py
+
+      - name: Diátaxis prose lint (Blueprints only — rules/documentation_standard.md §1)
+        uses: errata-ai/vale-action@v2
+        with:
+          files: '["**/*_BLUEPRINT.md"]'
+          fail_on_error: false
