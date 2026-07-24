@@ -27,7 +27,8 @@ PER_CLOSE_PHASE_RE = re.compile(r"close|commit", re.IGNORECASE)
 
 def is_per_close_or_commit(phase_cell: str, source_file: Path) -> bool:
     """True if this row's phase, or the workflow file itself, is a
-    per-sprint-close or per-commit cadence."""
+    per-sprint-close or per-commit cadence.
+    """
     if "close" in source_file.stem.lower():
         return True
     return bool(PER_CLOSE_PHASE_RE.search(phase_cell))
