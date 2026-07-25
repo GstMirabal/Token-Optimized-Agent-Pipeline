@@ -51,6 +51,7 @@ before any file in the tables below is touched, per J-12. This file itself was w
 | T7 | `.agents/skills/omni-context-minimizer/README.md` | edit | — |
 | T8 | `.agents/skills/python-quality-auditor/README.md` | edit | — |
 | T9 | `.agents/skills/skill-creator-3rd/README.md` | edit | — |
+| ~~T9~~ | ~~`.agents/skills/skill-creator-3rd/README.md`~~ | **DROPPED** — `rules/skills_and_integrations.md §3` Skill Documentation Veto blocks editing `-3rd`-suffixed skill READMEs; Golden Gate 2026-07-25 resolved via `task_scope.md` Finding #4, path (a): leave this file untouched this Sprint. Follow-up (mislabel investigation) explicitly out of scope. | — |
 | T10 | `.agents/skills/readme-standardizer/README.md` | edit | — |
 | T11 | `.agents/skills/readme-standardizer/assets/template.md` | edit | — |
 | T12 | `.agents/skills/mcp-registry/README.md` | edit | — |
