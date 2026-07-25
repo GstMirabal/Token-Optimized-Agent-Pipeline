@@ -53,9 +53,3 @@ Check for orphaned command→workflow references:
 ```bash
 python3 .agents/skills/slash-commander/scripts/verify_commands.py
 ```
-
----
-
-## 📬 Contact
-**Architect**: Gst Mirabal - [gst.mirabal@gmail.com](mailto:gst.mirabal@gmail.com)
-**Project**: Universal-Agents Matrix
