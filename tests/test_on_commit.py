@@ -74,6 +74,37 @@ def test_extract_commit_message():
     assert on_commit.extract_commit_message("git commit --amend") is None
 
 
+def test_extract_commit_message_heredoc():
+    # The `-m "$(cat <<'EOF' ... EOF)"` idiom used for multi-line commit
+    # bodies: this hook sees the raw, unresolved bash command text, so the
+    # naive quoted-string branch alone would mis-extract everything up to
+    # the first embedded '"' instead of the heredoc's real content.
+    command = (
+        "git commit -m \"$(cat <<'EOF'\n"
+        "feat(x): multi-line message #01\n"
+        "\n"
+        "Body line explaining the change.\n"
+        "EOF\n"
+        ")\""
+    )
+    message = on_commit.extract_commit_message(command)
+    assert message == (
+        "feat(x): multi-line message #01\n\nBody line explaining the change."
+    )
+    assert on_commit.is_valid_commit_message(message)
+
+    # A heredoc body that genuinely isn't a valid Conventional Commit must
+    # still be rejected — the fix must not open a validation bypass.
+    bad_command = (
+        "git commit -m \"$(cat <<'EOF'\n"
+        "not conventional and missing a sprint id\n"
+        "EOF\n"
+        ")\""
+    )
+    bad_message = on_commit.extract_commit_message(bad_command)
+    assert not on_commit.is_valid_commit_message(bad_message)
+
+
 # --- Dual Trinity audit ----------------------------------------------------
 
 def _make_skill(root, name, *, frontmatter=True, scripts=False, readme=False, init=False):
