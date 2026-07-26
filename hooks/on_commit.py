@@ -148,8 +148,28 @@ def is_blocked_push(command: str) -> bool:
     return not DEPLOY_UNLOCK.exists()
 
 
+HEREDOC_COMMIT_MSG_REGEX = re.compile(
+    r"-m\s+\"\$\(cat\s+<<-?\s*['\"]?(\w+)['\"]?\s*\n(.*?)\n\1\s*\)\"",
+    re.DOTALL,
+)
+
+
 def extract_commit_message(command: str) -> str | None:
-    """Pulls the -m message out of a git commit command, if present."""
+    """Pulls the -m message out of a git commit command, if present.
+
+    Handles both a plain quoted string and the `-m "$(cat <<'EOF' ...
+    EOF)"` heredoc idiom recommended for multi-line Conventional Commit
+    bodies: this hook only ever sees the raw, unresolved bash command text
+    (Claude Code's PreToolUse payload), never the shell-expanded result, so
+    a heredoc's body has to be parsed out of the literal `-m "$(cat <<...`
+    syntax explicitly — the naive quoted-string match below stops at the
+    first embedded `"` and silently mis-extracts everything before the
+    heredoc's actual content, which used to produce false COMMIT_MSG_VIOLATION
+    reports for perfectly valid Conventional Commit messages.
+    """
+    heredoc = HEREDOC_COMMIT_MSG_REGEX.search(command)
+    if heredoc:
+        return heredoc.group(2)
     m = re.search(r"-m\s+(?:\"([^\"]*)\"|'([^']*)')", command)
     if not m:
         return None
