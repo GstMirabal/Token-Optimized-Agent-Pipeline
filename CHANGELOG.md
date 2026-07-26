@@ -4,6 +4,9 @@ All notable changes to the Universal-Agents framework. Format: [Keep a Changelog
 
 ## [Unreleased]
 
+### Fixed
+- **`skills/skill-creator-3rd` mislabel**: the `-3rd` suffix never reflected reality — `SKILL.md`'s own frontmatter already named it `skill-creator`, `manifest_skills.json` already had a mismatched `name`/`path` pair, and its content is native institutional boilerplate self-referencing this framework's own rule numbers (a real vendor fork wouldn't). Renamed to `skills/skill-creator/`, which lifts the Skill Documentation Veto (`skills_and_integrations.md §3`) that blocked closing its personal-brand leak during Phase 14 (`v3.5.0`) — footer now stripped, consistent with the other 9 skills.
+
 ## [3.5.0] - 2026-07-26
 
 ### Added
