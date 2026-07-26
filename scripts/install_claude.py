@@ -136,7 +136,8 @@ def scaffold_identity_config() -> None:
     auto-fills repo_slug from `git remote get-url origin`; a missing/foreign
     remote is not a failure, it just leaves repo_slug blank for the human to
     fill in manually. This script never runs render_readme.py itself — that
-    stays a deliberate, manual step for the host owner."""
+    stays a deliberate, manual step for the host owner.
+    """
     dest = HOST_DIR / "identity.config.json"
     if dest.exists():
         return
