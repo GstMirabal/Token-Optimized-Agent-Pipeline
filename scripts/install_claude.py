@@ -25,6 +25,7 @@ What it does:
   6. Marks .agents/.claude_bridge.lock so hooks/on_init.py knows not to re-run.
 """
 import argparse
+import re
 import shutil
 import subprocess
 import sys
@@ -127,6 +128,39 @@ def ensure_gitignore_entries() -> None:
           f"for the bridge/graphify output: {', '.join(missing)}")
 
 
+def scaffold_identity_config() -> None:
+    """Copies docs/standards/templates/IDENTITY_TEMPLATE.json to the host root
+    as identity.config.json, but only the first time — never touches or merges
+    over a host's existing copy (plain existence-guard, same criterion as
+    link_one(), not a recursive merge since this is a flat file). Best-effort
+    auto-fills repo_slug from `git remote get-url origin`; a missing/foreign
+    remote is not a failure, it just leaves repo_slug blank for the human to
+    fill in manually. This script never runs render_readme.py itself — that
+    stays a deliberate, manual step for the host owner."""
+    dest = HOST_DIR / "identity.config.json"
+    if dest.exists():
+        return
+    template = AGENTS_DIR / "docs" / "standards" / "templates" / "IDENTITY_TEMPLATE.json"
+    data = json.loads(template.read_text())
+
+    try:
+        remote_url = subprocess.run(
+            ["git", "-C", str(HOST_DIR), "remote", "get-url", "origin"],
+            capture_output=True, text=True, check=True,
+        ).stdout.strip()
+        match = re.search(r"github\.com[:/](?P<owner>[^/]+)/(?P<repo>.+?)(?:\.git)?/?$", remote_url)
+        if match:
+            data["repo_slug"] = f"{match.group('owner')}/{match.group('repo')}"
+    except (subprocess.CalledProcessError, OSError) as exc:
+        print(f"ℹ️  Could not auto-detect repo_slug from 'git remote get-url origin': {exc}")
+
+    dest.write_text(json.dumps(data, indent=2) + "\n")
+    print(f"✅ Scaffolded {dest}")
+    print("📝 Fill in identity.config.json with your project's details, then run "
+          "`.agents/scripts/render_readme.py` manually to generate your README — "
+          "the installer never does this automatically.")
+
+
 def install_nucleus_bridge() -> int:
     """Minimal self-bridge for the nucleus repo itself: commands + agents +
     constitution import, so `/agents:*` works while developing the framework.
@@ -181,6 +215,7 @@ def main() -> int:
 
     add_claude_import("@.agents/agents.md")
     ensure_gitignore_entries()
+    scaffold_identity_config()
 
     if args.profile:
         profile_dir = AGENTS_DIR / "profiles" / args.profile
