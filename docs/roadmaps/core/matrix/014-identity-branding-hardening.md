@@ -1,15 +1,16 @@
 ---
 description: "Config-Driven Identity System & Personal Brand Leak Closure (Phase 14)"
-status: "IN_PROGRESS"
+status: "COMPLETED"
 version: 1.0.0
 ---
 
 # Roadmap: Phase 14 - Config-Driven Identity & Brand Leak Closure
 
 ## Status
-- **Strategy Lock:** `OPEN`
-- **Completion:** 0%
-- **Current UID Seal:** _Pending — assigned by `graphify update` at first commit onto `ai-sprint/014`._
+- **Strategy Lock:** `CLOSED`
+- **Completion:** 100% (22/22 executable tasks; T9 dropped by human Golden Gate decision)
+- **Current UID Seal:** _No graphify baseline exists for this checkout (`graphify-out/` never built here) — confirmed by QA Gate 1 as an informational scope note, not a blocker; initializing one is a separate DevOps decision outside this Sprint._
+- **Quality Gates:** Gate 1 (QA, structural) — PASA on re-certification after 2 fixes (`.agents/README.md` broken banner ref, `readme-standardizer` identity-propagation reopened). Gate 2 (Tester, functional) — PASA, 56 pytest + installer sandbox test green, zero regressions.
 - **Source of Truth:** `~/.claude/plans/groovy-snuggling-patterson.md` (Golden Gate passed via Plan Mode, human-approved — 9 numbered steps + Archivos Afectados + Verificación).
 - **Sprint ID:** `014` — next sequential number after Phase 13 (`013-refined-telemetry-and-redundancy.md`, currently `IN_PROGRESS` on an unrelated telemetry/redundancy track). This work does **not** inherit CryptoBot host numbering (`083`+); the host's `docs/sprints/[ID]-[Stack]-[Layer]/` topology is explicitly not auto-scaffolded onto the nucleus (`agents.md §5 nucleus_neutrality`), and no `.agents/docs/sprints/` directory exists or has ever existed. `.agents`'s own history ledger for substantial work packages is this `docs/roadmaps/core/matrix/NNN-slug.md` sequence (Phases 000-013, git-verified — confirmed no `014-*` file pre-existed) plus `CHANGELOG.md` `[Unreleased]` + eventual SemVer tag. This file **is** the Sprint folder equivalent for this track, in the shape the nucleus already uses for itself — not a foreign host convention grafted on (`agents.md §3 strict_rule`).
 - **Precedent checked:** the queued `documentation_standard.md` track (Track A) landed via branch `feat/documentation-standard` + `docs/audits/TOKEN_ECONOMY_AUDIT-documentation-standard.md`, with **no** roadmap Phase file and **no** Sprint ID — it predates this Phase-numbering formalization for identity work. Not reused as the pattern here because the user's task brief explicitly invokes literal `ai-sprint/[ID]` (J-12) for this track.
@@ -26,6 +27,8 @@ before any file in the tables below is touched, per J-12. This file itself was w
 
 ## Finding: plan says "11 README.md", verified count is 10 physical files
 `agents.md §1 exception_handling` / due diligence check before drafting Phase C below. Grepped `.agents/skills/` for the plan's own Verification-section signature (`gst.mirabal@gmail.com|linkedin.com/in/gstmirabal|x.com/gst_mirabal`, Paso 5 + Verificación §3) — **10 files match**, exactly the 10 named in the plan's "Archivos Afectados" list (9 skill `README.md` + `readme-standardizer/assets/template.md`). A broader grep (bare `GstMirabal`/`Gustavo Mirabal`) surfaces an 11th file, `skills/readme-standardizer/SKILL.md`, but it only contains a hardcoded `GstMirabal` example URL and a generic instruction to preserve "the Contact section" — no actual email/LinkedIn/X leak. It does **not** fail the plan's own Verification gate (Paso 5, 3rd bullet), so it is **not** added as a mandatory task here (would be undiscussed scope drift past the approved Golden Gate). Flagged for the Principal Agent / human to decide whether the plan's "11" prose should be corrected to "10" (J-14 PATCH_PROPAGATION-style drift between narrative and file table) and whether `SKILL.md`'s example URL is worth a discretionary follow-up.
+
+**Resolution (Tactical Liquidation):** the frozen, already-approved plan file (`~/.claude/plans/groovy-snuggling-patterson.md`) is left as-is — a post-hoc prose edit to an already-Golden-Gated artifact isn't worth the historical-record risk for a one-word count discrepancy that was fully surfaced and explained here. `SKILL.md` ended up edited anyway, but for a different and more serious reason found later at QA Gate 1 (see Certification Checklist below): it wasn't just an illustrative example URL, it actively instructed propagating the framework author's real contact info into third-party projects. That's fixed now, independent of this 11-vs-10 count question.
 
 ---
 
@@ -108,11 +111,17 @@ T22 ──[grep gate]──> T23
 T18, T19  (no deps, any time)
 ```
 
-## Certification Checklist (Tactical Liquidation gate, not yet executed)
-- [ ] All 23 atomic tasks assigned to subagents by `agent_orchestrator` (Phase 4).
-- [ ] `rule_validator` produces `task_scope.md` confirming no two in-flight tasks target the same physical file concurrently (T1/T21 and T15/T22 pairs specifically).
-- [ ] `qa_agent` + `tester_agent` run the plan's own Verificación block (5 grep gates + 2 script runs) before Golden Gate closes.
-- [ ] `CHANGELOG.md` `[Unreleased]` gets a Phase 14 entry; this file's `status` flips to `COMPLETED (100%)` at close, per the Phase 12/13 precedent.
+## Certification Checklist (Tactical Liquidation gate)
+- [x] All 23 atomic tasks assigned to subagents by `agent_orchestrator` (Phase 4). T9 dropped at Golden Gate (human decision, `skills_and_integrations.md §3` Veto conflict) — 22 executed.
+- [x] `rule_validator` produced `task_scope.md` confirming no two in-flight tasks targeted the same physical file concurrently (T1/T21 and T15/T22 pairs specifically) — session-scoped artifact, gitignored by design, not committed.
+- [x] `qa_agent` + `tester_agent` ran the plan's own Verificación block (5 grep gates + 2 script runs) before Golden Gate closed. Gate 1 initially bounced on two real defects (broken banner ref in `.agents/README.md`; `readme-standardizer` propagating personal identity as a functional payload, not just static docs) — both fixed and re-certified PASA. Gate 2 (functional) PASA on first pass: exhaustive `render_readme.py` scenario coverage + isolated `install_claude.py` scaffold test + full existing suite (56 pytest + installer sandbox), zero regressions. One cosmetic `ruff` D209 finding (new docstring) fixed post-Gate-2.
+- [x] `CHANGELOG.md` `[Unreleased]` got a Phase 14 entry; this file's `status` flipped to `COMPLETED (100%)` at close.
+
+## Known follow-ups (out of scope for this Sprint, not blocking)
+- **CryptoBot's own README/identity.config.json**: next cycle, once this lands upstream and the host's `.agents` pin is bumped (requires separate human-authorized `lightweight_sync`).
+- **`skills/skill-creator-3rd/README.md` (T9)**: still leaks the framework author's contact info. Blocked on `skills_and_integrations.md §3`'s Skill Documentation Veto — needs either a mislabel correction (drop the `-3rd` suffix, since the content is native institutional boilerplate, not real vendor docs) or an explicit human exception, as its own scoped task.
+- **`install_claude.py` integration point** for `identity.config.json` scaffolding: wired for the normal (non-nucleus) install path only, as scoped. Whether `--profile` installs need the same treatment was not evaluated — out of scope, no profile currently ships identity-sensitive content.
+- **`render_readme.py` against `.agents/README.md` itself**: not used for this Sprint's `.agents/README.md` patch (T16 was a manual incremental edit, by design — the template doesn't yet have full content parity with the real README's `Getting Started`/`Contributing`/`License` sections). Revisit once/if the template reaches that parity.
 
 ---
-*Authorized under Universal-Agents Rules (v3.3.2; `documentation_standard.md` merged and pending release as the next tag, per `CHANGELOG.md [Unreleased]`).*
+*Authorized under Universal-Agents Rules (v3.3.2; `documentation_standard.md` merged and pending release as the next tag, per `CHANGELOG.md [Unreleased]`). Phase 14 closed 2026-07-26, branch `ai-sprint/014`, pending PR against `GstMirabal/.agents`.*
