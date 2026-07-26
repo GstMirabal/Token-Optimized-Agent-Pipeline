@@ -1,5 +1,5 @@
 """
-🛡️ Universal-Agents: Environment Shielding Auditor (3rd-party)
+🛡️ Token-Optimized Agent Pipeline: Environment Shielding Auditor (3rd-party)
 Agnostic security check script for avoiding PII leaks and hardcoded secrets.
 """
 

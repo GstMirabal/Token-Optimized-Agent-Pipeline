@@ -4,7 +4,7 @@ Universal alignment for JS/TS projects (ESLint, Prettier, JSDoc) ensuring legal 
 
 ## About The Project
 
-The **JS-Standardizer** is the Matrix's universal alignment tool for JavaScript and TypeScript projects. It ensures code complies with the framework's quality standards (ESLint, Prettier) and that internal documentation stays legally coherent through mandatory JSDoc.
+The **JS-Standardizer** is the pipeline's universal alignment tool for JavaScript and TypeScript projects. It ensures code complies with the framework's quality standards (ESLint, Prettier) and that internal documentation stays legally coherent through mandatory JSDoc.
 
 **Key Features:**
 *   **Linter Automation:** Ready-to-use ESLint and Prettier configuration aligned with **Rule 35**.

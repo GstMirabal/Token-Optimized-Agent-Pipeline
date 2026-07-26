@@ -4,7 +4,7 @@ Assists in the creation of new atomic skills following global governance rules.
 
 ## About The Project
 
-The **Skill Creator** is the scaffolding and automation tool for expanding the Matrix arsenal. It ensures every new atomic skill inherits the institutional security, efficiency, and documentation protocols, in compliance with the flat `skills/` topology (`agents.md §3`).
+The **Skill Creator** is the scaffolding and automation tool for expanding the pipeline's skill library. It ensures every new atomic skill inherits the framework's security, efficiency, and documentation protocols, in compliance with the flat `skills/` topology (`agents.md §3`).
 
 **Key Features:**
 *   **Atomic Scaffolding:** Automatic generation of `scripts/` directories and `SKILL.md` / `README.md` files.
@@ -20,7 +20,7 @@ The **Skill Creator** is the scaffolding and automation tool for expanding the M
 
 ### Prerequisites
 
-*   **Universal-Agents Submodule**: Access to the framework's global scaffolding templates is required.
+*   **Token-Optimized Agent Pipeline Submodule**: Access to the framework's global scaffolding templates is required.
 
 ### Installation & Configuration
 
@@ -32,7 +32,7 @@ The **Skill Creator** is the scaffolding and automation tool for expanding the M
 
 ## Usage
 
-Invoked when the **Orchestrator** or the user identifies the need for a new technical capability that must be persisted into the Matrix:
+Invoked when the **Orchestrator** or the user identifies the need for a new technical capability that must be persisted into the pipeline:
 
 ```bash
 # Example: creating a new atomic scraping skill

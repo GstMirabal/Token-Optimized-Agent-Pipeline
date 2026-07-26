@@ -1,5 +1,5 @@
 """
-🛡️ Universal-Agents: Python Quality Auditor (3rd-party)
+🛡️ Token-Optimized Agent Pipeline: Python Quality Auditor (3rd-party)
 Agnostic health-check script for Python repositories.
 """
 

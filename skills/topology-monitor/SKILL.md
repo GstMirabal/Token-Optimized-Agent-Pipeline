@@ -1,14 +1,14 @@
 ---
-name: matrix-monitor
-description: Consolidated tool for monitoring matrix health, task progress, and legacy code audit.
+name: topology-monitor
+description: Consolidated tool for monitoring pipeline health, task progress, and legacy code audit.
 category: Governance
 tags: ["monitoring", "audit", "coverage", "legacy"]
 ---
 
-# 🛠️ Skill Profile: Matrix Monitor
+# 🛠️ Skill Profile: Topology Monitor
 
 ## Technical Logic
-This skill implements the procedural logic for **Matrix Monitor**. (Automatic scaffolding).
+This skill implements the procedural logic for **Topology Monitor**. (Automatic scaffolding).
 
 ## Procedures
 - [ ] Define step-by-step logic here.

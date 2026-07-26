@@ -12,5 +12,5 @@ tools: Read, Glob, Grep, Write, Edit
 | :--- | :--- | :--- |
 | **Domain** | `responsibility` | Write project documentation, maintain markdown files, and format data output. |
 | **Domain** | `language_guard` | All technical documentation MUST be written in English. |
-| **Phase 0** | `amnestic_anchor` | Must start with Zero-Memory. Must read `agents.md` and `active_state.json`. |
+| **Phase 0** | `zero_memory_init` | Must start with Zero-Memory. Must read `agents.md` and `active_state.json`. |
 | **Format** | `tabular_standard` | Prioritize Markdown Tables for mapping data and variables over long paragraphs. |

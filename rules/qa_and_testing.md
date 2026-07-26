@@ -13,6 +13,6 @@ This rule bounds deployment scopes, establishing testing thresholds and failsafe
 ## 3. Code Rollback Safety
 - **Tracking Deviations**: Any structural detour forced by environmental variables must be explicitly marked as `:tech-debt:` inside active implementation plans, immediately rendering the block a high-priority vulnerability for retroactive analysis.
 
-## 4. The Double-Gate Review Protocol (Matrix V2)
-- **Structural Halt**: No execution block may proceed to functional testing without the explicit, documented sign-off from the `QA Agent`, guaranteeing absolute constitutional, linguistic, and syntactic compliance.
+## 4. The Double-Gate Review Protocol
+- **Structural Halt**: No execution block may proceed to functional testing without the explicit, documented sign-off from the `QA Agent`, guaranteeing absolute governance, linguistic, and syntactic compliance.
 - **Functional Lock**: The `Tester Agent` operates downstream of QA. If functional integration tests or isolated `:memory:` tests fail, it must forcefully trigger the global **Remediation Loop**, routing the exact failure trace back to the initiating node. Under no circumstances may functional gaps be presented to the Human User for resolution.

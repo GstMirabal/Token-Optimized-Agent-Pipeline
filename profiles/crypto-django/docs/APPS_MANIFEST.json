@@ -1,5 +1,5 @@
 {
-  "_comment": "Sanctioned Django app list for the crypto-django project family. Copy to the host's docs/architecture/APPS_MANIFEST.json to enable shadow-app detection by matrix-monitor.",
+  "_comment": "Sanctioned Django app list for the crypto-django project family. Copy to the host's docs/architecture/APPS_MANIFEST.json to enable shadow-app detection by topology-monitor.",
   "apps": [
     "core",
     "datafeed",

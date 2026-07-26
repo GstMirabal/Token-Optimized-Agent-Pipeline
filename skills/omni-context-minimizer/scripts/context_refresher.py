@@ -17,7 +17,7 @@ def refresh_governance_context():
     # Dynamic paths using pathlib relative to the .agents root
     # Note: Using parent.parent because the script lives in .agents/scripts/
     root_path = pathlib.Path(__file__).parent.parent
-    rules_file = root_path / "governance/constitution/global_user_rules.md"
+    rules_file = root_path / "governance/ruleset/global_user_rules.md"
     task_file = root_path / "task/task.md"
 
     # Verification of existence

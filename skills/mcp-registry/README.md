@@ -2,7 +2,7 @@
 
 ## About The Project
 
-The **MCP Registry & Manager** is the Matrix's external-data discovery system. It manages the configuration and routing of local and remote Model Context Protocol (MCP) servers, letting subagents expand their knowledge frontier in a safe, audited way. Project-specific servers (e.g. market-data feeds) live in `profiles/[name]/mcp/registry.json`.
+The **MCP Registry & Manager** is the pipeline's external-data discovery system. It manages the configuration and routing of local and remote Model Context Protocol (MCP) servers, letting subagents expand their knowledge frontier in a safe, audited way. Project-specific servers (e.g. market-data feeds) live in `profiles/[name]/mcp/registry.json`.
 
 **Key Features:**
 *   **Centralized Registry:** A single source of truth in `registry.json` for all external connections.

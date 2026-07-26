@@ -1,6 +1,6 @@
 # 📄 Contract: Topology Scaffolder Skill Interface (v1.0.0)
 
-This contract defines the logic-level interface for the **Topology Scaffolder** local skill. It standardizes the physical injection of the Matrix hierarchy.
+This contract defines the logic-level interface for the **Topology Scaffolder** local skill. It standardizes the physical injection of the pipeline's directory hierarchy.
 
 | Parameter | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
@@ -19,4 +19,4 @@ The skill MUST instantiate the following physical paths:
 ## 2. Integrity Signatures
 The skill is responsible for injecting the **Sync-Lock** verification signature.
 - **Trigger**: Successful tree injection.
-- **Action**: Update `docs/architecture/matrix_topology_map.md`.
+- **Action**: Update `docs/architecture/topology_map.md`.

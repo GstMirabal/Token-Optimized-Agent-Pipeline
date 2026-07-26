@@ -3,7 +3,7 @@ description: "Emergency Rollback and Remediation Protocol (Keyword: remediation)
 version: 2.0.0
 ---
 
-# 🛡️ Workflow: Remediation (The Panic Button)
+# 🛡️ Workflow: Remediation (Rollback & Recovery)
 
 A critical emergency protocol designed to intercept infinite hallucination loops or Double-Gate stalemates. Its sole purpose is to nuke corrupted state, extract negative-heuristics natively, and return the system to safety.
 
@@ -20,4 +20,4 @@ A critical emergency protocol designed to intercept infinite hallucination loops
 | **3. Rollback** | `session_lock` | Explicitly alert human user of deadlock. Exit and enforce **SESSION LOCKED**. |
 
 ---
-*Optimized for Matrix V2 Failsafe Constraints & Tabular Density (v2.0.0).*
+*Optimized for Pipeline Failsafe Constraints & Tabular Density (v2.0.0).*

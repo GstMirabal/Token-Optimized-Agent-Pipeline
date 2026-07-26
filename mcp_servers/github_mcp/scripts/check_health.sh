@@ -1,9 +1,9 @@
 #!/bin/bash
-# 🛡️ MCP Health Check: GitHub Sentinel
+# 🛡️ MCP Health Check: Git Sync Agent
 # Version: 1.0.0
 
 # Protocol: Safe Export (No-Parser)
-# This script is called by the DevOps Sentinel to verify API connectivity.
+# This script is called by the DevOps Agent to verify API connectivity.
 
 # Set Working Directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -29,7 +29,7 @@ RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token $GITH
 
 # 4. Certification
 if [ "$RESPONSE" == "200" ]; then
-    echo "✅ [HEALTH_CHECK] GitHub Sentinel: Connection established successfully."
+    echo "✅ [HEALTH_CHECK] Git Sync Agent: Connection established successfully."
     exit 0
 else
     echo "❌ [HEALTH_CHECK] Error: API returned HTTP $RESPONSE. Check token validity and network."

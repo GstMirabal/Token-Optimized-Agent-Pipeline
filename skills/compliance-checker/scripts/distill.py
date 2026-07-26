@@ -24,14 +24,14 @@ def analyze_patterns(data):
 
 def generate_proposal(patterns):
     header = f"# Governance Heuristic Pulse ({datetime.now().strftime('%Y-%m-%d')})\n\n"
-    header += "This report identifies recurrent friction points detected by Matrix hooks. Patterns exceeding the threshold are promoted to Formal Clauses.\n\n"
-    
+    header += "This report identifies recurrent friction points detected by pipeline hooks. Patterns exceeding the threshold are promoted to Formal Clauses.\n\n"
+
     body = "## Frequency Analysis\n\n"
     body += "| Hook | Error Type | Frequency | Status |\n"
     body += "| :--- | :--- | :--- | :--- |\n"
-    
+
     clauses = "\n## Formal Clauses (Promoted)\n\n"
-    proposals = "\n## Proposed Amendments (Jurisprudence)\n\n"
+    proposals = "\n## Proposed Amendments (Rule Amendments)\n\n"
     
     proposed_count = 0
     clause_count = 0
@@ -47,7 +47,7 @@ def generate_proposal(patterns):
             # Simple heuristic mapping for now
             rule_text = "The agent MUST trigger a Manual Correction Alert and stop execution until the environment is restored (Manual Task)." if err_type == "ENVIRONMENT_VIOLATION" else "The agent MUST perform a structural audit before commit."
             
-            clauses += f"### Clause J-{clause_count:02d}: {err_type}\n"
+            clauses += f"### Clause RA-{clause_count:02d}: {err_type}\n"
             clauses += f"- **Rule**: {rule_text}\n"
             clauses += f"- **Source**: `{hook}`\n"
             clauses += f"- **Frequency**: {count} occurrences\n"
@@ -57,31 +57,31 @@ def generate_proposal(patterns):
             proposed_count += 1
             proposals += f"### Proposal P-{proposed_count:02d}: {err_type} Mitigation\n"
             proposals += f"**Detected in**: `{hook}`\n"
-            proposals += f"**Reasoning**: High frequency of this violation ({count} occurrences) suggests a need for automated remediation or constitutional clarification.\n"
+            proposals += f"**Reasoning**: High frequency of this violation ({count} occurrences) suggests a need for automated remediation or governance clarification.\n"
             proposals += "**Proposed Clause**: *Pending heuristic distillation logic refinement.*\n\n"
             
     if clause_count == 0:
         clauses += "_No clauses have reached the promotion threshold yet._\n"
     if proposed_count == 0:
-        proposals += "_No critical patterns detected. Matrix health is nominal._\n"
-        
+        proposals += "_No critical patterns detected. Pipeline health is nominal._\n"
+
     return header + body + clauses + proposals
 
 def main():
-    print("🧠 [GOVERNANCE SENTINEL] Distilling Matrix Telemetry...")
+    print("🧠 [COMPLIANCE CHECKER] Distilling Pipeline Telemetry...")
     data = load_telemetry()
-    
+
     if not data:
-        print("✅ [GOVERNANCE SENTINEL] No telemetry found. Matrix is silent.")
+        print("✅ [COMPLIANCE CHECKER] No telemetry found. Pipeline is silent.")
         return
-        
+
     patterns = analyze_patterns(data)
     report = generate_proposal(patterns)
-    
+
     with open(OUTPUT_PATH, "w") as f:
         f.write(report)
-        
-    print(f"📄 [GOVERNANCE SENTINEL] Heuristic Pulse updated at {OUTPUT_PATH}")
+
+    print(f"📄 [COMPLIANCE CHECKER] Heuristic Pulse updated at {OUTPUT_PATH}")
 
 if __name__ == "__main__":
     main()
