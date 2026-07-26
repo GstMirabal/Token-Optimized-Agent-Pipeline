@@ -4,6 +4,10 @@ All notable changes to the Universal-Agents framework. Format: [Keep a Changelog
 
 ## [Unreleased]
 
+### Fixed
+- **`skills/governance-sentinel/scripts/distill.py` never found real telemetry on any host**: `ROOT` was an unconditional 4-parent climb from the script, which lands inside `.agents/` for a normal host install instead of the host root — `memory/telemetry/raw_errors.json` was never checked at the path that actually holds it (`.agents/memory/` doesn't exist and never has, `submodule_purity`). Now mode-aware, same detection `install_claude.py`/`render_readme.py` already use (`AGENTS_ROOT/.git` real directory ⇒ nucleus, `ROOT = AGENTS_ROOT`; otherwise a host submodule, `ROOT = AGENTS_ROOT.parent`). Found by actually running the distiller during a session close and getting a suspicious "no telemetry" on a host with 7 recorded errors.
+- **`hooks/on_commit.py`'s commit-message extraction false-positives on the `-m "$(cat <<'EOF' ... EOF)"` heredoc idiom**: the PreToolUse hook only ever sees the raw, unresolved bash command text, so the naive quoted-string regex stopped at the first embedded `"` instead of the heredoc's real content, flagging perfectly valid Conventional Commit messages as violations. `extract_commit_message()` now recognizes the heredoc pattern explicitly and pulls the real body out before falling back to the plain-quote case. Confirmed via the same host's telemetry: this exact false positive fired 7 times in one session.
+
 ## [3.5.1] - 2026-07-26
 
 ### Fixed

@@ -3,8 +3,17 @@ from pathlib import Path
 from collections import Counter
 from datetime import datetime
 
-# Paths
-ROOT = Path(__file__).parent.parent.parent.parent
+# This file lives at <AGENTS_ROOT>/skills/governance-sentinel/scripts/distill.py,
+# so 4 parents reach AGENTS_ROOT. Telemetry, though, lives at the *host's* root,
+# not inside .agents/ (submodule_purity — .agents/memory/ must never exist as a
+# host artifact). In nucleus mode AGENTS_ROOT already *is* the host (real .git
+# dir, same detection install_claude.py/render_readme.py already use); in a
+# normal host install, AGENTS_ROOT is the `.agents/` submodule and the real
+# root is one level up. The previous unconditional 4-parent count always
+# landed inside .agents/ for a host install, so this script had never once
+# found real telemetry on any host.
+AGENTS_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+ROOT = AGENTS_ROOT if (AGENTS_ROOT / ".git").is_dir() else AGENTS_ROOT.parent
 TELEMETRY_PATH = ROOT / "memory/telemetry/raw_errors.json"
 OUTPUT_PATH = ROOT / "memory/telemetry/proposals.md"
 
