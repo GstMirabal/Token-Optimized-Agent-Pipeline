@@ -1,7 +1,7 @@
 <div align="center">
 
 <!-- BANNER_START -->
-<img src="docs/assets/logo/institutional_banner.png" alt="Universal-Agents banner" width="100%">
+<img src="docs/assets/logo/agents_banner.svg" alt="Universal-Agents banner" width="100%">
 <!-- BANNER_END -->
 
 [![Contributors][contributors-shield]][contributors-url]
