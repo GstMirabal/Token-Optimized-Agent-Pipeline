@@ -1,23 +1,24 @@
-# 🛠️ AI AI-Ops Skills Matrix
+# 🛠️ AI-Ops Skills Library
 
-This directory contains the universal tactical arsenal of **Universal-Agents**. These are autonomous or semi-autonomous tools designed to be invoked by the **Orchestrator** to solve specific engineering problems.
+This directory contains the skill library of the **Token-Optimized Agent Pipeline**. These are autonomous or semi-autonomous tools designed to be invoked by the **Orchestrator** to solve specific engineering problems.
 
-## 🧬 The Triangle of Sovereignty (Topological Governance)
+## 🧬 Flat Topology (Topological Governance)
 
-To maintain order and security, all skills are strictly divided into three distinct layers:
+To maintain order and security, `skills/` is strictly flat — no `core/`, `local/`, or `3rd/` sub-layers are permitted (`agents.md §3 topological_order`). Every skill is a top-level directory, and provenance is encoded in the directory name itself, not in nesting:
 
-1.  **`core/` (The Kernel):** Foundational skills that define the agent framework and infrastructure (e.g., `skill-creator`, `token-saver`). Essential for matrix stability.
-2.  **`local/` (Sovereignty Propia):** Custom tools synthesized specifically for this project or domain (e.g., `contract-writer`). These are internally developed/owned.
-3.  **`3rd/` (External Arsenal):** Downloaded or 3rd-party tools (e.g., `autoskills`, `django-expert`). Use for specialized external expertise.
+1.  **Native skills** (e.g. `skill-creator`, `token-saver-auditor`, `contract-writer`): internally developed and owned by this framework, named without a suffix.
+2.  **Third-party skills** (e.g. `autoskills-3rd`, `django-expert-3rd`): downloaded or vendored tools, explicitly marked with the `-3rd` directory-name suffix. Their documentation is vendor content and is not edited by this framework's own standardization tooling (`rules/skills_and_integrations.md §3`).
+
+Project-specific packs — as opposed to these framework-wide skills — live under `profiles/[name]/skills/` and are only linked into a host via `--profile [name]`.
 
 ## 📋 The Manifest (Dynamic Discovery)
 
 To minimize token consumption and reduce discovery time (Zero-Scanning Policy), the framework uses **`manifest_skills.json`** as the single source of truth.
 
-The Orchestrator and the **Skill Architect** query this manifest FIRST to identify capability, category, and tactical tags.
+The Orchestrator and the **Skill Architect** query this manifest FIRST to identify capability, category, and relevant tags.
 
 > [!IMPORTANT]
-> **Subagents are FORBIDDEN** from scanning directories recursively to look for scripts. They must reference the manifest to ensure they are using the sanctioned "Armory".
+> **Subagents are FORBIDDEN** from scanning directories recursively to look for scripts. They must reference the manifest to ensure they are using the sanctioned skill library.
 
 ## 🚀 Adding New Skills
 

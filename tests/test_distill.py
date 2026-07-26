@@ -1,4 +1,4 @@
-"""Regression coverage for skills/governance-sentinel/scripts/distill.py's
+"""Regression coverage for skills/compliance-checker/scripts/distill.py's
 ROOT resolution — a prior unconditional 4-parent count always landed inside
 .agents/ for a host install, so this script had never once found real
 telemetry on any host (memory/ only ever exists at the host root, never
@@ -10,7 +10,7 @@ from pathlib import Path
 
 DISTILL_PATH = (
     Path(__file__).resolve().parent.parent
-    / "skills" / "governance-sentinel" / "scripts" / "distill.py"
+    / "skills" / "compliance-checker" / "scripts" / "distill.py"
 )
 
 
@@ -26,7 +26,7 @@ def test_host_mode_root_is_one_level_above_agents(tmp_path):
     # Simulates .agents installed as a host's submodule: AGENTS_ROOT/.git is
     # a gitlink *file*, not a directory, so ROOT must climb one more level.
     agents_root = tmp_path / "host" / ".agents"
-    scripts_dir = agents_root / "skills" / "governance-sentinel" / "scripts"
+    scripts_dir = agents_root / "skills" / "compliance-checker" / "scripts"
     scripts_dir.mkdir(parents=True)
     (agents_root / ".git").write_text("gitdir: ../.git/modules/.agents\n")
 
@@ -46,7 +46,7 @@ def test_nucleus_mode_root_is_agents_root_itself(tmp_path):
     # Simulates running distill.py inside the .agents repo's own checkout:
     # .git there is a real directory, so ROOT stays at AGENTS_ROOT.
     agents_root = tmp_path / "nucleus-checkout"
-    scripts_dir = agents_root / "skills" / "governance-sentinel" / "scripts"
+    scripts_dir = agents_root / "skills" / "compliance-checker" / "scripts"
     scripts_dir.mkdir(parents=True)
     (agents_root / ".git").mkdir()
 

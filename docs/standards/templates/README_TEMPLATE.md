@@ -13,12 +13,12 @@
 [![License][license-shield]][license-url]
 [![Release][release-shield]][release-url]
 
-  <h3>⚖️ Universal-Agents: {{PROJECT_NAME}}</h3>
+  <h3>⚖️ Token-Optimized Agent Pipeline: {{PROJECT_NAME}}</h3>
 
   <p align="center">
     <strong>High-Integrity Governance & Federated Agentic Engineering</strong>
     <br />
-    Strategic Matrix for Zero-Trust Execution and Architectural Sovereignty.
+    Strategic Pipeline for Zero-Trust Execution and Architectural Sovereignty.
     <br />
     <a href="{{REPO_URL}}/issues">Report Bug</a>
     ·
@@ -36,7 +36,7 @@
 {{PROJECT_DESCRIPTION}}
 
 > [!IMPORTANT]
-> This project operates under the **Universal-Agents Constitution**. Every interaction is governed by the **Triple-Lock Security Protocol** and is subject to the **Sentinel Audiences** defined in the `.agents` matrix.
+> This project operates under the **Token-Optimized Agent Pipeline governance ruleset**. Every interaction is governed by the **Triple-Lock Security Protocol** and is subject to the **compliance audits** defined in the `.agents` pipeline.
 
 ---
 
@@ -45,19 +45,19 @@ The following layers define the jurisdictional boundaries of the project, ensuri
 
 | Layer | Namespace | Purpose | Primary Auditor |
 | :--- | :--- | :--- | :--- |
-| **`agents.md` + `rules/`** | Institutional Brain | Strategic logic and permanent rules. | Principal Agent |
-| **`skills/`** (flat) | Unified Arsenal | Native tools and `-3rd` suffixed external imports. | Skill Architect |
+| **`agents.md` + `rules/`** | Core Governance Logic | Strategic logic and permanent rules. | Principal Agent |
+| **`skills/`** (flat) | Skill Library | Native tools and `-3rd` suffixed external imports. | Skill Architect |
 | **`profiles/`** | Project Packs | Opt-in project-specific rules/agents/skills. | Orchestrator |
-| **`mcp_servers/`** | Bridge Registry | Model Context Protocol servers. | Sentinel Gateway |
+| **`mcp_servers/`** | Bridge Registry | Model Context Protocol servers. | MCP Registry Auditor |
 
 ---
 
-## 🛡️ Governance Status (Sentinel Check)
+## 🛡️ Governance Status (Compliance Check)
 Before any tactical planning, the following gates must be certified:
 
-- [ ] **GitHub Sentinel**: Branch Synchronization & Drift Audit.
-- [ ] **DevOps Sentinel**: Habitability Certification & Secret Shielding.
-- [ ] **Matrix Mapper**: Topological Integrity & Hook Protocol.
+- [ ] **Git Sync Auditor**: Branch Synchronization & Drift Audit.
+- [ ] **DevOps Agent**: Session Lock Check & Secret Shielding.
+- [ ] **Topology Mapper**: Topological Integrity & Hook Protocol.
 
 <!-- GOVERNED_BLOCK_START -->
 {{GOVERNED_BY_AGENTS}}
@@ -65,16 +65,16 @@ Before any tactical planning, the following gates must be certified:
 
 ---
 
-## ⚖️ Federated Registry (The Matrix Laws)
-This project is governed by the keyed constitution in `.agents/agents.md` (numbered "Rule NN" citations are legacy — resolve them via `rules/LEGACY_RULE_CONCORDANCE.md`).
+## ⚖️ Federated Registry
+This project is governed by the keyed governance ruleset in `.agents/agents.md` (numbered "Rule NN" citations are legacy — resolve them via `rules/LEGACY_RULE_CONCORDANCE.md`).
 
 | Section | Domain | Mandate |
 | :--- | :--- | :--- |
 | **§1** | Code & Language | `snake_case`+ruff / `camelCase`+pnpm lint, mandatory type hints, Technical English Sovereignty. |
 | **§2** | Autonomy | Triple Lock Security, token economy ladder, human authorization gates. |
-| **§3** | Topology | Dual Trinity Standard, flat `skills/`, profiles for project packs. |
-| **§6** | Command | Matrix V3 chain of command; pipeline defined in `matrix_workflow.md`. |
-| **§7** | Jurisprudence | `J-01`…`J-12` amendments, including Branch Discipline (J-12). |
+| **§3** | Topology | Three-File Skill Standard, flat `skills/`, profiles for project packs. |
+| **§6** | Command | Pipeline agent role assignments; sequence defined in `pipeline_workflow.md`. |
+| **§7** | Rule Amendments | `RA-01`…`RA-14` amendments, including Branch Discipline (RA-12). |
 
 ---
 
@@ -88,7 +88,7 @@ Upon opening a session, the following command is required to synchronize the age
 ```
 
 ### 2. Secret Shielding
-This project strictly follows the **Secure Secret Sovereignty** law. Agents MUST NOT read `.env` files. Access is limited to environment exports verified by the **DevOps Sentinel**.
+This project strictly follows the **Secure Secret Sovereignty** law. Agents MUST NOT read `.env` files. Access is limited to environment exports verified by the **DevOps Agent**.
 
 ### 3. Amnesia & Knowledge Purge
 After each sprint, tactical heuristics are distilled into the **Long-Term Memory (LTM)** located in `.agents/memory/` prior to the session context wipe.
@@ -100,7 +100,7 @@ For the full catalog of slash commands, see `docs/guides/AGENTS_SLASH_COMMANDS_G
 
 {{CREDIT_LINE}}
 
-## 📬 Institutional Contact
+## 📬 Contact
 **Owner**: {{OWNER_NAME}} - [{{OWNER_EMAIL}}](mailto:{{OWNER_EMAIL}})
 
 <div align="center">

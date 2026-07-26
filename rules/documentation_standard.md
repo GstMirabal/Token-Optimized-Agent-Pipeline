@@ -14,7 +14,7 @@ Every document is exactly one of four types. A document that needs content from 
 | **Tutorial** (learn by doing) | `README.md` |
 
 - **No absorption, either direction**: a Blueprint that needs to justify a decision links the relevant ADR instead of narrating it; a README that grows into an exhaustive reference (every config option, every field) has drifted into Reference territory and should link out instead.
-- **Naming**: How-to files follow Option B (`[MODULE]_[TASK]_GUIDE.md`, English, J-06). The in-document H1 is phrased as an imperative task ("How to add a new exchange to datafeed"), per Diátaxis's own convention for this type — file name and title serve different audiences (machine-sortable vs. human-scannable).
+- **Naming**: How-to files follow Option B (`[MODULE]_[TASK]_GUIDE.md`, English, RA-06). The in-document H1 is phrased as an imperative task ("How to add a new exchange to datafeed"), per Diátaxis's own convention for this type — file name and title serve different audiences (machine-sortable vs. human-scannable).
 - **Enforcement**: Vale (prose linter) flags Explanation-register language appearing inside Reference-type documents. Base English vocabulary: `we decided`, `instead of`, `alternative`, `trade-off`, `chose X over Y`, `to avoid`, `to prevent`, `to ensure`, `deferred … to`, `rather than`, `so that`, `so as to`. Style package lives at `styles/Diataxis/Explanation.yml` (`StylesPath: styles` in `.vale.ini`), warning-only. Each host project may extend/localize this vocabulary in its own `.vale.ini` if it documents in a language other than English — the framework ships the default, the host declares its own layer on top.
 
 ## 2. C4 — Architecture Zoom Levels
@@ -26,7 +26,7 @@ Every document is exactly one of four types. A document that needs content from 
 ### 2.1 Level 3 eligibility formula
 
 1. **Stack** — the density-comparison cohort, typically a language/runtime tier. A stack must hold enough containers for a percentile to be meaningful; declaring many single-container stacks defeats the mechanism.
-2. **`code_containers` declaration** — each host project declares its own roots as a sibling root key in `docs/active_state.json` (never nested inside `topology_map`, which holds only flat string paths and is maintained by `matrix-mapper`):
+2. **`code_containers` declaration** — each host project declares its own roots as a sibling root key in `docs/active_state.json` (never nested inside `topology_map`, which holds only flat string paths and is maintained by `topology-mapper`):
    ```json
    "code_containers": [
      {"stack": "backend", "root": "backend/apps/"},
@@ -111,5 +111,5 @@ All `WARN`-level, run every close:
 | `ADR_TEMPLATE.md` | Explanation | Nygard/MADR, scaled per §3.2. |
 | `GUIDE_TEMPLATE.md` | How-to | Goal · Prerequisites · Steps (may branch into alternatives, unlike a Tutorial) · Verify it worked · If something goes wrong. |
 | `README_TEMPLATE.md` | Tutorial | Out of scope for this rule — a host's own branding/identity question, not a governance concern. |
-| `SYSTEM_OVERVIEW_TEMPLATE.md` | — (Zero Coordinate anchor) | Carries the same metadata block (§4.1) plus C4 Level 1-2 diagrams. |
+| `SYSTEM_OVERVIEW_TEMPLATE.md` | — (Documentation Entry Point anchor) | Carries the same metadata block (§4.1) plus C4 Level 1-2 diagrams. |
 | `WALKTHROUGH_TEMPLATE.md` | — (historical narrative, outside Diátaxis) | Links the ADR behind a decision instead of re-explaining it. |

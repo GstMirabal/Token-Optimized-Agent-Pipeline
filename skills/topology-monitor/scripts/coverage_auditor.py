@@ -44,7 +44,7 @@ def audit_doc_coverage():
     
     for skill in manifest["skills"]:
         skill_path = Path("skills") / skill["path"]
-        # Standard Trinity: README, SKILL, scripts/
+        # Three-File Skill Standard: README, SKILL, scripts/
         has_readme = (skill_path / "README.md").exists()
         has_skill_md = (skill_path / "SKILL.md").exists()
         has_scripts = (skill_path / "scripts").is_dir()

@@ -1,17 +1,17 @@
 # .agents Global Context & Governance Rules
 
-This is the constitutional matrix of Universal-Agents (`.agents`).
+This is the governance ruleset of the Token-Optimized Agent Pipeline (`.agents`).
 It dictates in an absolute and transversal manner the behavior of subagents, code quality, and topological design.
 
-## 0. Zero Coordinate Protocol (Documentation Matrix)
+## 0. Documentation Entry Point
 
 | Rule | Value / Constraint |
 | :--- | :--- |
-| **Matrix Entry** | Every session MUST start by reading `docs/0_SYSTEM_OVERVIEW.md`. |
+| **Entry Point** | Every session MUST start by reading `docs/0_SYSTEM_OVERVIEW.md`. |
 | **Hierarchy** | `architecture/` (Law), `roadmaps/` (Future), `walkthroughs/` (Achievements), `sprints/` (History). |
 | **Traceability** | Every module MUST have a `[MODULE]_BLUEPRINT.md` in `architecture/` before coding (template: `docs/standards/templates/BLUEPRINT_TEMPLATE.md`). |
 | **Execution** | Every task must be recorded in the current Sprint folder. |
-| **Master Ledger** | The host root `CHANGELOG.md` (Keep a Changelog format; template: `docs/standards/templates/CHANGELOG_TEMPLATE.md`). Every Tactical Liquidation appends its sprint entry under `[Unreleased]`; every deployment seals it as `[vX.Y.Z]` before tagging. Strictly separate jurisdiction from `.agents/CHANGELOG.md` (framework evolution) — the only crossover allowed is a pin-bump entry (`chore(deps): pin .agents to vX.Y.Z`). |
+| **Master Ledger** | The host root `CHANGELOG.md` (Keep a Changelog format; template: `docs/standards/templates/CHANGELOG_TEMPLATE.md`). Every Sprint Closeout appends its sprint entry under `[Unreleased]`; every deployment seals it as `[vX.Y.Z]` before tagging. Strictly separate jurisdiction from `.agents/CHANGELOG.md` (framework evolution) — the only crossover allowed is a pin-bump entry (`chore(deps): pin .agents to vX.Y.Z`). |
 | **Certification** | Closing a Sprint requires updating Blueprints, Global Roadmap, Walkthroughs, and the Master Ledger. |
 
 ### Rule Contexts (lazy-load index)
@@ -68,11 +68,11 @@ Domain rules live in `rules/` and are loaded **on demand** at these triggers —
 
 | Category | Rule (Key) | Value / Constraint (Value) |
 | :--- | :--- | :--- |
-| **Matrix** | `federation` | Check `git remote`; isolate `.agents` purely as a *Git Submodule*. The sanctioned bridge into the host's `.claude/` is exclusively `.agents/scripts/install_claude.sh` (symlinks + non-destructive JSON merge) — no other mechanism may inject content into the host's Claude Code configuration. |
-| **Matrix** | `strict_rule` | Prohibited to alter internal architecture of this submodule from tactical injections. |
+| **Framework** | `federation` | Check `git remote`; isolate `.agents` purely as a *Git Submodule*. The sanctioned bridge into the host's `.claude/` is exclusively `.agents/scripts/install_claude.sh` (symlinks + non-destructive JSON merge) — no other mechanism may inject content into the host's Claude Code configuration. |
+| **Framework** | `strict_rule` | Prohibited to alter internal architecture of this submodule from tactical injections. |
 | **Environment** | `no_globals` | Cap or reject global injections in the main OS binary. |
 | **Environment** | `dependencies` | Force explicit prefix syntax by invoking commands through isolated local dev environment. |
-| **Infrastructure**| `trinity_standard` | **Executable skills** (they ship a `/scripts/` folder) MUST adhere to the full Trinity: 1. `README.md`, 2. `SKILL.md`, 3. `/scripts/` with `__init__.py`. **Knowledge skills** (pure guidance, no scripts) only require a `SKILL.md` with valid `name`/`description` frontmatter — padding them with empty scaffolding is PROHIBITED noise. |
+| **Infrastructure**| `three_file_standard` | **Executable skills** (they ship a `/scripts/` folder) MUST adhere to the full Three-File Standard: 1. `README.md`, 2. `SKILL.md`, 3. `/scripts/` with `__init__.py`. **Knowledge skills** (pure guidance, no scripts) only require a `SKILL.md` with valid `name`/`description` frontmatter — padding them with empty scaffolding is PROHIBITED noise. |
 | **Infrastructure**| `topological_order`| Skills flat inside `skills/`. Sub-layers (`core/`, `local/`) PROHIBITED. Project-specific packs live under `profiles/[name]/` and are only linked into a host via `install_claude.sh --profile [name]`. |
 | **Infrastructure**| `enforcement` | `mass-standardizer` tool is the official auditor for this standard. |
 | **Infrastructure**| `secret_sovereignty`| BANNED from reading `.env` into memory. Use environment export commands. |
@@ -102,45 +102,45 @@ Domain rules live in `rules/` and are loaded **on demand** at these triggers —
 | **Traceability** | `historical_log` | Reject pushes without the `#[Sprint_ID]` suffix (e.g. `#073`). Apply Conventional Commits. |
 | **MCP Registry** | `discovery_manifest` | `.agents/claude/mcp.json` is the submodule's MCP server template; `install_claude.sh` merges it non-destructively into the host's `.mcp.json`, which is the actual discovery point Claude Code reads. |
 
-## 6. Chain of Command & Core Workflow (Matrix V3)
+## 6. Agent Roles & Execution Pipeline
 
-The Matrix operates under a rigid, highly militarized sequential pipeline. Role usurpation is strictly prohibited.
+The pipeline operates under a rigid sequential process. Role usurpation is strictly prohibited.
 
 | Category | Rule (Key) | Value / Constraint (Value) |
 | :--- | :--- | :--- |
-| **Subagent Roles** | `principal_agent` | Supreme Coordinator. Creates Implementation Plan (informed by graphify), manages Golden Gate. |
-| **Subagent Roles** | `devops_agent` | Environment Guardian. Manages venv, .env export, and Docker health. |
-| **Subagent Roles** | `orchestrator` | Tactical Architect. Drafts Initial Roadmap and instantiates Sprint Hierarchy. |
-| **Subagent Roles** | `agent_orchestrator`| HR/Staffing. Assigns specific subagents to the Initial Roadmap steps. |
-| **Subagent Roles** | `skill_architect` | Tool Synthesizer. Prepares/injects skills for the assigned subagents. |
-| **Subagent Roles** | `rule_validator` | Governance Sentinel. Audits Roadmap using graphify dependency graph to generate the `task_scope.md`. |
+| **Subagent Roles** | `principal_agent` | Lead Agent. Creates Implementation Plan (informed by graphify), manages the Approval Gate. |
+| **Subagent Roles** | `devops_agent` | Environment Agent. Manages venv, .env export, and Docker health. |
+| **Subagent Roles** | `orchestrator` | Roadmap Author. Drafts Initial Roadmap and instantiates Sprint Hierarchy. |
+| **Subagent Roles** | `agent_orchestrator`| Agent Assignment. Assigns specific subagents to the Initial Roadmap steps. |
+| **Subagent Roles** | `skill_architect` | Skill Builder. Prepares/injects skills for the assigned subagents. |
+| **Subagent Roles** | `rule_validator` | Rule Auditor. Audits Roadmap using graphify dependency graph to generate the `task_scope.md`. |
 | **Subagent Roles** | `qa_agent` | Structural Verifier. Validates code standards and checks graphify AST graph integrity. |
-| **Subagent Roles** | `tester_agent` | Functional Verifier. Ensures logic stability and zero regression. |
+| **Subagent Roles** | `tester_agent` | Test Verifier. Ensures logic stability and zero regression. |
 
 > [!NOTE]
-> **Core vs. Auxiliary.** The 8 roles above are the *Núcleo del Pipeline V3* (mandatory in every Strategic Genesis → Tactical Liquidation cycle). `governance_learner`, `doc_orchestrator`, `matrix_mapper`, `github_sentinel`, and `token_economy_agent` (see `agents/*.md`) are **Agentes Auxiliares** — invoked as needed (knowledge distillation, documentation, topology, upstream sync) but not a mandatory stop on every pipeline pass. **Project-specific specialists** (e.g. `backend_identity_specialist`, `frontend_ux_hardener`) live in `profiles/[name]/agents/` and only join the Matrix when their profile is installed. Their absence from this table is intentional, not an omission.
+> **Core vs. Auxiliary.** The 8 roles above are the *Core Pipeline Roles* (mandatory in every Planning → Sprint Closeout cycle). `governance_learner`, `doc_orchestrator`, `topology_mapper`, `git_sync_agent`, and `token_economy_agent` (see `agents/*.md`) are **Auxiliary Agents** — invoked as needed (knowledge distillation, documentation, topology, upstream sync) but not a mandatory stop on every pipeline pass. **Project-specific specialists** (e.g. `backend_identity_specialist`, `frontend_ux_hardener`) live in `profiles/[name]/agents/` and only join the pipeline when their profile is installed. Their absence from this table is intentional, not an omission.
 
-### 🚀 The Execution Pipeline (Matrix V3)
-The normative 8-phase pipeline (Strategic Genesis → Tactical Liquidation) is defined **exclusively** in `workflows/matrix_workflow.md`, loaded on demand via `/agents:matrix`. It is not duplicated here to keep the always-loaded constitution lean and drift-free. Non-negotiables enforced at this level: the Golden Gate (Phase 5) is a single attended human authorization — never wrapped in an unattended `/loop` — and all execution happens on `ai-sprint/[ID]` (J-12).
+### 🚀 The Execution Pipeline
+The normative 8-phase pipeline (Planning → Sprint Closeout) is defined **exclusively** in `workflows/pipeline_workflow.md`, loaded on demand via `/agents:pipeline`. It is not duplicated here to keep the always-loaded governance ruleset lean and drift-free. Non-negotiables enforced at this level: the Approval Gate (Phase 5) is a single attended human authorization — never wrapped in an unattended `/loop` — and all execution happens on `ai-sprint/[ID]` (RA-12).
 
-## 7. Jurisprudence (Heuristic Amendments)
+## 7. Rule Amendments
 
 | Category | Rule (Key) | Value / Constraint (Value) |
 | :--- | :--- | :--- |
-| **Amendment** | `J-01: ENVIRONMENT_VIOLATION`| Agent MUST attempt autonomous remediation EXCEPT if prohibited. |
-| **Amendment** | `J-02: LAZY_SIGNAL_PARADIGM` | Prevent circular deps in Django `signals.py`: local imports in receiver. |
-| **Amendment** | `J-03: HOTFIX_FLAT` | For critical bugs, use `docs/hotfixes/[H-ID]-[Layer].md` (template: `HOTFIX_TEMPLATE.md`). **Sanctioned exception to J-06 naming** — emergency speed wins over Option B; the deviation is deliberate, not drift. |
-| **Amendment** | `J-04: FULL_DEPLOYMENT` | Orchestrator MUST deploy the COMPLETE task hierarchy in a single atomic action. |
-| **Amendment** | `J-05: TACTICAL_LIQUIDATION` | Mandatory update of Blueprints, Global Roadmap, Walkthroughs, and Ledger before closing. |
-| **Amendment** | `J-06: IDENTITY_NAMING` | Standard Option B: All docs must be named `[MODULE]_[TYPE].md` (e.g. `USERS_BLUEPRINT.md`). |
-| **Amendment** | `J-07: ARCHIVE_PURGE` | Prohibited to keep empty `archive/` folders. Purge immediately if found. |
-| **Amendment** | `J-08: COMMIT_SQUASH` | Mandatory atomic local commits; mandatory squash & push only during Tactical Liquidation. |
-| **Amendment** | `J-09: SECRET_SOVEREIGNTY`| Prohibited from reading `.env` into thought context. Use `Makefile` or `source .env` in a subshell. |
-| **Amendment** | `J-10: SUPPLY_CHAIN_SHIELD`| Mandate `pnpm 11+`, `ignore-scripts=true`, and `minimum-release-age=1440`. |
-| **Amendment** | `J-11: HOOK_BLOCKING_SEMANTICS`| Claude Code `PreToolUse` hooks only block a tool call on exit code `2` (stderr fed back to the model); exit `1` is a non-blocking warning. Every hook in `hooks/` that must halt execution MUST `sys.exit(2)`, never `1`. |
-| **Amendment** | `J-12: BRANCH_DISCIPLINE`| Every sprint lives on `ai-sprint/[ID]`, created in `matrix_workflow.md` Phase 3 before the first commit and pushed (never to `main`) in `close_workflow.md` Phase 5. Only `deployment_workflow.md` Phase 1 may merge a sprint branch into `main`/upstream. Direct commits or pushes to `main` during `Monitored Execution` are PROHIBITED. |
-| **Amendment** | `J-13: SEQUENTIAL_GATES`| A verification gate and the irreversible action it guards MUST be separate invocations: the gate's result is OBSERVED before the action is issued. Chaining them in one script/command (e.g. `sleep && merge`) voids the gate — that is how a red CI reached `main` in Sprint #081. |
-| **Amendment** | `J-14: PATCH_PROPAGATION`| A long-lived planning/design document revised across multiple sessions or review rounds MUST, at each patch, be grepped in full for other mentions of the same term/field before the patch is considered closed. A fix applied only where a reviewer looked, while the same reference drifts uncorrected elsewhere in the same artifact, is not a correction — it is a new inconsistency. |
+| **Amendment** | `RA-01: ENVIRONMENT_VIOLATION`| Agent MUST attempt autonomous remediation EXCEPT if prohibited. |
+| **Amendment** | `RA-02: LAZY_SIGNAL_PARADIGM` | Prevent circular deps in Django `signals.py`: local imports in receiver. |
+| **Amendment** | `RA-03: HOTFIX_FLAT` | For critical bugs, use `docs/hotfixes/[H-ID]-[Layer].md` (template: `HOTFIX_TEMPLATE.md`). **Sanctioned exception to RA-06 naming** — emergency speed wins over Option B; the deviation is deliberate, not drift. |
+| **Amendment** | `RA-04: FULL_DEPLOYMENT` | Orchestrator MUST deploy the COMPLETE task hierarchy in a single atomic action. |
+| **Amendment** | `RA-05: SPRINT_CLOSEOUT` | Mandatory update of Blueprints, Global Roadmap, Walkthroughs, and Ledger before closing. |
+| **Amendment** | `RA-06: IDENTITY_NAMING` | Standard Option B: All docs must be named `[MODULE]_[TYPE].md` (e.g. `USERS_BLUEPRINT.md`). |
+| **Amendment** | `RA-07: ARCHIVE_PURGE` | Prohibited to keep empty `archive/` folders. Purge immediately if found. |
+| **Amendment** | `RA-08: COMMIT_SQUASH` | Mandatory atomic local commits; mandatory squash & push only during Sprint Closeout. |
+| **Amendment** | `RA-09: SECRET_SOVEREIGNTY`| Prohibited from reading `.env` into thought context. Use `Makefile` or `source .env` in a subshell. |
+| **Amendment** | `RA-10: SUPPLY_CHAIN_SHIELD`| Mandate `pnpm 11+`, `ignore-scripts=true`, and `minimum-release-age=1440`. |
+| **Amendment** | `RA-11: HOOK_BLOCKING_SEMANTICS`| Claude Code `PreToolUse` hooks only block a tool call on exit code `2` (stderr fed back to the model); exit `1` is a non-blocking warning. Every hook in `hooks/` that must halt execution MUST `sys.exit(2)`, never `1`. |
+| **Amendment** | `RA-12: BRANCH_DISCIPLINE`| Every sprint lives on `ai-sprint/[ID]`, created in `pipeline_workflow.md` Phase 3 before the first commit and pushed (never to `main`) in `close_workflow.md` Phase 5. Only `deployment_workflow.md` Phase 1 may merge a sprint branch into `main`/upstream. Direct commits or pushes to `main` during `Execution` are PROHIBITED. |
+| **Amendment** | `RA-13: SEQUENTIAL_GATES`| A verification gate and the irreversible action it guards MUST be separate invocations: the gate's result is OBSERVED before the action is issued. Chaining them in one script/command (e.g. `sleep && merge`) voids the gate — that is how a red CI reached `main` in Sprint #081. |
+| **Amendment** | `RA-14: PATCH_PROPAGATION`| A long-lived planning/design document revised across multiple sessions or review rounds MUST, at each patch, be grepped in full for other mentions of the same term/field before the patch is considered closed. A fix applied only where a reviewer looked, while the same reference drifts uncorrected elsewhere in the same artifact, is not a correction — it is a new inconsistency. |
 
 ## 8. Supply Chain Security
 

@@ -8,7 +8,7 @@
 
 ## About The Project
 
-The **Omni Context Minimizer** is the Matrix's core efficiency tool. It solves the **Context Bloat** problem by extracting the structural skeleton of large source files (over 200 lines) through an **Abstract Syntax Tree (AST)** approach. This lets the AI understand project topology without consuming a massive amount of tokens.
+The **Omni Context Minimizer** is the pipeline's core efficiency tool. It solves the **Context Bloat** problem by extracting the structural skeleton of large source files (over 200 lines) through an **Abstract Syntax Tree (AST)** approach. This lets the AI understand project topology without consuming a massive amount of tokens.
 
 **Key Features:**
 *   **AST Analysis:** Extracts function, class, and method signatures without the weight of the code body.
@@ -31,7 +31,7 @@ The **Omni Context Minimizer** is the Matrix's core efficiency tool. It solves t
 ### Installation & Configuration
 
 1. **Clone/Submodule**
-   This skill is part of the core arsenal at `.agents/skills/omni-context-minimizer/`.
+   This skill is part of the core skill library at `.agents/skills/omni-context-minimizer/`.
 
 2. **Setup**
    No heavy external dependencies required — it uses Python's standard `ast` library.

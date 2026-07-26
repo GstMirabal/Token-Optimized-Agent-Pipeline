@@ -52,8 +52,8 @@ jobs:
           print(f"Manifest parity OK ({len(listed)} skills)")
           EOF
 
-      - name: Structural audit (flat topology + dual Trinity)
-        run: python3 skills/matrix-monitor/scripts/legacy_app_auditor.py
+      - name: Structural audit (flat topology + Three-File Skill Standard)
+        run: python3 skills/topology-monitor/scripts/legacy_app_auditor.py
 
       - name: Framework unit tests
         run: |

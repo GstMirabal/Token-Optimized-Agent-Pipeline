@@ -1,5 +1,5 @@
 # 🏁 Walkthrough: {{MODULE}}
-**File**: `docs/walkthroughs/{{MODULE}}_WALKTHROUGH.md` (J-06 Option B naming)
+**File**: `docs/walkthroughs/{{MODULE}}_WALKTHROUGH.md` (RA-06 Option B naming)
 **Last updated**: Sprint #{{SPRINT_ID}}
 
 ---
@@ -28,4 +28,4 @@ Minimum commands to run/verify the module (deterministic, prefixed paths per age
 ```
 
 ---
-*Updated at every Tactical Liquidation touching this module (J-05).*
+*Updated at every Sprint Closeout touching this module (RA-05).*

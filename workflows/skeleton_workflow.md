@@ -17,4 +17,4 @@ Master protocol for reducing token consumption by extracting high-level architec
 | **2. Ingestion** | `context_swap` | Replace full-file read attempts with the extracted skeleton to save tokens. |
 
 ---
-*Optimized for Matrix V2 Efficiency Standards & Tabular Density (v2.0.0).*
+*Optimized for Pipeline Efficiency Standards & Tabular Density (v2.0.0).*

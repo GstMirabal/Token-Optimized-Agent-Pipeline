@@ -17,11 +17,11 @@ Real Claude Code discovers slash commands by scanning `.claude/commands/**/*.md`
 | :--- | :--- | :--- |
 | `start_workflow.md` | `commands/start.md` | `/agents:start` |
 | `close_workflow.md` | `commands/close.md` | `/agents:close` |
-| `matrix_workflow.md` | `commands/matrix.md` | `/agents:matrix` |
+| `pipeline_workflow.md` | `commands/pipeline.md` | `/agents:pipeline` |
 | `extract_workflow.md` | `commands/extract.md` | `/agents:extract` |
 | *(new workflow)* | new `commands/<name>.md` | `/agents:<name>` |
 
-## 3. Constitutional Constraints
+## 3. Governance Constraints
 - **Isolation**: The installer MUST NOT overwrite anything under host `.claude/` that isn't already a symlink back into `.agents/` — it skips and warns on collisions instead.
 - **Mirroring**: A change to a workflow file's `description` frontmatter should be reflected by hand in its paired `commands/<name>.md` (no auto-sync exists; `verify_commands.py` only checks the reference resolves, not that the description text matches).
 
@@ -30,4 +30,4 @@ Real Claude Code discovers slash commands by scanning `.claude/commands/**/*.md`
 - **Bridge not installed / desynced**: `hooks/on_init.py` triggers `install_claude.sh` automatically at session start whenever `.agents/.claude_bridge.lock` is missing, its recorded commit is stale, **or** the linked `.claude/` artifacts are missing despite a matching lock (`bridge_intact` sentinel check — catches a `git clean -fd`/manual deletion of the host's untracked bridge, which the lock alone can't detect).
 
 ---
-*Optimized for Universal-Agents Rule 113.*
+*Optimized for the Token-Optimized Agent Pipeline, Rule 113.*

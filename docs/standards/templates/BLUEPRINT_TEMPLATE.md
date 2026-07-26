@@ -1,5 +1,5 @@
 # 🏛️ Blueprint: {{MODULE}}
-**File**: `docs/architecture/{{MODULE}}_BLUEPRINT.md` (J-06 Option B naming)
+**File**: `docs/architecture/{{MODULE}}_BLUEPRINT.md` (RA-06 Option B naming)
 **Status**: `DRAFT | RATIFIED | SUPERSEDED`
 **Sprint of origin**: #{{SPRINT_ID}}
 **Last Audit Sprint**: #{{SPRINT_ID}}
@@ -59,4 +59,4 @@ This module's ADR log — link, don't restate:
 | {{TERM}} | {{DEFINITION}} |
 
 ---
-*A module without a ratified Blueprint cannot enter Monitored Execution (agents.md §0). C4 Level 3 (Component diagram) required here if this module qualifies per `rules/documentation_standard.md §2.1` — see `**C4 Level Override**` for a manually-justified exception.*
+*A module without a ratified Blueprint cannot enter Execution (agents.md §0). C4 Level 3 (Component diagram) required here if this module qualifies per `rules/documentation_standard.md §2.1` — see `**C4 Level Override**` for a manually-justified exception.*

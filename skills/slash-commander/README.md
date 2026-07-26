@@ -1,14 +1,14 @@
-# ⚡ Slash Commander: Matrix Bridge
+# ⚡ Slash Commander: Pipeline Bridge
 
 <div align="center">
   <img src="../../../docs/assets/logo/agents_banner.svg" alt="Banner" width="100%">
 
-  <h3 align="center">⚖️ Universal-Agents: Slash Commander</h3>
+  <h3 align="center">⚖️ Token-Optimized Agent Pipeline: Slash Commander</h3>
 
   <p align="center">
     <strong>Workflows-as-Commands Orchestration</strong>
     <br />
-    Bridging the .agents Matrix with real Claude Code slash commands.
+    Bridging the .agents pipeline with real Claude Code slash commands.
   </p>
 </div>
 
@@ -30,8 +30,8 @@ The **Slash Commander** is the core skill that keeps every high-integrity protoc
 
 ---
 
-## 🛡️ Governance Sentinel Handshake
-- **Standard**: Trinity Standard (README, SKILL, /scripts/).
+## 🛡️ Compliance Checker Handshake
+- **Standard**: Three-File Skill Standard (README, SKILL, /scripts/).
 - **Jurisdiction**: `workflows/`, `commands/`, host `.claude/commands/agents/` (via the installer).
 - **Status**: `ACTIVE`
 

@@ -6,7 +6,7 @@
 
 ## About The Project
 
-The **Env-Shielding Auditor** is the Matrix's security guard against sensitive-information leaks. It scans source code for hardcoded secrets (API keys, access tokens, PII) and validates that the `.env` file is correctly git-ignored at the root and in submodules.
+The **Env-Shielding Auditor** is the pipeline's security guard against sensitive-information leaks. It scans source code for hardcoded secrets (API keys, access tokens, PII) and validates that the `.env` file is correctly git-ignored at the root and in submodules.
 
 **Key Features:**
 *   **Leak Detection:** Recursive regex-pattern search for provider keys (OpenAI, AWS, GCP, CCXT).
@@ -34,7 +34,7 @@ The **Env-Shielding Auditor** is the Matrix's security guard against sensitive-i
 
 ## Usage
 
-Invoked manually or by the **DevOps Sentinel** before every atomic commit:
+Invoked manually or by the **DevOps Agent** before every atomic commit:
 
 ```bash
 # Example: preventive secret scan of the current directory

@@ -1,6 +1,6 @@
 ---
 name: omni-context-minimizer
-description: Use this Skill imperatively BEFORE reading any code file containing more than 200 lines. This script extracts and returns a tactical skeleton (Imports, Class Names, and Function Signatures) discarding all internal logic, thus preventing massive context window consumption. Works for NodeJS, Python, Go, Rust, and Java.
+description: Use this Skill imperatively BEFORE reading any code file containing more than 200 lines. This script extracts and returns a structural skeleton (Imports, Class Names, and Function Signatures) discarding all internal logic, thus preventing massive context window consumption. Works for NodeJS, Python, Go, Rust, and Java.
 ---
 
 # 🪙 Skill: Omni Context Minimizer

@@ -2,7 +2,7 @@
 
 ## About The Project
 
-The **Token-Saver Auditor (CFO)** acts as the Matrix's financial supervisor. It is an economic "Kill Switch" that analyzes implementation plans to guarantee minimal token consumption, prioritizing the `omni-context-minimizer` and preventing redundant context scans (enforces `rules/token_economy.md`).
+The **Token-Saver Auditor (CFO)** acts as the pipeline's financial supervisor. It is an automated safeguard that analyzes implementation plans to guarantee minimal token consumption, prioritizing the `omni-context-minimizer` and preventing redundant context scans (enforces `rules/token_economy.md`).
 
 **Key Features:**
 *   **Economic Oversight:** Cost analysis before any massive task execution.
@@ -18,7 +18,7 @@ The **Token-Saver Auditor (CFO)** acts as the Matrix's financial supervisor. It 
 
 ### Prerequisites
 
-*   **Universal-Agents Core**: Requires the governance rules (`agents.md` + `rules/`) to be active.
+*   **Token-Optimized Agent Pipeline Core**: Requires the governance rules (`agents.md` + `rules/`) to be active.
 
 ### Installation & Configuration
 
@@ -30,7 +30,7 @@ The **Token-Saver Auditor (CFO)** acts as the Matrix's financial supervisor. It 
 
 ## Usage
 
-The Auditor reviews every **Orchestrator** proposal before the **DevOps Sentinel** may execute physical changes. If the plan is inefficient (e.g. recursive scan without the minimizer), the Auditor blocks execution.
+The Auditor reviews every **Orchestrator** proposal before the **DevOps Agent** may execute physical changes. If the plan is inefficient (e.g. recursive scan without the minimizer), the Auditor blocks execution.
 
 ```bash
 # Example: activating the Auditor during the debate phase
