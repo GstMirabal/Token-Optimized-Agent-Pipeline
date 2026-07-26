@@ -4,6 +4,8 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.1.0] - 2026-07-26
+
 ### Added
 - **Heuristic Pulse Gate (Phase 013 closure)**: `workflows/close_workflow.md` (v6.2.0) gains a new "2.5 Heuristic Pulse Gate" phase between `extract_handoff` and `memory_wipe` — presents the human with the exact candidate KI list before the destructive purge, applying the same `RA-13 SEQUENTIAL_GATES` principle to `memory_wipe` as already applies to merges. Skips (log-only) when the session runs under `/loop`, since `pipeline_workflow.md` allows `/loop` to wrap Sprint Closeout unattended and a hard block there would stall multi-sprint automation.
 
