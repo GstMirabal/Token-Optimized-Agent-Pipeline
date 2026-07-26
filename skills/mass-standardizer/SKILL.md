@@ -1,6 +1,6 @@
 ---
 name: mass-standardizer
-description: Batch-normalizes the flat skills/ arsenal — detects skills missing the Trinity Standard (README.md, SKILL.md, /scripts/) and injects the missing artifacts from templates, keeping manifest_skills.json in sync.
+description: Batch-normalizes the flat skills/ library — detects skills missing the Three-File Skill Standard (README.md, SKILL.md, /scripts/) and injects the missing artifacts from templates, keeping manifest_skills.json in sync.
 ---
 
 # Sub-Role Skill: Mass Standardizer
@@ -8,16 +8,16 @@ description: Batch-normalizes the flat skills/ arsenal — detects skills missin
 ## Base Profile
 **Name**: `mass-standardizer`
 **Category**: Infrastructure / Automation
-**Description**: Automotive engine for the batch normalization of the matrix arsenal following the `skill-creator` standard.
+**Description**: Automotive engine for the batch normalization of the pipeline's skill library following the `skill-creator` standard.
 
 ## Technical Logic
-This skill implements a **Template-Driven Scaffolding** pattern. It scans the matrix for structural gaps (missing `README.md`, `SKILL.md`, or `/scripts/` folders) and surgically injects the required artifacts using institutional templates and manifest metadata.
+This skill implements a **Template-Driven Scaffolding** pattern. It scans the skill library for structural gaps (missing `README.md`, `SKILL.md`, or `/scripts/` folders) and surgically injects the required artifacts using standardized templates and manifest metadata.
 
 ## Procedures
 
-### 1. Gap Analysis (Arsenal Audit)
+### 1. Gap Analysis (Skill Library Audit)
 - **Scanning**: Iterate through the flat `skills/` directory (and `profiles/*/skills/` when auditing profiles).
-- **Detection**: Apply the dual Trinity Standard (`agents.md §3 trinity_standard`):
+- **Detection**: Apply the Three-File Skill Standard (`agents.md §3 three_file_standard`):
     - Every skill: `SKILL.md` with `name`/`description` frontmatter.
     - Executable skills (those shipping `/scripts/`): additionally `README.md` and `scripts/__init__.py`.
 

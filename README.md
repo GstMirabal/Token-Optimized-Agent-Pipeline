@@ -1,7 +1,7 @@
 <div align="center">
 
 <!-- BANNER_START -->
-<img src="docs/assets/logo/agents_banner.svg" alt="Universal-Agents banner" width="100%">
+<img src="docs/assets/logo/agents_banner.svg" alt="Token-Optimized Agent Pipeline banner" width="100%">
 <!-- BANNER_END -->
 
 [![Contributors][contributors-shield]][contributors-url]
@@ -16,7 +16,7 @@
 
 <a name="readme-top"></a>
 
-<h3 align="center">Universal-Agents Framework (.agents)</h3>
+<h3 align="center">Token-Optimized Agent Pipeline (.agents)</h3>
 
 <p align="center">
   A hierarchical, zero-trust subagent architecture for context-aware and token-efficient AI software engineering.
@@ -57,15 +57,15 @@ It prevents context bloat, secures RCE environments, and disciplines AI agent sw
 
 ## About The Project
 
-Universal-Agents is a military-grade AI agent governance framework designed to prevent context bloat, secure RCE environments, and ensure long-term knowledge retention. It transforms standard AI agents into a disciplined swarm of specialized subagents.
+The Token-Optimized Agent Pipeline is an AI agent governance framework designed to prevent context bloat, secure RCE environments, and ensure long-term knowledge retention. It turns general-purpose AI agents into a coordinated pipeline of specialized subagents.
 
 **Key Features:**
 *   **Zero-Trust Identity Hierarchy:** Segregated Principal, Orchestrator, QA Agent, Tester Agent, and Skill Architect roles to prevent autonomous logic failures.
-*   **Matrix V2 Execution Pipeline:** A strict Double-Gate Review protocol ensuring structural and functional verification before user handoffs.
+*   **Double-Gate Execution Pipeline:** A strict Double-Gate Review protocol ensuring structural and functional verification before user handoffs.
 *   **100% Coverage Mandate:** Strategic requirement enforced by the **Tester Agent**, ensuring zero-defect integration before any code commitment.
-*   **Token-Saver Auditor:** An economic kill-switch that prevents inefficient plans and reduces API costs by optimizing context windows.
+*   **Token-Saver Auditor:** An automated safeguard that prevents inefficient plans and reduces API costs by optimizing context windows.
 *   **Omni-Context Minimizer:** Smart AST-based code skeleton extraction that allows AI to understand massive files (1000+ lines) while only consuming 10% of the normal token cost.
-*   **Skill Forge & Arsenal Flat Mapping:** Universal, deterministic tooling governed by the Trinity Standard and external nomenclature (`-3rd`), bridged to real Claude Code slash commands via `scripts/install_claude.sh` + the `slash-commander` skill.
+*   **Skill Forge & Flat Skill Mapping:** Universal, deterministic tooling governed by the Three-File Skill Standard and external nomenclature (`-3rd`), bridged to real Claude Code slash commands via `scripts/install_claude.sh` + the `slash-commander` skill.
 *   **Knowledge Extraction & Memory:** Automatic heuristic distillation via `extract_workflow.md`, indexing lessons into atomic Knowledge Items (KIs) inside `/memory/`.
 *   **Persistent Compliance Roadmap:** Integrated topology via `docs/roadmaps/`, anchored by the unbreakable `docs/active_state.json`.
 *   **Documentation Standard:** Deterministic freshness-gate (Diátaxis + C4 + ADR) that keeps architecture docs from silently going stale — enforced at sprint close, not by agent memory.
@@ -106,7 +106,7 @@ Universal-Agents is a military-grade AI agent governance framework designed to p
    ```bash
    .agents/scripts/install_claude.sh
    ```
-   This symlinks `.agents/agents/*.md` → `.claude/agents/`, `.agents/commands/*.md` → `.claude/commands/agents/` (exposed as `/agents:*`), `.agents/skills/*/` → `.claude/skills/`, merges hooks + MCP servers into your `.claude/settings.json` / `.mcp.json`, and adds the `@.agents/agents.md` import to your `CLAUDE.md` so the constitution auto-loads every session. It never overwrites non-symlinked host content.
+   This symlinks `.agents/agents/*.md` → `.claude/agents/`, `.agents/commands/*.md` → `.claude/commands/agents/` (exposed as `/agents:*`), `.agents/skills/*/` → `.claude/skills/`, merges hooks + MCP servers into your `.claude/settings.json` / `.mcp.json`, and adds the `@.agents/agents.md` import to your `CLAUDE.md` so the governance rules auto-load every session. It never overwrites non-symlinked host content.
 
    **Project profiles (opt-in)**: project-family packs (extra rules, specialist agents, domain skills) live under `profiles/` and are only linked when explicitly requested:
    ```bash
@@ -114,7 +114,7 @@ Universal-Agents is a military-grade AI agent governance framework designed to p
    ```
 
 4. **Pin a release (recommended) or track main**
-   Pin the submodule to a tagged release for reproducible governance — updates then happen deliberately, not by drift (same supply-chain reasoning as J-10):
+   Pin the submodule to a tagged release for reproducible governance — updates then happen deliberately, not by drift (same supply-chain reasoning as RA-10):
    ```bash
    cd .agents && git fetch --tags && git checkout v3.0.0 && cd ..
    git add .agents && git commit -m "chore(deps): pin .agents to v3.0.0 #[Sprint_ID]"
@@ -126,7 +126,7 @@ Universal-Agents is a military-grade AI agent governance framework designed to p
    ```
 
 5. **Audit & Configure**
-   Review `agents.md` (the constitution) to ensure your local environment variables and paths are correctly mapped within the framework.
+   Review `agents.md` (the governance ruleset) to ensure your local environment variables and paths are correctly mapped within the framework.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -145,7 +145,7 @@ If you are adding the framework to an **already established repository**, follow
 1.  **Submodule Insertion:** In your root folder: `git submodule add https://github.com/GstMirabal/.agents .agents`
 2.  **Bridge Installation:** `.agents/scripts/install_claude.sh` (creates `.claude/agents`, `.claude/commands/agents`, `.claude/skills`, and merges hooks/MCP config).
 3.  **AI Session Trigger:** Tell the AI: *"Initialize session using governance protocols in `.agents/` and execute `/agents:start`."*
-4.  **Roadmap Discovery:** The matrix will map `docs/active_state.json` (scaffolding it on first run — see `start_workflow.md`). Run the command: **`/agents:matrix`**.
+4.  **Roadmap Discovery:** The topology mapper will map `docs/active_state.json` (scaffolding it on first run — see `start_workflow.md`). Run the command: **`/agents:pipeline`**.
 
 The Orchestrator will automatically scan your source code, identify your project's current Phase, initialize your local context, and generate persistent architectural tracking in `docs/roadmaps/`.
 
@@ -156,14 +156,14 @@ The framework maps every `workflows/*.md` protocol to a real Claude Code slash c
 
 | Command | Purpose |
 | :--- | :--- |
-| **`/agents:start`** | **Entry Gate**: Initializes Zero-Memory, installs the Claude bridge on first run, syncs DevOps/Git Sentinels, and prepares execution limits. |
-| **`/agents:matrix`** | **Orchestration**: The V3 Double-Gate execution pipeline. Distributes tasks across subagents. |
+| **`/agents:start`** | **Entry Gate**: Initializes Zero-Memory, installs the Claude bridge on first run, syncs the DevOps/Git Sync agents, and prepares execution limits. |
+| **`/agents:pipeline`** | **Orchestration**: The Double-Gate execution pipeline. Distributes tasks across subagents. |
 | **`/agents:close`** | **Exit Gate**: Extracts heuristics, updates roadmaps, mirrors state, and seals the repo securely. |
 
 See the full command reference → [`docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md`](docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md) (all 11 commands, the Skills Manifest JSON example, and the full retrofit scenario walkthrough).
 
 > [!TIP]
-> **Documentation Sovereignty:** All technical docs, implementation plans (`docs/sprints/`), and local roadmaps (`docs/roadmaps/`) are tightly bound directly to Matrix V2 tracking under `/docs/`.
+> **Documentation Sovereignty:** All technical docs, implementation plans (`docs/sprints/`), and local roadmaps (`docs/roadmaps/`) are tightly bound directly to Pipeline tracking under `/docs/`.
 
 > [!IMPORTANT]
 > **Orchestration Manifest:** The Orchestrator uses **`.agents/skills/manifest_skills.json`** to statically route tools, drastically reducing token consumption and discovery time during sessions — see the guide above for a worked example.
@@ -178,7 +178,7 @@ Contributions are what make the open source community such an amazing place to l
 
 ### 🧬 Developing the Framework Itself (Nucleus Mode)
 
-Working *inside* this repo (not a host project) is a different case: the full host bridge is refused (`agents.md §5 nucleus_neutrality` — this repo is the law, not a project it governs), so `/agents:*` commands don't exist here until you run the installer's **minimal self-bridge**:
+Working *inside* this repo (not a host project) is a different case: the full host bridge is refused (`agents.md §5 nucleus_neutrality` — this repo is the ruleset, not a project it governs), so `/agents:*` commands don't exist here until you run the installer's **minimal self-bridge**:
 
 ```bash
 git clone https://github.com/GstMirabal/.agents.git

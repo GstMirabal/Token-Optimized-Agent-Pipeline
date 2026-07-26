@@ -21,11 +21,11 @@ def get_staged_files() -> list[str]:
         )
         return result.stdout.splitlines()
     except subprocess.CalledProcessError as e:
-        print(f"⚠️ [DEVOPS SENTINEL] Git error: {e}")
+        print(f"⚠️ [DEVOPS AGENT] Git error: {e}")
         return []
 
-def audit_trinity_standard() -> bool:
-    """Certifies the dual Trinity Standard (agents.md §3 trinity_standard) for modified skills."""
+def audit_three_file_standard() -> bool:
+    """Certifies the Three-File Skill Standard (agents.md §3 three_file_standard) for modified skills."""
     staged_files = get_staged_files()
     if not staged_files:
         return True
@@ -43,7 +43,7 @@ def audit_trinity_standard() -> bool:
 
     violations = []
     for skill_path in modified_skills:
-        print(f"🔍 [DEVOPS SENTINEL] Auditing {skill_path}...")
+        print(f"🔍 [DEVOPS AGENT] Auditing {skill_path}...")
 
         skill_md = skill_path / "SKILL.md"
         scripts = skill_path / "scripts"
@@ -56,7 +56,7 @@ def audit_trinity_standard() -> bool:
             if not head.startswith("---") or "name:" not in head or "description:" not in head:
                 violations.append(f"{skill_path}: SKILL.md missing name/description frontmatter")
 
-        # Full Trinity only applies to executable skills (agents.md §3 trinity_standard):
+        # Full standard only applies to executable skills (agents.md §3 three_file_standard):
         # a skill that ships scripts/ must also ship README.md and scripts/__init__.py.
         # Knowledge skills (no scripts/) are complete with just SKILL.md.
         if scripts.is_dir():
@@ -67,13 +67,13 @@ def audit_trinity_standard() -> bool:
 
     if violations:
         for v in violations:
-            print(f"❌ [ON_COMMIT] Trinity Violation: {v}")
+            print(f"❌ [ON_COMMIT] Structure Violation: {v}")
         return False
     
     return True
 
 def audit_secret_shielding() -> bool:
-    """Certifies secret shielding (agents.md §3 secret_sovereignty / J-09)."""
+    """Certifies secret shielding (agents.md §3 secret_sovereignty / RA-09)."""
     staged_files = get_staged_files()
     
     forbidden_extensions = [".env", ".pem", ".key"]
@@ -139,7 +139,7 @@ def read_hook_command() -> str:
 
 
 def is_blocked_push(command: str) -> bool:
-    """J-12 mechanical enforcement: pushes to main/master are blocked unless the
+    """RA-12 mechanical enforcement: pushes to main/master are blocked unless the
     deployment workflow has explicitly created the .agents/.deploy_unlock marker."""
     if "git push" not in command:
         return False
@@ -184,18 +184,18 @@ def is_valid_commit_message(message: str) -> bool:
 
 def block(reason: str) -> None:
     # Claude Code only feeds stderr back to the model on a blocking hook, and
-    # only exit code 2 actually blocks (J-11 HOOK_BLOCKING_SEMANTICS).
-    print(f"❌ [DEVOPS SENTINEL] {reason}", file=sys.stderr)
+    # only exit code 2 actually blocks (RA-11 HOOK_BLOCKING_SEMANTICS).
+    print(f"❌ [DEVOPS AGENT] {reason}", file=sys.stderr)
     sys.exit(2)
 
 
 def main():
     command = read_hook_command()
 
-    # Guard 1 (J-12): no direct pushes to main/master outside deployment.
+    # Guard 1 (RA-12): no direct pushes to main/master outside deployment.
     if command and is_blocked_push(command):
-        log_error("on_commit", "BRANCH_VIOLATION", "Direct push to main/master blocked (J-12)")
-        block("Push to main/master is PROHIBITED (J-12 Branch Discipline). "
+        log_error("on_commit", "BRANCH_VIOLATION", "Direct push to main/master blocked (RA-12)")
+        block("Push to main/master is PROHIBITED (RA-12 Branch Discipline). "
               "Merge through the deployment workflow (/agents:deployment), which creates "
               ".agents/.deploy_unlock for its sanctioned fallback push.")
 
@@ -211,23 +211,23 @@ def main():
             block("Commit message must follow Conventional Commits and end with the "
                   "#[Sprint_ID] suffix, e.g. \"feat(auth): add login flow #078\" (agents.md §5).")
 
-    print("🛡️ [DEVOPS SENTINEL] Pre-Commit Integrity Handshake...")
+    print("🛡️ [DEVOPS AGENT] Pre-Commit Integrity Handshake...")
 
-    trinity_ok = audit_trinity_standard()
-    if not trinity_ok:
-        log_error("on_commit", "TRINITY_VIOLATION", "trinity_standard compliance check failed")
+    three_file_ok = audit_three_file_standard()
+    if not three_file_ok:
+        log_error("on_commit", "STRUCTURE_VIOLATION", "three_file_standard compliance check failed")
 
     secrets_ok = audit_secret_shielding()
     if not secrets_ok:
         log_error("on_commit", "SECRET_VIOLATION", "secret_sovereignty scrutiny detected vulnerabilities")
 
-    if trinity_ok and secrets_ok:
+    if three_file_ok and secrets_ok:
         try:
             from hooks.state_mirror import mirror_active_state
             mirror_active_state()
         except ImportError:
             pass
-        print("✅ [DEVOPS SENTINEL] PR_COMMIT_UNLOCKED: PASSED.")
+        print("✅ [DEVOPS AGENT] PR_COMMIT_UNLOCKED: PASSED.")
         sys.exit(0)
     else:
         block("CRITICAL VIOLATION DETECTED. Commit blocked.")

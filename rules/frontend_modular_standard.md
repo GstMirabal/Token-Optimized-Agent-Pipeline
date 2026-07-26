@@ -1,4 +1,4 @@
-# 🛡️ Rule 041: Frontend Modular Standard (Matrix V2)
+# 🛡️ Rule 041: Frontend Modular Standard
 
 ## 1. Directory Anatomy (Rule 41.1)
 Every module inside `frontend/src/modules/` must adhere to the following minimum structure to guarantee interoperability and isolation:

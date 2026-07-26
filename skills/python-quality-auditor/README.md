@@ -15,7 +15,7 @@
 
 ## About The Project
 
-The **Python Quality Auditor** is the health-certification tool for Python projects inside the Matrix. It provides an agnostic, incremental audit through modern tooling (Ruff for linting/formatting, Mypy for static typing, and Bandit for security), ensuring code meets the production standards of **Rule 35**.
+The **Python Quality Auditor** is the health-certification tool for Python projects inside the pipeline. It provides an agnostic, incremental audit through modern tooling (Ruff for linting/formatting, Mypy for static typing, and Bandit for security), ensuring code meets the production standards of **Rule 35**.
 
 **Key Features:**
 *   **Agnostic Linting:** Ruff integration unifying 10+ linting tools into one fast run.
@@ -49,7 +49,7 @@ The **Python Quality Auditor** is the health-certification tool for Python proje
 
 ## Usage
 
-Invoked during each Sprint's **Hardening** phase to certify that the code increment complies with institutional standards:
+Invoked during each Sprint's **Hardening** phase to certify that the code increment complies with governance standards:
 
 ```bash
 # Example: running the auditor on a specific module

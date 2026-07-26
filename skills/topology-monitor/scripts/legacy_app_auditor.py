@@ -49,7 +49,7 @@ def audit_project_apps():
 
 def audit_repo_nodes():
     """Validates the .agents core: agent frontmatter + flat skill topology."""
-    print("🔍 [STRUCTURAL AUDITOR] ANALYZING MATRIX CORE NODES...")
+    print("🔍 [STRUCTURAL AUDITOR] ANALYZING PIPELINE CORE NODES...")
     errors = 0
 
     # 1. Agent profiles: every agents/*.md needs name/description frontmatter.
@@ -59,7 +59,7 @@ def audit_repo_nodes():
             print(f"❌ [PROFILE ERROR]: {profile} missing name/description frontmatter.")
             errors += 1
 
-    # 2. Skills: flat topology (agents.md §3) + dual Trinity Standard.
+    # 2. Skills: flat topology (agents.md §3) + Three-File Skill Standard.
     skills_root = Path("skills")
     forbidden_layers = {"core", "local", "3rd", "frontend", "backend"}
     for item in sorted(skills_root.iterdir()):
@@ -71,20 +71,20 @@ def audit_repo_nodes():
             continue
         skill_md = item / "SKILL.md"
         if not skill_md.exists():
-            print(f"❌ [TRINITY ERROR]: {item} missing SKILL.md.")
+            print(f"❌ [STRUCTURE ERROR]: {item} missing SKILL.md.")
             errors += 1
             continue
         head = skill_md.read_text(encoding="utf-8")[:500]
         if not head.startswith("---") or "name:" not in head or "description:" not in head:
-            print(f"❌ [TRINITY ERROR]: {skill_md} missing name/description frontmatter.")
+            print(f"❌ [STRUCTURE ERROR]: {skill_md} missing name/description frontmatter.")
             errors += 1
         scripts = item / "scripts"
         if scripts.is_dir():
             if not (item / "README.md").exists():
-                print(f"❌ [TRINITY ERROR]: executable skill {item} missing README.md.")
+                print(f"❌ [STRUCTURE ERROR]: executable skill {item} missing README.md.")
                 errors += 1
             if not (scripts / "__init__.py").exists():
-                print(f"❌ [TRINITY ERROR]: {scripts} missing __init__.py.")
+                print(f"❌ [STRUCTURE ERROR]: {scripts} missing __init__.py.")
                 errors += 1
 
     return errors
@@ -101,7 +101,7 @@ def main():
         print(f"🚨 [AUDIT FAILED]: {errors} structural conflicts detected.")
         sys.exit(1)
 
-    print("✨ [AUDIT PASSED]: Matrix Structure is Valid.")
+    print("✨ [AUDIT PASSED]: Pipeline Structure is Valid.")
     sys.exit(0)
 
 

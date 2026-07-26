@@ -1,5 +1,5 @@
 # 🧭 How-to: {{TASK_TITLE}}
-**File**: `docs/guides/{{MODULE}}_{{TASK}}_GUIDE.md` (J-06 Option B naming)
+**File**: `docs/guides/{{MODULE}}_{{TASK}}_GUIDE.md` (RA-06 Option B naming)
 **Module**: {{MODULE}}
 
 ---

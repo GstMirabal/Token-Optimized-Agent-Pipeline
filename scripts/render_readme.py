@@ -140,8 +140,8 @@ def build_credit_line(nucleus: bool, framework_author_name: str, framework_repo_
         A single-line Markdown credit string.
     """
     if nucleus:
-        return f"Built with the [Universal-Agents]({framework_repo_url}) framework."
-    return (f"Built with the [Universal-Agents]({framework_repo_url}) framework, "
+        return f"Built with the [Token-Optimized Agent Pipeline]({framework_repo_url}) framework."
+    return (f"Built with the [Token-Optimized Agent Pipeline]({framework_repo_url}) framework, "
             f"by {framework_author_name}.")
 
 
@@ -207,8 +207,8 @@ def apply_governed_block(text: str, governed_by_agents: bool, framework_repo_url
     """
     if governed_by_agents:
         text = strip_marker_lines(text, GOVERNED_BLOCK_START, GOVERNED_BLOCK_END)
-        badge = (f"> Governed by the [Universal-Agents]({framework_repo_url}) "
-                 "constitutional framework.")
+        badge = (f"> Governed by the [Token-Optimized Agent Pipeline]({framework_repo_url}) "
+                 "governance framework.")
         return text.replace("{{GOVERNED_BY_AGENTS}}", badge)
     text = strip_whole_block(text, GOVERNED_BLOCK_START, GOVERNED_BLOCK_END)
     return text.replace("{{GOVERNED_BY_AGENTS}}", "")

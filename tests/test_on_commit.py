@@ -1,6 +1,6 @@
 """Tests for hooks/on_commit.py — the PreToolUse gate that can block real
-commits/pushes. Covers the J-12 push guard, commit message validation, and
-the dual Trinity audit."""
+commits/pushes. Covers the RA-12 push guard, commit message validation, and
+the Three-File Skill Standard audit."""
 import subprocess
 import sys
 from pathlib import Path
@@ -11,7 +11,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from hooks import on_commit
 
 
-# --- J-12 push guard -------------------------------------------------------
+# --- RA-12 push guard -------------------------------------------------------
 
 @pytest.mark.parametrize("command", [
     "git push origin main",
@@ -105,7 +105,7 @@ def test_extract_commit_message_heredoc():
     assert not on_commit.is_valid_commit_message(bad_message)
 
 
-# --- Dual Trinity audit ----------------------------------------------------
+# --- Three-File Skill Standard audit ---------------------------------------
 
 def _make_skill(root, name, *, frontmatter=True, scripts=False, readme=False, init=False):
     d = root / "skills" / name
@@ -124,7 +124,7 @@ def _make_skill(root, name, *, frontmatter=True, scripts=False, readme=False, in
 def _audit_in(tmp_path, monkeypatch, staged):
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(on_commit, "get_staged_files", lambda: staged)
-    return on_commit.audit_trinity_standard()
+    return on_commit.audit_three_file_standard()
 
 
 def test_knowledge_skill_needs_only_frontmatter(tmp_path, monkeypatch):
@@ -137,11 +137,11 @@ def test_knowledge_skill_without_frontmatter_fails(tmp_path, monkeypatch):
     assert not _audit_in(tmp_path, monkeypatch, ["skills/bad-skill/SKILL.md"])
 
 
-def test_executable_skill_requires_full_trinity(tmp_path, monkeypatch):
+def test_executable_skill_requires_full_standard(tmp_path, monkeypatch):
     _make_skill(tmp_path, "tool-skill", scripts=True)  # no README, no __init__
     assert not _audit_in(tmp_path, monkeypatch, ["skills/tool-skill/scripts/run.py"])
 
 
-def test_executable_skill_full_trinity_passes(tmp_path, monkeypatch):
+def test_executable_skill_full_standard_passes(tmp_path, monkeypatch):
     _make_skill(tmp_path, "tool-skill", scripts=True, readme=True, init=True)
     assert _audit_in(tmp_path, monkeypatch, ["skills/tool-skill/scripts/run.py"])

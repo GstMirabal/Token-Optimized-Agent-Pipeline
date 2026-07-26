@@ -14,7 +14,7 @@
 
 ---
 
-## 🏁 Tactical Progression
+## 🏁 Sprint Progression
 Tracking of atomic goals achieved during the session.
 
 - [ ] **Objective 1**: {{DESCRIPTION}}
@@ -24,8 +24,8 @@ Tracking of atomic goals achieved during the session.
 
 ---
 
-## 🧠 Jurisprudence & Heuristic Harvest
-Extraction of knowledge for the **Amnesia Protocol**.
+## 🧠 Rule Amendments & Heuristic Harvest
+Extraction of knowledge for the **Memory Purge Protocol**.
 
 | Friction Point | Resolution / Workaround | KI ID |
 | :--- | :--- | :--- |
@@ -33,7 +33,7 @@ Extraction of knowledge for the **Amnesia Protocol**.
 
 ---
 
-## ⚓ Zero Coordinate Seal
+## ⚓ Documentation Entry Point Seal
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: {{LOCK_STATE}}

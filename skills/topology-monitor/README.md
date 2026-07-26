@@ -1,8 +1,8 @@
-# 🛠️ Sprint Architect
+# 🛠️ Topology Monitor
 
-Translates high-level roadmaps into tactical sprint definitions and task structures.
+Consolidated tool for monitoring pipeline health, task progress, and legacy code audit.
 
-## Category: Planning
+## Category: Governance
 
 ## 📋 Standard Structure
 This skill follows the `skill-creator` standard.

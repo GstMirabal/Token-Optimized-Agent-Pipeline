@@ -17,7 +17,7 @@ Full-dumping a file >200 lines is PROHIBITED (`agents.md §2 token_saver`). Skip
 ## 2. Plan-level Economics (enforced by Token-Saver Auditor)
 - **1-Agent : 1-File**: subagent prompts receive the exact filename and line range — never "review the whole system".
 - **No raw data dumps**: CSV/JSON datasets are summarized via a throwaway script (`.head()`, `.info()`), never pasted into context.
-- **Delegate search to heuristics**: `ripgrep`/graph queries over manual directory crawling; recursive `list_dir` over an indexed tree is rejected (`matrix_topology_map.md` Discovery Lock).
+- **Delegate search to heuristics**: `ripgrep`/graph queries over manual directory crawling; recursive `list_dir` over an indexed tree is rejected (`topology_map.md` Discovery Lock).
 
 ## 3. Session-level Economics
 - **Constitution loads once**: `agents.md` auto-loads via the host `CLAUDE.md` import; re-read it only after context compaction (`agents.md §2 anti_amnesia`), not per execution step.

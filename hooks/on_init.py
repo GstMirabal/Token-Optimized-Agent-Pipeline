@@ -17,7 +17,7 @@ INSTALL_SCRIPT = Path(".agents/scripts/install_claude.py")
 
 # A small, representative sample of the artifacts install_claude.py links into
 # the host. Cheap enough to stat on every session start.
-BRIDGE_SENTINELS = [
+BRIDGE_ANCHORS = [
     Path(".claude/commands/agents/start.md"),
     Path(".claude/agents/principal_agent.md"),
 ]
@@ -49,7 +49,7 @@ def bridge_intact() -> bool:
     untracked `.claude/` bridge without touching `.claude_bridge.lock` — the
     lock lives inside the `.agents` submodule, which `git clean` skips by
     default — leaving the lock trusting a bridge that no longer exists."""
-    return all(p.exists() for p in BRIDGE_SENTINELS)
+    return all(p.exists() for p in BRIDGE_ANCHORS)
 
 
 def sync_commands() -> bool:
@@ -81,7 +81,7 @@ def sync_commands() -> bool:
         return False
 
 def main():
-    print("🛡️ [DEVOPS SENTINEL] Initializing Matrix Session Protocol...")
+    print("🛡️ [DEVOPS AGENT] Initializing Pipeline Session Protocol...")
     
     env_ok = check_environment()
     if not env_ok:
@@ -92,9 +92,9 @@ def main():
         log_error("on_init", "SYNC_VIOLATION", "Slash Command sync failed")
     
     if env_ok and sync_ok:
-        print("✅ [DEVOPS SENTINEL] DEPLOYMENT_READY: PASSED. Matrix integrity certified.")
+        print("✅ [DEVOPS AGENT] DEPLOYMENT_READY: PASSED. Pipeline integrity certified.")
     else:
-        print("⚠️ [DEVOPS SENTINEL] DEPLOYMENT_READY: SEMI-PASSED. Review alerts above.")
+        print("⚠️ [DEVOPS AGENT] DEPLOYMENT_READY: SEMI-PASSED. Review alerts above.")
 
 if __name__ == "__main__":
     main()

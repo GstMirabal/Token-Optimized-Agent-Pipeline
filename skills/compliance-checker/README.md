@@ -1,8 +1,8 @@
-# 🛠️ Sprint Architect
+# 🛠️ Compliance Checker
 
-Translates high-level roadmaps into tactical sprint definitions and task structures.
+Monitors rule compliance and ensures governance alignment across the pipeline.
 
-## Category: Planning
+## Category: Governance
 
 ## 📋 Standard Structure
 This skill follows the `skill-creator` standard.

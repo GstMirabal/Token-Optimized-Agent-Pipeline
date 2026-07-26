@@ -1,6 +1,6 @@
 {
-  "last_update": "2026-07-19",
-  "sprint_id": "078",
+  "last_update": "2026-07-26",
+  "sprint_id": "016",
   "_schema": "Entries are summary-only Knowledge Items. The 'file' field is omitted once the raw log has been purged (agents.md §4 definitive_amnesia) — the 1-line summary IS the retained knowledge.",
   "items": [
     {
@@ -10,6 +10,22 @@
     {
       "id": "F-20260525-2426",
       "summary": "Global interpreter execution violation: failed to prefix python script with venv/bin."
+    },
+    {
+      "id": "F-20260726-RN01",
+      "summary": "Terminology sweeps must use case-insensitive grep — a case-sensitive pass missed multiple ALL-CAPS runtime print strings (e.g. hooks/on_commit.py's log prefixes, legacy_app_auditor.py's status banners) during Phase 015's rename."
+    },
+    {
+      "id": "F-20260726-RN02",
+      "summary": "Renaming a skill directory desyncs generate_manifest.py's category/tags (it preserves curated fields by matching the old manifest entry's name, which no longer matches post-rename) — restore them manually after regeneration, don't assume the regenerated entry is complete."
+    },
+    {
+      "id": "F-20260726-RN03",
+      "summary": "git mv fails with \"source directory is empty\" on directories holding only untracked files; verify with git ls-files before choosing git mv vs plain mv during a folder rename."
+    },
+    {
+      "id": "F-20260726-RN04",
+      "summary": "Editing docs/active_state.json directly (not via a workflow step) leaves .agent_state/mirror.json stale — always re-run hooks/state_mirror.py after any manual edit to the active state."
     }
   ]
 }

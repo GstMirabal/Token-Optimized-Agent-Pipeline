@@ -1,5 +1,5 @@
 """
-🛡️ Universal-Agents: JS/TS Standardizer (Native)
+🛡️ Token-Optimized Agent Pipeline: JS/TS Standardizer (Native)
 Agnostic health-check script for JS/TS repositories to ensure framework compliance.
 """
 
