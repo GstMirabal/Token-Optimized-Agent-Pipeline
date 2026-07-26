@@ -1,7 +1,7 @@
 # ⚡ Slash Commander: Matrix Bridge
 
 <div align="center">
-  <img src="../../../docs/assets/logo/institutional_banner.png" alt="Banner" width="100%">
+  <img src="../../../docs/assets/logo/agents_banner.svg" alt="Banner" width="100%">
 
   <h3 align="center">⚖️ Universal-Agents: Slash Commander</h3>
 
