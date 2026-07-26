@@ -16,7 +16,7 @@ If the Director (user) asks to **"create the readme"**, **"update the readme"**,
 Before blindly generating text, analyze the context of the current repository:
 - What languages does it use? (To fill in `{{TECH_STACK_BADGES}}`).
 - What are the execution steps? (Docker, npm, venv) for `{{INSTALLATION_xx}}`.
-- What is the project name and expected GitHub URL? (Usually `https://github.com/GstMirabal/[Directory-Name]`).
+- What is the project name and its actual GitHub URL? Infer it from the local `git remote -v` output, `package.json`/`pyproject.toml` repository fields, or equivalent project metadata. If it cannot be inferred with confidence, ASK the Director — never assume a default owner or organization.
 
 **Step 2: Read Master Template**
 Open and read the static template file using your base tool:
@@ -24,7 +24,7 @@ Open and read the static template file using your base tool:
 
 **Step 3: Fusion and Overwriting (Render)**
 Mentally replace all `{{UPPERCASE_VARIABLES}}` delimiters in the template with the actual project information you extracted in Step 1.
-Keep the HTML structure, `<p align="center">`, shields (Shields.io), navigation anchors (`<a name="readme-top"></a>`), and the "Contact" section at the end ABSOLUTELY intact.
+Keep the HTML structure, `<p align="center">`, shields (Shields.io), navigation anchors (`<a name="readme-top"></a>`), and the "Contact" section's Markdown/HTML structure intact. Fill the `{{OWNER_NAME}}`, `{{OWNER_EMAIL}}`, `{{OWNER_LINKEDIN_URL}}`, `{{OWNER_X_URL}}`, and `{{OWNER_GITHUB_USERNAME}}` placeholders in that section with the REAL owner data of the project you are currently standardizing — never assume they refer to the author of this Skill. If the owner's data cannot be inferred with confidence from repository context, ASK the Director for it before rendering.
 
 **Step 4: Injection**
 - If the `README.md` does not exist in the local project root, create it using the processed content.

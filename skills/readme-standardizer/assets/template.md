@@ -104,26 +104,26 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Contact
 
-Gustavo Mirabal Suarez - gst.mirabal@gmail.com
+{{OWNER_NAME}} - {{OWNER_EMAIL}}
 
-- LinkedIn: [@Gustavo-Mirabal](https://www.linkedin.com/in/gstmirabal/)
-- GitHub: [@GstMirabal](https://github.com/GstMirabal)
-- Twitter: [@GstMirabal](https://x.com/gst_mirabal)
+- LinkedIn: [{{OWNER_NAME}}]({{OWNER_LINKEDIN_URL}})
+- GitHub: [@{{OWNER_GITHUB_USERNAME}}](https://github.com/{{OWNER_GITHUB_USERNAME}})
+- Twitter: [@{{OWNER_GITHUB_USERNAME}}]({{OWNER_X_URL}})
 
 Project Link: [{{REPO_URL}}]({{REPO_URL}})
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- MARKDOWN LINKS & IMAGES -->
-[contributors-shield]: https://img.shields.io/github/contributors/GstMirabal/{{REPO_NAME}}.svg?style=for-the-badge
-[contributors-url]: https://github.com/GstMirabal/{{REPO_NAME}}/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/GstMirabal/{{REPO_NAME}}.svg?style=for-the-badge
-[forks-url]: https://github.com/GstMirabal/{{REPO_NAME}}/network/members
-[stars-shield]: https://img.shields.io/github/stars/GstMirabal/{{REPO_NAME}}.svg?style=for-the-badge
-[stars-url]: https://github.com/GstMirabal/{{REPO_NAME}}/stargazers
-[issues-shield]: https://img.shields.io/github/issues/GstMirabal/{{REPO_NAME}}.svg?style=for-the-badge
-[issues-url]: https://github.com/GstMirabal/{{REPO_NAME}}/issues
-[license-shield]: https://img.shields.io/github/license/GstMirabal/{{REPO_NAME}}.svg?style=for-the-badge
-[license-url]: https://github.com/GstMirabal/{{REPO_NAME}}/blob/master/LICENSE.txt
+[contributors-shield]: https://img.shields.io/github/contributors/{{OWNER_GITHUB_USERNAME}}/{{REPO_NAME}}.svg?style=for-the-badge
+[contributors-url]: https://github.com/{{OWNER_GITHUB_USERNAME}}/{{REPO_NAME}}/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/{{OWNER_GITHUB_USERNAME}}/{{REPO_NAME}}.svg?style=for-the-badge
+[forks-url]: https://github.com/{{OWNER_GITHUB_USERNAME}}/{{REPO_NAME}}/network/members
+[stars-shield]: https://img.shields.io/github/stars/{{OWNER_GITHUB_USERNAME}}/{{REPO_NAME}}.svg?style=for-the-badge
+[stars-url]: https://github.com/{{OWNER_GITHUB_USERNAME}}/{{REPO_NAME}}/stargazers
+[issues-shield]: https://img.shields.io/github/issues/{{OWNER_GITHUB_USERNAME}}/{{REPO_NAME}}.svg?style=for-the-badge
+[issues-url]: https://github.com/{{OWNER_GITHUB_USERNAME}}/{{REPO_NAME}}/issues
+[license-shield]: https://img.shields.io/github/license/{{OWNER_GITHUB_USERNAME}}/{{REPO_NAME}}.svg?style=for-the-badge
+[license-url]: https://github.com/{{OWNER_GITHUB_USERNAME}}/{{REPO_NAME}}/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://www.linkedin.com/in/gstmirabal/
+[linkedin-url]: {{OWNER_LINKEDIN_URL}}

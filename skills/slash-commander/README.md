@@ -1,7 +1,7 @@
 # ⚡ Slash Commander: Matrix Bridge
 
 <div align="center">
-  <img src="../../../docs/assets/logo/institutional_banner.png" alt="Banner" width="100%">
+  <img src="../../../docs/assets/logo/agents_banner.svg" alt="Banner" width="100%">
 
   <h3 align="center">⚖️ Universal-Agents: Slash Commander</h3>
 
@@ -53,9 +53,3 @@ Check for orphaned command→workflow references:
 ```bash
 python3 .agents/skills/slash-commander/scripts/verify_commands.py
 ```
-
----
-
-## 📬 Contact
-**Architect**: Gst Mirabal - [gst.mirabal@gmail.com](mailto:gst.mirabal@gmail.com)
-**Project**: Universal-Agents Matrix
