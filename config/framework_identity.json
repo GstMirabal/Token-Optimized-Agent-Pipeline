@@ -1,0 +1,11 @@
+{
+  "framework_author_name": "Gustavo Mirabal Suarez",
+  "framework_author_email": "gst.mirabal@gmail.com",
+  "framework_author_linkedin_url": "https://www.linkedin.com/in/gstmirabal/",
+  "framework_author_x_url": "https://x.com/gst_mirabal",
+  "framework_repo_slug": "GstMirabal/.agents",
+  "framework_banner_path": "docs/assets/logo/agents_banner.svg",
+  "framework_project_name": "Universal-Agents",
+  "framework_project_description": "High-Integrity Governance & Federated Agentic Engineering framework.",
+  "framework_project_hook": "Prevents context bloat, secures RCE environments, and disciplines AI agent swarms into a zero-trust hierarchy."
+}

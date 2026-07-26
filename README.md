@@ -1,9 +1,14 @@
 <div align="center">
 
+<!-- BANNER_START -->
+<img src="docs/assets/logo/agents_banner.svg" alt="Universal-Agents banner" width="100%">
+<!-- BANNER_END -->
+
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
+[![Release][release-shield]][release-url]
 [![MIT License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
@@ -22,6 +27,10 @@
 <a href="https://github.com/GstMirabal/.agents/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
 ·
 <a href="https://github.com/GstMirabal/.agents/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+</p>
+
+<p align="center">
+It prevents context bloat, secures RCE environments, and disciplines AI agent swarms into a zero-trust hierarchy — the same governance rigor applied to itself as to every host it audits.
 </p>
 
 <!-- TABLE OF CONTENTS -->
@@ -143,36 +152,21 @@ The Orchestrator will automatically scan your source code, identify your project
 ---
 
 ### 🤖 AI-Ops: Core Commands (Slash Commands)
-The framework maps every `workflows/*.md` protocol to a real Claude Code slash command in `commands/*.md`, installed under the `/agents:*` namespace so they never collide with commands your host project defines:
+The framework maps every `workflows/*.md` protocol to a real Claude Code slash command in `commands/*.md`, installed under the `/agents:*` namespace so they never collide with commands your host project defines. The three you will use every session:
 
 | Command | Purpose |
 | :--- | :--- |
 | **`/agents:start`** | **Entry Gate**: Initializes Zero-Memory, installs the Claude bridge on first run, syncs DevOps/Git Sentinels, and prepares execution limits. |
 | **`/agents:matrix`** | **Orchestration**: The V3 Double-Gate execution pipeline. Distributes tasks across subagents. |
 | **`/agents:close`** | **Exit Gate**: Extracts heuristics, updates roadmaps, mirrors state, and seals the repo securely. |
-| **`/agents:audit`** | **Inquisitor**: Proactive structural maintenance to purge logic drifts and missing `.md` rules. |
-| **`/agents:skill-forge`** | **Quartermaster**: Creates, tests, and natively registers new Matrix tools without mutating production logic. |
-| **`/agents:remediation`** | **Panic Button**: Halts infinite hallucination loops, nukes git to pristine state, and logs negative knowledge. |
-| **`/agents:standardization`** | **Structural**: Enforces the `[layer]/[app]/` dictionary and Technical English purity. |
-| **`/agents:extract`** | **Distillation**: Memory indexer handling the "Jurisprudence Loop" (see `agents.md §4`). |
-| **`/agents:deployment`** | **Vanguard**: Merges the sprint branch to upstream branches and operates CI/CD boundaries. |
-| **`/agents:skeleton`** | **Context Compression**: Forces the Omni-Minimizer to carve AST summaries of massive codefiles to protect token limits. |
-| **`/agents:graphify`** | **Knowledge Graph**: Runs the graphify pipeline over the current project into `graphify-out/`. |
+
+See the full command reference → [`docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md`](docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md) (all 11 commands, the Skills Manifest JSON example, and the full retrofit scenario walkthrough).
 
 > [!TIP]
 > **Documentation Sovereignty:** All technical docs, implementation plans (`docs/sprints/`), and local roadmaps (`docs/roadmaps/`) are tightly bound directly to Matrix V2 tracking under `/docs/`.
 
 > [!IMPORTANT]
-> **Orchestration Manifest:** The Orchestrator now uses **`.agents/skills/manifest_skills.json`** to statically route tools, drastically reducing token consumption and discovery time during sessions.
-
-```json
-// Example: The Orchestrator statically routes external tools using the Skills Manifest
-{
-  "name": "omni-context-minimizer",
-  "category": "Efficiency",
-  "tags": ["token-saver", "ast", "scan"]
-}
-```
+> **Orchestration Manifest:** The Orchestrator uses **`.agents/skills/manifest_skills.json`** to statically route tools, drastically reducing token consumption and discovery time during sessions — see the guide above for a worked example.
 
 Check the `/workflows/` directory for automated protocols like project scaffolding. Explore `/mcp_servers/` for bridging external LLM data nodes.
 
@@ -229,6 +223,8 @@ Project Link: [https://github.com/GstMirabal/.agents](https://github.com/GstMira
 [stars-url]: https://github.com/GstMirabal/.agents/stargazers
 [issues-shield]: https://img.shields.io/github/issues/GstMirabal/.agents.svg?style=for-the-badge
 [issues-url]: https://github.com/GstMirabal/.agents/issues
+[release-shield]: https://img.shields.io/github/v/release/GstMirabal/.agents?style=for-the-badge
+[release-url]: https://github.com/GstMirabal/.agents/releases
 [license-shield]: https://img.shields.io/github/license/GstMirabal/.agents.svg?style=for-the-badge
 [license-url]: https://github.com/GstMirabal/.agents/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
