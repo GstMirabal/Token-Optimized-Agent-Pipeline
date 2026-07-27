@@ -4,6 +4,8 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.2.0] - 2026-07-27
+
 ### Security
 - **Pre-publication hardening (Phase 017)**: audited the repo before making it public. `profiles/crypto-django/` (a real, identifiable production trading-bot blueprint — Django app inventory, business thresholds, KYC/vault handling, Polymarket integration) removed from the tracked tree and replaced with a fully illustrative `profiles/example-project/`; the corresponding `git filter-repo` history purge (it was present in every commit since `bb8e30d` and all tags `v3.0.0`-`v4.1.0`) is executed as a separate, explicitly-confirmed operation immediately after this merges. `skills/skillopt/data/scenarios.json` had a real absolute path leaking a real macOS username and a real host project name (`Cryptobot`, a casing variant the Phase 015 sweep missed) — replaced with a generic placeholder. `.env`/`.env.template` retired (confirmed unused); `mcp_servers/github_mcp/` mechanism kept, its setup docs no longer depend on the removed template. New `RA-15: HOST_CONTENT_GENERICIZATION` amendment (`agents.md §7`) and a new CI gate scanning for real-looking local developer paths, so this class of leak is caught automatically going forward instead of only at a pre-publication audit.
 
