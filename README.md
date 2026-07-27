@@ -110,7 +110,7 @@ The Token-Optimized Agent Pipeline is an AI agent governance framework designed 
 
    **Project profiles (opt-in)**: project-family packs (extra rules, specialist agents, domain skills) live under `profiles/` and are only linked when explicitly requested:
    ```bash
-   .agents/scripts/install_claude.sh --profile crypto-django
+   .agents/scripts/install_claude.sh --profile example-project
    ```
 
 4. **Pin a release (recommended) or track main**
@@ -198,7 +198,7 @@ This links `.claude/commands/agents/*` and `.claude/agents/*` (so `/agents:start
 
 ## License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the MIT License. See `LICENSE.txt` for more information. A handful of vendored skills carry their own license instead — see `NOTICE.md`.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

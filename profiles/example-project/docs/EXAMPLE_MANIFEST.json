@@ -1,0 +1,7 @@
+{
+  "_comment": "Illustrative project-specific manifest — a real profile might ship something like this (e.g. a sanctioned app list for shadow-app detection by topology-monitor). Not real data.",
+  "items": [
+    "example-app-one",
+    "example-app-two"
+  ]
+}

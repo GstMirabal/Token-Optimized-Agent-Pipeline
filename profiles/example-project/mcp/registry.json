@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "example-external-api": {
+      "command": "<launcher for your MCP server, e.g. /bin/bash or npx>",
+      "args": ["<path to your server script/package>"],
+      "env": {},
+      "description": "Illustrative placeholder — replace with real project-specific MCP server registrations (market-data feeds, internal APIs, etc.) in a real profile. Not a working entry."
+    }
+  }
+}

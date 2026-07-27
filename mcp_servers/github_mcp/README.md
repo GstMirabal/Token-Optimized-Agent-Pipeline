@@ -8,9 +8,8 @@ It conforms to the pipeline policy of keeping MCP servers structurally distanced
 - **Environment Variable**: `GITHUB_PERSONAL_ACCESS_TOKEN` must be sourced prior to execution.
 
 ## Setup (Manual)
-1. Copy the template: `cp .agents/.env.template .agents/.env`
-2. Edit `.agents/.env` and paste your GitHub Personal Access Token.
-3. The server script will automatically validate the presence of this variable.
+1. Create `.agents/.env` with a single line: `GITHUB_PERSONAL_ACCESS_TOKEN=<your-token>` (classic PAT with `repo` scope). This file is git-ignored — never commit it.
+2. The server script will automatically validate the presence of this variable.
 
 ## Usage
 The standard invocation handles JSON-RPC standard communication required by Model Context Protocols. It is designed to be attached strictly via the parent IDE MCP settings or via orchestrated proxy calls by the `git_sync_01` agent.

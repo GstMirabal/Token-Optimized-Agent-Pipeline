@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "_comment": "Framework-neutral MCP registry template. Project-specific servers live in profiles/[name]/mcp/registry.json (e.g. profiles/crypto-django/mcp/registry.json). Local-process commands MUST use 'pnpm dlx' per agents.md §8 — 'npx -y' is prohibited.",
+  "_comment": "Framework-neutral MCP registry template. Project-specific servers live in profiles/[name]/mcp/registry.json (e.g. profiles/example-project/mcp/registry.json). Local-process commands MUST use 'pnpm dlx' per agents.md §8 — 'npx -y' is prohibited.",
   "mcp_servers": {
     "example-remote-mcp": {
       "description": "Template entry for a remote MCP server. Duplicate, rename, and set status to 'enabled'.",

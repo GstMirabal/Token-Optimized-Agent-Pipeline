@@ -55,6 +55,41 @@ jobs:
       - name: Structural audit (flat topology + Three-File Skill Standard)
         run: python3 skills/topology-monitor/scripts/legacy_app_auditor.py
 
+      - name: No local developer-machine absolute paths (RA-15)
+        run: |
+          python3 - <<'EOF'
+          import re, subprocess, sys
+
+          # Real developer home paths (e.g. from a debugging session or a
+          # copy-pasted example) must never land in the tracked tree — this
+          # is exactly how a real host project name leaked into
+          # skills/skillopt/data/scenarios.json before the pre-publication
+          # audit (RA-15, agents.md §7). Generic placeholders are fine.
+          ALLOWED_USERS = {"developer", "user", "username", "yourname", "example"}
+          PATTERN = re.compile(r"/(?:Users|home)/([A-Za-z0-9_.-]+)/")
+
+          files = subprocess.run(
+              ["git", "grep", "-lIn", r"/Users/[A-Za-z0-9_.-]\+/\|/home/[A-Za-z0-9_.-]\+/"],
+              capture_output=True, text=True,
+          ).stdout.splitlines()
+
+          violations = []
+          for f in files:
+              if not f or f.startswith("venv_skillopt/"):
+                  continue
+              text = open(f, encoding="utf-8", errors="ignore").read()
+              for m in PATTERN.finditer(text):
+                  if m.group(1).lower() not in ALLOWED_USERS:
+                      violations.append(f"{f}: {m.group(0)}")
+
+          if violations:
+              print("❌ Real-looking local developer paths found (use a generic placeholder instead):")
+              for v in sorted(set(violations)):
+                  print(f"  {v}")
+              sys.exit(1)
+          print("✅ No local developer-machine absolute paths found.")
+          EOF
+
       - name: Framework unit tests
         run: |
           pip install -q pytest

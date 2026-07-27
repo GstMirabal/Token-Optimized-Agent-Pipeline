@@ -28,7 +28,7 @@ printf 'node_modules/\n*.pyc\n' > "$WORK/host/.gitignore"
 cd "$WORK/host"
 
 # --- Act ---------------------------------------------------------------------
-bash .agents/scripts/install_claude.sh --profile crypto-django > /dev/null
+bash .agents/scripts/install_claude.sh --profile example-project > /dev/null
 
 # --- Assert ------------------------------------------------------------------
 [ -L .claude/agents/orchestrator.md ] || fail "agent symlink missing"
@@ -50,9 +50,9 @@ assert "graphify" in m["mcpServers"], "mcp not merged"
 EOF
 
 grep -qxF "@.agents/agents.md" CLAUDE.md || fail "constitution import missing"
-[ -L .claude/agents/backend_identity_specialist.md ] || fail "profile agent not linked"
-[ -L .claude/skills/polymarket-gamma-3rd ] || fail "profile skill not linked"
-grep -q "crowd_intelligence_standards" CLAUDE.md || fail "profile rule import missing"
+[ -L .claude/agents/domain_specialist_example.md ] || fail "profile agent not linked"
+[ -L .claude/skills/example-api-bridge-3rd ] || fail "profile skill not linked"
+grep -q "domain_example_standard" CLAUDE.md || fail "profile rule import missing"
 
 grep -qxF "node_modules/" .gitignore || fail ".gitignore: pre-existing host entry was lost"
 grep -qxF "*.pyc" .gitignore || fail ".gitignore: pre-existing host entry was lost"
@@ -64,7 +64,7 @@ grep -qxF "/.claude/settings.json" .gitignore \
   && fail ".gitignore: settings.json must stay trackable, not ignored"
 
 # Idempotency: re-run must not duplicate imports nor error out.
-bash .agents/scripts/install_claude.sh --profile crypto-django > /dev/null
+bash .agents/scripts/install_claude.sh --profile example-project > /dev/null
 [ "$(grep -cxF "@.agents/agents.md" CLAUDE.md)" = "1" ] || fail "duplicate import on re-run"
 [ "$(grep -cxF "/graphify-out/" .gitignore)" = "1" ] || fail "duplicate .gitignore entry on re-run"
 
@@ -85,6 +85,6 @@ rm -f "$NUCLEUS/.claude_bridge.lock" "$NUCLEUS/CLAUDE.md"
 [ -e "$NUCLEUS/.claude/agents/principal_agent.md" ] || fail "nucleus: agents not linked"
 grep -qx "@agents.md" "$NUCLEUS/CLAUDE.md" || fail "nucleus: constitution import missing"
 [ ! -e "$NUCLEUS/.claude/skills" ] || fail "nucleus: skills must NOT be linked (minimal bridge)"
-( cd "$NUCLEUS" && python3 scripts/install_claude.py --profile crypto-django > /dev/null 2>&1 ) \
+( cd "$NUCLEUS" && python3 scripts/install_claude.py --profile example-project > /dev/null 2>&1 ) \
   && fail "nucleus: profile install must be refused" || true
 echo "✅ nucleus self-bridge test PASSED"

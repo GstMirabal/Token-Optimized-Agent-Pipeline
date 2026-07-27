@@ -13,8 +13,8 @@
   },
   {
     "id": "scenario_03_relative_paths",
-    "question": "Verificar cumplimiento de regla: Rutas absolutas prohibidas, usar solo rutas relativas. Código propuesto:\n```python\nfile_path = '/Users/gstmirabal/Developer/GitHub/Cryptobot/.agents/requirements.txt'\n```\nIndique si cumple y por qué.",
-    "ground_truth": "No cumple. Utiliza la ruta absoluta '/Users/gstmirabal/Developer/GitHub/Cryptobot/.agents/requirements.txt' en lugar de una ruta relativa.",
+    "question": "Verificar cumplimiento de regla: Rutas absolutas prohibidas, usar solo rutas relativas. Código propuesto:\n```python\nfile_path = '/Users/developer/projects/my-app/.agents/requirements.txt'\n```\nIndique si cumple y por qué.",
+    "ground_truth": "No cumple. Utiliza la ruta absoluta '/Users/developer/projects/my-app/.agents/requirements.txt' en lugar de una ruta relativa.",
     "task_type": "path_sovereignty"
   },
   {
