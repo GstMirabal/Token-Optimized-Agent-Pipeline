@@ -2,6 +2,12 @@
 .DS_Store
 .env
 
+# Credentials / certificates (defensive — nothing here should ever exist tracked)
+*.pem
+*.key
+*.crt
+id_rsa*
+
 # Local Project-Specific Records (Ignored by Global Submodule)
 task/task.md
 task/

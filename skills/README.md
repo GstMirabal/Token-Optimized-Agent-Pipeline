@@ -9,7 +9,7 @@ To maintain order and security, `skills/` is strictly flat — no `core/`, `loca
 1.  **Native skills** (e.g. `skill-creator`, `token-saver-auditor`, `contract-writer`): internally developed and owned by this framework, named without a suffix.
 2.  **Third-party skills** (e.g. `autoskills-3rd`, `django-expert-3rd`): downloaded or vendored tools, explicitly marked with the `-3rd` directory-name suffix. Their documentation is vendor content and is not edited by this framework's own standardization tooling (`rules/skills_and_integrations.md §3`).
 
-Project-specific packs — as opposed to these framework-wide skills — live under `profiles/[name]/skills/` and are only linked into a host via `--profile [name]`.
+Project-specific packs — as opposed to these framework-wide skills — live under `profiles/[name]/skills/` and are only linked into a host via `--profile [name]`. **Real production profiles are never committed to this public repo** (`RA-15`, `agents.md §3 topological_order`) — `profiles/example-project/` here is illustrative only.
 
 ## 📋 The Manifest (Dynamic Discovery)
 

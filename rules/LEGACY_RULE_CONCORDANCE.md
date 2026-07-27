@@ -11,7 +11,7 @@ Before the tabular refactor of the governance ruleset (commit `36ab935`), govern
 | **Rule 33** | `agents.md §5 historical_log` | Conventional Commits + `#[Sprint_ID]` suffix. |
 | **Rule 35** | `agents.md §1 linter_command` | Linter gates (ruff / pnpm run lint). |
 | **Rule 37** | `agents.md §3 dependencies` + `rules/project_topology.md` | Isolated local interpreters (venv prefix discipline). |
-| **Rule 40 / 40.x** | `profiles/crypto-django/rules/data_visibility_and_vault.md` | Data visibility & vault (self-defined, profile scope). |
+| **Rule 40 / 40.x** | *(removed)* | Was profile-scoped to a real production profile, self-defined and never a framework-wide rule; the profile itself was removed from this public repo (not published — see `RA-15`). No citation to resolve. |
 | **Rule 41 / 041 / 41.x** | `rules/frontend_modular_standard.md` | Frontend modular standard (self-defined). |
 | **Rule 52** | `agents.md §5 state_anchor` | State redundancy / mirror protocol (`.agent_state/mirror.json`). |
 | **Rule 60** | `agents.md §3 three_file_standard` | Three-File Skill Standard for skills. |
