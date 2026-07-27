@@ -35,8 +35,10 @@ Audit and harden this repo before flipping it from private to public: purge busi
 | `RA-15: HOST_CONTENT_GENERICIZATION` | New amendment (`agents.md §7`) requiring host-identifying content to be genericized before any `feedback_upstream` contribution; real production profiles never committed to the public nucleus (also noted in `agents.md §3 topological_order` and `skills/README.md`). |
 | Community files | `CODE_OF_CONDUCT.md` (Contributor Covenant v2.1), `SECURITY.md`, `CONTRIBUTING.md` (repo-specific: branch discipline, skill creation, what never belongs in a PR here). |
 
-### Deliberately deferred to a separate, isolated operation
-The repo's full git history still contains `profiles/crypto-django/` and the real `scenarios.json` path in every commit before this one — removing them from the *tracked tree* here does not remove them from *history*. A `git filter-repo` pass (purge path + replace-text, re-tag `v3.0.0`-`v4.1.0`, force-push) is required for genuine removal and is executed as its own explicitly-confirmed step, separate from this normal PR flow, precisely because it rewrites every commit hash and force-pushes — the highest-risk action in this whole effort.
+### History rewrite and final review (executed as a separate, explicitly-confirmed operation after this Phase merged)
+The repo's full git history still contained `profiles/crypto-django/` and the real `scenarios.json` path in every commit before this Phase — removing them from the *tracked tree* did not remove them from *history*. A first `git filter-repo` pass (purge `profiles/crypto-django/` + replace-text for the `scenarios.json` path, re-tag `v3.0.0`-`v4.1.0`) was run, but a subsequent full-tree-content scan (`git rev-list --all | xargs git grep`, not just diff-based grep) found the same real business content — encryption architecture, real Django app names, KYC/vault details — still present in **8 more old, pre-reorganization directory prefixes** the first pass never touched, because they predated the Phase 015/016 folder migrations: `memory/`, `core/`, `task/`, an old `docs/sprints/` layout, `knowledge/`, a bare `sprints/`, several superseded `scripts/*.py`, the old `skills/core/` prefix, and a hardcoded Django-app list inside a pre-rename script (`skills/matrix-monitor/scripts/legacy_app_auditor.py`). Fixed with 8 additional `--invert-paths` rounds (9 total), each re-verified with a full-tree-content grep for the most distinctive real-content terms until all returned zero hits. All 14 tags re-pointed correctly; `main` and tags force-pushed to `origin`. `README.md`'s `[license-url]` badge also corrected from `blob/master/LICENSE.txt` to `blob/main/LICENSE.txt` (the actual default branch). The repository was then flipped to **public** on GitHub (`gh repo edit --visibility public`).
+
+**Lesson for future host audits**: directory-name/path-based leak hunting via diff-based grep is unreliable once a repo has been reorganized — old, renamed-away top-level prefixes can still hold real content in history that a search scoped to the *current* tree structure will never surface. The rigorous check is `git rev-list --all | xargs git grep` (actual file content at every commit's tree state), cross-referenced against the current tree's top-level structure to catch every historical-only path prefix.
 
 ## Certification Checklist
 - [x] `pytest tests/` green (60 tests).
@@ -47,9 +49,11 @@ The repo's full git history still contains `profiles/crypto-django/` and the rea
 
 ## Known follow-ups (tracked, not blocking)
 - `docs/audits/THIRD_PARTY_PROVENANCE_TODO.md` — 11 vendored skills need their real license/origin confirmed.
-- `origin: ECC` on 4 Django `-3rd` skills — undefined anywhere in the repo; only the repo owner can say what it refers to.
-- The local PAT-bearing `git stash` should be reviewed/revoked on GitHub's side by the owner; cleaning the local stash object doesn't confirm the token's live status.
-- The `git filter-repo` history rewrite itself (see "Deliberately deferred" above) — executed as a separate step after this Phase merges.
+- `origin: ECC` on 4 Django `-3rd` skills — undefined anywhere in the repo; the repo owner confirmed they don't recognize it either. Genuinely unrecoverable from history; tracked as unknown provenance, not a publish blocker.
+- The local PAT-bearing `git stash` was cleaned locally (`git stash clear` + `reflog expire` + `gc`); reviewing/revoking the token itself on GitHub's side remains the owner's action.
+
+## Public deployment
+Repository flipped from private to public on GitHub after the final review above (9 total `git filter-repo` rounds, full-tree-content re-verification, force-push confirmed live on `origin`). Live at `https://github.com/GstMirabal/.agents`.
 
 ---
-*Closed 2026-07-27, branch `ai-sprint/017`, pending PR against `GstMirabal/.agents`.*
+*Closed 2026-07-27, branch `ai-sprint/017`, merged as `v4.2.0`. Final review, history rewrite, and public deployment executed and closed out 2026-07-27.*
