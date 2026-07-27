@@ -226,6 +226,6 @@ Project Link: [https://github.com/GstMirabal/.agents](https://github.com/GstMira
 [release-shield]: https://img.shields.io/github/v/release/GstMirabal/.agents?style=for-the-badge
 [release-url]: https://github.com/GstMirabal/.agents/releases
 [license-shield]: https://img.shields.io/github/license/GstMirabal/.agents.svg?style=for-the-badge
-[license-url]: https://github.com/GstMirabal/.agents/blob/master/LICENSE.txt
+[license-url]: https://github.com/GstMirabal/.agents/blob/main/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/gstmirabal/

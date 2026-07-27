@@ -4,6 +4,17 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.2.1] - 2026-07-27
+
+### Security
+- **Pre-publication final review (Phase 017 closeout)**: the `v4.2.0` `git filter-repo` pass only purged `profiles/crypto-django/` and `scenarios.json` from the current, reorganized directory layout. A full-tree-content re-scan (`git rev-list --all | xargs git grep`, not diff-based grep) found the same real business content — encryption architecture, real Django app names, KYC/vault details — still present in 8 more old, pre-reorganization directory prefixes never touched by the first pass (`memory/`, `core/`, `task/`, an old `docs/sprints/` layout, `knowledge/`, a bare `sprints/`, several superseded `scripts/*.py`, `skills/core/`, and a hardcoded app list inside a pre-rename `legacy_app_auditor.py`). Fixed with 8 additional `git filter-repo --invert-paths` rounds; all 14 tags re-pointed and force-pushed. Full verification detailed in `docs/roadmaps/core/pipeline/017-pre-publication-hardening.md`.
+
+### Fixed
+- `README.md`'s `[license-url]` badge pointed at `blob/master/LICENSE.txt`; corrected to `blob/main/LICENSE.txt`, the repo's actual default branch.
+
+### Deployment
+- Repository visibility flipped from private to public: `https://github.com/GstMirabal/.agents`.
+
 ## [4.2.0] - 2026-07-27
 
 ### Security
