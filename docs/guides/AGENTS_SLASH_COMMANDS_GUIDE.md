@@ -8,7 +8,7 @@
 Discover and invoke the `/agents:*` slash commands that map every `workflows/*.md` protocol to a real Claude Code command, in both a fresh host and an already-established (retrofit) repository.
 
 ## 2. Prerequisites
-- `.agents` added as a Git submodule at the host project root (`git submodule add https://github.com/GstMirabal/.agents .agents`).
+- `.agents` added as a Git submodule at the host project root (`git submodule add https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline .agents`).
 - The Claude Code bridge installed at least once via `.agents/scripts/install_claude.sh` (symlinks `.agents/commands/*.md` into `.claude/commands/agents/`, exposing the `/agents:*` namespace so host-defined commands never collide with framework ones).
 - A restarted Claude Code session after installation — commands are discovered at session start, not live.
 
@@ -17,7 +17,7 @@ Discover and invoke the `/agents:*` slash commands that map every `workflows/*.m
 ### 3.1 Retrofitting an already-established repository
 If you are adding the framework to an **already established repository**, follow this sequence to align your architectural roadmap:
 
-1. **Submodule Insertion:** In your root folder: `git submodule add https://github.com/GstMirabal/.agents .agents`
+1. **Submodule Insertion:** In your root folder: `git submodule add https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline .agents`
 2. **Bridge Installation:** `.agents/scripts/install_claude.sh` (creates `.claude/agents`, `.claude/commands/agents`, `.claude/skills`, and merges hooks/MCP config).
 3. **AI Session Trigger:** Tell the AI: *"Initialize session using governance protocols in `.agents/` and execute `/agents:start`."*
 4. **Roadmap Discovery:** The topology mapper will map `docs/active_state.json` (scaffolding it on first run — see `start_workflow.md`). Run the command: **`/agents:pipeline`**.

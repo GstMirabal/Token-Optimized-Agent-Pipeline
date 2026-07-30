@@ -18,7 +18,7 @@ It prevents context bloat, secures RCE environments, and disciplines AI agent sw
 
 <a href="agents.md"><strong>Read the governance ruleset »</strong></a>
 
-<a href="https://github.com/GstMirabal/.agents/issues/new">Report Bug</a> · <a href="https://github.com/GstMirabal/.agents/issues/new">Request Feature</a> · <a href="CONTRIBUTING.md">Contribute</a>
+<a href="https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline/issues/new">Report Bug</a> · <a href="https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline/issues/new">Request Feature</a> · <a href="CONTRIBUTING.md">Contribute</a>
 
 </div>
 
@@ -92,7 +92,7 @@ The Token-Optimized Agent Pipeline is an AI agent governance framework designed 
 1. **Add the framework as a submodule**
    To use it in a project, add it to your repository root:
    ```bash
-   git submodule add https://github.com/GstMirabal/.agents .agents
+   git submodule add https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline .agents
    ```
 
 2. **Install the Claude Code bridge**
@@ -115,7 +115,7 @@ The Token-Optimized Agent Pipeline is an AI agent governance framework designed 
    cd .agents && git fetch --tags && git checkout v4.2.1 && cd ..
    git add .agents && git commit -m "chore(deps): pin .agents to v4.2.1 #[Sprint_ID]"
    ```
-   Every tag is published as a [GitHub Release](https://github.com/GstMirabal/.agents/releases) with its notes, so you can read exactly what a version changes before pinning to it.
+   Every tag is published as a [GitHub Release](https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline/releases) with its notes, so you can read exactly what a version changes before pinning to it.
 
    To upgrade later: check the [CHANGELOG](CHANGELOG.md), check out the new tag, and re-run the installer to pick up new agents/commands/skills:
    ```bash
@@ -153,7 +153,7 @@ See the full command reference → [`docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md`
 
 If you are adding the framework to an **already established repository**, follow this sequence to align your architectural roadmap:
 
-1.  **Submodule insertion:** In your root folder: `git submodule add https://github.com/GstMirabal/.agents .agents`
+1.  **Submodule insertion:** In your root folder: `git submodule add https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline .agents`
 2.  **Bridge installation:** `.agents/scripts/install_claude.sh` (creates `.claude/agents`, `.claude/commands/agents`, `.claude/skills`, and merges hooks/MCP config).
 3.  **AI session trigger:** Tell the AI: *"Initialize session using governance protocols in `.agents/` and execute `/agents:start`."*
 4.  **Roadmap discovery:** The topology mapper will map `docs/active_state.json` (scaffolding it on first run — see `start_workflow.md`). Then run **`/agents:pipeline`**.
@@ -185,8 +185,8 @@ Contributions to the core framework are **greatly appreciated**. Start with [`CO
 Working *inside* this repo (not a host project) is a different case: the full host bridge is refused (`agents.md §5 nucleus_neutrality` — this repo is the ruleset, not a project it governs), so `/agents:*` commands don't exist here until you run the installer's **minimal self-bridge**:
 
 ```bash
-git clone https://github.com/GstMirabal/.agents.git
-cd .agents
+git clone https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline.git
+cd Token-Optimized-Agent-Pipeline
 python3 scripts/install_claude.py
 ```
 
@@ -202,20 +202,20 @@ Distributed under the MIT License — see [`LICENSE.txt`](LICENSE.txt). A handfu
 
 ## Contact
 
-**Gustavo Mirabal Suarez** — Project Link: [github.com/GstMirabal/.agents](https://github.com/GstMirabal/.agents)
+**Gustavo Mirabal Suarez** — Project Link: [github.com/GstMirabal/Token-Optimized-Agent-Pipeline](https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline)
 
 <a href="https://www.linkedin.com/in/gstmirabal/"><img src="https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=flat&logo=linkedin&logoColor=white" alt="Connect on LinkedIn"></a> <a href="mailto:gst.mirabal@gmail.com"><img src="https://img.shields.io/badge/Email-gst.mirabal@gmail.com-EA4335?style=flat&logo=gmail&logoColor=white" alt="Email gst.mirabal@gmail.com"></a> <a href="https://x.com/gst_mirabal"><img src="https://img.shields.io/badge/X-@gst__mirabal-000000?style=flat&logo=x&logoColor=white" alt="X profile"></a>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- MARKDOWN LINKS & IMAGES -->
-[version-shield]: https://img.shields.io/github/v/release/GstMirabal/.agents?style=flat&label=release&color=a68a5b&labelColor=18202f
-[version-url]: https://github.com/GstMirabal/.agents/releases/latest
-[license-shield]: https://img.shields.io/github/license/GstMirabal/.agents?style=flat&color=a68a5b&labelColor=18202f
-[license-url]: https://github.com/GstMirabal/.agents/blob/main/LICENSE.txt
-[stars-shield]: https://img.shields.io/github/stars/GstMirabal/.agents?style=flat&color=a68a5b&labelColor=18202f
-[stars-url]: https://github.com/GstMirabal/.agents/stargazers
-[issues-shield]: https://img.shields.io/github/issues/GstMirabal/.agents?style=flat&color=a68a5b&labelColor=18202f
-[issues-url]: https://github.com/GstMirabal/.agents/issues
+[version-shield]: https://img.shields.io/github/v/release/GstMirabal/Token-Optimized-Agent-Pipeline?style=flat&label=release&color=a68a5b&labelColor=18202f
+[version-url]: https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline/releases/latest
+[license-shield]: https://img.shields.io/github/license/GstMirabal/Token-Optimized-Agent-Pipeline?style=flat&color=a68a5b&labelColor=18202f
+[license-url]: https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline/blob/main/LICENSE.txt
+[stars-shield]: https://img.shields.io/github/stars/GstMirabal/Token-Optimized-Agent-Pipeline?style=flat&color=a68a5b&labelColor=18202f
+[stars-url]: https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline/stargazers
+[issues-shield]: https://img.shields.io/github/issues/GstMirabal/Token-Optimized-Agent-Pipeline?style=flat&color=a68a5b&labelColor=18202f
+[issues-url]: https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline/issues
 [python-shield]: https://img.shields.io/badge/Python-3.10%2B-a68a5b?style=flat&labelColor=18202f
 [python-url]: https://www.python.org/downloads/

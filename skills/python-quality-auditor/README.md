@@ -5,12 +5,12 @@
 <p align="center">
   Agnostic Python health-check (Ruff, Mypy, Bandit) to ensure compliance with framework standards.
 <br /><br />
-<a href="https://github.com/GstMirabal/.agents"><strong>Explore the docs »</strong></a>
+<a href="https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline"><strong>Explore the docs »</strong></a>
 <br />
 ·
-<a href="https://github.com/GstMirabal/.agents/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
+<a href="https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
 ·
-<a href="https://github.com/GstMirabal/.agents/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+<a href="https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
 </p>
 
 ## About The Project

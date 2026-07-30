@@ -2,12 +2,13 @@
 
 Tracking file, not a blocker for publishing. These vendored skills lack a verifiable license/source and were confirmed to be genuinely third-party content (not self-authored) during the pre-publication audit — see evidence per item. Each needs its actual origin confirmed, then either (a) proper attribution added (a `LICENSE.txt`/README credit, matching `NOTICE.md`'s pattern), or (b) removed if the origin can't be verified or the license turns out to be incompatible with redistribution.
 
+## Resolved
+
+- [x] **`origin: ECC` identified** — the 4 Django skills come from [`affaan-m/ECC`](https://github.com/affaan-m/ECC) ("The agent harness performance optimization system"), **MIT licensed**. Confirmed, not inferred: ECC's own `skills/django-patterns/SKILL.md` carries a byte-identical `description` to the vendored copy and stamps `metadata: origin: ECC` on its own skills, which is exactly the field that appears here. ECC also ships `django-security`, `django-tdd` and `django-verification` under the same paths. Attribution added to `NOTICE.md`; the vendored `SKILL.md` files themselves are left untouched under the Skill Documentation Veto (`rules/skills_and_integrations.md §3`).
+  - `skills/django-patterns-3rd/`, `skills/django-security-3rd/`, `skills/django-tdd-3rd/`, `skills/django-verification-3rd/`
+
 ## Confirmed third-party, license/origin unverified
 
-- [ ] `skills/django-patterns-3rd/` — frontmatter says `origin: ECC`, no URL, no license. "ECC" is not defined anywhere else in the repo.
-- [ ] `skills/django-security-3rd/` — same (`origin: ECC`).
-- [ ] `skills/django-tdd-3rd/` — same (`origin: ECC`).
-- [ ] `skills/django-verification-3rd/` — same (`origin: ECC`).
 - [ ] `skills/vite/` — has real attribution metadata: `author: Anthony Fu`, `source: Generated from https://github.com/vitejs/vite, scripts at https://github.com/antfu/skills`. Easiest one to close — the source is already named, just needs the actual license (Vite itself is MIT) confirmed and a `LICENSE.txt`/notice added.
 - [ ] `skills/seo/` — `author: web-quality-skills`, `license: MIT` self-declared, but no `LICENSE.txt` bundled and "web-quality-skills" isn't a resolvable URL/org as-is.
 - [ ] `skills/accessibility/` — same pattern as `seo` (`author: web-quality-skills`, `license: MIT` declared, no `LICENSE.txt`).
@@ -19,7 +20,7 @@ Tracking file, not a blocker for publishing. These vendored skills lack a verifi
 
 ## Why these are confirmed third-party, not self-written
 
-All of the above (except the 4 Django ones) were added in the **same commit** `324e12c` ("chore(skills): register new design and backend skills #066", 2026-05-14) — a single batch-registration commit, consistent with a bulk import from an external skill registry/marketplace rather than original authorship. The 4 Django skills were added together in commit `99e4ec1` and already carry the correct `-3rd` naming suffix; only their actual source is undocumented.
+All of the above were added in the **same commit** `324e12c` ("chore(skills): register new design and backend skills #066", 2026-05-14) — a single batch-registration commit, consistent with a bulk import from an external skill registry/marketplace rather than original authorship. (The 4 Django skills, added separately, are now resolved — see above.)
 
 ## Not a blocker
 
