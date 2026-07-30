@@ -1,4 +1,4 @@
-<svg viewBox="0 0 1200 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label=".agents — Token-Optimized Agent Pipeline: zero-trust subagent orchestration for AI software engineering">
+<svg viewBox="0 0 1200 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Token-Optimized Agent Pipeline — zero-trust subagent orchestration for AI software engineering, installs as .agents/">
   <defs>
     <linearGradient id="paper" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#fbfaf8"/>
@@ -20,9 +20,9 @@
 
   <text x="108" y="108" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="12" font-weight="600" fill="#a68a5b" letter-spacing="8.5">AI AGENT GOVERNANCE</text>
 
-  <text x="105" y="180" font-family="Georgia,'Times New Roman',Times,serif" font-size="74" font-weight="400" fill="#18202f" letter-spacing="0.5">.agents</text>
+  <text x="105" y="176" font-family="Georgia,'Times New Roman',Times,serif" font-size="47" font-weight="400" fill="#18202f" letter-spacing="0.5">Token-Optimized Agent Pipeline</text>
 
-  <text x="108" y="212" font-family="Georgia,'Times New Roman',Times,serif" font-size="17.5" font-style="italic" fill="#5d6474">Token-Optimized Agent Pipeline · Zero-trust subagent orchestration</text>
+  <text x="108" y="212" font-family="Georgia,'Times New Roman',Times,serif" font-size="17.5" font-style="italic" fill="#5d6474">Zero-trust subagent orchestration · installs as .agents/</text>
 
   <g font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="10.5" font-weight="600" fill="#8a7049" letter-spacing="3">
     <rect x="108" y="238" width="86" height="26" fill="none" stroke="#ddd6c9"/>
