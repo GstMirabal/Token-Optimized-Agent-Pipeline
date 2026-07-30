@@ -1,37 +1,26 @@
+<a name="readme-top"></a>
+
 <div align="center">
 
 <!-- BANNER_START -->
 <img src="docs/assets/logo/agents_banner.svg" alt="Token-Optimized Agent Pipeline banner" width="100%">
 <!-- BANNER_END -->
 
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![Release][release-shield]][release-url]
-[![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
+[![Release][version-shield]][version-url] [![License][license-shield]][license-url] [![Stars][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url] [![Python][python-shield]][python-url]
+
+<h3>Token-Optimized Agent Pipeline</h3>
+
+<p>
+A hierarchical, zero-trust subagent architecture for context-aware and token-efficient AI software engineering.
+<br />
+It prevents context bloat, secures RCE environments, and disciplines AI agent swarms into a zero-trust hierarchy — applying the same governance rigor to itself as to every host it audits.
+</p>
+
+<a href="agents.md"><strong>Read the governance ruleset »</strong></a>
+
+<a href="https://github.com/GstMirabal/.agents/issues/new">Report Bug</a> · <a href="https://github.com/GstMirabal/.agents/issues/new">Request Feature</a> · <a href="CONTRIBUTING.md">Contribute</a>
 
 </div>
-
-<a name="readme-top"></a>
-
-<h3 align="center">Token-Optimized Agent Pipeline (.agents)</h3>
-
-<p align="center">
-  A hierarchical, zero-trust subagent architecture for context-aware and token-efficient AI software engineering.
-<br /><br />
-<a href="https://github.com/GstMirabal/.agents"><strong>Explore the docs »</strong></a>
-<br />
-·
-<a href="https://github.com/GstMirabal/.agents/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
-·
-<a href="https://github.com/GstMirabal/.agents/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
-</p>
-
-<p align="center">
-It prevents context bloat, secures RCE environments, and disciplines AI agent swarms into a zero-trust hierarchy — the same governance rigor applied to itself as to every host it audits.
-</p>
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -39,13 +28,16 @@ It prevents context bloat, secures RCE environments, and disciplines AI agent sw
   <ol>
     <li>
       <a href="#about-the-project">About The Project</a>
-      <ul><li><a href="#built-with">Built With</a></li></ul>
+      <ul>
+        <li><a href="#at-a-glance">At a Glance</a></li>
+        <li><a href="#built-with">Built With</a></li>
+      </ul>
     </li>
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation & Configuration</a></li>
+        <li><a href="#installation--configuration">Installation &amp; Configuration</a></li>
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
@@ -70,12 +62,20 @@ The Token-Optimized Agent Pipeline is an AI agent governance framework designed 
 *   **Persistent Compliance Roadmap:** Integrated topology via `docs/roadmaps/`, anchored by the unbreakable `docs/active_state.json`.
 *   **Documentation Standard:** Deterministic freshness-gate (Diátaxis + C4 + ADR) that keeps architecture docs from silently going stale — enforced at sprint close, not by agent memory.
 
+### At a Glance
+
+| | |
+| :--- | :--- |
+| **Governance** | Keyed ruleset in [`agents.md`](agents.md) + 8 lazy-loaded domain rule contexts in [`rules/`](rules/) |
+| **Subagents** | 13 role-segregated agents in [`agents/`](agents/) — 8 core pipeline roles, 5 auxiliary |
+| **Skills** | 34 flat skills in [`skills/`](skills/), routed statically via `manifest_skills.json` |
+| **Workflows** | 10 protocols in [`workflows/`](workflows/), exposed as 11 `/agents:*` slash commands |
+| **Pipeline** | 8 phases (Planning → Sprint Closeout), gated by a single attended human authorization |
+| **Integration** | Git submodule + idempotent Claude Code bridge; never writes outside `.claude/` and `CLAUDE.md` |
+
 ### Built With
 
-![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
-![Shell Script](https://img.shields.io/badge/shell_script-%23121011.svg?style=for-the-badge&logo=gnu-bash&logoColor=white)
-![Markdown](https://img.shields.io/badge/markdown-%23000000.svg?style=for-the-badge&logo=markdown&logoColor=white)
-![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white) ![Shell Script](https://img.shields.io/badge/Shell_Script-121011?style=flat&logo=gnu-bash&logoColor=white) ![Markdown](https://img.shields.io/badge/Markdown-000000?style=flat&logo=markdown&logoColor=white) ![Git](https://img.shields.io/badge/Git-F05032?style=flat&logo=git&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?style=flat&logo=githubactions&logoColor=white) ![Claude Code](https://img.shields.io/badge/Claude%20Code-D97757?style=flat&logo=anthropic&logoColor=white)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -84,24 +84,18 @@ The Token-Optimized Agent Pipeline is an AI agent governance framework designed 
 ### Prerequisites
 
 *   **Git**: Required for submodule management and architectural inheritance.
-*   **Python 3.x**: Required for running the Omni-Minimizer and optimization scripts.
-*   **Node.js**: Recommended for managing advanced AI skills via `npx skills`.
+*   **Python 3.10+**: Required for the Omni-Minimizer, hooks, and governance scripts (stdlib only — no runtime dependencies). CI runs 3.12.
+*   **pnpm 11+** *(optional)*: Only for hosts managing JS/TS skills. `npm`/`yarn` are prohibited for installation, and `ignore-scripts=true` + `minimum-release-age=1440` are mandatory (`agents.md §8`, `RA-10`).
 
 ### Installation & Configuration
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/GstMirabal/.agents.git
-   cd .agents
-   ```
-
-2. **Initialize Git Submodule**
-   To use this framework in a new project, add it as a submodule to your root directory:
+1. **Add the framework as a submodule**
+   To use it in a project, add it to your repository root:
    ```bash
    git submodule add https://github.com/GstMirabal/.agents .agents
    ```
 
-3. **Install the Claude Code bridge**
+2. **Install the Claude Code bridge**
    Claude Code only auto-discovers agents/commands/skills/hooks from `.claude/` and `.mcp.json` at your **project root** — it never reads inside a submodule. Run the installer once (idempotent, safe to re-run):
    ```bash
    .agents/scripts/install_claude.sh
@@ -112,21 +106,25 @@ The Token-Optimized Agent Pipeline is an AI agent governance framework designed 
    ```bash
    .agents/scripts/install_claude.sh --profile example-project
    ```
+   > [!NOTE]
+   > Real production profiles are never committed to this public repo (`RA-15`) — they live in a private location the host controls. `profiles/example-project/` is illustrative only.
 
-4. **Pin a release (recommended) or track main**
-   Pin the submodule to a tagged release for reproducible governance — updates then happen deliberately, not by drift (same supply-chain reasoning as RA-10):
+3. **Pin a release (recommended) or track main**
+   Pin the submodule to a tagged release for reproducible governance — updates then happen deliberately, not by drift (same supply-chain reasoning as `RA-10`):
    ```bash
-   cd .agents && git fetch --tags && git checkout v3.0.0 && cd ..
-   git add .agents && git commit -m "chore(deps): pin .agents to v3.0.0 #[Sprint_ID]"
+   cd .agents && git fetch --tags && git checkout v4.2.1 && cd ..
+   git add .agents && git commit -m "chore(deps): pin .agents to v4.2.1 #[Sprint_ID]"
    ```
+   Every tag is published as a [GitHub Release](https://github.com/GstMirabal/.agents/releases) with its notes, so you can read exactly what a version changes before pinning to it.
+
    To upgrade later: check the [CHANGELOG](CHANGELOG.md), check out the new tag, and re-run the installer to pick up new agents/commands/skills:
    ```bash
    git submodule update --remote --merge   # only if you deliberately track main
    .agents/scripts/install_claude.sh
    ```
 
-5. **Audit & Configure**
-   Review `agents.md` (the governance ruleset) to ensure your local environment variables and paths are correctly mapped within the framework.
+4. **Audit & configure**
+   Review [`agents.md`](agents.md) — the governance ruleset the installer auto-imports into your `CLAUDE.md` — to confirm your local paths and environment map correctly onto the framework. Your own `docs/0_SYSTEM_OVERVIEW.md` entry point is scaffolded into the host on the first `/agents:pipeline` run (`workflows/standardization_workflow.md`), so there is nothing to write by hand.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -139,19 +137,8 @@ Once integrated, the framework automatically triggers its auditors during your A
 python .agents/skills/omni-context-minimizer/scripts/omni_minimizer.py path/to/large_file.py
 ```
 
-### 🛡️ Scenario: Retrofitting Existing Projects
-If you are adding the framework to an **already established repository**, follow this sequence to align your architectural roadmap:
+### 🤖 Core Commands (Slash Commands)
 
-1.  **Submodule Insertion:** In your root folder: `git submodule add https://github.com/GstMirabal/.agents .agents`
-2.  **Bridge Installation:** `.agents/scripts/install_claude.sh` (creates `.claude/agents`, `.claude/commands/agents`, `.claude/skills`, and merges hooks/MCP config).
-3.  **AI Session Trigger:** Tell the AI: *"Initialize session using governance protocols in `.agents/` and execute `/agents:start`."*
-4.  **Roadmap Discovery:** The topology mapper will map `docs/active_state.json` (scaffolding it on first run — see `start_workflow.md`). Run the command: **`/agents:pipeline`**.
-
-The Orchestrator will automatically scan your source code, identify your project's current Phase, initialize your local context, and generate persistent architectural tracking in `docs/roadmaps/`.
-
----
-
-### 🤖 AI-Ops: Core Commands (Slash Commands)
 The framework maps every `workflows/*.md` protocol to a real Claude Code slash command in `commands/*.md`, installed under the `/agents:*` namespace so they never collide with commands your host project defines. The three you will use every session:
 
 | Command | Purpose |
@@ -162,19 +149,36 @@ The framework maps every `workflows/*.md` protocol to a real Claude Code slash c
 
 See the full command reference → [`docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md`](docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md) (all 11 commands, the Skills Manifest JSON example, and the full retrofit scenario walkthrough).
 
+### 🛡️ Scenario: Retrofitting Existing Projects
+
+If you are adding the framework to an **already established repository**, follow this sequence to align your architectural roadmap:
+
+1.  **Submodule insertion:** In your root folder: `git submodule add https://github.com/GstMirabal/.agents .agents`
+2.  **Bridge installation:** `.agents/scripts/install_claude.sh` (creates `.claude/agents`, `.claude/commands/agents`, `.claude/skills`, and merges hooks/MCP config).
+3.  **AI session trigger:** Tell the AI: *"Initialize session using governance protocols in `.agents/` and execute `/agents:start`."*
+4.  **Roadmap discovery:** The topology mapper will map `docs/active_state.json` (scaffolding it on first run — see `start_workflow.md`). Then run **`/agents:pipeline`**.
+
+The Orchestrator will scan your source code, identify your project's current Phase, initialize your local context, and generate persistent architectural tracking in `docs/roadmaps/`.
+
 > [!TIP]
-> **Documentation Sovereignty:** All technical docs, implementation plans (`docs/sprints/`), and local roadmaps (`docs/roadmaps/`) are tightly bound directly to Pipeline tracking under `/docs/`.
+> **Documentation sovereignty:** All technical docs, implementation plans (`docs/sprints/`), and local roadmaps (`docs/roadmaps/`) are bound directly to Pipeline tracking under `/docs/`.
 
 > [!IMPORTANT]
-> **Orchestration Manifest:** The Orchestrator uses **`.agents/skills/manifest_skills.json`** to statically route tools, drastically reducing token consumption and discovery time during sessions — see the guide above for a worked example.
+> **Orchestration manifest:** The Orchestrator uses `.agents/skills/manifest_skills.json` to statically route tools, drastically reducing token consumption and discovery time during sessions — see the guide above for a worked example.
 
-Check the `/workflows/` directory for automated protocols like project scaffolding. Explore `/mcp_servers/` for bridging external LLM data nodes.
+Check [`workflows/`](workflows/) for automated protocols like project scaffolding, and [`mcp_servers/`](mcp_servers/) for bridging external LLM data nodes.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make to the core framework are **greatly appreciated**.
+Contributions to the core framework are **greatly appreciated**. Start with [`CONTRIBUTING.md`](CONTRIBUTING.md) — it covers the real flow used here (branch discipline under `RA-12`, forging a skill via `skill-creator`, and what never belongs in a PR to this repo). Participation is governed by the [Code of Conduct](CODE_OF_CONDUCT.md); to report a vulnerability, follow [`SECURITY.md`](SECURITY.md) instead of opening a public issue.
+
+1. Fork the project
+2. Create your branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes using Conventional Commits (`git commit -m 'feat: add some amazing feature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ### 🧬 Developing the Framework Itself (Nucleus Mode)
 
@@ -188,44 +192,30 @@ python3 scripts/install_claude.py
 
 This links `.claude/commands/agents/*` and `.claude/agents/*` (so `/agents:start`, `/agents:close`, etc. work while you develop) and adds `@agents.md` to a nucleus-local `CLAUDE.md` — no hooks, skills, MCP, or scaffolding (those assume a host root; `.claude/` here is git-ignored, regenerate anytime by re-running the script). **Restart your Claude Code session** afterward — commands are discovered at session start, not live.
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'feat: Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## License
 
-Distributed under the MIT License. See `LICENSE.txt` for more information. A handful of vendored skills carry their own license instead — see `NOTICE.md`.
+Distributed under the MIT License — see [`LICENSE.txt`](LICENSE.txt). A handful of vendored skills carry their own license instead; those are disclosed in [`NOTICE.md`](NOTICE.md), and skills whose provenance is still unverified are tracked in [`docs/audits/THIRD_PARTY_PROVENANCE_TODO.md`](docs/audits/THIRD_PARTY_PROVENANCE_TODO.md).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Contact
 
-Gustavo Mirabal Suarez - gst.mirabal@gmail.com
+**Gustavo Mirabal Suarez** — Project Link: [github.com/GstMirabal/.agents](https://github.com/GstMirabal/.agents)
 
-- LinkedIn: [@Gustavo-Mirabal](https://www.linkedin.com/in/gstmirabal/)
-- GitHub: [@GstMirabal](https://github.com/GstMirabal)
-- Twitter: [@GstMirabal](https://x.com/gst_mirabal)
-
-Project Link: [https://github.com/GstMirabal/.agents](https://github.com/GstMirabal/.agents)
+<a href="https://www.linkedin.com/in/gstmirabal/"><img src="https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=flat&logo=linkedin&logoColor=white" alt="Connect on LinkedIn"></a> <a href="mailto:gst.mirabal@gmail.com"><img src="https://img.shields.io/badge/Email-gst.mirabal@gmail.com-EA4335?style=flat&logo=gmail&logoColor=white" alt="Email gst.mirabal@gmail.com"></a> <a href="https://x.com/gst_mirabal"><img src="https://img.shields.io/badge/X-@gst__mirabal-000000?style=flat&logo=x&logoColor=white" alt="X profile"></a>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- MARKDOWN LINKS & IMAGES -->
-[contributors-shield]: https://img.shields.io/github/contributors/GstMirabal/.agents.svg?style=for-the-badge
-[contributors-url]: https://github.com/GstMirabal/.agents/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/GstMirabal/.agents.svg?style=for-the-badge
-[forks-url]: https://github.com/GstMirabal/.agents/network/members
-[stars-shield]: https://img.shields.io/github/stars/GstMirabal/.agents.svg?style=for-the-badge
-[stars-url]: https://github.com/GstMirabal/.agents/stargazers
-[issues-shield]: https://img.shields.io/github/issues/GstMirabal/.agents.svg?style=for-the-badge
-[issues-url]: https://github.com/GstMirabal/.agents/issues
-[release-shield]: https://img.shields.io/github/v/release/GstMirabal/.agents?style=for-the-badge
-[release-url]: https://github.com/GstMirabal/.agents/releases
-[license-shield]: https://img.shields.io/github/license/GstMirabal/.agents.svg?style=for-the-badge
+[version-shield]: https://img.shields.io/github/v/release/GstMirabal/.agents?style=flat&label=release&color=a68a5b&labelColor=18202f
+[version-url]: https://github.com/GstMirabal/.agents/releases/latest
+[license-shield]: https://img.shields.io/github/license/GstMirabal/.agents?style=flat&color=a68a5b&labelColor=18202f
 [license-url]: https://github.com/GstMirabal/.agents/blob/main/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://www.linkedin.com/in/gstmirabal/
+[stars-shield]: https://img.shields.io/github/stars/GstMirabal/.agents?style=flat&color=a68a5b&labelColor=18202f
+[stars-url]: https://github.com/GstMirabal/.agents/stargazers
+[issues-shield]: https://img.shields.io/github/issues/GstMirabal/.agents?style=flat&color=a68a5b&labelColor=18202f
+[issues-url]: https://github.com/GstMirabal/.agents/issues
+[python-shield]: https://img.shields.io/badge/Python-3.10%2B-a68a5b?style=flat&labelColor=18202f
+[python-url]: https://www.python.org/downloads/
