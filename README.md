@@ -6,7 +6,7 @@
 <img src="docs/assets/logo/agents_banner.svg" alt="Token-Optimized Agent Pipeline banner" width="100%">
 <!-- BANNER_END -->
 
-[![Version][version-shield]][version-url] [![License][license-shield]][license-url] [![Stars][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url] [![Python][python-shield]][python-url]
+[![Release][version-shield]][version-url] [![License][license-shield]][license-url] [![Stars][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url] [![Python][python-shield]][python-url]
 
 <h3>Token-Optimized Agent Pipeline</h3>
 
@@ -115,6 +115,8 @@ The Token-Optimized Agent Pipeline is an AI agent governance framework designed 
    cd .agents && git fetch --tags && git checkout v4.2.1 && cd ..
    git add .agents && git commit -m "chore(deps): pin .agents to v4.2.1 #[Sprint_ID]"
    ```
+   Every tag is published as a [GitHub Release](https://github.com/GstMirabal/.agents/releases) with its notes, so you can read exactly what a version changes before pinning to it.
+
    To upgrade later: check the [CHANGELOG](CHANGELOG.md), check out the new tag, and re-run the installer to pick up new agents/commands/skills:
    ```bash
    git submodule update --remote --merge   # only if you deliberately track main
@@ -207,8 +209,8 @@ Distributed under the MIT License — see [`LICENSE.txt`](LICENSE.txt). A handfu
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- MARKDOWN LINKS & IMAGES -->
-[version-shield]: https://img.shields.io/github/v/tag/GstMirabal/.agents?style=flat&label=version&color=a68a5b&labelColor=18202f
-[version-url]: https://github.com/GstMirabal/.agents/tags
+[version-shield]: https://img.shields.io/github/v/release/GstMirabal/.agents?style=flat&label=release&color=a68a5b&labelColor=18202f
+[version-url]: https://github.com/GstMirabal/.agents/releases/latest
 [license-shield]: https://img.shields.io/github/license/GstMirabal/.agents?style=flat&color=a68a5b&labelColor=18202f
 [license-url]: https://github.com/GstMirabal/.agents/blob/main/LICENSE.txt
 [stars-shield]: https://img.shields.io/github/stars/GstMirabal/.agents?style=flat&color=a68a5b&labelColor=18202f
