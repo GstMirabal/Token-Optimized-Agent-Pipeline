@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline/blob/main/SECURITY.md
+    about: Do not open a public issue — follow the private disclosure process in SECURITY.md.
+  - name: Contributing guide
+    url: https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline/blob/main/CONTRIBUTING.md
+    about: Branch discipline, how to forge a skill, and what never belongs in a PR here.

@@ -7,11 +7,11 @@ Tracking file, not a blocker for publishing. These vendored skills lack a verifi
 - [x] **`origin: ECC` identified** — the 4 Django skills come from [`affaan-m/ECC`](https://github.com/affaan-m/ECC) ("The agent harness performance optimization system"), **MIT licensed**. Confirmed, not inferred: ECC's own `skills/django-patterns/SKILL.md` carries a byte-identical `description` to the vendored copy and stamps `metadata: origin: ECC` on its own skills, which is exactly the field that appears here. ECC also ships `django-security`, `django-tdd` and `django-verification` under the same paths. Attribution added to `NOTICE.md`; the vendored `SKILL.md` files themselves are left untouched under the Skill Documentation Veto (`rules/skills_and_integrations.md §3`).
   - `skills/django-patterns-3rd/`, `skills/django-security-3rd/`, `skills/django-tdd-3rd/`, `skills/django-verification-3rd/`
 
+- [x] **`skills/vite/` traced and attributed** — its `source` metadata already named the chain; both ends verified **MIT** via the GitHub API: [vitejs/vite](https://github.com/vitejs/vite) (the content) and [antfu/skills](https://github.com/antfu/skills) (the generation scripts, by Anthony Fu, matching the declared `author`).
+- [x] **`skills/seo/` and `skills/accessibility/` traced and attributed** — the unresolvable-looking `author: web-quality-skills` is [addyosmani/web-quality-skills](https://github.com/addyosmani/web-quality-skills), **MIT**. Confirmed rather than assumed: that repo ships both skills under `skills/seo/` and `skills/accessibility/`, and each `description` is byte-identical to the vendored copy — the same verification method that resolved ECC.
+
 ## Confirmed third-party, license/origin unverified
 
-- [ ] `skills/vite/` — has real attribution metadata: `author: Anthony Fu`, `source: Generated from https://github.com/vitejs/vite, scripts at https://github.com/antfu/skills`. Easiest one to close — the source is already named, just needs the actual license (Vite itself is MIT) confirmed and a `LICENSE.txt`/notice added.
-- [ ] `skills/seo/` — `author: web-quality-skills`, `license: MIT` self-declared, but no `LICENSE.txt` bundled and "web-quality-skills" isn't a resolvable URL/org as-is.
-- [ ] `skills/accessibility/` — same pattern as `seo` (`author: web-quality-skills`, `license: MIT` declared, no `LICENSE.txt`).
 - [ ] `skills/vercel-composition-patterns/` — `author: vercel`, `license: MIT` declared, no `LICENSE.txt` bundled.
 - [ ] `skills/vercel-react-best-practices/` — same pattern (`author: vercel`, `license: MIT` declared, no `LICENSE.txt`).
 - [ ] `skills/tailwind-css-patterns/` — no license/author/source metadata at all.

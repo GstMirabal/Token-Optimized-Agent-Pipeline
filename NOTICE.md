@@ -11,5 +11,8 @@ This repository is distributed under the MIT License (`LICENSE.txt`), except for
 | `skills/django-security-3rd/` | MIT | ECC — [github.com/affaan-m/ECC](https://github.com/affaan-m/ECC). |
 | `skills/django-tdd-3rd/` | MIT | ECC — [github.com/affaan-m/ECC](https://github.com/affaan-m/ECC). |
 | `skills/django-verification-3rd/` | MIT | ECC — [github.com/affaan-m/ECC](https://github.com/affaan-m/ECC). |
+| `skills/vite/` | MIT | Anthony Fu — generated from [vitejs/vite](https://github.com/vitejs/vite) (MIT) by the scripts at [antfu/skills](https://github.com/antfu/skills) (MIT), as its own `source` metadata states. |
+| `skills/seo/` | MIT | [addyosmani/web-quality-skills](https://github.com/addyosmani/web-quality-skills) — the `web-quality-skills` named in the skill's `author` field. |
+| `skills/accessibility/` | MIT | [addyosmani/web-quality-skills](https://github.com/addyosmani/web-quality-skills). |
 
 For vendored skills whose license/provenance is **not yet verified**, see `docs/audits/THIRD_PARTY_PROVENANCE_TODO.md` — those are tracked separately and are not covered by this notice.

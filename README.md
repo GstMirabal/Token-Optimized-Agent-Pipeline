@@ -18,7 +18,7 @@ It prevents context bloat, secures RCE environments, and disciplines AI agent sw
 
 <a href="agents.md"><strong>Read the governance ruleset »</strong></a>
 
-<a href="https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline/issues/new">Report Bug</a> · <a href="https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline/issues/new">Request Feature</a> · <a href="CONTRIBUTING.md">Contribute</a>
+<a href="https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline/issues/new?template=bug_report.yml">Report Bug</a> · <a href="https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline/issues/new?template=feature_request.yml">Request Feature</a> · <a href="CONTRIBUTING.md">Contribute</a>
 
 </div>
 
