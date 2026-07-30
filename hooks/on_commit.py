@@ -72,6 +72,82 @@ def audit_three_file_standard() -> bool:
     
     return True
 
+# A secret leaks when a secret-named identifier is assigned a STRING LITERAL.
+# Matching the bare substring "PASSWORD =" instead flags every legitimate read
+# of a secret (`password = request.data.get("password")`,
+# `EMAIL_HOST_PASSWORD = config["EMAIL_HOST_PASSWORD"]`), which no project
+# handling authentication can avoid — the gate then blocks every commit and
+# stops meaning anything. The literal on the right-hand side is what
+# distinguishes a leak from a lookup.
+SECRET_WORDS = (
+    r"API_?KEY|SECRET|PASSWORD|PASSWD|PRIVATE_?KEY|AUTH_?TOKEN"
+    r"|MASTER_?KEY|SIGNING_?KEY|ACCESS_?KEY|PEPPER|CREDENTIAL"
+)
+
+# The affix groups are `*`, not `+`: the secret word may be the whole
+# identifier (MASTER_KEY), a suffix (EMAIL_HOST_PASSWORD) or a prefix
+# (SECRET_KEY_FALLBACK).
+SECRET_ASSIGNMENT = re.compile(
+    rf"""^[ \t]*
+        (?P<name>[A-Za-z0-9_]*(?:{SECRET_WORDS})[A-Za-z0-9_]*)
+        [ \t]*(?::[^=\n]+)?[ \t]*=[ \t]*
+        (?P<q>['"])(?P<value>(?:(?!(?P=q)).)*)(?P=q)
+    """,
+    re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+)
+
+# Values that are obviously not live credentials.
+PLACEHOLDER_MARKERS = (
+    "example", "changeme", "change-me", "placeholder", "your-", "your_",
+    "dummy", "sample", "redacted", "xxxx", "insert", "fake", "test",
+)
+
+MIN_SECRET_LENGTH = 8
+
+
+def _is_test_artifact(path: Path) -> bool:
+    """Reports whether a path holds test fixtures rather than shipped code.
+
+    Test credentials are deliberately hardcoded and carry no production value,
+    so scanning them only produces noise.
+    """
+    parts = {p.lower() for p in path.parts}
+    if {"tests", "test", "fixtures", "factories"} & parts:
+        return True
+    name = path.name.lower()
+    return (
+        name.startswith("test_")
+        or name.endswith("_test.py")
+        or name in {"conftest.py", "factories.py", "tests.py"}
+    )
+
+
+def find_hardcoded_secret(content: str) -> str | None:
+    """Returns the identifier of the first hardcoded secret found, if any.
+
+    Args:
+        content: Full text of a staged file.
+
+    Returns:
+        The offending variable name, or None when nothing credible is found.
+    """
+    for match in SECRET_ASSIGNMENT.finditer(content):
+        value = match.group("value")
+
+        if len(value) < MIN_SECRET_LENGTH:
+            continue
+        # "$VAR" / "${VAR}" are environment interpolation placeholders, which is
+        # exactly the sanctioned pattern in config.toml.example (RA-09).
+        if value.startswith("$") or value.startswith("{"):
+            continue
+        if any(marker in value.lower() for marker in PLACEHOLDER_MARKERS):
+            continue
+
+        return match.group("name")
+
+    return None
+
+
 def audit_secret_shielding() -> bool:
     """Certifies secret shielding (agents.md §3 secret_sovereignty / RA-09)."""
     staged_files = get_staged_files()
@@ -97,12 +173,14 @@ def audit_secret_shielding() -> bool:
                 check=True
             ).stdout
             
-            # Pattern matching (Case insensitive)
-            secret_patterns = ["API_KEY =", "SECRET =", "PASSWORD =", "PRIVATE_KEY"]
-            for pattern in secret_patterns:
-                if pattern in content.upper():
-                    violations.append(f"Suspicious string '{pattern}' detected in {file_path}")
-                    break
+            if _is_test_artifact(path):
+                continue
+
+            leak = find_hardcoded_secret(content)
+            if leak:
+                violations.append(
+                    f"Hardcoded secret assigned to '{leak}' in {file_path}"
+                )
         except Exception:
             # Skip binary files or git errors
             continue
