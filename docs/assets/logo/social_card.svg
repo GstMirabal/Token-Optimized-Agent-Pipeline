@@ -1,0 +1,58 @@
+<svg viewBox="0 0 1280 640" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Token-Optimized Agent Pipeline — zero-trust subagent orchestration for AI software engineering, installs as .agents/">
+  <defs>
+    <linearGradient id="paper" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbfaf8"/>
+      <stop offset="60%" stop-color="#f6f4f0"/>
+      <stop offset="100%" stop-color="#eeebe4"/>
+    </linearGradient>
+    <linearGradient id="rail" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#a68a5b" stop-opacity="0.15"/>
+      <stop offset="35%" stop-color="#a68a5b"/>
+      <stop offset="100%" stop-color="#8a7049"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1280" height="640" fill="url(#paper)"/>
+  <rect x="0" y="0" width="1280" height="2" fill="#ddd6c9"/>
+  <rect x="0" y="638" width="1280" height="2" fill="#ddd6c9"/>
+
+  <rect x="104" y="150" width="4" height="358" fill="url(#rail)"/>
+
+  <text x="148" y="192" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="15" font-weight="600" fill="#a68a5b" letter-spacing="10">AI AGENT GOVERNANCE</text>
+
+  <text x="144" y="300" font-family="Georgia,'Times New Roman',Times,serif" font-size="82" font-weight="400" fill="#18202f" letter-spacing="0.5">Token-Optimized</text>
+  <text x="144" y="388" font-family="Georgia,'Times New Roman',Times,serif" font-size="82" font-weight="400" fill="#18202f" letter-spacing="0.5">Agent Pipeline</text>
+
+  <text x="148" y="450" font-family="Georgia,'Times New Roman',Times,serif" font-size="24" font-style="italic" fill="#5d6474">Zero-trust subagent orchestration · installs as .agents/</text>
+
+  <g font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#8a7049" letter-spacing="3.6">
+    <rect x="148" y="480" width="108" height="34" fill="none" stroke="#ddd6c9" stroke-width="1.4"/>
+    <text x="202" y="502" text-anchor="middle">PYTHON</text>
+    <rect x="266" y="480" width="158" height="34" fill="none" stroke="#ddd6c9" stroke-width="1.4"/>
+    <text x="345" y="502" text-anchor="middle">CLAUDE CODE</text>
+    <rect x="434" y="480" width="150" height="34" fill="none" stroke="#ddd6c9" stroke-width="1.4"/>
+    <text x="509" y="502" text-anchor="middle">ZERO-TRUST</text>
+    <rect x="594" y="480" width="182" height="34" fill="none" stroke="#ddd6c9" stroke-width="1.4"/>
+    <text x="685" y="502" text-anchor="middle">TOKEN ECONOMY</text>
+  </g>
+
+  <circle cx="1074" cy="300" r="96" fill="none" stroke="#a68a5b" stroke-opacity="0.75" stroke-width="1.8"/>
+  <circle cx="1074" cy="300" r="82" fill="none" stroke="#a68a5b" stroke-opacity="0.35" stroke-width="1.2"/>
+
+  <g transform="translate(1074,300)" fill="none" stroke="#a68a5b" stroke-width="2">
+    <line x1="-44" y1="-27" x2="0" y2="0" stroke-opacity="0.45"/>
+    <line x1="-44" y1="27" x2="0" y2="0" stroke-opacity="0.45"/>
+    <line x1="0" y1="0" x2="44" y2="-29"/>
+    <line x1="0" y1="0" x2="44" y2="0"/>
+    <line x1="0" y1="0" x2="44" y2="29"/>
+    <circle cx="-44" cy="-27" r="6.5" fill="#f6f4f0" stroke-opacity="0.55"/>
+    <circle cx="-44" cy="27" r="6.5" fill="#f6f4f0" stroke-opacity="0.55"/>
+    <circle cx="0" cy="0" r="14" fill="#f6f4f0" stroke-width="2.8"/>
+    <circle cx="0" cy="0" r="4" fill="#a68a5b" stroke="none"/>
+    <circle cx="44" cy="-29" r="6.5" fill="#f6f4f0"/>
+    <circle cx="44" cy="0" r="6.5" fill="#f6f4f0"/>
+    <circle cx="44" cy="29" r="6.5" fill="#f6f4f0"/>
+  </g>
+
+  <text x="1074" y="440" text-anchor="middle" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="13" fill="#9a9484" letter-spacing="4.5">MIT LICENSED</text>
+</svg>
