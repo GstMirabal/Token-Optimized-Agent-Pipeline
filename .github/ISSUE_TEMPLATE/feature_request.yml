@@ -1,0 +1,45 @@
+name: Feature request
+description: Propose a new rule, agent, skill, or workflow — or a change to an existing one.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Read `CONTRIBUTING.md` first — it covers what does and does not belong in this repo.
+        Notably, **real production profiles never go in the public nucleus** (`RA-15`).
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve
+      description: Describe the situation that goes wrong today, not the solution you have in mind.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which area
+      options:
+        - Governance rule (agents.md / rules/)
+        - Subagent role (agents/)
+        - Skill (skills/)
+        - Workflow or slash command (workflows/ / commands/)
+        - Installer / Claude Code bridge (scripts/)
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: |
+        If it is a recurring mechanism, say whether it should be a deterministic script or an
+        agent judgment call — the framework prefers a script wherever one would do.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false
