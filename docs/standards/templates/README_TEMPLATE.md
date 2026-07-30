@@ -74,7 +74,7 @@ This project is governed by the keyed governance ruleset in `.agents/agents.md` 
 | **§2** | Autonomy | Triple Lock Security, token economy ladder, human authorization gates. |
 | **§3** | Topology | Three-File Skill Standard, flat `skills/`, profiles for project packs. |
 | **§6** | Command | Pipeline agent role assignments; sequence defined in `pipeline_workflow.md`. |
-| **§7** | Rule Amendments | `RA-01`…`RA-14` amendments, including Branch Discipline (RA-12). |
+| **§7** | Rule Amendments | `RA-01`…`RA-15` amendments, including Branch Discipline (RA-12). |
 
 ---
 

@@ -4,6 +4,15 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Changed
+- **README identity aligned with the author's personal-repo design system**: `docs/assets/logo/agents_banner.svg` rebuilt from the dark terminal-mockup into the editorial "paper" language used by `GstMirabal/GstMirabal` — same palette (`#fbfaf8`→`#eeebe4` paper, `#a68a5b`/`#8a7049` brass, `#18202f` ink, `#ddd6c9` hairline), same `1200×300` geometry, brass left rail, tracked-uppercase eyebrow, Georgia display title, italic serif subtitle, outlined tag boxes, and right-hand circular emblem (the subagent fan-out graph replacing the personal monogram). The hardcoded `MIT · v3.5.1` footer is gone — a version string baked into an SVG is a drift trap. `README.md` badges realigned to `style=flat` in the same brass/ink palette (project badges) plus real brand colors (tech badges), matching the personal repo's convention, and contact badges now mirror it exactly (LinkedIn/Email/X).
+
+### Fixed
+- **Broken and stale README references** found while aligning it: the "Explore the docs" link pointed at `docs/0_SYSTEM_OVERVIEW.md`, which does not exist in the nucleus (it is a *host-side* artifact, scaffolded by `standardization_workflow.md` on a host's first pipeline run) — repointed at `agents.md`. The release badge queried GitHub *Releases*, of which there are none (only git tags), so it rendered "no releases or repo not found" — replaced with a tag badge, which also matches the README's own instruction to pin to a tag. Issue links carried `?template=bug-report---.md` for issue templates that were never created (no `.github/ISSUE_TEMPLATE/` exists) — simplified to plain `/issues/new`. The submodule pin example still said `v3.0.0`; now `v4.2.1`. Prerequisites claimed "Python 3.x" while the codebase uses PEP 604 unions and `match` statements — corrected to **3.10+**. `Node.js … via npx skills` contradicted `agents.md §8`/`RA-10`, which prohibit `npm`/`yarn` — replaced with the mandated `pnpm 11+` guidance. The README also never linked `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, or `NOTICE.md` despite Phase 017 creating them for exactly this purpose — now referenced from the Contributing and License sections. `README_TEMPLATE.md`'s `§7` row said `RA-01…RA-14`; now `RA-15`.
+
+### Added
+- **`README.md` "At a Glance" table**: verified counts and entry points (8 rule contexts, 13 agents, 34 skills, 10 workflows / 11 slash commands, 8-phase pipeline) — each number checked against the tree rather than asserted.
+
 ## [4.2.1] - 2026-07-27
 
 ### Security
