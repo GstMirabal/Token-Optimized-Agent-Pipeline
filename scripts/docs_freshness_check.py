@@ -195,18 +195,59 @@ def load_denylist(denylist_dir: Path, language: str) -> set[str]:
     return {line.strip() for line in lines if line.strip() and not line.startswith("#")}
 
 
+def is_tooling_path(source_file: str) -> bool:
+    """Whether a graph node is tooling rather than host application code.
+
+    A leading dot is the convention for configuration and vendored tooling —
+    `.agents/`, `.claude/`, `.github/` — none of which is a container the host
+    architects or documents.
+
+    An absolute path is excluded too. Graph extractors sometimes record one,
+    and it cannot be repo-relative by definition; taken as a container it
+    produces an entry with an empty name.
+
+    This matters because a repository whose code sits at its root must declare
+    `root: "."`, and every top-level directory then resolves to a container.
+    Without this, the framework's own submodule is reported as a container of
+    the host, needing a C4 Level 3 the host cannot write.
+
+    Args:
+        source_file: Path as recorded on the graph node.
+
+    Returns:
+        True when the path's first segment is hidden.
+    """
+    return source_file.startswith((".", "/"))
+
+
 def container_for_source(source_file: str, containers: list[dict]) -> tuple[str, str] | None:
     """Map a node's source_file to its (stack, container) tuple, per §2.1.2.
 
     A file directly under a declared root with no subdirectory of its own
     (e.g. 'apps/__init__.py') is deliberately excluded — it would otherwise
     register as a phantom zero-density container.
+
+    Hidden paths are excluded for the same reason: a repository whose code sits
+    at the root must declare `root: "."`, which then matches every `.agents/**`
+    and `.claude/**` node in the graph and invents containers named after the
+    tooling.
     """
+    if is_tooling_path(source_file):
+        return None
     for entry in containers:
         root = entry.get("root", "")
-        if not root or not source_file.startswith(root):
+        if not root:
             continue
-        remainder = source_file[len(root):].split("/", 1)
+        # A repository whose code sits at its own root declares `root: "."`.
+        # Taken literally, `source_file[len(root):]` then removes the first
+        # character of every path — 'users/views.py' became 'sers/views.py'
+        # and matched nothing, while '.agents/hooks/x.py' became
+        # 'agents/hooks/x.py' and matched. The host's real code was invisible
+        # and the vendored framework was reported as its container.
+        prefix = "" if root in (".", "./") else root
+        if prefix and not source_file.startswith(prefix):
+            continue
+        remainder = source_file[len(prefix):].split("/", 1)
         if len(remainder) < 2:
             continue
         return entry.get("stack", ""), remainder[0]
@@ -374,12 +415,28 @@ def run(repo_root: Path, current_sprint: int, denylist_dir: Path = DENYLIST_DIR)
         densities = compute_container_density(repo_root, denylist_dir, state)
         qualifying = level3_qualifying_containers(densities)
         names = ", ".join(f"{stack}/{container}" for stack, container in sorted(qualifying))
-        report.warn(f"C4 Level 3 required for: {names or '(none — advisory, insufficient graph data)'}")
+        if names:
+            report.warn(f"C4 Level 3 required for: {names}")
+        # No qualifying container is the ordinary case for a small repository,
+        # and "required for: (none)" read as a finding where there was none.
+        # Silence is the honest report; a gate that speaks when it has nothing
+        # to say is one people stop reading.
     else:
         report.warn("code_containers not declared — C4 Level 3 stays advisory")
 
     last_audit_sprint = state.get("current_sprint", {}).get("last_audit_sprint")
-    if last_audit_sprint is not None:
+    if last_audit_sprint is None:
+        # Skipping quietly is how this check came to do nothing in a host that
+        # declared `current_sprint_id` at the root instead. The structural
+        # delta is the only producer of a BLOCK, so an unreadable sprint number
+        # disabled the sole check capable of stopping anything — silently.
+        report.warn(
+            "current_sprint.last_audit_sprint is unreadable in "
+            "docs/active_state.json, so the structural-change check is "
+            "skipped. Declare it under `current_sprint`, not as a root-level "
+            "`current_sprint_id`."
+        )
+    else:
         exceeded, mode = structural_change_status(repo_root, int(last_audit_sprint), current_sprint)
         if exceeded and mode == "enforced":
             report.block("Structural change since last audit exceeds the p90 delta threshold — refresh anchors")
@@ -396,4 +453,9 @@ if __name__ == "__main__":
     sprint_arg = int(sys.argv[2]) if len(sys.argv) > 2 else 0
     result = run(root, sprint_arg)
     result.print_summary()
-    sys.exit(0)
+    # A BLOCK exits non-zero. Until this line the exit was an unconditional
+    # `sys.exit(0)`: `has_block` was computed on every run and consulted on
+    # none, so the gate `documentation_standard.md §4` describes as gating
+    # SESSION LOCKED could not fail a build in any host. Every green run of it,
+    # anywhere, was a constant rather than a verification.
+    sys.exit(1 if result.has_block else 0)

@@ -225,3 +225,61 @@ def test_small_stack_below_five_containers_uses_safety_floor():
 def test_run_on_empty_repo_produces_no_block(tmp_path):
     report = dfc.run(tmp_path, current_sprint=1, denylist_dir=tmp_path / "denylists")
     assert report.has_block is False
+
+
+# ---------------------------------------------------------------------------
+# The gate's own failure modes. Each of these was a live defect: the script
+# computed a verdict and discarded it, skipped its only blocking check without
+# saying so, and invented containers out of vendored tooling.
+# ---------------------------------------------------------------------------
+
+
+def test_a_block_makes_has_block_true():
+    """`has_block` was computed on every run and consulted on none."""
+    report = dfc.FreshnessReport()
+    report.block("structural change exceeds the threshold")
+    assert report.has_block is True
+
+
+def test_a_warning_alone_does_not_block():
+    """A gate that fails on advisory findings is one people switch off."""
+    report = dfc.FreshnessReport()
+    report.warn("advisory only")
+    assert report.has_block is False
+
+
+def test_tooling_paths_are_not_containers():
+    """A repository rooted at '.' matched every hidden directory.
+
+    The framework's own submodule was reported as a container of the host,
+    needing a C4 Level 3 the host could not write.
+    """
+    assert dfc.is_tooling_path(".agents/hooks/on_commit.py") is True
+    assert dfc.is_tooling_path(".claude/settings.json") is True
+    assert dfc.is_tooling_path("users/views.py") is False
+    # Extractors sometimes record an absolute path; it cannot be repo-relative,
+    # and taken as a container it produced an entry with an empty name.
+    assert dfc.is_tooling_path("/Users/developer/repo/.agents/x.py") is True
+
+
+def test_hidden_paths_resolve_to_no_container():
+    containers = [{"stack": "app", "root": "."}]
+    assert dfc.container_for_source(".agents/scripts/x.py", containers) is None
+    assert dfc.container_for_source("users/models/user.py", containers) == ("app", "users")
+
+
+def test_unreadable_sprint_number_is_reported(tmp_path):
+    """Skipping quietly disabled the only check capable of blocking.
+
+    A host declaring `current_sprint_id` at the root instead of
+    `current_sprint.last_audit_sprint` got no structural check and no word
+    about it.
+    """
+    docs = tmp_path / "docs"
+    docs.mkdir()
+    (docs / "active_state.json").write_text(
+        json.dumps({"current_sprint_id": 4}), encoding="utf-8"
+    )
+    report = dfc.run(tmp_path, 4)
+    messages = " ".join(f.message for f in report.findings)
+    assert "last_audit_sprint" in messages
