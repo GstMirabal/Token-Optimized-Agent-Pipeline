@@ -8,7 +8,7 @@ version: 1.0.0
 
 ## Status
 - **Strategy Lock:** `OPEN`
-- **Completion:** 4 of 6 pull requests
+- **Completion:** 5 of 6 pull requests
 - **Sprint ID:** `019` — next sequential number after Phase 18 (`018-post-publication-field-hardening.md`, `COMPLETED`).
 - **Branch:** `ai-sprint/019` (`RA-12`). This is the first phase in this repository to actually use the branch convention `RA-12` mandates: `git log --all` records no prior `ai-sprint/*` reference.
 
@@ -25,7 +25,7 @@ Capability work — loop stop-conditions, code-craft rules, tool-result pruning,
 | 2 | **J** | Missing edges in the workflow graph (Phase 4 agents named, `close` → `deployment`, onboarding order, external-plan entry) | ✅ **Merged into the branch** |
 | 3 | **E** | `start`/`close` symmetry, readiness and platform probes, branch sovereignty, generated workflow map | ✅ **Merged into the branch** |
 | 4 | **H** | Protocol-failure detection (`last_close_commit`) and `/agents:reconcile` | ✅ **Merged into the branch** |
-| 5 | **G** | Documentary closeout: README counts as a build failure, repo docs review | Pending |
+| 5 | **G** | Documentary closeout: README counts as a build failure, repo docs review | ✅ **Merged into the branch** |
 | 6 | **F** | Complete `revdoc`: C4, Blueprints, ADR recovery, metadata stamping, findings destination | Pending |
 
 ## PR 1 — Track I (complete)
@@ -98,8 +98,24 @@ The drift this phase opened by repairing now has a detector and a protocol. `las
 
 With no baseline recorded, it reports that fact and passes, rather than passing silently. Silence about an unmeasurable state is precisely what allowed the original drift.
 
+## PR 5 — Track G (complete)
+
+The counts in the README's "At a Glance" table were repaired **by hand three times in this session**: once when the ledger reconstruction found `10 protocols / 11 slash commands` against a tree of 12 and 13, once after retiring `skeleton`, once after adding `reconcile`. Three manual corrections of the same class of error in one day is the definition of something that should be a build step.
+
+**Where the line between script and judgment was drawn**, since this track contains both:
+
+| Item | Kind | Why |
+| :--- | :--- | :--- |
+| Five tree-derived counts | Script (`exit 2`) | Countable files; delegating this to judgment is what Filter 5 rejects |
+| "8 phases" in the same table | **Not checked** | Prose about a workflow's internals, not a set of files. A check reporting success on something it never measured is the `#28` defect |
+| Presence of `CONTRIBUTING`/`SECURITY`/`CODE_OF_CONDUCT`/`NOTICE` | Script-checkable | Existence is mechanical |
+| Whether this sprint *invalidated* one of them | **Judgment, declared as such** | A green check over stale content is worse than no check |
+| `render_readme.py` at close | **Rejected outright** | The nucleus README has no `{{TAG}}` markers — it is hand-written, so a close-time re-render would overwrite it, not sync it |
+
+A README rewritten past the check's patterns **fails** rather than passing: a claim that vanished is not a claim that was satisfied.
+
 ## Certification
-- [x] `make verify` green end to end (88 tests, installer sandbox, all scanners).
+- [x] `make verify` green end to end (91 tests, installer sandbox, all scanners).
 - [x] `check_invocation_coverage()` proven to fail: 28 findings on the pre-fix tree, 0 after.
 - [x] 10 new tests, each asserting failure where failure is required.
 - [x] Counts recomputed after the retirement: 11 workflows, 12 commands, 13 agents, 8 rule contexts, 34 skills.

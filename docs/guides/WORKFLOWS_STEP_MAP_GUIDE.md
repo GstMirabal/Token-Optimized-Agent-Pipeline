@@ -50,6 +50,8 @@ protocols that should mirror each other shows up there first.
 | 1. Topographic Audit | `graph_rebuild` | write |
 | 1. Topographic Audit | `docs_freshness_gate` | write |
 | 2. Sprint Closeout | `history_sync` | write |
+| 2. Sprint Closeout | `readme_counts` | write |
+| 2. Sprint Closeout | `repo_docs_check` | verify |
 | 2. Sprint Closeout | `extract_handoff` | write |
 | 2.5 Heuristic Pulse Gate | `heuristic_pulse_gate` | verify |
 | 3. Zero-Tolerance Purge | `memory_wipe` | ? |

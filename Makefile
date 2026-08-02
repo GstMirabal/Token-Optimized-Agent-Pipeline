@@ -51,6 +51,7 @@ verify:
 	cd $(AGENTS_DIR) && python3 scripts/scan_workflow_determinism.py .
 	cd $(AGENTS_DIR) && python3 scripts/verify_references.py
 	cd $(AGENTS_DIR) && python3 scripts/map_workflows.py --check
+	cd $(AGENTS_DIR) && python3 scripts/check_readme_counts.py
 	cd $(AGENTS_DIR) && python3 scripts/check_manifest_parity.py
 	cd $(AGENTS_DIR) && python3 scripts/check_absolute_paths.py
 	cd $(AGENTS_DIR) && python3 skills/topology-monitor/scripts/legacy_app_auditor.py
