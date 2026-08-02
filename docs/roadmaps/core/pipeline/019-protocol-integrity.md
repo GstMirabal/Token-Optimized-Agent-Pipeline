@@ -8,7 +8,7 @@ version: 1.0.0
 
 ## Status
 - **Strategy Lock:** `OPEN`
-- **Completion:** 1 of 6 pull requests
+- **Completion:** 2 of 6 pull requests
 - **Sprint ID:** `019` — next sequential number after Phase 18 (`018-post-publication-field-hardening.md`, `COMPLETED`).
 - **Branch:** `ai-sprint/019` (`RA-12`). This is the first phase in this repository to actually use the branch convention `RA-12` mandates: `git log --all` records no prior `ai-sprint/*` reference.
 
@@ -22,7 +22,7 @@ Capability work — loop stop-conditions, code-craft rules, tool-result pruning,
 | PR | Track | Scope | Status |
 | :--- | :--- | :--- | :--- |
 | 1 | **I** | Invocation coverage (`RA-16`), `make verify` ≡ CI, orphan remediation | ✅ **Merged into the branch** |
-| 2 | **J** | Missing edges in the workflow graph (Phase 4 agents named, `close` → `deployment`, onboarding order, platform re-check, external-plan entry) | Pending |
+| 2 | **J** | Missing edges in the workflow graph (Phase 4 agents named, `close` → `deployment`, onboarding order, external-plan entry) | ✅ **Merged into the branch** |
 | 3 | **E** | `start`/`close` symmetry, readiness and platform probes, branch sovereignty, generated workflow map | Pending |
 | 4 | **H** | Protocol-failure detection (`last_close_commit`) and `/agents:reconcile` | Pending |
 | 5 | **G** | Documentary closeout: README counts as a build failure, repo docs review | Pending |
@@ -52,7 +52,18 @@ Running `check_invocation_coverage()` against the unmodified tree produced **28 
 | **Cost was measured, not assumed.** | The full `make verify`, including 75 tests and the installer sandbox, runs in **1.7 s**. The usual argument for splitting a verify target into fast and slow halves — which is how the asymmetry would return — does not apply here. |
 | **The phase practised what it legislates.** | `RA-16` landed in PR 1 precisely so the five mechanisms the remaining PRs introduce (`map_workflows.py`, `check_readme_counts.py`, `reconciliation_workflow.md`, and the two probes) cannot be born orphaned. |
 
-### Certification
+## PR 2 — Track J (complete)
+
+Four missing edges closed. **A fifth, `platform_recheck` in `close`, was deliberately moved to PR 3**: it reuses the platform probe that PR 3 builds, and writing a step that calls a mechanism which does not yet exist is precisely what `RA-16` — merged one PR earlier — forbids. The sequencing error was caught by the rule this phase had just introduced.
+
+| Edge | Before | After |
+| :--- | :--- | :--- |
+| Phase 4 | One cell: *"Summon Agent Orch, Skill Arch, and Rule Val"* | `4.1`/`4.2`/`4.3`, proper names, deliverables named including `task_scope.md` |
+| External plan → Phase 1 | Undeclared | An approved external plan is an **input** to Phase 1 and does not skip Phases 3-5 |
+| `close` → `deployment` | Jurisdiction only (*"exclusively deployment's job"*) | `deployment_handoff` step names the protocol and why the merge lives there |
+| Onboarding order | Three entry points, no sequence; the README omitted `standardization` | Declared once in `agents.md §6`; README and guide reference it |
+
+## Certification
 - [x] `make verify` green end to end (75 tests, installer sandbox, all scanners).
 - [x] `check_invocation_coverage()` proven to fail: 28 findings on the pre-fix tree, 0 after.
 - [x] 10 new tests, each asserting failure where failure is required.

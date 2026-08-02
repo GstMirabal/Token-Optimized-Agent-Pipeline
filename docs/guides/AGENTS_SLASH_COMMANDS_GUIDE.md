@@ -21,9 +21,7 @@ If you are adding the framework to an **already established repository**, follow
 2. **Bridge Installation:** `.agents/scripts/install_claude.sh` (creates `.claude/agents`, `.claude/commands/agents`, `.claude/skills`, and merges hooks/MCP config).
 3. **AI Session Trigger:** Tell the AI: *"Initialize session using governance protocols in `.agents/` and execute `/agents:start`."*
 4. **Roadmap Discovery:** The topology mapper will map `docs/active_state.json` (scaffolding it on first run — see `start_workflow.md`).
-5. **Harden the repository:** **`/agents:harden`**. It changes no code and reduces risk immediately, so it costs nothing to run before anything else.
-6. **Document what is there, before changing it:** **`/agents:revdoc`**. Fixing before documenting means fixing against a model of the system rather than the system, and documenting afterwards produces text that justifies what was done.
-7. **Then execute:** **`/agents:pipeline`**.
+5. **Then follow the canonical onboarding order**, defined once in `agents.md §6` and referenced rather than repeated (`RA-14`): **`/agents:harden`** → **`/agents:standardization`** → **`/agents:revdoc`** → **`/agents:pipeline`**. Each owns a different object — platform controls, artifacts and topology, documentation of the code, and change itself — and running them out of order produces documentation of a layout that is about to move.
 
 The Orchestrator will automatically scan your source code, identify your project's current Phase, initialize your local context, and generate persistent architectural tracking in `docs/roadmaps/`.
 

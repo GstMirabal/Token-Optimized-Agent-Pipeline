@@ -122,7 +122,17 @@ The pipeline operates under a rigid sequential process. Role usurpation is stric
 > **Core vs. Auxiliary.** The 8 roles above are the *Core Pipeline Roles* (mandatory in every Planning → Sprint Closeout cycle). `governance_learner`, `doc_orchestrator`, `topology_mapper`, `git_sync_agent`, and `token_economy_agent` (see `agents/*.md`) are **Auxiliary Agents** — invoked as needed (knowledge distillation, documentation, topology, upstream sync) but not a mandatory stop on every pipeline pass. **Project-specific specialists** (e.g. `backend_identity_specialist`, `frontend_ux_hardener`) live in `profiles/[name]/agents/` and only join the pipeline when their profile is installed. Their absence from this table is intentional, not an omission.
 
 ### 🚀 The Execution Pipeline
-Two protocols sit outside the sprint pipeline and run on a repository the framework has not handled before: `workflows/repository_hardening_workflow.md` (`/agents:harden`, platform controls) and `workflows/reverse_documentation_workflow.md` (`/agents:revdoc`, documentation that is verifiably true). Both are loaded on demand, and `revdoc` runs before any remediation on an undocumented repository.
+
+**Onboarding order (canonical, declared once).** On a repository the framework has not handled before, three protocols run before the pipeline, in this order. Every other document that mentions onboarding **references this list and never restates it** (`RA-14`):
+
+| # | Protocol | Owns | Why here |
+| :--- | :--- | :--- | :--- |
+| 1 | `workflows/repository_hardening_workflow.md` (`/agents:harden`) | **Platform controls**: secret scanning, private vulnerability reporting, Dependabot, code scanning, branch protection | Changes no code and reduces risk immediately, so it costs nothing to do first |
+| 2 | `workflows/standardization_workflow.md` (`/agents:standardization`) | **Artifacts and topology**: census of legacy material, secret scan, snapshot branch, migration under human approval | Ordering the house before documenting it; otherwise the documentation describes a layout about to change |
+| 3 | `workflows/reverse_documentation_workflow.md` (`/agents:revdoc`) | **Documentation of the code**: graph first, every declared path verified, contracts, C4, ADR | Fixing before documenting means fixing against a model of the system rather than the system |
+| 4 | `workflows/pipeline_workflow.md` (`/agents:pipeline`) | Change | Only now is there a verified account of what is being changed |
+
+Steps 2 and 3 are frequently confused because they are adjacent: `standardization` migrates *artifacts*, `revdoc` documents *code*. Different objects, and until Phase 019 no document declared which ran first.
 
 The normative 8-phase pipeline (Planning → Sprint Closeout) is defined **exclusively** in `workflows/pipeline_workflow.md`, loaded on demand via `/agents:pipeline`. It is not duplicated here to keep the always-loaded governance ruleset lean and drift-free. Non-negotiables enforced at this level: the Approval Gate (Phase 5) is a single attended human authorization — never wrapped in an unattended `/loop` — and all execution happens on `ai-sprint/[ID]` (RA-12).
 
