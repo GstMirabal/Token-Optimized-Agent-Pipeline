@@ -154,11 +154,20 @@ Six pull requests, all on `ai-sprint/019`, none on `main`.
 - [x] Counts verified mechanically, not by inspection: 12 workflows, 13 commands, 13 agents, 8 rule contexts, 34 skills.
 - [x] Drift detection replayed against the real `v4.3.0`→`#30` event: lists the commits, exits `2`.
 
-## Known follow-ups (tracked, not blocking)
-- **The branch `ai-sprint/019` is itself unintegrated**, and `branch_sovereignty.py audit` correctly refuses to seal while it is. Integrating it is `/agents:deployment`'s job (`RA-12`), which holds the Tester signature and the observed-green CI gate (`RA-13`).
-- **Five platform controls remain disabled** on this repository (secret scanning, push protection, Dependabot updates and alerts, branch protection). The probe now reports them at every start; turning them on is `/agents:harden`, a human decision.
-- **This repository has no `docs/decisions/` and no Blueprints.** The readiness probe reports it each session until either `/agents:revdoc` runs or the gap is acknowledged in `acknowledged_gaps` with a reason.
-- **Phase `020`** carries the deferred capability work: tool-result pruning, code-craft rules, `/loop` stop-conditions, and parallel fan-out — the last conditioned on evidence that sequential execution is a real bottleneck.
+## Follow-ups — all resolved 2026-08-02
+
+Recorded as open when this phase closed, and closed the same day. Left here rather than deleted: what a follow-up turned into is more useful than the fact that one existed.
+
+| Follow-up | Outcome |
+| :--- | :--- |
+| `ai-sprint/019` unintegrated, and the new gate correctly refused to seal | Integrated via PR `#31` through `deployment_workflow.md`: CI observed green as a **separate invocation** before the squash merge (`RA-13`). Phase `020` followed as PR `#32`. |
+| Five platform controls disabled | All enabled via `/agents:harden`, in the protocol's own order. Alert triage after enabling: **0 secret-scanning alerts, 0 Dependabot alerts**. Branch protection went last and requires only `audit` — the single check **observed green on real pull requests**, not the CodeQL checks enabled minutes earlier and never yet run on a PR, which is exactly the trap `repository_hardening_workflow.md` Phase 8 documents. |
+| No `docs/decisions/`, no Blueprints | `docs/decisions/` created with `ADR-0001` (Phase `020`). The Blueprint gap is acknowledged in `acknowledged_gaps` with a reason: the nucleus's modules are governance documents that already describe themselves, so a Blueprint for `close_workflow.md` would restate `close_workflow.md`. |
+| Phase `020` capability work | Completed. Three tracks implemented, parallel fan-out **declined on measured evidence** (`ADR-0001`). |
+
+### What integration proved about the branch gate
+
+`git branch --merged main` listed **neither** branch after both were fully merged, because `deployment` squash-merges and a squash commit is not a descendant of the branch. Had `branch_sovereignty.py` used that instrument — the obvious one — it would have blocked every future close and pruned nothing, forever. Merged-PR state identified both correctly and `prune` removed them. The design decision was validated on the first real integration it faced.
 
 ---
 *Opened and completed 2026-08-02 on `ai-sprint/019`. Not released — ledger entries sit under `[Unreleased]`.*
