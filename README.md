@@ -147,7 +147,14 @@ The framework maps every `workflows/*.md` protocol to a real Claude Code slash c
 | **`/agents:pipeline`** | **Orchestration**: The Double-Gate execution pipeline. Distributes tasks across subagents. |
 | **`/agents:close`** | **Exit Gate**: Extracts heuristics, updates roadmaps, mirrors state, and seals the repo securely. |
 
-See the full command reference → [`docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md`](docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md) (all 11 commands, the Skills Manifest JSON example, and the full retrofit scenario walkthrough).
+Two more earn their place on a repository the framework has not seen before:
+
+| Command | Purpose |
+| :--- | :--- |
+| **`/agents:harden`** | Turns on the platform controls a public repository should have — secret scanning, private vulnerability reporting, Dependabot, code scanning, branch protection — in an order that does not lock you out of your own work. |
+| **`/agents:revdoc`** | Produces documentation for an existing codebase that is true, and provably so: graph first, every declared path verified, contracts written for every exposed interface. |
+
+See the full command reference → [`docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md`](docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md) (all 13 commands, the Skills Manifest JSON example, and the full retrofit scenario walkthrough).
 
 ### 🛡️ Scenario: Retrofitting Existing Projects
 
@@ -156,7 +163,10 @@ If you are adding the framework to an **already established repository**, follow
 1.  **Submodule insertion:** In your root folder: `git submodule add https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline .agents`
 2.  **Bridge installation:** `.agents/scripts/install_claude.sh` (creates `.claude/agents`, `.claude/commands/agents`, `.claude/skills`, and merges hooks/MCP config).
 3.  **AI session trigger:** Tell the AI: *"Initialize session using governance protocols in `.agents/` and execute `/agents:start`."*
-4.  **Roadmap discovery:** The topology mapper will map `docs/active_state.json` (scaffolding it on first run — see `start_workflow.md`). Then run **`/agents:pipeline`**.
+4.  **Roadmap discovery:** The topology mapper will map `docs/active_state.json` (scaffolding it on first run — see `start_workflow.md`).
+5.  **Harden the repository:** **`/agents:harden`**. It changes no code and reduces risk immediately, so it costs nothing to do before anything else.
+6.  **Document what is there, before changing it:** **`/agents:revdoc`**. Fixing before documenting means fixing against a model of the system rather than the system, and documenting afterwards produces text that justifies what was done.
+7.  **Then execute:** **`/agents:pipeline`**.
 
 The Orchestrator will scan your source code, identify your project's current Phase, initialize your local context, and generate persistent architectural tracking in `docs/roadmaps/`.
 

@@ -48,6 +48,7 @@ Domain rules live in `rules/` and are loaded **on demand** at these triggers —
 | **Language** | `user_chat` | Spanish strictly confined to human-agent chat and Implementation Plans. |
 | **Language** | `technical_clarity` | Avoid redundant greetings. Prioritize Markdown Tables. Restrict Mermaid/ASCII. |
 | **Language** | `restrictions` | Define explicitly what is prohibited. Avoid vague positive actions. |
+| **Language** | `unambiguous_action` | EVERY instruction — plan step, task, commit message, rule — MUST be executable without interpretation. PROHIBITED: deictics (`here`, `there`, `this repo`) and abbreviations where a proper name exists; action verbs that do not state the operation (`align`, `adopt`, `review`, `evaluate`, `handle`); adjectives used as acceptance criteria (`perfect`, `correct`, `clean`, `complete`) without the check that proves them; magnitudes without a unit; and passive voice that hides who decides. Every step MUST state its operation, its target by name, and its done-criterion. Precedent: in one plan `here` resolved to two different repositories in the same document, and `leave it perfect` was the exit criterion of its largest phase — both would have executed wrongly with no visible error. |
 
 ## 2. Autonomy, Efficiency, and Execution
 
@@ -121,6 +122,8 @@ The pipeline operates under a rigid sequential process. Role usurpation is stric
 > **Core vs. Auxiliary.** The 8 roles above are the *Core Pipeline Roles* (mandatory in every Planning → Sprint Closeout cycle). `governance_learner`, `doc_orchestrator`, `topology_mapper`, `git_sync_agent`, and `token_economy_agent` (see `agents/*.md`) are **Auxiliary Agents** — invoked as needed (knowledge distillation, documentation, topology, upstream sync) but not a mandatory stop on every pipeline pass. **Project-specific specialists** (e.g. `backend_identity_specialist`, `frontend_ux_hardener`) live in `profiles/[name]/agents/` and only join the pipeline when their profile is installed. Their absence from this table is intentional, not an omission.
 
 ### 🚀 The Execution Pipeline
+Two protocols sit outside the sprint pipeline and run on a repository the framework has not handled before: `workflows/repository_hardening_workflow.md` (`/agents:harden`, platform controls) and `workflows/reverse_documentation_workflow.md` (`/agents:revdoc`, documentation that is verifiably true). Both are loaded on demand, and `revdoc` runs before any remediation on an undocumented repository.
+
 The normative 8-phase pipeline (Planning → Sprint Closeout) is defined **exclusively** in `workflows/pipeline_workflow.md`, loaded on demand via `/agents:pipeline`. It is not duplicated here to keep the always-loaded governance ruleset lean and drift-free. Non-negotiables enforced at this level: the Approval Gate (Phase 5) is a single attended human authorization — never wrapped in an unattended `/loop` — and all execution happens on `ai-sprint/[ID]` (RA-12).
 
 ## 7. Rule Amendments
