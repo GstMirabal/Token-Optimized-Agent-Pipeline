@@ -14,6 +14,7 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
+import hooks.on_commit_msg as ocm  # noqa: E402
 from hooks.on_commit import (  # noqa: E402
     audit_dependency_justification,
     audit_regression_test,
@@ -108,3 +109,32 @@ def test_vendored_manifest_is_ignored(repo):
 def test_chore_deps_is_exempt(repo):
     stage("requirements.txt", "existing==1.0.0\nbrand-new==2.0.0\n")
     assert audit_dependency_justification("chore(deps): weekly bump #020", ["requirements.txt"]) is None
+
+
+# --- native commit-msg hook (closes the pre-commit coverage hole) ------
+
+def test_strip_comments_drops_git_commentary():
+    raw = "feat(x): thing #020\n\n# Please enter the commit message\n# On branch main\n"
+    assert ocm.strip_comments(raw) == "feat(x): thing #020"
+
+
+def test_message_file_gates_a_fix_without_a_test(repo, monkeypatch):
+    stage("app.py", "def f(): pass\n")
+    msg = repo / "MSG"
+    msg.write_text("fix(app): correct it #020\n")
+    monkeypatch.setattr(sys, "argv", ["on_commit_msg.py", str(msg)])
+    assert ocm.main() == 1
+
+
+def test_message_file_passes_when_the_test_is_staged(repo, monkeypatch):
+    stage("app.py", "def f(): pass\n")
+    stage("tests/test_app.py", "def test_f(): pass\n")
+    msg = repo / "MSG"
+    msg.write_text("fix(app): correct it #020\n")
+    monkeypatch.setattr(sys, "argv", ["on_commit_msg.py", str(msg)])
+    assert ocm.main() == 0
+
+
+def test_missing_message_file_does_not_crash(monkeypatch, tmp_path):
+    monkeypatch.setattr(sys, "argv", ["on_commit_msg.py", str(tmp_path / "absent")])
+    assert ocm.main() == 0
