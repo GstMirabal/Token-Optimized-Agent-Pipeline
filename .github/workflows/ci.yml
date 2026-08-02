@@ -6,6 +6,16 @@ on:
   pull_request:
     branches: [main]
 
+# CI invokes `make verify` rather than restating its steps. Before Phase 019 the
+# two sides had drifted in BOTH directions: CI ran pytest, verify_references,
+# manifest parity and the RA-15 path scan that `make verify` did not, while
+# `make verify` ran the workflow-determinism scan that CI did not. A green local
+# run predicted nothing about CI, and vice versa. Keeping the list in one place
+# makes that divergence impossible rather than something to police.
+#
+# Only steps that cannot be a command belong here: the Vale prose lint is a
+# GitHub Action. Anything needing network or credentials stays out of `verify`.
+
 jobs:
   audit:
     runs-on: ubuntu-latest
@@ -16,95 +26,11 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Python syntax check
-        run: |
-          find . -name "*.py" -not -path "./.git/*" -not -path "*/node_modules/*" \
-            | xargs python3 -m py_compile
+      - name: Install test dependencies
+        run: pip install -q pytest
 
-      - name: JSON validity
-        run: |
-          python3 - <<'EOF'
-          import json, glob
-          for f in glob.glob('**/*.json', recursive=True):
-              if 'node_modules' in f or '.git/' in f:
-                  continue
-              json.load(open(f))
-          print("All JSON valid")
-          EOF
-
-      - name: Command <-> workflow link audit
-        run: python3 skills/slash-commander/scripts/verify_commands.py
-
-      - name: Manifest <-> skills parity
-        run: |
-          python3 - <<'EOF'
-          import json, os, sys
-          manifest = json.load(open('skills/manifest_skills.json'))
-          listed = {s['path'] for s in manifest['skills']}
-          on_disk = {n for n in os.listdir('skills')
-                     if os.path.isdir(os.path.join('skills', n))}
-          missing = sorted(p for p in listed if p not in on_disk)
-          unlisted = sorted(on_disk - listed)
-          if missing or unlisted:
-              print("manifest paths without dir:", missing)
-              print("dirs not in manifest:", unlisted)
-              sys.exit(1)
-          print(f"Manifest parity OK ({len(listed)} skills)")
-          EOF
-
-      - name: Structural audit (flat topology + Three-File Skill Standard)
-        run: python3 skills/topology-monitor/scripts/legacy_app_auditor.py
-
-      - name: No local developer-machine absolute paths (RA-15)
-        run: |
-          python3 - <<'EOF'
-          import re, subprocess, sys
-
-          # Real developer home paths (e.g. from a debugging session or a
-          # copy-pasted example) must never land in the tracked tree — this
-          # is exactly how a real host project name leaked into
-          # skills/skillopt/data/scenarios.json before the pre-publication
-          # audit (RA-15, agents.md §7). Generic placeholders are fine.
-          ALLOWED_USERS = {"developer", "user", "username", "yourname", "example"}
-          PATTERN = re.compile(r"/(?:Users|home)/([A-Za-z0-9_.-]+)/")
-
-          files = subprocess.run(
-              ["git", "grep", "-lIn", r"/Users/[A-Za-z0-9_.-]\+/\|/home/[A-Za-z0-9_.-]\+/"],
-              capture_output=True, text=True,
-          ).stdout.splitlines()
-
-          violations = []
-          for f in files:
-              if not f or f.startswith("venv_skillopt/"):
-                  continue
-              text = open(f, encoding="utf-8", errors="ignore").read()
-              for m in PATTERN.finditer(text):
-                  if m.group(1).lower() not in ALLOWED_USERS:
-                      violations.append(f"{f}: {m.group(0)}")
-
-          if violations:
-              print("❌ Real-looking local developer paths found (use a generic placeholder instead):")
-              for v in sorted(set(violations)):
-                  print(f"  {v}")
-              sys.exit(1)
-          print("✅ No local developer-machine absolute paths found.")
-          EOF
-
-      - name: Framework unit tests
-        run: |
-          pip install -q pytest
-          python3 -m pytest tests/ -q
-
-      - name: Installer sandbox test
-        run: bash tests/test_installer.sh
-
-      - name: Manifest is generated, not hand-drifted
-        run: |
-          python3 skills/mass-standardizer/scripts/generate_manifest.py
-          git diff --exit-code skills/manifest_skills.json
-
-      - name: Reference integrity (rules reachable, templates exist, Rule NN concordance)
-        run: python3 scripts/verify_references.py
+      - name: Framework self-check (make verify)
+        run: make verify
 
       - name: Diátaxis prose lint (Blueprints only — rules/documentation_standard.md §1)
         uses: errata-ai/vale-action@v2

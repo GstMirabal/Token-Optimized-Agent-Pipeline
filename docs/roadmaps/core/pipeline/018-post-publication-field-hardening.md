@@ -48,7 +48,7 @@ The secret scanner ran only as a Claude Code `PreToolUse` hook, so it saw only c
 | A pattern gap and a coverage gap are one problem, not two. | `#30` alone would have widened the net over a hole: a staged `MASTER_KEY = "<literal>"` passed the native hook exactly as it passed the agent hook, because the pattern list covered neither `MASTER_KEY` nor `ENCRYPTION_PEPPER`. Shipping the mechanism without `#27` would have produced a *more* confident false green. |
 | A host roadmap had recorded the wrong diagnosis. | It held that the pattern was right and the hook had never run. The hook ran; the pattern missed. Verifying end to end — staging a real secret and committing from a terminal — is what separated the two. |
 | The nucleus test suite cannot see host-shaped defects. | All three of `#27`, `#28`, `#30` were green in the nucleus and broken in the field. `#28`'s path bug specifically required a *host* directory layout to manifest. |
-| `RA-15` caught a contribution from this framework's own author. | `#28` initially used `/Users/someone/` in a test fixture; the repository's own absolute-path gate rejected it because `someone` is not among the allowed generic names. |
+| `RA-15` caught a contribution from this framework's own author. | `#28` initially used a home-directory placeholder whose user segment was not among the allowed generic names, and the repository's own absolute-path gate rejected it. The offending literal is deliberately paraphrased here rather than quoted: quoting it verbatim re-triggers the gate, as this very file demonstrated when `make verify` rejected an earlier draft of this row. |
 
 ## Certification Checklist
 - [x] `pytest tests/` green (65 tests collected).
