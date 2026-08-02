@@ -54,7 +54,7 @@ protocols that should mirror each other shows up there first.
 | 2. Sprint Closeout | `repo_docs_check` | verify |
 | 2. Sprint Closeout | `extract_handoff` | write |
 | 2.5 Heuristic Pulse Gate | `heuristic_pulse_gate` | verify |
-| 3. Zero-Tolerance Purge | `memory_wipe` | ? |
+| 3. Zero-Tolerance Purge | `memory_wipe` | write |
 | 3.5 Platform Recheck | `platform_recheck` | verify |
 | 4. State Sync | `state_sync` | write |
 | 5. Git Sovereignty | `atomic_commit` | write |
