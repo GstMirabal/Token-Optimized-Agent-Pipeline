@@ -260,6 +260,111 @@ def is_valid_commit_message(message: str) -> bool:
     return bool(COMMIT_MSG_REGEX.match(first_line))
 
 
+TEST_PATH = re.compile(r"(^|/)(tests?|__tests__)/|(^|/)test_[^/]+$|_test\.[a-z]+$|\.test\.[a-z]+$")
+SOURCE_SUFFIXES = (".py", ".js", ".jsx", ".ts", ".tsx", ".go", ".rs", ".java", ".rb", ".php")
+MANIFESTS = ("requirements", "package.json", "pyproject.toml")
+# A manifest inside vendored material is not this project's dependency
+# declaration. The retroactive run over 156 commits flagged two commits whose
+# only "dependency changes" were package.json files under node_modules/ inside
+# a vendored `-3rd` skill — nothing the author chose or controls.
+VENDORED = ("node_modules/", "-3rd/", "/3rd/", "venv_skillopt/")
+DEPENDENCY_LINE = re.compile(r"^Dependency:\s*\S+\s*[—-]\s*\S", re.MULTILINE)
+
+
+def audit_regression_test(message: str, staged: list[str]) -> str | None:
+    """A bug fix must ship the test that proves it (rules/code_craft.md §6).
+
+    `RA-13 SEQUENTIAL_GATES` applied to tests: the failing test is observed
+    before the fix, so the change is known to address the cause rather than a
+    symptom. Coverage (`qa_and_testing.md §1`) measures quantity; this measures
+    ordering, and nothing else did.
+
+    Exempt by design, following the PR #27 lesson that a gate must recognise
+    the legitimate case instead of blocking everything that resembles the
+    illegitimate one: a `fix(` commit that stages no source file at all has
+    nothing to write a test against.
+
+    Args:
+        message: The commit message.
+        staged: Paths staged for this commit.
+
+    Returns:
+        str | None: Failure reason, or None when the commit passes.
+    """
+    if not message.startswith("fix("):
+        return None
+    if not any(path.endswith(SOURCE_SUFFIXES) for path in staged):
+        return None  # Documentation, workflow or config fix: no test to write.
+    if any(TEST_PATH.search(path) for path in staged):
+        return None
+    return ("A `fix(` commit must stage the test that proves the bug (rules/code_craft.md §6). "
+            "Write the failing test, watch it fail, then fix. If this fix genuinely cannot be "
+            "tested, that is information about the design — say so and commit as `refactor(` "
+            "or `chore(` instead of relabelling it.")
+
+
+PACKAGE_NAME = re.compile(r'^[+-]\s*"?([A-Za-z0-9_.@/-]+)"?\s*[:=><~^"]')
+
+
+def newly_added_dependencies(manifests: list[str], ref: str = "--cached") -> set[str]:
+    """Package names this diff introduces, ignoring bumps, removals and reorders.
+
+    Firing on any touch of a manifest was the first version of this check, and
+    the retroactive run over 156 commits rejected 3 of 3 — including version
+    bumps and removals, where demanding a justification line is nonsense. The
+    signal is a name that appears on the added side and nowhere on the removed
+    side; anything else is maintenance of something already admitted.
+    """
+    diff = subprocess.run(
+        ["git", "diff", ref, "-U0", "--"] + manifests,
+        capture_output=True, text=True,
+    )
+    if diff.returncode != 0:
+        return set()
+
+    added, removed = set(), set()
+    for line in diff.stdout.splitlines():
+        if line.startswith(("+++", "---")):
+            continue
+        match = PACKAGE_NAME.match(line)
+        if not match:
+            continue
+        (added if line.startswith("+") else removed).add(match.group(1))
+    return added - removed
+
+
+def audit_dependency_justification(message: str, staged: list[str]) -> str | None:
+    """A new dependency must say why it earned its place (code_craft.md §7).
+
+    `agents.md §8` governs how a dependency is installed; nothing governed
+    whether it should enter. Every dependency is permanent code the project
+    does not control.
+
+    Exempt: `chore(deps)`, which is the conventional prefix for version
+    maintenance rather than admission of something new.
+
+    Args:
+        message: The commit message.
+        staged: Paths staged for this commit.
+
+    Returns:
+        str | None: Failure reason, or None when the commit passes.
+    """
+    if message.startswith("chore(deps"):
+        return None
+    manifests = [path for path in staged
+                 if any(m in path for m in MANIFESTS)
+                 and not any(v in path for v in VENDORED)]
+    if not manifests or not newly_added_dependencies(manifests):
+        return None
+    if DEPENDENCY_LINE.search(message):
+        return None
+    return ("This commit adds a dependency without justifying it "
+            "(rules/code_craft.md §7). Add a line `Dependency: <name> — <reason>` to the "
+            "commit message, or use `chore(deps)` if it is version maintenance rather "
+            "than a new dependency.")
+
+
 def block(reason: str) -> None:
     # Claude Code only feeds stderr back to the model on a blocking hook, and
     # only exit code 2 actually blocks (RA-11 HOOK_BLOCKING_SEMANTICS).
@@ -282,12 +387,29 @@ def main():
         sys.exit(0)
 
     # Guard 2 (agents.md §5): Conventional Commit + #[Sprint_ID] suffix.
+    # Guards 2-4 need the commit message, which is only reliably available on
+    # the agent path (the Bash command carries `-m`). At native pre-commit time
+    # git has not yet finalised COMMIT_EDITMSG, so reading it there would test
+    # the PREVIOUS commit's message — worse than not checking. Closing that gap
+    # needs a `commit-msg` hook; until then this coverage is honestly partial,
+    # not silently assumed.
     if command:
         message = extract_commit_message(command)
         if message is not None and not is_valid_commit_message(message):
             log_error("on_commit", "COMMIT_MSG_VIOLATION", f"Non-conforming message: {message[:80]}")
             block("Commit message must follow Conventional Commits and end with the "
                   "#[Sprint_ID] suffix, e.g. \"feat(auth): add login flow #078\" (agents.md §5).")
+
+        if message is not None:
+            staged = get_staged_files()
+            # Guard 3 (rules/code_craft.md §6): a bug fix ships its test.
+            if reason := audit_regression_test(message, staged):
+                log_error("on_commit", "REGRESSION_TEST_MISSING", message[:80])
+                block(reason)
+            # Guard 4 (rules/code_craft.md §7): a new dependency says why.
+            if reason := audit_dependency_justification(message, staged):
+                log_error("on_commit", "DEPENDENCY_UNJUSTIFIED", message[:80])
+                block(reason)
 
     print("🛡️ [DEVOPS AGENT] Pre-Commit Integrity Handshake...")
 

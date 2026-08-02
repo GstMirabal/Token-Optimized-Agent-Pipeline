@@ -185,6 +185,51 @@ def install_nucleus_bridge() -> int:
     return 0
 
 
+def install_git_commit_msg() -> None:
+    """Install a native commit-msg hook so message gates cover every commit.
+
+    `on_commit.py` runs at pre-commit time, where the message does not yet
+    exist — git has not finalised `COMMIT_EDITMSG`, so reading it there would
+    test the previous commit's message. The agent path escapes this because its
+    Bash command carries `-m`; a terminal or IDE commit had no message gate at
+    all. `commit-msg` is the hook that does have it.
+
+    Same ownership rule as the pre-commit installer: an existing hook belongs
+    to the project and is never overwritten.
+    """
+    hooks_dir = HOST_DIR / ".git" / "hooks"
+    if not hooks_dir.is_dir():
+        return
+
+    hook_path = hooks_dir / "commit-msg"
+    body = (
+        "#!/usr/bin/env bash\n"
+        "# Installed by .agents/scripts/install_claude.py\n"
+        "#\n"
+        "# Conventional Commit format, regression-test and dependency-\n"
+        "# justification gates. pre-commit cannot run these: the message does\n"
+        "# not exist yet at that point.\n"
+        "set -euo pipefail\n"
+        "[ -f .agents/hooks/on_commit_msg.py ] || exit 0\n"
+        'exec python3 .agents/hooks/on_commit_msg.py "$1"\n'
+    )
+
+    if hook_path.exists():
+        current = hook_path.read_text(encoding="utf-8", errors="replace")
+        if "on_commit_msg.py" in current:
+            return
+        print(
+            "ℹ️  A commit-msg hook already exists and was left alone. To gate "
+            "commit messages too, add:\n"
+            '      python3 .agents/hooks/on_commit_msg.py "$1"'
+        )
+        return
+
+    hook_path.write_text(body, encoding="utf-8")
+    hook_path.chmod(0o755)
+    print("🪝 Installed .git/hooks/commit-msg (message gates on every commit path)")
+
+
 def install_git_pre_commit() -> None:
     """Install a native pre-commit hook so a terminal commit is scanned too.
 
@@ -263,6 +308,7 @@ def main() -> int:
     ensure_gitignore_entries()
     scaffold_identity_config()
     install_git_pre_commit()
+    install_git_commit_msg()
 
     if args.profile:
         profile_dir = AGENTS_DIR / "profiles" / args.profile
