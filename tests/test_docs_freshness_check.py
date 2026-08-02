@@ -259,7 +259,7 @@ def test_tooling_paths_are_not_containers():
     assert dfc.is_tooling_path("users/views.py") is False
     # Extractors sometimes record an absolute path; it cannot be repo-relative,
     # and taken as a container it produced an entry with an empty name.
-    assert dfc.is_tooling_path("/Users/someone/repo/.agents/x.py") is True
+    assert dfc.is_tooling_path("/Users/developer/repo/.agents/x.py") is True
 
 
 def test_hidden_paths_resolve_to_no_container():
