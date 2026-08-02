@@ -17,6 +17,7 @@ protocols that should mirror each other shows up there first.
 | `deployment_workflow` | — | — | write | — | — | — |
 | `extract_workflow` | — | — | — | — | ?/write | — |
 | `pipeline_workflow` | — | ?/verify | write | — | — | — |
+| `reconciliation_workflow` | write | — | write | — | — | write |
 | `remediation_workflow` | write | — | — | — | — | — |
 | `repository_hardening_workflow` | — | — | — | — | — | — |
 | `reverse_documentation_workflow` | — | — | — | — | — | — |
@@ -102,6 +103,19 @@ protocols that should mirror each other shows up there first.
 | 6. Execution | `Subagents` | write |
 | 7. Quality Gate | `qa_agent` → `tester_agent` | verify |
 | 8. Sprint Closeout | `principal_agent` | write |
+
+### `reconciliation_workflow.md`
+
+| Phase | Step | Effect |
+| :--- | :--- | :--- |
+| 1 | `delimit` | write |
+| 2 | `classify` | write |
+| 3 | `rebuild_ledger` | write |
+| 4 | `rebuild_phase` | write |
+| 5 | `resync_state` | write |
+| 6 | `rebuild_graph` | write |
+| 7 | `regate` | verify |
+| 8 | `declare_unrecoverable` | write |
 
 ### `remediation_workflow.md`
 
@@ -195,6 +209,7 @@ protocols that should mirror each other shows up there first.
 | 0. Zero-Memory Initialization | `read_ruleset` | read |
 | 0. Zero-Memory Initialization | `pip_setup` | write |
 | 0. Zero-Memory Initialization | `read_graph` | write |
+| 0.4 Drift Check | `drift_check` | write |
 | 0.5 State Claim | `state_claim` | write |
 | 0.6 Readiness Probe | `readiness_probe` | write |
 | 0.7 Platform Probe | `platform_probe` | write |

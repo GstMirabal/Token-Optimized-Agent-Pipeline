@@ -8,7 +8,7 @@ version: 1.0.0
 
 ## Status
 - **Strategy Lock:** `OPEN`
-- **Completion:** 3 of 6 pull requests
+- **Completion:** 4 of 6 pull requests
 - **Sprint ID:** `019` — next sequential number after Phase 18 (`018-post-publication-field-hardening.md`, `COMPLETED`).
 - **Branch:** `ai-sprint/019` (`RA-12`). This is the first phase in this repository to actually use the branch convention `RA-12` mandates: `git log --all` records no prior `ai-sprint/*` reference.
 
@@ -24,7 +24,7 @@ Capability work — loop stop-conditions, code-craft rules, tool-result pruning,
 | 1 | **I** | Invocation coverage (`RA-16`), `make verify` ≡ CI, orphan remediation | ✅ **Merged into the branch** |
 | 2 | **J** | Missing edges in the workflow graph (Phase 4 agents named, `close` → `deployment`, onboarding order, external-plan entry) | ✅ **Merged into the branch** |
 | 3 | **E** | `start`/`close` symmetry, readiness and platform probes, branch sovereignty, generated workflow map | ✅ **Merged into the branch** |
-| 4 | **H** | Protocol-failure detection (`last_close_commit`) and `/agents:reconcile` | Pending |
+| 4 | **H** | Protocol-failure detection (`last_close_commit`) and `/agents:reconcile` | ✅ **Merged into the branch** |
 | 5 | **G** | Documentary closeout: README counts as a build failure, repo docs review | Pending |
 | 6 | **F** | Complete `revdoc`: C4, Blueprints, ADR recovery, metadata stamping, findings destination | Pending |
 
@@ -86,8 +86,20 @@ The audit is deliberately **not** scoped to `ai-sprint/*`: `git log --all` recor
 - The branch audit exits `2` on `ai-sprint/019` itself, which is genuinely unintegrated.
 - The generated map shows `start_workflow` moving from `—` to `read/write` on the state anchor: the symmetry is machine-visible, not asserted.
 
+## PR 4 — Track H (complete)
+
+The drift this phase opened by repairing now has a detector and a protocol. `last_close_commit` is the whole mechanism: one field, stamped at close, against which `HEAD` can be compared. Its absence is why the `v4.3.0` drift went unnoticed for a week — there was nothing to compare against, so no amount of diligence would have surfaced it.
+
+**Verified by replaying the real event.** Pointed at the commit preceding pull requests `#27`-`#30`, the detector lists them and exits `2`. That is the same drift that was reconciled by hand at the start of this session; `workflows/reconciliation_workflow.md` is the transcript of that recovery rather than a design sketch.
+
+**Two boundaries recorded explicitly**, because both are destructive if crossed:
+- `reconcile` **reverts nothing**. `remediation_workflow.md` revokes bad work with `git restore .`; here the work is good and only its record is missing. Confusing them would destroy exactly what needs documenting.
+- The check runs **before** `state_claim`. Claiming the lock writes `IN_PROGRESS`, so a status-keyed check placed after it would be reading its own side effect. The detector is status-agnostic for the same reason: it compares commits, not labels.
+
+With no baseline recorded, it reports that fact and passes, rather than passing silently. Silence about an unmeasurable state is precisely what allowed the original drift.
+
 ## Certification
-- [x] `make verify` green end to end (84 tests, installer sandbox, all scanners).
+- [x] `make verify` green end to end (88 tests, installer sandbox, all scanners).
 - [x] `check_invocation_coverage()` proven to fail: 28 findings on the pre-fix tree, 0 after.
 - [x] 10 new tests, each asserting failure where failure is required.
 - [x] Counts recomputed after the retirement: 11 workflows, 12 commands, 13 agents, 8 rule contexts, 34 skills.

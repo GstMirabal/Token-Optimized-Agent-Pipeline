@@ -36,6 +36,7 @@ Every `workflows/*.md` protocol maps to a real Claude Code slash command in `com
 | **`/agents:audit`** | **Standards Sweep**: Proactive structural maintenance to purge logic drifts and missing `.md` rules. |
 | **`/agents:skill-forge`** | **Tool Registration**: Creates, tests, and natively registers new pipeline tools without mutating production logic. |
 | **`/agents:remediation`** | **Rollback & Recovery**: Halts infinite hallucination loops, nukes git to pristine state, and logs negative knowledge. |
+| **`/agents:reconcile`** | **Protocol-Failure Recovery**: Restores traceability for commits made without `start` or `close` — rebuilds the Master Ledger entry and phase record from commit bodies and diffs. **Reverts nothing**: the work is good, its record is missing. Not to be confused with `remediation`, which revokes bad work. |
 | **`/agents:standardization`** | **Structural**: Enforces the `[layer]/[app]/` dictionary and Technical English purity. |
 | **`/agents:extract`** | **Distillation**: Memory indexer handling the "Rule Amendment Loop" (see `agents.md §4`). |
 | **`/agents:deployment`** | **Deployment**: Merges the sprint branch to upstream branches and operates CI/CD boundaries. |
@@ -72,7 +73,7 @@ If there's more than one valid path:
 ```bash
 ls .claude/commands/agents/
 ```
-Expected output: one `.md` file per command listed in §3.2 (`start.md`, `pipeline.md`, `close.md`, `audit.md`, `skill-forge.md`, `remediation.md`, `standardization.md`, `extract.md`, `deployment.md`, `graphify.md`, `harden.md`, `revdoc.md`), and in Claude Code the `/agents:` prefix autocompletes to the same 12 commands.
+Expected output: one `.md` file per command listed in §3.2 (`start.md`, `pipeline.md`, `close.md`, `audit.md`, `skill-forge.md`, `remediation.md`, `reconcile.md`, `standardization.md`, `extract.md`, `deployment.md`, `graphify.md`, `harden.md`, `revdoc.md`), and in Claude Code the `/agents:` prefix autocompletes to the same 13 commands.
 
 ## 5. If something goes wrong
 | Symptom | Likely cause | Fix |

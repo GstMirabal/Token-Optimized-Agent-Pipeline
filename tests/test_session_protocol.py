@@ -13,6 +13,7 @@ import pytest
 SCRIPTS = Path(__file__).parent.parent / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 import branch_sovereignty as bs  # noqa: E402
+import detect_drift as dd  # noqa: E402
 import session_state as ss  # noqa: E402
 
 
@@ -115,3 +116,43 @@ def test_prune_never_deletes_unproven_work(repo):
         capture_output=True, text=True,
     ).stdout.split()
     assert "unmerged" in branches
+
+
+# --- drift detection ---------------------------------------------------
+
+def test_no_baseline_is_reported_not_silently_passed(anchor, capsys):
+    """Silence about an unmeasurable state is what let the v4.3.0 drift last."""
+    anchor.write_text(json.dumps({"status": "CLOSED_SUCCESSFULLY"}))
+    assert dd.main() == 0
+    assert "baseline" in capsys.readouterr().out
+
+
+def test_commits_after_the_sealed_close_are_drift(repo):
+    (repo / "docs").mkdir()
+    baseline = subprocess.run(["git", "rev-parse", "HEAD"],
+                              capture_output=True, text=True).stdout.strip()
+    (repo / "f.txt").write_text("out of protocol\n")
+    subprocess.run(["git", "commit", "-aqm", "outside"], check=True)
+    (repo / "docs" / "active_state.json").write_text(
+        json.dumps({"status": "CLOSED_SUCCESSFULLY", "last_close_commit": baseline})
+    )
+    assert dd.main() == 2
+
+
+def test_head_matching_the_sealed_close_is_clean(repo):
+    (repo / "docs").mkdir()
+    head = subprocess.run(["git", "rev-parse", "HEAD"],
+                          capture_output=True, text=True).stdout.strip()
+    (repo / "docs" / "active_state.json").write_text(
+        json.dumps({"status": "CLOSED_SUCCESSFULLY", "last_close_commit": head})
+    )
+    assert dd.main() == 0
+
+
+def test_unknown_baseline_does_not_crash(repo):
+    """A rewritten history or a different clone must degrade, not explode."""
+    (repo / "docs").mkdir()
+    (repo / "docs" / "active_state.json").write_text(
+        json.dumps({"last_close_commit": "0" * 40})
+    )
+    assert dd.main() == 0
