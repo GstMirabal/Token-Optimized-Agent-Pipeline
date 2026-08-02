@@ -49,9 +49,28 @@ def check_rules_reachable(corpus: str) -> list[str]:
     return errors
 
 
+# Filenames GitHub defines, which this framework does not own and never ships
+# in docs/standards/templates/. Any workflow describing repository setup has to
+# name them, and doing so is not a dangling reference.
+PLATFORM_TEMPLATES = frozenset({
+    "PULL_REQUEST_TEMPLATE.md",
+    "ISSUE_TEMPLATE.md",
+})
+
+
 def check_templates_exist(corpus: str) -> list[str]:
+    """Every framework template cited in a loadable document must exist.
+
+    Args:
+        corpus: Concatenated text of agents.md and every workflow.
+
+    Returns:
+        list[str]: One error per template cited without a file behind it.
+    """
     errors = []
     for name in set(re.findall(r"([A-Z][A-Z_]*_TEMPLATE\.md)", corpus)):
+        if name in PLATFORM_TEMPLATES:
+            continue
         if not (TEMPLATES_DIR / name).exists():
             errors.append(f"(b) {name} is cited but missing from {TEMPLATES_DIR}/.")
     return errors
