@@ -91,7 +91,7 @@ First cycle a host adopts this gate: `WARN` only. From the second cycle: `BLOCK`
 
 A delta in `graphify graph_stats` (new community, or node/edge count change) between `last_audit_sprint` and the current sprint, plus a second trigger (a new or newly-promoted god-node). Threshold: 90th percentile of the historical deltas over the last **N=10** sprints (fewer if the project has less history) — self-recalculating, never a fixed number to re-litigate. `BLOCK` does not activate until at least 5 historical deltas exist; before that, the gate stays `WARN` regardless of cycle. A close with no prior `graph_stats.json`/`last_audit_*` (a project's first sprint) is a clean `WARN` pass, never an error.
 
-**Data source**: `close_workflow.md` Phase 1 persists a git-tracked, sprint-tagged snapshot at `docs/sprints/[ID]/graph_stats.json` on every close. Deltas are computed exclusively from these records — never from `graphify-out/`, which is gitignored and holds untagged tool-maturation re-runs, not sprint-to-sprint deltas.
+**Data source**: `close_workflow.md` Phase 1 persists a git-tracked, sprint-tagged snapshot at `graph_stats.json` inside the canonical sprint directory (`agents.md §5 mandatory_topology`) on every close. Deltas are computed exclusively from these records — never from `graphify-out/`, which is gitignored and holds untagged tool-maturation re-runs, not sprint-to-sprint deltas.
 
 ### 4.4 Documentation integrity
 

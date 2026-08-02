@@ -95,7 +95,7 @@ Domain rules live in `rules/` and are loaded **on demand** at these triggers —
 
 | Category | Rule (Key) | Value / Constraint (Value) |
 | :--- | :--- | :--- |
-| **Initialization** | `mandatory_topology` | Reject init if `/docs/` missing. Instantiate `docs/sprints/[Sprint_ID]-[Stack]-[Layer]/`. |
+| **Initialization** | `mandatory_topology` | Reject init if `/docs/` missing. **Canonical sprint path, declared here and referenced (never restated) elsewhere**: `docs/sprints/[Sprint_ID]-[Stack]-[Layer]/`. Four different forms of it were in circulation until Phase 019 — `docs/sprints/[ID]/`, this one, `docs/sprints/[ID]-[Stack]-[Layer]/`, and the nucleus's own `docs/sprints/core/pipeline/` — so `graph_stats.json` was being persisted to a path no other document recognised. **Host projects only**: the nucleus has no `docs/sprints/` hierarchy and traces its own work through branches, pull requests and `CHANGELOG.md` (see `agents/token_economy_agent.md`). |
 | **Initialization** | `legacy_onboarding` | If mature project: Execute **Full Reverse Engineering** and generate Walkthroughs. |
 | **Nucleus Guard** | `nucleus_neutrality` | Automatic structural scaffolding PROHIBITED if workspace is `.agents` core. |
 | **Traceability** | `state_anchor` | Context MUST be extracted from `docs/active_state.json` (Zero Coordinate). |

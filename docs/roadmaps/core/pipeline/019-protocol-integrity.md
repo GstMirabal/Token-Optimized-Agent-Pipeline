@@ -8,7 +8,7 @@ version: 1.0.0
 
 ## Status
 - **Strategy Lock:** `OPEN`
-- **Completion:** 2 of 6 pull requests
+- **Completion:** 3 of 6 pull requests
 - **Sprint ID:** `019` — next sequential number after Phase 18 (`018-post-publication-field-hardening.md`, `COMPLETED`).
 - **Branch:** `ai-sprint/019` (`RA-12`). This is the first phase in this repository to actually use the branch convention `RA-12` mandates: `git log --all` records no prior `ai-sprint/*` reference.
 
@@ -23,7 +23,7 @@ Capability work — loop stop-conditions, code-craft rules, tool-result pruning,
 | :--- | :--- | :--- | :--- |
 | 1 | **I** | Invocation coverage (`RA-16`), `make verify` ≡ CI, orphan remediation | ✅ **Merged into the branch** |
 | 2 | **J** | Missing edges in the workflow graph (Phase 4 agents named, `close` → `deployment`, onboarding order, external-plan entry) | ✅ **Merged into the branch** |
-| 3 | **E** | `start`/`close` symmetry, readiness and platform probes, branch sovereignty, generated workflow map | Pending |
+| 3 | **E** | `start`/`close` symmetry, readiness and platform probes, branch sovereignty, generated workflow map | ✅ **Merged into the branch** |
 | 4 | **H** | Protocol-failure detection (`last_close_commit`) and `/agents:reconcile` | Pending |
 | 5 | **G** | Documentary closeout: README counts as a build failure, repo docs review | Pending |
 | 6 | **F** | Complete `revdoc`: C4, Blueprints, ADR recovery, metadata stamping, findings destination | Pending |
@@ -63,8 +63,31 @@ Four missing edges closed. **A fifth, `platform_recheck` in `close`, was deliber
 | `close` → `deployment` | Jurisdiction only (*"exclusively deployment's job"*) | `deployment_handoff` step names the protocol and why the merge lives there |
 | Onboarding order | Three entry points, no sequence; the README omitted `standardization` | Declared once in `agents.md §6`; README and guide reference it |
 
+## PR 3 — Track E (complete)
+
+Four mechanisms, each of them a script rather than an instruction, because all four run once per session and `token_economy_agent`'s Filter 5 rejects a recurring mechanism delegated to agent judgment when a deterministic equivalent exists.
+
+| Mechanism | What it replaced |
+| :--- | :--- |
+| `scripts/session_state.py` | A workflow that wrote nothing and a collision guard nothing armed |
+| `scripts/session_probe.py` | Three checks that did not exist: graph freshness, documentation presence, platform controls |
+| `scripts/branch_sovereignty.py` | A close that pushed a branch and never asked whether it was integrated |
+| `scripts/map_workflows.py` | A step map that would have drifted at the first edit |
+
+### The finding worth keeping
+
+**Neither obvious instrument works for detecting an unintegrated branch here.** `git branch --merged` fails outright: `deployment` merges with `gh pr merge --squash`, and a squash commit is not a descendant of the branch, so the branch never appears as merged however completely its work landed. Verified — `git log --all --merges` after `v4.3.0` shows zero merge commits for five integrated pull requests. `git cherry` is better but still misses a multi-commit branch collapsed into one, since it compares per-commit patch-ids. Merged-PR state is the authoritative signal for a squash workflow; `git cherry` is the offline fallback; anything neither can prove is reported rather than assumed, and a false positive is answered with a recorded waiver instead of by weakening the check.
+
+The audit is deliberately **not** scoped to `ai-sprint/*`: `git log --all` records no such reference anywhere in this repository's history. A check scoped to a naming convention the repository does not follow reports clean on a dirty tree — the same defect `revdoc` Phase 4 documents for path prefixes.
+
+### Verification observed
+- The lock refused a second session with exit `2`, then refused the restoration attempt of the session that owned it — correct behaviour, resolved with the explicit `--takeover`.
+- The probes reported, unprompted, exactly the five disabled platform controls and the two missing documentation artifacts that had been found by hand during planning.
+- The branch audit exits `2` on `ai-sprint/019` itself, which is genuinely unintegrated.
+- The generated map shows `start_workflow` moving from `—` to `read/write` on the state anchor: the symmetry is machine-visible, not asserted.
+
 ## Certification
-- [x] `make verify` green end to end (75 tests, installer sandbox, all scanners).
+- [x] `make verify` green end to end (84 tests, installer sandbox, all scanners).
 - [x] `check_invocation_coverage()` proven to fail: 28 findings on the pre-fix tree, 0 after.
 - [x] 10 new tests, each asserting failure where failure is required.
 - [x] Counts recomputed after the retirement: 11 workflows, 12 commands, 13 agents, 8 rule contexts, 34 skills.
