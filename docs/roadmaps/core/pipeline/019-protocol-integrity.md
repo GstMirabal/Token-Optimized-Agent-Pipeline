@@ -7,8 +7,8 @@ version: 1.0.0
 # Roadmap: Phase 19 - Protocol Integrity
 
 ## Status
-- **Strategy Lock:** `OPEN`
-- **Completion:** 5 of 6 pull requests
+- **Strategy Lock:** `CLOSED`
+- **Completion:** 6 of 6 pull requests
 - **Sprint ID:** `019` — next sequential number after Phase 18 (`018-post-publication-field-hardening.md`, `COMPLETED`).
 - **Branch:** `ai-sprint/019` (`RA-12`). This is the first phase in this repository to actually use the branch convention `RA-12` mandates: `git log --all` records no prior `ai-sprint/*` reference.
 
@@ -26,7 +26,7 @@ Capability work — loop stop-conditions, code-craft rules, tool-result pruning,
 | 3 | **E** | `start`/`close` symmetry, readiness and platform probes, branch sovereignty, generated workflow map | ✅ **Merged into the branch** |
 | 4 | **H** | Protocol-failure detection (`last_close_commit`) and `/agents:reconcile` | ✅ **Merged into the branch** |
 | 5 | **G** | Documentary closeout: README counts as a build failure, repo docs review | ✅ **Merged into the branch** |
-| 6 | **F** | Complete `revdoc`: C4, Blueprints, ADR recovery, metadata stamping, findings destination | Pending |
+| 6 | **F** | Complete `revdoc`: C4, Blueprints, ADR recovery, metadata stamping, findings destination | ✅ **Merged into the branch** |
 
 ## PR 1 — Track I (complete)
 
@@ -114,11 +114,51 @@ The counts in the README's "At a Glance" table were repaired **by hand three tim
 
 A README rewritten past the check's patterns **fails** rather than passing: a claim that vanished is not a claim that was satisfied.
 
+## PR 6 — Track F (complete)
+
+`revdoc` produced **none** of the three artifacts `rules/documentation_standard.md` mandates, and its last phase verified metadata no earlier phase wrote.
+
+| Gap | Repair |
+| :--- | :--- |
+| No C4 at any level; the Level 3 eligibility formula (`§2.1`) never run | Phase `4.5` |
+| No Blueprints, though `agents.md §0` requires one per module | Phase `6.5` |
+| No ADRs, though `§3` defines seven triggers and format scaling | Phase `6.7` |
+| Phase 10 parsed `Last Audit Sprint`/`Date`/`Commit SHA` that nothing stamped | Stamping moved into the phases that touch each document |
+| Findings "feed `audit_workflow.md`" with no named destination | Phase `9.5` → `docs/audits/REVDOC_FINDINGS-[slug].md` |
+
+**Fractional numbering is deliberate.** Renumbering 1-10 would break every `Phase N` citation in `agents.md`, the README and this repository's history — an `RA-14` violation committed while repairing an `RA-14` finding.
+
+**ADR recovery is bounded honestly.** The `§3.1` triggers are detectable from code — blast radius, security and privacy boundaries, data-loss risk — but *why* someone chose a design is not, unless the code, the history or an existing document says so. Unevidenced rationale is written as `unrecoverable at this audit` and never inferred: an absent rationale is a gap anyone can see, a guessed one reads as evidence and gets cited as if it were.
+
+---
+
+## Phase outcome
+
+Six pull requests, all on `ai-sprint/019`, none on `main`.
+
+| Before | After |
+| :--- | :--- |
+| 28 mechanisms with no declared caller | 0 — `RA-16` enforced by a check in both `make verify` and CI |
+| Local and CI verification disagreed in both directions | One set; CI invokes `make verify` |
+| `start` wrote nothing; the collision guard could never fire | `start` claims the lock; a second session is refused with exit `2` |
+| No way to notice work done outside the protocol | `last_close_commit` + `/agents:reconcile`, verified against the real `v4.3.0` drift |
+| A close that pushed a branch and never asked if it was integrated | Seal refused while unintegrated work exists, with squash-aware detection |
+| README counts corrected by hand, three times in one session | Build failure |
+| `revdoc` missing three mandated artifacts | Produced, with stamping in the right phases |
+| 65 tests | 91 |
+
 ## Certification
 - [x] `make verify` green end to end (91 tests, installer sandbox, all scanners).
 - [x] `check_invocation_coverage()` proven to fail: 28 findings on the pre-fix tree, 0 after.
-- [x] 10 new tests, each asserting failure where failure is required.
-- [x] Counts recomputed after the retirement: 11 workflows, 12 commands, 13 agents, 8 rule contexts, 34 skills.
+- [x] Every new gate carries a test asserting it **fails** where it must, not only that it passes.
+- [x] Counts verified mechanically, not by inspection: 12 workflows, 13 commands, 13 agents, 8 rule contexts, 34 skills.
+- [x] Drift detection replayed against the real `v4.3.0`→`#30` event: lists the commits, exits `2`.
+
+## Known follow-ups (tracked, not blocking)
+- **The branch `ai-sprint/019` is itself unintegrated**, and `branch_sovereignty.py audit` correctly refuses to seal while it is. Integrating it is `/agents:deployment`'s job (`RA-12`), which holds the Tester signature and the observed-green CI gate (`RA-13`).
+- **Five platform controls remain disabled** on this repository (secret scanning, push protection, Dependabot updates and alerts, branch protection). The probe now reports them at every start; turning them on is `/agents:harden`, a human decision.
+- **This repository has no `docs/decisions/` and no Blueprints.** The readiness probe reports it each session until either `/agents:revdoc` runs or the gap is acknowledged in `acknowledged_gaps` with a reason.
+- **Phase `020`** carries the deferred capability work: tool-result pruning, code-craft rules, `/loop` stop-conditions, and parallel fan-out — the last conditioned on evidence that sequential execution is a real bottleneck.
 
 ---
-*Opened 2026-08-02 on `ai-sprint/019`. Not released — ledger entries sit under `[Unreleased]`.*
+*Opened and completed 2026-08-02 on `ai-sprint/019`. Not released — ledger entries sit under `[Unreleased]`.*

@@ -36,12 +36,29 @@ of writing its API contract — neither was visible in a blueprint.
 | **2** | **Measure coverage.** Every source file present in the graph. | Uncovered files listed and explained, not ignored. |
 | **3** | **Read the existing documentation.** Every file under `docs/`, in full. | — |
 | **4** | **Contrast each claim against the graph and the tree.** | Every path, symbol and route the documentation declares is confirmed to exist. |
-| **5** | **Correct what is false**, in place, saying what it said before. | — |
+| **4.5** | **C4 layer.** Levels 1-2 always; Level 3 only for the containers the eligibility formula selects (`rules/documentation_standard.md §2.1`). | Every selected container has a Level 3; every manual override cites its ADR. |
+| **5** | **Correct what is false**, in place, saying what it said before. **Stamp the metadata block** (`§4.1`) on every document touched. | — |
 | **6** | **Write the missing contracts**, one per exposed interface, using the `contract-writer` skill. | Every endpoint and public interface has one. |
+| **6.5** | **Blueprints.** One `[MODULE]_BLUEPRINT.md` per module, from `BLUEPRINT_TEMPLATE.md`, with the metadata block stamped. | `agents.md §0` requires one per module; none may be missing without being named as absent. |
+| **6.7** | **ADR recovery.** Identify decisions that meet a trigger in `§3.1` and record one ADR each, with the metadata block stamped. **Rationale that is not evidenced in the code or its history is recorded as `unrecoverable at this audit` — never inferred.** | Every triggering decision has an ADR; every unrecoverable rationale says so. |
 | **7** | **Diátaxis classification.** Reference, Explanation, How-to, Tutorial. | No document does two jobs. |
 | **8** | **Prose gate.** `vale docs/`. | Zero findings. |
 | **9** | **Coverage closure.** Re-run phase 4 against the finished set. | Zero stale references. |
+| **9.5** | **Findings handoff.** Write everything surfaced that this protocol does not fix to `docs/audits/REVDOC_FINDINGS-[slug].md`, from `AUDIT_REPORT_TEMPLATE.md`. | Every finding has a destination; none live only in the session transcript. |
 | **10** | **Freshness gate.** `docs_freshness_check.py . <sprint>` | Exit 0. |
+
+> [!IMPORTANT]
+> **Phases 4.5, 6.5, 6.7 and 9.5 were added in Phase 019, and the numbering is deliberately fractional.** Renumbering 1-10 would break every `Phase N` citation in `agents.md`, the README and this repository's own history — the `RA-14` failure mode, committed while fixing an `RA-14` finding.
+>
+> Until then this protocol produced **none of the three artifacts** `rules/documentation_standard.md` mandates: no C4 at any level, no Blueprints despite `agents.md §0` requiring one per module, and no ADRs despite `§3` defining seven triggers and a format-scaling rule. Worse, **Phase 10 verified metadata that no earlier phase wrote**: `docs_freshness_check.py` parses `Last Audit Sprint`/`Date`/`Commit SHA` (`§4.1`), so the gate ran against documents this very workflow had just created without those fields. Stamping now happens in the phases that touch each document.
+
+## Phase 6.7 — Recovering decisions without inventing them
+
+Reverse-documenting a system can recover **that** a decision was made, and often what it cost; it cannot recover why someone chose it, unless the code, the commit history or an existing document says so.
+
+The triggers in `§3.1` are detectable from the code — a god node's blast radius, a security or privacy boundary, a data-loss risk. Detect them, write the ADR, and where the rationale is not evidenced, write `unrecoverable at this audit` in the Decision section rather than a plausible reconstruction.
+
+A guessed rationale is worse than an absent one. An absent one is a gap anybody can see; a guessed one reads as evidence and gets cited as if it were.
 
 ## Phase 1 — Graph first, not graph afterwards
 
@@ -122,5 +139,7 @@ curl -sL "https://github.com/errata-ai/vale/releases/download/v${V}/vale_${V}_ma
   reading. `audit_workflow.md` is where claims get executed.
 
 ---
-*Feeds `audit_workflow.md`: findings surfaced while writing contracts are
-audit input, recorded and not fixed in this phase.*
+*Feeds `audit_workflow.md`: findings surfaced while writing contracts are audit
+input, recorded in `docs/audits/REVDOC_FINDINGS-[slug].md` (Phase 9.5) and not
+fixed in this phase. Until Phase 019 this line named no destination, so the
+handoff had a sender and no address.*

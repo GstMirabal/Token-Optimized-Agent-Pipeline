@@ -152,11 +152,15 @@ protocols that should mirror each other shows up there first.
 | 2 | `Measure coverage.** Every source file present in the graph.` | ? |
 | 3 | `Read the existing documentation.** Every file under `docs/`, in full.` | ? |
 | 4 | `Contrast each claim against the graph and the tree.` | verify |
-| 5 | `Correct what is false**, in place, saying what it said before.` | ? |
+| 4.5 | `C4 layer.** Levels 1-2 always; Level 3 only for the containers the eligibility formula selects (`rules/documentation_standard.md §2.1`).` | ? |
+| 5 | `Correct what is false**, in place, saying what it said before. **Stamp the metadata block** (`§4.1`) on every document touched.` | ? |
 | 6 | `Write the missing contracts**, one per exposed interface, using the `contract-writer` skill.` | ? |
+| 6.5 | `Blueprints.** One `[MODULE]_BLUEPRINT.md` per module, from `BLUEPRINT_TEMPLATE.md`, with the metadata block stamped.` | ? |
+| 6.7 | `ADR recovery.** Identify decisions that meet a trigger in `§3.1` and record one ADR each, with the metadata block stamped. **Rationale that is not evidenced in the code or its history is recorded as `unrecoverable at this audit` — never inferred.` | ? |
 | 7 | `Diátaxis classification.** Reference, Explanation, How-to, Tutorial.` | ? |
 | 8 | `Prose gate.** `vale docs/`.` | ? |
 | 9 | `Coverage closure.** Re-run phase 4 against the finished set.` | ? |
+| 9.5 | `Findings handoff.** Write everything surfaced that this protocol does not fix to `docs/audits/REVDOC_FINDINGS-[slug].md`, from `AUDIT_REPORT_TEMPLATE.md`.` | ? |
 | 10 | `Freshness gate.** `docs_freshness_check.py . <sprint>` | ? |
 
 ### `skill_forge_workflow.md`
