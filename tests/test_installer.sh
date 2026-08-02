@@ -88,3 +88,22 @@ grep -qx "@agents.md" "$NUCLEUS/CLAUDE.md" || fail "nucleus: constitution import
 ( cd "$NUCLEUS" && python3 scripts/install_claude.py --profile example-project > /dev/null 2>&1 ) \
   && fail "nucleus: profile install must be refused" || true
 echo "✅ nucleus self-bridge test PASSED"
+
+# ---------------------------------------------------------------------------
+# Native pre-commit hook. The Claude Code PreToolUse hook only sees commits the
+# agent makes; every other path into the repository bypassed the scanner.
+# ---------------------------------------------------------------------------
+
+test_pre_commit_hook_is_installed() {
+    local repo="$1"
+    [ -x "$repo/.git/hooks/pre-commit" ] || return 1
+    grep -q "on_commit.py" "$repo/.git/hooks/pre-commit" || return 1
+}
+
+test_existing_pre_commit_hook_is_not_overwritten() {
+    local repo="$1"
+    printf '#!/bin/sh\necho project-owned\n' > "$repo/.git/hooks/pre-commit"
+    chmod +x "$repo/.git/hooks/pre-commit"
+    python3 "$repo/.agents/scripts/install_claude.py" >/dev/null 2>&1
+    grep -q "project-owned" "$repo/.git/hooks/pre-commit" || return 1
+}

@@ -183,6 +183,49 @@ def install_nucleus_bridge() -> int:
     return 0
 
 
+def install_git_pre_commit() -> None:
+    """Install a native pre-commit hook so a terminal commit is scanned too.
+
+    The secret scanner runs as a Claude Code `PreToolUse` hook, which sees only
+    commits the agent makes through its Bash tool. A commit typed in a terminal,
+    made from an IDE, or produced by any other tool bypasses it entirely — and
+    those are most of the commits in a repository with a human in it.
+
+    Written only when no pre-commit hook exists. An existing one belongs to the
+    project and is never overwritten; the path to add is printed instead.
+    """
+    hooks_dir = HOST_DIR / ".git" / "hooks"
+    if not hooks_dir.is_dir():
+        return
+
+    hook_path = hooks_dir / "pre-commit"
+    body = (
+        "#!/usr/bin/env bash\n"
+        "# Installed by .agents/scripts/install_claude.py\n"
+        "#\n"
+        "# The Claude Code PreToolUse hook only sees commits the agent makes.\n"
+        "# This covers every other path into the repository.\n"
+        "set -euo pipefail\n"
+        "[ -f .agents/hooks/on_commit.py ] || exit 0\n"
+        "exec python3 .agents/hooks/on_commit.py\n"
+    )
+
+    if hook_path.exists():
+        current = hook_path.read_text(encoding="utf-8", errors="replace")
+        if "on_commit.py" in current:
+            return
+        print(
+            "ℹ️  A pre-commit hook already exists and was left alone. To scan "
+            "terminal commits too, add:\n"
+            "      python3 .agents/hooks/on_commit.py"
+        )
+        return
+
+    hook_path.write_text(body, encoding="utf-8")
+    hook_path.chmod(0o755)
+    print("🪝 Installed .git/hooks/pre-commit (scans terminal commits too)")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Install the .agents Claude Code bridge.")
     parser.add_argument("--profile", help="Optional project profile to install (profiles/<name>)")
@@ -217,6 +260,7 @@ def main() -> int:
     add_claude_import("@.agents/agents.md")
     ensure_gitignore_entries()
     scaffold_identity_config()
+    install_git_pre_commit()
 
     if args.profile:
         profile_dir = AGENTS_DIR / "profiles" / args.profile
