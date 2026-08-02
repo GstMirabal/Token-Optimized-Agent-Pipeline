@@ -1,0 +1,63 @@
+{
+  "_purpose": "Artifacts that legitimately have no invoker inside the framework (RA-16 INVOCATION_COVERAGE, agents.md §7). Read by scripts/verify_references.py check (d).",
+  "_why_a_data_file": "Not frontmatter: vendored SKILL.md files cannot be edited at all under the Skill Documentation Veto (rules/skills_and_integrations.md §3).",
+  "_valid_reasons": ["model-invoked", "vendored-reference", "human-entry-point", "one-time"],
+  "_rule": "An entry pointing at a path that no longer exists fails the check. A stale exemption silently excuses the next artifact to take that name.",
+  "exceptions": [
+    {
+      "path": "skills/django-patterns-3rd",
+      "reason": "vendored-reference",
+      "note": "Vendored from affaan-m/ECC (MIT, see NOTICE.md). Reference material an agent consults when working on a Django host; not a step in any framework workflow."
+    },
+    {
+      "path": "skills/django-security-3rd",
+      "reason": "vendored-reference",
+      "note": "Vendored from affaan-m/ECC (MIT). Same status as django-patterns-3rd."
+    },
+    {
+      "path": "skills/django-tdd-3rd",
+      "reason": "vendored-reference",
+      "note": "Vendored from affaan-m/ECC (MIT). Same status as django-patterns-3rd."
+    },
+    {
+      "path": "skills/django-verification-3rd",
+      "reason": "vendored-reference",
+      "note": "Vendored from affaan-m/ECC (MIT). Same status as django-patterns-3rd."
+    },
+    {
+      "path": "skills/skills-samples-3rd",
+      "reason": "vendored-reference",
+      "note": "Sample skills kept as authoring examples for skill_forge_workflow.md. Wiring them into a workflow step would execute examples as if they were tools."
+    },
+    {
+      "path": "skills/skill-creator",
+      "reason": "model-invoked",
+      "note": "Claude invokes it by name when authoring a skill. skill_forge_workflow.md governs the procedure; this is the instrument Claude reaches for inside it."
+    },
+    {
+      "path": "skills/contract-writer",
+      "reason": "model-invoked",
+      "note": "Now named by reverse_documentation_workflow.md Phase 6. Listed here because the workflow names it in prose rather than as a scripted call, so the automated scan cannot resolve it as a wired invocation."
+    },
+    {
+      "path": "skills/python-quality-auditor",
+      "reason": "model-invoked",
+      "note": "The instrument behind agents.md §1 `python-doctor check --diff`. The rule states the threshold; the QA Agent reaches for this skill to measure it."
+    },
+    {
+      "path": "skills/js-standardizer",
+      "reason": "model-invoked",
+      "note": "Counterpart to python-quality-auditor for the JS/TS rows of agents.md §1 (`pnpm run lint`, `pnpm run react-doctor`)."
+    },
+    {
+      "path": "skills/mcp-registry",
+      "reason": "model-invoked",
+      "note": "Used when registering an MCP server (agents.md §5 discovery_manifest). The merge itself is install_claude.sh's job; this skill is for authoring the entry."
+    },
+    {
+      "path": "skills/topology-scaffolder",
+      "reason": "model-invoked",
+      "note": "The instrument topology_mapper reaches for when scaffolding [Stack]/[Layer] directories. The agent profile owns the decision; the skill performs it."
+    }
+  ]
+}

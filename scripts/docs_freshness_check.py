@@ -1,5 +1,7 @@
 """Deterministic documentation freshness and integrity checks.
 
+invoked_by: close_workflow.md#docs_freshness_gate, Makefile `docs-freshness-check`.
+
 Implements rules/documentation_standard.md §2.1 (C4 Level 3 density),
 §4 (bold-key metadata parsing, freshness-gate threshold, and the five
 documentation-integrity sub-checks). Invoked via `make docs-freshness-check`

@@ -69,7 +69,7 @@ The Token-Optimized Agent Pipeline is an AI agent governance framework designed 
 | **Governance** | Keyed ruleset in [`agents.md`](agents.md) + 8 lazy-loaded domain rule contexts in [`rules/`](rules/) |
 | **Subagents** | 13 role-segregated agents in [`agents/`](agents/) — 8 core pipeline roles, 5 auxiliary |
 | **Skills** | 34 flat skills in [`skills/`](skills/), routed statically via `manifest_skills.json` |
-| **Workflows** | 10 protocols in [`workflows/`](workflows/), exposed as 11 `/agents:*` slash commands |
+| **Workflows** | 12 protocols in [`workflows/`](workflows/), exposed as 13 `/agents:*` slash commands |
 | **Pipeline** | 8 phases (Planning → Sprint Closeout), gated by a single attended human authorization |
 | **Integration** | Git submodule + idempotent Claude Code bridge; never writes outside `.claude/` and `CLAUDE.md` |
 
@@ -164,9 +164,7 @@ If you are adding the framework to an **already established repository**, follow
 2.  **Bridge installation:** `.agents/scripts/install_claude.sh` (creates `.claude/agents`, `.claude/commands/agents`, `.claude/skills`, and merges hooks/MCP config).
 3.  **AI session trigger:** Tell the AI: *"Initialize session using governance protocols in `.agents/` and execute `/agents:start`."*
 4.  **Roadmap discovery:** The topology mapper will map `docs/active_state.json` (scaffolding it on first run — see `start_workflow.md`).
-5.  **Harden the repository:** **`/agents:harden`**. It changes no code and reduces risk immediately, so it costs nothing to do before anything else.
-6.  **Document what is there, before changing it:** **`/agents:revdoc`**. Fixing before documenting means fixing against a model of the system rather than the system, and documenting afterwards produces text that justifies what was done.
-7.  **Then execute:** **`/agents:pipeline`**.
+5.  **Then follow the canonical onboarding order**, defined once in [`agents.md §6`](agents.md) and deliberately not restated here: **`/agents:harden`** (platform controls, changes no code) → **`/agents:standardization`** (artifacts and topology) → **`/agents:revdoc`** (documentation of the code, verified against the graph) → **`/agents:pipeline`** (change).
 
 The Orchestrator will scan your source code, identify your project's current Phase, initialize your local context, and generate persistent architectural tracking in `docs/roadmaps/`.
 

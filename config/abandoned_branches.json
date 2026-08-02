@@ -1,0 +1,6 @@
+{
+  "_purpose": "Branches the human has declared abandoned, so close_workflow.md 5.5 stops blocking on them. Read by scripts/branch_sovereignty.py.",
+  "_why_it_exists": "Without a valve, one forgotten branch would refuse every future session close, and a gate with no answer is a gate that gets disabled rather than satisfied.",
+  "_rule": "A reason is mandatory. 'Abandoned' with no explanation is indistinguishable from work someone forgot, which is the case this check exists to surface.",
+  "abandoned": []
+}

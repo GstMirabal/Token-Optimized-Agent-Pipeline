@@ -1,0 +1,164 @@
+---
+description: "Protocol Integrity — invocation coverage, start/close symmetry, drift recovery (Phase 19)"
+status: "IN_PROGRESS"
+version: 1.0.0
+---
+
+# Roadmap: Phase 19 - Protocol Integrity
+
+## Status
+- **Strategy Lock:** `CLOSED`
+- **Completion:** 6 of 6 pull requests
+- **Sprint ID:** `019` — next sequential number after Phase 18 (`018-post-publication-field-hardening.md`, `COMPLETED`).
+- **Branch:** `ai-sprint/019` (`RA-12`). This is the first phase in this repository to actually use the branch convention `RA-12` mandates: `git log --all` records no prior `ai-sprint/*` reference.
+
+## Objective
+Repair defects **confirmed with evidence** in the framework's own protocols. Three independent inputs converged: five external publications on loop and graph engineering (which mostly restated capabilities this framework already has, often in stronger form), a symptom reported by the repository owner (`start` and `close` do not update everything), and an invocation audit of the tree that found published mechanisms nothing calls.
+
+Capability work — loop stop-conditions, code-craft rules, tool-result pruning, parallel fan-out — is deliberately deferred to Phase `020`, so that a failure in something new cannot block the repair of something broken.
+
+## Work Breakdown
+
+| PR | Track | Scope | Status |
+| :--- | :--- | :--- | :--- |
+| 1 | **I** | Invocation coverage (`RA-16`), `make verify` ≡ CI, orphan remediation | ✅ **Merged into the branch** |
+| 2 | **J** | Missing edges in the workflow graph (Phase 4 agents named, `close` → `deployment`, onboarding order, external-plan entry) | ✅ **Merged into the branch** |
+| 3 | **E** | `start`/`close` symmetry, readiness and platform probes, branch sovereignty, generated workflow map | ✅ **Merged into the branch** |
+| 4 | **H** | Protocol-failure detection (`last_close_commit`) and `/agents:reconcile` | ✅ **Merged into the branch** |
+| 5 | **G** | Documentary closeout: README counts as a build failure, repo docs review | ✅ **Merged into the branch** |
+| 6 | **F** | Complete `revdoc`: C4, Blueprints, ADR recovery, metadata stamping, findings destination | ✅ **Merged into the branch** |
+
+## PR 1 — Track I (complete)
+
+### What the detector found before anything was fixed
+Running `check_invocation_coverage()` against the unmodified tree produced **28 findings**: 12 workflows, 5 scripts and 11 executable skills with no declared caller. Running it first was the point — a detector demonstrated only against a tree already cleaned proves nothing.
+
+| Finding | Disposition |
+| :--- | :--- |
+| `make verify` and `ci.yml` asymmetric **in both directions** | `ci.yml` now invokes `make verify`. Divergence became impossible rather than policed |
+| `skeleton_workflow.md` bypassed by its own governance | Retired, with `commands/skeleton.md`. `omni_minimizer.py` untouched |
+| `remediation_workflow.md` named by nobody | Named in `rules/qa_and_testing.md §4` and `agents/principal_agent.md` |
+| `contract-writer` unwired from the phase it was built for | `revdoc` Phase 6 now names it |
+| `migrate_docs_v3.py` orphaned | Removed |
+| `merge_json.py` **apparently** orphaned | **Kept** — `install_claude.py` imports it as a module |
+| 11 workflows, 4 scripts, 10 skills | Invoker declared, or typed exception recorded |
+
+### Findings recorded
+
+| Finding | Consequence |
+| :--- | :--- |
+| **A filename-based orphan scan produces false positives that delete working code.** `merge_json.py` is imported as `from merge_json import merge`, so a scan for `merge_json.py` finds nothing. | Deleting it would have broken the bridge installer — the sanctioned path into a host's `.claude/`. The checker now resolves Python imports via AST, and a test fails if that regresses. |
+| **A gate that lives only in CI is not a gate for the person deciding to push.** | Made local, the RA-15 path scan immediately rejected two literals written during this very PR: one in the Phase 018 roadmap, one in the new scanner's own docstring. Both would have failed only after push. |
+| **Cost was measured, not assumed.** | The full `make verify`, including 75 tests and the installer sandbox, runs in **1.7 s**. The usual argument for splitting a verify target into fast and slow halves — which is how the asymmetry would return — does not apply here. |
+| **The phase practised what it legislates.** | `RA-16` landed in PR 1 precisely so the five mechanisms the remaining PRs introduce (`map_workflows.py`, `check_readme_counts.py`, `reconciliation_workflow.md`, and the two probes) cannot be born orphaned. |
+
+## PR 2 — Track J (complete)
+
+Four missing edges closed. **A fifth, `platform_recheck` in `close`, was deliberately moved to PR 3**: it reuses the platform probe that PR 3 builds, and writing a step that calls a mechanism which does not yet exist is precisely what `RA-16` — merged one PR earlier — forbids. The sequencing error was caught by the rule this phase had just introduced.
+
+| Edge | Before | After |
+| :--- | :--- | :--- |
+| Phase 4 | One cell: *"Summon Agent Orch, Skill Arch, and Rule Val"* | `4.1`/`4.2`/`4.3`, proper names, deliverables named including `task_scope.md` |
+| External plan → Phase 1 | Undeclared | An approved external plan is an **input** to Phase 1 and does not skip Phases 3-5 |
+| `close` → `deployment` | Jurisdiction only (*"exclusively deployment's job"*) | `deployment_handoff` step names the protocol and why the merge lives there |
+| Onboarding order | Three entry points, no sequence; the README omitted `standardization` | Declared once in `agents.md §6`; README and guide reference it |
+
+## PR 3 — Track E (complete)
+
+Four mechanisms, each of them a script rather than an instruction, because all four run once per session and `token_economy_agent`'s Filter 5 rejects a recurring mechanism delegated to agent judgment when a deterministic equivalent exists.
+
+| Mechanism | What it replaced |
+| :--- | :--- |
+| `scripts/session_state.py` | A workflow that wrote nothing and a collision guard nothing armed |
+| `scripts/session_probe.py` | Three checks that did not exist: graph freshness, documentation presence, platform controls |
+| `scripts/branch_sovereignty.py` | A close that pushed a branch and never asked whether it was integrated |
+| `scripts/map_workflows.py` | A step map that would have drifted at the first edit |
+
+### The finding worth keeping
+
+**Neither obvious instrument works for detecting an unintegrated branch here.** `git branch --merged` fails outright: `deployment` merges with `gh pr merge --squash`, and a squash commit is not a descendant of the branch, so the branch never appears as merged however completely its work landed. Verified — `git log --all --merges` after `v4.3.0` shows zero merge commits for five integrated pull requests. `git cherry` is better but still misses a multi-commit branch collapsed into one, since it compares per-commit patch-ids. Merged-PR state is the authoritative signal for a squash workflow; `git cherry` is the offline fallback; anything neither can prove is reported rather than assumed, and a false positive is answered with a recorded waiver instead of by weakening the check.
+
+The audit is deliberately **not** scoped to `ai-sprint/*`: `git log --all` records no such reference anywhere in this repository's history. A check scoped to a naming convention the repository does not follow reports clean on a dirty tree — the same defect `revdoc` Phase 4 documents for path prefixes.
+
+### Verification observed
+- The lock refused a second session with exit `2`, then refused the restoration attempt of the session that owned it — correct behaviour, resolved with the explicit `--takeover`.
+- The probes reported, unprompted, exactly the five disabled platform controls and the two missing documentation artifacts that had been found by hand during planning.
+- The branch audit exits `2` on `ai-sprint/019` itself, which is genuinely unintegrated.
+- The generated map shows `start_workflow` moving from `—` to `read/write` on the state anchor: the symmetry is machine-visible, not asserted.
+
+## PR 4 — Track H (complete)
+
+The drift this phase opened by repairing now has a detector and a protocol. `last_close_commit` is the whole mechanism: one field, stamped at close, against which `HEAD` can be compared. Its absence is why the `v4.3.0` drift went unnoticed for a week — there was nothing to compare against, so no amount of diligence would have surfaced it.
+
+**Verified by replaying the real event.** Pointed at the commit preceding pull requests `#27`-`#30`, the detector lists them and exits `2`. That is the same drift that was reconciled by hand at the start of this session; `workflows/reconciliation_workflow.md` is the transcript of that recovery rather than a design sketch.
+
+**Two boundaries recorded explicitly**, because both are destructive if crossed:
+- `reconcile` **reverts nothing**. `remediation_workflow.md` revokes bad work with `git restore .`; here the work is good and only its record is missing. Confusing them would destroy exactly what needs documenting.
+- The check runs **before** `state_claim`. Claiming the lock writes `IN_PROGRESS`, so a status-keyed check placed after it would be reading its own side effect. The detector is status-agnostic for the same reason: it compares commits, not labels.
+
+With no baseline recorded, it reports that fact and passes, rather than passing silently. Silence about an unmeasurable state is precisely what allowed the original drift.
+
+## PR 5 — Track G (complete)
+
+The counts in the README's "At a Glance" table were repaired **by hand three times in this session**: once when the ledger reconstruction found `10 protocols / 11 slash commands` against a tree of 12 and 13, once after retiring `skeleton`, once after adding `reconcile`. Three manual corrections of the same class of error in one day is the definition of something that should be a build step.
+
+**Where the line between script and judgment was drawn**, since this track contains both:
+
+| Item | Kind | Why |
+| :--- | :--- | :--- |
+| Five tree-derived counts | Script (`exit 2`) | Countable files; delegating this to judgment is what Filter 5 rejects |
+| "8 phases" in the same table | **Not checked** | Prose about a workflow's internals, not a set of files. A check reporting success on something it never measured is the `#28` defect |
+| Presence of `CONTRIBUTING`/`SECURITY`/`CODE_OF_CONDUCT`/`NOTICE` | Script-checkable | Existence is mechanical |
+| Whether this sprint *invalidated* one of them | **Judgment, declared as such** | A green check over stale content is worse than no check |
+| `render_readme.py` at close | **Rejected outright** | The nucleus README has no `{{TAG}}` markers — it is hand-written, so a close-time re-render would overwrite it, not sync it |
+
+A README rewritten past the check's patterns **fails** rather than passing: a claim that vanished is not a claim that was satisfied.
+
+## PR 6 — Track F (complete)
+
+`revdoc` produced **none** of the three artifacts `rules/documentation_standard.md` mandates, and its last phase verified metadata no earlier phase wrote.
+
+| Gap | Repair |
+| :--- | :--- |
+| No C4 at any level; the Level 3 eligibility formula (`§2.1`) never run | Phase `4.5` |
+| No Blueprints, though `agents.md §0` requires one per module | Phase `6.5` |
+| No ADRs, though `§3` defines seven triggers and format scaling | Phase `6.7` |
+| Phase 10 parsed `Last Audit Sprint`/`Date`/`Commit SHA` that nothing stamped | Stamping moved into the phases that touch each document |
+| Findings "feed `audit_workflow.md`" with no named destination | Phase `9.5` → `docs/audits/REVDOC_FINDINGS-[slug].md` |
+
+**Fractional numbering is deliberate.** Renumbering 1-10 would break every `Phase N` citation in `agents.md`, the README and this repository's history — an `RA-14` violation committed while repairing an `RA-14` finding.
+
+**ADR recovery is bounded honestly.** The `§3.1` triggers are detectable from code — blast radius, security and privacy boundaries, data-loss risk — but *why* someone chose a design is not, unless the code, the history or an existing document says so. Unevidenced rationale is written as `unrecoverable at this audit` and never inferred: an absent rationale is a gap anyone can see, a guessed one reads as evidence and gets cited as if it were.
+
+---
+
+## Phase outcome
+
+Six pull requests, all on `ai-sprint/019`, none on `main`.
+
+| Before | After |
+| :--- | :--- |
+| 28 mechanisms with no declared caller | 0 — `RA-16` enforced by a check in both `make verify` and CI |
+| Local and CI verification disagreed in both directions | One set; CI invokes `make verify` |
+| `start` wrote nothing; the collision guard could never fire | `start` claims the lock; a second session is refused with exit `2` |
+| No way to notice work done outside the protocol | `last_close_commit` + `/agents:reconcile`, verified against the real `v4.3.0` drift |
+| A close that pushed a branch and never asked if it was integrated | Seal refused while unintegrated work exists, with squash-aware detection |
+| README counts corrected by hand, three times in one session | Build failure |
+| `revdoc` missing three mandated artifacts | Produced, with stamping in the right phases |
+| 65 tests | 91 |
+
+## Certification
+- [x] `make verify` green end to end (91 tests, installer sandbox, all scanners).
+- [x] `check_invocation_coverage()` proven to fail: 28 findings on the pre-fix tree, 0 after.
+- [x] Every new gate carries a test asserting it **fails** where it must, not only that it passes.
+- [x] Counts verified mechanically, not by inspection: 12 workflows, 13 commands, 13 agents, 8 rule contexts, 34 skills.
+- [x] Drift detection replayed against the real `v4.3.0`→`#30` event: lists the commits, exits `2`.
+
+## Known follow-ups (tracked, not blocking)
+- **The branch `ai-sprint/019` is itself unintegrated**, and `branch_sovereignty.py audit` correctly refuses to seal while it is. Integrating it is `/agents:deployment`'s job (`RA-12`), which holds the Tester signature and the observed-green CI gate (`RA-13`).
+- **Five platform controls remain disabled** on this repository (secret scanning, push protection, Dependabot updates and alerts, branch protection). The probe now reports them at every start; turning them on is `/agents:harden`, a human decision.
+- **This repository has no `docs/decisions/` and no Blueprints.** The readiness probe reports it each session until either `/agents:revdoc` runs or the gap is acknowledged in `acknowledged_gaps` with a reason.
+- **Phase `020`** carries the deferred capability work: tool-result pruning, code-craft rules, `/loop` stop-conditions, and parallel fan-out — the last conditioned on evidence that sequential execution is a real bottleneck.
+
+---
+*Opened and completed 2026-08-02 on `ai-sprint/019`. Not released — ledger entries sit under `[Unreleased]`.*

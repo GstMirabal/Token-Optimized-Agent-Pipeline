@@ -1,4 +1,6 @@
-"""Static scanner for `token_economy_agent`'s Filter 5 (skills/token-saver-
+"""invoked_by: Makefile `verify` target (and therefore .github/workflows/ci.yml).
+
+Static scanner for `token_economy_agent`'s Filter 5 (skills/token-saver-
 auditor/SKILL.md): finds workflow steps that look like they run every
 sprint-close/commit and rely on agent judgment where a deterministic
 script/make-target would do.

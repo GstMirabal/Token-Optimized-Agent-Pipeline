@@ -20,7 +20,8 @@ If you are adding the framework to an **already established repository**, follow
 1. **Submodule Insertion:** In your root folder: `git submodule add https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline .agents`
 2. **Bridge Installation:** `.agents/scripts/install_claude.sh` (creates `.claude/agents`, `.claude/commands/agents`, `.claude/skills`, and merges hooks/MCP config).
 3. **AI Session Trigger:** Tell the AI: *"Initialize session using governance protocols in `.agents/` and execute `/agents:start`."*
-4. **Roadmap Discovery:** The topology mapper will map `docs/active_state.json` (scaffolding it on first run — see `start_workflow.md`). Run the command: **`/agents:pipeline`**.
+4. **Roadmap Discovery:** The topology mapper will map `docs/active_state.json` (scaffolding it on first run — see `start_workflow.md`).
+5. **Then follow the canonical onboarding order**, defined once in `agents.md §6` and referenced rather than repeated (`RA-14`): **`/agents:harden`** → **`/agents:standardization`** → **`/agents:revdoc`** → **`/agents:pipeline`**. Each owns a different object — platform controls, artifacts and topology, documentation of the code, and change itself — and running them out of order produces documentation of a layout that is about to move.
 
 The Orchestrator will automatically scan your source code, identify your project's current Phase, initialize your local context, and generate persistent architectural tracking in `docs/roadmaps/`.
 
@@ -35,11 +36,18 @@ Every `workflows/*.md` protocol maps to a real Claude Code slash command in `com
 | **`/agents:audit`** | **Standards Sweep**: Proactive structural maintenance to purge logic drifts and missing `.md` rules. |
 | **`/agents:skill-forge`** | **Tool Registration**: Creates, tests, and natively registers new pipeline tools without mutating production logic. |
 | **`/agents:remediation`** | **Rollback & Recovery**: Halts infinite hallucination loops, nukes git to pristine state, and logs negative knowledge. |
+| **`/agents:reconcile`** | **Protocol-Failure Recovery**: Restores traceability for commits made without `start` or `close` — rebuilds the Master Ledger entry and phase record from commit bodies and diffs. **Reverts nothing**: the work is good, its record is missing. Not to be confused with `remediation`, which revokes bad work. |
 | **`/agents:standardization`** | **Structural**: Enforces the `[layer]/[app]/` dictionary and Technical English purity. |
 | **`/agents:extract`** | **Distillation**: Memory indexer handling the "Rule Amendment Loop" (see `agents.md §4`). |
 | **`/agents:deployment`** | **Deployment**: Merges the sprint branch to upstream branches and operates CI/CD boundaries. |
-| **`/agents:skeleton`** | **Context Compression**: Forces the Omni-Minimizer to carve AST summaries of massive codefiles to protect token limits. |
 | **`/agents:graphify`** | **Knowledge Graph**: Runs the graphify pipeline over the current project into `graphify-out/`. |
+
+Two more sit outside the sprint pipeline and apply to a repository the framework has not handled before:
+
+| Command | Purpose |
+| :--- | :--- |
+| **`/agents:harden`** | **Platform Controls**: Turns on secret scanning, private vulnerability reporting, Dependabot, code scanning, and branch protection, in an order that does not lock you out of your own repository. |
+| **`/agents:revdoc`** | **Reverse Documentation**: Produces documentation for an existing codebase that is true, and provably so — graph first, every declared path verified, contracts written for every exposed interface. Runs before any remediation on an undocumented repository. |
 
 > [!TIP]
 > **Documentation Sovereignty:** All technical docs, implementation plans (`docs/sprints/`), and local roadmaps (`docs/roadmaps/`) are tightly bound directly to Pipeline tracking under `/docs/`.
@@ -65,7 +73,7 @@ If there's more than one valid path:
 ```bash
 ls .claude/commands/agents/
 ```
-Expected output: one `.md` file per command listed in §3.2 (`start.md`, `pipeline.md`, `close.md`, `audit.md`, `skill-forge.md`, `remediation.md`, `standardization.md`, `extract.md`, `deployment.md`, `skeleton.md`, `graphify.md`), and in Claude Code the `/agents:` prefix autocompletes to the same 11 commands.
+Expected output: one `.md` file per command listed in §3.2 (`start.md`, `pipeline.md`, `close.md`, `audit.md`, `skill-forge.md`, `remediation.md`, `reconcile.md`, `standardization.md`, `extract.md`, `deployment.md`, `graphify.md`, `harden.md`, `revdoc.md`), and in Claude Code the `/agents:` prefix autocompletes to the same 13 commands.
 
 ## 5. If something goes wrong
 | Symptom | Likely cause | Fix |

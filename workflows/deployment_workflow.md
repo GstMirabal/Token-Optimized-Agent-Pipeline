@@ -1,6 +1,7 @@
 ---
 description: "Deployment and Production Release Protocol (Keyword: deploy)"
 version: 3.0.0
+invoked_by: human:/agents:deployment
 ---
 
 # 🛡️ Workflow: Deploy (Deployment Protocol)

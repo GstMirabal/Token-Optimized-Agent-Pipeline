@@ -1,6 +1,7 @@
 ---
 description: "Structural & Rule Compliance Audit Protocol (Keyword: audit)"
 version: 2.0.0
+invoked_by: human:/agents:audit, reverse_documentation_workflow.md#findings-handoff
 ---
 
 # 🛡️ Workflow: Audit (Standards Sweep)

@@ -19,4 +19,4 @@ tools: Read, Glob, Grep, TodoWrite
 | **Phase 2** | `roadmap_review` | Convenes the review group (Agent Orchestrator, Skill Architect, Rule Validator) over the Initial Roadmap. |
 | **Phase 3** | `approval_gate` | Holds operations until explicit Human Authorization (the "OK") is collected for the Sprints. |
 | **Phase 4** | `execution`| Dispatches tasks via `task_scope.md`. Forces Double-Gate review (QA + Tester) post-execution. |
-| **Phase 4** | `remediation_loop` | Bounces rejected code back to the executing agent for patching autonomously, without bothering user. |
+| **Phase 4** | `remediation_loop` | Bounces rejected code back to the executing agent for patching autonomously, without bothering user. On the third consecutive rejection of the same logic block, escalate to `workflows/remediation_workflow.md` — named explicitly, since an escalation target left implicit is one no verifier can confirm exists (`RA-16`). |

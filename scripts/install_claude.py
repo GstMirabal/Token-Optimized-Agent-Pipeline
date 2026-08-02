@@ -1,5 +1,7 @@
 """Portable installer for the .agents -> Claude Code bridge.
 
+invoked_by: scripts/install_claude.sh, start_workflow.md#bridge_check, hooks/on_init.py.
+
 Cross-platform port of the original bash installer (install_claude.sh is now a
 thin wrapper around this). Idempotent: safe to re-run any time.
 
