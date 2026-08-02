@@ -30,6 +30,10 @@ You must ABORT and return the Orchestrator's plan if you detect any of the follo
    - A per-sprint/per-commit step relies on LLM judgment where a deterministic script/make-target suffices.
    - **Forced Correction:** Reject and force a script — but you MUST first name a concrete deterministic alternative; a mechanism with no reasonable script equivalent (genuine semantic judgment, e.g. the memory-handoff step in `extract_workflow.md` that decides what survives into `memory_index.json`) is exempt by default. Owned and maintained by `token_economy_agent`.
 
+6. **Unbounded Loop (No Stop Set):**
+   - A plan proposes unattended execution (`/loop`, `/schedule`, a routine) without declaring the three binding stops of `rules/loop_governance.md §2`: a machine-checkable success condition, an iteration cap, and no-progress detection.
+   - **Forced Correction:** Reject and require the stop set be armed via `scripts/loop_guard.py start` before the first iteration. A token budget may be declared but is advisory — no agent reads its own spend reliably, so making it binding would force a field nobody can fill truthfully. Owned by `token_economy_agent`, like Filter 5.
+
 ## 🟢 Approval Procedure
 
 If the plan correctly uses the Cache, delegates searching to local heuristics (`ripgrep`), and fractions responsibility so each subagent handles small, isolated prompts, you issue the ruling: `STATUS: GREEN - TOKEN-EFFICIENT`.
