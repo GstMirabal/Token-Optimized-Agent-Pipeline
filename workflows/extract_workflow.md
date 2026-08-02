@@ -1,6 +1,7 @@
 ---
 description: "Knowledge Extractor and Intelligence Distillation Protocol (Keyword: extract)"
 version: 4.0.0
+invoked_by: human:/agents:extract, close_workflow.md#extract_handoff
 ---
 
 # 🛡️ Workflow: Extract (Knowledge Distillation)

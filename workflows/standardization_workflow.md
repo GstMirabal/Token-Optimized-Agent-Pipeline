@@ -1,6 +1,7 @@
 ---
 description: "Standardized Hierarchy Alignment Protocol (SHAP)"
 version: 5.0.0
+invoked_by: human:/agents:standardization, start_workflow.md#first_run_scaffold
 ---
 
 # 🛡️ Workflow: Standardization (Alignment)

@@ -1,6 +1,7 @@
 ---
 description: "Skill Registration Protocol (Keyword: forge)"
 version: 2.0.0
+invoked_by: human:/agents:skill-forge, rules/skills_and_integrations.md
 ---
 
 # 🛡️ Workflow: Skill Forge (Tool Registration)

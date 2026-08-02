@@ -1,6 +1,7 @@
 ---
 description: "Reverse Documentation Protocol (Keyword: revdoc)"
 version: 1.0.0
+invoked_by: human:/agents:revdoc
 ---
 
 # 📐 Workflow: Reverse Documentation
@@ -36,7 +37,7 @@ of writing its API contract — neither was visible in a blueprint.
 | **3** | **Read the existing documentation.** Every file under `docs/`, in full. | — |
 | **4** | **Contrast each claim against the graph and the tree.** | Every path, symbol and route the documentation declares is confirmed to exist. |
 | **5** | **Correct what is false**, in place, saying what it said before. | — |
-| **6** | **Write the missing contracts**, one per exposed interface. | Every endpoint and public interface has one. |
+| **6** | **Write the missing contracts**, one per exposed interface, using the `contract-writer` skill. | Every endpoint and public interface has one. |
 | **7** | **Diátaxis classification.** Reference, Explanation, How-to, Tutorial. | No document does two jobs. |
 | **8** | **Prose gate.** `vale docs/`. | Zero findings. |
 | **9** | **Coverage closure.** Re-run phase 4 against the finished set. | Zero stale references. |
@@ -87,6 +88,11 @@ status code, what the caller can and cannot infer, and what the host must
 supply. Writing one honestly is impossible without following a request through
 to its effect, which is why this phase finds what module-level reading does
 not.
+
+Use the `contract-writer` skill (`skills/contract-writer/`) rather than
+improvising the shape. It exists for this phase and, until Phase 019, this
+workflow did not name it once — the skill was built for the job and left
+unwired, which is the pattern `RA-16` now blocks.
 
 Record what is **absent** as explicitly as what is present. A blueprint stating
 "no contract exists for this interface at this audit" is doing its job; one

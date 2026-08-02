@@ -1,5 +1,11 @@
 """Config-driven README tag-substitution engine.
 
+invoked_by: human, during host onboarding — `scripts/install_claude.py` prints
+the instruction to run it after scaffolding `identity.config.json`. Deliberately
+NOT wired into `close_workflow.md`: this renders a README from a template, and
+the nucleus's own README is hand-written (it contains no `{{TAG}}` markers), so
+a close-time re-render would overwrite it rather than sync it.
+
 Renders a README template (any file containing the `{{TAG}}` placeholders
 documented below) by resolving its tags against a host's identity.config.json
 — or, when this script is running from inside the `.agents` nucleus itself

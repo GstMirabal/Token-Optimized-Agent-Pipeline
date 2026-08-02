@@ -1,6 +1,7 @@
 ---
 description: "Execution Pipeline Protocol (Keyword: pipeline)"
 version: 3.6.0
+invoked_by: human:/agents:pipeline, start_workflow.md#pipeline_invocation
 ---
 
 # 🛡️ Workflow: Pipeline (Execution Pipeline)

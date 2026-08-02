@@ -69,7 +69,7 @@ The Token-Optimized Agent Pipeline is an AI agent governance framework designed 
 | **Governance** | Keyed ruleset in [`agents.md`](agents.md) + 8 lazy-loaded domain rule contexts in [`rules/`](rules/) |
 | **Subagents** | 13 role-segregated agents in [`agents/`](agents/) — 8 core pipeline roles, 5 auxiliary |
 | **Skills** | 34 flat skills in [`skills/`](skills/), routed statically via `manifest_skills.json` |
-| **Workflows** | 12 protocols in [`workflows/`](workflows/), exposed as 13 `/agents:*` slash commands |
+| **Workflows** | 11 protocols in [`workflows/`](workflows/), exposed as 12 `/agents:*` slash commands |
 | **Pipeline** | 8 phases (Planning → Sprint Closeout), gated by a single attended human authorization |
 | **Integration** | Git submodule + idempotent Claude Code bridge; never writes outside `.claude/` and `CLAUDE.md` |
 

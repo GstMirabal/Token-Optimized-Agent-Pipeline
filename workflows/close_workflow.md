@@ -1,6 +1,7 @@
 ---
 description: "Session-Close Protocol (Keyword: close)"
 version: 6.2.0
+invoked_by: human:/agents:close
 ---
 
 # 🛡️ Workflow: Close (Session Close)

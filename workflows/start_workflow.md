@@ -1,6 +1,7 @@
 ---
 description: "Session-Start Protocol (Keyword: start)"
 version: 6.1.0
+invoked_by: human:/agents:start
 ---
 
 # 🛡️ Workflow: Start (Pipeline Initiation)

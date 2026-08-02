@@ -6,8 +6,10 @@ host project folder leaked into `skills/skillopt/data/scenarios.json` and was
 caught only during the pre-publication audit (agents.md §7, RA-15).
 
 Generic placeholders are allowed; the allow-list below is deliberately small,
-and it has already rejected a contribution from this framework's own author
-(`/Users/someone/` in a test fixture, PR #28).
+and it has already rejected a contribution from this framework's own author — a
+home path in a PR #28 test fixture whose user segment was not on the list. That
+literal is paraphrased rather than quoted here: quoting it would trip this very
+scanner, as an earlier draft of this docstring did.
 
 invoked_by: Makefile `verify` target (and therefore .github/workflows/ci.yml,
 which invokes `make verify`). Extracted from a CI-inline heredoc so the same

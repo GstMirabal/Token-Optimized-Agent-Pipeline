@@ -41,7 +41,6 @@ Every `workflows/*.md` protocol maps to a real Claude Code slash command in `com
 | **`/agents:standardization`** | **Structural**: Enforces the `[layer]/[app]/` dictionary and Technical English purity. |
 | **`/agents:extract`** | **Distillation**: Memory indexer handling the "Rule Amendment Loop" (see `agents.md §4`). |
 | **`/agents:deployment`** | **Deployment**: Merges the sprint branch to upstream branches and operates CI/CD boundaries. |
-| **`/agents:skeleton`** | **Context Compression**: Forces the Omni-Minimizer to carve AST summaries of massive codefiles to protect token limits. |
 | **`/agents:graphify`** | **Knowledge Graph**: Runs the graphify pipeline over the current project into `graphify-out/`. |
 
 Two more sit outside the sprint pipeline and apply to a repository the framework has not handled before:
@@ -75,7 +74,7 @@ If there's more than one valid path:
 ```bash
 ls .claude/commands/agents/
 ```
-Expected output: one `.md` file per command listed in §3.2 (`start.md`, `pipeline.md`, `close.md`, `audit.md`, `skill-forge.md`, `remediation.md`, `standardization.md`, `extract.md`, `deployment.md`, `skeleton.md`, `graphify.md`, `harden.md`, `revdoc.md`), and in Claude Code the `/agents:` prefix autocompletes to the same 13 commands.
+Expected output: one `.md` file per command listed in §3.2 (`start.md`, `pipeline.md`, `close.md`, `audit.md`, `skill-forge.md`, `remediation.md`, `standardization.md`, `extract.md`, `deployment.md`, `graphify.md`, `harden.md`, `revdoc.md`), and in Claude Code the `/agents:` prefix autocompletes to the same 12 commands.
 
 ## 5. If something goes wrong
 | Symptom | Likely cause | Fix |

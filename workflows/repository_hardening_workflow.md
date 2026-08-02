@@ -1,6 +1,7 @@
 ---
 description: "Repository Hardening Protocol (Keyword: harden)"
 version: 1.0.0
+invoked_by: human:/agents:harden
 ---
 
 # 🔒 Workflow: Repository Hardening
