@@ -13,7 +13,7 @@ protocols that should mirror each other shows up there first.
 | Workflow | active_state.json | task_scope.md | CHANGELOG.md | graph.json | memory_index.json | mirror.json |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | `audit_workflow` | — | — | — | — | — | — |
-| `close_workflow` | write | — | write | — | verify/write | — |
+| `close_workflow` | write | write | write | — | verify/write | — |
 | `deployment_workflow` | — | — | write | — | — | — |
 | `extract_workflow` | — | — | — | — | ?/write | — |
 | `pipeline_workflow` | — | ?/verify | write | — | — | — |
@@ -54,6 +54,7 @@ protocols that should mirror each other shows up there first.
 | 2. Sprint Closeout | `repo_docs_check` | verify |
 | 2. Sprint Closeout | `extract_handoff` | write |
 | 2.5 Heuristic Pulse Gate | `heuristic_pulse_gate` | verify |
+| 2.6 Phase Completion Gate | `double_gate_evidence` | write |
 | 3. Zero-Tolerance Purge | `memory_wipe` | write |
 | 3.5 Platform Recheck | `platform_recheck` | verify |
 | 4. State Sync | `state_sync` | write |
@@ -224,6 +225,7 @@ protocols that should mirror each other shows up there first.
 | 1.5 Bridge Provision | `bridge_check` | write |
 | 1.5 Bridge Provision | `first_run_scaffold` | read |
 | 2. Pipeline Handoff | `pipeline_invocation` | ? |
+| 2. Pipeline Handoff | `delegation_conflict` | write |
 
 ---
 *A `?` means the heuristic could not classify that step's verb. It is left

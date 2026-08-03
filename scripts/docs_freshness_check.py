@@ -365,6 +365,69 @@ def node_delta(previous: dict, current: dict) -> int:
     return node_change + edge_change + (community_change * 100)
 
 
+# Artifact -> the pipeline phase that produces it. Reported by phase, not by
+# filename, so the reader learns which STEP was skipped rather than which file
+# happens to be absent.
+PHASE_ARTIFACTS: dict[str, str] = {
+    "task_scope.md": "Phase 4 (Roadmap Review) — Rule Validator",
+    "SPRINT_LOG.md": "Phase 3 (Roadmap Drafting) — Orchestrator",
+}
+
+
+def check_phase_artifacts(repo_root: Path, current_sprint: int, report) -> None:
+    """Detect a pipeline phase that never ran, by the artifact it failed to leave.
+
+    Every other control in this framework inspects the CONTENT of what was
+    written: `on_commit.py` validates commit shape and scans for secrets, and
+    the checks above compare documentation against the graph. None of them asks
+    whether the phase responsible for a file executed at all, so an entire
+    phase can be skipped and leave no signal.
+
+    That is not hypothetical. A host ran a sprint without Phases 4 and 7;
+    `task_scope.md` had been produced by every sprint for thirty cycles and its
+    absence raised nothing for twelve commits. The cost was not procedural —
+    `jurisdictional_lock` and `no_interference` are both enforced by READING
+    `task_scope.md`, so skipping the phase that writes it silently disabled two
+    isolation rules while they appeared to be in force.
+
+    Args:
+        repo_root (Path): Host repository root.
+        current_sprint (int): Active sprint id.
+        report: Accumulator exposing `warn` and `block`.
+    """
+    if not current_sprint:
+        return
+
+    sprints_dir = repo_root / SPRINTS_DIR
+    if not sprints_dir.is_dir():
+        return
+
+    sprint_dir = next(
+        (
+            candidate
+            for candidate in sorted(sprints_dir.iterdir())
+            if candidate.is_dir()
+            and "".join(ch for ch in candidate.name.split("-")[0] if ch.isdigit())
+            == f"{current_sprint:03d}"
+        ),
+        None,
+    )
+
+    if sprint_dir is None:
+        report.warn(
+            f"docs/sprints/{current_sprint:03d}* does not exist — Phase 3 instantiates the "
+            "sprint hierarchy before the first commit (RA-12)"
+        )
+        return
+
+    for artifact, phase in PHASE_ARTIFACTS.items():
+        if not (sprint_dir / artifact).is_file():
+            report.warn(
+                f"{sprint_dir.name}/{artifact} is missing — {phase} left no artifact, "
+                "so that phase did not run"
+            )
+
+
 def structural_change_status(repo_root: Path, last_audit_sprint: int, current_sprint: int) -> tuple[bool, str]:
     """§4.3: does a structural-change delta exist since last_audit_sprint,
     and has enough history accumulated to allow BLOCK (vs. WARN-only)?
@@ -425,6 +488,8 @@ def run(repo_root: Path, current_sprint: int, denylist_dir: Path = DENYLIST_DIR)
         # to say is one people stop reading.
     else:
         report.warn("code_containers not declared — C4 Level 3 stays advisory")
+
+    check_phase_artifacts(repo_root, current_sprint, report)
 
     last_audit_sprint = state.get("current_sprint", {}).get("last_audit_sprint")
     if last_audit_sprint is None:
