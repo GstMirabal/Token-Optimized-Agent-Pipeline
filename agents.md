@@ -13,6 +13,7 @@ It dictates in an absolute and transversal manner the behavior of subagents, cod
 | **Execution** | Every task must be recorded in the current Sprint folder. |
 | **Master Ledger** | The host root `CHANGELOG.md` (Keep a Changelog format; template: `docs/standards/templates/CHANGELOG_TEMPLATE.md`). Every Sprint Closeout appends its sprint entry under `[Unreleased]`; every deployment seals it as `[vX.Y.Z]` before tagging. Strictly separate jurisdiction from `.agents/CHANGELOG.md` (framework evolution) — the only crossover allowed is a pin-bump entry (`chore(deps): pin .agents to vX.Y.Z`). |
 | **Certification** | Closing a Sprint requires updating Blueprints, Global Roadmap, Walkthroughs, and the Master Ledger. |
+| **Open upstream findings** | **Nucleus sessions only.** `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` holds framework-class defects reported by hosts under `§4 feedback_upstream` — the ones `strict_rule` forbade the host from patching. Read it before planning nucleus work, because several are blocking a shipped mechanism rather than proposing a new one. Announced here rather than left to be discovered: in nucleus mode `docs/active_state.json` does not exist (by design, see `§5`) and neither does `docs/0_SYSTEM_OVERVIEW.md` (finding `F-093-N1` in that file), so **this document is the only file a nucleus session is guaranteed to read**. |
 
 ### Rule Contexts (lazy-load index)
 Domain rules live in `rules/` and are loaded **on demand** at these triggers — never preloaded (token economy):
