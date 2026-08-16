@@ -220,6 +220,38 @@ no `docs/sprints/` hierarchy. The second is one sentence and consistent with how
 the other nucleus-mode exception is handled; the first gives nucleus sessions the
 same entry point every host gets.
 
+### - [ ] `F-093-N2` — a mandatory close step crashes in every host
+
+**Evidence.** `scripts/check_readme_counts.py:47`
+
+```python
+lambda: len([p for p in Path("skills").iterdir() if p.is_dir()]),
+```
+
+`Path("skills")` is relative to the working directory. In the nucleus that
+resolves; in a host the skills live at `.agents/skills/` and the path does not
+exist, so the script raises `FileNotFoundError` and exits **1**.
+
+`close_workflow.md` Phase 2 `readme_counts` names this script as a step of every
+session close and says it "**Exits `2` on drift**". In a host it exits 1 without
+having counted anything — a different code for a different reason, which is why
+nobody reading the workflow would recognise the failure as environmental.
+
+**How to reproduce.** Run it from the root of any host that pins this submodule.
+
+**Consequence.** The step has never passed in a host close. Either it was skipped,
+or its failure was read as drift it never measured. Both are the shape this
+document keeps describing: a control whose verdict depends on where it was run.
+
+**Proposed fix.** Resolve the counted paths against the script's own location
+rather than the working directory — the same nucleus/host asymmetry
+`close_workflow.md` already handles explicitly for `docs/sprints/`, `memory/` and
+the Entry Point anchors. If the counts are meaningful only in the nucleus, the
+workflow should say so and the script should exit 0 with that statement in a host,
+rather than crashing.
+
+**Found by** running the close protocol, not by reading it.
+
 ---
 
 ## Inherited from host sprint records — **re-measure before acting**
