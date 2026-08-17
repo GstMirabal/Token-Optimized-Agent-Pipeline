@@ -156,3 +156,145 @@ def test_unknown_baseline_does_not_crash(repo):
         json.dumps({"last_close_commit": "0" * 40})
     )
     assert dd.main() == 0
+
+
+# --- drift verdicts (ADR-0002) -----------------------------------------
+
+def _head() -> str:
+    return subprocess.run(["git", "rev-parse", "HEAD"],
+                          capture_output=True, text=True).stdout.strip()
+
+
+def _commit(repo, text: str, message: str) -> str:
+    """Commit distinct content. The `repo` fixture already committed 'base'."""
+    (repo / "f.txt").write_text(text)
+    subprocess.run(["git", "commit", "-aqm", message], check=True)
+    return _head()
+
+
+def _ledger(repo, released: list[str], unreleased: str = "") -> None:
+    body = f"# Changelog\n\n## [Unreleased]\n{unreleased}\n"
+    for version in released:
+        body += f"\n## [{version}] - 2026-01-01\n- an entry\n"
+    (repo / "CHANGELOG.md").write_text(body)
+
+
+def _baseline(repo, sha: str) -> None:
+    (repo / "docs").mkdir(exist_ok=True)
+    (repo / "docs" / "active_state.json").write_text(
+        json.dumps({"last_close_commit": sha})
+    )
+
+
+def test_sealed_range_is_not_drift(repo, capsys):
+    """The live defect: deployment seals and tags, and the check cried wolf."""
+    base = _head()
+    _commit(repo, "work\n", "work")
+    subprocess.run(["git", "tag", "v1.1.0"], check=True)
+    _ledger(repo, ["1.1.0"])
+    _baseline(repo, base)
+
+    assert dd.main() == 0
+    out = capsys.readouterr().out
+    assert "v1.1.0" in out
+    # The limit must be stated, or `S` reads as "every commit documented".
+    assert "RANGE" in out
+
+
+def test_unrecorded_range_is_still_drift(repo):
+    """Anti-whitewash calibration — the Phase 018 scenario.
+
+    If this ever returns 0 the fix has certified genuine drift as sealed, which
+    is worse than crying wolf: a false clean verdict reads as evidence. The
+    abort criterion in the Sprint 024 plan is keyed on this test.
+    """
+    base = _head()
+    subprocess.run(["git", "tag", "v1.0.0"], check=True)
+    _commit(repo, "unrecorded\n", "outside the protocol")
+    _ledger(repo, ["1.0.0"])          # nothing covers the commit after the tag
+    _baseline(repo, base)
+
+    assert dd.main() == 2
+
+
+def test_mixed_range_reports_only_the_unsealed(repo, capsys):
+    """A partially sealed range must name the uncovered commits, not all of them."""
+    base = _head()
+    _commit(repo, "sealed\n", "already released")
+    subprocess.run(["git", "tag", "v1.1.0"], check=True)
+    _commit(repo, "loose\n", "landed after the tag")
+    _ledger(repo, ["1.1.0"])
+    _baseline(repo, base)
+
+    assert dd.main() == 2
+    err = capsys.readouterr().err
+    assert "landed after the tag" in err
+    # Messages must not overlap as substrings, or this assertion cannot fail.
+    assert "already released" not in err
+
+
+def test_nonempty_unreleased_is_indeterminate_not_clean(repo, capsys):
+    """Entries may cover the commits, but reachability cannot prove it per commit."""
+    base = _head()
+    _commit(repo, "work\n", "work")
+    _ledger(repo, ["1.0.0"], unreleased="- something was recorded here\n")
+    subprocess.run(["git", "tag", "v1.0.0", base], check=True)
+    _baseline(repo, base)
+
+    assert dd.main() == 2
+    assert "per commit" in capsys.readouterr().err
+
+
+def test_no_sealing_tag_cannot_clear_the_range(repo, capsys):
+    """Unproven coverage is not coverage — the case a pre-existing test caught.
+
+    An earlier design returned 0 here ("nothing measurable"), which whitewashed
+    the Phase 018 scenario in its early form: commits after the baseline in a
+    repository that has never released anything.
+    """
+    base = _head()
+    _commit(repo, "work\n", "work")
+    _ledger(repo, [])
+    _baseline(repo, base)
+
+    assert dd.main() == 2
+    assert "nothing proves any of" in capsys.readouterr().err
+
+
+def test_tag_without_a_ledger_section_does_not_seal(repo):
+    """This repository carries v3.4.0 and v3.5.2 with no section; they seal nothing."""
+    base = _head()
+    _commit(repo, "work\n", "work")
+    subprocess.run(["git", "tag", "v9.9.9"], check=True)
+    _ledger(repo, ["1.0.0"])          # v9.9.9 owns no section
+    _baseline(repo, base)
+
+    assert dd.main() == 2
+    assert dd.sealing_tags() == []
+
+
+def test_orphaned_baseline_falls_back_to_merge_base(repo, capsys):
+    """A squash-merged sprint branch leaves the recorded baseline off-branch.
+
+    `git cat-file -e` cannot catch it — the object still exists — so without
+    the merge-base fallback the range lists the whole history since the fork.
+    """
+    fork = _head()
+    subprocess.run(["git", "checkout", "-qb", "sprint"], check=True)
+    orphan = _commit(repo, "on the branch\n", "branch work")
+    subprocess.run(["git", "checkout", "-q", "main"], check=True)
+    _commit(repo, "squashed\n", "squashed onto main")
+    subprocess.run(["git", "tag", "v1.1.0"], check=True)
+    _ledger(repo, ["1.1.0"])
+    _baseline(repo, orphan)
+
+    assert dd.main() == 0
+    assert "merge-base" in capsys.readouterr().err
+    assert dd.resolve_baseline(orphan)[0] == fork
+
+
+def test_baseline_on_the_branch_is_not_substituted(repo):
+    """The fallback must fire only when it has to — regression guard."""
+    base = _head()
+    _commit(repo, "work\n", "work")
+    assert dd.resolve_baseline(base) == (base, None)
