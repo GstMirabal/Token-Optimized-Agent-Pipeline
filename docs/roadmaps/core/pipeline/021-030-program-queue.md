@@ -599,7 +599,7 @@ are documentation, governance or skill roles; `qa_agent`, `tester_agent`, `princ
 `devops_agent` do not write. For `scripts/` and `hooks/` **there is no owner**. `F-086-A1` is the
 visible case of a structural void.
 
-## Scope: eleven units, eleven commits
+## Scope: thirteen units, thirteen commits
 
 Ordered by the cost of what goes wrong if nobody decides, not by effort.
 
@@ -714,6 +714,9 @@ pass identically, and additionally pass from any other cwd.
 
 ### C1-C8, in brief
 
+> **C9 runs before all of these.** See the `C9-C10` section below: `023`'s own close runs
+> `branch_sovereignty audit`, and that gate is intermittently wrong until `C9` lands.
+
 - **C1** — anchor README and the five counters against `agents_root()`. Do **not** wrap
   `iterdir()` in `try/except`: that turns the crash into false drift.
 - **C2** — when the key is absent emit `"cannot determine (field not returned)"` instead of
@@ -740,6 +743,64 @@ pass identically, and additionally pass from any other cwd.
   it is.
 - **C8** — tick each closed finding's box **keeping the entry** (rule 3 of the document); add
   `F-021-A2` and the three measurement corrections.
+
+### C9-C10 — two gates that answer when they do not know
+
+Both were found while **closing Sprint 022**, by running the framework's own close machinery
+rather than by reading it. They are one defect class: **a control that treats "I could not
+determine" as a determination.** `C9` answers red when it does not know; `C10` answers green.
+Neither corrupts data; both make a gate lie, which is what this program exists to pursue.
+
+**`C9` runs FIRST, before every other unit of this sprint** — `023`'s own close runs
+`branch_sovereignty audit`, so leaving it flaky means the sprint trips on the defect it came to
+repair.
+
+- **C9** — `merged_pr_exists` (`scripts/branch_sovereignty.py:94-107`) collapses a transient
+  network failure into a verdict: `if result.returncode != 0: return False`. **Measured, not
+  inferred**: twelve consecutive calls to the exact query the script issues returned
+  **10 OK and 2 failures**, `rc=1`, `HTTP 503: No server is currently available`. Since
+  `content_is_integrated` already returns `False` for any squash-merged branch, one 503 flips an
+  **integrated** branch to "unintegrated". Reproduced end to end — three consecutive `audit` runs
+  on an unchanged tree exited **`0`, `2`, `0`**, accusing `ai-sprint/025`, whose PR `#41` is
+  `MERGED`. **A second triple run minutes later exited `0`, `0`, `2` and accused
+  `ai-sprint/024` instead** — the accused branch *varies between runs on an identical tree*, which
+  is the signature of a per-call network failure rather than any property of a branch. That is the
+  cheapest regression test available: an audit whose accusation is not reproducible is not
+  reporting a fact about the repository.
+  **Consequence recorded live**: this session declined to run `prune` because its own declared
+  precondition (three consecutive `exit 0`) failed, even knowing both PRs were `MERGED`.
+  Overriding a red gate on the strength of knowing better is the behaviour this unit exists to
+  make unnecessary — so the branches stay until `C9` lands and the gate is worth obeying.
+  **The failure direction is safe**: `prune` deletes only what it classified as integrated, so a
+  503 leaves the branch untouched — it never destroys. **The real damage is the remediation it
+  induces.** On that `exit 2` the script instructs the operator to either re-run
+  `/agents:deployment` on an already-merged branch, or record the branch in
+  `config/abandoned_branches.json` — which **permanently disables the check for a healthy
+  branch**. The script warns about exactly this in its own text: *"an undeclared exception is how
+  this check gets disabled instead of answered"*. Its own flakiness manufactures the pressure that
+  disables it.
+  Fix: three states — *yes*, *no*, *could not determine* — with retry and backoff; the third is
+  **reported as indeterminate and never as a verdict**, and the waiver is not offered when the
+  cause was a network failure. Also closes an `agents.md §1 exception_handling` violation: the
+  error is swallowed with no log.
+- **C10** — `workflows/deployment_workflow.md:17` names `gh pr checks [N] --watch` as the `RA-13`
+  gate before merging. **It cannot wait for a check that is not registered yet.** Timeline
+  measured on PR `#45`: created 16:12:37; `--watch` terminated ~16:13 having seen only `audit`;
+  the CodeQL run was **registered at 16:15:14**, two minutes later. Two of the three required
+  checks (`Analyze (python)`, `CodeQL`) had not reported when the gate returned. What actually
+  blocked the merge was GitHub branch protection — **not the framework's gate** — and
+  `/agents:harden` is optional and runs once, so **on a host without it the merge would have gone
+  through unverified**.
+  `mergeStateStatus` alone is not the fix: it returns `CLEAN` **also when no check is required**,
+  so an unprotected repository reads green from the first second — precisely the host case.
+  Fix: `scripts/ci_gate.py` reads the **required** checks from branch protection, confirms each
+  one reported and passed, and **fails loudly when none is declared**, because an unprotected
+  repository is not a verified one. `invoked_by:` declared (`RA-16`), and
+  `deployment_workflow.md:17` stops naming `--watch`.
+
+**Amendment candidate for `agents.md §7`, to be decided in this sprint**: *a control that depends
+on the network MUST distinguish "could not determine" from a verdict, and never collapse it into
+either.* One rule covers both units.
 
 ## Execution
 
@@ -1198,7 +1259,7 @@ Six holes no individual sprint owned. Not defects of a sprint: properties of the
 | :--- | :--- | :--- |
 | **J1** | **The plan grows `agents.md` without budgeting it.** Several sprints edit it (`C0`, `C6`, `P1`, `P5`, `P7`, `U3`) and it is the only file loaded in **every session of every subagent**. A program whose thesis is token economy adds lines to the always-loaded file without counting the cost | **Declared ceiling:** `agents.md` does not exceed **200 lines** at the close of 029. Whatever does not fit moves to a lazy `rules/*.md`. `session_cost.py` can measure the effect: it is fixed cost × every subagent × every session |
 | **J2** | **No sprint declares an abort criterion.** If `C3`'s regex produces false positives in production, nothing says what reverts it | Every sprint with code names its `workflows/remediation_workflow.md` trigger. For `C3` it is concrete: **a false positive blocking a host reverts the commit**, it is not hot-patched — the hook already blocked a host once for this |
-| **J3** | **Sprint 023 has eleven units and 021 imposes a session bound.** The first drafting of this risk claimed the anchor was already the continuity mechanism — **false, and verified**: `session_state.py` has two states and neither means "session closed, sprint open" | **Resolved in `M6` of 021**, not declared. Without it, `release()` mid-sprint sets a false baseline for `detect_drift`, and the next session must declare itself crash recovery |
+| **J3** | **Sprint 023 has thirteen units and 021 imposes a session bound.** The first drafting of this risk claimed the anchor was already the continuity mechanism — **false, and verified**: `session_state.py` has two states and neither means "session closed, sprint open" | **Resolved in `M6` of 021**, not declared. Without it, `release()` mid-sprint sets a false baseline for `detect_drift`, and the next session must declare itself crash recovery |
 | **J4** | **`T5` requires declaring documentary impact per sprint, and the ones already written lack it** | The obligation applies from 029 onward. Retro-applying it is rewriting without signal; each adds it when extracting its Implementation Plan at Phase 1 |
 | **J5** | **Counting `scripts/` generates churn.** That directory grows almost every sprint, so the README would need editing each time — the very drift-generating pattern this program fights | The row is added **generated**, not hand-written: same pattern as `manifest_skills.json`, which `generate_manifest.py` produces and `check_manifest_parity.py` verifies. A figure a script writes cannot drift |
 | **J6** | **A figure produced by a transformation, cited as if it came from the source.** Four instances in the session that drafted this: (a) *"6 commits outside `main` = squash-merge remnants"* — they were remote branches; (b) *"`task_scope.md` is not in `.gitignore`"* — it was, line 38; (c) *"`#37` at `CHANGELOG.md:44`"* — the 44 was the line number **within the filtered section**, the real one is 51; (d) the first drafting of this very row claimed a line-range gate *"would have caught all three"* — **it would have caught none**, verified | **The mitigation is not a range gate.** That check (resolving `file:line` under `docs/`) is cheap and enters **029** inside `verify_references.py`, but it only catches citations **out of range** — none of the four were. What works, and worked twice in this document, is **every measured claim carrying the command that reproduces it**: that is how `14 → 18` was corrected in `C0.2` and how `44 → 51` was found. Adopted as a drafting requirement in `T5`: *a figure without its command is not evidence, it is memory* |
