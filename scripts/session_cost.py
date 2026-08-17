@@ -168,6 +168,19 @@ def measure(transcript: Path) -> dict:
     }
 
 
+def measure_previous(project: Path) -> dict | None:
+    """The most recent completed session for a project, for `session_probe.py`.
+
+    Returns None when there is no transcript to read — a first session in a new
+    project is not a finding.
+    """
+    directory = PROJECTS / project_slug(project)
+    if not directory.is_dir():
+        return None
+    transcripts = sorted(directory.glob("*.jsonl"), key=lambda p: p.stat().st_mtime)
+    return measure(transcripts[-1]) if transcripts else None
+
+
 def render(result: dict) -> None:
     """Print a measurement in tokens. Never in currency — see the module docstring."""
     if not result["measurable"]:
