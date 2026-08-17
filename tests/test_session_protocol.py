@@ -243,6 +243,129 @@ def test_prune_never_deletes_unproven_work(repo):
     assert "unmerged" in branches
 
 
+# --- branch sovereignty: "could not determine" is not a verdict --------
+#
+# The pull request lookup used to return a bool and map every non-zero exit to
+# False, so a transient API failure read as "no merged PR exists". Measured
+# against the live API: 2 of 12 calls returned rc=1, HTTP 503. Because
+# content_is_integrated already returns False for every squash-merged branch,
+# one 503 was enough to flip an integrated branch to unintegrated — reproduced
+# as two triple-runs on an unchanged tree exiting 0,2,0 and 0,0,2, accusing a
+# different branch each time.
+
+REAL_RUN = subprocess.run
+
+
+def _gh_returning(returncode, stderr="", stdout=""):
+    """A stand-in for `gh` that leaves real `git` calls alone."""
+    def run(cmd, **kwargs):
+        if cmd and cmd[0] == "gh":
+            return subprocess.CompletedProcess(cmd, returncode, stdout, stderr)
+        return REAL_RUN(cmd, **kwargs)
+    return run
+
+
+@pytest.fixture
+def gh_installed(monkeypatch):
+    """Pretend `gh` is on PATH and remove the retry sleep."""
+    monkeypatch.setattr(bs, "BACKOFF_SECONDS", 0)
+    monkeypatch.setattr(bs.shutil, "which", lambda _: "/usr/bin/gh")
+
+
+def test_a_transient_failure_is_undetermined_not_a_verdict(repo, gh_installed, monkeypatch):
+    """HTTP 503 says nothing about whether a pull request was merged."""
+    monkeypatch.setattr(bs.subprocess, "run",
+                        _gh_returning(1, "HTTP 503: No server is currently available"))
+    assert bs.merged_pr_exists("feature") == bs.UNKNOWN
+
+
+def test_a_transient_failure_is_retried_before_giving_up(repo, gh_installed, monkeypatch):
+    """The retry is what makes UNKNOWN rare enough to be worth blocking on."""
+    calls = []
+
+    def run(cmd, **kwargs):
+        if cmd and cmd[0] == "gh":
+            calls.append(1)
+            if len(calls) < bs.ATTEMPTS:
+                return subprocess.CompletedProcess(cmd, 1, "", "HTTP 503: unavailable")
+            return subprocess.CompletedProcess(cmd, 0, '[{"number": 41}]', "")
+        return REAL_RUN(cmd, **kwargs)
+
+    monkeypatch.setattr(bs.subprocess, "run", run)
+    assert bs.merged_pr_exists("feature") == bs.YES
+    assert len(calls) == bs.ATTEMPTS
+
+
+def test_no_github_side_is_a_definitive_no(repo, gh_installed, monkeypatch):
+    """A repository with no remote can hold no pull requests, and that is an answer.
+
+    Reporting it as UNKNOWN would refuse the seal forever in every local-only
+    repository — trading an intermittently wrong gate for a permanently closed
+    one, which is strictly worse. Retrying cannot conjure a remote either.
+    """
+    monkeypatch.setattr(bs.subprocess, "run", _gh_returning(1, "no git remotes found"))
+    assert bs.merged_pr_exists("feature") == bs.NO
+
+
+def test_missing_gh_is_declared_rather_than_assumed(repo, monkeypatch):
+    monkeypatch.setattr(bs.shutil, "which", lambda _: None)
+    assert bs.merged_pr_exists("feature") == bs.UNKNOWN
+
+
+def test_a_negative_lookup_does_not_read_as_integrated(repo, monkeypatch):
+    """Regression guard for the truthiness trap the three-valued answer introduces.
+
+    The condition used to be `content_is_integrated(...) or merged_pr_exists(...)`.
+    With strings, `NO` is non-empty and therefore truthy, so that chain would have
+    reported *every* branch integrated — silently inverting the gate, which is far
+    worse than the flakiness this change removes.
+    """
+    subprocess.run(["git", "checkout", "-qb", "feature"], check=True)
+    (repo / "f.txt").write_text("changed\n")
+    subprocess.run(["git", "commit", "-aqm", "work"], check=True)
+    subprocess.run(["git", "checkout", "-q", "main"], check=True)
+    monkeypatch.setattr(bs, "merged_pr_exists", lambda _: bs.NO)
+    integrated, unintegrated, indeterminate, _ = bs.classify("main")
+    assert unintegrated == ["feature"]
+    assert integrated == [] and indeterminate == []
+
+
+def test_undetermined_is_reported_as_such_and_offered_no_waiver(repo, capsys, monkeypatch):
+    """It still blocks — but as doubt, not as an accusation.
+
+    The waiver is permanent. Offering it here would invite silencing a branch
+    whose work may be perfectly integrated, which is how a gate gets disabled
+    instead of answered.
+    """
+    subprocess.run(["git", "checkout", "-qb", "feature"], check=True)
+    (repo / "f.txt").write_text("changed\n")
+    subprocess.run(["git", "commit", "-aqm", "work"], check=True)
+    subprocess.run(["git", "checkout", "-q", "main"], check=True)
+    monkeypatch.setattr(bs, "merged_pr_exists", lambda _: bs.UNKNOWN)
+
+    assert bs.audit("main") == 2
+    err = capsys.readouterr().err
+    assert "could NOT be determined" in err
+    assert "unintegrated work" not in err
+    assert str(bs.WAIVERS) not in err
+
+
+def test_prune_never_deletes_an_undetermined_branch(repo, monkeypatch):
+    """Deletion is irreversible; a lookup that did not answer must not authorise it."""
+    subprocess.run(["git", "checkout", "-qb", "maybe-merged"], check=True)
+    (repo / "f.txt").write_text("changed\n")
+    subprocess.run(["git", "commit", "-aqm", "work"], check=True)
+    subprocess.run(["git", "checkout", "-q", "main"], check=True)
+    monkeypatch.setattr(bs, "merged_pr_exists", lambda _: bs.UNKNOWN)
+
+    bs.prune("main")
+    branches = REAL_RUN(
+        ["git", "for-each-ref", "--format=%(refname:short)", "refs/heads/"],
+        capture_output=True, text=True,
+    ).stdout.split()
+    assert "maybe-merged" in branches
+
+
 # --- drift detection ---------------------------------------------------
 
 def test_no_baseline_is_reported_not_silently_passed(anchor, capsys):
