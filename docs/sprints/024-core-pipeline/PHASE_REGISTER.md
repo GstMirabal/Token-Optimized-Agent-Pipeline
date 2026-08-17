@@ -25,11 +25,11 @@ of what was written, never whether the phase responsible for it ran.
 
 | Gate | Round | Verdict |
 | :--- | :--- | :--- |
-| Structural (`make verify`) | 1 | **REJECTED** — `map_workflows.py --check`: the generated step map went stale when two workflows were edited |
-| Structural (`make verify`) | 2 | **PASSED** — guide regenerated in the same commit, since the check compares byte for byte |
-| Test (`pytest`) | 1 | **REJECTED** — 9 failures. Two causes, both worth recording |
-| Test (`pytest`) | 2 | **REJECTED** — 1 failure: an assertion that could not fail (`"unsealed work"` contains `"sealed work"`) |
-| Test (`pytest`) | 3 | **PASSED** — 23/23, then 127/127 across the suite |
+| **QA Agent** (structural, `make verify`) | 1 | **REJECTED** — `map_workflows.py --check`: the generated step map went stale when two workflows were edited |
+| **QA Agent** (structural, `make verify`) | 2 | **PASSED** — guide regenerated in the same commit, since the check compares byte for byte |
+| **Tester Agent** (functional, `pytest`) | 1 | **REJECTED** — 9 failures. Two causes, both worth recording |
+| **Tester Agent** (functional, `pytest`) | 2 | **REJECTED** — 1 failure: an assertion that could not fail (`"unsealed work"` contains `"sealed work"`) |
+| **Tester Agent** (functional, `pytest`) | 3 | **PASSED** — 23/23, then 127/127 across the suite |
 
 **The first test round is the one that mattered.** Among the nine failures was
 `test_commits_after_the_sealed_close_are_drift` — a Phase 019 test, written long

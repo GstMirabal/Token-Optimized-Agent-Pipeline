@@ -12,9 +12,107 @@ import pytest
 
 SCRIPTS = Path(__file__).parent.parent / "scripts"
 sys.path.insert(0, str(SCRIPTS))
+import _mode  # noqa: E402
 import branch_sovereignty as bs  # noqa: E402
 import detect_drift as dd  # noqa: E402
 import session_state as ss  # noqa: E402
+import submodule_purity as sp  # noqa: E402
+
+
+# --- jurisdiction: host work never lands inside the submodule -----------
+
+def _tiny_repo(path: Path) -> None:
+    path.mkdir(parents=True, exist_ok=True)
+    run = lambda *a: subprocess.run(["git", *a], cwd=path, check=True,
+                                    capture_output=True, text=True)
+    run("init", "-q", "-b", "main")
+    run("config", "user.email", "t@example.com")
+    run("config", "user.name", "T")
+    (path / "agents.md").write_text("# constitution\n")
+    run("add", "-A")
+    run("commit", "-qm", "base")
+
+
+def test_a_git_directory_is_the_nucleus(tmp_path, monkeypatch):
+    monkeypatch.setattr(_mode, "agents_dir", lambda: tmp_path)
+    (tmp_path / ".git").mkdir()
+    assert _mode.is_nucleus() is True
+
+
+def test_a_git_pointer_file_is_a_submodule_checkout(tmp_path, monkeypatch):
+    """git's own layout is the discriminator; nothing has to be configured."""
+    monkeypatch.setattr(_mode, "agents_dir", lambda: tmp_path)
+    (tmp_path / ".git").write_text("gitdir: ../.git/modules/.agents\n")
+    assert _mode.is_nucleus() is False
+
+
+def test_nucleus_mode_never_blocks_even_on_a_dirty_tree(tmp_path, monkeypatch):
+    """The mirror of Sprint 024's D7: a guard must not fire inside its own jurisdiction.
+
+    The branch-sovereignty gate refused the very branch it was sealing. A
+    jurisdiction guard that refused the framework's own sprint would be that
+    defect rebuilt, and it would block every nucleus close.
+    """
+    _tiny_repo(tmp_path)
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "loose.md").write_text("uncommitted work\n")
+    monkeypatch.setattr(sp, "is_nucleus", lambda: True)
+    monkeypatch.setattr(sp, "agents_dir", lambda: tmp_path)
+    assert sp.main() == 0
+
+
+def test_a_clean_submodule_passes(tmp_path, monkeypatch):
+    _tiny_repo(tmp_path)
+    monkeypatch.setattr(sp, "is_nucleus", lambda: False)
+    monkeypatch.setattr(sp, "agents_dir", lambda: tmp_path)
+    assert sp.main() == 0
+
+
+def test_host_sprint_records_written_into_the_submodule_are_refused(
+    tmp_path, monkeypatch, capsys
+):
+    """The contamination case, and the one .gitignore used to hide entirely."""
+    _tiny_repo(tmp_path)
+    sprint = tmp_path / "docs" / "sprints" / "085-backend-api"
+    sprint.mkdir(parents=True)
+    (sprint / "task_scope.md").write_text("a host's sprint scope\n")
+    monkeypatch.setattr(sp, "is_nucleus", lambda: False)
+    monkeypatch.setattr(sp, "agents_dir", lambda: tmp_path)
+
+    assert sp.main() == 2
+    err = capsys.readouterr().err
+    assert "085-backend-api" in err
+    # The remedy must name the HOST root, or the reader moves it sideways.
+    assert "HOST root" in err
+
+
+def test_editing_the_framework_in_place_is_classified_separately(
+    tmp_path, monkeypatch, capsys
+):
+    """A modified tracked file is the strict_rule violation proper, not misplaced records."""
+    _tiny_repo(tmp_path)
+    (tmp_path / "agents.md").write_text("# constitution, patched by a host\n")
+    monkeypatch.setattr(sp, "is_nucleus", lambda: False)
+    monkeypatch.setattr(sp, "agents_dir", lambda: tmp_path)
+
+    assert sp.main() == 2
+    err = capsys.readouterr().err
+    assert "tracked framework file" in err
+    assert "feedback_upstream" in err
+
+
+def test_an_ignored_only_dirty_state_is_not_contamination(tmp_path, monkeypatch):
+    """venv_skillopt/, memory/ and the anchor are transient by design."""
+    _tiny_repo(tmp_path)
+    (tmp_path / ".gitignore").write_text("venv_skillopt/\n")
+    subprocess.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(["git", "commit", "-qm", "ignore"], cwd=tmp_path, check=True,
+                   capture_output=True)
+    (tmp_path / "venv_skillopt").mkdir()
+    (tmp_path / "venv_skillopt" / "pyvenv.cfg").write_text("home = /usr\n")
+    monkeypatch.setattr(sp, "is_nucleus", lambda: False)
+    monkeypatch.setattr(sp, "agents_dir", lambda: tmp_path)
+    assert sp.main() == 0
 
 
 # --- session lock ------------------------------------------------------

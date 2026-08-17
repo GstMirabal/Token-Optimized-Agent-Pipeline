@@ -365,6 +365,28 @@ def audit_dependency_justification(message: str, staged: list[str]) -> str | Non
             "than a new dependency.")
 
 
+def audit_submodule_purity() -> str | None:
+    """Refuse a host commit while the framework submodule carries host work.
+
+    `agents.md §3 jurisdiction`. Delegates to `scripts/submodule_purity.py` so
+    the rule has one implementation rather than two that can drift apart — the
+    close-time gate (`close_workflow.md` Phase 5) invokes the same script.
+
+    Returns:
+        str | None: the refusal reason, or None in nucleus mode / when clean.
+    """
+    script = Path(__file__).resolve().parent.parent / "scripts" / "submodule_purity.py"
+    if not script.exists():
+        # A missing check is reported by RA-16's invocation coverage, not
+        # silently treated as a pass here.
+        return None
+    result = subprocess.run([sys.executable, str(script)], capture_output=True, text=True)
+    if result.returncode == 0:
+        return None
+    return (result.stderr.strip() or
+            "Host work found inside the .agents submodule (agents.md §3 jurisdiction).")
+
+
 def block(reason: str) -> None:
     # Claude Code only feeds stderr back to the model on a blocking hook, and
     # only exit code 2 actually blocks (RA-11 HOOK_BLOCKING_SEMANTICS).
@@ -385,6 +407,14 @@ def main():
     # Everything below only applies to git commit invocations.
     if command and "git commit" not in command:
         sys.exit(0)
+
+    # Guard 1.5 (agents.md §3 jurisdiction): a host session's work never lands
+    # inside the framework submodule. Checked HERE and not only at close,
+    # because by close time the contamination has had a whole sprint to spread
+    # and a commit may already record a dirty submodule. No-op in nucleus mode.
+    if reason := audit_submodule_purity():
+        log_error("on_commit", "JURISDICTION_VIOLATION", reason[:80])
+        block(reason)
 
     # Guard 2 (agents.md §5): Conventional Commit + #[Sprint_ID] suffix.
     # Guards 2-4 need the commit message, which is only reliably available on

@@ -37,6 +37,9 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _mode import is_nucleus as _is_nucleus  # noqa: E402
+
 ACTIVE_STATE = Path("docs/active_state.json")
 GRAPH = Path("graphify-out/graph.json")
 PLATFORM_TTL_DAYS = 7
@@ -57,12 +60,13 @@ def acknowledged(state: dict, key: str) -> str | None:
 
 
 def is_nucleus() -> bool:
-    """True inside the framework's own repository.
+    """Whether this checkout is the framework repository itself.
 
-    Same criterion the bridge installer uses (`scripts/install_claude.py`): a
-    real `.git` directory rather than the file pointer a submodule gets.
+    Delegates to `_mode.is_nucleus`, which two files answered independently
+    before Sprint 025 extracted it (`rules/code_craft.md §1`: two call sites
+    justify extraction).
     """
-    return (Path(__file__).resolve().parent.parent / ".git").is_dir()
+    return _is_nucleus()
 
 
 # --- probes -----------------------------------------------------------
