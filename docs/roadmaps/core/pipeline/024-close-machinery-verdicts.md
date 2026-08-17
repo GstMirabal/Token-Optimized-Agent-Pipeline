@@ -1,14 +1,14 @@
 ---
 description: "Close-machinery verdicts — drift, orphaned baselines, branch sovereignty (Sprint 024)"
-status: "IN_PROGRESS"
+status: "COMPLETED"
 version: 1.0.0
 ---
 
 # Roadmap: Sprint 024 - Close Machinery Verdicts
 
 ## Status
-- **Strategy Lock:** `OPEN`
-- **Completion:** 0% — 4 commits planned
+- **Strategy Lock:** `CLOSED`
+- **Completion:** 100% — 4 commits, `make verify` green (127 tests), both live acceptances observed
 - **Sprint ID:** `024` — **not sequential after `020`, deliberately.** This sprint was queued
   fourth in a nine-sprint program and promoted to first when its defect blocked the program's
   own start. IDs are labels, not positions; renumbering was rejected because it was the single
@@ -33,10 +33,10 @@ command; verifying it surfaced the second; siting this file surfaced the third.
 
 | Commit | Track | Scope | Status |
 | :--- | :--- | :--- | :--- |
-| 0 | **Documentation** | This roadmap and the Implementation Plan, written before any code | ⏳ |
-| 1 | **A — drift verdicts** | `detect_drift.py`: orphaned baseline, five verdicts, exit code follows required action | ⏳ |
-| 2 | **B — branch sovereignty** | `branch_sovereignty.py`: the checked-out branch is not an abandoned branch | ⏳ |
-| 3 | **C — protocol text** | `start_workflow.md` Phase 0.4 states the verdicts | ⏳ |
+| 0 | **Documentation** | This roadmap and the Implementation Plan, written before any code | ✅ `30d2fa6` |
+| 1 | **A — drift verdicts** | `detect_drift.py`: orphaned baseline, five verdicts, exit code follows required action | ✅ `6bfd3a2` |
+| 2 | **B — branch sovereignty** | `branch_sovereignty.py`: the checked-out branch is not an abandoned branch | ✅ `6aaeaf2` |
+| 3 | **C — protocol text** | `start_workflow.md` Phase 0.4 states the verdicts | ✅ `6c35209` |
 
 ## The three defects
 
@@ -134,13 +134,13 @@ so the artifact would be lost exactly as the two April plans were.
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| 1 | `docs/roadmaps/core/pipeline/024-close-machinery-verdicts.md` | create | low | lead (doc_orchestrator ruleset) | ⏳ |
-| 2 | `docs/roadmaps/core/pipeline/024-close-machinery-verdicts-IMPLEMENTATION_PLAN.md` | create | low | lead (principal_agent ruleset) | ⏳ |
-| 3 | `scripts/detect_drift.py` | modify | **high** — a gate | lead (devops_agent ruleset) | ⏳ |
-| 4 | `tests/test_session_protocol.py` | modify | medium | lead (tester_agent ruleset) | ⏳ |
-| 5 | `scripts/branch_sovereignty.py` | modify | **high** — a gate | lead (devops_agent ruleset) | ⏳ |
-| 6 | `workflows/start_workflow.md` | modify | low | lead (doc_orchestrator ruleset) | ⏳ |
-| 7 | `CHANGELOG.md` | modify | low | lead (doc_orchestrator ruleset) | ⏳ |
+| 1 | `docs/roadmaps/core/pipeline/024-close-machinery-verdicts.md` | create | low | lead (doc_orchestrator ruleset) | ✅ |
+| 2 | `docs/roadmaps/core/pipeline/024-close-machinery-verdicts-IMPLEMENTATION_PLAN.md` | create | low | lead (principal_agent ruleset) | ✅ |
+| 3 | `scripts/detect_drift.py` | modify | **high** — a gate | lead (devops_agent ruleset) | ✅ |
+| 4 | `tests/test_session_protocol.py` | modify | medium | lead (tester_agent ruleset) | ✅ |
+| 5 | `scripts/branch_sovereignty.py` | modify | **high** — a gate | lead (devops_agent ruleset) | ✅ |
+| 6 | `workflows/start_workflow.md` | modify | low | lead (doc_orchestrator ruleset) | ✅ |
+| 7 | `CHANGELOG.md` | modify | low | lead (doc_orchestrator ruleset) | ✅ |
 
 **`loop_guard` limitation, declared:** `scripts/loop_guard.py:38` reads `Path("task_scope.md")` at
 the repository root and will not find this table. It does not affect this sprint — that guard only
@@ -155,3 +155,15 @@ than left to be rediscovered.
 | `F-024-D2` | The baseline is orphaned by every squash-merge deployment | Fixed, commit 1 |
 | `F-024-D3` | The close gate refuses the sprint's own branch | Fixed, commit 2 |
 | `F-024-D4` | The nucleus gitignores its own pipeline state | **Recorded**, routed to Sprint `023` `C0` |
+| `F-024-D5` | **The `R` verdict was designed to exit `0` and would have whitewashed genuine drift** | Corrected during execution. `test_commits_after_the_sealed_close_are_drift` — a test written in Phase 019, not for this sprint — failed against the new code and refuted the design: a repository with commits after the baseline and no releases at all is the Phase 018 scenario in its early form. `R` now exits `2`. This is the anti-whitewash principle catching the author of the anti-whitewash test |
+
+## Outcome
+
+| Check | Result |
+| :--- | :--- |
+| `make verify` | green — 127 tests, installer sandbox, nucleus self-bridge |
+| Anti-whitewash calibration | `U`, exit 2 — the abort criterion did **not** fire |
+| Live acceptance, drift | `3 commits, none recorded` → `1 of 3 uncovered`, naming only the unsealed one |
+| Live acceptance, sovereignty | exit `0` from the sprint branch, exit `2` for the same branch from `main` |
+| Verdict transition observed | `M` → `A` once `[Unreleased]` was filled, correctly separating the 4 sprint commits from the 2 sealed ones |
+| `invoked_by` (`RA-16`) | intact on both scripts |
