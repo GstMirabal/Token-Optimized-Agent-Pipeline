@@ -17,9 +17,9 @@
 
 | Gate | Round | Verdict |
 | :--- | :--- | :--- |
-| Test (`pytest`) | 1 | **REJECTED** — `test_host_sprint_records_written_into_the_submodule_are_refused`: the guard reported `?? docs/` instead of the offending file, because `--porcelain` collapses untracked trees |
-| Test (`pytest`) | 2 | **PASSED** — 33/33 in this file, 137/137 across the suite |
-| Structural (`make verify`) | 1 | **PASSED** |
+| **QA Agent** (structural) | 1 | **PASSED** — `make verify`: reference integrity, determinism scan, manifest parity, command links, `py_compile`, no absolute paths |
+| **Tester Agent** (functional) | 1 | **REJECTED** — `test_host_sprint_records_written_into_the_submodule_are_refused`: the guard reported `?? docs/` instead of the offending file, because `--porcelain` collapses untracked trees |
+| **Tester Agent** (functional) | 2 | **PASSED** — 33/33 in this file, 137/137 across the suite |
 
 **The single rejection is the one worth keeping.** The verdict was already
 correct — exit `2` either way — and only the message was useless. A guard that
