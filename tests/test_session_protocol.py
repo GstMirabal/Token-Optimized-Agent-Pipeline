@@ -184,6 +184,37 @@ def test_unknown_baseline_does_not_crash(repo):
     assert dd.main() == 0
 
 
+# --- the nucleus can record its own pipeline state ---------------------
+
+REPO_ROOT = Path(__file__).parent.parent
+
+
+@pytest.mark.parametrize("path", [
+    "docs/sprints/024-core-pipeline/task_scope.md",
+    "docs/sprints/024-core-pipeline/graph_stats.json",
+    "docs/sprints/024-core-pipeline/IMPLEMENTATION_PLAN.md",
+])
+def test_the_pipeline_record_is_not_hidden_from_git(path):
+    """`git status --porcelain` does not list ignored files, and that is the point.
+
+    `close_workflow.md` submodule_purity guards the submodule with exactly that
+    command, so excluding these paths hid host contamination from the only check
+    built to catch it — verified: a file created under docs/sprints/ left the
+    command completely empty. It also made rules/documentation_standard.md:94
+    impossible to satisfy, since that rule mandates a *git-tracked*
+    graph_stats.json inside this very directory.
+
+    Scoped to sprint CONTENT. docs/active_state.json stays ignored on purpose:
+    it mixes durable record with live session state, and tracking it would ship
+    the nucleus's session into every host checkout.
+    """
+    result = subprocess.run(
+        ["git", "check-ignore", "-q", path],
+        cwd=REPO_ROOT, capture_output=True,
+    )
+    assert result.returncode != 0, f"{path} is gitignored; submodule_purity cannot see it"
+
+
 # --- drift verdicts (ADR-0002) -----------------------------------------
 
 def _head() -> str:

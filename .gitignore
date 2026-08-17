@@ -9,23 +9,53 @@
 id_rsa*
 
 # Local Project-Specific Records (Ignored by Global Submodule)
+#
+# This block used to also exclude the pipeline's own records — docs/sprints/,
+# docs/active_state.json, implementation_plan*, task_scope.md — to keep a host's
+# work out of the shared nucleus when .agents is installed as a submodule. That
+# intent is right and RA-15 states it. The instrument was wrong, and inverted:
+#
+#   `close_workflow.md` submodule_purity guards the submodule with
+#   `git -C .agents status --porcelain` is clean — and that command DOES NOT
+#   LIST IGNORED FILES. Verified: a file created under docs/sprints/ left
+#   `git status --porcelain` completely empty. The ignore did not protect the
+#   nucleus from host contamination; it hid the contamination from the one
+#   check built to catch it.
+#
+# The cost was equally concrete. `rules/documentation_standard.md:94` mandates a
+# **git-tracked** graph_stats.json inside the canonical sprint directory — a
+# tracked file in an ignored path, impossible to satisfy, so the freshness
+# gate's delta series could never accumulate here. And with the anchor AND its
+# mirror both excluded, the nucleus's entire state lived on one machine with no
+# recoverable copy: the exact single point of failure the Phase 019 drift
+# recovery was about.
+#
+# The rule is now stated where it can be enforced instead of assumed: a host
+# session MUST NOT write inside .agents (agents.md §3 strict_rule), and
+# submodule_purity refuses the close when it does — now that it can see.
+#
+# The line drawn is CONTENT vs SESSION STATE, not "sprint records yes/no":
+#
+#   Versioned — docs/sprints/[ID]/ : plan, task_scope, assignments, sprint log,
+#     phase register, graph_stats. These describe work that happened. Excluding
+#     them is what killed the four mechanisms above.
+#
+#   Not versioned — docs/active_state.json : it carries two lifetimes in one
+#     file, durable (last_close_commit, current_sprint, acknowledged_gaps) and
+#     volatile (session_id, start_time, status). Tracking it would ship the
+#     nucleus's live session into every host checkout, and a host session that
+#     ran any script with cwd=.agents would read and write the nucleus's own
+#     anchor. Its durable half is recoverable from the tracked sprint record,
+#     the ledger and the tags — which is exactly what Sprint 024 built. Splitting
+#     the file by lifetime is a separate concern and is not invented here.
 task/task.md
 task/
 task/sprints/
 task/roadmaps/
 docs/active_state.json
 docs/active_task.md
-docs/sprints/
 .agent_state/
 .agent_state/session_metadata.json
-implementation_plan*.md
-implementation_plan*.json
-implementation_plan*.yaml
-implementation_plan*.yml
-implementation_plan*.toml
-implementation_plan*.xml
-implementation_plan*.txt
-implementation_plan*.log
 
 # IDE and OS Temp files
 *~
@@ -34,8 +64,11 @@ implementation_plan*.log
 .idea/
 .vscode/
 
-# Session artifacts (never versioned)
-task_scope.md
+# (task_scope.md was excluded here as a "session artifact". It is not one: it is
+# what jurisdictional_lock and no_interference are applied by reading, what
+# loop_guard.py measures progress from, and what close_workflow.md Phase 2.6
+# demands as phase evidence. Excluding it made all three unenforceable in the
+# nucleus. It now lives inside the sprint directory and is versioned.)
 
 # Machine-local install markers and environments
 installed.lock

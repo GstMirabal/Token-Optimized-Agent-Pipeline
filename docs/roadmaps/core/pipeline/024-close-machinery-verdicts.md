@@ -20,6 +20,11 @@ version: 1.0.0
   it, because a roadmap sorts by phase and `[MODULE]_[TYPE]` does not sort at all. Renaming this
   one file to comply would make it unfindable beside its own series. Declared here rather than
   left as drift, the way `RA-03` declares its own sanctioned deviation.
+- **The Implementation Plan does not deviate, and no longer needs to.** It sits at
+  `docs/sprints/024-core-pipeline/IMPLEMENTATION_PLAN.md` — the canonical path of
+  `agents.md §5`, `[TYPE].md` inside the sprint directory. It was drafted beside this roadmap
+  only because `.gitignore` excluded `docs/sprints/`; commit `5` removed that exclusion, so the
+  asymmetry between nucleus and host that this sprint was going to declare **does not exist**.
 
 ## Objective
 
@@ -155,6 +160,8 @@ than left to be rediscovered.
 | `F-024-D2` | The baseline is orphaned by every squash-merge deployment | Fixed, commit 1 |
 | `F-024-D3` | The close gate refuses the sprint's own branch | Fixed, commit 2 |
 | `F-024-D4` | The nucleus gitignores its own pipeline state | **Recorded**, routed to Sprint `023` `C0` |
+| `F-024-D8` | **`submodule_purity` is prose, not a mechanism** — one line in `close_workflow.md` Phase 5, no script, already flagged by `scripts/scan_workflow_determinism.py`. It is the only protection against a host session dirtying `.agents`, and it depends on an agent remembering to run a command | **Recorded**, routed to Sprint `025` (`jurisdiction`) together with the host-side `pre-commit` hook and the rule stated in `agents.md §3` |
+| `F-024-D9` | **`docs/active_state.json` carries two lifetimes in one file** — durable (`last_close_commit`, `current_sprint`) and volatile (`session_id`, `start_time`). It was briefly versioned during this sprint and reverted: tracking it ships the nucleus's live session into every host checkout | **Reverted within the sprint.** Splitting the file by lifetime is a concern of its own and is not invented here |
 | `F-024-D5` | **The `R` verdict was designed to exit `0` and would have whitewashed genuine drift** | Corrected during execution. `test_commits_after_the_sealed_close_are_drift` — a test written in Phase 019, not for this sprint — failed against the new code and refuted the design: a repository with commits after the baseline and no releases at all is the Phase 018 scenario in its early form. `R` now exits `2`. This is the anti-whitewash principle catching the author of the anti-whitewash test |
 
 ## Outcome
