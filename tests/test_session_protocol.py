@@ -105,6 +105,32 @@ def test_waived_branch_does_not_block(repo):
     assert bs.audit("main") == 0
 
 
+def test_the_branch_being_sealed_does_not_refuse_its_own_seal(repo):
+    """close_workflow.md 5.5 runs on the sprint branch; Phase 6 leaves it unmerged.
+
+    Auditing the checked-out branch made every close refuse itself. Verified on
+    ai-sprint/024: audit passed until the first commit, then exited 2 naming that
+    branch and advising the very integration Phase 6 defers to deployment.
+    """
+    subprocess.run(["git", "checkout", "-qb", "ai-sprint/999"], check=True)
+    (repo / "f.txt").write_text("sprint work\n")
+    subprocess.run(["git", "commit", "-aqm", "sprint work"], check=True)
+    assert bs.audit("main") == 0
+
+
+def test_the_same_branch_still_blocks_once_it_is_no_longer_checked_out(repo):
+    """The exclusion is positional, not permanent — regression guard.
+
+    A branch left behind by an earlier sprint is exactly what this gate exists
+    to catch, and it must still catch it the moment it stops being HEAD.
+    """
+    subprocess.run(["git", "checkout", "-qb", "ai-sprint/999"], check=True)
+    (repo / "f.txt").write_text("sprint work\n")
+    subprocess.run(["git", "commit", "-aqm", "sprint work"], check=True)
+    subprocess.run(["git", "checkout", "-q", "main"], check=True)
+    assert bs.audit("main") == 2
+
+
 def test_prune_never_deletes_unproven_work(repo):
     subprocess.run(["git", "checkout", "-qb", "unmerged"], check=True)
     (repo / "f.txt").write_text("changed\n")
