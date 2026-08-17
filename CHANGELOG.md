@@ -4,6 +4,9 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Changed
+- **The program queue moved from a plan file into the repository** (`docs/roadmaps/core/pipeline/021-030-program-queue.md`). The document that designed the fix for plans lost to ephemeral storage was being written outside version control itself. It could not land until Sprint `024` removed the `.gitignore` exclusion that made the nucleus unable to version its own records; `v4.5.0` demonstrated the circuit with twelve tracked sprint artifacts. Three transformations on the way in. **Translated to English**: `agents.md §1 code_logic` requires it for artifacts, and `user_chat` confines Spanish to chat and Implementation Plans — a program roadmap is neither, and every other file in that directory is English. **`token-economy-enforcement` reassigned from `025` to `030`**: the queue reserved `025` for it and `025` shipped as `jurisdiction`, so the doctrine the document itself argues applies — IDs are labels, not positions, and renumbering caused 15 of the 23 defects in its own audit — and the reassignment moves nothing else. **Condensed 1574 → 1185 lines by dropping session transcript, not evidence**: the full Sprint `024` specification now lives in `docs/sprints/024-core-pipeline/` and its roadmap, and the in-flight corrections live in each sprint's `SPRINT_LOG.md` and `PHASE_REGISTER.md`, so duplicating them here would be the drift `RA-14` pursues. Every measurement is preserved with the command that reproduces it — which program risk `J6` records as the only mitigation that actually worked for the four times a figure produced by a transformation was cited as if it came from the source. Recorded here by `reconciliation_workflow.md`: the commit landed on a documentation branch that ran no sprint close, so `detect_drift.py` correctly reported it as `U` — unrecorded work no released section covers.
+
 ## [4.5.0] - 2026-08-17
 
 ### Fixed
