@@ -605,3 +605,119 @@ def test_suspend_does_not_launder_unrecorded_work(repo):
     subprocess.run(["git", "commit", "-aqm", "mid-sprint work"], check=True)
     ss.suspend()
     assert dd.main() == 2
+
+
+# --- model tiering: the map, the detector, the guards --------------------
+
+import check_model_tiers as cmt  # noqa: E402
+import detect_new_models as dnm  # noqa: E402
+
+CATALOGUE_FIXTURE = """\
+# Claude Model Catalog
+
+| Friendly Name   | Alias (use this)  | Full ID  | Context | Max Output | Status |
+|-----------------|-------------------|----------|---------|------------|--------|
+| Claude Opus 5   | `claude-opus-5`   | —        | 1M      | 128K       | Active |
+| Claude Sonnet 5 | `claude-sonnet-5` | —        | 1M      | 128K       | Active |
+| Claude Opus 4.1 | `claude-opus-4-1` | `claude-opus-4-1-20250805` | Deprecated (retires 2026-08-05 — migrate to `claude-opus-5`) |
+| Claude Haiku 3  | `claude-haiku-3`  | `claude-3-haiku-20240307`  | Retired |
+
+## What users mean
+
+| Phrase        | Model |
+|---------------|-------|
+| "sonnet 3.7"  | Retired — suggest `claude-sonnet-5` |
+| "haiku 3"     | Deprecated — suggest `claude-opus-5` |
+"""
+
+
+def test_the_phrasing_table_does_not_overwrite_the_catalogue(tmp_path):
+    """The bug that would have failed the build over a healthy tier.
+
+    A first parser scanned each row for any alias and any status word, so
+    `| "sonnet 3.7" | Retired — suggest \\`claude-sonnet-5\\` |` recorded Sonnet 5
+    as Retired. Wired to the severity ladder, that fails `make verify` on a tier
+    that is perfectly current. This fixture reproduces the real file's shape --
+    without the phrasing table, the broken parser passes this test.
+    """
+    path = tmp_path / "models.md"
+    path.write_text(CATALOGUE_FIXTURE)
+    catalogue = dnm.parse_catalogue(path)
+    assert catalogue["claude-sonnet-5"]["status"] == "Active"
+    assert catalogue["claude-opus-5"]["status"] == "Active"
+
+
+def test_status_is_read_from_rows_of_differing_width(tmp_path):
+    """The catalogue's tables do not share a column count, so index-based reads fail."""
+    path = tmp_path / "models.md"
+    path.write_text(CATALOGUE_FIXTURE)
+    catalogue = dnm.parse_catalogue(path)
+    assert catalogue["claude-opus-4-1"]["status"] == "Deprecated"
+    assert catalogue["claude-haiku-3"]["status"] == "Retired"
+
+
+def test_a_retirement_date_is_captured_when_present(tmp_path):
+    """It rides inside the status prose, which is what lets Deprecated carry a clock."""
+    path = tmp_path / "models.md"
+    path.write_text(CATALOGUE_FIXTURE)
+    assert dnm.parse_catalogue(path)["claude-opus-4-1"]["retires"] == "2026-08-05"
+
+
+def _tiers(gate="opus", snapshot=None) -> dict:
+    return {
+        "tiers": {"gate": {"claude_code": {"model": gate, "effort": "high"},
+                           "profiles": ["qa_agent"]}},
+        "catalog_snapshot": {"aliases": snapshot or {"claude-opus-5": "Active"}},
+    }
+
+
+def test_the_gate_reads_the_committed_snapshot_not_the_bundled_file():
+    """The bundled catalogue is absent in CI, so a gate reading it would never fire
+    exactly where nobody is watching -- a mechanism wired where it cannot run."""
+    retired, _ = dnm.tier_status(
+        _tiers(snapshot={"claude-opus-5": "Retired"}),
+        dnm.snapshot_catalogue(_tiers(snapshot={"claude-opus-5": "Retired"})),
+    )
+    assert retired and "RETIRED" in retired[0]
+
+
+def test_a_current_snapshot_clears_the_gate():
+    retired, deprecated = dnm.tier_status(_tiers(), dnm.snapshot_catalogue(_tiers()))
+    assert not retired and not deprecated
+
+
+def test_a_new_alias_is_proposed_and_never_blocks(tmp_path):
+    """A model is not adopted for existing; that is the evidence protocol's job."""
+    path = tmp_path / "models.md"
+    path.write_text(CATALOGUE_FIXTURE)
+    fresh, _ = dnm.refresh_findings(_tiers(), dnm.parse_catalogue(path))
+    assert "claude-sonnet-5" in fresh
+
+
+def test_a_family_alias_resolves_to_the_newest_release(tmp_path):
+    """Profiles declare `opus`, never a pinned ID -- the alias absorbs bumps."""
+    path = tmp_path / "models.md"
+    path.write_text(CATALOGUE_FIXTURE)
+    alias, entry = dnm.resolve("opus", dnm.parse_catalogue(path))
+    assert alias == "claude-opus-5"
+    assert entry["status"] == "Active"
+
+
+def test_a_profile_whose_tier_disagrees_with_the_map_is_a_failure():
+    """Not a typo: the harness reads `model:` and ignores `tier:`, so the file
+    would claim one thing and the subagent do another."""
+    problems = cmt.check_agreement(
+        _tiers(), {"qa_agent": {"tier": "mechanical", "model": "opus"}}
+    )
+    assert any("declares tier" in p for p in problems)
+
+
+def test_a_profile_agreeing_with_the_map_passes():
+    assert not cmt.check_agreement(_tiers(), {"qa_agent": {"tier": "gate", "model": "opus"}})
+
+
+def test_a_dated_model_id_is_rejected_by_the_pattern():
+    """`claude-opus-4-1` is a legitimate alias; `...-20250805` pins one release."""
+    assert cmt.DATED_ID.search("claude-opus-4-1-20250805")
+    assert not cmt.DATED_ID.search("claude-opus-4-1")
+    assert not cmt.DATED_ID.search("claude-haiku-4-5")

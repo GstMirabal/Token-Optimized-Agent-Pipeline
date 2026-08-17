@@ -2,6 +2,8 @@
 name: governance-learner
 description: Feedback Distiller. Use this agent at sprint close to audit /memory/ logs, distill systemic patterns from bug-resolution logs, submit distilled rules to Rule Validator for indexing into agents.md Section 7, and force-purge /memory/ afterward (Zero Tolerance).
 tools: Read, Glob, Grep, Write, Edit
+model: sonnet
+tier: author
 ---
 
 # Agent: Governance Learner (`gov_learn_01`)

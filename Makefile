@@ -50,6 +50,8 @@ verify:
 	   if not any(p in f for p in ('node_modules', '.git/', 'venv_skillopt'))]; print('JSON OK')"
 	cd $(AGENTS_DIR) && python3 scripts/scan_workflow_determinism.py .
 	cd $(AGENTS_DIR) && python3 scripts/verify_references.py
+	cd $(AGENTS_DIR) && $(PY) scripts/check_model_tiers.py
+	cd $(AGENTS_DIR) && $(PY) scripts/detect_new_models.py --check
 	cd $(AGENTS_DIR) && python3 scripts/map_workflows.py --check
 	cd $(AGENTS_DIR) && python3 scripts/check_readme_counts.py
 	cd $(AGENTS_DIR) && python3 scripts/check_manifest_parity.py
