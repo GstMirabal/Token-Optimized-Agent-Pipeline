@@ -62,5 +62,9 @@ verify:
 
 # Deterministic docs freshness + integrity gate (rules/documentation_standard.md §4).
 # Inspects the CALLER's tree, so run it from the host project root.
+# SPRINT_ID defaults to the anchor's current_sprint.id. It used to default to
+# empty, so the script fell back to sprint 0 and check_phase_artifacts returned
+# immediately: the phase-artifact check never ran from make, in any project.
+SPRINT_ID ?= $(shell python3 -c "import json;print(json.load(open('docs/active_state.json')).get('current_sprint',{}).get('id',0))" 2>/dev/null || echo 0)
 docs-freshness-check:
 	python3 $(AGENTS_DIR)/scripts/docs_freshness_check.py . $(SPRINT_ID)

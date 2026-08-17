@@ -53,16 +53,34 @@ def base_branch() -> str:
     return "main"
 
 
+def current_branch() -> str | None:
+    """The checked-out branch, or None on a detached HEAD."""
+    result = git("symbolic-ref", "--quiet", "--short", "HEAD")
+    return result.stdout.strip() if result.returncode == 0 else None
+
+
 def local_branches(base: str) -> list[str]:
-    """Every local branch except the base itself.
+    """Every local branch except the base and the one currently checked out.
 
     Deliberately not filtered to `ai-sprint/*`: this repository has never used
     that prefix (`git log --all` records no such reference), and a check scoped
     to a naming convention the repository does not follow reports clean on a
     dirty tree — the failure `revdoc` Phase 4 documents.
+
+    **The checked-out branch is excluded, and that is not a weakening.**
+    `close_workflow.md` Phase 5.5 runs this while the sprint branch holds the
+    sprint's own commits, and Phase 6 of the same workflow states that branch
+    stays unmerged until `deployment_workflow.md` integrates it. Auditing it
+    here refused every seal for the branch being sealed — verified on
+    `ai-sprint/024`, where `audit` passed until the first commit and then exited
+    `2` naming that same branch, advising `/agents:deployment` to integrate what
+    Phase 6 says must not be integrated yet. What this check exists to catch is
+    stated in its own docstring: branches left behind by *earlier* sprints. The
+    branch whose close is executing is the subject of the close, not a leftover.
     """
     result = git("for-each-ref", "--format=%(refname:short)", "refs/heads/")
-    return [b for b in result.stdout.split() if b != base]
+    skip = {base, current_branch()}
+    return [b for b in result.stdout.split() if b not in skip]
 
 
 def load_waivers() -> dict[str, str]:

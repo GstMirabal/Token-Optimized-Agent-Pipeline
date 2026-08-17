@@ -60,7 +60,7 @@ protocols that should mirror each other shows up there first.
 | 4. State Sync | `state_sync` | write |
 | 5. Git Sovereignty | `atomic_commit` | write |
 | 5. Git Sovereignty | `submodule_purity` | write |
-| 5.5 Branch Sovereignty | `branch_audit` | verify |
+| 5.5 Branch Sovereignty | `branch_audit` | write |
 | 5.5 Branch Sovereignty | `local_prune` | write |
 | 6. Session Lock | `deployment_handoff` | verify |
 | 6. Session Lock | `session_lock` | ? |
