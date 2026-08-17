@@ -13,6 +13,7 @@ import pytest
 SCRIPTS = Path(__file__).parent.parent / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 import _mode  # noqa: E402
+import session_cost as sc  # noqa: E402
 import branch_sovereignty as bs  # noqa: E402
 import detect_drift as dd  # noqa: E402
 import session_state as ss  # noqa: E402
@@ -453,3 +454,79 @@ def test_baseline_on_the_branch_is_not_substituted(repo):
     base = _head()
     _commit(repo, "work\n", "work")
     assert dd.resolve_baseline(base) == (base, None)
+
+
+# --- cost instrumentation: the unit is the context cycle ----------------
+
+def _turn(cache_read: int, model: str = "claude-opus-5", out: int = 100) -> str:
+    return json.dumps({"message": {"model": model, "usage": {
+        "input_tokens": 0, "output_tokens": out,
+        "cache_read_input_tokens": cache_read, "cache_creation_input_tokens": 0}}})
+
+
+def _transcript(tmp_path, lines: list[str], name: str = "s.jsonl"):
+    p = tmp_path / name
+    p.write_text("\n".join(lines) + "\n")
+    return p
+
+
+def test_two_resets_produce_three_cycles(tmp_path):
+    """The defect the quartile view hid: a session is a sawtooth, not a ramp.
+
+    Measuring against the session's first turn would stop the bound firing after
+    the first reset, because the ratio collapses with the window.
+    """
+    lines = ([_turn(20_000), _turn(400_000), _turn(800_000)]
+             + [_turn(20_000), _turn(500_000)]
+             + [_turn(22_000), _turn(300_000)])
+    result = sc.measure(_transcript(tmp_path, lines))
+    assert len(result["cycles"]) == 3
+    assert [c["messages"] for c in result["cycles"]] == [3, 2, 2]
+    assert result["cycles"][0]["ratio"] == 40.0   # 800k / 20k
+    assert result["cycles"][1]["ratio"] == 25.0   # 500k / 20k
+
+
+def test_a_small_dip_is_not_a_reset(tmp_path):
+    """Ordinary variation must not register as compaction — regression guard."""
+    lines = [_turn(200_000), _turn(150_000), _turn(400_000)]
+    assert len(sc.measure(_transcript(tmp_path, lines))["cycles"]) == 1
+
+
+def test_a_drop_below_the_floor_is_not_a_reset(tmp_path):
+    """Early small turns collapse in ratio without the window being rebuilt."""
+    lines = [_turn(50_000), _turn(1_000), _turn(80_000)]
+    assert len(sc.measure(_transcript(tmp_path, lines))["cycles"]) == 1
+
+
+def test_synthetic_turns_are_discarded(tmp_path):
+    """They are not API calls; counting them inflates every total."""
+    lines = [_turn(10_000), _turn(999_999, model="<synthetic>"), _turn(20_000)]
+    result = sc.measure(_transcript(tmp_path, lines))
+    assert result["synthetic_skipped"] == 1
+    assert result["totals"]["cache_read_input_tokens"] == 30_000
+    assert "<synthetic>" not in result["by_model"]
+
+
+def test_a_transcript_without_usage_says_so_instead_of_returning_zero(tmp_path):
+    """A silent zero reads as 'this session was free' — the defect in
+    docs_freshness_check.py that this program keeps finding in other shapes."""
+    lines = [json.dumps({"message": {"model": "claude-opus-5"}}), "not json at all"]
+    result = sc.measure(_transcript(tmp_path, lines))
+    assert result["measurable"] is False
+    assert "no usage" in result["reason"]
+
+
+def test_totals_are_split_per_model(tmp_path):
+    """Tier decisions are compared per model, so the meter must separate them."""
+    lines = [_turn(10_000, model="claude-opus-5", out=500),
+             _turn(20_000, model="claude-haiku-4-5", out=300)]
+    models = sc.measure(_transcript(tmp_path, lines))["by_model"]
+    assert models["claude-opus-5"]["output_tokens"] == 500
+    assert models["claude-haiku-4-5"]["cache_read_input_tokens"] == 20_000
+
+
+def test_the_meter_reports_no_currency(tmp_path):
+    """Prices belong to config/model_tiers.json (Sprint 022). A price copied here
+    would be stale the day it was written."""
+    result = sc.measure(_transcript(tmp_path, [_turn(10_000)]))
+    assert not any(k in json.dumps(result).lower() for k in ("usd", "$", "price", "cost_per"))
