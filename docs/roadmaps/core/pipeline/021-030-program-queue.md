@@ -43,7 +43,7 @@ the program's own opening command.
 | :--- | :--- | :--- | :--- |
 | ✅ | **024** | `close-machinery-verdicts` | Delivered `v4.5.0` (PR #40). Three close-machinery controls returned the wrong verdict; the first blocked this program's opening command |
 | ✅ | **025** | `jurisdiction` | Delivered `v4.5.0` (PR #41). The rule that a host session never dirties the submodule became a mechanism instead of a sentence |
-| **1st** | **021** | `cost-instrumentation` | **54% of a real session's cost sits in its last quarter.** Splitting the session yields ~50%, tiering ~40% — and without a meter nothing else is measurable |
+| **1st** | **021** | `cost-instrumentation` | **A context cycle climbs to 45× its first turn, and compaction resets the axis without reducing the area.** Bounding the climb yields ~50%, tiering ~40% — and without a meter nothing else is measurable |
 | **2nd** | **022** | `model-tiering` | **Makes everything after it cheaper.** Doing it last means paying the top tier during the two longest sprints |
 | **3rd** | **023** | `upstream-findings` | Seven framework-class findings a host reported and could not patch, plus the Implementation Plan's missing location |
 | **4th** | **026** | `tool-portability` (Cursor) | Depends on the artifact registry (`C0.2` of `023`): portability requires specifying artifacts, not mechanisms |
@@ -72,22 +72,41 @@ Claude Code transcripts (`~/.claude/projects/*/*.jsonl`) record `usage` per mess
 | `cache_write` | 2,183,787 | $13.65 | 16% |
 | uncached `input` | 912 | $0.00 | ~0% |
 
-**And cost grows with message position:**
+**And cost grows steeply within a context cycle — but the session is a sawtooth, not a ramp.**
 
-| Quartile | Mean `cache_read`/message | Share of cost |
-| :--- | ---: | ---: |
-| Q1 | 80,903 | 7% |
-| Q2 | 170,928 | 15% |
-| Q3 | 266,537 | 23% |
-| **Q4** | **605,971** | **54%** |
+> **Correction, Sprint 021.** An earlier version of this table reported session quartiles of
+> 7% / 15% / 23% / 54% and called the growth monotonic. **That measurement was taken over the
+> first 400 messages of the drafting session, which fell entirely inside its first context
+> cycle**, before any reset. Re-measured over all 1,070 messages the quartiles are *not*
+> monotonic — 157K / 681K / 245K / 485K — because the session was compacted four times. The
+> quartile figures were real; the scope they came from was not the one declared. Recorded as the
+> fifth instance of program risk `J6`, and the most expensive: this figure ordered the queue.
 
-First message 22,174 tokens; last 836,178 — **37.7×**. The final quarter cost more than
-the first three combined.
+Four context cycles, segmented by `cache_read` drops greater than 50% from above 100K:
 
-**The conclusion that reordered the queue:** the driver is neither the model nor the
-cache — the cache performs almost perfectly. It is **session length**, and total cost
-grows quadratically with it. The two symptoms in the usage report (*95% from sessions
-active 8+ hours*, *90% above 150k context*) are this one phenomenon measured twice.
+| Cycle | Messages | First turn | Peak | Ratio | `cache_read` |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 414 | 22,174 | 849,060 | **38×** | 123,791,322 |
+| 2 | 113 | 22,174 | 995,197 | **45×** | 99,489,407 |
+| 3 | 267 | 25,833 | 361,337 | 14× | 64,036,103 |
+| 4 | 282 | 22,174 | 630,886 | **28×** | 136,030,710 |
+
+**Three findings the corrected shape produces, none available from the quartile view:**
+
+1. **The reset point is 22,174 tokens, identical three times.** That is the fixed session-start
+   cost, and it turns the break-even figure from an estimate into an observed constant.
+2. **Compaction is not a cost control.** Four resets happened and the session still spent 423M
+   `cache_read`. Cycle 2 proves it: **113 messages cost 99.5M**, nearly as much as cycle 1's 414,
+   because it climbed to 995K. **Cost tracks peak height, not message count.**
+3. **The hard threshold would have fired in 3 of the 4 cycles** — the calibration holds, measured
+   per cycle rather than per session. Without that change the ratio collapses after the first
+   reset and the bound never fires again.
+
+**The conclusion that reordered the queue still stands, better supported:** the driver is neither
+the model nor the cache — the cache performs almost perfectly. It is **how high a context cycle
+is allowed to climb**, and total cost is the area under the sawtooth. Compaction resets the x
+axis without reducing that area. The two symptoms in the usage report (*95% from sessions active
+8+ hours*, *90% above 150k context*) are this one phenomenon measured twice.
 
 | Lever | Estimated reduction |
 | :--- | ---: |
@@ -108,7 +127,7 @@ active 8+ hours*, *90% above 150k context*) are this one phenomenon measured twi
 
 ## Calibrating the bound
 
-**Unit: ratio against the session's own first turn** — `cache_read(turn) / cache_read(first turn)`.
+**Unit: ratio against the first turn of the current context CYCLE** — not of the session. A session is a sawtooth: after a compaction the reference resets, and measuring against the session's first turn would collapse the ratio and stop the bound firing for the rest of the session. Cycles are segmented from the transcript itself by a `cache_read` drop greater than 50% from above 100K.
 Self-calibrating per project: a large repository starts with more base context, but "10×
 your first turn" means the same everywhere, and nothing has to be configured per host.
 
@@ -123,7 +142,7 @@ turn, and once a turn costs 800K of `cache_read`, every turn after it costs at l
 
 **Measured break-even:** restarting costs **at least** ~22K tokens (the first turn of the
 measured session). That is a lower bound — it excludes the human reorienting and the agent
-re-reading the plan and anchor. The final quarter averaged 606K, **27× above break-even**.
+re-reading the plan and anchor. Measured cycle peaks reached 849K, 995K, 361K and 631K — **up to 45× above break-even**.
 The data says the bound must be more aggressive than intuition suggests. With those
 thresholds the soft one would have fired around message ~120 and the hard one around ~250;
 the real session reached **37×**.
@@ -253,7 +272,7 @@ have nothing to compare against. **The instrument precedes the rule** — the sa
 | `session_cost.py` over a test transcript returns totals per model and per quartile | **Yes** — it does not exist |
 | Over a transcript with no `usage` field, it **says it cannot measure** instead of returning zero | **Yes** — a silent zero reads as "free" |
 | The meter reports tokens per model without depending on any price | **Yes** |
-| `M3`'s bound is machine-checkable: ratio against the first turn, 5×/15× thresholds | **Yes** |
+| `M3`'s bound is machine-checkable: ratio against the first turn **of the current cycle**, 5×/15× thresholds | **Yes** |
 | `session_cost.py` records, per sprint, the ratio at which the bound fired and the ratio at the natural close | **Yes** |
 | `rules/loop_governance.md` records that its "advisory budget" premise changed | **Yes** |
 | `suspend` sets `SUSPENDED` and **leaves `last_close_commit` intact** — the test compares the field before and after | **Yes** |

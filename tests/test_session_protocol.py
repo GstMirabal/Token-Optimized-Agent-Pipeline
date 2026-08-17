@@ -13,6 +13,7 @@ import pytest
 SCRIPTS = Path(__file__).parent.parent / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 import _mode  # noqa: E402
+import session_cost as sc  # noqa: E402
 import branch_sovereignty as bs  # noqa: E402
 import detect_drift as dd  # noqa: E402
 import session_state as ss  # noqa: E402
@@ -453,3 +454,154 @@ def test_baseline_on_the_branch_is_not_substituted(repo):
     base = _head()
     _commit(repo, "work\n", "work")
     assert dd.resolve_baseline(base) == (base, None)
+
+
+# --- cost instrumentation: the unit is the context cycle ----------------
+
+def _turn(cache_read: int, model: str = "claude-opus-5", out: int = 100) -> str:
+    return json.dumps({"message": {"model": model, "usage": {
+        "input_tokens": 0, "output_tokens": out,
+        "cache_read_input_tokens": cache_read, "cache_creation_input_tokens": 0}}})
+
+
+def _transcript(tmp_path, lines: list[str], name: str = "s.jsonl"):
+    p = tmp_path / name
+    p.write_text("\n".join(lines) + "\n")
+    return p
+
+
+def test_two_resets_produce_three_cycles(tmp_path):
+    """The defect the quartile view hid: a session is a sawtooth, not a ramp.
+
+    Measuring against the session's first turn would stop the bound firing after
+    the first reset, because the ratio collapses with the window.
+    """
+    lines = ([_turn(20_000), _turn(400_000), _turn(800_000)]
+             + [_turn(20_000), _turn(500_000)]
+             + [_turn(22_000), _turn(300_000)])
+    result = sc.measure(_transcript(tmp_path, lines))
+    assert len(result["cycles"]) == 3
+    assert [c["messages"] for c in result["cycles"]] == [3, 2, 2]
+    assert result["cycles"][0]["ratio"] == 40.0   # 800k / 20k
+    assert result["cycles"][1]["ratio"] == 25.0   # 500k / 20k
+
+
+def test_a_small_dip_is_not_a_reset(tmp_path):
+    """Ordinary variation must not register as compaction — regression guard."""
+    lines = [_turn(200_000), _turn(150_000), _turn(400_000)]
+    assert len(sc.measure(_transcript(tmp_path, lines))["cycles"]) == 1
+
+
+def test_a_drop_below_the_floor_is_not_a_reset(tmp_path):
+    """Early small turns collapse in ratio without the window being rebuilt."""
+    lines = [_turn(50_000), _turn(1_000), _turn(80_000)]
+    assert len(sc.measure(_transcript(tmp_path, lines))["cycles"]) == 1
+
+
+def test_synthetic_turns_are_discarded(tmp_path):
+    """They are not API calls; counting them inflates every total."""
+    lines = [_turn(10_000), _turn(999_999, model="<synthetic>"), _turn(20_000)]
+    result = sc.measure(_transcript(tmp_path, lines))
+    assert result["synthetic_skipped"] == 1
+    assert result["totals"]["cache_read_input_tokens"] == 30_000
+    assert "<synthetic>" not in result["by_model"]
+
+
+def test_a_transcript_without_usage_says_so_instead_of_returning_zero(tmp_path):
+    """A silent zero reads as 'this session was free' — the defect in
+    docs_freshness_check.py that this program keeps finding in other shapes."""
+    lines = [json.dumps({"message": {"model": "claude-opus-5"}}), "not json at all"]
+    result = sc.measure(_transcript(tmp_path, lines))
+    assert result["measurable"] is False
+    assert "no usage" in result["reason"]
+
+
+def test_totals_are_split_per_model(tmp_path):
+    """Tier decisions are compared per model, so the meter must separate them."""
+    lines = [_turn(10_000, model="claude-opus-5", out=500),
+             _turn(20_000, model="claude-haiku-4-5", out=300)]
+    models = sc.measure(_transcript(tmp_path, lines))["by_model"]
+    assert models["claude-opus-5"]["output_tokens"] == 500
+    assert models["claude-haiku-4-5"]["cache_read_input_tokens"] == 20_000
+
+
+def test_the_meter_reports_no_currency(tmp_path):
+    """Prices belong to config/model_tiers.json (Sprint 022). A price copied here
+    would be stale the day it was written."""
+    result = sc.measure(_transcript(tmp_path, [_turn(10_000)]))
+    assert not any(k in json.dumps(result).lower() for k in ("usd", "$", "price", "cost_per"))
+
+
+# --- SUSPENDED: a session can end without sealing its sprint ------------
+
+def test_suspend_does_not_write_the_close_baseline(anchor):
+    """The whole point. last_close_commit means "where the last CLOSE sealed";
+    writing it at session end would set a false baseline and blind detect_drift."""
+    ss.claim("session-a", takeover=False)
+    anchor.write_text(json.dumps({**json.loads(anchor.read_text()),
+                                  "last_close_commit": "baseline-sha"}))
+    assert ss.suspend() == 0
+    state = json.loads(anchor.read_text())
+    assert state["status"] == "SUSPENDED"
+    assert state["last_close_commit"] == "baseline-sha"
+    assert state["end_time"]
+
+
+def test_release_still_seals_the_sprint(repo):
+    """The asymmetry's other half — regression to protect."""
+    (repo / "docs").mkdir()
+    ss.claim("session-a", takeover=False)
+    assert ss.release() == 0
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert state["status"] == "CLOSED_SUCCESSFULLY"
+    assert state["last_close_commit"]
+
+
+def test_resuming_a_suspended_sprint_is_not_a_collision(anchor, capsys):
+    """A planned handoff and a crash were indistinguishable before this state."""
+    ss.claim("session-a", takeover=False)
+    ss.suspend()
+    assert ss.claim("session-b", takeover=False) == 0
+    assert "Resuming" in capsys.readouterr().out
+
+
+def test_a_live_session_still_blocks_a_second_one(anchor):
+    """The collision guard must stay armed on IN_PROGRESS — regression guard."""
+    ss.claim("session-a", takeover=False)
+    assert ss.claim("session-b", takeover=False) == 2
+
+
+def test_sessions_are_counted_across_a_suspended_sprint(anchor):
+    """session_cost.py needs to know a sprint took three sessions, not three sprints."""
+    ss.claim("session-a", takeover=False)
+    ss.suspend()
+    ss.claim("session-b", takeover=False)
+    ss.suspend()
+    ss.claim("session-c", takeover=False)
+    assert json.loads(anchor.read_text())["session_count"] == 3
+
+
+def test_suspend_records_where_to_resume(repo):
+    """Degraded and declared: the registry-derived form arrives with C0.2."""
+    (repo / "docs").mkdir()
+    ss.claim("session-a", takeover=False)
+    ss.suspend()
+    pointer = json.loads((repo / "docs" / "active_state.json").read_text())["resume_pointer"]
+    assert pointer["branch"] == "main"
+    assert pointer["at"]
+    assert "registry pending" in pointer["derived_from"]
+
+
+def test_suspend_does_not_launder_unrecorded_work(repo):
+    """The abort criterion. If suspending cleared the drift, the new state would
+    have broken the detector Sprint 024 repaired."""
+    (repo / "docs").mkdir()
+    baseline = subprocess.run(["git", "rev-parse", "HEAD"],
+                              capture_output=True, text=True).stdout.strip()
+    (repo / "docs" / "active_state.json").write_text(
+        json.dumps({"status": "CLOSED_SUCCESSFULLY", "last_close_commit": baseline}))
+    ss.claim("session-a", takeover=False)
+    (repo / "f.txt").write_text("work done in a suspended sprint\n")
+    subprocess.run(["git", "commit", "-aqm", "mid-sprint work"], check=True)
+    ss.suspend()
+    assert dd.main() == 2

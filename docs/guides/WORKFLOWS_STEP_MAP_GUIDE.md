@@ -23,7 +23,7 @@ protocols that should mirror each other shows up there first.
 | `reverse_documentation_workflow` | — | — | — | — | — | — |
 | `skill_forge_workflow` | — | — | — | — | — | — |
 | `standardization_workflow` | verify | — | write | — | write | — |
-| `start_workflow` | read/write | — | write | write | — | read |
+| `start_workflow` | read/write | write | write | write | — | read |
 
 ## 2. Steps, by protocol
 

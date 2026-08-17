@@ -38,7 +38,10 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import session_cost  # noqa: E402
 from _mode import is_nucleus as _is_nucleus  # noqa: E402
+
+HARD_RATIO = 15  # rules/token_economy.md §3.1
 
 ACTIVE_STATE = Path("docs/active_state.json")
 GRAPH = Path("graphify-out/graph.json")
@@ -182,6 +185,50 @@ def probe_platform(state: dict, force: bool) -> str | None:
             "does not lock you out).")
 
 
+def probe_cost(state: dict) -> str | None:
+    """Report what the previous session spent, and whether any cycle broke the bound.
+
+    `rules/token_economy.md §3.1` makes the session bound binding because
+    `session_cost.py` reads spend from the transcript rather than asking an agent
+    to estimate it. This is where a human sees the previous session's shape
+    before deciding how much to take on in this one.
+
+    Advisory, like every probe: it proposes and never executes. A cycle over the
+    hard threshold is a fact about a session that already ended — acting on it is
+    a decision about the one starting.
+
+    Args:
+        state: the parsed anchor, for `acknowledged_gaps`.
+
+    Returns:
+        str | None: the finding, or None when clean or unmeasurable.
+    """
+    if (note := acknowledged(state, "cost")):
+        return None
+    try:
+        result = session_cost.measure_previous(Path.cwd())
+    except Exception:
+        # A probe that crashes on a malformed transcript would block every start.
+        return None
+    if result is None or not result.get("measurable"):
+        return None
+
+    breaches = [(n, c) for n, c in enumerate(result["cycles"], 1)
+                if (c["ratio"] or 0) > HARD_RATIO]
+    if not breaches:
+        return None
+    worst = max(breaches, key=lambda pair: pair[1]["ratio"])
+    return (
+        f"Previous session ({result['session'][:8]}) had {len(breaches)} context "
+        f"cycle(s) past the hard bound of {HARD_RATIO}x — worst was cycle "
+        f"{worst[0]} at {worst[1]['ratio']}x its first turn "
+        f"({worst[1]['peak']:,} tokens). Cost is the area under the sawtooth, and "
+        f"compaction resets the axis without reducing it "
+        f"(`rules/token_economy.md §3.1`). Reproduce: "
+        f"`python3 .agents/scripts/session_cost.py --session {result['session']}`."
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--force-platform", action="store_true",
@@ -191,7 +238,8 @@ def main() -> int:
     state = load_state()
     findings = [f for f in (probe_graph(),
                             probe_docs(state),
-                            probe_platform(state, args.force_platform)) if f]
+                            probe_platform(state, args.force_platform),
+                            probe_cost(state)) if f]
 
     if not findings:
         print("✅ Readiness probes clean — graph current, documentation present, platform configured.")
