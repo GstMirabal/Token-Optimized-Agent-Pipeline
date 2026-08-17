@@ -530,3 +530,78 @@ def test_the_meter_reports_no_currency(tmp_path):
     would be stale the day it was written."""
     result = sc.measure(_transcript(tmp_path, [_turn(10_000)]))
     assert not any(k in json.dumps(result).lower() for k in ("usd", "$", "price", "cost_per"))
+
+
+# --- SUSPENDED: a session can end without sealing its sprint ------------
+
+def test_suspend_does_not_write_the_close_baseline(anchor):
+    """The whole point. last_close_commit means "where the last CLOSE sealed";
+    writing it at session end would set a false baseline and blind detect_drift."""
+    ss.claim("session-a", takeover=False)
+    anchor.write_text(json.dumps({**json.loads(anchor.read_text()),
+                                  "last_close_commit": "baseline-sha"}))
+    assert ss.suspend() == 0
+    state = json.loads(anchor.read_text())
+    assert state["status"] == "SUSPENDED"
+    assert state["last_close_commit"] == "baseline-sha"
+    assert state["end_time"]
+
+
+def test_release_still_seals_the_sprint(repo):
+    """The asymmetry's other half — regression to protect."""
+    (repo / "docs").mkdir()
+    ss.claim("session-a", takeover=False)
+    assert ss.release() == 0
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert state["status"] == "CLOSED_SUCCESSFULLY"
+    assert state["last_close_commit"]
+
+
+def test_resuming_a_suspended_sprint_is_not_a_collision(anchor, capsys):
+    """A planned handoff and a crash were indistinguishable before this state."""
+    ss.claim("session-a", takeover=False)
+    ss.suspend()
+    assert ss.claim("session-b", takeover=False) == 0
+    assert "Resuming" in capsys.readouterr().out
+
+
+def test_a_live_session_still_blocks_a_second_one(anchor):
+    """The collision guard must stay armed on IN_PROGRESS — regression guard."""
+    ss.claim("session-a", takeover=False)
+    assert ss.claim("session-b", takeover=False) == 2
+
+
+def test_sessions_are_counted_across_a_suspended_sprint(anchor):
+    """session_cost.py needs to know a sprint took three sessions, not three sprints."""
+    ss.claim("session-a", takeover=False)
+    ss.suspend()
+    ss.claim("session-b", takeover=False)
+    ss.suspend()
+    ss.claim("session-c", takeover=False)
+    assert json.loads(anchor.read_text())["session_count"] == 3
+
+
+def test_suspend_records_where_to_resume(repo):
+    """Degraded and declared: the registry-derived form arrives with C0.2."""
+    (repo / "docs").mkdir()
+    ss.claim("session-a", takeover=False)
+    ss.suspend()
+    pointer = json.loads((repo / "docs" / "active_state.json").read_text())["resume_pointer"]
+    assert pointer["branch"] == "main"
+    assert pointer["at"]
+    assert "registry pending" in pointer["derived_from"]
+
+
+def test_suspend_does_not_launder_unrecorded_work(repo):
+    """The abort criterion. If suspending cleared the drift, the new state would
+    have broken the detector Sprint 024 repaired."""
+    (repo / "docs").mkdir()
+    baseline = subprocess.run(["git", "rev-parse", "HEAD"],
+                              capture_output=True, text=True).stdout.strip()
+    (repo / "docs" / "active_state.json").write_text(
+        json.dumps({"status": "CLOSED_SUCCESSFULLY", "last_close_commit": baseline}))
+    ss.claim("session-a", takeover=False)
+    (repo / "f.txt").write_text("work done in a suspended sprint\n")
+    subprocess.run(["git", "commit", "-aqm", "mid-sprint work"], check=True)
+    ss.suspend()
+    assert dd.main() == 2
