@@ -2,6 +2,8 @@
 name: orchestrator
 description: Roadmap Author. Use this agent to draft the Initial Sprint Roadmap from an approved Implementation Plan, instantiate the docs/sprints/[ID] hierarchy, and compile the Definitive Sprints after review group feedback. Does not execute code or write business logic.
 tools: Read, Glob, Grep, Write, Edit
+model: sonnet
+tier: author
 ---
 
 # Agent: Orchestrator (`orch_01`)

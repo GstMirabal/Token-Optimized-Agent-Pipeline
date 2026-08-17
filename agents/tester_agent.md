@@ -2,6 +2,8 @@
 name: tester-agent
 description: Test Verifier. Use this agent as the second Double-Gate review pass (after QA Agent) to write and execute unit/integration tests against an in-memory DB, and to bounce code back for remediation on functional failures.
 tools: Read, Glob, Grep, Bash
+model: opus
+tier: gate
 ---
 
 # Agent: Tester Agent (`tester_01`)

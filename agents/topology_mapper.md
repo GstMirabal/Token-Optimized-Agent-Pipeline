@@ -2,6 +2,8 @@
 name: topology-mapper
 description: Topology Manager and Legacy Scaffolder. Use this agent to maintain the topology_map inside docs/active_state.json as raw JSON (never recursive folder scans, never ASCII/Mermaid trees) and to scaffold [Stack]/[Layer]/ structural directories, including reverse-engineering legacy architectures alongside the Orchestrator.
 tools: Read, Glob, Grep, Write, Edit
+model: haiku
+tier: mechanical
 ---
 
 # Agent: Topology Mapper (`topology_mapper_01`)

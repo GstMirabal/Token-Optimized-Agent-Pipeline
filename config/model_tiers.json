@@ -1,0 +1,101 @@
+{
+  "_comment": [
+    "Tier -> model per tool. Profiles in agents/ declare BOTH `model:` (a family",
+    "alias, which the harness applies natively) and `tier:` (the intent). A check in",
+    "`make verify` asserts they agree: tier-only would be silently ignored by the",
+    "harness and the subagent would run on the session default, the most expensive",
+    "tier.",
+    "NEVER write a model ID with a date suffix. Family aliases absorb version bumps",
+    "without touching thirteen files, and a guard in `make verify` enforces it.",
+    "PRICES ARE DELIBERATELY ABSENT. They exist on no disk here, so a copy would be",
+    "stale the day it was written -- the defect this program pursues. The dated",
+    "record lives in docs/roadmaps/core/pipeline/021-030-program-queue.md, and",
+    "`verified_at` below makes its age visible instead of letting it rot quietly.",
+    "The `cursor` column is derived by audit_cursor_models.py in Sprint 026 from the",
+    "catalogue on disk. Cursor has no subagents, so the tier applies per PHASE",
+    "(authoring vs gate) rather than per agent."
+  ],
+  "tiers": {
+    "gate": {
+      "claude_code": {
+        "model": "opus",
+        "effort": "high"
+      },
+      "cursor": {
+        "model": null,
+        "family": null
+      },
+      "profiles": [
+        "qa_agent",
+        "tester_agent",
+        "principal_agent"
+      ],
+      "basis": "Adversarial review and planning. Across four consecutive host sprints every central defect was found by a gate and nothing else, several after surviving their author's own verification. Cheapening the reviewer is the first thing a budget attacks and the last thing that helps."
+    },
+    "author": {
+      "claude_code": {
+        "model": "sonnet",
+        "effort": "medium"
+      },
+      "cursor": {
+        "model": null,
+        "family": null
+      },
+      "profiles": [
+        "orchestrator",
+        "rule_validator",
+        "skill_architect",
+        "doc_orchestrator",
+        "agent_orchestrator",
+        "governance_learner",
+        "token_economy_agent"
+      ],
+      "basis": "Structured authorship against a stated rule; downstream gates catch their errors."
+    },
+    "mechanical": {
+      "claude_code": {
+        "model": "haiku",
+        "effort": "low"
+      },
+      "cursor": {
+        "model": null,
+        "family": null
+      },
+      "profiles": [
+        "devops_agent",
+        "git_sync_agent",
+        "topology_mapper"
+      ],
+      "basis": "Deterministic, verifiable results. A wrong answer fails at the next command."
+    }
+  },
+  "excluded": {
+    "claude-fable-5": "2x the cost of Opus ($10/$50 vs $5/$25) and requires 30-day retention, so it does not work under ZDR. It is the most capable model, which is exactly why the exclusion is written down rather than left implicit: it enters only by explicit human decision."
+  },
+  "context_limits": {
+    "haiku": "200K -- the only one of the three without 1M. The `mechanical` tier inherits this ceiling; a role in that tier handed a large context fails, and that has to be known in advance.",
+    "sonnet": "1M",
+    "opus": "1M"
+  },
+  "catalog_snapshot": {
+    "_purpose": "The DURABLE copy, and the gate's only source. The bundled catalogue lives in a per-user temp directory the system clears and CI never has, so a gate reading it directly would silently never fire there -- a mechanism wired where it cannot run (RA-16). This snapshot is committed, so `--check` works everywhere; refreshing it from the bundled file is the opportunistic half.",
+    "cli_version": "2.1.233",
+    "captured_at": "2026-08-17",
+    "aliases": {
+      "claude-fable-5": "Active",
+      "claude-haiku-4-5": "Active",
+      "claude-mythos-5": "Active",
+      "claude-opus-4-1": "Deprecated",
+      "claude-opus-4-5": "Active",
+      "claude-opus-4-6": "Active",
+      "claude-opus-4-7": "Active",
+      "claude-opus-4-8": "Active",
+      "claude-opus-5": "Active",
+      "claude-sonnet-4-5": "Active",
+      "claude-sonnet-4-6": "Active",
+      "claude-sonnet-5": "Active"
+    }
+  },
+  "verified_at": "2026-08-17",
+  "verified_against": "claude-api bundled skill catalogue (models.md), CLI 2.1.233"
+}

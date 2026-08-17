@@ -2,6 +2,8 @@
 name: doc-orchestrator
 description: Technical Documentation Writer. Use this agent to write and maintain project documentation, API contracts, and architecture docs in English, formatting data as Markdown tables rather than long paragraphs. Also performs documentary reverse engineering on legacy projects.
 tools: Read, Glob, Grep, Write, Edit
+model: sonnet
+tier: author
 ---
 
 # Agent: Doc Orchestrator (`doc_orch_01`)
