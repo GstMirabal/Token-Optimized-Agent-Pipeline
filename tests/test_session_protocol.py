@@ -36,14 +36,14 @@ def _tiny_repo(path: Path) -> None:
 
 
 def test_a_git_directory_is_the_nucleus(tmp_path, monkeypatch):
-    monkeypatch.setattr(_mode, "agents_dir", lambda: tmp_path)
+    monkeypatch.setattr(_mode, "agents_root", lambda: tmp_path)
     (tmp_path / ".git").mkdir()
     assert _mode.is_nucleus() is True
 
 
 def test_a_git_pointer_file_is_a_submodule_checkout(tmp_path, monkeypatch):
     """git's own layout is the discriminator; nothing has to be configured."""
-    monkeypatch.setattr(_mode, "agents_dir", lambda: tmp_path)
+    monkeypatch.setattr(_mode, "agents_root", lambda: tmp_path)
     (tmp_path / ".git").write_text("gitdir: ../.git/modules/.agents\n")
     assert _mode.is_nucleus() is False
 
@@ -59,14 +59,14 @@ def test_nucleus_mode_never_blocks_even_on_a_dirty_tree(tmp_path, monkeypatch):
     (tmp_path / "docs").mkdir()
     (tmp_path / "docs" / "loose.md").write_text("uncommitted work\n")
     monkeypatch.setattr(sp, "is_nucleus", lambda: True)
-    monkeypatch.setattr(sp, "agents_dir", lambda: tmp_path)
+    monkeypatch.setattr(sp, "agents_root", lambda: tmp_path)
     assert sp.main() == 0
 
 
 def test_a_clean_submodule_passes(tmp_path, monkeypatch):
     _tiny_repo(tmp_path)
     monkeypatch.setattr(sp, "is_nucleus", lambda: False)
-    monkeypatch.setattr(sp, "agents_dir", lambda: tmp_path)
+    monkeypatch.setattr(sp, "agents_root", lambda: tmp_path)
     assert sp.main() == 0
 
 
@@ -79,7 +79,7 @@ def test_host_sprint_records_written_into_the_submodule_are_refused(
     sprint.mkdir(parents=True)
     (sprint / "task_scope.md").write_text("a host's sprint scope\n")
     monkeypatch.setattr(sp, "is_nucleus", lambda: False)
-    monkeypatch.setattr(sp, "agents_dir", lambda: tmp_path)
+    monkeypatch.setattr(sp, "agents_root", lambda: tmp_path)
 
     assert sp.main() == 2
     err = capsys.readouterr().err
@@ -95,7 +95,7 @@ def test_editing_the_framework_in_place_is_classified_separately(
     _tiny_repo(tmp_path)
     (tmp_path / "agents.md").write_text("# constitution, patched by a host\n")
     monkeypatch.setattr(sp, "is_nucleus", lambda: False)
-    monkeypatch.setattr(sp, "agents_dir", lambda: tmp_path)
+    monkeypatch.setattr(sp, "agents_root", lambda: tmp_path)
 
     assert sp.main() == 2
     err = capsys.readouterr().err
@@ -113,7 +113,7 @@ def test_an_ignored_only_dirty_state_is_not_contamination(tmp_path, monkeypatch)
     (tmp_path / "venv_skillopt").mkdir()
     (tmp_path / "venv_skillopt" / "pyvenv.cfg").write_text("home = /usr\n")
     monkeypatch.setattr(sp, "is_nucleus", lambda: False)
-    monkeypatch.setattr(sp, "agents_dir", lambda: tmp_path)
+    monkeypatch.setattr(sp, "agents_root", lambda: tmp_path)
     assert sp.main() == 0
 
 

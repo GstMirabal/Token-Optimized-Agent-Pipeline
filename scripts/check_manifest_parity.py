@@ -19,16 +19,25 @@ Exit codes:
 """
 
 import json
+import os
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _root import agents_root  # noqa: E402
 
 SKILLS_DIR = Path("skills")
 MANIFEST = SKILLS_DIR / "manifest_skills.json"
 
 
 def main() -> int:
+    # Framework-scoped: the root is this file's repository, never the caller's
+    # directory. See `scripts/_root.py` for why the cwd is set once here rather
+    # than each path being rewritten.
+    os.chdir(agents_root())
+
     if not MANIFEST.exists():
-        print(f"❌ {MANIFEST} not found — run from the .agents root.")
+        print(f"❌ {MANIFEST} not found inside {agents_root()}.")
         return 1
 
     listed = {entry["path"] for entry in json.loads(MANIFEST.read_text())["skills"]}

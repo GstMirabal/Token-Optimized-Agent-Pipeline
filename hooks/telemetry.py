@@ -1,3 +1,12 @@
+"""Record hook errors as raw material for heuristic distillation.
+
+**Host-scoped**: the root is the project being worked. `memory/` belongs to the
+host and is purged at its sprint close, so this path MUST NOT be anchored to
+`scripts/_root.py` — doing so would write a host's error log into the framework
+submodule, which `agents.md §3 strict_rule` forbids outright (Sprint 023 `C0.3`).
+
+invoked_by: hooks/on_commit.py, hooks/on_init.py.
+"""
 import json
 from datetime import datetime
 from pathlib import Path

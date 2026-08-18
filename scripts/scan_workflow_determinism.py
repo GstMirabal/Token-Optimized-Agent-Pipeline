@@ -64,8 +64,16 @@ def scan(repo_root: Path) -> list[str]:
 
 
 if __name__ == "__main__":
+    import os
     import sys
 
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from _root import agents_root
+
+    # Framework-scoped: `workflows/` is this repository's. An explicit argument
+    # still wins, and now resolves against the framework rather than against
+    # wherever the caller happened to stand.
+    os.chdir(agents_root())
     root = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(".")
     results = scan(root)
     if not results:

@@ -16,24 +16,24 @@ own records belong here. In submodule mode the host is the work, and
 — framework improvements go through `§4 feedback_upstream`, a branch and pull
 request against the nucleus repository, worked in a separate clone.
 
+Root resolution used to live here as `agents_dir()`. Sprint 023 `C0.3` moved it
+to `scripts/_root.py` as `agents_root()` — the rename that module was written in
+anticipation of — because eleven scripts needed the root and only three needed
+the mode, and a module named for one question is the wrong place to answer the
+other.
+
 invoked_by: scripts/submodule_purity.py, scripts/session_probe.py,
 scripts/install_claude.py.
 
 Usage:
-    from _mode import is_nucleus, agents_dir
+    from _mode import is_nucleus
 """
 
+import sys
 from pathlib import Path
 
-
-def agents_dir() -> Path:
-    """The framework root, resolved from this file rather than from the cwd.
-
-    Sprint 023 `C0.3` unifies root resolution across the five framework-scoped
-    scripts that each spell it differently. This is deliberately the same
-    anchoring those will adopt, so that change is a rename and not a redesign.
-    """
-    return Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _root import agents_root  # noqa: E402
 
 
 def is_nucleus() -> bool:
@@ -43,4 +43,4 @@ def is_nucleus() -> bool:
         bool: True if `.git` is a real directory (the nucleus), False when it is
             a submodule pointer file (installed inside a host).
     """
-    return (agents_dir() / ".git").is_dir()
+    return (agents_root() / ".git").is_dir()

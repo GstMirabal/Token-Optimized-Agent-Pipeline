@@ -1,3 +1,13 @@
+"""Shadow-copy the state anchor, so a corrupt or lost one is recoverable.
+
+**Host-scoped**: the root is the project being worked, which is the directory
+this hook fires in. Both paths below are deliberately relative and MUST NOT be
+anchored to `scripts/_root.py` — the anchor and its mirror belong to the host,
+and pointing them at the framework would mirror the wrong repository's state
+(Sprint 023 `C0.3`).
+
+invoked_by: claude/settings.hooks.json Stop hook, close_workflow.md#state_sync.
+"""
 import json
 import shutil
 from pathlib import Path

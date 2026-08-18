@@ -31,16 +31,19 @@ Exit codes:
 
 import argparse
 import json
+import os
 import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _root import agents_root  # noqa: E402
+
 WORKFLOWS = Path("workflows")
 OUTPUT = Path("docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md")
-# Resolved from this file, not from the cwd: the registry is framework data and
-# this script is framework-scoped. `C0.3` replaces the expression with a single
-# `scripts/_root.py`.
-ARTIFACT_REGISTRY = Path(__file__).resolve().parent.parent / "config" / "artifact_registry.json"
+# Absolute even though `main()` sets the cwd, because `ARTIFACTS` below is
+# evaluated at import — before any entry point runs.
+ARTIFACT_REGISTRY = agents_root() / "config" / "artifact_registry.json"
 
 
 def load_artifacts(registry: Path = ARTIFACT_REGISTRY) -> dict[str, str]:
@@ -164,6 +167,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--check", action="store_true", help="Fail if the guide is stale.")
     args = parser.parse_args()
+
+    # Framework-scoped: `workflows/` and the guide are this repository's, not the
+    # caller's. See `scripts/_root.py` for why the cwd is set rather than each
+    # path rewritten — every message below stays relative and unchanged.
+    os.chdir(agents_root())
 
     generated = build()
     if args.check:

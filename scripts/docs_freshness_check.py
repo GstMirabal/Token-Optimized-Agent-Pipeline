@@ -1,5 +1,10 @@
 """Deterministic documentation freshness and integrity checks.
 
+**Host-scoped**: the root of this script is the project being worked, taken from
+`repo_root`, never the framework. Anchoring it to `.agents` would make it audit
+the framework's documentation instead of the host's. The only exceptions are
+`DENYLIST_DIR` and `ARTIFACT_REGISTRY`, which are framework data and say so.
+
 invoked_by: close_workflow.md#docs_freshness_gate, Makefile `docs-freshness-check`.
 
 Implements rules/documentation_standard.md §2.1 (C4 Level 3 density),
@@ -15,8 +20,12 @@ on which cycle this host is on (see §4.2).
 """
 import json
 import re
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _root import agents_root  # noqa: E402
 
 GRAPH_JSON = Path("graphify-out/graph.json")
 DENYLIST_LANGUAGES = {"python", "js", "go"}
@@ -29,12 +38,13 @@ ADR_STATUS_SUPERSEDED_RE = re.compile(r"^\s*Status:\s*Superseded", re.MULTILINE)
 ADR_DIR = Path("docs/decisions")
 BLUEPRINT_GLOB = "docs/**/*_BLUEPRINT.md"
 SPRINTS_DIR = Path("docs/sprints")
-DENYLIST_DIR = Path(".agents/scripts/denylists")
-# Framework data, not the host's: this script runs against a host repository
-# root while the registry ships inside `.agents`. Resolved from this file rather
-# than from the cwd — Sprint 023 `C0.3` replaces the expression with a single
-# `scripts/_root.py` for the eleven scripts that each resolve it their own way.
-ARTIFACT_REGISTRY = Path(__file__).resolve().parent.parent / "config" / "artifact_registry.json"
+# The two paths below are FRAMEWORK data read by a host-scoped script, so they
+# anchor to `agents_root()` while every other path here stays relative to the
+# host. `DENYLIST_DIR` was `.agents/scripts/denylists`, host-relative: correct
+# inside a host, and in nucleus mode a directory that does not exist, so the
+# three denylists that do ship were never found and the density filter ran empty.
+DENYLIST_DIR = agents_root() / "scripts" / "denylists"
+ARTIFACT_REGISTRY = agents_root() / "config" / "artifact_registry.json"
 GRAPH_STATS_WINDOW = 10
 BOOTSTRAP_MIN_DELTAS = 5
 

@@ -59,7 +59,15 @@ import sys
 import time
 from pathlib import Path
 
-WAIVERS = Path("config/abandoned_branches.json")
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _root import agents_root  # noqa: E402
+
+# **Mixed scope, deliberately**: every git command below runs against the HOST
+# repository in the cwd, while the waiver list is FRAMEWORK data. As a bare
+# relative path this was read from wherever the caller stood, so running the
+# gate from any other directory found no waivers and said nothing about it —
+# a declared exception silently ignored reads exactly like no exception.
+WAIVERS = agents_root() / "config" / "abandoned_branches.json"
 
 # Three answers, because two cannot express doubt. The whole finding behind this
 # file's second docstring paragraph is that `NO` and `UNKNOWN` were the same value.
