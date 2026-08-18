@@ -368,9 +368,12 @@ def node_delta(previous: dict, current: dict) -> int:
 # Artifact -> the pipeline phase that produces it. Reported by phase, not by
 # filename, so the reader learns which STEP was skipped rather than which file
 # happens to be absent.
+# Ordered by phase, so a report on a sprint that skipped several steps reads in
+# the order they should have run rather than in the order someone typed them.
 PHASE_ARTIFACTS: dict[str, str] = {
-    "task_scope.md": "Phase 4 (Roadmap Review) — Rule Validator",
+    "IMPLEMENTATION_PLAN.md": "Phase 1 (Planning) — Principal Agent",
     "SPRINT_LOG.md": "Phase 3 (Roadmap Drafting) — Orchestrator",
+    "task_scope.md": "Phase 4 (Roadmap Review) — Rule Validator",
 }
 
 

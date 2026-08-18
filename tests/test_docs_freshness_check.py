@@ -283,3 +283,76 @@ def test_unreadable_sprint_number_is_reported(tmp_path):
     report = dfc.run(tmp_path, 4)
     messages = " ".join(f.message for f in report.findings)
     assert "last_audit_sprint" in messages
+
+
+# --- phase artifacts (a phase that left no artifact did not run) --------
+#
+# check_phase_artifacts shipped in PR #37 with no direct test of its own.
+# Sprint 023 C0 adds IMPLEMENTATION_PLAN.md to the map it reads, so the map
+# stops being the only thing standing between a skipped phase and silence.
+
+def _sprint_dir(repo: Path, sprint_id: int, *artifacts: str) -> Path:
+    """Build docs/sprints/{NNN}-core-pipeline/ holding only `artifacts`."""
+    path = repo / "docs" / "sprints" / f"{sprint_id:03d}-core-pipeline"
+    path.mkdir(parents=True, exist_ok=True)
+    for name in artifacts:
+        (path / name).write_text("body\n", encoding="utf-8")
+    return path
+
+
+def test_a_missing_plan_names_the_phase_that_should_have_written_it(tmp_path):
+    """Reporting by phase is the whole point: a filename tells you what is
+    absent, a phase tells you which step to go run."""
+    _sprint_dir(tmp_path, 23, "SPRINT_LOG.md", "task_scope.md")
+    report = dfc.FreshnessReport()
+    dfc.check_phase_artifacts(tmp_path, 23, report)
+    messages = " ".join(f.message for f in report.findings)
+    assert "IMPLEMENTATION_PLAN.md" in messages
+    assert "Phase 1" in messages
+
+
+def test_a_sprint_with_every_artifact_is_silent(tmp_path):
+    _sprint_dir(tmp_path, 23, "IMPLEMENTATION_PLAN.md", "SPRINT_LOG.md", "task_scope.md")
+    report = dfc.FreshnessReport()
+    dfc.check_phase_artifacts(tmp_path, 23, report)
+    assert report.findings == []
+
+
+def test_each_missing_artifact_is_reported_separately(tmp_path):
+    """Three skipped phases are three problems with three remedies, not one."""
+    _sprint_dir(tmp_path, 23)
+    report = dfc.FreshnessReport()
+    dfc.check_phase_artifacts(tmp_path, 23, report)
+    assert len(report.findings) == len(dfc.PHASE_ARTIFACTS) == 3
+
+
+def test_the_report_reads_in_phase_order(tmp_path):
+    """The dict order is a contract, not an accident: a sprint that skipped
+    several steps should be read in the order they should have run."""
+    _sprint_dir(tmp_path, 23)
+    report = dfc.FreshnessReport()
+    dfc.check_phase_artifacts(tmp_path, 23, report)
+    phases = [f.message.split(" — ")[1].split(" (")[0] for f in report.findings]
+    assert phases == ["Phase 1", "Phase 3", "Phase 4"]
+
+
+def test_a_sprint_with_no_directory_is_not_accused_of_a_missing_plan(tmp_path):
+    """The cause is a different one — Phase 3 never instantiated the
+    hierarchy — and naming the plan here would send the reader to the wrong
+    phase."""
+    (tmp_path / "docs" / "sprints").mkdir(parents=True)
+    report = dfc.FreshnessReport()
+    dfc.check_phase_artifacts(tmp_path, 23, report)
+    messages = " ".join(f.message for f in report.findings)
+    assert "Phase 3 instantiates" in messages
+    assert "IMPLEMENTATION_PLAN.md" not in messages
+
+
+def test_sprint_zero_is_not_inspected(tmp_path):
+    """`SPRINT_ID` unset used to fall back to 0, and this check returned on
+    its first line — so it never ran from `make`, in any project. Pinning the
+    early return keeps that failure visible as a deliberate boundary."""
+    _sprint_dir(tmp_path, 0)
+    report = dfc.FreshnessReport()
+    dfc.check_phase_artifacts(tmp_path, 0, report)
+    assert report.findings == []

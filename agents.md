@@ -11,6 +11,7 @@ It dictates in an absolute and transversal manner the behavior of subagents, cod
 | **Hierarchy** | `architecture/` (Law), `roadmaps/` (Future), `walkthroughs/` (Achievements), `sprints/` (History). |
 | **Traceability** | Every module MUST have a `[MODULE]_BLUEPRINT.md` in `architecture/` before coding (template: `docs/standards/templates/BLUEPRINT_TEMPLATE.md`). |
 | **Execution** | Every task must be recorded in the current Sprint folder. |
+| **Implementation Plan** | Every sprint MUST leave `IMPLEMENTATION_PLAN.md` inside the sprint directory named in `§5 mandatory_topology` (template: `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md`). Authored at Phase 1, extracted to that path at Phase 3, **committed before Phase 5 approves it** (`§2 triple_lock`). It is mentioned seven times across this corpus and until Sprint 023 **no document said where it is written**: a host lost an approved plan to ephemeral storage and nothing detected it, and this repository held two Implementation Plans from April 2026 untracked for four months. `plansDirectory` → `docs/plans/` is a safety net against loss, **not the canonical location** — files there carry IDE-generated names, and `close_workflow.md` Phase 2.6 asks whether *this sprint* left its plan, which cannot be asked of a file named by an editor. |
 | **Master Ledger** | The host root `CHANGELOG.md` (Keep a Changelog format; template: `docs/standards/templates/CHANGELOG_TEMPLATE.md`). Every Sprint Closeout appends its sprint entry under `[Unreleased]`; every deployment seals it as `[vX.Y.Z]` before tagging. Strictly separate jurisdiction from `.agents/CHANGELOG.md` (framework evolution) — the only crossover allowed is a pin-bump entry (`chore(deps): pin .agents to vX.Y.Z`). |
 | **Certification** | Closing a Sprint requires updating Blueprints, Global Roadmap, Walkthroughs, and the Master Ledger. |
 
@@ -56,7 +57,7 @@ Domain rules live in `rules/` and are loaded **on demand** at these triggers —
 
 | Category | Rule (Key) | Value / Constraint (Value) |
 | :--- | :--- | :--- |
-| **Security** | `triple_lock` | Approved Implementation Plan + Active Sprint + QA/Tester Approval + Human OK. |
+| **Security** | `triple_lock` | Approved Implementation Plan + Active Sprint + QA/Tester Approval + Human OK. **Lock 1 has a path and an ordering**: the plan is at `IMPLEMENTATION_PLAN.md` inside the canonical sprint directory (`§0`, `§5 mandatory_topology`) and is committed **before** Phase 5 runs. A lock cannot close over an artifact that does not exist, and an approval whose object vanished cannot be audited afterwards — which is the failure this rule was written against. |
 | **Context** | `token_saver` | Files >200 lines MUST NOT be fully dumped. Targeted partial reads (offset/limit on the affected function) are the sanctioned mechanism. Decision ladder in `rules/token_economy.md`. |
 | **Context** | `ast_skeleton` | For structural discovery on large files, invoke `omni_minimizer.py` to extract the skeleton before any partial read. |
 | **Context** | `anti_amnesia` | Re-read `agents.md` and `active_state.json` once per session (at start) and after any context compaction — not after every execution step. |

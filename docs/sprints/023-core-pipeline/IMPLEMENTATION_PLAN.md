@@ -1,0 +1,189 @@
+# Implementation Plan: Sprint 023 — upstream-findings
+
+**Canonical path**: `docs/sprints/023-core-pipeline/IMPLEMENTATION_PLAN.md`
+**Branch**: `ai-sprint/023` · **Base**: `main` at `18696c5` (`v4.7.0`)
+**Status**: `EXECUTING`
+
+> First artifact written from `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md`,
+> which unit `C0` of this sprint ships. Filed retroactively, and that is recorded rather
+> than hidden: this sprint began before the rule existed, so its plan was extracted from
+> a draft that lived in `~/.claude/plans/` — the exact ephemeral storage the unit is about.
+
+---
+
+## Context
+
+A host running sprints 085-093 accumulated thirteen framework-class findings.
+`agents.md §4 feedback_upstream` obliges routing them upstream; `§3 strict_rule`
+forbids that host patching the submodule in place. **Between those two rules a nucleus
+finding had nowhere to live**, and for eight sprints it lived nowhere: the inventory sat
+in a session scratchpad and was lost.
+
+The seven findings recovered from that inventory **reproduce 7 of 7** against `v4.4.0`.
+The governing rule of this sprint is therefore **reproduce before repairing**: a check
+that passes against the current tree proves nothing about a defect claimed to be in it.
+
+Two more units were found while *closing* Sprint 022 — by running the close machinery
+rather than reading it — and they are one defect class with the rest:
+**a control that treats "I could not determine" as a determination.**
+
+---
+
+## Design
+
+### The unifying frame
+
+`C9` answers red when it does not know; `C10` answers green. Neither corrupts data;
+both make a gate lie. The remedy is not to let doubt pass — a real outage that passed
+would be a false green, the same defect inverted — but to **stop collapsing doubt into
+a verdict**, and to report it as doubt with a different remedy attached.
+
+### `C9` — three values, because two cannot express doubt
+
+`merged_pr_exists` returned a bool and mapped every non-zero exit to `False`, so
+*"I could not find out"* became *"no merged PR exists"*. Measured against the live API:
+**2 of 12 calls returned `rc=1`, `HTTP 503`**. Since `content_is_integrated` already
+returns `False` for every squash-merged branch, one 503 was enough to flip an
+**integrated** branch to unintegrated — reproduced as two triple-runs of `audit` on an
+unchanged tree exiting `0,2,0` and `0,0,2`, **accusing a different branch each time**.
+
+Ran first by design: this sprint's own close invokes `branch_sovereignty audit`, so
+repairing that gate last would mean tripping on the defect the sprint exists to remove.
+
+### `C0` — the plan gets a location and a gate
+
+The Implementation Plan is `triple_lock`'s first lock, the Phase 1 deliverable, and
+`rules/code_craft.md §7` requires justifying every dependency in it. It is mentioned
+**seven times** across the governance corpus and **no document said where it is written**.
+Measured: 11 templates in `docs/standards/templates/` and none for a plan.
+
+**The sequencing contradiction, resolved.** The plan is *authored* at Phase 1; the sprint
+directory is *instantiated* at Phase 3. The canonical path does not exist when the plan is
+written. So: Phase 1 authors, Phase 3 files and commits, Phase 5 checks as a precondition,
+close verifies retrospectively.
+
+**No new mechanism.** Enforcement reuses what PR `#37` built — the `artifact → producing
+phase` map in `scripts/docs_freshness_check.py` gains one entry. No new script, no new
+`invoked_by` to declare (`RA-16`).
+
+**Declared limit.** The close gate proves the plan **exists and is versioned** — the loss
+it was built against. It does **not** prove the plan existed before approval; that ordering
+is held by the Phase 5 precondition, an attended human step. Written down rather than left
+to be discovered.
+
+---
+
+## Work
+
+| # | File | Operation | Risk | Assignee | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| C9 | `scripts/branch_sovereignty.py`, `tests/`, `close_workflow.md` | modify | **high** — a gate | lead · `devops_agent` ruleset | ✅ `437493b` |
+| C0 | `agents.md`, `pipeline_workflow.md`, `close_workflow.md`, template, 3 agent profiles | modify/create | **high** — governance | lead · `rule_validator` ruleset | 🔄 in flight |
+| C0.2 | `config/artifact_registry.json` + 3 consumers | create/modify | high | lead · `rule_validator` ruleset | ⏳ |
+| C0.3 | `scripts/_root.py` + 6 consumers | create/modify | high | lead · `devops_agent` ruleset | ⏳ |
+| C1 | `scripts/check_readme_counts.py` | modify | high | lead · `devops_agent` ruleset | ⏳ |
+| C2 | `scripts/session_probe.py` | modify | high — a security report | lead · `devops_agent` ruleset | ⏳ |
+| C3 | `env_shielding_auditor.py`, `hooks/on_commit.py` | modify | **high** — secrets | lead · `devops_agent` ruleset | ⏳ |
+| C4 | `mass_standardizer.py` | modify | medium | lead · `skill_architect` ruleset | ⏳ |
+| C5 | `agents/devops_agent.md` | modify | medium — role map | lead · `agent_orchestrator` ruleset | ⏳ |
+| C6 | `agents.md`, `start_workflow.md` | modify | medium | lead · `rule_validator` ruleset | ⏳ |
+| C7 | `requirements-freeze.txt` | modify | low | lead · `devops_agent` ruleset | ⏳ |
+| C8 | `origin/contrib/host-findings` | modify | low | lead · `doc_orchestrator` ruleset | ⏳ |
+| C10 | `scripts/ci_gate.py` (new), `deployment_workflow.md:17` | create/modify | **high** — a gate | lead · `devops_agent` ruleset | ⏳ |
+
+---
+
+## Dependencies
+
+**None.** Every unit uses the standard library. `C9`'s retry uses `time.sleep`; `C10`'s
+gate will shell out to `gh`, which is already a declared prerequisite of
+`deployment_workflow.md` rather than a new dependency.
+
+---
+
+## Mechanisms
+
+| Mechanism | Deterministic or agent judgment | Invoker (`RA-16`) |
+| :--- | :--- | :--- |
+| `branch_sovereignty audit` tri-state (`C9`) | deterministic — script | `close_workflow.md` Phase 5.5 |
+| `IMPLEMENTATION_PLAN.md` phase-artifact check (`C0`) | deterministic — existing `docs_freshness_check.py`, one map entry | `Makefile docs-freshness-check` target |
+| Phase 5 plan precondition (`C0`) | **attended human step, deliberately** | `pipeline_workflow.md` Phase 5 |
+| `scripts/ci_gate.py` (`C10`) | deterministic — script | `deployment_workflow.md` Phase 1 |
+
+`C0` adds no script, so it introduces no new invoker to declare.
+
+---
+
+## Tests
+
+| Check | Fails against the current tree? |
+| :--- | :--- |
+| `C9`: a simulated 503 yields `UNKNOWN`, not `False` | **Yes** — this is the defect |
+| `C9`: a branch with a merged PR + 503 reports **indeterminate**, not unintegrated | **Yes** |
+| `C9`: the indeterminate message does **not** offer `abandoned_branches.json` | **Yes** |
+| `C9`: no remote → definitive `NO`, not `UNKNOWN` | **Yes** — a naive tri-state would block every local-only repository forever |
+| `C9`: merged PR + healthy network → integrated, exit 0 | **No** — regression to protect |
+| `C0`: the freshness gate names the missing plan **and its phase** | **Yes** — measured before the fix, then after |
+| `C0`: a sprint directory holding the plan produces no warning | **No** — regression to protect |
+| `C0`: a sprint with no directory still yields the Phase 3 warning, not a plan warning | **No** — regression to protect |
+
+`check_phase_artifacts` had **no test at all** before this sprint, despite being the
+mechanism `C0` extends.
+
+---
+
+## Verification
+
+Exit codes read with `$?` directly, **never through a pipe** — the mistake made twice in
+this sprint's own session, which reported a green verdict taken from `tail` rather than
+from the command being measured.
+
+| Command | Expected |
+| :--- | :--- |
+| `make verify` | exit 0; the full suite green |
+| `make docs-freshness-check` before `C0`'s plan file exists | warns, naming `IMPLEMENTATION_PLAN.md` and Phase 1 |
+| `make docs-freshness-check` after | back to baseline (only the unrelated `code_containers` advisory) |
+| `python3 scripts/branch_sovereignty.py audit` ×5 | same verdict five times |
+| `python3 scripts/map_workflows.py --check` | exit 0 after regenerating the step-map guide |
+
+---
+
+## Out of scope
+
+| Exclusion | Why, and where it goes instead |
+| :--- | :--- |
+| The 7 "carried-over" findings (`G-03`, `REVDOC-G1`, `ADR-0006`, `ADR-0007`, `C5`, `#12`, `#13`) | Not reproduced. This sprint's own rule forbids acting on them |
+| Splitting an implementer profile that can write code (`F-021-A2`) | A redesign of the role map. `C5` **declares** the void; it does not resolve it |
+| Editing `skills/django-expert-3rd/skills/SKILL.md` | Vendored; `rules/skills_and_integrations.md §3` forbids it |
+| Pruning `ai-sprint/024` and `ai-sprint/025` | Deferred until `C9` is merged, so the gate authorising the deletion is trustworthy first |
+| Whether the nucleus installs its own `.claude/` bridge | Measured in `task_scope.md`: no `.claude/settings.json` exists here, so `plansDirectory` never applied to the nucleus. Routed to `C6` |
+
+---
+
+## Abort criterion
+
+**`C9`**: if the tri-state gate reports `UNKNOWN` on a healthy repository with a working
+remote, the change traded an intermittently wrong gate for a permanently closed one and is
+reverted. Verified by the regression tests running against a temp repository with no remote.
+
+**`C0`**: if the phase-artifact entry produces a warning on a sprint directory that does
+contain the plan, the gate is worse than its absence and the entry is removed.
+
+**Sprint-wide**: `rules/token_economy.md §3.1` hard bound at 15× per context cycle. On
+reaching it the session **suspends** via `scripts/session_state.py suspend` with unfinished
+work recorded in `task_scope.md`, rather than closing or pushing on. This already fired once
+at cycle 7 (16.5×) — the first time since Sprint 021 built the bound.
+
+---
+
+## Approval — `triple_lock` lock 1
+
+| Field | Value |
+| :--- | :--- |
+| **Approved by** | GstMirabal |
+| **Date** | 2026-08-17 |
+| **Plan commit at approval** | filed retroactively with `C0`; approval of the sprint scope was given per-unit in session |
+| **Remaining locks** | Active Sprint ✅ `ai-sprint/023` · QA + Tester verdicts ⏳ · Human OK at close ⏳ |
+
+*Phase 5 is a single attended human authorization and is never wrapped in an unattended
+`/loop` (`rules/loop_governance.md`).*

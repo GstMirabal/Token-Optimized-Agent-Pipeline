@@ -16,7 +16,7 @@ protocols that should mirror each other shows up there first.
 | `close_workflow` | write | write | write | — | verify/write | — |
 | `deployment_workflow` | — | — | write | — | — | — |
 | `extract_workflow` | — | — | — | — | ?/write | — |
-| `pipeline_workflow` | — | ?/verify | write | — | — | — |
+| `pipeline_workflow` | — | verify/write | write | — | — | — |
 | `reconciliation_workflow` | write | — | write | — | — | write |
 | `remediation_workflow` | write | — | — | — | — | — |
 | `repository_hardening_workflow` | — | — | — | — | — | — |
@@ -96,13 +96,13 @@ protocols that should mirror each other shows up there first.
 
 | Phase | Step | Effect |
 | :--- | :--- | :--- |
-| 1. Planning | `principal_agent` | ? |
+| 1. Planning | `principal_agent` | write |
 | 2. Environment Readiness | `devops_agent` | verify |
 | 3. Roadmap Drafting | `orchestrator` | write |
 | 4.1 Agent Assignment | `agent_orchestrator` | ? |
 | 4.2 Skill Assignment | `skill_architect` | verify |
 | 4.3 Rule Audit | `rule_validator` | verify |
-| 5. Approval Gate | `principal_agent` | ? |
+| 5. Approval Gate | `principal_agent` | write |
 | 6. Execution | `Subagents` | write |
 | 7. Quality Gate | `qa_agent` → `tester_agent` | verify |
 | 8. Sprint Closeout | `principal_agent` | write |
