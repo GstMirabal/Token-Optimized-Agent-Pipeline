@@ -30,6 +30,26 @@ map the gate read before `C0.2` listed three filenames and could not see them.
 That is the unit working as designed on the sprint that built it, and it is
 recorded here rather than quietly fixed.
 
+## The model that ran, which is not the model the tiers declare
+
+| Ruleset | Tier it declares | Model that actually ran |
+| :--- | :--- | :--- |
+| `principal_agent`, `qa_agent`, `tester_agent` | `gate` — opus, effort high | Opus 5 (session model) — agrees by coincidence, not by dispatch |
+| `orchestrator`, `rule_validator`, `skill_architect`, `agent_orchestrator` | `author` — sonnet, effort medium | **Opus 5** (session model) |
+| `devops_agent` | `author` — sonnet | **Opus 5** (session model) |
+
+No subagent was dispatched, so no profile's `model:` key was ever read by the
+harness. `scripts/check_model_tiers.py` passes on every `make verify` and what it
+proves is that two **declarations** agree — `config/model_tiers.json` and the 13
+frontmatters — never that the declared model is the one that executed.
+
+This matters for attribution rather than for cost: `C0.2`'s `Assignee` column was
+added so a gate rejection could be traced to the role and tier that produced the
+defect, and that trace is only true when the profile's model is the one that ran.
+Recorded here, and in `task_scope.md`, as the standing gap. The durable fix —
+requiring this statement of every sprint — is proposed against
+`pipeline_workflow.md` Phase 4.1 and deliberately not applied in this commit.
+
 ## Unresolved
 
 `F-021-A2` stands: **no profile in `agents/` holds `Write` for `scripts/`**, so
