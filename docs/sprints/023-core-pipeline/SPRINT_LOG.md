@@ -1,7 +1,7 @@
 # Sprint Log — 023 (`upstream-findings`)
 
 **Branch**: `ai-sprint/023` from `main` at `18696c5` (`v4.7.0`)
-**Status**: open. 4 of 13 units delivered.
+**Status**: open. 5 of 13 units delivered.
 
 ## Delivered
 
@@ -227,12 +227,37 @@ code, stdout *and* stderr of each anchored script run from the repository root
 and from a temp directory: an anchored script cannot tell where it was called
 from.
 
-### Gate rounds — `C9`, `C0`, `C0.2`, `C0.3`
+### `C1` — a mandatory close step that had never completed in a host (`b2d7c2e`)
+
+`F-093-N2`. `close_workflow.md` Phase 2 invokes `check_readme_counts.py` from
+the **host** root, where every path it read resolved against the host: `README.md`
+became the host's README, `rules/` and `agents/` globbed empty, and
+`skills/`.iterdir() raised. Measured from a directory holding only a host
+README — `FileNotFoundError: 'skills'`, **exit 1**, not the exit `2` the script's
+own docstring and that workflow both promise. Measured green from the same
+directory after anchoring, and the script joins the parametrised cwd-invariance
+test that `C0.3` had deliberately excluded it from.
+
+`iterdir()` is still not wrapped in `try/except`, and the reason now lives in the
+code rather than only in the roadmap: anchored, those directories always exist,
+so an exception means a broken checkout. Catching it would report **0 skills**,
+which reads as drift against the README and sends the reader to edit a number
+that was never measured.
+
+**Two collateral fixes, both the same lesson `C0.3` had just taught.** The readme
+fixture steered the script by cwd — the mechanism this unit removes — so it
+substitutes `agents_root` instead. And the tree-mutation guard added in `c8c8c35`
+compared against `HEAD`, so it failed on its own author's unstaged edits: a guard
+that fires on normal development is one that gets disabled rather than satisfied.
+It now compares before against after the suite, and was **verified to still fire
+on a real mutation** rather than assumed to.
+
+### Gate rounds — `C9`, `C0`, `C0.2`, `C0.3`, `C1`
 
 | Gate | Round | Verdict |
 | :--- | :--- | :--- |
 | **QA Agent** (structural — `make verify`: reference integrity, determinism scan, manifest parity, absolute-path scan, step-map regeneration, README counts) | 1 | **PASSED**, exit `0` read from `$?` |
-| **Tester Agent** (functional — `pytest tests/`, installer sandbox, nucleus self-bridge) | 1 | **PASSED** — 200 tests, no regressions against the 174 inherited |
+| **Tester Agent** (functional — `pytest tests/`, installer sandbox, nucleus self-bridge) | 1 | **PASSED** — 201 tests, no regressions against the 174 inherited |
 | **Tester Agent**, `C0.3` regression | 2 | **REJECTED then PASSED** — the suite was green while a test destroyed a tracked config file. The rejection came from reading a diff, which is why `make verify` now asserts the tree is unchanged after the suite |
 
 Both gates were applied by the lead session under the respective rulesets, not
@@ -258,9 +283,10 @@ resume worked off the record rather than the conversation, which is what Sprint
 collision, and `IMPLEMENTATION_PLAN.md`, `task_scope.md` and `resume_pointer`
 carried the state across the boundary.
 
-**Next Phase**: `C1` (`scripts/check_readme_counts.py` — anchor the README and
-its five counters against `agents_root()`; the roadmap warns explicitly against
-wrapping `iterdir()` in `try/except`, which would turn a crash into false drift).
-Nine units remain; `task_scope.md` holds per-unit status and the findings routed
-out of `C0`, `C0.2`, `C0.3` and this session's start, including two that no unit
+**Next Phase**: `C2` (`scripts/session_probe.py` — a security report that asserts
+a state it did not measure; when the key is absent it must say *"cannot determine
+(field not returned)"*, and `dependabot_security_updates` comes from
+`GET /repos/{owner}/{repo}/automated-security-fixes`). Eight units remain;
+`task_scope.md` holds per-unit status and the findings routed out of `C0`,
+`C0.2`, `C0.3`, `C1` and this session's start, including three that no unit
 owns.

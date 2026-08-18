@@ -1,7 +1,7 @@
 # Task Scope — Sprint 023 (`upstream-findings`)
 
 **Branch**: `ai-sprint/023` · **Base**: `main` at `18696c5` (`v4.7.0`)
-**State**: **IN_PROGRESS**, resumed 2026-08-18. Sprint open. Next unit: `C1`.
+**State**: **IN_PROGRESS**, resumed 2026-08-18. Sprint open. Next unit: `C2`.
 
 Thirteen units, thirteen commits. `C9` ran first by design: this sprint's own
 close invokes `branch_sovereignty audit`, so leaving that gate intermittently
@@ -13,8 +13,8 @@ wrong meant the sprint would trip on the defect it came to repair.
 | C0 | `agents.md`, both workflows, new template, 3 agent profiles | modify/create | **high** — governance | lead · `rule_validator` ruleset | ✅ `2821953` |
 | C0.2 | `config/artifact_registry.json` + 3 consumers | create/modify | high | lead · `rule_validator` ruleset | ✅ `92f42da` |
 | C0.3 | `scripts/_root.py` + 6 consumers | create/modify | high | lead · `devops_agent` ruleset | ✅ `359d03c` + `fix` |
-| C1 | `scripts/check_readme_counts.py` | modify | high | lead · `devops_agent` ruleset | ⏳ **next** |
-| C2 | `scripts/session_probe.py` | modify | high — a security report | lead · `devops_agent` ruleset | ⏳ |
+| C1 | `scripts/check_readme_counts.py` | modify | high | lead · `devops_agent` ruleset | ✅ `b2d7c2e` |
+| C2 | `scripts/session_probe.py` | modify | high — a security report | lead · `devops_agent` ruleset | ⏳ **next** |
 | C3 | `env_shielding_auditor.py`, `hooks/on_commit.py` | modify | **high** — secrets | lead · `devops_agent` ruleset | ⏳ |
 | C4 | `mass_standardizer.py` | modify | medium | lead · `skill_architect` ruleset | ⏳ |
 | C5 | `agents/devops_agent.md` | modify | medium — role map | lead · `agent_orchestrator` ruleset | ⏳ |
