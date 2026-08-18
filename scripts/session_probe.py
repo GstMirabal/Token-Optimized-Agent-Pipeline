@@ -118,6 +118,49 @@ def probe_docs(state: dict) -> str | None:
             "record it in `acknowledged_gaps.docs` in the anchor with a reason.")
 
 
+def probe_anchor_sprint(state: dict) -> str | None:
+    """Does the anchor name the sprint the checked-out branch is working?
+
+    Opening a sprint updates neither field: `session_state.py claim` takes only
+    a session id, so `current_sprint.id` is a hand edit with no gate. Found on
+    the resume of Sprint 023 — the anchor still read `22` while `ai-sprint/023`
+    and its sprint directory both existed, which is exactly what a cold session
+    reads first and trusts.
+
+    Compared against the BRANCH, not against the newest sprint directory. That
+    other comparison looks equivalent and is not: measured on this repository,
+    `docs/sprints/` holds `024` and `025` while `023` is legitimately in flight,
+    so "a directory newer than the anchor" fires on a correct state. The branch
+    is the sprint being worked, by `RA-12`.
+
+    Args:
+        state (dict): Parsed `docs/active_state.json`.
+
+    Returns:
+        str | None: The finding, or None when the two agree or nothing can be
+            compared. A branch outside `ai-sprint/*` is not a mismatch — it is
+            no evidence either way, and is reported as neither.
+    """
+    result = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"],
+                            capture_output=True, text=True)
+    branch = result.stdout.strip()
+    if result.returncode != 0 or not branch.startswith("ai-sprint/"):
+        return None
+
+    suffix = branch.split("/", 1)[1]
+    if not suffix.isdigit():
+        return None
+
+    anchored = state.get("current_sprint", {}).get("id")
+    if anchored is None or int(anchored) == int(suffix):
+        return None
+
+    return (f"Anchor names sprint {anchored} while the checked-out branch is `{branch}`. "
+            "Opening a sprint writes neither field — no script does — so the anchor a cold "
+            f"session reads first is behind the work.\n   Propose: set `current_sprint.id` "
+            f"to {int(suffix)} in `docs/active_state.json` and refresh the mirror.")
+
+
 def gh_json(*args: str) -> dict | list | None:
     result = subprocess.run(["gh", *args], capture_output=True, text=True)
     if result.returncode != 0:
@@ -237,6 +280,7 @@ def main() -> int:
 
     state = load_state()
     findings = [f for f in (probe_graph(),
+                            probe_anchor_sprint(state),
                             probe_docs(state),
                             probe_platform(state, args.force_platform),
                             probe_cost(state)) if f]

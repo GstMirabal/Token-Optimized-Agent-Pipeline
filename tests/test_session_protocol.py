@@ -16,6 +16,7 @@ import _mode  # noqa: E402
 import session_cost as sc  # noqa: E402
 import branch_sovereignty as bs  # noqa: E402
 import detect_drift as dd  # noqa: E402
+import session_probe as spr  # noqa: E402
 import session_state as ss  # noqa: E402
 import submodule_purity as sp  # noqa: E402
 
@@ -173,6 +174,54 @@ def repo(tmp_path, monkeypatch):
     run("add", "-A")
     run("commit", "-qm", "base")
     return tmp_path
+
+
+# --- anchor vs. the branch being worked --------------------------------
+#
+# Opening a sprint updates no field of the anchor — `claim` takes only a
+# session id — so a cold session reads a sprint number nobody wrote. Found on
+# the resume of Sprint 023, where the anchor said 22.
+
+def _checkout(repo: Path, branch: str) -> None:
+    subprocess.run(["git", "checkout", "-q", "-b", branch], cwd=repo, check=True,
+                   capture_output=True)
+
+
+def test_an_anchor_behind_the_branch_is_reported(repo):
+    _checkout(repo, "ai-sprint/023")
+    finding = spr.probe_anchor_sprint({"current_sprint": {"id": 22}})
+    assert finding is not None
+    assert "22" in finding and "ai-sprint/023" in finding
+
+
+def test_an_anchor_that_agrees_is_silent(repo):
+    _checkout(repo, "ai-sprint/023")
+    assert spr.probe_anchor_sprint({"current_sprint": {"id": 23}}) is None
+
+
+def test_a_branch_outside_the_convention_is_no_evidence_either_way(repo):
+    """`main`, a hotfix branch or a detached HEAD say nothing about which
+    sprint is active. Reporting a mismatch from them would be inventing one."""
+    assert spr.probe_anchor_sprint({"current_sprint": {"id": 23}}) is None
+
+
+def test_a_newer_sprint_directory_is_not_a_mismatch(repo, tmp_path):
+    """The comparison deliberately ignores `docs/sprints/`.
+
+    That looks like the equivalent signal and is not: measured on this
+    repository, `024` and `025` exist as directories while `023` is
+    legitimately in flight, so a directory-based check fires on a correct
+    state. The branch is the sprint being worked (`RA-12`).
+    """
+    _checkout(repo, "ai-sprint/023")
+    (tmp_path / "docs" / "sprints" / "025-core-pipeline").mkdir(parents=True)
+    assert spr.probe_anchor_sprint({"current_sprint": {"id": 23}}) is None
+
+
+def test_an_anchor_with_no_sprint_recorded_is_not_accused(repo):
+    """A first run has no `current_sprint` yet. Absent is not wrong."""
+    _checkout(repo, "ai-sprint/023")
+    assert spr.probe_anchor_sprint({}) is None
 
 
 def test_branch_with_unique_work_is_reported(repo):
