@@ -157,11 +157,32 @@ Assignee | Status`. What was actually wrong was the *declared* shape —
 `Operation` nor `Risk`, matching no file on disk, in the profile of the agent
 that writes them.
 
+**The third finding routed to this unit** (`16ed3e9`). Opening a sprint updates
+no field of the anchor and no script does, so `current_sprint.id` is a hand edit
+with no gate — this sprint's own resume read `22` while `ai-sprint/023` and its
+directory both existed. **The instrument the record proposed was rejected by
+measurement**: comparing the anchor against the newest directory under
+`docs/sprints/` fires on a *correct* state here, since `024` and `025` exist as
+directories while `023` is legitimately in flight. The probe compares against the
+checked-out `ai-sprint/[ID]` branch instead, and a test pins the rejected
+comparison so the cheaper wrong instrument cannot come back.
+
 **Verification**: `make verify` exit `0` read from `$?` directly, never through
-a pipe — **185 tests** (174 + 11). `check_phase_artifacts` keeps its six `C0`
+a pipe — **190 tests** (174 + 16). `check_phase_artifacts` keeps its six `C0`
 tests and gains three; the registry contract gets eight, one of which pins that
 every registry filename is named literally in some workflow, so `R2` cannot
-silently regress.
+silently regress; the anchor probe gets five.
+
+### Gate rounds — `C9`, `C0`, `C0.2`
+
+| Gate | Round | Verdict |
+| :--- | :--- | :--- |
+| **QA Agent** (structural — `make verify`: reference integrity, determinism scan, manifest parity, absolute-path scan, step-map regeneration, README counts) | 1 | **PASSED**, exit `0` read from `$?` |
+| **Tester Agent** (functional — `pytest tests/`, installer sandbox, nucleus self-bridge) | 1 | **PASSED** — 190 tests, no regressions against the 174 inherited |
+
+Both gates were applied by the lead session under the respective rulesets, not
+dispatched as subagents. That is the declared deviation recorded below, and it
+is stated here rather than left for a reader to infer from a green verdict.
 
 ## Suspended, not closed
 

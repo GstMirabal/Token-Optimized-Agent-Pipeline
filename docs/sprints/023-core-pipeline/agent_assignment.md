@@ -12,7 +12,7 @@ which is what this artifact is for, and why a declared solo session still owes i
 | :--- | :--- |
 | `principal_agent` | `IMPLEMENTATION_PLAN.md`, the Approval Gate held per unit |
 | `orchestrator` | this directory and `SPRINT_LOG.md` |
-| `devops_agent` | `scripts/branch_sovereignty.py` (`C9`) |
+| `devops_agent` | `scripts/branch_sovereignty.py` (`C9`), `scripts/docs_freshness_check.py`, `scripts/map_workflows.py`, `scripts/session_probe.py` (`C0.2`) |
 | `rule_validator` | `agents.md`, `workflows/pipeline_workflow.md`, `workflows/close_workflow.md`, `agents/rule_validator.md`, `config/artifact_registry.json` (`C0`, `C0.2`) |
 | `agent_orchestrator` | this file |
 | `skill_architect` | `skill_assignment.md` |
