@@ -1,7 +1,7 @@
 # Sprint Log — 023 (`upstream-findings`)
 
 **Branch**: `ai-sprint/023` from `main` at `18696c5` (`v4.7.0`)
-**Status**: open. 3 of 13 units delivered.
+**Status**: open. 4 of 13 units delivered.
 
 ## Delivered
 
@@ -173,12 +173,67 @@ tests and gains three; the registry contract gets eight, one of which pins that
 every registry filename is named literally in some workflow, so `R2` cannot
 silently regress; the anchor probe gets five.
 
-### Gate rounds — `C9`, `C0`, `C0.2`
+### `C0.3` — the framework root resolved once (`359d03c`, plus its fix)
+
+**The defect, measured rather than described.** Five framework-scoped scripts
+addressed `README.md`, `skills/`, `workflows/`, `rules/` and `config/` as bare
+relative paths. Each was copied out of the tree and run from an empty directory,
+and the three failure modes differ — only one of them fails the way it should:
+
+| Script, before `C0.3`, from another directory | Result |
+| :--- | :--- |
+| `scan_workflow_determinism.py` | `[OK] no candidates found`, exit `0` — **a clean pass over nothing** |
+| `verify_references.py` | Crash: `FileNotFoundError: agents.md` |
+| `check_manifest_parity.py` | Exit `1`, *"run from the .agents root"* — a false failure that told the human to compensate for the defect |
+
+`map_workflows.py` is not measurable that way: copying the file displaces the
+`__file__` its registry path anchors to. Said rather than a fourth row invented.
+
+**A rename, not a redesign.** Sprint 025 wrote this exact anchoring as
+`_mode.agents_dir()` on purpose and said so in its docstring. `scripts/_root.py`
+now holds `agents_root()`, `_mode.py` imports it and keeps only `is_nucleus`.
+One function, one name, one definition — a second name for the same fact would
+have been the defect `C0.2` had just removed one level up.
+
+**Why the cwd is set instead of every path rewritten**, written into `_root.py`
+so the next contributor inherits the reasoning: rewriting each `Path("workflows")`
+would turn every message these scripts print from a relative path into an
+absolute one, and `C0.3`'s stated limit is that no observable behaviour changes;
+and the next bare `Path("docs")` added would silently reintroduce the defect.
+`verify_references.LOADABLE` evaluated its globs at import — before any entry
+point — so it became a function.
+
+**The inverse error is the larger one, and host-scoped scripts now say so in
+their own docstrings.** Anchoring `hooks/telemetry.py` to the framework would
+write a host's error log inside the submodule, which `§3 strict_rule` forbids
+outright. Two mixed-scope paths did move: `branch_sovereignty`'s `WAIVERS`, the
+relative path deferred out of `C9`, and `docs_freshness_check`'s `DENYLIST_DIR`,
+which named `.agents/scripts/denylists` — correct in a host, non-existent in the
+nucleus, so the three denylists that ship were never loaded here.
+
+**What this unit broke, and how it was caught.** Anchoring `WAIVERS` converted
+`test_waived_branch_does_not_block` from a test writing into its own `tmp_path`
+into one **overwriting the repository's real `config/abandoned_branches.json`**
+with fixture data, destroying the three keys that document the valve. The suite
+passed green throughout; it was found by reading the commit's diff. The remedy
+is not only the restore and the patched test but the assertion that was missing:
+`make verify` now runs `git diff --exit-code config/ hooks/ scripts/` after the
+suite. **Anchoring a constant is not a local change** — every test that wrote
+through it now writes into the real repository.
+
+**Verification**: `make verify` exit `0` read from `$?` directly — **200 tests**
+(190 + 10). The acceptance criterion is one parametrised test comparing exit
+code, stdout *and* stderr of each anchored script run from the repository root
+and from a temp directory: an anchored script cannot tell where it was called
+from.
+
+### Gate rounds — `C9`, `C0`, `C0.2`, `C0.3`
 
 | Gate | Round | Verdict |
 | :--- | :--- | :--- |
 | **QA Agent** (structural — `make verify`: reference integrity, determinism scan, manifest parity, absolute-path scan, step-map regeneration, README counts) | 1 | **PASSED**, exit `0` read from `$?` |
-| **Tester Agent** (functional — `pytest tests/`, installer sandbox, nucleus self-bridge) | 1 | **PASSED** — 190 tests, no regressions against the 174 inherited |
+| **Tester Agent** (functional — `pytest tests/`, installer sandbox, nucleus self-bridge) | 1 | **PASSED** — 200 tests, no regressions against the 174 inherited |
+| **Tester Agent**, `C0.3` regression | 2 | **REJECTED then PASSED** — the suite was green while a test destroyed a tracked config file. The rejection came from reading a diff, which is why `make verify` now asserts the tree is unchanged after the suite |
 
 Both gates were applied by the lead session under the respective rulesets, not
 dispatched as subagents. That is the declared deviation recorded below, and it
@@ -203,7 +258,9 @@ resume worked off the record rather than the conversation, which is what Sprint
 collision, and `IMPLEMENTATION_PLAN.md`, `task_scope.md` and `resume_pointer`
 carried the state across the boundary.
 
-**Next Phase**: `C0.3` (the framework root resolved once — `scripts/_root.py`
-and six consumers, including the relative `WAIVERS` path deferred out of `C9`).
-Ten units remain; `task_scope.md` holds per-unit status and the findings routed
-out of `C0`, `C0.2` and this session's start.
+**Next Phase**: `C1` (`scripts/check_readme_counts.py` — anchor the README and
+its five counters against `agents_root()`; the roadmap warns explicitly against
+wrapping `iterdir()` in `try/except`, which would turn a crash into false drift).
+Nine units remain; `task_scope.md` holds per-unit status and the findings routed
+out of `C0`, `C0.2`, `C0.3` and this session's start, including two that no unit
+owns.
