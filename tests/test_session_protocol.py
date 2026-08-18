@@ -337,6 +337,12 @@ def test_branch_protection_reads_the_field_a_non_admin_can_see():
     assert spr.branch_protection_state(0, '{"protected": true}', "", False) == spr.ENABLED
     assert spr.branch_protection_state(0, '{"protected": false}', "", False) == spr.DISABLED
     assert spr.branch_protection_state(0, '{}', "", False) == spr.UNDETERMINED
+    # `D6` on this function specifically. Its twin `dependabot_updates_state`
+    # had the non-dict row and this one did not, so dropping the isinstance
+    # guard here survived a green suite while raising AttributeError out of a
+    # `main()` that has no try/except — every probe dies, not just this one.
+    assert spr.branch_protection_state(0, '[]', "", True) == spr.UNDETERMINED
+    assert spr.branch_protection_state(0, 'null', "", True) == spr.UNDETERMINED
 
 
 def test_each_gated_endpoint_is_asked_exactly_once(monkeypatch):
@@ -349,6 +355,14 @@ def test_each_gated_endpoint_is_asked_exactly_once(monkeypatch):
     Counting calls rather than asserting a rendered string, because the defect
     was invisible in the output — both responses were identical under a healthy
     network, and only a failure between them diverged.
+
+    The identity assertion is the Tester gate's `T-1`. Counting alone let `D2`
+    be reverted in full while the suite stayed green: swapping
+    `branches/{branch}` back to the admin-only `branches/{branch}/protection`
+    keeps the count at three. That URL used to live inside
+    `branch_protection_state`, where its own test could see it; moving the
+    fetch to the caller moved it out of every test's reach, so the assertion
+    belongs here now.
     """
     calls: list[str] = []
 
@@ -359,8 +373,11 @@ def test_each_gated_endpoint_is_asked_exactly_once(monkeypatch):
     monkeypatch.setattr(spr, "gh_call", counting_gh_call)
     spr.collect_security_controls("o/r", {}, True, "main")
 
-    assert len(calls) == len(set(calls)), f"an endpoint was asked twice: {calls}"
-    assert len(calls) == 3, calls
+    assert calls == [
+        "api repos/o/r/automated-security-fixes",
+        "api repos/o/r/vulnerability-alerts",
+        "api repos/o/r/branches/main",
+    ], calls
 
 
 def test_a_doubt_line_states_the_cause_it_measured(monkeypatch):
@@ -404,6 +421,51 @@ def test_doubt_is_reported_apart_from_accusation_and_never_as_disabled(monkeypat
     assert "not in the state" not in report
     assert "/agents:harden" not in report
     assert "Re-run before treating any of these as disabled" in report
+
+
+@pytest.mark.parametrize("admin,accuses", [(True, True), (False, False), (None, False)])
+def test_the_admin_discriminator_is_read_from_the_repository_payload(
+    admin, accuses, monkeypatch
+):
+    """The Tester gate's `T-2`. `permissions.admin` is what separates a 404
+    meaning "off" from a 404 meaning "you cannot see this", so it is the whole
+    of `D1`. Nothing pinned its extraction: replacing the lookup with a literal
+    `None` passed the entire suite while turning the probe into the permanently
+    closed gate the Implementation Plan names as an abort criterion.
+
+    The pre-existing integration test cannot catch it — it stubs `gh_json` to
+    return None for `api repos/{slug}`, so `is_admin` is already None inside it
+    and a broken extraction is indistinguishable from a working one.
+
+    Every endpoint answers 404 here, so the verdict is decided by `admin` alone:
+    an administrator is told the controls are off, everyone else is told the
+    probe could not see them.
+
+    The two `security_and_analysis` controls are supplied as enabled so they
+    contribute neither bucket. Left absent they land in doubt on their own —
+    correctly, since the payload genuinely did not answer — and an admin would
+    then produce both buckets at once, which measures the payload rather than
+    the discriminator this test exists to pin.
+    """
+    monkeypatch.setattr(spr.shutil, "which", lambda _: "/usr/bin/gh")
+    monkeypatch.setattr(spr, "gh_json", lambda *a: (
+        {"nameWithOwner": "o/r", "description": "d", "homepageUrl": "h",
+         "defaultBranchRef": {"name": "main"}}
+        if a[:2] == ("repo", "view")
+        else {"permissions": {"admin": admin},
+              "security_and_analysis": {
+                  "secret_scanning": {"status": "enabled"},
+                  "secret_scanning_push_protection": {"status": "enabled"}}}
+    ))
+    monkeypatch.setattr(spr, "gh_call", lambda *a: (1, "", "gh: Not Found (HTTP 404)"))
+    monkeypatch.setattr(spr.Path, "exists", lambda self: True)
+    monkeypatch.setattr(spr.Path, "is_dir", lambda self: True)
+
+    report = spr.probe_platform({}, force=True)
+
+    assert report is not None
+    assert ("Propose: `/agents:harden`" in report) is accuses, report
+    assert ("an unanswered question" in report) is not accuses, report
 
 
 def test_branch_with_unique_work_is_reported(repo):
