@@ -30,6 +30,11 @@ ADR_DIR = Path("docs/decisions")
 BLUEPRINT_GLOB = "docs/**/*_BLUEPRINT.md"
 SPRINTS_DIR = Path("docs/sprints")
 DENYLIST_DIR = Path(".agents/scripts/denylists")
+# Framework data, not the host's: this script runs against a host repository
+# root while the registry ships inside `.agents`. Resolved from this file rather
+# than from the cwd — Sprint 023 `C0.3` replaces the expression with a single
+# `scripts/_root.py` for the eleven scripts that each resolve it their own way.
+ARTIFACT_REGISTRY = Path(__file__).resolve().parent.parent / "config" / "artifact_registry.json"
 GRAPH_STATS_WINDOW = 10
 BOOTSTRAP_MIN_DELTAS = 5
 
@@ -365,16 +370,37 @@ def node_delta(previous: dict, current: dict) -> int:
     return node_change + edge_change + (community_change * 100)
 
 
-# Artifact -> the pipeline phase that produces it. Reported by phase, not by
-# filename, so the reader learns which STEP was skipped rather than which file
-# happens to be absent.
-# Ordered by phase, so a report on a sprint that skipped several steps reads in
-# the order they should have run rather than in the order someone typed them.
-PHASE_ARTIFACTS: dict[str, str] = {
-    "IMPLEMENTATION_PLAN.md": "Phase 1 (Planning) — Principal Agent",
-    "SPRINT_LOG.md": "Phase 3 (Roadmap Drafting) — Orchestrator",
-    "task_scope.md": "Phase 4 (Roadmap Review) — Rule Validator",
-}
+def load_phase_artifacts(registry: Path = ARTIFACT_REGISTRY) -> dict[str, str]:
+    """Artifact filename -> the pipeline phase that produces it.
+
+    Reported by phase, not by filename, so the reader learns which STEP was
+    skipped rather than which file happens to be absent. Order follows the
+    registry, which is ordered by phase, so a report on a sprint that skipped
+    several steps reads in the order they should have run.
+
+    Only `scope: sprint` entries marked `required` are returned. Repository-scoped
+    artifacts do not live in the sprint directory, and the two written during the
+    close itself — `PHASE_REGISTER.md` and `graph_stats.json` — would be reported
+    missing by every check that runs before the close, which is every run of this
+    one.
+
+    Args:
+        registry (Path): Path to `config/artifact_registry.json`.
+
+    Returns:
+        dict[str, str]: filename -> "Phase N (Name) — Role". Empty when the
+            registry is absent or unparseable; the caller reports that as doubt
+            rather than treating it as nothing to check.
+    """
+    try:
+        data = json.loads(registry.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return {
+        entry["filename"]: f"{entry['phase']} — {entry['role']}"
+        for entry in data.get("artifacts", [])
+        if entry.get("scope") == "sprint" and entry.get("required")
+    }
 
 
 def check_phase_artifacts(repo_root: Path, current_sprint: int, report) -> None:
@@ -392,6 +418,10 @@ def check_phase_artifacts(repo_root: Path, current_sprint: int, report) -> None:
     `jurisdictional_lock` and `no_interference` are both enforced by READING
     `task_scope.md`, so skipping the phase that writes it silently disabled two
     isolation rules while they appeared to be in force.
+
+    Which artifacts count is read from `config/artifact_registry.json`, not
+    written here: a phase is defined by the artifact it leaves, so the list
+    belongs in the registry every consumer shares (Sprint 023 `C0.2`).
 
     Args:
         repo_root (Path): Host repository root.
@@ -423,7 +453,18 @@ def check_phase_artifacts(repo_root: Path, current_sprint: int, report) -> None:
         )
         return
 
-    for artifact, phase in PHASE_ARTIFACTS.items():
+    # Passed explicitly rather than left to the default: a default argument is
+    # bound once at definition, so a test could not substitute the registry and
+    # the doubt path below would be unreachable by construction.
+    phase_artifacts = load_phase_artifacts(ARTIFACT_REGISTRY)
+    if not phase_artifacts:
+        report.warn(
+            f"{ARTIFACT_REGISTRY.name} is absent or unparseable — the phase-completion "
+            "check reported nothing rather than passing. It did not run"
+        )
+        return
+
+    for artifact, phase in phase_artifacts.items():
         if not (sprint_dir / artifact).is_file():
             report.warn(
                 f"{sprint_dir.name}/{artifact} is missing — {phase} left no artifact, "

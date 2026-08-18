@@ -1,0 +1,142 @@
+{
+  "_purpose": "Every artifact the pipeline leaves behind, keyed by the phase that produces it. The coordination matrix of the framework: a phase is defined by the artifact it leaves, not by the agent that produces it nor the tool that runs it (Sprint 023 C0.2).",
+  "_why_it_matters": "A framework requiring 'Phase 4.1 leaves agent_assignment.md' runs under Claude Code, under Cursor and from a terminal. One requiring 'invoke agent_orchestrator' runs only where that primitive exists. Sprint 026 (tool-portability) consumes this file for exactly that reason.",
+  "_consumers": [
+    "scripts/docs_freshness_check.py — check_phase_artifacts: warns per sprint-scoped entry with required=true that the sprint directory does not hold",
+    "scripts/map_workflows.py — derives the artifact x workflow matrix columns from every entry",
+    "workflows/close_workflow.md Phase 2.6 — refuses the close when a sprint-scoped required entry is absent"
+  ],
+  "_fields": {
+    "filename": "Basename as it appears on disk. map_workflows.py matches it literally against workflow prose, which is why workflows must name their deliverable by filename rather than describe it.",
+    "phase": "The producing phase, written as the workflow states it. A display string: no consumer parses it.",
+    "role": "Advisory. Display name of the profile in agents/ whose ruleset governs the write (Principal Agent -> agents/principal_agent.md). Advisory because the artifact is the contract; the role is who usually writes it.",
+    "scope": "sprint — lives inside the sprint directory named in agents.md §5 mandatory_topology. repository — one per repository.",
+    "host_path": "Path in a host project, relative to the host root.",
+    "nucleus_path": "Path in the .agents nucleus, relative to the nucleus root. null where the artifact does not exist in nucleus mode.",
+    "required": "true when a gate refuses or warns on absence. ENFORCED TODAY ONLY FOR scope=sprint: the two gates above filter on scope==sprint && required. On scope=repository the field is declarative — it records that a protocol depends on the artifact, and no consumer filters on it yet. Stated rather than implied, because a field that looks enforced and is not is the defect class this sprint exists to remove."
+  },
+  "_paths_are_identical_by_measurement": "Every entry declares the same host_path and nucleus_path except memory_index.json. That is a measurement, not redundancy: agents.md §5 mandatory_topology unified the sprint path at Sprint 024, and the two fields keep the asymmetry expressible for the hosts where it returns.",
+  "_limit": "This registry declares artifacts that are already produced. It invents none. PHASE_REGISTER.md, agent_assignment.md and skill_assignment.md were produced by sprints 021, 022, 024 and 025 with zero consumers reading them; this file is their first.",
+  "version": 1,
+  "artifacts": [
+    {
+      "filename": "IMPLEMENTATION_PLAN.md",
+      "phase": "Phase 1 (Planning)",
+      "role": "Principal Agent",
+      "scope": "sprint",
+      "host_path": "docs/sprints/[Sprint_ID]-[Stack]-[Layer]/IMPLEMENTATION_PLAN.md",
+      "nucleus_path": "docs/sprints/[Sprint_ID]-[Stack]-[Layer]/IMPLEMENTATION_PLAN.md",
+      "required": true,
+      "note": "triple_lock's first lock. Authored at Phase 1, filed and committed at Phase 3, checked as a Phase 5 precondition. The gate proves it exists and is versioned; it does not prove it existed before approval."
+    },
+    {
+      "filename": "SPRINT_LOG.md",
+      "phase": "Phase 3 (Roadmap Drafting)",
+      "role": "Orchestrator",
+      "scope": "sprint",
+      "host_path": "docs/sprints/[Sprint_ID]-[Stack]-[Layer]/SPRINT_LOG.md",
+      "nucleus_path": "docs/sprints/[Sprint_ID]-[Stack]-[Layer]/SPRINT_LOG.md",
+      "required": true
+    },
+    {
+      "filename": "agent_assignment.md",
+      "phase": "Phase 4.1 (Agent Assignment)",
+      "role": "Agent Orchestrator",
+      "scope": "sprint",
+      "host_path": "docs/sprints/[Sprint_ID]-[Stack]-[Layer]/agent_assignment.md",
+      "nucleus_path": "docs/sprints/[Sprint_ID]-[Stack]-[Layer]/agent_assignment.md",
+      "required": true,
+      "note": "A session that cannot dispatch subagents still produces it: sprint 022 recorded which profile's RULESET governed each write, which is what the artifact is for."
+    },
+    {
+      "filename": "skill_assignment.md",
+      "phase": "Phase 4.2 (Skill Assignment)",
+      "role": "Skill Architect",
+      "scope": "sprint",
+      "host_path": "docs/sprints/[Sprint_ID]-[Stack]-[Layer]/skill_assignment.md",
+      "nucleus_path": "docs/sprints/[Sprint_ID]-[Stack]-[Layer]/skill_assignment.md",
+      "required": true,
+      "note": "Sprint 022 recorded skills deliberately NOT used alongside those used. Both halves are the deliverable: an unused tool that was considered is a decision, an unused tool that was never seen is a gap."
+    },
+    {
+      "filename": "task_scope.md",
+      "phase": "Phase 4.3 (Rule Audit)",
+      "role": "Rule Validator",
+      "scope": "sprint",
+      "host_path": "docs/sprints/[Sprint_ID]-[Stack]-[Layer]/task_scope.md",
+      "nucleus_path": "docs/sprints/[Sprint_ID]-[Stack]-[Layer]/task_scope.md",
+      "required": true,
+      "note": "jurisdictional_lock and no_interference are both enforced by READING this file, so a skipped Phase 4.3 disables two isolation rules while they still appear to be in force."
+    },
+    {
+      "filename": "graph_stats.json",
+      "phase": "close_workflow.md Phase 1 (docs_freshness_gate)",
+      "role": "DevOps Agent",
+      "scope": "sprint",
+      "host_path": "docs/sprints/[Sprint_ID]-[Stack]-[Layer]/graph_stats.json",
+      "nucleus_path": "docs/sprints/[Sprint_ID]-[Stack]-[Layer]/graph_stats.json",
+      "required": false,
+      "note": "required=false for two measured reasons, not by leniency. It is written during the close, so a check running before the close would report every open sprint as defective; and scripts/docs_freshness_check.py already holds a dedicated check_graph_stats_gaps, so a second warning would double-report the same absence. Measured 2026-08-18: zero sprint directories hold one."
+    },
+    {
+      "filename": "PHASE_REGISTER.md",
+      "phase": "Phase 8 (Sprint Closeout)",
+      "role": "Principal Agent",
+      "scope": "sprint",
+      "host_path": "docs/sprints/[Sprint_ID]-[Stack]-[Layer]/PHASE_REGISTER.md",
+      "nucleus_path": "docs/sprints/[Sprint_ID]-[Stack]-[Layer]/PHASE_REGISTER.md",
+      "required": false,
+      "note": "Produced at Closeout, after both gates that read this registry have run. Demanding it would fail every sprint that is still open, which is every sprint at the moment the check fires."
+    },
+    {
+      "filename": "active_state.json",
+      "phase": "start_workflow.md Phase 0.5 (State Claim) and close_workflow.md Phase 4 (State Sync)",
+      "role": "DevOps Agent",
+      "scope": "repository",
+      "host_path": "docs/active_state.json",
+      "nucleus_path": "docs/active_state.json",
+      "required": true,
+      "note": "The Zero Coordinate (agents.md §5 state_anchor). Written by scripts/session_state.py, never by hand for the fields it owns."
+    },
+    {
+      "filename": "CHANGELOG.md",
+      "phase": "Phase 8 (Sprint Closeout)",
+      "role": "Principal Agent",
+      "scope": "repository",
+      "host_path": "CHANGELOG.md",
+      "nucleus_path": "CHANGELOG.md",
+      "required": true,
+      "note": "Same filename, separate jurisdictions: the host root file is the Master Ledger of the project, the nucleus file records framework evolution. The only crossover permitted is a pin-bump entry."
+    },
+    {
+      "filename": "memory_index.json",
+      "phase": "extract_workflow.md Phase 3 (Semantic Indexing)",
+      "role": "Governance Learner",
+      "scope": "repository",
+      "host_path": "memory_index.json",
+      "nucleus_path": "memory_index.json",
+      "required": false,
+      "note": "The nucleus location is measured (repository root). The host location is not: agents.md §4 index_files names the file without a directory, so this entry repeats the nucleus measurement rather than inventing a host path."
+    },
+    {
+      "filename": "graph.json",
+      "phase": "close_workflow.md Phase 1 (graph_rebuild)",
+      "role": "DevOps Agent",
+      "scope": "repository",
+      "host_path": "graphify-out/graph.json",
+      "nucleus_path": "graphify-out/graph.json",
+      "required": false,
+      "note": "Gitignored, and deliberately skipped on hosts under roughly 25 source files, where a targeted grep costs less than building and loading a graph. An artifact that is correctly absent cannot be required."
+    },
+    {
+      "filename": "mirror.json",
+      "phase": "hooks/state_mirror.py (Stop hook, and close_workflow.md Phase 4)",
+      "role": "DevOps Agent",
+      "scope": "repository",
+      "host_path": ".agent_state/mirror.json",
+      "nucleus_path": ".agent_state/mirror.json",
+      "required": false,
+      "note": "The backup, never the authority: when it disagrees with the anchor the anchor wins. It is authoritative only when the anchor is missing or corrupt, which is why its absence blocks nothing."
+    }
+  ]
+}

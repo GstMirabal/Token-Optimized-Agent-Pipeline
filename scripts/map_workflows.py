@@ -12,6 +12,12 @@ why the parser is shape-tolerant and why anything it cannot classify is emitted
 as `?` rather than guessed: a script that feigns certainty about prose is the
 PR #28 defect wearing different clothes.
 
+The matrix columns come from `config/artifact_registry.json` (Sprint 023
+`C0.2`). They were a fixed table of six state artifacts and zero documentary
+ones, matched against workflow prose by literal filename — so a deliverable a
+protocol described in words instead of naming was invisible to this map by
+construction, and the producer of `task_scope.md` registered as its consumer.
+
 invoked_by: Makefile `verify` target (regenerate-and-compare).
 
 Usage:
@@ -24,24 +30,44 @@ Exit codes:
 """
 
 import argparse
+import json
 import re
 import sys
 from pathlib import Path
 
 WORKFLOWS = Path("workflows")
 OUTPUT = Path("docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md")
+# Resolved from this file, not from the cwd: the registry is framework data and
+# this script is framework-scoped. `C0.3` replaces the expression with a single
+# `scripts/_root.py`.
+ARTIFACT_REGISTRY = Path(__file__).resolve().parent.parent / "config" / "artifact_registry.json"
 
-# Artifacts worth tracking across protocols: the shared state every workflow
-# either reads, writes or verifies. Anything not listed is out of scope by
-# declaration rather than by oversight.
-ARTIFACTS = {
-    "active_state.json": "State anchor",
-    "task_scope.md": "Subtask ledger",
-    "CHANGELOG.md": "Master Ledger",
-    "graph.json": "Knowledge graph",
-    "memory_index.json": "Distilled knowledge",
-    "mirror.json": "State mirror",
-}
+
+def load_artifacts(registry: Path = ARTIFACT_REGISTRY) -> dict[str, str]:
+    """Artifact filename -> the phase that produces it, for the matrix columns.
+
+    The columns used to be a fixed table of six state artifacts and zero
+    documentary ones, so a protocol's real deliverables — the plan, the sprint
+    log, the two assignment records — were invisible to the map by construction.
+    They come from `config/artifact_registry.json` now, which is the same list
+    the freshness gate and the close gate read.
+
+    Args:
+        registry (Path): Path to `config/artifact_registry.json`.
+
+    Returns:
+        dict[str, str]: filename -> producing phase, in registry order.
+
+    Raises:
+        FileNotFoundError: The registry is absent. Deliberately fatal: a matrix
+            silently built with no columns would read as "no workflow touches
+            any artifact", which is a false green rather than a missing file.
+    """
+    data = json.loads(registry.read_text(encoding="utf-8"))
+    return {entry["filename"]: entry["phase"] for entry in data["artifacts"]}
+
+
+ARTIFACTS = load_artifacts()
 
 WRITE_VERBS = ("update", "write", "append", "create", "instantiate", "record",
                "generate", "stamp", "persist", "refresh", "sync", "delete",
@@ -107,6 +133,15 @@ def build() -> str:
             kinds = {classify(action) for _, _, action in rows if artifact in action}
             cells.append("/".join(sorted(kinds)) if kinds else "—")
         lines.append(f"| `{path.stem}` | " + " | ".join(cells) + " |")
+
+    lines += [
+        "",
+        "**Columns**, from `config/artifact_registry.json` — the artifact and the phase",
+        "that leaves it. A phase is defined by the artifact it leaves, which is what makes",
+        "the matrix portable across tools rather than tied to one runner's agent names.",
+        "",
+    ]
+    lines += [f"- `{artifact}` — {phase}" for artifact, phase in ARTIFACTS.items()]
 
     lines += ["", "## 2. Steps, by protocol", ""]
     for path, rows in parsed.items():
