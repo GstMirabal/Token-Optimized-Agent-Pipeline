@@ -30,8 +30,8 @@ what this artifact is for, and why a declared solo session still owed it.
 | `agent_orchestrator` | this file |
 | `skill_architect` | `skill_assignment.md` |
 | `tester_agent` | `tests/test_docs_freshness_check.py`, `tests/test_artifact_registry.py` |
-| `qa_agent` | `make verify` for `C9`-`C1` — structural verification, not a dispatched role. **Dispatched as a subagent for `C2`**, and it rejected the unit |
-| `tester_agent` (dispatched) | `C2` round 1 — rejected it, reproducing the critical defect live against `cli/cli` and `torvalds/linux` |
+| `qa_agent` | `make verify` for `C9`-`C1` — structural verification, not a dispatched role. **Dispatched as a subagent for `C2`** rounds 1-3: rejected, rejected, approved |
+| `tester_agent` (dispatched) | `C2` rounds 1-2 — rejected, then approved. Reproduced the critical defect live against `cli/cli` and `torvalds/linux` in round 1, and verified its remediation the same way in round 2 |
 
 ## The gap this file was itself found by
 
@@ -48,12 +48,19 @@ recorded here rather than quietly fixed.
 
 | Ruleset | Tier it declares | Model that actually ran |
 | :--- | :--- | :--- |
-| `principal_agent`, `qa_agent`, `tester_agent` | `gate` — opus, effort high | Opus 5 (session model) — agrees by coincidence, not by dispatch |
+| `principal_agent` | `gate` — opus, effort high | Opus 5 (session model) — agrees by coincidence, not by dispatch |
+| `qa_agent`, `tester_agent` **on `C2`** | `gate` — opus, effort high | **Opus 5, by dispatch** — the tier was requested explicitly and the harness honoured it |
+| `qa_agent`, `tester_agent` on every other unit | `gate` — opus, effort high | Opus 5 (session model) — agrees by coincidence |
 | `orchestrator`, `rule_validator`, `skill_architect`, `agent_orchestrator` | `author` — sonnet, effort medium | **Opus 5** (session model) |
 | `devops_agent` | `author` — sonnet | **Opus 5** (session model) |
 
-No subagent was dispatched, so no profile's `model:` key was ever read by the
-harness. `scripts/check_model_tiers.py` passes on every `make verify` and what it
+Outside `C2` no subagent was dispatched, so no profile's `model:` key was ever
+read by the harness. `C2` is the one unit where the declared tier and the model
+that ran are the same fact rather than two that happen to coincide — and the
+gap it exposes is the reverse of the one recorded here: the model matched
+because it was **requested at dispatch**, not because the harness read
+`config/model_tiers.json`. Attribution through the profile still does not hold
+by itself. `scripts/check_model_tiers.py` passes on every `make verify` and what it
 proves is that two **declarations** agree — `config/model_tiers.json` and the 13
 frontmatters — never that the declared model is the one that executed.
 

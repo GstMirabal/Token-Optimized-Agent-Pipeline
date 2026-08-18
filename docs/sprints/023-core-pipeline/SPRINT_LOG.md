@@ -252,10 +252,14 @@ that fires on normal development is one that gets disabled rather than satisfied
 It now compares before against after the suite, and was **verified to still fire
 on a real mutation** rather than assumed to.
 
-### `C2` — the platform report answers in four values (`26367cf`, ungated)
+### `C2` — the platform report answers in four values (`26367cf` + `ca29010` + `509f525`, approved)
 
-**The first unit of this sprint gated by dispatched subagents, and the first
-rejected.** Both gates returned `REJECTED` on round 1. Round 2 has not run.
+**The first unit of this sprint gated by dispatched subagents, the first
+rejected, and the only one whose author did not sign off on his own work.**
+Both gates returned `REJECTED` on round 1. Session #2 ran the remaining rounds:
+`tester_agent` **APPROVED** at round 2, `qa_agent` **REJECTED** at round 2 and
+**APPROVED** at round 3. Three rejections across two gates before this unit
+passed — more than the rest of the sprint combined.
 
 **The defect the unit was for.** `security.get(control, {}).get("status") !=
 "enabled"` turned a field the API never returned into a disabled security
@@ -294,10 +298,58 @@ report joiner renders a bullet at an indent used nowhere else. Rendered: it is
 exactly the indent `main()` gives every top-level finding. A gate is not right
 by virtue of being a gate.
 
-**Verification**: `make verify` exit `0` read from `$?` — **226 tests**
-(212 + 14). The live probe reports no platform finding on this repository, so
-the admin path gained no false accusation. **That is not an approval**: both
-gates rejected round 1 and neither has seen the remediation.
+**`G-1` — the sprint's own defect, a third time, and the most instructive of the
+three.** The QA gate rejected `26367cf` because `collect_security_controls`
+fetched an endpoint to derive the doubt line while the state function fetched
+the **same** endpoint again internally. Both arguments to `record()` evaluate
+eagerly, so the cause came from one response and the state it annotated came
+from another; a failure between the two calls made the report explain an answer
+it had never received. **Invisible in every rendering** — under a healthy network
+both responses agreed — and therefore found by *counting calls*, not by reading
+output: **5 invocations for 3 endpoints**. The correct one-call shape already
+existed twelve lines away in the same function, so one function held two
+opposite patterns, which is the exact shape of `D4` one level up. Fixed in
+`ca29010`: the two classifiers now take `(rc, stdout, stderr, is_admin)`, the
+shape `state_from_exit` and `undetermined_cause` already used, and the caller
+fetches once. Pinned by a test that counts calls rather than asserting a string.
+
+**`D1` was verified live, which is the whole point.** Round 1's suite had
+asserted the defect rather than catching it, so a unit test proving `D1` fixed
+would have proven nothing. Measured against real repositories the token does not
+administer:
+
+| Repository | Round-1 code | HEAD accusations | HEAD doubt |
+| :--- | :--- | :--- | :--- |
+| `cli/cli` | **5 false** | **0** | 4, each naming its measured cause |
+| `torvalds/linux` | **5 false** | 1 (**true positive**) | 4 |
+| `rust-lang/rust`, `python/cpython` | — | **0** | 4 |
+
+The `torvalds/linux` line was checked before being counted: `.protected` is
+`false` and `rulesets` is `[]`, so the branch genuinely is unprotected. The
+false-negative vector the new `protected` discriminator could have introduced —
+a branch protected by rulesets only — was tested against four repositories with
+2 to 15 rulesets each, all reporting `protected=true`. **Anti-inversion holds**:
+on administered repositories genuinely disabled controls are still accused
+(3 accusations, 0 doubt), so the tri-state did not become the permanently closed
+gate the Implementation Plan names as an abort criterion.
+
+**Approved with coverage debt, and the debt was paid the same session.** The
+Tester approved the unit while naming three defects that survived a green suite
+when reintroduced by mutation — `T-1` no test asserted which URL is asked;
+`T-2` nothing pinned the `permissions.admin` extraction, which is the whole of
+`D1`; `T-3` `D6` was pinned for one classifier and not its twin. It approved
+rather than blocked because all three concern a *future* regression and no path
+was found, live or synthetic, where the shipped code answers wrongly — the gate
+declining to be right by virtue of being a gate, the same discipline the author
+showed rejecting `F-5`. Closed in `509f525` and verified by mutation: baseline
+exit `0`, all three mutants exit `1`, restored exit `0`. **`T-1` is a coverage
+*regression*, not an omission** — the URL used to live inside
+`branch_protection_state` where its own test could see it, and `ca29010` moved
+the fetch to the caller, out of every test's reach. Fixing `G-1` cost a test.
+
+**Verification**: `make verify` exit `0` read from `$?` — **230 tests**, from
+226 at `26367cf` (+1 for `G-1`'s pin, +3 for `T-1`/`T-2`/`T-3`). The live probe
+reports no platform finding on this repository.
 
 ### Gate rounds — `C9`, `C0`, `C0.2`, `C0.3`, `C1`
 

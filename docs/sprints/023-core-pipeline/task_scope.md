@@ -1,7 +1,8 @@
 # Task Scope — Sprint 023 (`upstream-findings`)
 
 **Branch**: `ai-sprint/023` · **Base**: `main` at `18696c5` (`v4.7.0`)
-**State**: **IN_PROGRESS**, resumed 2026-08-18. Sprint open. **`C2` is delivered but ungated** — see below. Next: re-gate `C2`, then `C3`.
+**State**: **IN_PROGRESS**, resumed 2026-08-18 (session #2). Sprint open. **`C2` is
+delivered and now approved by both gates** — see below. Next: `C3`.
 
 Thirteen units, thirteen commits. `C9` ran first by design: this sprint's own
 close invokes `branch_sovereignty audit`, so leaving that gate intermittently
@@ -14,8 +15,8 @@ wrong meant the sprint would trip on the defect it came to repair.
 | C0.2 | `config/artifact_registry.json` + 3 consumers | create/modify | high | lead · `rule_validator` ruleset | ✅ `92f42da` |
 | C0.3 | `scripts/_root.py` + 6 consumers | create/modify | high | lead · `devops_agent` ruleset | ✅ `359d03c` + `fix` |
 | C1 | `scripts/check_readme_counts.py` | modify | high | lead · `devops_agent` ruleset | ✅ `b2d7c2e` |
-| C2 | `scripts/session_probe.py` | modify | high — a security report | lead · `devops_agent` ruleset | 🔄 `26367cf` — **gate round 2 owed** |
-| C3 | `env_shielding_auditor.py`, `hooks/on_commit.py` | modify | **high** — secrets | lead · `devops_agent` ruleset | ⏳ **next**, after `C2`'s round 2 |
+| C2 | `scripts/session_probe.py` | modify | high — a security report | lead · `devops_agent` ruleset | ✅ `26367cf` + `ca29010` + `509f525` |
+| C3 | `env_shielding_auditor.py`, `hooks/on_commit.py` | modify | **high** — secrets | lead · `devops_agent` ruleset | ⏳ **next** |
 | C4 | `mass_standardizer.py` | modify | medium | lead · `skill_architect` ruleset | ⏳ |
 | C5 | `agents/devops_agent.md` | modify | medium — role map | lead · `agent_orchestrator` ruleset | ⏳ |
 | C6 | `agents.md`, `start_workflow.md` | modify | medium | lead · `rule_validator` ruleset | ⏳ |
@@ -71,16 +72,49 @@ one. Recorded here rather than inferred later.
 | **`DENYLIST_DIR` pointed at `.agents/scripts/denylists`** — correct inside a host, a directory that does not exist in the nucleus. The three denylists that ship in `scripts/denylists/` were therefore never loaded here and the density filter ran empty, degrading silently because `load_denylist` returns an empty set on a missing file | Fixed inside `C0.3`'s commit as a mixed-scope path, the same treatment the plan specified for `branch_sovereignty`'s `config/` |
 | **`hooks/state_mirror.py` swallows a corrupt anchor with a bare `except: pass`**, and closes with `else: pass`. `agents.md §1 exception_handling` prohibits both — *"No `pass` in except. Explicit logging required."* A mirror that silently declines to update when the anchor is unparseable leaves the backup stale exactly when it is the one thing that matters | **Unrouted.** Not `C0.3` — that unit only added the file's module docstring, and folding a behaviour change into it would break the atomicity `RA-08` requires. Named here rather than fixed in passing |
 
-## `C2` is delivered and NOT approved — read this before resuming
+## `C2` is delivered and APPROVED — closed 2026-08-18, session #2
 
-`26367cf` is the remediation of a **double rejection**, and no round-2 verdict
-exists. Until both gates pass, `C2` has no approved gate and `triple_lock`'s
-third lock is unmet for it.
+`26367cf` was the remediation of a **double rejection**. Both gates have now
+returned, and `triple_lock`'s third lock is met for this unit.
 
-| Gate | Round 1 | Round 2 |
-| :--- | :--- | :--- |
-| `qa_agent` (dispatched subagent) | **REJECTED** — `F-1` `probe_platform` at 93 lines against the 50-line bound; `F-2` closure parameter shadowing `state` with a different type; `F-3` `_from_exit` privacy marker the same commit reached past; `F-4`, `F-6` advisory | **owed** |
-| `tester_agent` (dispatched subagent) | **REJECTED** — `D1` critical, plus `D2`-`D7` | **owed** |
+| Gate | Round 1 | Round 2 | Round 3 |
+| :--- | :--- | :--- | :--- |
+| `qa_agent` (dispatched subagent) | **REJECTED** — `F-1` `probe_platform` at 93 lines against the 50-line bound; `F-2` closure parameter shadowing `state` with a different type; `F-3` `_from_exit` privacy marker the same commit reached past; `F-4`, `F-6` advisory | **REJECTED** — `G-1` blocking | **APPROVED** against `ca29010` |
+| `tester_agent` (dispatched subagent) | **REJECTED** — `D1` critical, plus `D2`-`D7` | **APPROVED** against `ca29010`, `D1`-`D7` each reproduced remediated | — |
+
+**`G-1`, the round-2 rejection, is the same defect class as the sprint's own
+thesis.** `collect_security_controls` issued a request to derive the doubt line,
+then the state function issued the **same** request internally. Both arguments to
+`record()` evaluate eagerly, so the cause came from one response and the state it
+annotated came from another: under a failure between the two calls the report
+explained an answer it had never received. Measured by counting calls, not by
+reading output — **5 invocations for 3 endpoints** — because under a healthy
+network both responses agreed and the duplication was invisible in every
+rendering. The correct one-call shape already existed twelve lines away, so one
+function held two opposite patterns. Fixed in `ca29010`; the two classifiers now
+take the fetched response, the shape `state_from_exit` already used.
+
+**The Tester verified `D1` live rather than by unit test**, which is what round 1
+had got wrong — that suite asserted the defect instead of catching it. Against
+`cli/cli` the round-1 code produced **5 false accusations** and HEAD produces
+**0**, with 4 doubt lines each naming its measured cause. `rust-lang/rust` and
+`python/cpython` likewise 0. The anti-inversion check holds: on repositories the
+token administers, genuinely disabled controls are still accused (3 accusations,
+0 doubt on `GstMirabal/.github`), so the tri-state did not become a permanently
+closed gate. The one accusation on `torvalds/linux` was checked before being
+counted and is a **true positive** — `.protected` is `false` and `rulesets` is
+`[]` — not a permission artifact.
+
+**`T-1`, `T-2`, `T-3` — approved with coverage debt, and the debt is paid.**
+The Tester approved the unit and named three defects that survived a green suite
+when reintroduced by mutation. Closed in `509f525`, each verified to kill its
+mutant (baseline `0`, three mutants `1`, restored `0`):
+
+| ID | What passed green while broken |
+| :--- | :--- |
+| `T-1` | No test asserted **which** URL is asked, so reverting `D2` to the admin-only endpoint kept the count at three and passed. Coverage was *lost*, not missing: the URL used to live inside `branch_protection_state` where its own test saw it, and `ca29010` moved the fetch to the caller |
+| `T-2` | Nothing pinned the extraction of `permissions.admin` — the whole of `D1`. Replacing it with `None` passed everything while producing the permanently closed gate the plan names as an abort criterion |
+| `T-3` | `D6` was pinned for `dependabot_updates_state` and not its twin. Dropping the guard raises `AttributeError` out of a `main()` with no `try/except`, killing all five probes |
 
 **`D1`, and why it matters more than the fix.** GitHub answers `404` on an
 admin-only endpoint to any caller without administrative access, whether the
@@ -118,12 +152,41 @@ recorded rather than inferred.
 | :--- | :--- |
 | **`resume_pointer.derived_from` reads `"git (registry pending C0.2)"`, and `C0.2` landed.** The substance is still true — the pointer is derived from git — but the parenthetical now names a delivered unit, so a cold session reads it as work outstanding that is not. The cause is that `C0.2` shipped `config/artifact_registry.json` with the three consumers the roadmap named, and `scripts/session_state.py` was never one of them: deriving the pointer from the registry is roadmap item `M6.3`, correctly outside this unit. Reproduce: `python3 -c "import json;print(json.load(open('docs/active_state.json'))['resume_pointer'])"` | **Unrouted, and deliberately not fixed on the way out.** Editing the anchor by hand is the exact class of change `session_probe.probe_anchor_sprint` was built this session to detect. The label should be corrected when `session_state.py` becomes a registry consumer under `M6.3`, so the text and the mechanism change together rather than the text alone drifting into a second false claim |
 
+## Found at session start, session #2 (2026-08-18)
+
+Three findings from running the start protocol rather than reading it. All three
+are measured; none is routed to an existing unit.
+
+| Finding | Where it goes |
+| :--- | :--- |
+| **`last_platform_probe` is read and written by nothing, so the documented 7-day cache never engages.** `session_probe.py:494` reads it; `grep -rn "last_platform_probe" --include="*.py" --include="*.md" .` returns **one reader, one doc mention in `start_workflow.md:22`, zero writers**, and the key is absent from `docs/active_state.json` after a probe run. Every session therefore makes 3-5 live GitHub API calls that the design says should happen a couple of times a year. Introduced in `7ccbde6` (Phase 019), **not** by `C2` — confirmed independently by the Tester gate as its `O-2` | **Unrouted.** Same class as the `ruff` finding below: a mechanism declared in prose that no code implements. Not `C2` (it repairs the report's *values*, not the cache), not `C6` |
+| **`probe_cost` cannot measure the previous session, because it measures the live one.** `session_cost.measure_previous` takes `transcripts[-1]` sorted by mtime, and at session start the newest transcript is the session doing the asking. Reproduced: it returned `3b4625a5` — this session — while the session it should report is `50ce34a7`. That session measured **15.9×** against `§3.1`'s bound of 15×. Both firings of the bound in this sprint (16.5× and 15.9×) were recorded by hand; the probe built to surface them has never once seen one | **Unrouted.** The fix is one line — exclude the live session id — but `probe_cost` is the mechanism `rules/token_economy.md §3.1` leans on, so changing it is a governance-adjacent edit rather than a record |
+| **`docs/0_SYSTEM_OVERVIEW.md` does not exist in the nucleus.** `agents.md §0` makes it the mandatory entry point of *every* session, and `start_workflow.md` `read_ruleset` names it. `ls docs/` shows no such file and `find . -name "0_SYSTEM_OVERVIEW.md"` returns nothing. The reading it stands for is satisfied here by `agents.md` plus `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md`, which is what `acknowledged_gaps.docs` already reasons about for Blueprints | **Unrouted.** Either the file is written or `§0` names what the nucleus reads instead. Adjacent to `C6` (the nucleus entry point) but not the same question, so not filed under it |
+
+## Found while gating `C2` — no unit owns these
+
+| Finding | Where it goes |
+| :--- | :--- |
+| **`session_probe.py:493-501` has a bare `except ValueError: pass` and depth-4 nesting**, both prohibited by `agents.md §1`. The QA gate's `G-2` and `G-3`, proven **byte-identical to the parent** of `26367cf`, so `C2` did not author them and `rules/code_craft.md §2` forbids folding the fix in | **Unrouted**, alongside `hooks/state_mirror.py`'s identical `except: pass` recorded under `C0.3`. Three sites of one defect class now — worth one unit rather than three patches |
+| **`gh_json:192` is the only function in `session_probe.py` with a rewritten body and no docstring.** The QA gate's `G-4`. `26367cf` rewrote it to delegate to `gh_call` and left it undocumented; the gate declined to block on it in `ca29010` because adjacency is not authorship, and applying a different standard to it than to `G-2`/`G-3` would make the gate inconsistent within one sprint | **Unrouted**, with `G-2`/`G-3` |
+| **`HTTP_STATUS_RE` takes the first `(HTTP nnn)` in stderr, and `gh` puts a server-controlled message *before* the status.** The Tester's `N-1`: a message containing a literal `(HTTP 404)` would override the true status — same class as `D3`, narrower. The gate **could not reproduce it against the real API** and explicitly declined to press it; real formats confirmed as `gh: Bad credentials (HTTP 401)`, `gh: Validation Failed (HTTP 422)`. Parsing the last match would close it | **Unrouted, and deliberately not fixed.** This sprint's governing rule is *reproduce before repairing*; an unreproduced finding is exactly what the rule forbids acting on. Recorded so it is not rediscovered as new |
+| **The secret-scanning pair's doubt cause is still a hardcoded literal.** The Tester's `O-1`: residual `D7`. `is_admin` is in scope at that call site, yet a non-admin reads `the repository payload did not answer` while the endpoint controls correctly read `admin-only endpoint, and this token does not administer the repository`. Not false — the payload genuinely omits the block — so it is a quality-of-cause note, not a defect. It does misdirect for an **admin** on a private repository, measured on `GstMirabal/CryptoBot` | **Unrouted.** Would be a one-line improvement to `C2`'s own thesis, but `C2` is closed and approved; reopening an approved unit for a non-defect is not warranted |
+
 ## Declared deviation — delegation
 
-Unchanged from `022`: this session cannot spawn subagents, reported before
-Phase 1 and authorised. `F-021-A2` makes it unavoidable for `scripts/`
-regardless — no profile in `agents/` holds `Write` for that tree, which is
-`C5`'s subject.
+Unchanged from `022`: the session configuration forbids spawning subagents
+unless the human asks. Reported before Phase 1 in session #1 and authorised.
+
+**Session #2 reported the same conflict at the same point and the human lifted
+it for both gates**, so `C2`'s remaining rounds were gated by dispatched
+`qa_agent` and `tester_agent`, not by their author. The lift is per-session and
+per-unit, not standing: `C3` onwards must ask again. Recording it because the
+distinction is what `agent_assignment.md` exists to keep honest — five units of
+this sprint were written *and* gated by the same session, and `C2` is the one
+where that is not true.
+
+`F-021-A2` makes self-execution unavoidable for `scripts/` regardless — no
+profile in `agents/` holds `Write` for that tree, which is `C5`'s subject.
 
 ## Isolation
 
