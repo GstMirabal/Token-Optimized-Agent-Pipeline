@@ -1,7 +1,7 @@
 # Sprint Log — 023 (`upstream-findings`)
 
 **Branch**: `ai-sprint/023` from `main` at `18696c5` (`v4.7.0`)
-**Status**: open. 2 of 13 units delivered.
+**Status**: open. 3 of 13 units delivered.
 
 ## Delivered
 
@@ -103,6 +103,66 @@ could not have passed before this change. `make verify`: **174 passed**.
 This sprint's own plan is filed with the commit, from the new template, and says
 in its header that it was filed retroactively.
 
+### `C0.2` — each phase is defined by the artifact it leaves (`92f42da`)
+
+**The defect.** The pipeline's coordination matrix existed as four
+hand-maintained copies of overlapping lists: three filenames in
+`docs_freshness_check.py`, six in `map_workflows.py`, two demanded by
+`close_workflow.md` Phase 2.6, and prose in `pipeline_workflow.md` that
+described deliverables without naming them. Nothing reconciled the four.
+
+**The principle, which is what makes it worth a mechanism.** A framework
+requiring *"Phase 4.1 leaves `agent_assignment.md`"* runs under Claude Code,
+under Cursor and from a terminal. One requiring *"invoke `agent_orchestrator`"*
+runs only where that primitive exists. Sprint `026` (`tool-portability`)
+consumes this registry for exactly that reason, and Sprint `027` needs it for
+the `SubagentStop` hook.
+
+**Measured red, then green, on this tree.** With the list externalised the
+freshness gate immediately named `agent_assignment.md` (Phase 4.1) and
+`skill_assignment.md` (Phase 4.2) as missing from this sprint — **both produced
+by sprints `021`, `022`, `024` and `025`**, and both invisible to the
+three-filename map that preceded the change. The unit caught a real skipped
+phase on the sprint that built it, and the two records were then written rather
+than the finding quietly dropped.
+
+**Why `map_workflows.py` could not have found it.** It matched workflow prose by
+literal filename against six state artifacts and zero documentary ones, so a
+phase describing its deliverable in words was invisible by construction — which
+is how `task_scope.md` came out registered as `pipeline_workflow`'s *consumer*
+while `close_workflow` writes it. Phases 3, 4.1, 4.2 and 8 now name their
+artifact; the matrix carries twelve columns and a legend derived from the same
+registry.
+
+**The doubt path, because this sprint's subject is gates that answer when they
+do not know.** Externalising a list creates a new way to report a false green: a
+missing registry would make the loop iterate over nothing and pass a sprint that
+left no artifact at all. The freshness gate reports *"the check did not run"*;
+`map_workflows.py` raises instead, because a matrix with no columns reads as
+*"no workflow touches any artifact"*. Opposite directions, deliberately: one
+reports findings, the other generates a document.
+
+**Two artifacts are deliberately not required**, and the registry says so per
+entry: `PHASE_REGISTER.md` and `graph_stats.json` are written *during* the
+close, so demanding them would fail every sprint at the moment the check fires.
+`graph_stats.json` also already has its own dedicated check, so a second warning
+would double-report the same absence.
+
+**`R6` was already satisfied, and that is recorded rather than manufactured.**
+The roadmap predicted `task_scope.md` would need an `Assignee` column added.
+Measured: all five sprint files already carry `# | File | Operation | Risk |
+Assignee | Status`. What was actually wrong was the *declared* shape —
+`pipeline_workflow.md` Phase 4.3 and, found by the `RA-14` grep,
+`agents/rule_validator.md` both declared a four-column form naming neither
+`Operation` nor `Risk`, matching no file on disk, in the profile of the agent
+that writes them.
+
+**Verification**: `make verify` exit `0` read from `$?` directly, never through
+a pipe — **185 tests** (174 + 11). `check_phase_artifacts` keeps its six `C0`
+tests and gains three; the registry contract gets eight, one of which pins that
+every registry filename is named literally in some workflow, so `R2` cannot
+silently regress.
+
 ## Suspended, not closed
 
 `rules/token_economy.md §3.1` hard threshold: cycle 7 reached **16.5×** its
@@ -116,6 +176,13 @@ one to infer later.
 the record above: the bound fired, and the calibration `§3.1` asks for needs the
 event kept, not tidied away once the work continued.
 
-**Next Phase**: `C0.2` (the artifact registry — `config/artifact_registry.json`
-and its three consumers). Eleven units remain; `task_scope.md` holds per-unit
-status and the findings routed out of `C0`.
+**A second session resumed the sprint on 2026-08-18** and delivered `C0.2`. The
+resume worked off the record rather than the conversation, which is what Sprint
+021's session bound was built for: `SUSPENDED` was read as a resume and not a
+collision, and `IMPLEMENTATION_PLAN.md`, `task_scope.md` and `resume_pointer`
+carried the state across the boundary.
+
+**Next Phase**: `C0.3` (the framework root resolved once — `scripts/_root.py`
+and six consumers, including the relative `WAIVERS` path deferred out of `C9`).
+Ten units remain; `task_scope.md` holds per-unit status and the findings routed
+out of `C0`, `C0.2` and this session's start.

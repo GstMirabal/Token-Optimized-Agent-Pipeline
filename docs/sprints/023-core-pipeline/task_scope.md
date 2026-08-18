@@ -1,7 +1,7 @@
 # Task Scope — Sprint 023 (`upstream-findings`)
 
 **Branch**: `ai-sprint/023` · **Base**: `main` at `18696c5` (`v4.7.0`)
-**State**: **SUSPENDED** at the session bound, sprint open. Resume at `C0`.
+**State**: **IN_PROGRESS**, resumed 2026-08-18. Sprint open. Next unit: `C0.2`.
 
 Thirteen units, thirteen commits. `C9` ran first by design: this sprint's own
 close invokes `branch_sovereignty audit`, so leaving that gate intermittently
@@ -11,8 +11,8 @@ wrong meant the sprint would trip on the defect it came to repair.
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | C9 | `scripts/branch_sovereignty.py`, `tests/…`, `workflows/close_workflow.md` | modify | **high** — a gate | lead · `devops_agent` ruleset | ✅ `437493b` |
 | C0 | `agents.md`, both workflows, new template, 3 agent profiles | modify/create | **high** — governance | lead · `rule_validator` ruleset | ✅ `2821953` |
-| C0.2 | `config/artifact_registry.json` + 3 consumers | create/modify | high | lead · `rule_validator` ruleset | ⏳ **next** |
-| C0.3 | `scripts/_root.py` + 6 consumers | create/modify | high | lead · `devops_agent` ruleset | ⏳ |
+| C0.2 | `config/artifact_registry.json` + 3 consumers | create/modify | high | lead · `rule_validator` ruleset | ✅ `92f42da` |
+| C0.3 | `scripts/_root.py` + 6 consumers | create/modify | high | lead · `devops_agent` ruleset | ⏳ **next** |
 | C1 | `scripts/check_readme_counts.py` | modify | high | lead · `devops_agent` ruleset | ⏳ |
 | C2 | `scripts/session_probe.py` | modify | high — a security report | lead · `devops_agent` ruleset | ⏳ |
 | C3 | `env_shielding_auditor.py`, `hooks/on_commit.py` | modify | **high** — secrets | lead · `devops_agent` ruleset | ⏳ |
@@ -48,6 +48,19 @@ one. Recorded here rather than inferred later.
 | :--- | :--- |
 | **The nucleus never gets `plansDirectory`, and the safety net shipped in `v4.6.0` is host-only.** Measured, not inferred: this repository has **no `.claude/settings.json` at all**, and `C0`'s own plan was drafted under `~/.claude/plans/` — the exact ephemeral storage the unit exists to replace. The cause is structural rather than an oversight: `plansDirectory` ships in `claude/settings.hooks.json`, the **bridge template**, and `agents.md §5 nucleus_neutrality` prohibits installing the bridge when the workspace is `.agents` itself. So the framework that wrote the fix cannot receive it. Recorded in `docs/plans/README.md` under Limits | `C6` (the nucleus entry point) — resolving it means deciding whether the nucleus installs its own bridge, which is that unit's subject, not `C0`'s |
 | **`RA-14` found three false paths, not the two the plan predicted.** The worst was `agents/rule_validator.md:19`, calling `task_scope.md` a *"git-ignored session artifact at the host root"* — both halves false since Sprint 024, in the profile of the agent that **produces** the file. `pipeline_workflow.md` Phase 4.3 and `agents/token_economy_agent.md:25` were the other two | Fixed inside `C0`'s commit. The lesson is the one `RA-14` already states and this session re-earned: grep the term, do not patch the sites you happened to look at |
+
+## Found at session start on resume (2026-08-18)
+
+| Finding | Where it goes |
+| :--- | :--- |
+| **The nucleus has a *partial* `.claude/` bridge, which is worse than none because it reads as installed.** Measured: `.claude/commands/agents/` holds 11 symlinks dated 2026-07-20/26, while `commands/` holds 13. The three added since — `harden.md`, `reconcile.md`, `revdoc.md` — are **not linked and therefore not invocable in the nucleus**, and `skeleton.md` is a dangling link to a deleted target. Reproduce with `comm -13 <(ls .claude/commands/agents/ \| sed 's/\.md//' \| sort) <(ls commands/ \| sed 's/\.md//' \| sort)`. This bit immediately: `start_workflow.md` `drift_check` exited `2` and directed to `/agents:reconcile`, a command this repository cannot run. It also sharpens the precedent `RA-16` was written from — `/agents:harden` shipped and was never run here, and one reason is that it was never linked | `C6`, which already owns whether the nucleus installs its own bridge (routed there by `C0`'s findings). The measurement changes that unit's question from *whether to install a bridge* to *what to do with a stale one already present* |
+
+## Found while executing `C0.2`
+
+| Finding | Where it goes |
+| :--- | :--- |
+| **Sprint 023 had skipped Phases 4.1 and 4.2 and nothing could see it.** The registry's first act was to report `agent_assignment.md` and `skill_assignment.md` missing from this directory — both produced by sprints `021`, `022`, `024` and `025`, both invisible to the three-filename map `docs_freshness_check.py` held before `C0.2`. Reproduce: `python3 scripts/docs_freshness_check.py . 23` | Fixed in the same session: both files are now in this directory, covering the sprint to date. The gap is recorded rather than quietly closed, because it is `C0.2` catching a real defect on the sprint that built it |
+| **`ruff check .` is normative and no mechanism runs it.** `agents.md §1 linter_command` says *"Reject if exit code > 0"*. Measured 2026-08-18: `which ruff` → not found; no `lint` target in the `Makefile`; `grep -rn ruff Makefile scripts/ hooks/` → no hits. `skills/python-quality-auditor` declares the command and is wired into nothing. So every Python change in this repository, including this sprint's, has been merged unlinted against a rule that reads as enforced | **Unrouted — no existing unit owns it.** Not `C1`-`C3` (each repairs one named script), not `C0.3` (path resolution). Named here rather than attached to the nearest unit, because a finding filed under a unit that does not cover it is how a finding disappears |
 
 ## Declared deviation — delegation
 
