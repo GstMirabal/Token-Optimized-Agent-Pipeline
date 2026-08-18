@@ -262,15 +262,23 @@ def undetermined_cause(rc: int, stderr: str, is_admin: bool | None) -> str:
     return f"no HTTP response (rc={rc})"
 
 
-def dependabot_updates_state(slug: str, is_admin: bool | None) -> str:
+def dependabot_updates_state(rc: int, stdout: str, stderr: str,
+                             is_admin: bool | None) -> str:
     """Whether Dependabot security updates are on, from the endpoint that says so.
 
     `automated-security-fixes` is the only endpoint carrying `paused`, which
     `security_and_analysis` cannot express — verified against the live API, it
     returns `{"enabled": true, "paused": false}`.
 
+    **The caller fetches, this classifies.** It used to issue its own request
+    while the caller issued the same one to derive the doubt line, so the state
+    and the cause explaining it came from two different responses and a failure
+    between them made the report annotate an answer it had not received.
+
     Args:
-        slug (str): `owner/name` of the repository.
+        rc (int): `gh` exit code for `repos/{slug}/automated-security-fixes`.
+        stdout (str): `gh` standard output, the JSON body when `rc` is 0.
+        stderr (str): `gh` standard error, carrying the `(HTTP nnn)` status.
         is_admin (bool | None): Whether the token administers this repository.
 
     Returns:
@@ -280,7 +288,6 @@ def dependabot_updates_state(slug: str, is_admin: bool | None) -> str:
             one unit held two opposite rules for a missing field, and the branch
             that failed was the security one.
     """
-    rc, stdout, stderr = gh_call("api", f"repos/{slug}/automated-security-fixes")
     if rc != 0:
         return state_from_exit(rc, stderr, is_admin)
     try:
@@ -294,7 +301,8 @@ def dependabot_updates_state(slug: str, is_admin: bool | None) -> str:
     return PAUSED if data.get("paused") is True else ENABLED
 
 
-def branch_protection_state(slug: str, branch: str, is_admin: bool | None) -> str:
+def branch_protection_state(rc: int, stdout: str, stderr: str,
+                            is_admin: bool | None) -> str:
     """Whether a branch is protected, read from the field a non-admin can see.
 
     `branches/{branch}/protection` is admin-only and answers 404 to everyone
@@ -303,16 +311,20 @@ def branch_protection_state(slug: str, branch: str, is_admin: bool | None) -> st
     boolean — measured on `cli/cli` with a non-admin token, `.protected` is
     `true` while `.../protection` returns 404.
 
+    **The caller fetches, this classifies** — same reason as
+    `dependabot_updates_state`. The branch name is no longer needed here: it is
+    the caller that builds the URL, and it does so unescaped, verified against
+    GitHub routing `branches/ai-sprint/023` with the slash intact.
+
     Args:
-        slug (str): `owner/name` of the repository.
-        branch (str): Branch name. Slashes are not escaped, verified: GitHub
-            routes `branches/ai-sprint/023` unencoded.
+        rc (int): `gh` exit code for `repos/{slug}/branches/{branch}`.
+        stdout (str): `gh` standard output, the JSON body when `rc` is 0.
+        stderr (str): `gh` standard error, carrying the `(HTTP nnn)` status.
         is_admin (bool | None): Whether the token administers this repository.
 
     Returns:
         str: `ENABLED`, `DISABLED` or `UNDETERMINED`.
     """
-    rc, stdout, stderr = gh_call("api", f"repos/{slug}/branches/{branch}")
     if rc != 0:
         return state_from_exit(rc, stderr, is_admin)
     try:
@@ -383,11 +395,14 @@ def collect_security_controls(slug: str, security: dict | None,
                "field not returned" if security is not None
                else "the repository payload did not answer")
 
-    rc, _, err = gh_call("api", f"repos/{slug}/automated-security-fixes")
-    record("dependabot_security_updates", dependabot_updates_state(slug, is_admin),
+    # One request per endpoint, feeding both the state and the doubt line that
+    # explains it. Asking twice let a transient failure between the two calls
+    # pair a cause with a state that a different response had produced.
+    rc, out, err = gh_call("api", f"repos/{slug}/automated-security-fixes")
+    record("dependabot_security_updates", dependabot_updates_state(rc, out, err, is_admin),
            "dependabot_security_updates disabled", undetermined_cause(rc, err, is_admin))
 
-    rc, _, err = gh_call("api", f"repos/{slug}/vulnerability-alerts")
+    rc, out, err = gh_call("api", f"repos/{slug}/vulnerability-alerts")
     record("Dependabot alerts", state_from_exit(rc, err, is_admin),
            "Dependabot alerts off", undetermined_cause(rc, err, is_admin))
 
@@ -397,8 +412,8 @@ def collect_security_controls(slug: str, security: dict | None,
     if not branch:
         undetermined.append("branch protection — cannot determine (no default branch reported)")
     else:
-        rc, _, err = gh_call("api", f"repos/{slug}/branches/{branch}")
-        record(f"{branch} protection", branch_protection_state(slug, branch, is_admin),
+        rc, out, err = gh_call("api", f"repos/{slug}/branches/{branch}")
+        record(f"{branch} protection", branch_protection_state(rc, out, err, is_admin),
                f"{branch} not protected", undetermined_cause(rc, err, is_admin))
 
     return findings, undetermined

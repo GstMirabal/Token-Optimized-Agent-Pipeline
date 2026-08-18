@@ -321,26 +321,46 @@ def test_dependabot_updates_come_from_the_endpoint_that_answers_them(
     the security one. `{"enabled": "false"}` reported the control ON, the only
     false green in the unit.
     """
-    monkeypatch.setattr(spr, "gh_call", lambda *a: (0, payload, ""))
-    assert spr.dependabot_updates_state("o/r", True) == expected
+    assert spr.dependabot_updates_state(0, payload, "", True) == expected
 
 
-def test_a_transient_failure_does_not_report_dependabot_as_off(monkeypatch):
-    monkeypatch.setattr(spr, "gh_call", lambda *a: (1, "", "gh: Server Error (HTTP 503)"))
-    assert spr.dependabot_updates_state("o/r", True) == spr.UNDETERMINED
+def test_a_transient_failure_does_not_report_dependabot_as_off():
+    assert spr.dependabot_updates_state(
+        1, "", "gh: Server Error (HTTP 503)", True) == spr.UNDETERMINED
 
 
-def test_branch_protection_reads_the_field_a_non_admin_can_see(monkeypatch):
+def test_branch_protection_reads_the_field_a_non_admin_can_see():
     """`branches/{b}/protection` is admin-only and 404s to everyone else, so it
     cannot tell an unprotected branch from an unprivileged caller. The public
     `protected` boolean can — measured on `cli/cli`, true while the admin
     endpoint returned 404."""
-    monkeypatch.setattr(spr, "gh_call", lambda *a: (0, '{"protected": true}', ""))
-    assert spr.branch_protection_state("o/r", "trunk", False) == spr.ENABLED
-    monkeypatch.setattr(spr, "gh_call", lambda *a: (0, '{"protected": false}', ""))
-    assert spr.branch_protection_state("o/r", "trunk", False) == spr.DISABLED
-    monkeypatch.setattr(spr, "gh_call", lambda *a: (0, '{}', ""))
-    assert spr.branch_protection_state("o/r", "trunk", False) == spr.UNDETERMINED
+    assert spr.branch_protection_state(0, '{"protected": true}', "", False) == spr.ENABLED
+    assert spr.branch_protection_state(0, '{"protected": false}', "", False) == spr.DISABLED
+    assert spr.branch_protection_state(0, '{}', "", False) == spr.UNDETERMINED
+
+
+def test_each_gated_endpoint_is_asked_exactly_once(monkeypatch):
+    """The QA gate's `G-1`, round 2: `collect_security_controls` fetched an
+    endpoint to derive the doubt line and the state function fetched the same
+    endpoint again, so the cause explained a response that had not produced the
+    state it annotated. Measured before the fix: 5 calls for 3 endpoints,
+    `automated-security-fixes` and `branches/main` twice each.
+
+    Counting calls rather than asserting a rendered string, because the defect
+    was invisible in the output — both responses were identical under a healthy
+    network, and only a failure between them diverged.
+    """
+    calls: list[str] = []
+
+    def counting_gh_call(*args: str) -> tuple[int, str, str]:
+        calls.append(" ".join(args))
+        return 1, "", "gh: Not Found (HTTP 404)"
+
+    monkeypatch.setattr(spr, "gh_call", counting_gh_call)
+    spr.collect_security_controls("o/r", {}, True, "main")
+
+    assert len(calls) == len(set(calls)), f"an endpoint was asked twice: {calls}"
+    assert len(calls) == 3, calls
 
 
 def test_a_doubt_line_states_the_cause_it_measured(monkeypatch):
