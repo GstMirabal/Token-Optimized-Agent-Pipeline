@@ -61,6 +61,15 @@ verify:
 	  && git -C $(AGENTS_DIR) diff --exit-code skills/manifest_skills.json
 	cd $(AGENTS_DIR) && $(PY) -m pytest tests/ -q
 	cd $(AGENTS_DIR) && bash tests/test_installer.sh
+# A test must not leave the tracked tree changed. Same regenerate-and-compare
+# shape as the manifest check above, applied to the suite itself: once
+# `C0.3` anchored `branch_sovereignty.WAIVERS` to the framework root, a test
+# that had been writing into its own tmp_path started overwriting the real
+# `config/abandoned_branches.json`, destroying the three keys that document it.
+# Nothing failed — the suite passed green and the damage was found by reading a
+# commit's diff. This is the assertion that was missing.
+	cd $(AGENTS_DIR) && git -C $(AGENTS_DIR) diff --exit-code config/ hooks/ scripts/ \
+	  || (echo "❌ The test suite modified tracked files listed above." && exit 1)
 
 # Deterministic docs freshness + integrity gate (rules/documentation_standard.md §4).
 # Inspects the CALLER's tree, so run it from the host project root.

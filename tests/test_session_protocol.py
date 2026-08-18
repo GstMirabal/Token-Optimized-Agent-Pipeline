@@ -241,15 +241,26 @@ def test_branch_whose_commits_are_in_main_passes(repo):
     assert bs.audit("main") == 0
 
 
-def test_waived_branch_does_not_block(repo):
+def test_waived_branch_does_not_block(repo, monkeypatch):
+    """The waiver list is patched, not written where the constant points.
+
+    It used to be a bare relative path, so writing it landed inside the test's
+    own `tmp_path`. Sprint 023 `C0.3` anchored it to the framework root — which
+    is correct, and made this test overwrite the repository's real
+    `config/abandoned_branches.json` with fixture data, destroying the three
+    explanatory keys it ships with. Caught by reading a commit's diff rather
+    than by any assertion, so the fixture is pinned here instead.
+    """
     subprocess.run(["git", "checkout", "-qb", "abandoned"], check=True)
     (repo / "f.txt").write_text("changed\n")
     subprocess.run(["git", "commit", "-aqm", "work"], check=True)
     subprocess.run(["git", "checkout", "-q", "main"], check=True)
     (repo / "config").mkdir()
-    bs.WAIVERS.write_text(json.dumps(
+    waivers = repo / "config" / "abandoned_branches.json"
+    waivers.write_text(json.dumps(
         {"abandoned": [{"branch": "abandoned", "reason": "superseded experiment"}]}
     ))
+    monkeypatch.setattr(bs, "WAIVERS", waivers)
     assert bs.audit("main") == 0
 
 
