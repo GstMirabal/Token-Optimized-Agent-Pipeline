@@ -13,6 +13,7 @@ is loud in the right way:
 | `scan_workflow_determinism.py` | `[OK] no candidates found`, exit `0` — **a clean pass over nothing** |
 | `verify_references.py` | Crash: `FileNotFoundError: agents.md` |
 | `check_manifest_parity.py` | Exit `1`, *"run from the .agents root"* — a false failure that told the human to compensate for the defect |
+| `check_readme_counts.py` (unit `C1`) | Crash: `FileNotFoundError: 'skills'`, **exit 1** — not the exit `2` its own docstring and `close_workflow.md` Phase 2 both promise. `close_workflow.md` runs it from the host root, so this mandatory close step had never run to completion in any host |
 
 `map_workflows.py` is not measurable that way, because copying the file
 displaces the `__file__` its registry path is anchored to; its `workflows/` and
@@ -36,11 +37,9 @@ import branch_sovereignty as bs  # noqa: E402
 import docs_freshness_check as dfc  # noqa: E402
 from _root import agents_root  # noqa: E402
 
-# `check_readme_counts.py` is deliberately absent: it is Sprint 023 unit `C1`,
-# which anchors it alongside repairing its five counters. Listing it here would
-# fail for a defect this unit does not claim to have fixed.
 FRAMEWORK_SCOPED = [
     ["scripts/check_manifest_parity.py"],
+    ["scripts/check_readme_counts.py"],
     ["scripts/map_workflows.py", "--check"],
     ["scripts/scan_workflow_determinism.py"],
     ["scripts/verify_references.py"],

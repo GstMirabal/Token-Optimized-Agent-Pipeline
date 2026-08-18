@@ -13,6 +13,14 @@ internal structure rather than a countable set of files; pretending to verify
 it would be the PR #28 defect — a check that reports success on something it
 never actually measured.
 
+**Framework-scoped, and it was not.** `close_workflow.md` Phase 2 runs this from
+the HOST root, where every path below resolved against the host: `README.md`
+became the host's README, `rules/` and `agents/` globbed empty, and
+`skills/`.iterdir() raised. Measured from a directory holding only a host
+README — `FileNotFoundError: 'skills'`, **exit 1**, not the exit 2 this docstring
+and that workflow both promise. A mandatory close step had therefore never run
+to completion in any host (`F-093-N2`). Sprint 023 `C1` anchors it.
+
 invoked_by: Makefile `verify` target, close_workflow.md#readme_counts.
 
 Usage:
@@ -23,9 +31,13 @@ Exit codes:
     2 — drift found (RA-11: 2 is what blocks)
 """
 
+import os
 import re
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _root import agents_root  # noqa: E402
 
 README = Path("README.md")
 
@@ -42,6 +54,12 @@ CHECKS = {
         r"(\d+)\s+role-segregated agents",
         lambda: len(list(Path("agents").glob("*.md"))),
     ),
+    # `iterdir()` is deliberately not wrapped in try/except. Anchored to the
+    # framework root these directories always exist, so an exception means a
+    # broken checkout — and catching it would report 0 skills, which reads as
+    # drift against the README rather than as the installation failure it is.
+    # A crash names its own cause; a false count sends the reader to edit the
+    # README until it agrees with a number that was never measured.
     "skills": (
         r"(\d+)\s+flat skills",
         lambda: len([p for p in Path("skills").iterdir() if p.is_dir()]),
@@ -58,8 +76,14 @@ CHECKS = {
 
 
 def main() -> int:
+    # Framework-scoped: the README and the five directories counted below are
+    # this repository's, never the caller's. `close_workflow.md` invokes this
+    # from the host root, which is why anchoring is the whole unit. See
+    # `scripts/_root.py` for why the cwd is set rather than each path rewritten.
+    os.chdir(agents_root())
+
     if not README.exists():
-        print(f"❌ {README} not found — run from the .agents root.", file=sys.stderr)
+        print(f"❌ {README} not found inside {agents_root()}.", file=sys.stderr)
         return 2
 
     text = README.read_text(encoding="utf-8")

@@ -113,9 +113,18 @@ def test_missing_registry_is_reported(tree):
 
 @pytest.fixture
 def readme_tree(tmp_path, monkeypatch):
+    """A fake framework tree, substituted through `agents_root` rather than the cwd.
+
+    `monkeypatch.chdir` alone stopped working at Sprint 023 `C1`: the script now
+    sets its own working directory, because `close_workflow.md` invokes it from
+    the HOST root and every path it read used to resolve against the host. A
+    test that steers it by cwd is steering the thing the unit deliberately
+    removed — so the root itself is what gets substituted.
+    """
     for name in ("rules", "agents", "skills", "workflows", "commands"):
         (tmp_path / name).mkdir()
     monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(crc, "agents_root", lambda: tmp_path)
     return tmp_path
 
 
