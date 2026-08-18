@@ -30,7 +30,8 @@ what this artifact is for, and why a declared solo session still owed it.
 | `agent_orchestrator` | this file |
 | `skill_architect` | `skill_assignment.md` |
 | `tester_agent` | `tests/test_docs_freshness_check.py`, `tests/test_artifact_registry.py` |
-| `qa_agent` | `make verify` — structural verification, not a dispatched role |
+| `qa_agent` | `make verify` for `C9`-`C1` — structural verification, not a dispatched role. **Dispatched as a subagent for `C2`**, and it rejected the unit |
+| `tester_agent` (dispatched) | `C2` round 1 — rejected it, reproducing the critical defect live against `cli/cli` and `torvalds/linux` |
 
 ## The gap this file was itself found by
 

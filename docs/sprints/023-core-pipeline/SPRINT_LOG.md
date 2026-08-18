@@ -1,7 +1,7 @@
 # Sprint Log — 023 (`upstream-findings`)
 
 **Branch**: `ai-sprint/023` from `main` at `18696c5` (`v4.7.0`)
-**Status**: open. 5 of 13 units delivered.
+**Status**: open. 5 of 13 units delivered and gated; `C2` delivered and **awaiting gate round 2**.
 
 ## Delivered
 
@@ -252,6 +252,53 @@ that fires on normal development is one that gets disabled rather than satisfied
 It now compares before against after the suite, and was **verified to still fire
 on a real mutation** rather than assumed to.
 
+### `C2` — the platform report answers in four values (`26367cf`, ungated)
+
+**The first unit of this sprint gated by dispatched subagents, and the first
+rejected.** Both gates returned `REJECTED` on round 1. Round 2 has not run.
+
+**The defect the unit was for.** `security.get(control, {}).get("status") !=
+"enabled"` turned a field the API never returned into a disabled security
+control, and `security_and_analysis` is omitted wholesale for a caller without
+administrative access — so a hardened repository was told three of its controls
+were off.
+
+**The defect the unit introduced, which is the more instructive one.** The
+repair mapped HTTP `404` to `disabled`. GitHub answers `404` on an admin-only
+endpoint to any caller lacking administrative access, whether the feature is on
+or off. The Tester gate reproduced it live against `cli/cli` and
+`torvalds/linux` — both demonstrably hardened — and got three false accusations
+each, under the accusation heading, with a remedy offering to patch a repository
+the caller cannot administer. **This sprint's own defect, rebuilt inside the
+function written to remove it.** The author had measured only against this
+repository, where the token is an admin, stated that blind spot aloud, and did
+not act on it. The first test suite asserted the defect rather than catching it.
+
+The discriminator was free and readable without admin: `permissions.admin`, in
+the same call that already carries `security_and_analysis`. A `404` is
+`disabled` only for a caller who could have seen the answer.
+
+**Six more defects, all reproduced rather than argued.** Branch protection asked
+an admin-only endpoint when the public `protected` boolean answers it; the HTTP
+status was matched by searching stderr for `404`, which a dead proxy on a
+repository whose *name* contains `404` defeats; a missing `enabled` read as
+`disabled` while a missing analysis key read as doubt — two opposite rules for
+absence in one unit, the failing one being the security branch;
+`{"enabled": "false"}` reported an off control as on; a non-dict payload raised
+`AttributeError` and would have taken down the entire readiness probe; and every
+doubt line hardcoded *"field not returned"* over causes it never measured — the
+unit's thesis violated one level down.
+
+**What the author rejected, with a measurement.** Gate 1's `F-5` claimed the
+report joiner renders a bullet at an indent used nowhere else. Rendered: it is
+exactly the indent `main()` gives every top-level finding. A gate is not right
+by virtue of being a gate.
+
+**Verification**: `make verify` exit `0` read from `$?` — **226 tests**
+(212 + 14). The live probe reports no platform finding on this repository, so
+the admin path gained no false accusation. **That is not an approval**: both
+gates rejected round 1 and neither has seen the remediation.
+
 ### Gate rounds — `C9`, `C0`, `C0.2`, `C0.3`, `C1`
 
 | Gate | Round | Verdict |
@@ -283,10 +330,22 @@ resume worked off the record rather than the conversation, which is what Sprint
 collision, and `IMPLEMENTATION_PLAN.md`, `task_scope.md` and `resume_pointer`
 carried the state across the boundary.
 
-**Next Phase**: `C2` (`scripts/session_probe.py` — a security report that asserts
-a state it did not measure; when the key is absent it must say *"cannot determine
-(field not returned)"*, and `dependabot_security_updates` comes from
-`GET /repos/{owner}/{repo}/automated-security-fixes`). Eight units remain;
-`task_scope.md` holds per-unit status and the findings routed out of `C0`,
-`C0.2`, `C0.3`, `C1` and this session's start, including three that no unit
-owns.
+## Suspended at the token bound, a second time
+
+`rules/token_economy.md §3.1`: cycle 1 of session `50ce34a7` reached **15.1×**
+its first turn against a bound of 15×. The rule is binding and the sprint is
+open, so the session suspends. The first firing in this sprint was cycle 7 at
+16.5×; two firings across two sessions of one sprint is the calibration signal
+`§3.1` asks to be recorded rather than inferred later.
+
+**Re-gating `C2` was deliberately left undone.** A verification performed on
+exhausted context is the low-quality check the bound exists to prevent, and an
+approval produced that way is worse than the absence it replaces.
+
+**Next Phase, in order**: (1) re-gate `C2` — dispatch `qa_agent` and
+`tester_agent` against `26367cf`, round 2; (2) `C3` (`env_shielding_auditor.py`
+and `hooks/on_commit.py` — the secret-scanning suffix tuple and the three regex
+alternations, preserving every existing false-positive exclusion, since that
+hook already blocked a host once). Eight units remain; `task_scope.md` holds
+per-unit status and the findings routed out of `C0`, `C0.2`, `C0.3`, `C1` and
+this session's start, including three that no unit owns.

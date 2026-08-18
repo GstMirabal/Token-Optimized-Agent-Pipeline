@@ -1,7 +1,7 @@
 # Task Scope — Sprint 023 (`upstream-findings`)
 
 **Branch**: `ai-sprint/023` · **Base**: `main` at `18696c5` (`v4.7.0`)
-**State**: **IN_PROGRESS**, resumed 2026-08-18. Sprint open. Next unit: `C2`.
+**State**: **IN_PROGRESS**, resumed 2026-08-18. Sprint open. **`C2` is delivered but ungated** — see below. Next: re-gate `C2`, then `C3`.
 
 Thirteen units, thirteen commits. `C9` ran first by design: this sprint's own
 close invokes `branch_sovereignty audit`, so leaving that gate intermittently
@@ -14,8 +14,8 @@ wrong meant the sprint would trip on the defect it came to repair.
 | C0.2 | `config/artifact_registry.json` + 3 consumers | create/modify | high | lead · `rule_validator` ruleset | ✅ `92f42da` |
 | C0.3 | `scripts/_root.py` + 6 consumers | create/modify | high | lead · `devops_agent` ruleset | ✅ `359d03c` + `fix` |
 | C1 | `scripts/check_readme_counts.py` | modify | high | lead · `devops_agent` ruleset | ✅ `b2d7c2e` |
-| C2 | `scripts/session_probe.py` | modify | high — a security report | lead · `devops_agent` ruleset | ⏳ **next** |
-| C3 | `env_shielding_auditor.py`, `hooks/on_commit.py` | modify | **high** — secrets | lead · `devops_agent` ruleset | ⏳ |
+| C2 | `scripts/session_probe.py` | modify | high — a security report | lead · `devops_agent` ruleset | 🔄 `26367cf` — **gate round 2 owed** |
+| C3 | `env_shielding_auditor.py`, `hooks/on_commit.py` | modify | **high** — secrets | lead · `devops_agent` ruleset | ⏳ **next**, after `C2`'s round 2 |
 | C4 | `mass_standardizer.py` | modify | medium | lead · `skill_architect` ruleset | ⏳ |
 | C5 | `agents/devops_agent.md` | modify | medium — role map | lead · `agent_orchestrator` ruleset | ⏳ |
 | C6 | `agents.md`, `start_workflow.md` | modify | medium | lead · `rule_validator` ruleset | ⏳ |
@@ -70,6 +70,47 @@ one. Recorded here rather than inferred later.
 | **A test destroyed the repository's real waiver list and the suite stayed green.** Anchoring `branch_sovereignty.WAIVERS` to the framework root is correct, and it silently converted `test_waived_branch_does_not_block` from a test writing into its own `tmp_path` into one overwriting `config/abandoned_branches.json` with fixture data, destroying the three keys that document why the valve exists. **Found by reading the commit's diff, not by any assertion** | Fixed in the commit after `359d03c`: file restored, the test patches `WAIVERS` instead of writing through it, and `make verify` gains `git diff --exit-code config/ hooks/ scripts/` after the suite — the same regenerate-and-compare shape the manifest check already used. The general lesson is `C0.3`'s own, inverted: **anchoring a constant is not a local change**, because every test that wrote through it now writes into the real repository |
 | **`DENYLIST_DIR` pointed at `.agents/scripts/denylists`** — correct inside a host, a directory that does not exist in the nucleus. The three denylists that ship in `scripts/denylists/` were therefore never loaded here and the density filter ran empty, degrading silently because `load_denylist` returns an empty set on a missing file | Fixed inside `C0.3`'s commit as a mixed-scope path, the same treatment the plan specified for `branch_sovereignty`'s `config/` |
 | **`hooks/state_mirror.py` swallows a corrupt anchor with a bare `except: pass`**, and closes with `else: pass`. `agents.md §1 exception_handling` prohibits both — *"No `pass` in except. Explicit logging required."* A mirror that silently declines to update when the anchor is unparseable leaves the backup stale exactly when it is the one thing that matters | **Unrouted.** Not `C0.3` — that unit only added the file's module docstring, and folding a behaviour change into it would break the atomicity `RA-08` requires. Named here rather than fixed in passing |
+
+## `C2` is delivered and NOT approved — read this before resuming
+
+`26367cf` is the remediation of a **double rejection**, and no round-2 verdict
+exists. Until both gates pass, `C2` has no approved gate and `triple_lock`'s
+third lock is unmet for it.
+
+| Gate | Round 1 | Round 2 |
+| :--- | :--- | :--- |
+| `qa_agent` (dispatched subagent) | **REJECTED** — `F-1` `probe_platform` at 93 lines against the 50-line bound; `F-2` closure parameter shadowing `state` with a different type; `F-3` `_from_exit` privacy marker the same commit reached past; `F-4`, `F-6` advisory | **owed** |
+| `tester_agent` (dispatched subagent) | **REJECTED** — `D1` critical, plus `D2`-`D7` | **owed** |
+
+**`D1`, and why it matters more than the fix.** GitHub answers `404` on an
+admin-only endpoint to any caller without administrative access, whether the
+feature is on or off. Reproduced live against `cli/cli` and `torvalds/linux`,
+both demonstrably hardened: three false accusations each, with a remedy
+proposing to patch a repository the caller cannot administer. **The unit
+rebuilt this sprint's own defect inside the function written to remove it**,
+and the first test suite asserted the defect instead of catching it. The author
+had measured only against this repository, where the token is an admin, and
+recorded that blind spot in the session without acting on it.
+
+`F-5` was rejected back at Gate 1 with a measurement rather than an argument:
+the report joiner renders at exactly the indent `main()` gives every top-level
+finding.
+
+## Suspended at the token bound, a second time
+
+`rules/token_economy.md §3.1`: cycle 1 of session `50ce34a7` reached **15.1×**
+its first turn (335,285 tokens) against a bound of 15×. Reproduce:
+`python3 scripts/session_cost.py --session 50ce34a7-24bc-4431-9294-11c1c9c5fcbc`.
+
+The rule is binding and the sprint is open, so the session suspends rather than
+closing or pushing on. **Re-gating `C2` was deliberately NOT done on the way
+out**: a verification performed on exhausted context is the low-quality check
+the bound exists to prevent, and an approval produced that way would be worse
+than the missing one it replaces.
+
+**Second firing in this sprint** — the first was cycle 7 at 16.5×. Two firings
+across two sessions of one sprint is the calibration signal `§3.1` asks to be
+recorded rather than inferred.
 
 ## Declared deviation — delegation
 
