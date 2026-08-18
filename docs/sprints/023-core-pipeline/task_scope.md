@@ -112,6 +112,12 @@ than the missing one it replaces.
 across two sessions of one sprint is the calibration signal `§3.1` asks to be
 recorded rather than inferred.
 
+## Found while suspending
+
+| Finding | Where it goes |
+| :--- | :--- |
+| **`resume_pointer.derived_from` reads `"git (registry pending C0.2)"`, and `C0.2` landed.** The substance is still true — the pointer is derived from git — but the parenthetical now names a delivered unit, so a cold session reads it as work outstanding that is not. The cause is that `C0.2` shipped `config/artifact_registry.json` with the three consumers the roadmap named, and `scripts/session_state.py` was never one of them: deriving the pointer from the registry is roadmap item `M6.3`, correctly outside this unit. Reproduce: `python3 -c "import json;print(json.load(open('docs/active_state.json'))['resume_pointer'])"` | **Unrouted, and deliberately not fixed on the way out.** Editing the anchor by hand is the exact class of change `session_probe.probe_anchor_sprint` was built this session to detect. The label should be corrected when `session_state.py` becomes a registry consumer under `M6.3`, so the text and the mechanism change together rather than the text alone drifting into a second false claim |
+
 ## Declared deviation — delegation
 
 Unchanged from `022`: this session cannot spawn subagents, reported before
