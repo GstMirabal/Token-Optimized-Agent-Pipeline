@@ -3,10 +3,23 @@
 **Covers the sprint to date** (units `C9`, `C0`, `C0.2`). Eleven units remain and
 this file is appended as they land, then finalised at Closeout.
 
-Eight roles were **not** dispatched: this session cannot spawn subagents, a
-conflict reported before Phase 1 and authorised by the human in this session and
-in `022`. What follows records which profile's **ruleset** governed each write —
-which is what this artifact is for, and why a declared solo session still owes it.
+**The delegation deviation ended mid-sprint, at unit `C2`.** Until then no role
+was dispatched: the session configuration forbids spawning subagents unless the
+human asks, a conflict reported before Phase 1 and authorised in this sprint and
+in `022`. The human lifted it at `C2`, and `qa_agent` and `tester_agent` were
+dispatched as actual subagents for the first time in this sprint — on the unit
+where the framework's own tier basis says the value is highest, a security
+report.
+
+Units `C9`, `C0`, `C0.2`, `C0.3` and `C1` were therefore written *and* gated by
+the same session. That is not a footnote: `config/model_tiers.json` records that
+across four consecutive host sprints every central defect was found by a gate
+and nothing else, several after surviving their author's own verification. The
+verdicts on those five units are the author's, and this file says so rather than
+letting a green result imply otherwise.
+
+What follows records which profile's **ruleset** governed each write — which is
+what this artifact is for, and why a declared solo session still owed it.
 
 | Ruleset applied | Artifacts |
 | :--- | :--- |

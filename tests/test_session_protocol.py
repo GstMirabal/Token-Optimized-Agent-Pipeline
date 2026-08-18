@@ -224,6 +224,168 @@ def test_an_anchor_with_no_sprint_recorded_is_not_accused(repo):
     assert spr.probe_anchor_sprint({}) is None
 
 
+# --- the platform probe answers in more than two values ----------------
+#
+# Sprint 023 C2. `security.get(control, {}).get("status") != "enabled"` made a
+# field that was never returned indistinguishable from a control that is off,
+# in a SECURITY report. `security_and_analysis` is omitted wholesale for a
+# caller without administrative access, so the whole object going missing told
+# a hardened repository that all three controls were disabled.
+
+def test_a_control_that_is_on_reads_enabled():
+    assert spr.analysis_state({"secret_scanning": {"status": "enabled"}},
+                              "secret_scanning") == spr.ENABLED
+
+
+def test_a_control_that_is_off_reads_disabled():
+    assert spr.analysis_state({"secret_scanning": {"status": "disabled"}},
+                              "secret_scanning") == spr.DISABLED
+
+
+@pytest.mark.parametrize("payload", [
+    {},                                          # key absent
+    {"secret_scanning": {}},                     # present, no status
+    {"secret_scanning": {"status": None}},       # present, null status
+    {"secret_scanning": {"status": "not_set"}},  # a value this code does not know
+    {"secret_scanning": None},                   # not an object at all
+    None,                                        # the call did not answer
+])
+def test_only_an_explicit_disabled_is_reported_as_disabled(payload):
+    """The defect, and the second version of it the Tester gate found.
+
+    Absence became `disabled` at first. The repair then collapsed *everything
+    that is not the string "enabled"* into `disabled`, which moved the same
+    two-value collapse one level in rather than removing it. Safe to report all
+    of these as doubt because a genuinely-off control is stated explicitly:
+    this repository's live payload returns `secret_scanning_validity_checks:
+    disabled` in full.
+    """
+    assert spr.analysis_state(payload, "secret_scanning") == spr.UNDETERMINED
+
+
+def test_an_explicitly_disabled_control_is_still_an_accusation():
+    """Doubt must not swallow the real finding — the inverse failure."""
+    assert spr.analysis_state({"secret_scanning": {"status": "disabled"}},
+                              "secret_scanning") == spr.DISABLED
+
+
+def test_a_404_is_only_off_for_a_caller_who_could_have_seen_it():
+    """Reproduced live by the Tester gate, and the reason this unit was rejected.
+
+    GitHub answers `404` on an admin-only endpoint to any caller without
+    administrative access, whether the feature is on or off. `cli/cli` and
+    `torvalds/linux` — both demonstrably hardened — returned 404 on all three
+    probed endpoints for a non-admin token, so mapping 404 to `disabled` told
+    them they were exposed and offered to patch repositories the caller cannot
+    administer. The first version of this test asserted the defect.
+    """
+    assert spr.state_from_exit(1, "gh: Not Found (HTTP 404)", True) == spr.DISABLED
+    assert spr.state_from_exit(1, "gh: Not Found (HTTP 404)", False) == spr.UNDETERMINED
+    assert spr.state_from_exit(1, "gh: Not Found (HTTP 404)", None) == spr.UNDETERMINED
+
+
+def test_the_status_comes_from_the_status_not_from_a_substring():
+    """Also reproduced with the real binary: a dead proxy on a repository whose
+    NAME contains 404 emitted a transport error carrying the URL, and a 503 body
+    read `upstream cache miss for /404/handler`. Both were classified as off."""
+    proxy_failure = ('Get "https://api.github.com/repos/acme/tools404/vulnerability-alerts": '
+                     'proxyconnect tcp: dial tcp 127.0.0.1:1: connect: connection refused')
+    assert spr.state_from_exit(1, proxy_failure, True) == spr.UNDETERMINED
+    assert spr.state_from_exit(
+        1, "gh: upstream cache miss for /404/handler (HTTP 503)", True) == spr.UNDETERMINED
+    assert spr.state_from_exit(0, "", False) == spr.ENABLED
+    assert spr.http_status("gh: Not Found (HTTP 404)") == 404
+    assert spr.http_status("dial tcp: no such host") is None
+
+
+@pytest.mark.parametrize("payload,expected", [
+    ('{"enabled": true, "paused": false}', "enabled"),
+    ('{"enabled": true, "paused": true}', "paused"),
+    ('{"enabled": false, "paused": false}', "disabled"),
+    ('{"paused": false}', "undetermined"),        # no `enabled` at all
+    ('{}', "undetermined"),
+    ('{"enabled": null}', "undetermined"),
+    ('{"enabled": "false"}', "undetermined"),     # truthiness would say ENABLED
+    ('["not", "an", "object"]', "undetermined"),
+    ("not json at all", "undetermined"),
+])
+def test_dependabot_updates_come_from_the_endpoint_that_answers_them(
+    payload, expected, monkeypatch
+):
+    """`{"enabled": true, "paused": false}` is the live shape, verified against
+    the API. `paused` is its own finding: enabled-but-paused applies nothing.
+
+    The last six rows are the Tester gate's `D2` and `D3`. A missing `enabled`
+    read as `disabled` while `analysis_state` read a missing key as doubt — two
+    opposite rules for absence inside one unit, and the branch that failed was
+    the security one. `{"enabled": "false"}` reported the control ON, the only
+    false green in the unit.
+    """
+    monkeypatch.setattr(spr, "gh_call", lambda *a: (0, payload, ""))
+    assert spr.dependabot_updates_state("o/r", True) == expected
+
+
+def test_a_transient_failure_does_not_report_dependabot_as_off(monkeypatch):
+    monkeypatch.setattr(spr, "gh_call", lambda *a: (1, "", "gh: Server Error (HTTP 503)"))
+    assert spr.dependabot_updates_state("o/r", True) == spr.UNDETERMINED
+
+
+def test_branch_protection_reads_the_field_a_non_admin_can_see(monkeypatch):
+    """`branches/{b}/protection` is admin-only and 404s to everyone else, so it
+    cannot tell an unprotected branch from an unprivileged caller. The public
+    `protected` boolean can — measured on `cli/cli`, true while the admin
+    endpoint returned 404."""
+    monkeypatch.setattr(spr, "gh_call", lambda *a: (0, '{"protected": true}', ""))
+    assert spr.branch_protection_state("o/r", "trunk", False) == spr.ENABLED
+    monkeypatch.setattr(spr, "gh_call", lambda *a: (0, '{"protected": false}', ""))
+    assert spr.branch_protection_state("o/r", "trunk", False) == spr.DISABLED
+    monkeypatch.setattr(spr, "gh_call", lambda *a: (0, '{}', ""))
+    assert spr.branch_protection_state("o/r", "trunk", False) == spr.UNDETERMINED
+
+
+def test_a_doubt_line_states_the_cause_it_measured(monkeypatch):
+    """Every doubt line used to read "field not returned" whatever had actually
+    happened — the unit's own thesis violated one level down."""
+    assert "HTTP 503" in spr.undetermined_cause(1, "gh: Server Error (HTTP 503)", True)
+    assert "does not administer" in spr.undetermined_cause(
+        1, "gh: Not Found (HTTP 404)", False)
+    assert "no HTTP response" in spr.undetermined_cause(1, "dial tcp: no such host", True)
+
+
+def test_a_non_dict_control_does_not_take_down_the_whole_probe():
+    """`security[control].get("status")` raised AttributeError on a null value,
+    and `probe_platform` has no try/except, so the graph, docs, anchor and cost
+    findings would never print."""
+    assert spr.analysis_state({"secret_scanning": None}, "secret_scanning") == spr.UNDETERMINED
+
+
+def test_doubt_is_reported_apart_from_accusation_and_never_as_disabled(monkeypatch):
+    """The two belong under different headings because they have different
+    remedies: a disabled control needs `/agents:harden`, an unanswered question
+    needs a token that can see the answer."""
+    monkeypatch.setattr(spr.shutil, "which", lambda _: "/usr/bin/gh")
+    monkeypatch.setattr(spr, "gh_json", lambda *a: (
+        {"nameWithOwner": "o/r", "description": "d", "homepageUrl": "h",
+         "defaultBranchRef": {"name": "main"}}
+        if a[:2] == ("repo", "view") else None
+    ))
+    monkeypatch.setattr(spr, "gh_call", lambda *a: (1, "", "gh: Server Error (HTTP 503)"))
+    monkeypatch.setattr(spr.Path, "exists", lambda self: True)
+    monkeypatch.setattr(spr.Path, "is_dir", lambda self: True)
+
+    report = spr.probe_platform({}, force=True)
+
+    assert report is not None
+    assert "cannot determine" in report
+    assert "an unanswered question" in report
+    # The accusation block must be absent entirely — asserted on its heading
+    # rather than on the word "disabled", which legitimately appears in the
+    # remedy sentence telling the reader not to treat doubt as a disabled control.
+    assert "not in the state" not in report
+    assert "/agents:harden" not in report
+    assert "Re-run before treating any of these as disabled" in report
+
+
 def test_branch_with_unique_work_is_reported(repo):
     subprocess.run(["git", "checkout", "-qb", "feature"], check=True)
     (repo / "f.txt").write_text("changed\n")
