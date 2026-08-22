@@ -282,14 +282,54 @@ def test_real_leaks_survive_the_narrowing(filename, line, expected):
 
 def test_pem_private_key_in_a_block_scalar_is_caught():
     """A block scalar's value token is one character, so the key line alone
-    can never carry the evidence. The PEM header is matched instead."""
+    can never carry the evidence. The PEM body is matched instead."""
     content = (
         "private_key: |\n"
         "  -----BEGIN RSA PRIVATE KEY-----\n"
         "  MIIEowIBAAKCAQEA7f2a4c8e1b7d3a56\n"
     )
     found = on_commit.find_hardcoded_secret(content, Path("values.yaml"))
-    assert found == "PRIVATE KEY block"
+    assert found == "PRIVATE KEY"
+
+
+# The PEM form was first written to return before the exclusion filters, which
+# made it the one form an author could not write a legitimate example against.
+# It blocked a setup guide whose body was `YOUR_PRIVATE_KEY_HERE` — a phrase
+# already in PLACEHOLDER_MARKERS.
+@pytest.mark.parametrize("content", [
+    "-----BEGIN RSA PRIVATE KEY-----\nYOUR_PRIVATE_KEY_HERE\n-----END RSA PRIVATE KEY-----\n",
+    "-----BEGIN PRIVATE KEY-----\nchangeme\n-----END PRIVATE KEY-----\n",
+    "-----BEGIN PRIVATE KEY-----\nEXAMPLE-PLACEHOLDER-NOT-A-REAL-KEY\n-----END PRIVATE KEY-----\n",
+    "Files beginning with `-----BEGIN PRIVATE KEY-----` are PKCS#8 keys.\n",
+])
+def test_documented_pem_examples_are_not_flagged(content):
+    assert on_commit.find_hardcoded_secret(content, Path("docs/TLS_SETUP.md")) is None
+
+
+# A URL is a pointer only when the key says so. When the URL IS the credential
+# — a capability URL, a DSN with inline userinfo — exempting it lost detections
+# this gate made before C3 existed, while the auditor half went on calling a
+# Slack webhook a secret.
+@pytest.mark.parametrize("filename,line,expected", [
+    ("config/slack.py",
+     ('SLACK_WEBHOOK_SECRET = "https://hooks.slack.com/services/TABCDEFGH/'
+      'BABCDEFGH/abcdefghij1234567890abcd"\n'),
+     "SLACK_WEBHOOK_SECRET"),
+    ("config/db.py",
+     'MONGO_PASSWORD = "mongodb+srv://admin:Tr0ub4dor3@cluster0.mongodb.net"\n',
+     "MONGO_PASSWORD"),
+    ("deploy/amqp.yaml",
+     "amqp_password: amqp://user:R3allySecret@rabbit:5672/\n",
+     "amqp_password"),
+])
+def test_a_credential_that_is_a_url_is_still_a_credential(filename, line, expected):
+    assert on_commit.find_hardcoded_secret(line, Path(filename)) == expected
+
+
+def test_a_key_that_points_at_a_url_is_still_a_pointer():
+    """The name side, not the value side, is what makes this one clean."""
+    line = "  api_key_url: https://vault.internal/v1/secret\n"
+    assert on_commit.find_hardcoded_secret(line, Path("values.yaml")) is None
 
 
 def test_compose_secrets_list_is_not_a_credential():
@@ -301,19 +341,20 @@ def test_compose_secrets_list_is_not_a_credential():
 # --- secret_forms_for: the selector itself ----------------------------------
 
 @pytest.mark.parametrize("filename,expected", [
-    ("values.yaml",        {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "YAML_SECRET"}),
-    ("values.YAML",        {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "YAML_SECRET"}),
-    ("config.yml.example", {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "YAML_SECRET"}),
-    ("Dockerfile",         {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "DOCKERFILE_SECRET"}),
-    ("Dockerfile.prod",    {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "DOCKERFILE_SECRET"}),
-    ("api.Dockerfile",     {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "DOCKERFILE_SECRET"}),
-    ("settings.py",        {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET"}),
-    ("Makefile",           {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET"}),
+    ("values.yaml",        {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "PRIVATE_KEY_BLOCK", "YAML_SECRET"}),
+    ("values.YAML",        {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "PRIVATE_KEY_BLOCK", "YAML_SECRET"}),
+    ("config.yml.example", {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "PRIVATE_KEY_BLOCK", "YAML_SECRET"}),
+    ("Dockerfile",         {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "PRIVATE_KEY_BLOCK", "DOCKERFILE_SECRET"}),
+    ("Dockerfile.prod",    {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "PRIVATE_KEY_BLOCK", "DOCKERFILE_SECRET"}),
+    ("api.Dockerfile",     {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "PRIVATE_KEY_BLOCK", "DOCKERFILE_SECRET"}),
+    ("settings.py",        {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "PRIVATE_KEY_BLOCK"}),
+    ("Makefile",           {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "PRIVATE_KEY_BLOCK"}),
 ])
 def test_secret_forms_for_selects_by_format(filename, expected):
     by_pattern = {
         id(on_commit.SECRET_ASSIGNMENT): "SECRET_ASSIGNMENT",
         id(on_commit.QUERY_STRING_SECRET): "QUERY_STRING_SECRET",
+        id(on_commit.PRIVATE_KEY_BLOCK): "PRIVATE_KEY_BLOCK",
         id(on_commit.YAML_SECRET): "YAML_SECRET",
         id(on_commit.DOCKERFILE_SECRET): "DOCKERFILE_SECRET",
     }

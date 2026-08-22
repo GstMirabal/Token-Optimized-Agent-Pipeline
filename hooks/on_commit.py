@@ -162,8 +162,23 @@ QUERY_STRING_SECRET = re.compile(
 # line is one character — dropped under MIN_SECRET_LENGTH before anything looks
 # at the block. Matched on its own header instead, which is format-agnostic and
 # so covers the folded, flow and multi-line spellings in one rule.
+#
+# The BODY is captured, not just the header, for two reasons. It made this a
+# form like any other, filtered by the same exclusions — the first version
+# returned early and so bypassed all of them, blocking a setup guide whose
+# body was literally `YOUR_PRIVATE_KEY_HERE`, a phrase already in
+# PLACEHOLDER_MARKERS. And requiring a base64-shaped body is what distinguishes
+# a key from prose that merely quotes the header, which has no closing
+# delimiter at all.
+# The closing `-----END` is NOT required: a key pasted into a diff hunk or
+# truncated mid-file is still a key, and requiring the delimiter lost exactly
+# that case. Sixteen unbroken base64 characters after the header carry the
+# whole distinction on their own — `YOUR_PRIVATE_KEY_HERE` breaks at the
+# underscore, prose quoting the header is followed by prose, and neither
+# reaches sixteen.
 PRIVATE_KEY_BLOCK = re.compile(
-    r"-----BEGIN (?:[A-Z][A-Z0-9 ]*)?PRIVATE KEY-----"
+    r"-----BEGIN (?:[A-Z][A-Z0-9 ]*[ ])?(?P<name>PRIVATE KEY)-----"
+    r"\s*(?P<value>[A-Za-z0-9+/=]{16,})"
 )
 
 # A mapping form is only a mapping in a file that uses mappings. Applied to
@@ -213,7 +228,7 @@ def secret_forms_for(path: Path | None) -> tuple[re.Pattern[str], ...]:
         next scan, whereas a gate that blocks a legitimate commit gets
         disabled and then catches nothing at all.
     """
-    forms = [SECRET_ASSIGNMENT, QUERY_STRING_SECRET]
+    forms = [SECRET_ASSIGNMENT, QUERY_STRING_SECRET, PRIVATE_KEY_BLOCK]
     if path is None:
         return tuple(forms)
     # `config.yml.example` is a YAML file whose suffix says `.example`, and it
@@ -241,10 +256,16 @@ REFERENCE_KEY_SUFFIXES = (
 )
 REFERENCE_KEY_PREFIXES = ("existing",)
 
-# A value that is an absolute path or a URL points AT a credential; it is not
-# one. Base64 payloads may contain `/` but do not begin with it.
-REFERENCE_VALUE_PREFIX = "/"
-REFERENCE_VALUE_MARKER = "://"
+# There is deliberately NO value-side pointer test to go with the name-side one
+# above. The first version exempted any value starting with `/` or containing
+# `://`, and it was wrong twice over. It dropped credentials that ARE URLs —
+# a Slack webhook, a MongoDB DSN with inline userinfo — including ones this
+# gate caught before this unit existed, while the auditor half of the same unit
+# still calls a Slack webhook a secret; the two halves contradicted each other.
+# And its stated justification, that base64 does not begin with `/`, is false:
+# 1 in 64 does. The name side already covers every pointer shape measured here
+# (`api_key_url`, `private_key_path`, `POSTGRES_PASSWORD_FILE`), because a key
+# that points at a credential is named for what it points with.
 
 
 def _names_a_reference(name: str) -> bool:
@@ -315,9 +336,6 @@ def find_hardcoded_secret(content: str, path: Path | None = None) -> str | None:
     Returns:
         The offending variable name, or None when nothing credible is found.
     """
-    if PRIVATE_KEY_BLOCK.search(content):
-        return "PRIVATE KEY block"
-
     matches = itertools.chain.from_iterable(
         form.finditer(content) for form in secret_forms_for(path)
     )
@@ -327,8 +345,6 @@ def find_hardcoded_secret(content: str, path: Path | None = None) -> str | None:
         if len(value) < MIN_SECRET_LENGTH:
             continue
         if _names_a_reference(match.group("name")):
-            continue
-        if value.startswith(REFERENCE_VALUE_PREFIX) or REFERENCE_VALUE_MARKER in value:
             continue
         # "$VAR" / "${VAR}" are environment interpolation placeholders, which is
         # exactly the sanctioned pattern in config.toml.example (RA-09).
