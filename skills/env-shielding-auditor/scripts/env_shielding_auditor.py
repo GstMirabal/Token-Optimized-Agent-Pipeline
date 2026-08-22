@@ -33,11 +33,36 @@ SCANNED_SUFFIXES = (
 # whether Compose is covered.
 SCANNED_NAMES = ("Dockerfile", "Makefile", "docker-compose.yml")
 
-# `Dockerfile.prod`, `Dockerfile.dev`: splitting the build file leaves a suffix
-# that is not a format suffix, so neither test above sees it. Matched here so
-# this auditor and hooks/on_commit.py agree on what a build file is called —
-# the two halves of this unit disagreed until the QA gate said so.
-SCANNED_PREFIX = "Dockerfile."
+# `Dockerfile.prod` and `api.Dockerfile`: splitting the build file leaves an
+# affix that is not a format suffix, so neither test above sees it. Matched
+# here so this auditor and hooks/on_commit.py agree on what a build file is
+# called — the two halves of this unit disagreed until the gates said so, in
+# two successive rounds.
+BUILD_FILE_NAME = "dockerfile"
+
+
+def is_scanned(filename: str) -> bool:
+    """Reports whether a file is one this auditor reads.
+
+    Comparison is lowercased throughout: `endswith` is case-sensitive, so
+    `values.YAML` was skipped here while hooks/on_commit.py, which lowercases,
+    read it — the same rule disagreeing with itself across the two halves.
+
+    Args:
+        filename: Bare filename, without its directory.
+
+    Returns:
+        True when the file matches a scanned suffix, an exact name, or one of
+        the container build-file spellings.
+    """
+    lowered = filename.lower()
+    return (
+        lowered.endswith(SCANNED_SUFFIXES)
+        or lowered in tuple(n.lower() for n in SCANNED_NAMES)
+        or lowered == BUILD_FILE_NAME
+        or lowered.startswith(f"{BUILD_FILE_NAME}.")
+        or lowered.endswith(f".{BUILD_FILE_NAME}")
+    )
 
 
 def scan_files(directory):
@@ -47,8 +72,7 @@ def scan_files(directory):
             continue
 
         for file in files:
-            if (file.endswith(SCANNED_SUFFIXES) or file in SCANNED_NAMES
-                    or file.startswith(SCANNED_PREFIX)):
+            if is_scanned(file):
                 file_path = os.path.join(root, file)
                 try:
                     with open(file_path, "r", encoding="utf-8") as f:

@@ -92,3 +92,23 @@ def test_previously_scanned_formats_still_are(tmp_path, name, body):
 def test_unlisted_formats_stay_unscanned(tmp_path, name):
     """The list is widened deliberately, not abolished."""
     assert not _scanned(tmp_path, name, f'api_key = "{LIVE}"\n')
+
+
+@pytest.mark.parametrize("name", ["values.YAML", "Config.YML", "api.Dockerfile"])
+def test_case_variants_are_scanned(tmp_path, name):
+    """`endswith` is case-sensitive, and hooks/on_commit.py lowercases.
+
+    The two halves of C3 disagreed on `values.YAML` until the Tester gate
+    measured it: the hook read the file and this auditor skipped it.
+    """
+    assert _scanned(tmp_path, name, f'api_key = "{LIVE}"\n')
+
+
+@pytest.mark.parametrize("name,body", [
+    ("values.yaml",        "existingSecret: postgresql-credentials\n"),
+    ("docker-compose.yml", "      POSTGRES_PASSWORD_FILE: /run/secrets/db_pw\n"),
+    ("main.tf",            'name = "app-execution-role"\n'),
+])
+def test_stock_manifests_are_not_reported(tmp_path, name, body):
+    """Widening the file list must not turn legitimate config into findings."""
+    assert not _scanned(tmp_path, name, body)

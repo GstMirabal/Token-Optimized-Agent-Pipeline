@@ -80,8 +80,15 @@ def audit_three_file_standard() -> bool:
 # handling authentication can avoid — the gate then blocks every commit and
 # stops meaning anything. The literal on the right-hand side is what
 # distinguishes a leak from a lookup.
+# `ACCESS_TOKEN` and `REFRESH_TOKEN` are the OAuth pair and were both absent:
+# the list held `AUTH_?TOKEN` and `ACCESS_?KEY`, so `access_token` — among the
+# commonest credential parameter names there is — matched no form. It went
+# unnoticed because the query-string form briefly used a loose `token`
+# substring that covered it by accident, and removing that loose list is what
+# exposed the real gap underneath.
 SECRET_WORDS = (
     r"API_?KEY|SECRET|PASSWORD|PASSWD|PRIVATE_?KEY|AUTH_?TOKEN"
+    r"|ACCESS_?TOKEN|REFRESH_?TOKEN"
     r"|MASTER_?KEY|SIGNING_?KEY|ACCESS_?KEY|PEPPER|CREDENTIAL"
 )
 
@@ -107,8 +114,12 @@ SECRET_ASSIGNMENT = re.compile(
 # when that risk returns.
 
 # `ENV API_KEY=x`, `ARG API_KEY=x`, and the legacy space-separated `ENV KEY x`.
+# The `=` form is not anchored to the first pair on the line: `ENV` accepts
+# several pairs at once (`ENV APP_HOME=/srv API_KEY=…`), and anchoring examined
+# only the first, so the documented multi-pair syntax hid every later one.
 DOCKERFILE_SECRET = re.compile(
     rf"""^[ \t]*(?:ENV|ARG)[ \t]+
+        (?:\S+[ \t]+)*?
         (?P<name>[A-Za-z0-9_]*(?:{SECRET_WORDS})[A-Za-z0-9_]*)
         (?:[ \t]*=[ \t]*|[ \t]+)
         (?P<value>"[^"\n]*"|'[^'\n]*'|[^\s#]+)
@@ -131,11 +142,28 @@ YAML_SECRET = re.compile(
 
 # `?api_key=…` / `&access_token=…` anywhere in a line: a credential pasted into
 # a URL is not an assignment and so was never matched.
+#
+# The name uses SECRET_WORDS like every other form, and ENDS on it. A bare
+# substring list (`key|token|secret|password`) read `?keywords=`, `?tokenizer=`,
+# `?sort_key=`, `?utm_token=` and `?monkey=` as credentials — this form is the
+# one that applies to every file type including prose, so it is also the one
+# that could not afford a loose word list. Ending on the word is what separates
+# a parameter that CARRIES a credential (`?api_key=`) from one that merely
+# contains the letters (`?passwordless=`).
 QUERY_STRING_SECRET = re.compile(
-    r"""[?&](?P<name>\w*(?:key|token|secret|password)\w*)=
+    rf"""[?&](?P<name>[A-Za-z0-9_-]*(?:{SECRET_WORDS}))=
         (?P<value>[^&\s'"#]+)
     """,
     re.IGNORECASE | re.VERBOSE,
+)
+
+# A PEM private key is the highest-value leak there is, and it reaches a values
+# file as a YAML block scalar (`private_key: |`) whose value token on the key
+# line is one character — dropped under MIN_SECRET_LENGTH before anything looks
+# at the block. Matched on its own header instead, which is format-agnostic and
+# so covers the folded, flow and multi-line spellings in one rule.
+PRIVATE_KEY_BLOCK = re.compile(
+    r"-----BEGIN (?:[A-Z][A-Z0-9 ]*)?PRIVATE KEY-----"
 )
 
 # A mapping form is only a mapping in a file that uses mappings. Applied to
@@ -147,12 +175,29 @@ QUERY_STRING_SECRET = re.compile(
 # format-agnostic ones always apply.
 YAML_SUFFIXES = (".yml", ".yaml")
 
-# `Dockerfile`, plus the `Dockerfile.prod` / `Dockerfile.dev` variants a real
-# deployment splits it into. Held as one name rather than a list of spellings:
-# `Containerfile` was carried here briefly and no file of that name exists in
-# this repository, which `rules/code_craft.md §1` calls configuring what nobody
-# asked to vary. The auditor half of this unit matches the same two shapes.
-DOCKERFILE_NAME = "Dockerfile"
+# `Dockerfile`, plus the `Dockerfile.prod` and `api.Dockerfile` spellings a
+# real deployment splits it into — the second is the monorepo convention and
+# was missed by both halves of this unit until the Tester gate said so. Held
+# as one name rather than a list: `Containerfile` was carried here briefly and
+# no file of that name exists in this repository, which `rules/code_craft.md
+# §1` calls configuring what nobody asked to vary.
+DOCKERFILE_NAME = "dockerfile"
+
+
+def _is_build_file(name: str) -> bool:
+    """Reports whether a lowercased filename is a container build file.
+
+    Args:
+        name: A filename, already lowercased and stripped of `.example`.
+
+    Returns:
+        True for `dockerfile`, `dockerfile.prod` and `api.dockerfile`.
+    """
+    return (
+        name == DOCKERFILE_NAME
+        or name.startswith(f"{DOCKERFILE_NAME}.")
+        or name.endswith(f".{DOCKERFILE_NAME}")
+    )
 
 
 def secret_forms_for(path: Path | None) -> tuple[re.Pattern[str], ...]:
@@ -171,11 +216,54 @@ def secret_forms_for(path: Path | None) -> tuple[re.Pattern[str], ...]:
     forms = [SECRET_ASSIGNMENT, QUERY_STRING_SECRET]
     if path is None:
         return tuple(forms)
-    if path.suffix.lower() in YAML_SUFFIXES:
+    # `config.yml.example` is a YAML file whose suffix says `.example`, and it
+    # is the spelling agents.md §3 secret_sovereignty sanctions for a committed
+    # template. Stripping the marker first is what makes this half agree with
+    # the auditor half, which reaches the same file through `.example`.
+    name = path.name.lower().removesuffix(".example")
+    if Path(name).suffix in YAML_SUFFIXES:
         forms.append(YAML_SECRET)
-    if path.name == DOCKERFILE_NAME or path.name.startswith(f"{DOCKERFILE_NAME}."):
+    if _is_build_file(name):
         forms.append(DOCKERFILE_SECRET)
     return tuple(forms)
+
+# A key that NAMES a secret is not a key that CONTAINS one. In Kubernetes,
+# Helm and Compose the dominant use of a secret-worded key is a reference —
+# the name of a Secret object, the path of a mounted secret file, the id of a
+# signing key — and every one of them was read as a leak. Measured on stock
+# manifests: 16 of 20 legitimate lines flagged, including
+# `POSTGRES_PASSWORD_FILE: /run/secrets/db_password`, which is the RECOMMENDED
+# secure pattern. Blocking a host for doing it correctly is the failure this
+# gate's abort criterion is written against.
+REFERENCE_KEY_SUFFIXES = (
+    "name", "file", "path", "paths", "ref", "id", "policy",
+    "dir", "url", "uri", "arn", "provider",
+)
+REFERENCE_KEY_PREFIXES = ("existing",)
+
+# A value that is an absolute path or a URL points AT a credential; it is not
+# one. Base64 payloads may contain `/` but do not begin with it.
+REFERENCE_VALUE_PREFIX = "/"
+REFERENCE_VALUE_MARKER = "://"
+
+
+def _names_a_reference(name: str) -> bool:
+    """Reports whether an identifier refers to a secret rather than holds one.
+
+    Args:
+        name: The matched identifier, in its original casing.
+
+    Returns:
+        True when the name ends in a reference word (`secretName`,
+        `vault_password_file`, `SIGNING_KEY_ID`) or begins with one
+        (`existingSecret`), in which case its value is a pointer.
+    """
+    lowered = name.lower().rstrip("_-")
+    return (
+        lowered.startswith(REFERENCE_KEY_PREFIXES)
+        or lowered.endswith(REFERENCE_KEY_SUFFIXES)
+    )
+
 
 # Values that are obviously not live credentials.
 PLACEHOLDER_MARKERS = (
@@ -227,6 +315,9 @@ def find_hardcoded_secret(content: str, path: Path | None = None) -> str | None:
     Returns:
         The offending variable name, or None when nothing credible is found.
     """
+    if PRIVATE_KEY_BLOCK.search(content):
+        return "PRIVATE KEY block"
+
     matches = itertools.chain.from_iterable(
         form.finditer(content) for form in secret_forms_for(path)
     )
@@ -235,9 +326,16 @@ def find_hardcoded_secret(content: str, path: Path | None = None) -> str | None:
 
         if len(value) < MIN_SECRET_LENGTH:
             continue
+        if _names_a_reference(match.group("name")):
+            continue
+        if value.startswith(REFERENCE_VALUE_PREFIX) or REFERENCE_VALUE_MARKER in value:
+            continue
         # "$VAR" / "${VAR}" are environment interpolation placeholders, which is
         # exactly the sanctioned pattern in config.toml.example (RA-09).
-        if value.startswith("$") or value.startswith("{"):
+        # "[" and "{" additionally open a YAML flow collection: Compose's
+        # `secrets: [db_password]` declares which secrets a service consumes
+        # and is a list of names, never a credential.
+        if value.startswith(("$", "{", "[")):
             continue
         if any(marker in value.lower() for marker in PLACEHOLDER_MARKERS):
             continue

@@ -223,3 +223,149 @@ def test_unknown_path_uses_only_format_agnostic_forms():
     assert on_commit.find_hardcoded_secret(f'K = "{LIVE}"\n') is None
     assert on_commit.find_hardcoded_secret(
         f'SECRET_KEY = "{LIVE}"\n') == "SECRET_KEY"
+
+
+# --- F1/F2: the host-shaped negative corpus --------------------------------
+#
+# The first version of this unit measured its false-positive rate against this
+# repository's 455 tracked files and reported zero. The number was true and
+# non-probative: only six tracked files are reachable by the YAML form and no
+# tracked file is a Dockerfile at all, so the corpus could not falsify the
+# claim. These are stock lines from Kubernetes, Helm, Compose, Terraform and
+# CI manifests — the content a host commits — and sixteen of them were flagged
+# before the reference-name filter existed.
+
+@pytest.mark.parametrize("filename,line", [
+    # A key that names a Secret object, not one that holds a secret.
+    ("ingress.yaml",        "    secretName: myapp-tls-certificate\n"),
+    ("values.yaml",         "existingSecret: postgresql-credentials\n"),
+    ("values.yaml",         "existingSecretPasswordKey: postgres-password\n"),
+    ("values.yaml",         "credentialsSecretName: aws-s3-credentials\n"),
+    ("values.yaml",         "masterKeySecretName: meilisearch-master-key\n"),
+    # The RECOMMENDED secure pattern: a path to a mounted secret.
+    ("docker-compose.yml",  "      POSTGRES_PASSWORD_FILE: /run/secrets/db_password\n"),
+    ("values.yaml",         "  vault_password_file: /etc/ansible/vault-pass\n"),
+    ("values.yaml",         "  private_key_path: /etc/ssl/private/server.pem\n"),
+    ("values.yaml",         "  secret_key_file: /var/run/secrets/app.key\n"),
+    # Public metadata that merely mentions a credential.
+    ("values.yaml",         "  SIGNING_KEY_ID: 4a7c9e2b-1f83-4d56-9a0e-7c3b8f1d2e64\n"),
+    ("values.yaml",         "  passwordPolicy: strict-minimum-fourteen\n"),
+    (".gitlab-ci.yml",      "  SECRET_DETECTION_EXCLUDED_PATHS: docs/,fixtures/\n"),
+    ("values.yaml",         "  api_key_url: https://vault.internal/v1/secret\n"),
+    # A URL query parameter that is not a credential.
+    ("README.md",           "See https://site.io/search?keywords=machine-learning-2024\n"),
+    ("README.md",           "See https://site.io/docs?tokenizer=wordpiece-uncased\n"),
+    ("README.md",           "See https://api.io/v1/items?sort_key=created_at_desc\n"),
+    ("README.md",           "See https://site.io/?utm_token=newsletter-spring-2026\n"),
+    ("README.md",           "See https://site.io/?passwordless=true-for-all-users\n"),
+    ("README.md",           "See https://shop.io/p?monkey=plush-toy-large\n"),
+    ("Dockerfile",          "ENV API_KEY_FILE /run/secrets/api_key\n"),
+])
+def test_host_manifests_are_not_flagged(filename, line):
+    assert on_commit.find_hardcoded_secret(line, Path(filename)) is None
+
+
+# The filter above narrows what counts as a leak, so each narrowing needs a
+# case proving it did not switch the gate off.
+@pytest.mark.parametrize("filename,line,expected", [
+    ("values.yaml",        f"  api_key: {LIVE}\n",                    "api_key"),
+    ("docker-compose.yml", f"      POSTGRES_PASSWORD: {LIVE}\n",      "POSTGRES_PASSWORD"),
+    ("README.md",          f"curl https://api.io/v1?api_key={LIVE}\n", "api_key"),
+    ("Dockerfile",         f"ENV APP_HOME=/srv API_KEY={LIVE}\n",     "API_KEY"),
+    ("api.Dockerfile",     f"ENV AUTH_TOKEN={LIVE}\n",                "AUTH_TOKEN"),
+    ("config.yml.example", f"api_key: {LIVE}\n",                      "api_key"),
+    ("values.YAML",        f"secret_key: {LIVE}\n",                   "secret_key"),
+])
+def test_real_leaks_survive_the_narrowing(filename, line, expected):
+    assert on_commit.find_hardcoded_secret(line, Path(filename)) == expected
+
+
+def test_pem_private_key_in_a_block_scalar_is_caught():
+    """A block scalar's value token is one character, so the key line alone
+    can never carry the evidence. The PEM header is matched instead."""
+    content = (
+        "private_key: |\n"
+        "  -----BEGIN RSA PRIVATE KEY-----\n"
+        "  MIIEowIBAAKCAQEA7f2a4c8e1b7d3a56\n"
+    )
+    found = on_commit.find_hardcoded_secret(content, Path("values.yaml"))
+    assert found == "PRIVATE KEY block"
+
+
+def test_compose_secrets_list_is_not_a_credential():
+    """`secrets: [db_password]` names which secrets a service consumes."""
+    content = "services:\n  db:\n    secrets: [db_password]\n"
+    assert on_commit.find_hardcoded_secret(content, Path("docker-compose.yml")) is None
+
+
+# --- secret_forms_for: the selector itself ----------------------------------
+
+@pytest.mark.parametrize("filename,expected", [
+    ("values.yaml",        {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "YAML_SECRET"}),
+    ("values.YAML",        {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "YAML_SECRET"}),
+    ("config.yml.example", {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "YAML_SECRET"}),
+    ("Dockerfile",         {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "DOCKERFILE_SECRET"}),
+    ("Dockerfile.prod",    {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "DOCKERFILE_SECRET"}),
+    ("api.Dockerfile",     {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "DOCKERFILE_SECRET"}),
+    ("settings.py",        {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET"}),
+    ("Makefile",           {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET"}),
+])
+def test_secret_forms_for_selects_by_format(filename, expected):
+    by_pattern = {
+        id(on_commit.SECRET_ASSIGNMENT): "SECRET_ASSIGNMENT",
+        id(on_commit.QUERY_STRING_SECRET): "QUERY_STRING_SECRET",
+        id(on_commit.YAML_SECRET): "YAML_SECRET",
+        id(on_commit.DOCKERFILE_SECRET): "DOCKERFILE_SECRET",
+    }
+    selected = {by_pattern[id(f)] for f in on_commit.secret_forms_for(Path(filename))}
+    assert selected == expected
+
+
+def test_secret_forms_for_without_a_path_takes_the_safe_subset():
+    selected = on_commit.secret_forms_for(None)
+    assert on_commit.YAML_SECRET not in selected
+    assert on_commit.DOCKERFILE_SECRET not in selected
+
+
+# --- audit_secret_shielding: the integration layer --------------------------
+#
+# Every other secret test calls find_hardcoded_secret directly, so the layer
+# that resolves the path, applies the test-artifact skip and runs the
+# forbidden-extension branch had no coverage at all — named by the Tester gate.
+
+def _repo_with_staged(tmp_path, files: dict) -> Path:
+    """Builds a throwaway git repository with `files` staged."""
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    for name, body in files.items():
+        target = tmp_path / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(body, encoding="utf-8")
+        subprocess.run(["git", "add", "-f", name], cwd=tmp_path, check=True)
+    return tmp_path
+
+
+def test_audit_blocks_a_leak_in_a_staged_manifest(tmp_path, monkeypatch):
+    _repo_with_staged(tmp_path, {"charts/values.yaml": f"api_key: {LIVE}\n"})
+    monkeypatch.chdir(tmp_path)
+    assert not on_commit.audit_secret_shielding()
+
+
+def test_audit_allows_a_stock_manifest(tmp_path, monkeypatch):
+    _repo_with_staged(tmp_path, {
+        "deploy/ingress.yaml": "spec:\n  tls:\n    - secretName: myapp-tls-cert\n",
+        "docker-compose.yml": "services:\n  db:\n    secrets: [db_password]\n",
+    })
+    monkeypatch.chdir(tmp_path)
+    assert on_commit.audit_secret_shielding()
+
+
+def test_audit_skips_test_artifacts(tmp_path, monkeypatch):
+    _repo_with_staged(tmp_path, {"tests/fixtures.yaml": f"api_key: {LIVE}\n"})
+    monkeypatch.chdir(tmp_path)
+    assert on_commit.audit_secret_shielding()
+
+
+def test_audit_blocks_a_forbidden_extension(tmp_path, monkeypatch):
+    _repo_with_staged(tmp_path, {"deploy/server.pem": "not a real key\n"})
+    monkeypatch.chdir(tmp_path)
+    assert not on_commit.audit_secret_shielding()
