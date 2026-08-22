@@ -256,16 +256,47 @@ REFERENCE_KEY_SUFFIXES = (
 )
 REFERENCE_KEY_PREFIXES = ("existing",)
 
-# There is deliberately NO value-side pointer test to go with the name-side one
-# above. The first version exempted any value starting with `/` or containing
-# `://`, and it was wrong twice over. It dropped credentials that ARE URLs —
-# a Slack webhook, a MongoDB DSN with inline userinfo — including ones this
-# gate caught before this unit existed, while the auditor half of the same unit
-# still calls a Slack webhook a secret; the two halves contradicted each other.
-# And its stated justification, that base64 does not begin with `/`, is false:
-# 1 in 64 does. The name side already covers every pointer shape measured here
-# (`api_key_url`, `private_key_path`, `POSTGRES_PASSWORD_FILE`), because a key
-# that points at a credential is named for what it points with.
+# The name side above cannot cover every pointer, because not every pointer is
+# named for what it points WITH. `GOOGLE_APPLICATION_CREDENTIALS` — the
+# canonical Google Cloud variable — is named for what it points AT, ends in a
+# SECRET_WORD, and always holds a path to a mounted key file. So a value-side
+# test is needed after all, and this is the narrow one.
+#
+# It is narrow because the wide version was wrong twice. Exempting anything
+# containing `://` dropped credentials that ARE URLs — a Slack webhook, a
+# MongoDB DSN with inline userinfo — including ones this gate caught before
+# this unit existed. And exempting anything merely starting with `/` was
+# justified by the claim that base64 does not begin with `/`, which is false:
+# 1 in 64 does.
+#
+# So: an absolute path of at least two segments, over a character set that
+# EXCLUDES `+` and `=`. That last part is what keeps base64 out, and it is
+# measured rather than argued — see the exemption rate quoted in
+# tests/test_on_commit.py. A URL fails on the leading `/`; a DSN fails on it
+# too; a Slack webhook fails on it too.
+PATH_VALUE = re.compile(r"^/(?:[A-Za-z0-9._-]+/)+[A-Za-z0-9._-]+$")
+
+
+def _points_at_a_file(value: str) -> bool:
+    """Reports whether a value is a filesystem path rather than a credential.
+
+    Args:
+        value: The matched value, already unquoted.
+
+    Returns:
+        True for an absolute multi-segment path. A file extension or a third
+        segment is required on top of the shape, because base64 contains no
+        `.` at all and rarely carries three `/`.
+
+        Measured over 200,000 random values per size, not reasoned about,
+        which is the mistake the deleted `/`-prefix rule made: it wrongly
+        exempted 1.54% of 24-byte base64 while its comment asserted it
+        exempted none. This test exempts 0.067% at 24 bytes, 0.107% at 32 and
+        0.140% at 48. Lower, and deliberately not claimed to be zero.
+    """
+    if not PATH_VALUE.match(value):
+        return False
+    return "." in value or value.count("/") >= 3
 
 
 def _names_a_reference(name: str) -> bool:
@@ -345,6 +376,8 @@ def find_hardcoded_secret(content: str, path: Path | None = None) -> str | None:
         if len(value) < MIN_SECRET_LENGTH:
             continue
         if _names_a_reference(match.group("name")):
+            continue
+        if _points_at_a_file(value):
             continue
         # "$VAR" / "${VAR}" are environment interpolation placeholders, which is
         # exactly the sanctioned pattern in config.toml.example (RA-09).

@@ -260,6 +260,15 @@ def test_unknown_path_uses_only_format_agnostic_forms():
     ("README.md",           "See https://site.io/?passwordless=true-for-all-users\n"),
     ("README.md",           "See https://shop.io/p?monkey=plush-toy-large\n"),
     ("Dockerfile",          "ENV API_KEY_FILE /run/secrets/api_key\n"),
+    # Named for what it points AT, not what it points with, so the name-side
+    # test structurally cannot see it. The canonical Google Cloud variable.
+    ("docker-compose.yml",
+     "      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/gcp-sa.json\n"),
+    ("Dockerfile",
+     "ENV PYTHONUNBUFFERED=1 GOOGLE_APPLICATION_CREDENTIALS=/app/config/sa.json\n"),
+    ("values.yaml",         "  privateKey: /etc/ssl/private/tls.key\n"),
+    ("values.yaml",         "  azure_credentials: /etc/azure/credentials.json\n"),
+    ("values.yaml",         "  vault_secret: /secret/data/production/app\n"),
 ])
 def test_host_manifests_are_not_flagged(filename, line):
     assert on_commit.find_hardcoded_secret(line, Path(filename)) is None
@@ -410,3 +419,14 @@ def test_audit_blocks_a_forbidden_extension(tmp_path, monkeypatch):
     _repo_with_staged(tmp_path, {"deploy/server.pem": "not a real key\n"})
     monkeypatch.chdir(tmp_path)
     assert not on_commit.audit_secret_shielding()
+
+
+def test_a_path_exemption_does_not_reach_a_bare_credential():
+    """The path test must not become the next over-wide exemption.
+
+    A credential is not a path, and a value-side test that let one through
+    would repeat the `://` mistake in the other direction.
+    """
+    line = "  GOOGLE_APPLICATION_CREDENTIALS: 9f2a4c8e1b7d3a5690b4e2c1f8a7d6e3\n"
+    found = on_commit.find_hardcoded_secret(line, Path("docker-compose.yml"))
+    assert found == "GOOGLE_APPLICATION_CREDENTIALS"

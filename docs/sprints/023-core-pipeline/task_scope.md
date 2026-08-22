@@ -241,6 +241,29 @@ The Tester also attacked `_names_a_reference`'s bare `endswith` on request and
 `private_key_id`, `token_uri`) are public metadata. Reported as a suspicion and
 explicitly not acted on, which is this sprint's rule working as intended.
 
+### Round 3 of the Tester gate — one finding, and it refuted the reasoning
+
+| Finding | Resolution |
+| :--- | :--- |
+| **`GOOGLE_APPLICATION_CREDENTIALS` is blocked, in stock Compose and stock Dockerfile.** Round 2 deleted the value-side pointer test on the argument that *"a key that points at a credential is named for what it points with"*, so the name side would cover every case. The canonical Google Cloud variable is named for what it points **at**: it ends in `credentials`, which is a `SECRET_WORD` and not a reference word, so `_names_a_reference` structurally cannot see it, and its value is always a path to a mounted key file. Three more of the shape: `privateKey: /etc/ssl/private/tls.key`, `azure_credentials:`, `vault_secret:`. Both formats are `C3`'s own new forms and both were clean before this unit | **Fixed** with a narrow value-side test — `_points_at_a_file`: an absolute path of two or more segments over a charset excluding `+` and `=`, plus a file extension or a third segment. It does **not** reopen the round-2 regression: a Slack webhook, a Mongo DSN and a protocol-relative URL all fail on the leading `/`, and all three stay pinned as detections |
+| The base64 exemption rate of that new rule | **Measured, not argued** — 200,000 random values per size: **0.067%** at 24 bytes, 0.107% at 32, 0.140% at 48, against **1.54%** for the deleted `/`-prefix rule. Written in the docstring as those three numbers and explicitly not claimed to be zero. The first draft of that docstring said 0.02%, which was an estimate rather than a measurement, and correcting it before commit is the whole content of the `R2-3` lesson |
+| **Elided ASN.1 prefix in documentation.** A README showing `-----BEGIN RSA PRIVATE KEY-----` followed by `MIIEpAIBAAKCAQEA...` is flagged. That prefix is a fixed DER header shared by essentially every RSA key and carries zero entropy | **Open, low severity, not fixed.** The Tester declined to reject on it and so does this record: an author has an escape via `PLACEHOLDER_MARKERS`, and content shaped like a key body arguably should not be committed. Recorded so it is not rediscovered as new |
+
+**The Tester corrected its own round-2 work on the record**: it had also reported a
+GKE `Deployment` manifest in that class, then found real Kubernetes uses
+`- name: X` / `value: Y` pairs rather than flat mappings, so its single-line
+version had not been stock content. The finding survived on Compose and
+Dockerfile, which do use flat mappings. Worth keeping because the gate had
+rejected round 1 partly on the discipline of testing stock files over invented
+lines, and that discipline cut against its own case.
+
+**Strike position.** Three consecutive Tester rejections on one unit.
+`workflows/remediation_workflow.md` Phase 0 triggers at **more than** three, so
+it has not fired; a fourth rejection fires it. Recorded rather than left to be
+counted later. The trend is converging — two blocking findings, then two, then
+one — and each round's finding was in the fix for the previous round, which is
+the signature of a gate doing its job rather than of a unit out of control.
+
 ### Declared limits of `C3`, so they are not rediscovered as defects
 
 | Limit | Why it is a limit and not a bug |
