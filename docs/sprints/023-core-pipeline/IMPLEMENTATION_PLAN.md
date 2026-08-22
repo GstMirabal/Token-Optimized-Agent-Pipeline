@@ -84,7 +84,7 @@ to be discovered.
 | C1 | `scripts/check_readme_counts.py` | modify | high | lead · `devops_agent` ruleset | ⏳ |
 | C2 | `scripts/session_probe.py` | modify | high — a security report | lead · `devops_agent` ruleset | ⏳ |
 | C3 | `env_shielding_auditor.py`, `hooks/on_commit.py` | modify | **high** — secrets | lead · `devops_agent` ruleset | ✅ `aa83309`…`5bcbdf6` |
-| C3.2 | `hooks/on_commit.py` (`ALLOW_MARKER`) | create | **high** — a documented bypass of a secret gate | lead · `devops_agent` ruleset | 🔄 gate round 5 |
+| C3.2 | `hooks/on_commit.py` (`ALLOW_MARKER`), `rules/qa_and_testing.md` | create | **high** — a documented bypass of a secret gate | lead · `devops_agent` ruleset | ✅ `50094c1` + `R5` fixes |
 | C4 | `mass_standardizer.py` | modify | medium | lead · `skill_architect` ruleset | ⏳ |
 | C5 | `agents/devops_agent.md` | modify | medium — role map | lead · `agent_orchestrator` ruleset | ⏳ |
 | C6 | `agents.md`, `start_workflow.md` | modify | medium | lead · `rule_validator` ruleset | ⏳ |

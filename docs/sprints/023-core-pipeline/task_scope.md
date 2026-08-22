@@ -1,12 +1,13 @@
 # Task Scope — Sprint 023 (`upstream-findings`)
 
 **Branch**: `ai-sprint/023` · **Base**: `main` at `18696c5` (`v4.7.0`)
-**State**: **IN_PROGRESS**, resumed 2026-08-22 (session #3). Sprint open. `C2` is
-delivered and approved by both gates. **`C3` is delivered in `aa83309` and is
-under the Double Gate** — delegation lifted for those two passes only (see
-*Declared deviation — delegation*). Next after it: `C4`.
+**State**: **IN_PROGRESS**, resumed 2026-08-22 (session #3). Sprint open.
+**`C3` and `C3.2` are delivered and APPROVED by both gates** — five Tester
+rounds, four rejections, one approval. Delegation was lifted for those passes
+only (see *Declared deviation — delegation*). **Next: `C4`**, which must ask
+for that lift again.
 
-Thirteen units, thirteen commits. `C9` ran first by design: this sprint's own
+Fourteen units after `C3.2` was added mid-sprint at the remediation halt. `C9` ran first by design: this sprint's own
 close invokes `branch_sovereignty audit`, so leaving that gate intermittently
 wrong meant the sprint would trip on the defect it came to repair.
 
@@ -18,7 +19,8 @@ wrong meant the sprint would trip on the defect it came to repair.
 | C0.3 | `scripts/_root.py` + 6 consumers | create/modify | high | lead · `devops_agent` ruleset | ✅ `359d03c` + `fix` |
 | C1 | `scripts/check_readme_counts.py` | modify | high | lead · `devops_agent` ruleset | ✅ `b2d7c2e` |
 | C2 | `scripts/session_probe.py` | modify | high — a security report | lead · `devops_agent` ruleset | ✅ `26367cf` + `ca29010` + `509f525` |
-| C3 | `env_shielding_auditor.py`, `hooks/on_commit.py` | modify | **high** — secrets | lead · `devops_agent` ruleset | ✅ `aa83309` |
+| C3 | `env_shielding_auditor.py`, `hooks/on_commit.py` | modify | **high** — secrets | lead · `devops_agent` ruleset | ✅ `aa83309`…`5bcbdf6`, gate-approved |
+| C3.2 | `hooks/on_commit.py` (`ALLOW_MARKER`), `rules/qa_and_testing.md` | create | **high** — a documented bypass of a secret gate | lead · `devops_agent` ruleset | ✅ `50094c1` + `R5` fixes |
 | C4 | `mass_standardizer.py` | modify | medium | lead · `skill_architect` ruleset | ⏳ |
 | C5 | `agents/devops_agent.md` | modify | medium — role map | lead · `agent_orchestrator` ruleset | ⏳ |
 | C6 | `agents.md`, `start_workflow.md` | modify | medium | lead · `rule_validator` ruleset | ⏳ |
@@ -303,6 +305,37 @@ single question the decision turns on: **whether a relative
 
 **F3, a fourth consecutive time**: the 455-file nucleus delta reported 0 new and
 0 lost this round too, while `R4-1` was live.
+
+### Round 5 — `APPROVED`. `C3` and `C3.2` clear the Double Gate
+
+Five Tester rounds on one unit: reject, reject, reject, reject, approve. Every
+defect raised across the four rejections is fixed and independently verified by
+the gate that raised it. The gate stated it checked the approval the same way it
+checked round 4's rejection, and reported two findings at full strength rather
+than softening them to justify passing.
+
+| Gate finding | Resolution |
+| :--- | :--- |
+| **`R5-1` — `_suppression_reason` made the scan quadratic.** It does a backwards `rfind` per surviving match and was ordered **before** the cheap `$`/`{`/`[` and `PLACEHOLDER_MARKERS` tests, so every match paid it, and on a single long line each call walks to position 0. Measured by the gate: ×4.00 per doubling where the previous code was linear, and a stock 200 KB single-line JSON export at **259 ms against 0.83 ms — a 313× regression**. No marker needed to trigger it | **Fixed, not routed.** The filter is now last, which makes it strictly cheaper as well as correct. Reproduced here before and after: growth back to ×2 per doubling, and the 200 KB export at **1.8 ms** |
+| **`R5-2` — the affordance was undiscoverable at the point of failure.** The block message named only the identifier; `grep -rn "secret-scan" agents.md rules/` returned nothing; the sole document containing the string was this sprint's own `IMPLEMENTATION_PLAN.md`, which no host reads. So for the shapes deliberately left to the marker, a host was **still in the round-4 position in practice** — blocked, with no visible option but to disable the hook | **Fixed, not routed.** The remedy now travels with the refusal, and `rules/qa_and_testing.md §5` documents the marker, its mandatory reason, its line scope and the hard boundary it cannot unlock. It was the unfinished half of `C3.2`'s own argument, so routing it would have left the unit arguing against itself |
+| **Found by this session, not by the gate: the waiver announcement counted markers, not suppressions.** `ALLOW_MARKER.finditer(content)` reports a waiver for any line that merely *mentions* the marker — the `IMPLEMENTATION_PLAN.md` row documenting it did exactly that. Nothing was suppressed, so nothing was unsafe; the gate simply **claimed an outcome that had not occurred** | **Fixed.** One filter chain, `_credible_findings`, is now shared by the detector and the announcer, so the two cannot disagree about what a finding is. Recorded because it is the sprint's own defect class appearing in the sprint's own remedy |
+
+The gate's three attack results, kept because negatives are evidence too:
+**`ALLOW_MARKER`** is textual rather than syntactic, so it also waives inside a
+JSON string or a Markdown heading and one marker covers its whole line —
+recorded as characteristics, identical to `# noqa` and `#gitleaks:allow`, since
+a committer who could plant a marker in a string could simply write one
+properly. A **forbidden file is not waivable**, which is the right hard
+boundary. **No credential encoding can take `./`, `../` or `~/` shape** — 0 of
+200,000 across base64, base64url and hex — so the zero-risk claim for that
+branch is exact rather than approximate. And **`C3.2` was judged a real unit**
+rather than the fourth narrowing in disguise, on the grounds that the canonical
+case was fixed outright and only marginal shapes left to the marker.
+
+**`F3` held for a fifth consecutive time**: the 455-file nucleus delta reported
+0 new and 0 lost this round too, while `R5-1` and `R5-2` were both live. Five
+rounds, five clean deltas, five rounds with real findings. That is the whole
+case for the routed finding.
 
 ### Declared limits of `C3`, so they are not rediscovered as defects
 

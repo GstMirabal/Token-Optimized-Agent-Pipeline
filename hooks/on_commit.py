@@ -411,15 +411,19 @@ def _unquote(value: str) -> str:
     return value
 
 
-def find_hardcoded_secret(content: str, path: Path | None = None) -> str | None:
-    """Returns the identifier of the first hardcoded secret found, if any.
+def _credible_findings(content: str, path: Path | None):
+    """Yields every match that survives the exclusions, with its waiver.
+
+    One filter chain shared by the detector and the waiver announcer, so the
+    two can never disagree about what counts as a finding.
 
     Args:
         content: Full text of a staged file.
         path: Path of that file, used to select the format-specific patterns.
 
-    Returns:
-        The offending variable name, or None when nothing credible is found.
+    Yields:
+        Tuples of the offending identifier and the reason waiving it, or None
+        when no waiver is declared on that line.
     """
     matches = itertools.chain.from_iterable(
         form.finditer(content) for form in secret_forms_for(path)
@@ -436,8 +440,6 @@ def find_hardcoded_secret(content: str, path: Path | None = None) -> str | None:
         # path shape, roughly 1 private key in 706.
         if match.re is not PRIVATE_KEY_BLOCK and _points_at_a_file(value):
             continue
-        if _suppression_reason(content, match.start()):
-            continue
         # "$VAR" / "${VAR}" are environment interpolation placeholders, which is
         # exactly the sanctioned pattern in config.toml.example (RA-09).
         # "[" and "{" additionally open a YAML flow collection: Compose's
@@ -448,9 +450,51 @@ def find_hardcoded_secret(content: str, path: Path | None = None) -> str | None:
         if any(marker in value.lower() for marker in PLACEHOLDER_MARKERS):
             continue
 
-        return match.group("name")
+        # LAST, because it is the only filter that scans backwards through the
+        # file. Ordered before the cheap tests it made the whole scan
+        # quadratic: every surviving match paid a `rfind` that, on a single
+        # long line, walks to position 0. Measured on a 200 KB single-line
+        # JSON export whose values are env placeholders — 259 ms against
+        # 0.83 ms, a 313x regression — and it doubled fourfold from there.
+        yield match.group("name"), _suppression_reason(content, match.start())
 
+
+def find_hardcoded_secret(content: str, path: Path | None = None) -> str | None:
+    """Returns the identifier of the first unwaived hardcoded secret, if any.
+
+    Args:
+        content: Full text of a staged file.
+        path: Path of that file, used to select the format-specific patterns.
+
+    Returns:
+        The offending variable name, or None when nothing credible is found.
+    """
+    for name, waiver in _credible_findings(content, path):
+        if waiver is None:
+            return name
     return None
+
+
+def announce_waivers(content: str, path: Path, file_path: str) -> None:
+    """Prints every waiver that actually suppressed a finding.
+
+    Announcing `ALLOW_MARKER` matches instead would report a waiver for any
+    line that merely mentions the marker — the row of IMPLEMENTATION_PLAN.md
+    documenting it, for one — so the gate would claim to have waived something
+    it never found. A control asserting an outcome it cannot support is the
+    defect class this whole sprint exists to remove.
+
+    Args:
+        content: Full text of the staged file.
+        path: Path of that file, for format selection.
+        file_path: Path as staged, used in the message.
+    """
+    for name, waiver in _credible_findings(content, path):
+        if waiver:
+            print(
+                f"ℹ️  [ON_COMMIT] Secret scan waived for '{name}' "
+                f"in {file_path}: {waiver}"
+            )
 
 
 def audit_secret_shielding() -> bool:
@@ -481,16 +525,19 @@ def audit_secret_shielding() -> bool:
             if _is_test_artifact(path):
                 continue
 
-            for waiver in ALLOW_MARKER.finditer(content):
-                print(
-                    "ℹ️  [ON_COMMIT] Secret scan waived in "
-                    f"{file_path}: {waiver.group('reason')}"
-                )
+            announce_waivers(content, path, file_path)
 
             leak = find_hardcoded_secret(content, path)
             if leak:
+                # The remedy travels with the refusal. A gate whose only
+                # visible option is to disable it gets disabled: the affordance
+                # existed one round before this message did, and a host that
+                # cannot find it is in the same position as a host without it.
                 violations.append(
-                    f"Hardcoded secret assigned to '{leak}' in {file_path}"
+                    f"Hardcoded secret assigned to '{leak}' in {file_path}. "
+                    "If this is a false positive, append "
+                    "`# secret-scan: allow <reason>` to that line — the reason "
+                    "is required and the waiver is printed on every commit."
                 )
         except Exception:
             # Skip binary files or git errors

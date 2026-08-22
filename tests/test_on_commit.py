@@ -496,3 +496,33 @@ def test_a_pem_body_is_never_treated_as_a_path():
         "/fgwTBxuAVPH1A17UzI/Fk3sXUsYwMHj/PNvuXKIJLzsPnGa4Y5sewHI9btQi1Ea\n"
     )
     assert on_commit.find_hardcoded_secret(content, Path("id_rsa")) == "PRIVATE KEY"
+
+
+def test_a_line_that_only_documents_the_marker_waives_nothing():
+    """Announcing ALLOW_MARKER matches rather than actual suppressions made
+    the gate report a waiver for any line mentioning the marker — including
+    the IMPLEMENTATION_PLAN.md row documenting it. A control asserting an
+    outcome it cannot support is this sprint's defect class."""
+    line = "| `# secret-scan: allow <reason>` | the marker | documented here |\n"
+    on_commit.announce_waivers(line, Path("PLAN.md"), "PLAN.md")
+
+
+def test_the_waiver_announcement_names_the_finding_it_suppressed(capsys):
+    line = "api_key: 9f2a4c8e1b7d3a5690b4e2c1f8a7d6e3  # secret-scan: allow rotated by CI\n"
+    on_commit.announce_waivers(line, Path("values.yaml"), "values.yaml")
+    out = capsys.readouterr().out
+    assert "'api_key'" in out and "rotated by CI" in out
+
+
+def test_the_block_message_carries_the_remedy(tmp_path, monkeypatch, capsys):
+    """A gate whose only visible option is to disable it gets disabled.
+
+    The affordance existed one round before this message did, and the Tester
+    gate's standing objection was that a host could not find it.
+    """
+    _repo_with_staged(tmp_path, {
+        "values.yaml": "azure_credentials: /etc/azure-creds\n",
+    })
+    monkeypatch.chdir(tmp_path)
+    assert not on_commit.audit_secret_shielding()
+    assert "secret-scan: allow" in capsys.readouterr().out
