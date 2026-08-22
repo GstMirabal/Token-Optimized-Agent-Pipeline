@@ -1,8 +1,10 @@
 # Task Scope — Sprint 023 (`upstream-findings`)
 
 **Branch**: `ai-sprint/023` · **Base**: `main` at `18696c5` (`v4.7.0`)
-**State**: **IN_PROGRESS**, resumed 2026-08-18 (session #2). Sprint open. **`C2` is
-delivered and now approved by both gates** — see below. Next: `C3`.
+**State**: **IN_PROGRESS**, resumed 2026-08-22 (session #3). Sprint open. `C2` is
+delivered and approved by both gates. **`C3` is delivered in `aa83309` and is
+under the Double Gate** — delegation lifted for those two passes only (see
+*Declared deviation — delegation*). Next after it: `C4`.
 
 Thirteen units, thirteen commits. `C9` ran first by design: this sprint's own
 close invokes `branch_sovereignty audit`, so leaving that gate intermittently
@@ -16,7 +18,7 @@ wrong meant the sprint would trip on the defect it came to repair.
 | C0.3 | `scripts/_root.py` + 6 consumers | create/modify | high | lead · `devops_agent` ruleset | ✅ `359d03c` + `fix` |
 | C1 | `scripts/check_readme_counts.py` | modify | high | lead · `devops_agent` ruleset | ✅ `b2d7c2e` |
 | C2 | `scripts/session_probe.py` | modify | high — a security report | lead · `devops_agent` ruleset | ✅ `26367cf` + `ca29010` + `509f525` |
-| C3 | `env_shielding_auditor.py`, `hooks/on_commit.py` | modify | **high** — secrets | lead · `devops_agent` ruleset | ⏳ **next** |
+| C3 | `env_shielding_auditor.py`, `hooks/on_commit.py` | modify | **high** — secrets | lead · `devops_agent` ruleset | ✅ `aa83309` |
 | C4 | `mass_standardizer.py` | modify | medium | lead · `skill_architect` ruleset | ⏳ |
 | C5 | `agents/devops_agent.md` | modify | medium — role map | lead · `agent_orchestrator` ruleset | ⏳ |
 | C6 | `agents.md`, `start_workflow.md` | modify | medium | lead · `rule_validator` ruleset | ⏳ |
@@ -178,6 +180,32 @@ are measured; none is routed to an existing unit.
 | **`HTTP_STATUS_RE` takes the first `(HTTP nnn)` in stderr, and `gh` puts a server-controlled message *before* the status.** The Tester's `N-1`: a message containing a literal `(HTTP 404)` would override the true status — same class as `D3`, narrower. The gate **could not reproduce it against the real API** and explicitly declined to press it; real formats confirmed as `gh: Bad credentials (HTTP 401)`, `gh: Validation Failed (HTTP 422)`. Parsing the last match would close it | **Unrouted, and deliberately not fixed.** This sprint's governing rule is *reproduce before repairing*; an unreproduced finding is exactly what the rule forbids acting on. Recorded so it is not rediscovered as new |
 | **The secret-scanning pair's doubt cause is still a hardcoded literal.** The Tester's `O-1`: residual `D7`. `is_admin` is in scope at that call site, yet a non-admin reads `the repository payload did not answer` while the endpoint controls correctly read `admin-only endpoint, and this token does not administer the repository`. Not false — the payload genuinely omits the block — so it is a quality-of-cause note, not a defect. It does misdirect for an **admin** on a private repository, measured on `GstMirabal/CryptoBot` | **Unrouted.** Would be a one-line improvement to `C2`'s own thesis, but `C2` is closed and approved; reopening an approved unit for a non-defect is not warranted |
 
+## Found at session start, session #3 (2026-08-22)
+
+One new finding, plus three prior ones re-verified as still true. Re-verification
+is recorded because `RA-14`'s lesson is that a finding written once is not a
+finding that stays true, and because two of the three now have a second session
+of evidence behind them.
+
+| Finding | Where it goes |
+| :--- | :--- |
+| **`detect_drift.py` has no notion of "these commits belong to the sprint that is open", so verdict `A` fires on every resume of any in-flight sprint.** Measured this session: exit `2`, 24 of 26 commits reported as covered by no released section. All 24 are Sprint 023's own, on `ai-sprint/023`, each carrying the `#023` suffix `agents.md §5 historical_log` requires, with `SPRINT_LOG.md` recording them. `[Unreleased]` holds only the **planning** entry for `C9`/`C10`; the delivery entries are written by `close_workflow.md` Phase 4, which by definition has not run while the sprint is open. The check therefore directs a resuming session to `/agents:reconcile` — a workflow whose own text says it exists for work done **outside** the protocol — for work done inside it. Same defect class the sprint exists to remove: a control reporting a determination it cannot support. Reproduce: `python3 scripts/detect_drift.py; echo $?` on any open sprint branch | **Unrouted.** Not `C10` (that unit is `ci_gate.py`) and not `C9` (`branch_sovereignty.py`). The fix is a fourth verdict or an `A`-suppression when `HEAD` is on `ai-sprint/[ID]` and the anchor's `current_sprint.id` matches — but `detect_drift.py` is the instrument `start_workflow.md` `drift_check` leans on, so changing it is governance-adjacent. Human decision this session: **record and proceed to `C3`**, do not reconcile and do not open a unit for it |
+
+Re-verified, all three still true and all three still unrouted:
+
+| Prior finding | Re-verification this session |
+| :--- | :--- |
+| The nucleus `.claude/` bridge is partial | `comm -13` still returns `harden`, `reconcile`, `revdoc` as present in `commands/` and absent from `.claude/commands/agents/`; `skeleton.md` is still a dangling symlink. Second session of evidence. Belongs to `C6` |
+| `last_platform_probe` has no writer | Key still absent from `docs/active_state.json` after a `session_probe.py` run this session. Unrouted |
+| `docs/0_SYSTEM_OVERVIEW.md` does not exist | `ls docs/` still shows no such file. Unrouted |
+
+## Found while executing `C3`
+
+| Finding | Where it goes |
+| :--- | :--- |
+| **The roadmap's framing of `C3` is half wrong: `env_shielding_auditor.py` does not have "good patterns with a bad list" — the patterns are also bad.** The value character class is `[a-z0-9+/=]{16,}`, which excludes `-` and `_`, so the auditor misses the three commonest real credential shapes **in files it already scanned**: `sk-live-…` (Stripe/OpenAI), `ghp_…` (GitHub PAT), `xoxb-…` (Slack). Measured in isolation — `api_key = "abcdef0123456789abcd"` MATCHES, `api_key = "sk-live-9f2a4c8e1b7d3a5690"` does not. Found because a reproduction case in a `.py` file (already on the scanned list) failed for a reason the file list could not explain | **Unrouted, and deliberately not fixed in `C3`.** The unit's approved scope is the file list and the hook's three alternations; widening the value class changes the false-positive profile of every pattern at once, which is the one thing this unit's abort criterion is written against. `tests/test_env_shielding_auditor.py` uses a value that matches the current class **on purpose**, so its cases isolate the file-list defect and nothing else. Worth a unit of its own — it is a live miss, not a cosmetic one |
+| **`agents.md §1` declares `ruff check .` as the linter with "Reject if exit code > 0", and nothing invokes it.** Measured: `grep -n ruff Makefile` returns nothing, `make verify` runs fourteen checks and ruff is not among them, and `ruff check .` exits `1` with **176 errors** across the tree. So the declared gate has never rejected anything. `hooks/on_commit.py` alone carries nine, all predating this sprint — proven by running ruff against the stashed tree and getting a byte-identical rule/site set | **Unrouted.** Exactly the `RA-16 INVOCATION_COVERAGE` class — a mechanism declared in prose that no invoker calls — and the same shape as `last_platform_probe` above. Not `C3`: `rules/code_craft.md §2` forbids folding 176 pre-existing findings into a fix commit, and turning the gate on is a decision with a migration attached, not a patch |
+
 ## Declared deviation — delegation
 
 Unchanged from `022`: the session configuration forbids spawning subagents
@@ -186,7 +214,13 @@ unless the human asks. Reported before Phase 1 in session #1 and authorised.
 **Session #2 reported the same conflict at the same point and the human lifted
 it for both gates**, so `C2`'s remaining rounds were gated by dispatched
 `qa_agent` and `tester_agent`, not by their author. The lift is per-session and
-per-unit, not standing: `C3` onwards must ask again. Recording it because the
+per-unit, not standing: `C3` onwards must ask again.
+
+**Session #3 asked again, as that sentence requires, and the human lifted it on
+the same terms: QA and Tester gates only, for `C3`.** Authoring stays with this
+session — `F-021-A2` leaves no choice for `scripts/`, and the human declined the
+wider lift so that author and reviewer stay distinct on a unit that handles
+secrets. `C4` onwards must ask again. Recording it because the
 distinction is what `agent_assignment.md` exists to keep honest — five units of
 this sprint were written *and* gated by the same session, and `C2` is the one
 where that is not true.

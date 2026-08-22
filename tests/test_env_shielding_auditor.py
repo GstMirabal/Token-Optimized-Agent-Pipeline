@@ -61,6 +61,22 @@ def test_configuration_formats_are_scanned(tmp_path, name, body):
     assert _scanned(tmp_path, name, body)
 
 
+@pytest.mark.parametrize("name", ["Dockerfile.prod", "Dockerfile.dev"])
+def test_split_build_files_are_scanned(tmp_path, name):
+    """The two halves of C3 must agree on what a build file is called.
+
+    `hooks/on_commit.py` reads `Dockerfile.prod` and this auditor did not,
+    so a credential in a split build file was caught at commit time and
+    missed by the audit — found by the QA gate, not by the tests.
+    """
+    assert _scanned(tmp_path, name, "ENV AWS_KEY=AKIAIOSFODNN7EXAMPLE\n")
+
+
+def test_env_example_survives_the_removal_of_its_own_entry(tmp_path):
+    """`.env.example` is reachable through `.example`, not through itself."""
+    assert _scanned(tmp_path, ".env.example", f"API_KEY={LIVE}\n")
+
+
 @pytest.mark.parametrize("name,body", [
     ("app.py",    f'api_key = "{LIVE}"\n'),
     ("index.js",  f'const apiKey = "{LIVE}";\n'),

@@ -19,8 +19,11 @@ SECRET_PATTERNS = {
 # original list read source only: Compose, Helm values, Terraform, `.ini`,
 # `.cfg`, `.conf` and `.toml` were all unread (F-086-S1). `.example` covers the
 # `config.toml.example` form the sanctioned RA-09 pattern uses.
+# `.env.example` is deliberately absent: `endswith` is suffix matching, so
+# `.example` already covers it, and keeping both would be an entry that can
+# never be the one that matched.
 SCANNED_SUFFIXES = (
-    ".py", ".js", ".ts", ".json", ".env", ".env.example", ".sh", ".bash",
+    ".py", ".js", ".ts", ".json", ".env", ".sh", ".bash",
     ".yml", ".yaml", ".toml", ".cfg", ".ini", ".conf", ".tf", ".example",
 )
 
@@ -30,6 +33,12 @@ SCANNED_SUFFIXES = (
 # whether Compose is covered.
 SCANNED_NAMES = ("Dockerfile", "Makefile", "docker-compose.yml")
 
+# `Dockerfile.prod`, `Dockerfile.dev`: splitting the build file leaves a suffix
+# that is not a format suffix, so neither test above sees it. Matched here so
+# this auditor and hooks/on_commit.py agree on what a build file is called —
+# the two halves of this unit disagreed until the QA gate said so.
+SCANNED_PREFIX = "Dockerfile."
+
 
 def scan_files(directory):
     leaks = []
@@ -38,7 +47,8 @@ def scan_files(directory):
             continue
 
         for file in files:
-            if file.endswith(SCANNED_SUFFIXES) or file in SCANNED_NAMES:
+            if (file.endswith(SCANNED_SUFFIXES) or file in SCANNED_NAMES
+                    or file.startswith(SCANNED_PREFIX)):
                 file_path = os.path.join(root, file)
                 try:
                     with open(file_path, "r", encoding="utf-8") as f:

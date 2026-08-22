@@ -146,10 +146,16 @@ QUERY_STRING_SECRET = re.compile(
 # pattern. So the format-specific forms are selected by path, and the
 # format-agnostic ones always apply.
 YAML_SUFFIXES = (".yml", ".yaml")
-DOCKERFILE_NAMES = ("Dockerfile", "Containerfile")
+
+# `Dockerfile`, plus the `Dockerfile.prod` / `Dockerfile.dev` variants a real
+# deployment splits it into. Held as one name rather than a list of spellings:
+# `Containerfile` was carried here briefly and no file of that name exists in
+# this repository, which `rules/code_craft.md §1` calls configuring what nobody
+# asked to vary. The auditor half of this unit matches the same two shapes.
+DOCKERFILE_NAME = "Dockerfile"
 
 
-def secret_forms_for(path: Path | None) -> tuple:
+def secret_forms_for(path: Path | None) -> tuple[re.Pattern[str], ...]:
     """Selects the secret patterns that apply to one file.
 
     Args:
@@ -163,11 +169,11 @@ def secret_forms_for(path: Path | None) -> tuple:
         disabled and then catches nothing at all.
     """
     forms = [SECRET_ASSIGNMENT, QUERY_STRING_SECRET]
-    if path is not None and path.suffix.lower() in YAML_SUFFIXES:
+    if path is None:
+        return tuple(forms)
+    if path.suffix.lower() in YAML_SUFFIXES:
         forms.append(YAML_SECRET)
-    if path is not None and (
-        path.name in DOCKERFILE_NAMES or path.name.startswith("Dockerfile.")
-    ):
+    if path.name == DOCKERFILE_NAME or path.name.startswith(f"{DOCKERFILE_NAME}."):
         forms.append(DOCKERFILE_SECRET)
     return tuple(forms)
 
