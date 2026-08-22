@@ -15,14 +15,30 @@ SECRET_PATTERNS = {
     "Generic Password": r"(?i)(password|passwd|pwd)['\"]?\s*[:=]\s*['\"]?[a-z0-9@#$%^&*()_+]{8,}['\"]?"
 }
 
+# Credentials live in configuration far more often than in source, and the
+# original list read source only: Compose, Helm values, Terraform, `.ini`,
+# `.cfg`, `.conf` and `.toml` were all unread (F-086-S1). `.example` covers the
+# `config.toml.example` form the sanctioned RA-09 pattern uses.
+SCANNED_SUFFIXES = (
+    ".py", ".js", ".ts", ".json", ".env", ".env.example", ".sh", ".bash",
+    ".yml", ".yaml", ".toml", ".cfg", ".ini", ".conf", ".tf", ".example",
+)
+
+# Files whose whole name is the identifier: a suffix test cannot see them,
+# because they have no suffix. `docker-compose.yml` is already reachable via
+# `.yml` and is named anyway, so grepping this tuple answers the question of
+# whether Compose is covered.
+SCANNED_NAMES = ("Dockerfile", "Makefile", "docker-compose.yml")
+
+
 def scan_files(directory):
     leaks = []
     for root, _, files in os.walk(directory):
         if any(x in root for x in [".git", ".agents", "venv", "node_modules", ".agent_state"]):
             continue
-            
+
         for file in files:
-            if file.endswith((".py", ".js", ".ts", ".json", ".env", ".env.example", ".sh", ".bash")):
+            if file.endswith(SCANNED_SUFFIXES) or file in SCANNED_NAMES:
                 file_path = os.path.join(root, file)
                 try:
                     with open(file_path, "r", encoding="utf-8") as f:

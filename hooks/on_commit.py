@@ -1,5 +1,6 @@
 import subprocess
 import sys
+import itertools
 import json
 import re
 from datetime import datetime
@@ -96,6 +97,80 @@ SECRET_ASSIGNMENT = re.compile(
     re.IGNORECASE | re.MULTILINE | re.VERBOSE,
 )
 
+# The quoted-literal assignment above is the Python/JS form and only that form.
+# Three others carry credentials just as directly and read as clean against it
+# (F-086-S2), so each gets its own alternation rather than one regex widened
+# until it matches everything: a Dockerfile `ENV`/`ARG`, a YAML `key: value`,
+# and a credential in a URL query string. Every one of them is filtered by the
+# same exclusions in find_hardcoded_secret — the gate has already blocked a
+# real host once on a false positive, and widening what it reads is exactly
+# when that risk returns.
+
+# `ENV API_KEY=x`, `ARG API_KEY=x`, and the legacy space-separated `ENV KEY x`.
+DOCKERFILE_SECRET = re.compile(
+    rf"""^[ \t]*(?:ENV|ARG)[ \t]+
+        (?P<name>[A-Za-z0-9_]*(?:{SECRET_WORDS})[A-Za-z0-9_]*)
+        (?:[ \t]*=[ \t]*|[ \t]+)
+        (?P<value>"[^"\n]*"|'[^'\n]*'|[^\s#]+)
+    """,
+    re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+)
+
+# YAML `api_key: value`, including a list item (`- api_key: value`). The value
+# is a single token deliberately: `password: str = None` is a Python type
+# annotation, not a mapping, and a token-bounded value reads `str` there —
+# under MIN_SECRET_LENGTH, so it is dropped instead of blocking the commit.
+YAML_SECRET = re.compile(
+    rf"""^[ \t]*(?:-[ \t]+)?
+        (?P<name>[A-Za-z0-9_-]*(?:{SECRET_WORDS})[A-Za-z0-9_-]*)
+        [ \t]*:[ \t]+
+        (?P<value>"[^"\n]*"|'[^'\n]*'|[^\s#]+)
+    """,
+    re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+)
+
+# `?api_key=…` / `&access_token=…` anywhere in a line: a credential pasted into
+# a URL is not an assignment and so was never matched.
+QUERY_STRING_SECRET = re.compile(
+    r"""[?&](?P<name>\w*(?:key|token|secret|password)\w*)=
+        (?P<value>[^&\s'"#]+)
+    """,
+    re.IGNORECASE | re.VERBOSE,
+)
+
+# A mapping form is only a mapping in a file that uses mappings. Applied to
+# every staged file regardless of type, YAML_SECRET reads JavaScript object
+# literals inside Markdown code blocks as leaks — measured against this
+# repository: five false positives across its own skill documentation, among
+# them `password: process.env.DB_PASSWORD`, which is the sanctioned RA-09
+# pattern. So the format-specific forms are selected by path, and the
+# format-agnostic ones always apply.
+YAML_SUFFIXES = (".yml", ".yaml")
+DOCKERFILE_NAMES = ("Dockerfile", "Containerfile")
+
+
+def secret_forms_for(path: Path | None) -> tuple:
+    """Selects the secret patterns that apply to one file.
+
+    Args:
+        path: Path of the file being scanned, or None when it is not known.
+
+    Returns:
+        The applicable compiled patterns. A format-specific form is omitted
+        when the path does not identify that format, including when the path
+        is unknown: a leak missed in an unidentified file is caught by the
+        next scan, whereas a gate that blocks a legitimate commit gets
+        disabled and then catches nothing at all.
+    """
+    forms = [SECRET_ASSIGNMENT, QUERY_STRING_SECRET]
+    if path is not None and path.suffix.lower() in YAML_SUFFIXES:
+        forms.append(YAML_SECRET)
+    if path is not None and (
+        path.name in DOCKERFILE_NAMES or path.name.startswith("Dockerfile.")
+    ):
+        forms.append(DOCKERFILE_SECRET)
+    return tuple(forms)
+
 # Values that are obviously not live credentials.
 PLACEHOLDER_MARKERS = (
     "example", "changeme", "change-me", "placeholder", "your-", "your_",
@@ -122,17 +197,35 @@ def _is_test_artifact(path: Path) -> bool:
     )
 
 
-def find_hardcoded_secret(content: str) -> str | None:
+def _unquote(value: str) -> str:
+    """Strips one matched pair of surrounding quotes, if present.
+
+    Args:
+        value: A captured value, quoted or bare depending on the form matched.
+
+    Returns:
+        The value without its surrounding quotes.
+    """
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in "'\"":
+        return value[1:-1]
+    return value
+
+
+def find_hardcoded_secret(content: str, path: Path | None = None) -> str | None:
     """Returns the identifier of the first hardcoded secret found, if any.
 
     Args:
         content: Full text of a staged file.
+        path: Path of that file, used to select the format-specific patterns.
 
     Returns:
         The offending variable name, or None when nothing credible is found.
     """
-    for match in SECRET_ASSIGNMENT.finditer(content):
-        value = match.group("value")
+    matches = itertools.chain.from_iterable(
+        form.finditer(content) for form in secret_forms_for(path)
+    )
+    for match in matches:
+        value = _unquote(match.group("value"))
 
         if len(value) < MIN_SECRET_LENGTH:
             continue
@@ -176,7 +269,7 @@ def audit_secret_shielding() -> bool:
             if _is_test_artifact(path):
                 continue
 
-            leak = find_hardcoded_secret(content)
+            leak = find_hardcoded_secret(content, path)
             if leak:
                 violations.append(
                     f"Hardcoded secret assigned to '{leak}' in {file_path}"
