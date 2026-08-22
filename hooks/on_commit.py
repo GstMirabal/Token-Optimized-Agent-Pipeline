@@ -274,7 +274,11 @@ REFERENCE_KEY_PREFIXES = ("existing",)
 # measured rather than argued — see the exemption rate quoted in
 # tests/test_on_commit.py. A URL fails on the leading `/`; a DSN fails on it
 # too; a Slack webhook fails on it too.
-PATH_VALUE = re.compile(r"^/(?:[A-Za-z0-9._-]+/)+[A-Za-z0-9._-]+$")
+# `./`, `../` and `~/` carry no base64 risk at all: neither `.` nor `~` is in
+# the base64 alphabet, so a key can never take these shapes. The leading-`/`
+# form is the only one that needs a guard, and it gets one below.
+RELATIVE_PATH_VALUE = re.compile(r"^(?:\./|\.\./|~/)[A-Za-z0-9._/-]*[A-Za-z0-9._-]$")
+ABSOLUTE_PATH_VALUE = re.compile(r"^/[A-Za-z0-9._/-]*[A-Za-z0-9._-]$")
 
 
 def _points_at_a_file(value: str) -> bool:
@@ -293,15 +297,23 @@ def _points_at_a_file(value: str) -> bool:
         exempted 1.54% of 24-byte base64 while its comment asserted it
         exempted none.
 
-        This test exempts 0.066% at 24 bytes, 0.091% at 32 and 0.134% at 48,
+        This test exempts 0.080% at 24 bytes, 0.121% at 32 and 0.153% at 48,
         **with `=` padding stripped**. That clause is not decoration: a padded
         32-byte value ends in `=`, which is outside this charset, so the
         padded rate at that size is exactly 0% and the figure above is
-        unreachable without it. The first version of this docstring omitted
+        unreachable without it. An earlier version of this docstring omitted
         the method and did not reproduce — the same defect as the rule it
         replaced, one round later. Deliberately not claimed to be zero.
+
+        The third-segment threshold is kept strict rather than relaxed to two,
+        which was measured at 0.35% — five times worse — for the sake of
+        `/etc/azure-creds`. Shapes this test declines are what ALLOW_MARKER is
+        for; loosening the heuristic to chase each one is what failed three
+        times before the marker existed.
     """
-    if not PATH_VALUE.match(value):
+    if RELATIVE_PATH_VALUE.match(value):
+        return True
+    if not ABSOLUTE_PATH_VALUE.match(value):
         return False
     return "." in value or value.count("/") >= 3
 
@@ -350,6 +362,41 @@ def _is_test_artifact(path: Path) -> bool:
     )
 
 
+# A gate with no way to comply is a gate that gets disabled, and then it
+# catches nothing. Three value-side rules in three rounds of this unit each
+# narrowed the last and each was wrong in a new direction — exempting every
+# URL dropped real credentials, exempting nothing blocked real pointers,
+# exempting absolute paths blocked relative ones. Value shape cannot separate
+# a pointer from a credential, because the same string is either one depending
+# on what reads it. Every production secret scanner ships an allowlist for
+# that reason; this one ships a marker.
+#
+# The reason is MANDATORY and the marker is printed at commit time. A silent
+# bypass is how RA-09 gets defeated by the control meant to enforce it; a
+# declared one is an audit trail.
+ALLOW_MARKER = re.compile(
+    r"#[ \t]*secret-scan:[ \t]*allow[ \t]+(?P<reason>\S.*?)[ \t]*$",
+    re.IGNORECASE | re.MULTILINE,
+)
+
+
+def _suppression_reason(content: str, offset: int) -> str | None:
+    """Returns the declared reason waiving a finding, if one is on its line.
+
+    Args:
+        content: Full text of the file being scanned.
+        offset: Character offset where the candidate match begins.
+
+    Returns:
+        The reason text, or None when the line carries no marker.
+    """
+    start = content.rfind("\n", 0, offset) + 1
+    end = content.find("\n", offset)
+    line = content[start:] if end == -1 else content[start:end]
+    marker = ALLOW_MARKER.search(line)
+    return marker.group("reason") if marker else None
+
+
 def _unquote(value: str) -> str:
     """Strips one matched pair of surrounding quotes, if present.
 
@@ -384,7 +431,12 @@ def find_hardcoded_secret(content: str, path: Path | None = None) -> str | None:
             continue
         if _names_a_reference(match.group("name")):
             continue
-        if _points_at_a_file(value):
+        # A PEM body is never a filesystem path, so the path test can only
+        # cost detection there: 0.142% of generated key first lines took a
+        # path shape, roughly 1 private key in 706.
+        if match.re is not PRIVATE_KEY_BLOCK and _points_at_a_file(value):
+            continue
+        if _suppression_reason(content, match.start()):
             continue
         # "$VAR" / "${VAR}" are environment interpolation placeholders, which is
         # exactly the sanctioned pattern in config.toml.example (RA-09).
@@ -428,6 +480,12 @@ def audit_secret_shielding() -> bool:
             
             if _is_test_artifact(path):
                 continue
+
+            for waiver in ALLOW_MARKER.finditer(content):
+                print(
+                    "ℹ️  [ON_COMMIT] Secret scan waived in "
+                    f"{file_path}: {waiver.group('reason')}"
+                )
 
             leak = find_hardcoded_secret(content, path)
             if leak:

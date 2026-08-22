@@ -83,7 +83,8 @@ to be discovered.
 | C0.3 | `scripts/_root.py` + 6 consumers | create/modify | high | lead · `devops_agent` ruleset | ⏳ |
 | C1 | `scripts/check_readme_counts.py` | modify | high | lead · `devops_agent` ruleset | ⏳ |
 | C2 | `scripts/session_probe.py` | modify | high — a security report | lead · `devops_agent` ruleset | ⏳ |
-| C3 | `env_shielding_auditor.py`, `hooks/on_commit.py` | modify | **high** — secrets | lead · `devops_agent` ruleset | ⏳ |
+| C3 | `env_shielding_auditor.py`, `hooks/on_commit.py` | modify | **high** — secrets | lead · `devops_agent` ruleset | ✅ `aa83309`…`5bcbdf6` |
+| C3.2 | `hooks/on_commit.py` (`ALLOW_MARKER`) | create | **high** — a documented bypass of a secret gate | lead · `devops_agent` ruleset | 🔄 gate round 5 |
 | C4 | `mass_standardizer.py` | modify | medium | lead · `skill_architect` ruleset | ⏳ |
 | C5 | `agents/devops_agent.md` | modify | medium — role map | lead · `agent_orchestrator` ruleset | ⏳ |
 | C6 | `agents.md`, `start_workflow.md` | modify | medium | lead · `rule_validator` ruleset | ⏳ |
@@ -109,6 +110,7 @@ gate will shell out to `gh`, which is already a declared prerequisite of
 | `IMPLEMENTATION_PLAN.md` phase-artifact check (`C0`) | deterministic — existing `docs_freshness_check.py`, one map entry | `Makefile docs-freshness-check` target |
 | Phase 5 plan precondition (`C0`) | **attended human step, deliberately** | `pipeline_workflow.md` Phase 5 |
 | `scripts/ci_gate.py` (`C10`) | deterministic — script | `deployment_workflow.md` Phase 1 |
+| `# secret-scan: allow <reason>` marker (`C3.2`) | deterministic — script, and **a declared human waiver by design** | `hooks/on_commit.py audit_secret_shielding` |
 
 `C0` adds no script, so it introduces no new invoker to declare.
 
@@ -147,6 +149,29 @@ from the command being measured.
 | `python3 scripts/map_workflows.py --check` | exit 0 after regenerating the step-map guide |
 
 ---
+
+### `C3.2`, added mid-sprint — why a unit was added rather than the heuristic tuned again
+
+`C3` was rejected four consecutive times by the Tester gate, firing
+`workflows/remediation_workflow.md` Phase 0. Three of those rejections were the
+same logic block: a value-side test deciding whether a matched value is a
+credential or a pointer at one. Each fix narrowed the previous one and each was
+wrong in a **new** direction — exempting every URL dropped real credentials,
+exempting nothing blocked real pointers, exempting absolute paths blocked
+relative ones.
+
+The conclusion, reached by the gate and ratified by the human at the halt:
+**value shape cannot separate a pointer from a credential**, because the same
+string is either one depending on what reads it. Every production secret
+scanner ships an allowlist or baseline for that reason. `C3.2` gives this gate
+the affordance it never had, and `_points_at_a_file` is then allowed to be
+deliberately imperfect instead of being narrowed a fourth time.
+
+**The reason is mandatory and every waiver is printed at commit time.** A silent
+bypass is how `RA-09 SECRET_SOVEREIGNTY` would be defeated by the control built
+to enforce it; a declared one is an audit trail. The abort criterion for `C3.2`
+is that a marker with no reason must not suppress anything, which is pinned by
+test.
 
 ## Out of scope
 

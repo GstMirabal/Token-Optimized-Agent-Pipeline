@@ -430,3 +430,69 @@ def test_a_path_exemption_does_not_reach_a_bare_credential():
     line = "  GOOGLE_APPLICATION_CREDENTIALS: 9f2a4c8e1b7d3a5690b4e2c1f8a7d6e3\n"
     found = on_commit.find_hardcoded_secret(line, Path("docker-compose.yml"))
     assert found == "GOOGLE_APPLICATION_CREDENTIALS"
+
+
+# --- C3.2: the suppression affordance ---------------------------------------
+#
+# Value shape cannot separate a pointer from a credential — three rules over
+# three gate rounds each narrowed the last and each was wrong in a new
+# direction. A gate with no way to comply is a gate that gets disabled, so the
+# residual shapes get a declared waiver instead of a fourth narrowing.
+
+@pytest.mark.parametrize("filename,line", [
+    # Confirmed stock: `gcloud auth application-default login` writes the
+    # second of these, and mounting ~/.config/gcloud is documented practice.
+    ("docker-compose.yml",
+     "      GOOGLE_APPLICATION_CREDENTIALS: ./secrets/gcp-sa.json\n"),
+    ("docker-compose.yml",
+     ("      GOOGLE_APPLICATION_CREDENTIALS: ~/.config/gcloud/"
+      "application_default_credentials.json\n")),
+    ("docker-compose.yml",
+     "      GOOGLE_APPLICATION_CREDENTIALS: ../shared/sa-key.json\n"),
+    ("docker-compose.yml",
+     "      GOOGLE_APPLICATION_CREDENTIALS: /sa-key.json\n"),
+])
+def test_relative_and_single_segment_pointers_are_clean(filename, line):
+    assert on_commit.find_hardcoded_secret(line, Path(filename)) is None
+
+
+@pytest.mark.parametrize("line", [
+    "  azure_credentials: /etc/azure-creds  # secret-scan: allow no extension, mounted dir\n",
+    "  vault_secret: /secret/data/prod/  # secret-scan: allow trailing slash, KV mount\n",
+    "  private_key: /var/my+app/tls.key  # secret-scan: allow plus sign in vendor path\n",
+])
+def test_a_declared_waiver_suppresses_the_finding(line):
+    assert on_commit.find_hardcoded_secret(line, Path("values.yaml")) is None
+
+
+@pytest.mark.parametrize("line", [
+    # No reason given: the marker is an audit trail, not an off switch.
+    "  api_key: 9f2a4c8e1b7d3a5690b4e2c1f8a7d6e3  # secret-scan: allow\n",
+    "  api_key: 9f2a4c8e1b7d3a5690b4e2c1f8a7d6e3  # secret-scan:allow   \n",
+    # A waiver on a different line does not reach this one.
+    ("  other: x  # secret-scan: allow unrelated\n"
+     "  api_key: 9f2a4c8e1b7d3a5690b4e2c1f8a7d6e3\n"),
+])
+def test_a_waiver_without_a_reason_or_on_another_line_does_not_suppress(line):
+    assert on_commit.find_hardcoded_secret(line, Path("values.yaml")) is not None
+
+
+def test_a_waiver_is_announced_at_commit_time(tmp_path, monkeypatch, capsys):
+    """A silent bypass is how RA-09 gets defeated by its own control."""
+    _repo_with_staged(tmp_path, {
+        "values.yaml":
+            "  azure_credentials: /etc/azure-creds"
+            "  # secret-scan: allow no extension, mounted dir\n",
+    })
+    monkeypatch.chdir(tmp_path)
+    assert on_commit.audit_secret_shielding()
+    assert "Secret scan waived" in capsys.readouterr().out
+
+
+def test_a_pem_body_is_never_treated_as_a_path():
+    """The path test can only cost detection on the PEM form."""
+    content = (
+        "-----BEGIN RSA PRIVATE KEY-----\n"
+        "/fgwTBxuAVPH1A17UzI/Fk3sXUsYwMHj/PNvuXKIJLzsPnGa4Y5sewHI9btQi1Ea\n"
+    )
+    assert on_commit.find_hardcoded_secret(content, Path("id_rsa")) == "PRIVATE KEY"
