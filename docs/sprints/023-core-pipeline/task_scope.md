@@ -345,6 +345,49 @@ case for the routed finding.
 | `ENV` **continuation lines** (`ENV APP=x \` + newline + `API_KEY=…`) are not read | Multi-pair on a single line is now read. Joining continuations means rewriting the content before matching, which changes what every other form sees — a larger change than the finding warrants |
 | The auditor's value character class still excludes `-` and `_` | Recorded above as its own unrouted finding. The Tester confirmed the interaction: the eight new suffixes widen *which files* are read but not *what can be seen in them*, so `sk-live-…` in a newly covered `values.yaml` is still invisible. **The green suite overstates the delivered coverage**, and that is written here rather than left implicit |
 
+## Suspended at the token bound, a third time — session #3
+
+`rules/token_economy.md §3.1`, measured rather than estimated:
+`python3 scripts/session_cost.py --session 5990fd61-30e0-4b2a-9c64-b2458eec8ab3`
+
+| Cycle | msgs | first turn | peak | ratio |
+| :--- | ---: | ---: | ---: | ---: |
+| 1 | 293 | 0 | 296,706 | unusable — no first turn recorded |
+| **2** | 50 | 24,272 | 336,603 | **13.9×** |
+
+**The hard bound was NOT crossed.** 13.9× against 15×, and the session suspends
+anyway, deliberately: `C3` cost five gate rounds, so opening `C4` would cross
+the bound mid-unit. A unit left half-written and un-gated is precisely what the
+bound exists to prevent, and the boundary available right now is clean — both
+gates approved, every unit committed, `git status --porcelain` empty, graph
+rebuilt. `§3.1` prices a restart at ~22K, measured three times, against a
+336K peak.
+
+`forced: false`. This is a chosen stop at a clean boundary, not a threshold
+firing — the first of the three in this sprint that is.
+
+**Third time the bound has governed this sprint**: 16.5× (session #1, cycle 7),
+15.9× (session #2, cycle 1), and 13.9× here with the next unit judged certain
+to cross. `§3.1` asks for the "too tight" signal to be recorded rather than
+inferred later, so: **three sessions, three stops, seven of fourteen units.**
+The provenance note in that section says `n=1` and of one kind — intensive
+planning, little code execution. This sprint is the other kind, heavy on code
+and on gate rounds, and it stopped at the bound three times out of three. That
+is the calibration datum, and it is worth more than any single unit here.
+
+**Cycle 1's `0x` is the measurement artifact already recorded above**, not a
+real reading: `session_cost.py` reports no first turn for the cycle that
+precedes the first compaction. The usable figure is cycle 2's.
+
+## Where session #4 resumes
+
+| | |
+| :--- | :--- |
+| **Next unit** | **`C4`** — `mass_standardizer.py`. Two defects: the 5-level `base_dir` (adopt `agents_root()`) and the stub that ignores nested content. `skills/django-expert-3rd/skills/SKILL.md` is vendored and **not touched** |
+| **Delegation** | Must be asked for again. The lift is per-session and per-unit; session #3's covered `C3`'s gates only |
+| **Remaining** | `C4`, `C5`, `C6`, `C7`, `C8`, `C10` |
+| **Highest-severity open item** | **`F8`** — a literal `.env` holding live credentials passes `hooks/on_commit.py` today. Routed, unowned, and it defeats `RA-09`. It deserves a unit before the sprint closes |
+
 ## Declared deviation — delegation
 
 Unchanged from `022`: the session configuration forbids spawning subagents
