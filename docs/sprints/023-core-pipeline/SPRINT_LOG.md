@@ -1,7 +1,7 @@
 # Sprint Log — 023 (`upstream-findings`)
 
 **Branch**: `ai-sprint/023` from `main` at `18696c5` (`v4.7.0`)
-**Status**: open. 5 of 13 units delivered and gated; `C2` delivered and **awaiting gate round 2**.
+**Status**: open. **9 of 14 units delivered and gated.** Remaining: `C5`, `C6`, `C7`, `C8`, `C10`.
 
 ## Delivered
 
@@ -350,6 +350,97 @@ the fetch to the caller, out of every test's reach. Fixing `G-1` cost a test.
 **Verification**: `make verify` exit `0` read from `$?` — **230 tests**, from
 226 at `26367cf` (+1 for `G-1`'s pin, +3 for `T-1`/`T-2`/`T-3`). The live probe
 reports no platform finding on this repository.
+
+### `C3` + `C3.2` — the secret gate reads the formats credentials live in (`aa83309`…`5bcbdf6`, `50094c1`)
+
+**Recorded here retrospectively, in session #4.** Session #3 delivered both units
+and wrote their full account into `task_scope.md` without adding a section to
+this log, so between `2026-08-18` and `2026-08-22` this file's status line read
+*"5 of 13 units delivered; `C2` awaiting gate round 2"* while eight units were
+delivered and `C2` was approved. That is drift in the artifact whose purpose is
+to prevent it, and it is stated rather than quietly corrected.
+
+Five Tester rounds, four rejections, one approval. `C3.2` was added mid-sprint at
+the `remediation_workflow.md` Phase 0 halt, after three consecutive rejections of
+the same logic block: a value-side test deciding whether a matched string is a
+credential or a pointer at one. The conclusion, reached by the gate and ratified
+by the human: **value shape cannot separate a pointer from a credential**,
+because the same string is either one depending on what reads it. `C3.2` gives
+the gate the allowlist affordance every production scanner ships, with a
+mandatory reason printed at commit time — a silent bypass is how `RA-09` would be
+defeated by the control built to enforce it. Full account, including the two
+findings closed rather than routed in round 5, is in `task_scope.md`.
+
+### `C4` — the official auditor could not run, and harmed the tree when it did (`5056796`)
+
+Four rounds, three rejections. The roadmap named two defects; execution found a
+third, and the unit committed a fourth against itself.
+
+**Defect 1, the root.** `base_dir` climbed five `.parent` levels where four are
+correct, so `manifest_skills.json` resolved one directory *above* the framework.
+`agents.md §3 enforcement` calls this script the official auditor of the
+Three-File Skill Standard; it could not run from the repository root or anywhere
+else. It now adopts `agents_root()`, the `C0.3` anchor the roadmap already named
+it for.
+
+**Defect 2, the false green.** That failure path printed `ERROR: Manifest not
+found …` and returned exit `0`. The same class as `C9` and `C10` — a control
+reporting a determination it cannot support — this time telling every caller
+that a run which never happened had succeeded.
+
+**Defect 3, found only by running the repaired script.** `scripts/` was created
+for **every** skill in the manifest, so the auditor violated the standard it
+enforces: `agents.md §3` prohibits padding a knowledge skill with empty
+scaffolding. Measured — the first run that reached this library wrote
+`scripts/__init__.py` into **11** knowledge skills and a template `README.md`
+into 9, reverted with `git clean`. It stayed invisible because defect 1 hid it.
+`F-086-S3` reads *"the auditor does not generate a bad stub: it cannot run"*;
+repairing the second clause is what exposed the first. **The sprint's governing
+rule, read forward:** *reproduce before repairing* also means run it after, or a
+defect that needs the fix in place to appear cannot be seen at all.
+
+**Defect 4, committed by this unit against itself.** A root `SKILL.md` was
+treated as a generated stub because it contained the template's `(Automatic
+scaffolding)` sentence, and `skills/django-expert-3rd/SKILL.md` was deleted. It
+also carried three authored directives, one of them the mandate `RA-02` states.
+The QA gate found it with `git log -S`; nothing in the diff, the docstring or the
+tests recorded the loss, and **the test written to forbid that deletion passed
+only because its fixture avoided the case**. Restored byte-identical to HEAD. The
+substring licence is replaced by byte-equality with the freshly rendered
+template — the only shape proving nobody edited the file after this script wrote
+it. On the single production sample the substring existed to judge, it was wrong
+every time.
+
+**`F-086-S3` is not closed, and no unit can close it.** The vendored 247-line
+skill stays unreachable through that root, because the root file is legitimate
+content. Deleting it is `agents.md §2 destructive_flags`; copying vendor content
+into the framework tree is `rules/skills_and_integrations.md §3`. Both gates
+ratified that reading independently. The condition is now printed as one `[!]`
+line on every run instead of being latent, and the decision is the human's.
+
+**Verification**: `make verify` exit `0` read from `$?` — **372 tests**, from 357
+at `4a3c64a`. Against the pre-fix tree 14 of the 15 new tests fail; both gates
+confirmed the suite also catches the destructive version above.
+
+### Gate rounds — `C4`
+
+| Gate | Round | Verdict |
+| :--- | :--- | :--- |
+| **QA Agent** (dispatched) | 1 | **REJECTED** — the unit deleted hand-authored governance content; the abort criterion was a substring; the safety test certified an invariant the tree disproved; the tests were not hermetic |
+| **Tester Agent** (dispatched) | 1 | **REJECTED** — `monkeypatch` died on `AttributeError` so defect 2 was never reproduced; no test observed the *process* exit code; the docstring recorded a discrimination count that measurement contradicted |
+| **Tester Agent** | 2 | **APPROVED** — one advisory: the strong/weak split was 9/5 where measurement gave 8 strong, 5 `AttributeError`, 1 `OSError` |
+| **QA Agent** | 2 | **REJECTED** — `RA-14`: three statements describing the corrected behaviour left standing in `README.md` ×2 and `SKILL.md` ×1 |
+| **QA Agent** | 3 | **REJECTED** — `RA-14` again, one word: the table was corrected to 8 while the prose three lines below still read *nine* |
+| **QA Agent** | 4 | **APPROVED** |
+| **Tester Agent** | 3 | **APPROVED** — verdict re-confirmed on the tree as it stood after the documentation fixes, not carried forward |
+
+Both gates were **dispatched as subagents**, on a per-unit lift the human granted
+at session start. Every blocking finding above was raised by a gate and none was
+reachable by the author: the deletion was found with `git log -S` against a file
+the author had read and not registered, and the false count was found by
+re-measuring rather than by re-reading. `C4` is the second unit of this sprint
+where author and reviewer are distinct, and the one that would have shipped a
+destructive regression without it.
 
 ### Gate rounds — `C9`, `C0`, `C0.2`, `C0.3`, `C1`
 

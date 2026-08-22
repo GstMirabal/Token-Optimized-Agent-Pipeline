@@ -1,11 +1,12 @@
 # Task Scope — Sprint 023 (`upstream-findings`)
 
 **Branch**: `ai-sprint/023` · **Base**: `main` at `18696c5` (`v4.7.0`)
-**State**: **IN_PROGRESS**, resumed 2026-08-22 (session #3). Sprint open.
-**`C3` and `C3.2` are delivered and APPROVED by both gates** — five Tester
-rounds, four rejections, one approval. Delegation was lifted for those passes
-only (see *Declared deviation — delegation*). **Next: `C4`**, which must ask
-for that lift again.
+**State**: **IN_PROGRESS**, resumed 2026-08-22 (session #4). Sprint open.
+**`C4` is delivered and APPROVED by both gates** (`5056796`) — four rounds,
+three rejections, one approval, and the rejections caught a destructive
+regression this unit had committed against itself. Delegation was lifted for
+those passes only (see *Declared deviation — delegation*). **Next: `C5`**,
+which must ask for that lift again.
 
 Fourteen units after `C3.2` was added mid-sprint at the remediation halt. `C9` ran first by design: this sprint's own
 close invokes `branch_sovereignty audit`, so leaving that gate intermittently
@@ -21,7 +22,7 @@ wrong meant the sprint would trip on the defect it came to repair.
 | C2 | `scripts/session_probe.py` | modify | high — a security report | lead · `devops_agent` ruleset | ✅ `26367cf` + `ca29010` + `509f525` |
 | C3 | `env_shielding_auditor.py`, `hooks/on_commit.py` | modify | **high** — secrets | lead · `devops_agent` ruleset | ✅ `aa83309`…`5bcbdf6`, gate-approved |
 | C3.2 | `hooks/on_commit.py` (`ALLOW_MARKER`), `rules/qa_and_testing.md` | create | **high** — a documented bypass of a secret gate | lead · `devops_agent` ruleset | ✅ `50094c1` + `R5` fixes |
-| C4 | `mass_standardizer.py` | modify | medium | lead · `skill_architect` ruleset | ⏳ |
+| C4 | `mass_standardizer.py`, `tests/…`, skill `README.md` + `SKILL.md` | modify/create | medium — raised to **high** on execution: the unit deleted authored content | lead · `skill_architect` ruleset | ✅ `5056796`, gate-approved |
 | C5 | `agents/devops_agent.md` | modify | medium — role map | lead · `agent_orchestrator` ruleset | ⏳ |
 | C6 | `agents.md`, `start_workflow.md` | modify | medium | lead · `rule_validator` ruleset | ⏳ |
 | C7 | `requirements-freeze.txt` | modify | low | lead · `devops_agent` ruleset | ⏳ |
@@ -379,13 +380,39 @@ is the calibration datum, and it is worth more than any single unit here.
 real reading: `session_cost.py` reports no first turn for the cycle that
 precedes the first compaction. The usable figure is cycle 2's.
 
-## Where session #4 resumes
+## Found at session start, session #4 (2026-08-22)
+
+Nothing new. Four prior findings re-verified as still true, which is the point of
+recording them: `drift_check` and the partial bridge now have three sessions of
+evidence each.
+
+| Prior finding | Re-verification this session |
+| :--- | :--- |
+| `detect_drift.py` fires verdict `A` on an open sprint | Exit `2`, **33 of 35** commits reported as covered by no released section. Verified all 33 are this sprint's own `#023` commits; the 2 covered are `b7f6741` (Sprint 022) and `e5b5fbd` (the `4.7.0` seal). Second firing. Session #3's human decision — record and proceed, do not reconcile — was applied unchanged rather than re-litigated |
+| The nucleus `.claude/` bridge is partial | Still 11 symlinks against 13 commands; `harden`, `reconcile`, `revdoc` unlinked, `skeleton.md` still dangling. **Third session of evidence.** It bit again in the same way: `drift_check` directed this session to `/agents:reconcile`, which this repository still cannot invoke. Belongs to `C6` |
+| `last_platform_probe` has no writer | Key still absent from `docs/active_state.json` after this session's `session_probe.py` run, which reached the platform section — `gh` is present and authenticated here. Unrouted |
+| `docs/0_SYSTEM_OVERVIEW.md` does not exist | `ls docs/` still shows no such file. `read_ruleset` was satisfied by `agents.md` plus `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md`, as in prior sessions. Unrouted |
+
+## Found while executing `C4`
+
+`C4`'s roadmap entry named two defects. Executing it found a third, and the unit
+committed a fourth against itself before the gates caught it.
+
+| Finding | Where it goes |
+| :--- | :--- |
+| **The auditor violated the standard it enforces, and only running it revealed that.** `standardize_skill` called `mkdir()` on `scripts/` for every skill in the manifest, so a skill became executable by the act of being audited. `agents.md §3` says padding a knowledge skill with empty scaffolding is PROHIBITED noise. Measured, not inferred: the first run that reached this library wrote `scripts/__init__.py` into **11** knowledge skills and a template `README.md` into 9, reverted with `git clean`. It was invisible for as long as it was, because defect #1 meant the script could not run at all — `F-086-S3` says "the auditor does not generate a bad stub: it cannot run", and repairing the second half exposed the first | Fixed inside `C4`. The lesson is the sprint's own governing rule read forward rather than backward: *reproduce before repairing* also means **run the thing after repairing**, because a defect that needs the fix in place to appear is invisible to any amount of reading |
+| **This unit deleted hand-authored governance content and its own test certified that it could not.** `skills/django-expert-3rd/SKILL.md` was treated as a generated stub because it contained the template's `(Automatic scaffolding)` sentence. It also carried three authored directives, one of them the mandate `RA-02` states (`Clause J-02: LAZY_SIGNAL_PARADIGM`). The QA gate found it with `git log -S`; nothing in the diff, the docstring or the tests recorded the loss. Restored with `git checkout --`, byte-identical to HEAD | Fixed inside `C4`. The substring licence is replaced by **byte-equality with the freshly rendered template** — the only shape that proves nobody has edited the file since this script wrote it. A substring cannot separate *generated* from *generated-then-edited*; on the single production sample it existed to judge, it was wrong 100% of the time |
+| **`F-086-S3` is NOT closed by `C4`, and cannot be closed by any unit.** The vendored 247-line Django skill remains unreachable through `skills/django-expert-3rd/`'s root, because the root file is legitimate authored content rather than a stub. Both ways to close it inside this unit are forbidden: deleting the authored file is `agents.md §2 destructive_flags`, and copying vendor content into the framework's tree is `rules/skills_and_integrations.md §3`. Both gates ratified this reading independently | **Human decision required**, and it is now surfaced rather than latent: the repaired auditor prints one `[!] … left untouched, resolve by hand.` line for this skill on every run. The question is where the three directives should live if the root file is to become a pointer |
+| **`Makefile:74`'s tree-integrity guard watches `config/ hooks/ scripts/` and not `skills/`.** It would have stayed green through the deletion above — the same failure its own comment records about `config/abandoned_branches.json` being destroyed while the suite passed. The strongest advisory either gate produced | **Unrouted.** Not `C4`'s file to edit under `jurisdictional_lock`. Deserves its own unit; the blast radius of the skill library is unwatched |
+| **`scripts/verify_references.py:194` check (d) globs only `workflows/*.md` and `scripts/*.py`, so `skills/*/scripts/` is never scanned.** Measured: **25** skill scripts are invisible to the `RA-16` gate and **20** of them declare no `invoked_by`. `verify_references.py` returns exit 0 while asserting "every mechanism has an invoker", over a scan that never read them. `mass_standardizer.py`'s own declaration is therefore honest but unenforced | **Unrouted.** Same class as `RA-16`'s founding precedent, and the same shape as `last_platform_probe`: a mechanism whose declared scope is wider than its implemented scope |
+
+## Where session #5 resumes
 
 | | |
 | :--- | :--- |
-| **Next unit** | **`C4`** — `mass_standardizer.py`. Two defects: the 5-level `base_dir` (adopt `agents_root()`) and the stub that ignores nested content. `skills/django-expert-3rd/skills/SKILL.md` is vendored and **not touched** |
-| **Delegation** | Must be asked for again. The lift is per-session and per-unit; session #3's covered `C3`'s gates only |
-| **Remaining** | `C4`, `C5`, `C6`, `C7`, `C8`, `C10` |
+| **Next unit** | **`C5`** — `agents/devops_agent.md:4` gains `Write, Edit`. One line closes `F-086-A1`; `F-021-A2`'s structural void is **declared**, not resolved |
+| **Delegation** | Must be asked for again. The lift is per-session and per-unit; session #4's covered `C4`'s gates only |
+| **Remaining** | `C5`, `C6`, `C7`, `C8`, `C10` |
 | **Highest-severity open item** | **`F8`** — a literal `.env` holding live credentials passes `hooks/on_commit.py` today. Routed, unowned, and it defeats `RA-09`. It deserves a unit before the sprint closes |
 
 ## Declared deviation — delegation
@@ -406,6 +433,26 @@ secrets. `C4` onwards must ask again. Recording it because the
 distinction is what `agent_assignment.md` exists to keep honest — five units of
 this sprint were written *and* gated by the same session, and `C2` is the one
 where that is not true.
+
+**Session #4 asked again and the human lifted it on the same terms: QA and
+Tester gates only, for `C4`.** `C5` onwards must ask again.
+
+This is the unit that shows what the distinction is worth, and it is worth
+recording in one place rather than being inferred from the round count. `C4`
+was rejected **three times**: the Tester found two defects that had no test and
+a false measurement recorded in the deliverable's own docstring; the QA gate
+found that the unit had **deleted hand-authored governance content** — three
+directives including the mandate `RA-02` states — and that the test written to
+forbid exactly that deletion passed only because its fixture avoided the case.
+Two further rounds were `RA-14` propagation: a claim corrected where a reviewer
+had pointed, left standing three lines below and in two other files.
+
+None of it was reachable by its author. The deletion was found with `git log -S`
+against a file the author had read and not registered; the false docstring count
+was found by re-measuring rather than by re-reading. Six units of this sprint
+were written *and* gated by the same session; `C2` and `C4` are the two where
+that is not true, and `C4` is the one that would have shipped a destructive
+regression without it.
 
 `F-021-A2` makes self-execution unavoidable for `scripts/` regardless — no
 profile in `agents/` holds `Write` for that tree, which is `C5`'s subject.
