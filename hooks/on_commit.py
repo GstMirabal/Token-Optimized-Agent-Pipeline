@@ -291,8 +291,15 @@ def _points_at_a_file(value: str) -> bool:
         Measured over 200,000 random values per size, not reasoned about,
         which is the mistake the deleted `/`-prefix rule made: it wrongly
         exempted 1.54% of 24-byte base64 while its comment asserted it
-        exempted none. This test exempts 0.067% at 24 bytes, 0.107% at 32 and
-        0.140% at 48. Lower, and deliberately not claimed to be zero.
+        exempted none.
+
+        This test exempts 0.066% at 24 bytes, 0.091% at 32 and 0.134% at 48,
+        **with `=` padding stripped**. That clause is not decoration: a padded
+        32-byte value ends in `=`, which is outside this charset, so the
+        padded rate at that size is exactly 0% and the figure above is
+        unreachable without it. The first version of this docstring omitted
+        the method and did not reproduce — the same defect as the rule it
+        replaced, one round later. Deliberately not claimed to be zero.
     """
     if not PATH_VALUE.match(value):
         return False

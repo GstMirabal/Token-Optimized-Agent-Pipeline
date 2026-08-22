@@ -264,6 +264,46 @@ counted later. The trend is converging — two blocking findings, then two, then
 one — and each round's finding was in the fix for the previous round, which is
 the signature of a gate doing its job rather than of a unit out of control.
 
+### Round 4 — `remediation_workflow.md` Phase 0 has fired. `C3` is HALTED pending a human decision
+
+Fourth consecutive Tester rejection. The trigger is *"QA or Tester forcefully
+reject the exact same logic block **>3 consecutive times**"*, and `R3-1` and
+`R4-1` are the same logic block — the value-side pointer test. **Nothing is
+reverted and no further patching is done until the human decides**, because
+deciding for them is the failure mode this switch exists to stop.
+
+| Finding | Status |
+| :--- | :--- |
+| **`_points_at_a_file` blocks relative and home-relative pointers.** `GOOGLE_APPLICATION_CREDENTIALS: ./secrets/gcp-sa.json` and `: ~/.config/gcloud/application_default_credentials.json` are blocked in stock local-development Compose files that were clean before `C3`. The second is the literal path `gcloud auth application-default login` writes. `PATH_VALUE` requires a **leading `/`**, so relative paths — half of the path space — fail it. Five more: bare `secrets/gcp-sa.json`, root-level `/sa-key.json` (one segment), `/etc/azure-creds` (no extension, two segments), `/secret/data/prod/` (trailing slash), `/var/my+app/tls.key` (`+` excluded) | **Open — the rejection.** The aggravator the Tester rested on: **the gate has no suppression affordance at all** — no inline marker, no allowlist, no baseline. In `R3-2` it declined to reject because an author could reach for a `PLACEHOLDER_MARKER`; here the only options are to change the deployment or disable the hook |
+| **The exemption rates in the docstring did not reproduce as written.** Independently re-measured: 24 and 48 bytes match, **32 bytes gives exactly 0% padded** and 0.09% only with `=` stripped, because a 32-byte value ends in `=` which is outside the charset. Confirmed here before accepting it | **Fixed.** The docstring now names the unpadded method and says why the clause matters. Errs conservative, so not a security finding — but `R2-3`'s lesson was that a number must carry its method, and this repeated that defect **one round after recording it**. That is the more useful fact than the number |
+| **The path rule is applied to `PRIVATE_KEY_BLOCK`, where it can only cost detection.** A PEM body is never a filesystem path, yet the value-side test filters that form too: **0.142% of naturally generated PEM first lines are exempted, about 1 in 706 private keys** | **Open, low severity.** Excluding that one form from the value-side test costs nothing. Held with everything else pending the decision |
+| The elided ASN.1 prefix (`R3-2`) | **Open by agreement of both sides.** The Tester was asked whether to close it and said to leave it recorded |
+
+**The structural argument, which is why this is a human decision and not another
+patch.** Three value-side rules in three rounds: exempt every URL or path
+(dropped real credentials), exempt nothing (blocked real pointers), exempt
+absolute multi-segment paths (blocks relative pointers). Each was a reasonable
+narrowing of the last and each was wrong in a **new** direction. The Tester's
+reading, which this record adopts: value-shape classification cannot separate a
+pointer from a credential, because the same string is either one depending on
+what reads it. Every production secret scanner ships an allowlist or a baseline
+for that reason, and this gate has none.
+
+**`git restore .` would do nothing here** — every round of `C3` is committed, so
+the remediation instrument assumes uncommitted work and finds none. Recorded as
+a defect of the switch itself, in the sprint that exists to find controls that
+cannot do what they claim.
+
+**The Tester's own note on the strike position**, kept because it is the part a
+later reader will want: it stated that it checked whether it was applying a
+harsher bar than in earlier rounds, judged that it was not, and declined to
+reject on three further findings this round that did not meet it. It named the
+single question the decision turns on: **whether a relative
+`GOOGLE_APPLICATION_CREDENTIALS` path is stock content.**
+
+**F3, a fourth consecutive time**: the 455-file nucleus delta reported 0 new and
+0 lost this round too, while `R4-1` was live.
+
 ### Declared limits of `C3`, so they are not rediscovered as defects
 
 | Limit | Why it is a limit and not a bug |
