@@ -738,6 +738,41 @@ the worst outcome available to the unit.
 | **`docs/audits/THIRD_PARTY_PROVENANCE_TODO.md` carries `TODO` in its filename**, which `agents.md §1 Markers ephemeral` rejects on sight | **Unrouted, pre-existing.** Not `C7`'s defect and outside its scope. Recorded so it is not rediscovered later as a gate failure |
 | `docs/roadmaps/…:531,573,617` and `CHANGELOG.md:197` still name the old path | **`RA-05` closeout obligations.** Under the instruct/testify rule these **testify** — they are the finding and its prescribed fix, and rewriting them would erase why `C7` exists |
 
+## Suspended below the bound, a fifth time — session #5, and the first that was not forced
+
+**`forced: false`, and unlike sessions #1-#4 this one did not reach the bound.**
+Measured with `scripts/session_cost.py --json`, which `rules/token_economy.md §3.1`
+requires — *"a figure without it is memory, not evidence"*:
+
+| Cycle | Messages | First turn | Peak | Ratio |
+| :--- | :--- | :--- | :--- | :--- |
+| 1 | 94 | 24,272 | 119,653 | 4.9× |
+| 2 | 219 | 24,272 | 280,938 | 11.6× |
+| 3 | 12 | 24,272 | 292,606 | **12.1×** |
+
+Stopped at **12.1× of 15×**, by choice rather than by the bound: the next unit is
+`C10`, a new gate script, and `C5` and `C6` cost two gate rounds each while `C3`
+cost four. Starting it here would guarantee cutting it mid-round. The reasoning
+sessions #3 and #4 used — price the *next* step, not the consumed budget — with
+the difference that this session could stop before the bound instead of at it.
+
+### Two calibration data points `§3.1` asks for by name
+
+`§3.1` declares its provenance as **`n=1` and of one kind** (intensive planning,
+many reads, little code execution). This session is of a third kind again — heavy
+on **gate rounds**: six dispatches, five rounds, three units closed.
+
+1. **The reset point is a per-project constant, now confirmed in a second
+   session.** `§3.1` observed *"22,174 tokens, identical three times"*. This
+   session: **24,272, identical three times** across three cycles. Different
+   value, same phenomenon — which supports the rule's core design choice of
+   measuring against the cycle's first turn rather than the session's, since that
+   denominator is stable.
+2. **Three units closed at 12.1× where four prior sessions closed ten units
+   between them at the bound.** The bound did not bind here, which is the
+   observation `§3.1` says its calibration cannot make while the hard threshold
+   always fires first. Recorded as evidence the threshold is not set too tight.
+
 ## Where session #6 resumes
 
 The table under `## Where session #5 resumes` above is **spent** — its two
