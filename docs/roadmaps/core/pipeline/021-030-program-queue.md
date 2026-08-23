@@ -809,6 +809,12 @@ under `scripts/` or `hooks/`. Writes are emitted by the lead agent **under the r
 profile governing each artifact**, and the deviation is recorded in `task_scope.md` so the
 structural gate **audits** it instead of discovering it.
 
+**Valid until `C5`.** `C5` closed `F-086-A1`, so `devops_agent` now holds `Write`/`Edit` for
+the framework-root `scripts/` and `hooks/` trees. The practice above survives unchanged from
+`C5` onward, but its **reason** does not: writes stay with the lead session because this
+session's configuration forbids dispatching subagents for authoring, **not** because the role
+map lacks an owner. `F-021-A2` — the absence of an implementer role — remains open.
+
 One atomic commit per concern (`RA-08`), all on `ai-sprint/023`, one sprint PR.
 
 ## Risks and exclusions

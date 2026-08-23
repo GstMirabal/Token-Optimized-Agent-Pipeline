@@ -86,7 +86,7 @@ to be discovered.
 | C3 | `env_shielding_auditor.py`, `hooks/on_commit.py` | modify | **high** — secrets | lead · `devops_agent` ruleset | ✅ `aa83309`…`5bcbdf6` |
 | C3.2 | `hooks/on_commit.py` (`ALLOW_MARKER`), `rules/qa_and_testing.md` | create | **high** — a documented bypass of a secret gate | lead · `devops_agent` ruleset | ✅ `50094c1` + `R5` fixes |
 | C4 | `mass_standardizer.py`, `tests/`, skill `README.md` + `SKILL.md` | modify/create | medium — **raised to high on execution** | lead · `skill_architect` ruleset | ✅ `5056796` |
-| C5 | `agents/devops_agent.md` | modify | medium — role map | lead · `agent_orchestrator` ruleset | ⏳ |
+| C5 | `agents/devops_agent.md`, `agents.md` §6 role table | modify | medium — role map | lead · `agent_orchestrator` ruleset | 🔄 `R1` applied, **UN-GATED** — re-gate died on an account quota, not on a verdict |
 | C6 | `agents.md`, `start_workflow.md` | modify | medium | lead · `rule_validator` ruleset | ⏳ |
 | C7 | `requirements-freeze.txt` | modify | low | lead · `devops_agent` ruleset | ⏳ |
 | C8 | `origin/contrib/host-findings` | modify | low | lead · `doc_orchestrator` ruleset | ⏳ |
@@ -172,6 +172,31 @@ bypass is how `RA-09 SECRET_SOVEREIGNTY` would be defeated by the control built
 to enforce it; a declared one is an audit trail. The abort criterion for `C3.2`
 is that a marker with no reason must not suppress anything, which is pinned by
 test.
+
+### `C5`'s tier re-evaluation — the step the roadmap assigned, and its verdict
+
+`docs/roadmaps/core/pipeline/021-030-program-queue.md:498-503` reads: *"assign `haiku`
+now, and have 023 re-evaluate that specific tier when closing `C5` — **recorded in 023's
+plan as a step, not an option**."* It was recorded in no row of this plan until the QA gate
+found the omission at `R1`. Filed here, with the verdict rather than only the step, because
+a step whose outcome is not written is the same loss over again.
+
+**Verdict: `devops_agent` keeps `tier: mechanical` / `model: haiku`.** The basis, not the
+adjective:
+
+| Question | Answer |
+| :--- | :--- |
+| Does the grant make this profile an *author* of `scripts/` and `hooks/`? | **No.** It makes it the accountable **owner**. `F-021-A2` is declared and not resolved, so no implementer role exists and authoring still falls to the lead session |
+| Then does the roadmap's premise hold? | **Not yet.** *"A profile moving from verifying to authoring deployment artifacts"* presupposes the profile authors. It does not, and this sprint's own units are the evidence: every one was written by the lead session |
+| Is the declared tier what actually ran? | **No, and that is already recorded** (`task_scope.md`, session #3 findings): in a session that cannot dispatch subagents, every unit runs on the session model regardless of its assignee's tier. `check_model_tiers.py` proves coherence between two declarations, never what executed |
+
+**The trigger for re-asking, written down so it is not lost with this context**: the moment
+`F-021-A2` is resolved and a profile actually *authors* under the framework-root `scripts/`
+or `hooks/` trees, this tier MUST be re-evaluated **before the first dispatch**, because the
+roadmap's premise becomes true at that instant. `config/model_tiers.json` records
+`mechanical` as *"Deterministic, verifiable results. A wrong answer fails at the next
+command"* — which describes an environment operator, not the author of a governance gate,
+and `agents/devops_agent.md` says so in its own text.
 
 ## Out of scope
 

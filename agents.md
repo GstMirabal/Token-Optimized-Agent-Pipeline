@@ -115,7 +115,7 @@ The pipeline operates under a rigid sequential process. Role usurpation is stric
 | Category | Rule (Key) | Value / Constraint (Value) |
 | :--- | :--- | :--- |
 | **Subagent Roles** | `principal_agent` | Lead Agent. Creates Implementation Plan (informed by graphify), manages the Approval Gate. |
-| **Subagent Roles** | `devops_agent` | Environment Agent. Manages venv, .env export, and Docker health. |
+| **Subagent Roles** | `devops_agent` | Environment Agent. Manages venv, .env export, and Docker health. **Sole holder of `Write`/`Edit` for the framework-root `scripts/` and `hooks/` trees** (`F-086-A1`, Sprint 023) — not `skills/[name]/scripts/`, which `skill_architect` forges. It gives those trees an owner without creating the implementer role the map still lacks (`F-021-A2`, declared in that profile). |
 | **Subagent Roles** | `orchestrator` | Roadmap Author. Drafts Initial Roadmap and instantiates Sprint Hierarchy. |
 | **Subagent Roles** | `agent_orchestrator`| Agent Assignment. Assigns specific subagents to the Initial Roadmap steps. |
 | **Subagent Roles** | `skill_architect` | Skill Builder. Prepares/injects skills for the assigned subagents. |

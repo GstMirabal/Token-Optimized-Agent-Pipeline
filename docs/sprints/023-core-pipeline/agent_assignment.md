@@ -73,7 +73,16 @@ requiring this statement of every sprint — is proposed against
 
 ## Unresolved
 
-`F-021-A2` stands: **no profile in `agents/` holds `Write` for `scripts/`**, so
-`devops_agent` is the closest owner of the script changes rather than the correct
-one. Sprint `023` unit `C5` widens the role map; until it lands, every `scripts/`
-write in this sprint is attributed to a profile that could not have performed it.
+**Through `C4.2`, `F-021-A2` stood**: no profile in `agents/` held `Write` for
+`scripts/`, so `devops_agent` was the closest owner of the script changes rather
+than the correct one, and every `scripts/` write up to that point is attributed
+to a profile that could not have performed it.
+
+**`C5` closed `F-086-A1` and changed this for the units that follow.**
+`devops_agent` now holds `Write`/`Edit` for the framework-root `scripts/` and
+`hooks/` trees, so from `C5` onward the attribution names a profile that *could*
+have performed the write. `F-021-A2` itself is **declared, not resolved**: the
+grant creates an owner, not an implementer role, and authoring still falls to the
+lead session — for the remaining units (`C6`, `C7`, `C8`, `C10`, and `C10`'s new
+`scripts/ci_gate.py`) the reason is the session's delegation restriction, no
+longer the role map.
