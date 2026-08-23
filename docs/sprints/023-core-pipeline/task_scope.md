@@ -1,13 +1,14 @@
 # Task Scope — Sprint 023 (`upstream-findings`)
 
 **Branch**: `ai-sprint/023` · **Base**: `main` at `18696c5` (`v4.7.0`)
-**State**: **IN_PROGRESS**, resumed 2026-08-22 (session #4). Sprint open.
-**`C4` and `C4.2` are delivered and APPROVED by both gates** (`5056796`,
-`955eb5d`) — seven gate rounds across the two, five rejections, and the
-rejections caught a destructive regression `C4` had committed against itself.
-**`F-086-S3` is closed.** Delegation was lifted for
-those passes only (see *Declared deviation — delegation*). **Next: `C5`**,
-which must ask for that lift again.
+**State**: **IN_PROGRESS**, resumed 2026-08-23 (session #6). Sprint open.
+**Twelve of fourteen units are delivered and gate-approved.** Remaining: `C8`
+and `C10`, plus `F8`, which still has no unit. **Next: `C10`** — the last
+high-risk unit, chosen over `C8` because it is the other half of this sprint's
+thesis (`C9` answers red when it does not know; `C10` answers green) and
+because `deployment_workflow.md` Phase 1 is the gate through which this sprint
+itself will merge. Delegation was lifted for `C10`'s QA + Tester passes only
+(see *Declared deviation — delegation*); `C8` onwards must ask again.
 
 Fourteen units after `C3.2` was added mid-sprint at the remediation halt. `C9` ran first by design: this sprint's own
 close invokes `branch_sovereignty audit`, so leaving that gate intermittently
@@ -29,7 +30,7 @@ wrong meant the sprint would trip on the defect it came to repair.
 | C6 | `agents.md` §0, `start_workflow.md` (3 rows), `audit_workflow.md` (`federation_audit`), `docs/plans/README.md` (routing discharged), `tests/test_installer.sh` (+1 assertion), `.claude/commands/agents/` (untracked, regenerable) | modify | medium | lead · `rule_validator` ruleset | ✅ `R2` — both gates APPROVED |
 | C7 | `requirements-freeze.txt` → `docs/audits/SKILLOPT_TRANSITIVE_CLOSURE.md` (git rename), `skills/skillopt/SKILL.md` (reference) | move | low | lead · `devops_agent` ruleset | ✅ both gates APPROVED, first round |
 | C8 | `origin/contrib/host-findings` | modify | low | lead · `doc_orchestrator` ruleset | ⏳ |
-| C10 | `scripts/ci_gate.py` (new), `workflows/deployment_workflow.md:17` | create/modify | **high** — a gate | lead · `devops_agent` ruleset | ⏳ |
+| C10 | `scripts/ci_gate.py` (new), `tests/test_ci_gate.py` (new), `workflows/deployment_workflow.md:17` | create/modify | **high** — a gate | lead · `devops_agent` ruleset | ✅ `R6` — both gates APPROVED after 6 rounds, 4 rejections |
 
 ## Why this session stopped here
 
@@ -790,6 +791,370 @@ instructions ("re-apply the `agents.md §6` row", "dispatch `qa_agent` and
 | **Highest-severity open item** | Unchanged: **`F8`** — a literal `.env` holding live credentials passes `hooks/on_commit.py` today. Routed, unowned, defeats `RA-09`. It deserves a unit before the sprint closes |
 | **Governance escalations pending** | Two rules the QA gate stated during `C5`/`C6`, recorded under `## C6 gate rounds` and routed to `extract_workflow` / `agents.md §7` rather than applied mid-unit: **correct the documents that instruct, annotate the records that testify**, and **fold in a correction that this unit's own change falsifies; route a new mechanism.** `agents.md` has 28 lines of headroom under `J1` for sprints 024-029, so spending ceiling on them is a close-time decision |
 
+## Found at session start, session #6 (2026-08-23)
+
+| Finding | Routing |
+| :--- | :--- |
+| **`detect_drift.py` verdict `A` fired again, exactly as line 197 of this file predicts it would on every resume of an in-flight sprint.** Now **45 of 47** commits where session #3 measured 24 of 26 — the count grows with the sprint, which is the signature of the defect rather than of a new problem. All 45 are Sprint 023's own, on `ai-sprint/023`, each carrying `#023`. Reproduce: `python3 scripts/detect_drift.py; echo $?` | **Still unrouted, and the human decision was re-taken this session rather than inherited: record and proceed to `C10`.** Asked again on the same reasoning session #5 recorded for delegation — a decision is granted to the session that receives it. The answer was the same, which is why asking cost nothing. The fix remains a fourth verdict or an `A`-suppression when `HEAD` is on `ai-sprint/[ID]` and the anchor's `current_sprint.id` matches; it is a candidate unit for `024`, not for this sprint |
+| **The start protocol ran clean end to end for the first time in this sprint.** Mirror agreed with the anchor, `readiness_probe` and `platform_probe` both green, the working tree empty, and the nucleus bridge intact at 13 commands / 13 symlinks with none dangling. Sessions #2 through #5 each lost rounds to one of these | Nothing to route — recorded as the **evidence that `C6` worked**. `C6` repaired the bridge that had held eleven stale symlinks since July, and `C2` repaired the probe. This is the first session to start on top of both, and it is the only measurement that can show it |
+
+## `C10` gate round `R1` — QA approved, Tester rejected, and the split is the finding
+
+`C10` delivers `scripts/ci_gate.py` (new), `tests/test_ci_gate.py` (new) and the
+`pr_flow` row of `workflows/deployment_workflow.md`. Both gates were dispatched
+under session #6's lift. **They disagreed, and the disagreement is worth more
+than either verdict alone**: the structural gate found the file clean on every
+mandatory axis and the functional gate found three false-verdict paths in the
+same file. Structure and behaviour are different objects, which is the whole
+reason the Double Gate has two passes rather than one reviewer with two
+checklists.
+
+### QA: `APPROVED`, with one correction to this session's reasoning
+
+Measured, not asserted: 12/12 functions with return annotations and no unannotated
+argument; longest function `_state_of` at **39** lines against the 50 limit;
+deepest nesting exactly **3**, at the limit, in `gh_json`; one `except` handler
+that propagates its cause; zero `TODO`/`FIXME`; zero absolute paths;
+`ruff check scripts/ci_gate.py` exit 0 against the 9-finding baseline of
+`branch_sovereignty.py`. `RA-16` verified in **both** directions — the docstring
+declares `deployment_workflow.md#pr_flow`, and that row actually invokes the
+script.
+
+**It refuted this session's justification for one decision while confirming the
+decision.** The lead session kept `# noqa: E402` on the test's import because 13
+sibling files do the same — an argument from idiom. The QA gate removed it and
+ran `ruff check --select E402 --isolated`, which raised the real error, then put
+it back: the directive is load-bearing under any configuration that enables E402
+and reads as "unused" only because this repository ships no ruff config. Right
+answer, better basis. Recorded because *"the tree does it this way"* is exactly
+the reasoning that propagates a defect when the tree is wrong.
+
+### Tester: `REJECTED` — 10 of 26 mutants killed, 38%
+
+The suite was green at 25/25 and the gate behaved correctly on every live
+command. **Neither fact was worth anything**, and the mutation pass is what
+showed it. Six findings, three of them in shipped code:
+
+| # | Finding | Class |
+| :--- | :--- | :--- |
+| `D1` | `evaluate()` was pinned, but **`main()` — the only thing that issues an exit code — was executed by no test at all.** Mutating the verdict line `if buckets[FAILED] or buckets[PENDING]` to drop `PENDING` left all 25 tests green while the gate reprinted the literal PR `#45` false green | test |
+| `D2` | *"A branch declaring no required check is a failure"* is the unit's second headline claim, argued for three paragraphs in the docstring, and **no test asserted it**. `if not required and False:` survived | test |
+| `D3` | **Shipped code.** With a non-admin token on *this* repository — protection `FORBIDDEN`, `rules/branches/main` `[]`, three checks genuinely required — the empty union was returned as a verdict. The gate could never exit 0, the message was false, and it routed the operator to `/agents:harden` on an already-hardened repository | **the defect class this sprint exists to remove, committed inside the unit written to remove it** |
+| `D4` | **Shipped code.** `CheckRun.startedAt` is null until a run starts, so a queued re-run sorted *below* the superseded pass it replaces and was discarded. The test written against this risk **gave both runs real ordered timestamps and so avoided the case that breaks it** — the same fixture failure `C4` shipped earlier in this sprint | false green |
+| `D5` | **Shipped code.** `--base` defaulted to `main` while `deployment_workflow.md` invokes the gate without it, so every pull request was gated against `main`'s requirements — green while its own base had a failing check, or permanently closed on any host whose default branch is not `main` | false green + false red |
+| `D6` | Coverage **49.7%** (83/167 statements) against `rules/qa_and_testing.md §1`'s 100% mandate. Six of ten functions never executed by any test | coverage |
+| `D7` | `NOT_PROTECTED` and `NO_SUCH_BRANCH` declared as fixtures under a comment explaining the distinction, and **referenced by no test** | dead fixture |
+
+**`D3` is the one that matters beyond this unit.** The plan's unifying frame
+says the remedy is to *"stop collapsing doubt into a verdict"*. `required_checks`
+returned `(set(), "")` when one source was unreadable and the other empty —
+`error == ""` meaning *"this answer is trustworthy"* — which is indistinguishable
+from both sources answering that nothing is required. The author wrote three
+paragraphs of docstring reasoning about not blocking non-admin operators and then
+produced the gate that blocks exactly them. Reasoning in prose about a failure
+mode is not the same as testing for it, and this unit is the proof.
+
+### Remediation, and how it was verified
+
+Every finding accepted; none argued down. `required_checks` now returns
+`(None, reason)` when one source is unreadable and the other empty, with the
+message *"unproven rather than empty"*. `_reduce_runs` was extracted: any
+pending run makes the check pending regardless of timestamps, ties resolve to
+`FAILED`. `pr_base()` reads `baseRefName`; `--base` is an override only.
+Tests grew 25 → 50, adding a `drive()` helper that runs the real `main()` and
+asserts **exit codes** rather than helper return values.
+
+| Measurement | Before | After |
+| :--- | :--- | :--- |
+| Statement coverage of `ci_gate.py` (stdlib `trace`) | 49.7% | **99.4%** — the only uncovered line is `sys.exit(main())` under the `__main__` guard |
+| Tester's mutants killed | 10 of 26 | **15 of 15 reproduced, all reported killed — see the retraction below: the harness was invalid and this number is void** |
+| `make verify` | 397 | **422**, exit 0 |
+
+**Two mutants were initially detected by *hanging* rather than by an assertion,
+and that was treated as a defect in the suite rather than a pass.** Removing
+`poll`'s exit conditions makes the loop unbounded, so the suite stalled instead
+of going red — which in CI reads as infrastructure trouble and gets retried.
+`fake_gh` now caps invocations at `CALL_CAP` and raises when exceeded. Both
+mutants now fail in milliseconds. The signal existed either way; what changed is
+that it is now legible.
+
+## `C10` gate rounds `R2`-`R4` — and it ends **un-gated**, deliberately
+
+### `R2`: QA rejected, Tester approved — the mirror of `R1`
+
+The two gates swapped verdicts, which is worth recording as evidence the Double
+Gate is measuring two different things rather than duplicating one.
+
+**QA `REJECTED`, two blocking findings, both introduced by the `R1`
+remediation itself.** `F1`: `required_checks` had grown from 36 to **55**
+physical lines, over `agents.md §1`'s 50-line limit. `F2`: `ruff UP035` — the
+`Callable` import added to satisfy QA's own `Obs-2` was written
+`from typing import Callable` instead of `from collections.abc import Callable`,
+and it was the **only** `UP035` in the repository.
+
+**The QA gate refused to change the yardstick to clear the unit, and said so.**
+It noted that under a docstring-excluded convention `required_checks` measures
+37 and would pass, then declined that metric because it was not the one it had
+applied in `R1` — *"switching yardsticks mid-audit to clear the unit is the
+softening my role forbids."* Both numbers were put on the record so the lead
+could split the function or amend the rule, rather than being handed one number
+that happened to pass. Fixed by splitting: the `if not known:` branch moved
+verbatim into `_from_one_source`, and `required_checks` fell to 31.
+
+**Tester `APPROVED`** with five non-blocking recommendations, having re-run the
+`R1` harness plus 33 mutants of its own (28 killed, 5 survived, **0 skipped** —
+it confirmed every anchor applied).
+
+### `R3`: QA approved, with two rulings and a second escalation
+
+Both blocking findings verified fixed by measurement. The gate then answered the
+two questions it had been asked to rule on rather than leaving them implicit:
+
+**Ruling 1 — the `RUF100` deviation is legitimate, and `agents.md §1` is what
+needs correcting.** The rule says `ruff check .`, *"Reject if exit code > 0"*,
+with no qualification. Measured: that exact command **exits 1 on this repository
+right now**. `C10` contributes 1 of 41 `RUF100` and introduced no new code.
+Applied literally, the rule rejects every unit in this repository in perpetuity,
+including units that touch no Python — *"a gate nobody can pass is a gate that
+gets removed"*, which is `ci_gate.py`'s own docstring quoted back at the
+governance that would have rejected it.
+
+**Independently verified by the lead before recording**, because a deviation
+resting on one party's measurement is a deviation resting on nothing: with the
+directive present, `ruff check --isolated --select E402` exits 0; with it
+removed, exit 1 and `E402 Module level import not at top of file`. The `noqa` is
+load-bearing.
+
+**`Esc-2`, framework-class, routed to `extract_workflow` / `agents.md §7`:**
+there is **no ruff configuration anywhere** — no `ruff.toml`, `.ruff.toml` or
+`pyproject.toml` in this repository or any parent. The tree is being linted by
+whatever rule set the installed ruff defaults to, which nobody chose, and which
+enables `RUF100` while **not** enabling `E402` — so every genuinely necessary
+`noqa: E402` reads as unused. Recommended fix, in order: (1) add a `ruff.toml`
+pinning the rule set with `E402` enabled, which dissolves all 41 correctly by
+making the directives *used* rather than deleted; (2) amend `linter_command` to
+state that the exit code is judged on the files a unit changed and the findings
+it introduced, with the tree-wide backlog tracked separately.
+
+**A correction the lead made to its own measurement**, recorded so it is not
+inherited: the first histogram read as 41 `RUF100` **and** 41 `E402`. There are
+**zero** actual `E402` findings — the grep matched the string inside each
+`RUF100` message (*"non-enabled: `E402`"*) as well as in the code column, and
+double-counted. There are **zero** actual `E402` findings tree-wide, confirmed
+by both parties (`ruff check . --select E402` exits 0), and that absence is
+exactly why 41 `RUF100` fire.
+
+**A second correction, this one to the correction above — the QA gate caught
+the lead being wrong about the gate.** The lead first recorded *"the tree-wide
+total is 176, not the 93 the gate reported; 93 is ruff's fixable subset"*. It is
+not. Both figures are right for different scopes, and the coincidence is what
+misled:
+
+| Command | Errors | Fixable |
+| :--- | ---: | ---: |
+| `ruff check scripts hooks tests` — the gate's stated scope | **93** | 59 |
+| `ruff check .` — the scope `agents.md §1 linter_command` names | **176** | **93** |
+
+The fixable subset of the wide scope equals the total of the narrow one. Two
+unrelated 93s. The gate's sentence had said *"93 findings across `scripts/`,
+`hooks/` and `tests/` **alone**"* and meant it literally; the lead read the word
+"alone" past and inferred a relationship from the matching number. **176 is
+still the figure `Esc-2` carries**, because `ruff check .` is the command the
+rule actually names — but the lead's number was right for a reason it had not
+established, which is not the same as being right.
+
+**And the `RA-14` sweep this correction triggered found that `Esc-2` is not
+new.** Line 213 of this file already records, from an earlier session:
+*"`agents.md §1` declares `ruff check .` as the linter … and nothing invokes it
+… exits `1` with **176 errors** across the tree."* Same measurement, same
+number, already `Unrouted`. What the QA gate adds is the **diagnosis** that
+finding never had: there is no ruff configuration anywhere, so the rule set is
+whatever the installed binary defaults to, and it enables `RUF100` while not
+enabling `E402` — which is why 41 of the 176 are the tool complaining about
+suppressions it made necessary. The remedy therefore is not "turn the declared
+gate on and migrate 176 findings" but "pin the rule set first, which dissolves
+41 of them correctly, then turn it on". `Esc-2` is a **merge into the line-213
+finding**, not a new entry beside it — recorded this way so the next session
+routes one unit and not two.
+
+**Ruling 2 — change neither** `main()`'s missing docstring (tree idiom 12 of 18;
+its contract is the module docstring's `Exit codes:` block) nor the four
+one-line fixture docstrings (expanding a 3-line fixture into eight lines of
+`Args:`/`Returns:` restates the signature and is the padding
+`agents.md §3` calls prohibited noise in its own domain).
+
+### One Tester recommendation was applied although it was **not** blocking
+
+`P1`: a stale `QUEUED` run pinned a check whose later run had completed, so a
+healthy repository could never clear the gate. The Tester classified it
+*"narrowly, in the safe direction"* and non-blocking, correctly — it fails
+closed and stays inside the declared contract.
+
+**It was applied anyway, because it meets this unit's own declared abort
+criterion**: *"a permanently closed gate on a healthy repository"* is the
+wording, and failing closed is not an exemption when that is the criterion
+itself. The gate's severity judgment was reasonable; the unit's stated terms are
+stricter than that judgment, and the stated terms win. `_reduce_runs` now pins a
+check only on a run that is unorderable (`""` or `0001-01-01T00:00:00Z`) or in
+the newest timestamp group.
+
+### The lead's own harness caught the failure it had warned the Tester about
+
+Re-running the mutation harness after that rewrite printed
+`!! SKIP — anchor not found` for the `D4` mutant instead of counting it killed:
+the rewrite had moved the anchor text. **That is precisely the miscount the lead
+had warned the Tester to guard against ninety minutes earlier**, and it was
+visible only because the harness distinguishes a skipped mutation from a killed
+one.
+
+**And that was the smaller of the two defects in it. `R5` found the larger one,
+and it voids every mutation number this session reported before that point.**
+
+### `R5`: the lead's mutation harness had been reporting false kills for three rounds
+
+The Tester rejected again, and one of its findings contradicted a measurement
+the lead had published: mutant `G6` — replacing the unorderable-timestamp filter
+with `list(runs)` — was reported **KILLED** by the lead's harness and
+**SURVIVED** by the Tester's. Both could not be right, and the lead's was wrong.
+
+Cause, measured by running the harness sandbox **with no mutation applied at
+all**:
+
+```
+UNMUTATED_BASELINE_RC=1
+FAILED test_the_workflow_phase_that_declares_it_actually_names_the_script
+FAILED test_the_replaced_command_is_still_named_as_history
+```
+
+Those two tests read `workflows/deployment_workflow.md` relative to the
+repository root, and the harness copied only `scripts/` and `tests/` into its
+temporary directory. So the baseline raised `FileNotFoundError` and exited `1`
+— and the harness judged "killed" by `exit != 0`. **Every mutant therefore
+reported KILLED whether or not a single test detected it.** `✅ All 15 mutants
+killed` and `✅ All 18 mutants killed` were both meaningless.
+
+**This is the sprint's own defect class, in the instrument built to verify a
+gate against it.** `C10` exists because `gh pr checks --watch` reported a
+determination it could not support; the harness verifying `C10` did exactly
+that, and it did so while the lead was writing docstrings about controls that
+overclaim. It survived three rounds because its output was green and green was
+what was expected — the same reason the Tester gives for why a passing suite is
+what has to be audited rather than trusted.
+
+Fixed by copying every path the suite reads into the sandbox and, more
+importantly, by **asserting the unmutated baseline is green before any mutant
+runs** — a harness that cannot prove its own zero point cannot report a delta.
+True result on the validated harness: **17 of 18 killed, `G6` SURVIVED**, which
+is what the Tester had said.
+
+**The `C10` finding that matters most came from this**, and it is not the
+harness: `P1` is **not fixed and is not fixable from `statusCheckRollup`
+alone**. The Tester retracted its own round-2 recommendation — *"my rule pins
+unorderable runs, so it cannot fix a case whose defining feature is an
+unorderable pending run"* — and a queued re-run and a stale queued entry present
+**identical** rollup data. No timestamp rule separates them.
+
+The lead's test `test_a_stale_queued_run_does_not_pin_a_check_a_later_run_completed`
+claimed otherwise, and passed **only because its fixture gave a `QUEUED` run a
+real `startedAt`** — contradicting the premise stated twenty lines above it in
+the function it tested, and departing from the shape both of its neighbouring
+`QUEUED` fixtures use. **Third occurrence of `C4` fixture avoidance in this
+sprint**, and this one was written directly beneath a docstring paragraph citing
+`C4` as the lesson. Reading a rule is not obeying it.
+
+Remediation: the test was given the shape its neighbours use, failed, and was
+rewritten to pin only the property the rule actually has (supersession by a real
+older timestamp). `P1` is now pinned as an **open, declared limit** by
+`test_p1_remains_open_an_unorderable_pending_run_still_pins`, so a future change
+that turns it green re-opens `D4` and a test says so. The redundant
+filter/guard pair `G6` exposed was collapsed by normalising unorderable
+timestamps to one value, which also fixes the case both spellings appear at once
+— filtering ranked `0001-01-01T00:00:00Z` above `""` and dropped runs it should
+have weighed. `test_both_unstarted_forms_rank_equally` kills `G6`.
+
+The docstring's *"Both forms arrive in practice"* was downgraded to what is
+measured: schema-permitted, and **0 of 51 rollup entries across 12 pull requests
+of this repository** carry an unorderable `startedAt`. It was an unmeasured
+claim written as a measured one, which `agents.md §1 unambiguous_action` is
+precisely about.
+
+### `R6`: **both gates APPROVED. `C10` clears the Double Gate.**
+
+Six rounds, four rejections, and the unit that took them is the one whose
+subject is gates that report what they cannot support.
+
+**The Tester confirmed its own harness was never affected by the lead's defect**,
+and said so with evidence rather than assurance: every sandbox it built created
+`mut*/workflows/` and copied the file, and it printed the unmutated baseline
+before each run (`SANDBOX_BASELINE_EXIT=0` in `R2`, `killed=28 survived=5
+skipped=0` in `R3` against a green baseline). It then made the guard explicit in
+its own harness anyway. Two harnesses, one broken and one not, and the broken
+one was the author's.
+
+Final verdicts on the artifact as it stands: `make verify` exit 0 at **428**;
+56 tests in this unit; statement coverage **99.5%** by the Tester's counter with
+`sys.exit(main())` the sole miss; **18 of 18** mutants killed on the lead's
+validated harness and **15 of 19 killed, 4 survived, 0 skipped** on the
+Tester's, every survivor named and adjudicated non-blocking;
+`ruff check scripts/ci_gate.py` exit 0; `python3 scripts/ci_gate.py 45 --no-wait`
+exit 0 live. `_reduce_runs` at 48 of 50 lines.
+
+**`test_p1_remains_open_...` was itself audited against the standard that
+condemned its predecessor**, and passed: it iterates both shapes the source's
+premise requires of a `QUEUED` run and asserts `PENDING`, hitting the case it
+names instead of stepping around it, with a failure message that states the
+consequence (`D4 is reopened`). A test that pins an open defect is only worth
+having if it cannot be satisfied by avoiding it.
+
+### `R4` never happened: both gates died on an external quota
+
+Both agents were resumed for the round-4 re-gate and **both terminated on an
+account-level monthly spend limit before producing a verdict** — neither got
+past reading the changed file. Identical to how session #5's re-gate ended.
+
+At that moment `C10` was un-gated and the session was prepared to commit it that
+way rather than sign it itself. **The human intervened and asked that the gates
+be retried; they resumed with their context intact and `R5`/`R6` followed**, so
+the handoff below never had to happen. It is left on the record because the
+decision it describes was real and would have bound: the last verdicts then
+standing (QA `R3`, Tester `R2`) had been issued over the version **before** the
+`_reduce_runs` rewrite, and the lead voided them by changing the file — acting
+on the scope note the QA gate had attached to its own approval, *"an approval
+cannot close over an artifact that then changes."*
+
+**The change was to be kept rather than reverted to restore those approvals'
+validity.** Reverting would have made two approvals formally cover code the
+Tester had already shown wrong in a way this unit's abort criterion names. An
+approval whose object is knowingly defective is worse than a recorded absence of
+approval. That reasoning stands even though the situation dissolved.
+
+State at handoff, measured after `R5`: `make verify` exit 0 at **428** tests; 56
+tests in this unit; statement coverage of `ci_gate.py` **99.4%** with
+`sys.exit(main())` the sole miss; **18 of 18 mutants killed on a harness whose
+unmutated baseline is asserted green first** — the qualifier is the point, since
+the same figure was meaningless three rounds running without it;
+`ruff check scripts/ci_gate.py` exit 0; `python3 scripts/ci_gate.py 45 --no-wait`
+exit 0 against the live repository.
+
+**Known-open in shipped code, declared not hidden**: `P1` — a stale `QUEUED`
+entry lingering beside a newer completed pass keeps the check pending. False
+red, unfixable from rollup data, pinned by test as a limit rather than left to
+be rediscovered as a defect.
+
+### Routed out of `C10` — recommendations not applied, with reasons
+
+| Finding | Why it was not applied here |
+| :--- | :--- |
+| Tester `H3`: **the normalisation direction is unpinned, and the two directions disagree** | Mapping unorderable timestamps to `"9999"` instead of `""` — making an unstarted run the *newest* rather than the oldest — passes all 56 tests. Nothing fixes the choice. The asymmetry the Tester named: the same uncertainty (*this run cannot be ordered, so we cannot know it is superseded*) is handled **conservatively** when the run is `PENDING` and **permissively** when it is `FAILED` — an unorderable failed run is discarded in favour of a real-timestamped pass, which is the false-green direction. Not a regression: the filter it replaced discarded them identically, its input is unmeasured (0 of 51), and no claim in the record contradicts it — the Tester's stated discriminator every round. **Required follow-up, not optional**: extend rule 1 to any unorderable non-`PASSED` run, or state in the docstring that an unorderable completed run is deliberately superseded, and add a test that kills `H3`. Deferred because the fix pushes `_reduce_runs` past 50 lines, so it must land together with `Esc-4`'s prescribed remedy — relocate the "Declared limit" paragraph to an ADR and cite it — and that is a unit, not a patch |
+| Tester `P4`: the success banner reads *"All N required check(s) reported and passed"* even when one source was unreadable and the set is known-incomplete | Real, and an honesty defect of this sprint's own class. Needs a completeness flag plumbed through `required_checks` → `_from_one_source` → `resolve_inputs` → `main`, which is four signature changes under an approval that had already been invalidated twice. **Candidate unit for `024`** |
+| Tester `F6`: the operator warning can name the wrong source as unreadable | Diagnostic text only, no verdict change. Same plumbing as `P4`; they should move together |
+| Tester `N8`: `pr_base` accepts an empty `baseRefName` | Proven harmless — `required_checks("")` still exits 2 downstream. Recorded so it is not rediscovered as a defect |
+| Tester's note on `_from_one_source` applying **opposite doctrine** to the same epistemic state — blocking when the readable source is empty, passing when it declared something | Deliberate and argued in the docstring, but the asymmetry is real and undocumented at the point a reader meets it. Belongs with `P4` |
+| QA `Esc-3`: **an empirical claim written into a comment or docstring passes the structural gate by construction** | **The most reusable finding of this unit, and the QA gate raised it by auditing its own error.** Its round-4 ruling approved the `UNORDERABLE` comment partly because the sentence *"both forms arrive in practice"* carried non-derivable information — it verified the sentence was *informative* and never that it was *true*. It was not: the Tester later measured 0 of 51 rollup entries across 12 pull requests. A structural auditor cannot check an assertion about live data; that is the Tester's instrument. So `ci_gate.py` alone carries four such claims — the PR `#45` timings, the 2-of-12 `HTTP 503` rate, the three-required-checks table, the 0-of-51 figure — and **no step of the Double Gate routes any of them to the party able to verify them.** Proposed: `close_workflow.md` Phase 2.6, or the Tester's brief, requires that a measurement quoted in source carry its provenance and be re-verified when the Tester runs. Framework-class |
+| QA `Esc-4`: `max_lines_per_func: 50` counts a span that is **83% docstring** in `_reduce_runs`'s case | Raised twice, with a second data point. The gate refused the docstring-excluded metric in `R2` and still refuses it — *"switching conventions to clear a limit is how limits stop meaning anything"* — but the rule should **declare** which convention it counts rather than leaving each auditor to pick. As written it pressures authors toward under-documenting exactly where rationale is most valuable: `_reduce_runs` is 8 executable lines carrying 39 of docstring, and sits 2 lines from breaching. A wording amendment, not a relaxation. **The gate also named the remedy for when it does breach** — relocate the "Declared limit" paragraph to an ADR and cite it, never trim the rationale |
+| QA `Esc-1`: 259 of 259 test functions tree-wide carry no return annotation | Pre-existing, tree-wide, and the QA gate declined to invent an enforcement boundary at one unit's gate. Governance decision |
+| QA `Esc-2`: no ruff configuration exists; 176 findings under a rule set nobody chose | Framework-class, and **a merge into the unrouted finding at line 213** rather than a new entry — that session measured the same 176 and that nothing invokes the declared gate; this one supplies the missing cause. One unit, not two. The primary fix is one new file (`ruff.toml`) enabling `E402`, which dissolves 41 of the 176 by making the `noqa` directives *used*; it changes the verdict of every future `linter_command` invocation, so it is a unit and not a side edit |
+
 ## Declared deviation — delegation
 
 Unchanged from `022`: the session configuration forbids spawning subagents
@@ -815,7 +1180,16 @@ Tester gates only, for `C4`.** `C5` onwards must ask again.
 **Session #5 asked again and the human lifted it on the same terms: QA and
 Tester gates only, for `C5`.** `C6` onwards must ask again.
 
-**That lift is now spent.** Both agents were dispatched under it, both returned
+**Session #6 asked again and the human lifted it on the same terms: QA and
+Tester gates only, for `C10`.** `C8` onwards must ask again. The conflict was
+reported at `start_workflow.md` Phase 2 as that step requires, and reported for
+**two** causes rather than one: the session policy that has forbidden dispatch
+since `022`, and the account-level monthly spend limit that killed both agents
+mid-work in session #5. The second may make the lift unusable in practice; that
+is a different outcome from not having asked, and if the gates cannot be
+dispatched the session reports it rather than substituting itself for them.
+
+**Session #5's lift was spent.** Both agents were dispatched under it, both returned
 findings, both were resumed for the re-gate, and both died on an account-level
 monthly spend limit mid-work. A lift is spent by being used, not by producing a
 verdict — so `C5`'s re-gate needs a fresh one, and `C6` onwards needs one
