@@ -1155,6 +1155,52 @@ be rediscovered as a defect.
 | QA `Esc-1`: 259 of 259 test functions tree-wide carry no return annotation | Pre-existing, tree-wide, and the QA gate declined to invent an enforcement boundary at one unit's gate. Governance decision |
 | QA `Esc-2`: no ruff configuration exists; 176 findings under a rule set nobody chose | Framework-class, and **a merge into the unrouted finding at line 213** rather than a new entry — that session measured the same 176 and that nothing invokes the declared gate; this one supplies the missing cause. One unit, not two. The primary fix is one new file (`ruff.toml`) enabling `E402`, which dissolves 41 of the 176 by making the `noqa` directives *used*; it changes the verdict of every future `linter_command` invocation, so it is a unit and not a side edit |
 
+## Suspended below the bound, a sixth time — session #6
+
+**`forced: false`.** Stopped at **12.9×** of the 15× bound, measured with
+`scripts/session_cost.py --json` as `rules/token_economy.md §3.1` requires:
+
+| Cycle | Messages | First turn | Peak | Ratio |
+| :--- | :--- | :--- | :--- | :--- |
+| 1 | 240 | 24,272 | 249,526 | 10.3× |
+| 2 | 78 | 24,272 | 313,797 | **12.9×** |
+
+One unit closed, and it took **six gate rounds and four rejections** — more than
+`C3`'s four. Stopping here rather than opening `C8` is the same reasoning
+sessions #3 through #5 used: price the *next* step. `C8` is cheap but still
+needs two gates, and this session has twice watched gates die mid-round on an
+external quota.
+
+### A third confirmation of the per-project reset constant
+
+`§3.1` observed 22,174 identical three times; session #5 observed 24,272
+identical three times; this session observed **24,272 identical twice**, the
+same value as #5. Two sessions, five cycles, one number. That is now strong
+enough to stop being called an observation — the denominator `§3.1` chose is
+stable across sessions of the same project, which is the property the rule was
+designed around.
+
+### The calibration datum this session actually contributes
+
+**One unit at 12.9× where session #5 closed three at 12.1×.** Not a regression
+in efficiency — a measurement of what a *contested* unit costs. `C7` cleared
+both gates on the first round; `C10` took six. The bound is not sensitive to
+unit count, it is sensitive to **rejection count**, and nothing in `§3.1`
+currently says so. A session planning by units-remaining will mis-plan whenever
+the next unit is a gate.
+
+## Where session #7 resumes
+
+| | |
+| :--- | :--- |
+| **Next action** | **`C8`** — tick the closed findings on `origin/contrib/host-findings`. Low risk, the last declared unit, and the only one left before the sprint can close |
+| **Delegation** | Must be asked again. Session #6's lift was granted for `C10` only and is spent — six rounds used it |
+| **Blocked on** | Nothing. `make verify` green at 428, working tree clean, `C10` committed at `3046f25` |
+| **Then** | **`F8` still has no unit and is still the highest-severity open item** — a literal `.env` holding live credentials passes `hooks/on_commit.py` today, defeating `RA-09`. It has now survived **three** sessions as "routed, unowned", which is the exact pattern this sprint's own `Context` section identifies as the original loss. Draft the unit before closing even if it executes in `024` |
+| **Six findings routed out of `C10`**, all named in the table above | `H3` (normalisation direction unpinned — the Tester calls this required follow-up, not optional), `P4` (success banner overclaims when the required set is known-incomplete), `F6`, `Esc-1`, `Esc-2`, `Esc-3`, `Esc-4`. `H3` + `P4` + `F6` + `Esc-4` want **one** unit: all four need either the completeness flag plumbed or the docstring relocated to an ADR, and `_reduce_runs` has 2 lines of headroom so they cannot land separately |
+| **`Esc-2` is a merge, not a new entry** | Line 213 of this file already recorded the same 176-error measurement and that nothing invokes the declared linter. Route **one** unit |
+| **Do NOT** | Re-run the lead's mutation harness without checking it asserts a green unmutated baseline first. It did not, for three rounds, and reported every mutant killed |
+
 ## Declared deviation — delegation
 
 Unchanged from `022`: the session configuration forbids spawning subagents
