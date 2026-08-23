@@ -43,8 +43,13 @@ extracted from whatever lands here, deliberately, before Phase 5 approves it.
 - **What the gate proves is existence, not ordering.** It cannot show the plan was
   written before it was approved; that is held by the Phase 5 precondition in
   `pipeline_workflow.md`, an attended human step.
-- **In nucleus mode `plansDirectory` never applies.** It ships in the bridge template,
-  and `agents.md §5 nucleus_neutrality` prohibits installing the bridge when the
-  workspace is `.agents` itself — measured: this repository has no
-  `.claude/settings.json`, and `C0`'s own plan was drafted under `~/.claude/plans/`.
-  Routed to Sprint `023` `C6`.
+- **In nucleus mode `plansDirectory` never applies.** The conclusion is unchanged and
+  still measured — this repository has no `.claude/settings.json`, and `C0`'s own plan
+  was drafted under `~/.claude/plans/` — but **the reason recorded here was wrong**, and
+  Sprint `023` `C6` corrected it. `nucleus_neutrality` does **not** prohibit installing
+  the bridge: it prohibits *structural scaffolding* (`agents.md §5`), and
+  `scripts/install_claude.py` ships `install_nucleus_bridge()` for exactly this case.
+  What that self-bridge deliberately omits is hooks, skills, MCP and settings — so no
+  `.claude/settings.json` reaches the nucleus, and `plansDirectory`, which lives in that
+  file, never arrives. Absent by omission, not by prohibition. **Routing discharged by
+  `C6`.**

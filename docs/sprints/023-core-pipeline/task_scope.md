@@ -26,7 +26,7 @@ wrong meant the sprint would trip on the defect it came to repair.
 | C4 | `mass_standardizer.py`, `tests/…`, skill `README.md` + `SKILL.md` | modify/create | medium — raised to **high** on execution: the unit deleted authored content | lead · `skill_architect` ruleset | ✅ `5056796`, gate-approved |
 | C4.2 | `rules/django_backend_standard.md` (new), `agents.md`, `README.md`, `skills/django-expert-3rd/SKILL.md` | create/modify | **high** — relocating governance content | lead · `rule_validator` ruleset | ✅ `955eb5d`, gate-approved |
 | C5 | `agents/devops_agent.md`, `agents.md` §6 role table | modify | medium — role map | lead · `agent_orchestrator` ruleset | ✅ `aa2b11d` + `R1` — both gates APPROVED |
-| C6 | `agents.md`, `start_workflow.md` | modify | medium | lead · `rule_validator` ruleset | ⏳ |
+| C6 | `agents.md` §0, `start_workflow.md` (3 rows), `audit_workflow.md` (`federation_audit`), `docs/plans/README.md` (routing discharged), `tests/test_installer.sh` (+1 assertion), `.claude/commands/agents/` (untracked, regenerable) | modify | medium | lead · `rule_validator` ruleset | ✅ `R2` — both gates APPROVED |
 | C7 | `requirements-freeze.txt` | modify | low | lead · `devops_agent` ruleset | ⏳ |
 | C8 | `origin/contrib/host-findings` | modify | low | lead · `doc_orchestrator` ruleset | ⏳ |
 | C10 | `scripts/ci_gate.py` (new), `workflows/deployment_workflow.md:17` | create/modify | **high** — a gate | lead · `devops_agent` ruleset | ⏳ |
@@ -54,7 +54,7 @@ one. Recorded here rather than inferred later.
 
 | Finding | Where it goes |
 | :--- | :--- |
-| **The nucleus never gets `plansDirectory`, and the safety net shipped in `v4.6.0` is host-only.** Measured, not inferred: this repository has **no `.claude/settings.json` at all**, and `C0`'s own plan was drafted under `~/.claude/plans/` — the exact ephemeral storage the unit exists to replace. The cause is structural rather than an oversight: `plansDirectory` ships in `claude/settings.hooks.json`, the **bridge template**, and `agents.md §5 nucleus_neutrality` prohibits installing the bridge when the workspace is `.agents` itself. So the framework that wrote the fix cannot receive it. Recorded in `docs/plans/README.md` under Limits | `C6` (the nucleus entry point) — resolving it means deciding whether the nucleus installs its own bridge, which is that unit's subject, not `C0`'s |
+| **The nucleus never gets `plansDirectory`, and the safety net shipped in `v4.6.0` is host-only.** Measured, not inferred: this repository has **no `.claude/settings.json` at all**, and `C0`'s own plan was drafted under `~/.claude/plans/` — the exact ephemeral storage the unit exists to replace. The cause is structural rather than an oversight: `plansDirectory` ships in `claude/settings.hooks.json`, the **bridge template**, and `agents.md §5 nucleus_neutrality` prohibits installing the bridge when the workspace is `.agents` itself. So the framework that wrote the fix cannot receive it. Recorded in `docs/plans/README.md` under Limits | `C6` (the nucleus entry point) — resolving it means deciding whether the nucleus installs its own bridge, which is that unit's subject, not `C0`'s. **✅ Discharged by `C6`, and the finding's stated cause above is corrected there**: `nucleus_neutrality` prohibits *structural scaffolding*, not the bridge — `scripts/install_claude.py` ships `install_nucleus_bridge()` for this exact case, and what it deliberately omits is hooks, skills, MCP and settings. So `plansDirectory` is absent **by omission, not by prohibition**. The finding statement is left as written, per the rule the `C5` gates set: a finding records what was found, and is closed with a marker rather than rewritten |
 | **`RA-14` found three false paths, not the two the plan predicted.** The worst was `agents/rule_validator.md:19`, calling `task_scope.md` a *"git-ignored session artifact at the host root"* — both halves false since Sprint 024, in the profile of the agent that **produces** the file. `pipeline_workflow.md` Phase 4.3 and `agents/token_economy_agent.md:25` were the other two | Fixed inside `C0`'s commit. The lesson is the one `RA-14` already states and this session re-earned: grep the term, do not patch the sites you happened to look at |
 
 ## Found at session start on resume (2026-08-18)
@@ -498,7 +498,7 @@ lacks, and a mechanical tier is not the right author for a governance gate.
 
 | Finding | Routing |
 | :--- | :--- |
-| **Three mandated commands are not invocable in this workspace.** `commands/` holds 13 files; the installed bridge `.claude/commands/agents/` holds 11 symlinks dated 20–26 July. Missing: `harden.md`, `reconcile.md`, `revdoc.md`. Dangling: `skeleton.md` → `../../../commands/skeleton.md`, which no longer exists in the source. Confirmed against this session's own available-command list, which offers neither `harden`, `reconcile` nor `revdoc` — so `start_workflow.md` `drift_check` mandates running `/agents:reconcile` on exit 2, and that command cannot be typed here. The same holds for the two protocols that open `agents.md §6`'s onboarding order | **`C6`** — this is the nucleus's own `.claude/` bridge, already declared out of scope in the plan and routed to `C6`. This is measured evidence for it. Not fixed at session start: Phase 1.5 is PROHIBITED in nucleus mode (`nucleus_neutrality`) |
+| **Three mandated commands are not invocable in this workspace.** `commands/` holds 13 files; the installed bridge `.claude/commands/agents/` holds 11 symlinks dated 20–26 July. Missing: `harden.md`, `reconcile.md`, `revdoc.md`. Dangling: `skeleton.md` → `../../../commands/skeleton.md`, which no longer exists in the source. Confirmed against this session's own available-command list, which offers neither `harden`, `reconcile` nor `revdoc` — so `start_workflow.md` `drift_check` mandates running `/agents:reconcile` on exit 2, and that command cannot be typed here. The same holds for the two protocols that open `agents.md §6`'s onboarding order | **`C6`** — this is the nucleus's own `.claude/` bridge, already declared out of scope in the plan and routed to `C6`. This is measured evidence for it. Not fixed at session start: Phase 1.5 is PROHIBITED in nucleus mode (`nucleus_neutrality`). **✅ Discharged by `C6`, and this stated reason was wrong**: `nucleus_neutrality` prohibits *structural scaffolding*, not `bridge_check`. The bridge could have been refreshed at session start; nothing prohibited it. Annotated rather than rewritten because this cell testifies to what a session believed — and that belief, held for a month across four documents, is the substance of what `C6` found |
 | **`RA-16`'s guarantee holds on paper while three of its declared invokers are unreachable.** Measured, not inferred: `scripts/verify_references.py:46` puts `.claude/` in the excluded set by design ("linked `.claude` trees"), `:60` builds the corpus from `commands/` — the source — and `:200` asserts only that the string `invoked_by:` is *present* in a file. It never resolves the command that string names to a route. `verify_references.py` exits 0 against the state above | **Unrouted.** Adjacent to `C6` but a distinct question: `C6` is about whether the nucleus installs a bridge, this is about a check that cannot see the bridge either way. A candidate unit — check (d) resolving `human:/agents:x` to `commands/x.md` would have caught all four discrepancies |
 | **`drift_check` returned exit 2, verdict `A`, and the verdict is fully explained by the sprint in flight.** Of the 41 commits in the range, the 2 covered are Sprint 022's merge and its `[4.7.0]` seal; the 39 uncovered are exactly the 39 commits carrying `#023`. No commit outside the open sprint is unaccounted for. The verdict cannot distinguish "sprint in flight" from "merged work never recorded" because the script has no notion of an open sprint | **Human decision at session start: proceed to handoff without reconciling**, on the measurement above. Recorded rather than left implicit — `start_workflow.md` mandates `/agents:reconcile` on any exit 2, so a future reader finds a departure from the workflow with its reason attached, not a skipped step. A candidate refinement for the same unit: teach `detect_drift.py` to read `current_sprint.id` and report commits of the open sprint separately from unaccounted ones |
 | `docs/0_SYSTEM_OVERVIEW.md` still does not exist | `ls docs/` shows no such file, for the fourth session running. `read_ruleset` satisfied by `agents.md` plus `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md`, as in sessions #2–#4. Unrouted |
@@ -600,6 +600,105 @@ orphan was masked).
 | **The `token_economy_agent` precedence is recorded one-directionally.** `agents/devops_agent.md`'s new `scope_boundaries` row names it, but `agents/token_economy_agent.md:19-20` still declares it "Owns `scripts/check_model_tiers.py`…" with no reciprocal pointer | **Unrouted, and deliberately not folded into `C5`** — that file is outside this unit's declared scope, and editing it would have re-opened the QA gate's own finding #3. Worth one line when a future unit next opens it. Raised by the gate that specified the precedence rule in the first place |
 | The profile's one-file `jurisdictional_lock` limit has **no enforcing mechanism** — `claude/settings.hooks.json` registers a `PreToolUse` matcher on `Bash` only, none on `Write`/`Edit`. The profile text says "check**able**", not "checked", so it is honest | Non-blocking, and not an `RA-16` violation (a profile row is not a workflow, script, skill, hook or gate). Unrouted |
 
+## `C6` gate rounds — and a governance principle worth more than the unit
+
+Both gates rejected at `R1` and **converged for the second time this sprint**,
+independently naming the same defect: regenerating
+`docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` had flipped `read_ruleset` from `read`
+to **`write`**, because the added clause contained *"recorded"* and
+`map_workflows.py`'s `WRITE_VERBS` matches `record` by prefix. `C6` promotes that
+guide to mandated reading in the same change that put a false claim into it — and
+`make verify` **cannot** catch it, because `map_workflows.py --check` compares the
+file against its generator: consistency, not correctness. Green and wrong at once.
+Replacing one word restored `read` and removed the guide from the diff entirely.
+
+| Round | Gate | Blocking finding | Remedy |
+| :--- | :--- | :--- | :--- |
+| `R1` | both | The `read` → `write` misclassification | `recorded` → `hit`; guide regenerated and now byte-identical to `HEAD` |
+| `R1` | QA | The `bridge_check` row asserted `on_init.py` automation unqualified. **Half a docstring was quoted while its other half falsified the sentence beside it** — the nucleus self-bridge installs *no hooks by design*, which is the real reason this bridge went stale for a month. Had the hook ever run, it could not have | Sentence scoped "in a host", plus a nucleus paragraph naming all three mechanisms |
+| `R1` | QA | `docs/plans/README.md:46-51` held the overturned reading and **names `C6` as its owner** | Reason corrected, conclusion kept, routing discharged |
+| `R2` | QA | A **fourth** live holder at `task_scope.md:501` — this session's own start-of-session routing cell, justifying an inaction with the exact proposition `C6` overturns, 444 lines from the marker at `:57` | Discharge marker with the corrected cause appended |
+| `R2` | Tester | *(routed, folded in by choice)* `audit_workflow.md:18` claims the nucleus *"has no bridge"*. Already false before `C6` — but `C6` turns a **wrong-but-consistent** pair of documents into a contradictory one, and one clause now is cheaper than carrying it to closeout | Row rewritten to skip only the checks that do not apply, and to point at `bridge_check` for the one that does |
+
+**Verdict: `APPROVED` by both gates at `R2`.**
+
+### The classifier defect is systemic, not the one-off `R1` treated it as
+
+Found by the Tester at `R2` while confirming nothing had drifted. It checked
+**every** row of `audit_workflow.md` rather than the edited one, and reported that
+`federation_audit` publishes as `write` because `release` — a `WRITE_VERB` —
+prefix-matches the **noun** in *"pinned to a release tag"*. That is at `HEAD`,
+predating this sprint. **A read-only audit step is already published as a
+writer**, in the artifact whose own preamble calls that column *"the diagnostic
+one"*.
+
+So `R1`'s `recorded`/`record` collision was not an unlucky word choice: prefix
+matching against an unanchored verb list mislabels ordinary English, and the
+guide has been carrying at least one false label all along. This raises the
+priority of the classifier unit already routed out of `C5`/`C6` — and it means
+the fix is not "add a word to a denylist" but "stop matching nouns", which is a
+behaviour change to a script and therefore its own unit with its own `RA-16`
+invoker.
+
+**The rule the QA gate stated for these calls**, which explains every routing
+decision this sprint made and is worth reusing: **fold in a correction that this
+unit's own change falsifies; route a new mechanism.**
+
+### `C0` gave the plan a home and a gate, but no currency check — measured on `C0`'s own plan
+
+Found while writing `C6`'s row into the Work table. `IMPLEMENTATION_PLAN.md` and
+`task_scope.md` carry **the same table** and had drifted apart: the plan showed
+`C0` as *"in flight"* and `C0.2`, `C0.3`, `C1`, `C2` as `⏳` — all five committed
+and gate-approved — and **omitted `C4.2` entirely**, a unit that exists at
+`955eb5d`. Six rows wrong in `triple_lock`'s **first lock**.
+
+`C0`'s own text declares the limit that permits this: the close gate proves the
+plan *"exists and is versioned"*, not that it is accurate, and
+`docs_freshness_check.py` asserts `(sprint_dir / artifact).is_file()` — existence
+only, as the Tester independently established in `C5`. So a plan can be present,
+versioned, gated green, and misreport its own sprint.
+
+**Synced under `RA-14` rather than routed**, and the distinction matters against
+the QA gate's fold-or-route rule: this session had just patched the `Status`
+field of that artifact for `C6`, and `RA-14` requires grepping the artifact in
+full for *the same field* before the patch is closed. Five stale rows of the
+field just touched are inside that obligation, not outside it. All eight commit
+SHAs were verified to exist and their subjects matched their units before being
+copied across — the plan is Lock 1, and a synced-but-unverified table would trade
+a visible defect for an invisible one.
+
+**What is routed**: that nothing detects the drift. Two artifacts holding one
+table with no equality check is a mechanism-shaped gap — a candidate unit
+alongside the classifier, not a `C6` fix.
+
+**The principle, supplied by the QA gate while ruling on how `task_scope.md:57`
+should be treated.** This session cited the `C5` precedent to justify annotating
+rather than rewriting, and the gate accepted the outcome while rejecting the
+reasoning — the distinction is worth keeping:
+
+> `021-030-program-queue.md:597-599`, ruled untouchable in `C5`, recorded a
+> **measured state of the tree**: true when written, and `C5` changed the world
+> rather than the measurement. `task_scope.md:57` records an **interpretation of a
+> rule that was wrong when written** — `install_nucleus_bridge()` shipped in July
+> and `README.md:193` already documented the carve-out. Nothing changed to falsify
+> it; `C6` discovered it had never been true. *"Superseded by events"* and
+> *"wrong when written"* are different categories, and the `C5` ruling covers only
+> the first.
+>
+> **The durable rule: correct the documents that instruct; annotate the records
+> that testify.** `docs/plans/README.md` instructs, so its reason was corrected in
+> place and its conclusion kept. `task_scope.md:57` and `:501` testify, so they
+> carry markers — and erasing their wrong reasoning would destroy the evidence
+> that the framework held a mistaken reading for a month, which **is** what `C6`
+> found. A bare discharge tick would not qualify: the marker must carry the
+> correction inline, or a reader can lift the wrong claim without meeting the
+> right one.
+
+**Routed to `extract_workflow` / `agents.md §7`, not applied here.** It refines
+how `RA-14` is applied and is framework-class under `§4 constitutional_escalation`.
+Folding a governance amendment into `C6` would be the scope expansion the QA gate
+has already flagged twice in this sprint.
+
 ## Where session #6 resumes
 
 The table under `## Where session #5 resumes` above is **spent** — its two
@@ -608,9 +707,10 @@ instructions ("re-apply the `agents.md §6` row", "dispatch `qa_agent` and
 
 | | |
 | :--- | :--- |
-| **Next action** | **`C6`.** `C5` is closed — both gates APPROVED at `R1`. `C6` is the nucleus's own `.claude/` bridge and `agents.md`/`start_workflow.md`; session #5's start findings supply it measured evidence it did not have before (three mandated commands unreachable, `RA-16` blind to the installed bridge) |
-| **Delegation** | Must be asked again. The session-#5 lift was granted for `C5`'s gates and is **spent** |
-| **Blocked on** | Nothing. `make verify` green at 372 on `aa2b11d` |
+| **Next action** | **`C7`** (`requirements-freeze.txt`, low risk) or **`C10`** (a new gate script, high risk — wants a fresh cycle with budget for gate rounds). `C5` and `C6` are both closed, each APPROVED by both gates |
+| **Delegation** | Must be asked again. The session-#5 lifts for `C5` and `C6` are **spent** |
+| **Blocked on** | Nothing. `make verify` green at 372 |
+| **Two mechanism-shaped gaps routed this session**, both candidates for their own unit | (1) `map_workflows.py`'s prefix matching mislabels ordinary English — proven systemic, not a one-off, since `federation_audit` publishes as `write` off the **noun** in "a release tag". (2) `IMPLEMENTATION_PLAN.md` and `task_scope.md` carry the same Work table with **no equality check**; they had drifted by six rows before this session synced them |
 | **Do NOT** | Re-apply the `agents.md §6` row reproduced under `### C5 is in the working tree` — it is the version the QA gate **rejected**. The live, corrected row is the `devops_agent` row in `agents.md` §6, identifiable by its opening *"Sole holder of `Write`/`Edit` for the **framework-root** …"* rather than by a line number. That block carries a `⚠️ SUPERSEDED` warning; heed it |
 | **Remaining after `C5`** | `C6`, `C7`, `C8`, `C10` |
 | **Highest-severity open item** | Unchanged: **`F8`** — a literal `.env` holding live credentials passes `hooks/on_commit.py` today. Routed, unowned, defeats `RA-09`. It deserves a unit before the sprint closes |

@@ -7,7 +7,7 @@ It dictates in an absolute and transversal manner the behavior of subagents, cod
 
 | Rule | Value / Constraint |
 | :--- | :--- |
-| **Entry Point** | Every session MUST start by reading `docs/0_SYSTEM_OVERVIEW.md`. |
+| **Entry Point** | Every session MUST start by reading `docs/0_SYSTEM_OVERVIEW.md`. **It is host-only by design** and does not exist in the nucleus: `standardization_workflow.md` scaffolds it into a host at onboarding, and `close_workflow.md` already says the same of it and its sibling anchor. **A nucleus session reads `agents.md` plus `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` instead** — stated here rather than left to inference, because five consecutive sessions of Sprint 023 found the absence and each re-derived the same substitute. That guide is **generated** by `scripts/map_workflows.py` and its staleness is gated by `make verify`: regenerate it, never hand-edit it, and never resolve a discrepancy by deleting it. |
 | **Hierarchy** | `architecture/` (Law), `roadmaps/` (Future), `walkthroughs/` (Achievements), `sprints/` (History). |
 | **Traceability** | Every module MUST have a `[MODULE]_BLUEPRINT.md` in `architecture/` before coding (template: `docs/standards/templates/BLUEPRINT_TEMPLATE.md`). |
 | **Execution** | Every task must be recorded in the current Sprint folder. |

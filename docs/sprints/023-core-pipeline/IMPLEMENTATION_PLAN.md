@@ -78,16 +78,17 @@ to be discovered.
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | C9 | `scripts/branch_sovereignty.py`, `tests/`, `close_workflow.md` | modify | **high** — a gate | lead · `devops_agent` ruleset | ✅ `437493b` |
-| C0 | `agents.md`, `pipeline_workflow.md`, `close_workflow.md`, template, 3 agent profiles | modify/create | **high** — governance | lead · `rule_validator` ruleset | 🔄 in flight |
-| C0.2 | `config/artifact_registry.json` + 3 consumers | create/modify | high | lead · `rule_validator` ruleset | ⏳ |
-| C0.3 | `scripts/_root.py` + 6 consumers | create/modify | high | lead · `devops_agent` ruleset | ⏳ |
-| C1 | `scripts/check_readme_counts.py` | modify | high | lead · `devops_agent` ruleset | ⏳ |
-| C2 | `scripts/session_probe.py` | modify | high — a security report | lead · `devops_agent` ruleset | ⏳ |
-| C3 | `env_shielding_auditor.py`, `hooks/on_commit.py` | modify | **high** — secrets | lead · `devops_agent` ruleset | ✅ `aa83309`…`5bcbdf6` |
+| C0 | `agents.md`, `pipeline_workflow.md`, `close_workflow.md`, template, 3 agent profiles | modify/create | **high** — governance | lead · `rule_validator` ruleset | ✅ `2821953` |
+| C0.2 | `config/artifact_registry.json` + 3 consumers | create/modify | high | lead · `rule_validator` ruleset | ✅ `92f42da` |
+| C0.3 | `scripts/_root.py` + 6 consumers | create/modify | high | lead · `devops_agent` ruleset | ✅ `359d03c` + `fix` |
+| C1 | `scripts/check_readme_counts.py` | modify | high | lead · `devops_agent` ruleset | ✅ `b2d7c2e` |
+| C2 | `scripts/session_probe.py` | modify | high — a security report | lead · `devops_agent` ruleset | ✅ `26367cf` + `ca29010` + `509f525`, gate-approved |
+| C3 | `env_shielding_auditor.py`, `hooks/on_commit.py` | modify | **high** — secrets | lead · `devops_agent` ruleset | ✅ `aa83309`…`5bcbdf6`, gate-approved |
 | C3.2 | `hooks/on_commit.py` (`ALLOW_MARKER`), `rules/qa_and_testing.md` | create | **high** — a documented bypass of a secret gate | lead · `devops_agent` ruleset | ✅ `50094c1` + `R5` fixes |
-| C4 | `mass_standardizer.py`, `tests/`, skill `README.md` + `SKILL.md` | modify/create | medium — **raised to high on execution** | lead · `skill_architect` ruleset | ✅ `5056796` |
+| C4 | `mass_standardizer.py`, `tests/`, skill `README.md` + `SKILL.md` | modify/create | medium — **raised to high on execution** | lead · `skill_architect` ruleset | ✅ `5056796`, gate-approved |
+| C4.2 | `rules/django_backend_standard.md`, skill `SKILL.md` | create/modify | medium | lead · `rule_validator` ruleset | ✅ `955eb5d`, gate-approved |
 | C5 | `agents/devops_agent.md`, `agents.md` §6 role table | modify | medium — role map | lead · `agent_orchestrator` ruleset | ✅ `aa2b11d` + `R1` — both gates APPROVED |
-| C6 | `agents.md`, `start_workflow.md` | modify | medium | lead · `rule_validator` ruleset | ⏳ |
+| C6 | `agents.md` §0, `start_workflow.md` (3 rows), `audit_workflow.md` (`federation_audit`), `docs/plans/README.md` (routing discharged), `tests/test_installer.sh` (+1 assertion), `.claude/commands/agents/` (untracked, regenerable) | modify | medium | lead · `rule_validator` ruleset | ✅ `R2` — both gates APPROVED |
 | C7 | `requirements-freeze.txt` | modify | low | lead · `devops_agent` ruleset | ⏳ |
 | C8 | `origin/contrib/host-findings` | modify | low | lead · `doc_orchestrator` ruleset | ⏳ |
 | C10 | `scripts/ci_gate.py` (new), `deployment_workflow.md:17` | create/modify | **high** — a gate | lead · `devops_agent` ruleset | ⏳ |
