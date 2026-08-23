@@ -27,6 +27,7 @@ Domain rules live in `rules/` and are loaded **on demand** at these triggers —
 | `rules/project_topology.md` | Running local commands, choosing interpreters/paths, or touching DB containers. |
 | `rules/skills_and_integrations.md` | Searching, registering, or forging skills/tools. |
 | `rules/frontend_modular_standard.md` | Touching `frontend/src/modules/`. |
+| `rules/django_backend_standard.md` | Writing or modifying Django code — models, views, serializers, `signals.py`, app layout, or DRF endpoints. |
 | `rules/graphify.md` | Querying or rebuilding the knowledge graph. |
 | `rules/documentation_standard.md` | Creating/updating any document under `docs/`, authoring an ADR, or running `docs-freshness-check`. |
 | `rules/LEGACY_RULE_CONCORDANCE.md` | Encountering a numbered `Rule NN` citation in any document. |
