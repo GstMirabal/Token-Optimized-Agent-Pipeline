@@ -443,8 +443,14 @@ artifact already lost.
 **The edit**: `agents/devops_agent.md:4` becomes
 `tools: Read, Glob, Grep, Bash, Write, Edit`, plus a `Jurisdiction | write_scope`
 row and a section explaining the grant. `agents.md §6`'s `devops_agent` row gains
-a clause naming that jurisdiction — **that second edit is not in the tree**; it
-was reverted so `C4.2` could commit atomically, and must be re-applied.
+a clause naming that jurisdiction — **that second edit is not in the tree and is
+in no commit**; it was reverted so `C4.2` could commit atomically. Reproduced
+verbatim here, because it existed nowhere else and would otherwise have to be
+re-invented:
+
+> \| **Subagent Roles** \| `devops_agent` \| Environment Agent. Manages venv, .env export, and Docker health. **Sole holder of `Write`/`Edit` for `scripts/` and `hooks/`** (`F-086-A1`, Sprint 023) — which gives those trees an owner without creating the implementer role the map still lacks (`F-021-A2`, declared in that profile). \|
+
+It replaces the current row, which ends after *"Docker health."*
 
 **What was verified before making it**, which is the part worth not re-deriving:
 
