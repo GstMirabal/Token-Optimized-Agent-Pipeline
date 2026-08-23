@@ -782,13 +782,13 @@ instructions ("re-apply the `agents.md §6` row", "dispatch `qa_agent` and
 | | |
 | :--- | :--- |
 | **Next action** | **`C10`** — a new gate script (`scripts/ci_gate.py`), the last high-risk unit. It wants a fresh cycle with real budget for its rounds: `C5` and `C6` cost two rounds each and `C3` cost four. `C8` (tick closed findings on `origin/contrib/host-findings`) is the cheap alternative if budget is short |
-| **Delegation** | Must be asked again. The session-#5 lifts for `C5` and `C6` are **spent** |
+| **Delegation** | Must be asked again. The session-#5 lifts for `C5`, `C6` and `C7` are all **spent** — each was granted per-unit for QA + Tester and each was used |
 | **Blocked on** | Nothing. `make verify` green at 372 |
-| **Two mechanism-shaped gaps routed this session**, both candidates for their own unit | (1) `map_workflows.py`'s prefix matching mislabels ordinary English — proven systemic, not a one-off, since `federation_audit` publishes as `write` off the **noun** in "a release tag". (2) `IMPLEMENTATION_PLAN.md` and `task_scope.md` carry the same Work table with **no equality check**; they had drifted by six rows before this session synced them |
+| **Three mechanism-shaped gaps routed this session**, each a candidate for its own unit | (1) `map_workflows.py`'s prefix matching mislabels ordinary English — proven **systemic**, not a one-off, since `federation_audit` publishes as `write` off the **noun** in "a release tag". (2) `IMPLEMENTATION_PLAN.md` and `task_scope.md` carry the same Work table with **no equality check**; they had drifted by six rows before this session synced them. (3) `tools:` frontmatter is entirely unvalidated — three fake tool names keep the suite green, proven by the Tester in a disposable worktree |
 | **Do NOT** | Re-apply the `agents.md §6` row reproduced under `### C5 is in the working tree` — it is the version the QA gate **rejected**. The live, corrected row is the `devops_agent` row in `agents.md` §6, identifiable by its opening *"Sole holder of `Write`/`Edit` for the **framework-root** …"* rather than by a line number. That block carries a `⚠️ SUPERSEDED` warning; heed it |
-| **Remaining after `C5`** | `C6`, `C7`, `C8`, `C10` |
+| **Remaining** | `C8`, `C10` — plus `F8`, which has no unit and needs one drafted before it can be executed |
 | **Highest-severity open item** | Unchanged: **`F8`** — a literal `.env` holding live credentials passes `hooks/on_commit.py` today. Routed, unowned, defeats `RA-09`. It deserves a unit before the sprint closes |
-| **Newly unrouted, from session #5** | `tools:` frontmatter is unvalidated (three fake tool names keep the suite green, proven by the Tester); `RA-16` cannot see the installed bridge, so `/agents:reconcile`, `/agents:harden` and `/agents:revdoc` are unreachable here while `verify_references.py` exits 0 |
+| **Governance escalations pending** | Two rules the QA gate stated during `C5`/`C6`, recorded under `## C6 gate rounds` and routed to `extract_workflow` / `agents.md §7` rather than applied mid-unit: **correct the documents that instruct, annotate the records that testify**, and **fold in a correction that this unit's own change falsifies; route a new mechanism.** `agents.md` has 28 lines of headroom under `J1` for sprints 024-029, so spending ceiling on them is a close-time decision |
 
 ## Declared deviation — delegation
 
