@@ -27,7 +27,7 @@ wrong meant the sprint would trip on the defect it came to repair.
 | C4.2 | `rules/django_backend_standard.md` (new), `agents.md`, `README.md`, `skills/django-expert-3rd/SKILL.md` | create/modify | **high** — relocating governance content | lead · `rule_validator` ruleset | ✅ `955eb5d`, gate-approved |
 | C5 | `agents/devops_agent.md`, `agents.md` §6 role table | modify | medium — role map | lead · `agent_orchestrator` ruleset | ✅ `aa2b11d` + `R1` — both gates APPROVED |
 | C6 | `agents.md` §0, `start_workflow.md` (3 rows), `audit_workflow.md` (`federation_audit`), `docs/plans/README.md` (routing discharged), `tests/test_installer.sh` (+1 assertion), `.claude/commands/agents/` (untracked, regenerable) | modify | medium | lead · `rule_validator` ruleset | ✅ `R2` — both gates APPROVED |
-| C7 | `requirements-freeze.txt` | modify | low | lead · `devops_agent` ruleset | ⏳ |
+| C7 | `requirements-freeze.txt` → `docs/audits/SKILLOPT_TRANSITIVE_CLOSURE.md` (git rename), `skills/skillopt/SKILL.md` (reference) | move | low | lead · `devops_agent` ruleset | ✅ both gates APPROVED, first round |
 | C8 | `origin/contrib/host-findings` | modify | low | lead · `doc_orchestrator` ruleset | ⏳ |
 | C10 | `scripts/ci_gate.py` (new), `workflows/deployment_workflow.md:17` | create/modify | **high** — a gate | lead · `devops_agent` ruleset | ⏳ |
 
@@ -699,6 +699,45 @@ how `RA-14` is applied and is framework-class under `§4 constitutional_escalati
 Folding a governance amendment into `C6` would be the scope expansion the QA gate
 has already flagged twice in this sprint.
 
+## `C7` gate round — APPROVED by both, and the Tester caught a staging hazard
+
+Both gates approved on the first round. The unit moves `requirements-freeze.txt`
+to `docs/audits/SKILLOPT_TRANSITIVE_CLOSURE.md`: Dependabot parses any
+`requirements*.txt` as a manifest and its **alerts cannot be excluded by path**
+(`.github/dependabot.yml` governs *updates*), so removing the manifest is the only
+lever. Alerts were confirmed enabled — `gh api repos/:owner/:repo/vulnerability-alerts`
+→ **HTTP 204**, where 404 would mean disabled — so the exposure is real rather
+than hypothetical.
+
+**The Tester's blocking precondition, and it is the best catch of the round.**
+The index held `D requirements-freeze.txt` staged while the replacement sat
+**untracked**. A plain `git commit` would have shipped the removal of 125 pins
+with no replacement in the tree, leaving the audit record in the working
+directory only — *this sprint's own founding lesson, reproduced by the unit built
+to prevent that class of loss.* Staged before committing; git then recorded it as
+a **rename** (`R052`) rather than a delete plus a create, which is the correct
+history. It was a staging state and not a defect in the authored change, which is
+why it was a precondition rather than a rejection — and one keystroke from being
+the worst outcome available to the unit.
+
+| Verification | Result |
+| :--- | :--- |
+| Content fidelity | **125 pins byte-for-byte, order preserved, 0 duplicates, 0 truncation** — measured element-wise against `git show HEAD:` by both gates independently |
+| The 4 dropped header comments | Intended. QA traced each to where its content now lives (opening paragraph, the install-path table, `## Regenerating`), and confirmed the regeneration command lost its `> requirements-freeze.txt` redirect — *"the detail that usually drifts, and it did not"* |
+| The non-claim | QA ruled it **genuinely prevents** the misreading rather than asserting it does: the callout sits *above* the pins, states a falsifiable invariant, and names what actually changed. A reader cannot reach the list without passing it |
+| Is `skills/skillopt/SKILL.md` under the Documentation Veto? | **No.** Verified against the tree, not the claim: seven directories carry the `-3rd` suffix the Nomenclature Mandate requires; `skills/skillopt/` carries none, so it is a native wrapper over a vendored *package* |
+| Operational consumers of the removed file | **None.** `ci.yml:30` installs only `pytest`; no Makefile target, test, hook or installer reads it; `grep "\-r requirements-freeze"` empty |
+| Consumers enumerating `docs/audits/` | **None.** `check_readme_counts.py` counts five sets, none under `docs/` |
+| `make verify` · `docs-freshness-check` | **0** · **0**, 372 passed, one pre-existing advisory |
+
+### Routed out of `C7`
+
+| Finding | Routing |
+| :--- | :--- |
+| `RA-06` fits the new filename loosely — `TRANSITIVE_CLOSURE` names the subject rather than a corpus document type, where the sibling `TOKEN_ECONOMY_AUDIT-…` uses `AUDIT` | **Left as-is deliberately.** The roadmap prescribes this exact filename at `:740`, so renaming it to satisfy a naming preference would breach Lock 1. The document's own `**Type**: Audit record` header supplies the metadata. Belongs to a naming pass, not here |
+| **`docs/audits/THIRD_PARTY_PROVENANCE_TODO.md` carries `TODO` in its filename**, which `agents.md §1 Markers ephemeral` rejects on sight | **Unrouted, pre-existing.** Not `C7`'s defect and outside its scope. Recorded so it is not rediscovered later as a gate failure |
+| `docs/roadmaps/…:531,573,617` and `CHANGELOG.md:197` still name the old path | **`RA-05` closeout obligations.** Under the instruct/testify rule these **testify** — they are the finding and its prescribed fix, and rewriting them would erase why `C7` exists |
+
 ## Where session #6 resumes
 
 The table under `## Where session #5 resumes` above is **spent** — its two
@@ -707,7 +746,7 @@ instructions ("re-apply the `agents.md §6` row", "dispatch `qa_agent` and
 
 | | |
 | :--- | :--- |
-| **Next action** | **`C7`** (`requirements-freeze.txt`, low risk) or **`C10`** (a new gate script, high risk — wants a fresh cycle with budget for gate rounds). `C5` and `C6` are both closed, each APPROVED by both gates |
+| **Next action** | **`C10`** — a new gate script (`scripts/ci_gate.py`), the last high-risk unit. It wants a fresh cycle with real budget for its rounds: `C5` and `C6` cost two rounds each and `C3` cost four. `C8` (tick closed findings on `origin/contrib/host-findings`) is the cheap alternative if budget is short |
 | **Delegation** | Must be asked again. The session-#5 lifts for `C5` and `C6` are **spent** |
 | **Blocked on** | Nothing. `make verify` green at 372 |
 | **Two mechanism-shaped gaps routed this session**, both candidates for their own unit | (1) `map_workflows.py`'s prefix matching mislabels ordinary English — proven systemic, not a one-off, since `federation_audit` publishes as `write` off the **noun** in "a release tag". (2) `IMPLEMENTATION_PLAN.md` and `task_scope.md` carry the same Work table with **no equality check**; they had drifted by six rows before this session synced them |

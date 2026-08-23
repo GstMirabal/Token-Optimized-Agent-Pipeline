@@ -1,7 +1,57 @@
-# Full reproducible freeze (lockfile) of the complete environment including the
-# optional skillopt stack. For day-to-day installs use requirements-core.txt
-# (session bootstrap) or requirements-skillopt.txt (on-demand). Regenerate with:
-#   .agents/venv_skillopt/bin/pip freeze > requirements-freeze.txt
+# SkillOpt Transitive Closure
+
+**Type**: Audit record · **Sprint**: 023 (`C7`) · **Supersedes**: `requirements-freeze.txt`
+
+## What this document is, and what it is not
+
+This is the recorded transitive closure of the **optional** `skillopt` stack: the
+125 packages `pip freeze` reports for `.agents/venv_skillopt/` once that stack is
+installed. It exists so a human can audit or reproduce that environment.
+
+It used to live at `requirements-freeze.txt`, and that location made it two
+things at once — documentation for a reader and a **dependency manifest** for a
+scanner. GitHub's Dependabot parses any `requirements*.txt` as a manifest and
+raises alerts against every pin in it. Those alerts **cannot be excluded by
+path**: `.github/dependabot.yml` governs *updates*, not *alerts*.
+
+> [!IMPORTANT]
+> **This change does NOT claim there is no exposure.** Every version pinned below
+> is exactly as exposed as it was before the move. What changes is **whose debt
+> it is**: these packages are transitive dependencies of a vendored optional
+> stack that **no install path in this framework reads**, and attributing them to
+> the framework's own supply chain misreported where the risk lives. A reader
+> auditing this file is looking at the same versions the scanner was.
+
+## Why no install path reads it
+
+| Path | Installs |
+| :--- | :--- |
+| `start_workflow.md` `pip_setup` (every session) | `requirements-core.txt` |
+| `skillopt` skill, on first run only | `requirements-skillopt.txt` |
+| Nothing | this closure |
+
+The `azure-*` packages are the clearest case and are documented in
+`skills/skillopt/SKILL.md`: the vendored `skillopt` package ships an
+`azure_openai` backend module that is never called — `train_runner.py`
+`apply_monkeypatches()` imports it only as a patch target and overwrites its
+functions. They are real, unused, transitive dependencies of a pinned version,
+and must not be "cleaned up".
+
+## Regenerating
+
+This document is a record, not a lockfile — `pip install -r` cannot read a
+Markdown file, which is the point. To reproduce the environment, install
+`requirements-skillopt.txt` and re-freeze:
+
+```
+.agents/venv_skillopt/bin/pip freeze
+```
+
+Then replace the block below and stamp the sprint that did it.
+
+## The closure, as of Sprint 023
+
+```
 annotated-doc==0.0.4
 annotated-types==0.7.0
 anyio==4.13.0
@@ -127,3 +177,4 @@ typing_extensions==4.15.0
 uritemplate==4.2.0
 urllib3==2.7.0
 uvicorn==0.48.0
+```
