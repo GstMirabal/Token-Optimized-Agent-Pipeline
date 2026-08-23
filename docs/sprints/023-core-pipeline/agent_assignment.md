@@ -83,6 +83,6 @@ to a profile that could not have performed it.
 `hooks/` trees, so from `C5` onward the attribution names a profile that *could*
 have performed the write. `F-021-A2` itself is **declared, not resolved**: the
 grant creates an owner, not an implementer role, and authoring still falls to the
-lead session — for the remaining units (`C6`, `C7`, `C8`, `C10`, and `C10`'s new
-`scripts/ci_gate.py`) the reason is the session's delegation restriction, no
-longer the role map.
+lead session — for the remaining units (`C6`, `C7`, `C8` and `C10`, the last of
+which creates `scripts/ci_gate.py`) the reason is the session's delegation
+restriction, no longer the role map.

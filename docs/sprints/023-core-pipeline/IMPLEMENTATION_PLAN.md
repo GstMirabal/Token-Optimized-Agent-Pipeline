@@ -86,7 +86,7 @@ to be discovered.
 | C3 | `env_shielding_auditor.py`, `hooks/on_commit.py` | modify | **high** — secrets | lead · `devops_agent` ruleset | ✅ `aa83309`…`5bcbdf6` |
 | C3.2 | `hooks/on_commit.py` (`ALLOW_MARKER`), `rules/qa_and_testing.md` | create | **high** — a documented bypass of a secret gate | lead · `devops_agent` ruleset | ✅ `50094c1` + `R5` fixes |
 | C4 | `mass_standardizer.py`, `tests/`, skill `README.md` + `SKILL.md` | modify/create | medium — **raised to high on execution** | lead · `skill_architect` ruleset | ✅ `5056796` |
-| C5 | `agents/devops_agent.md`, `agents.md` §6 role table | modify | medium — role map | lead · `agent_orchestrator` ruleset | 🔄 `R1` applied, **UN-GATED** — re-gate died on an account quota, not on a verdict |
+| C5 | `agents/devops_agent.md`, `agents.md` §6 role table | modify | medium — role map | lead · `agent_orchestrator` ruleset | ✅ `aa2b11d` + `R1` — both gates APPROVED |
 | C6 | `agents.md`, `start_workflow.md` | modify | medium | lead · `rule_validator` ruleset | ⏳ |
 | C7 | `requirements-freeze.txt` | modify | low | lead · `devops_agent` ruleset | ⏳ |
 | C8 | `origin/contrib/host-findings` | modify | low | lead · `doc_orchestrator` ruleset | ⏳ |
@@ -189,6 +189,18 @@ adjective:
 | Does the grant make this profile an *author* of `scripts/` and `hooks/`? | **No.** It makes it the accountable **owner**. `F-021-A2` is declared and not resolved, so no implementer role exists and authoring still falls to the lead session |
 | Then does the roadmap's premise hold? | **Not yet.** *"A profile moving from verifying to authoring deployment artifacts"* presupposes the profile authors. It does not, and this sprint's own units are the evidence: every one was written by the lead session |
 | Is the declared tier what actually ran? | **No, and that is already recorded** (`task_scope.md`, session #3 findings): in a session that cannot dispatch subagents, every unit runs on the session model regardless of its assignee's tier. `check_model_tiers.py` proves coherence between two declarations, never what executed |
+
+**The roadmap does not merely permit keeping `haiku` — it forbids the alternative.** Supplied
+by the QA gate at `R1`, which read the paragraph to its end where this plan had stopped at its
+middle. `021-030-program-queue.md:501-503` closes: *"Pre-assigning a high tier 'just in case'
+would be the speculative generality `rules/code_craft.md §1` prohibits."* Moving `devops_agent`
+to `author`/`sonnet` on the strength of a capability it does not yet exercise **is** that act.
+The roadmap demanded a re-evaluation with a recorded outcome, not a tier change; leaving
+`config/model_tiers.json` untouched obeys it, and changing it would have breached it.
+
+**A second reason not to touch that file**: `config/model_tiers.json` is `token_economy_agent`'s
+declared `tier_ownership` (`agents/token_economy_agent.md:20`) and sits outside `C5`'s declared
+scope. Editing it would have re-opened the QA gate's own finding #3.
 
 **The trigger for re-asking, written down so it is not lost with this context**: the moment
 `F-021-A2` is resolved and a profile actually *authors* under the framework-root `scripts/`

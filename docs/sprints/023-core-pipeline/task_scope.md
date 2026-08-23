@@ -25,7 +25,7 @@ wrong meant the sprint would trip on the defect it came to repair.
 | C3.2 | `hooks/on_commit.py` (`ALLOW_MARKER`), `rules/qa_and_testing.md` | create | **high** — a documented bypass of a secret gate | lead · `devops_agent` ruleset | ✅ `50094c1` + `R5` fixes |
 | C4 | `mass_standardizer.py`, `tests/…`, skill `README.md` + `SKILL.md` | modify/create | medium — raised to **high** on execution: the unit deleted authored content | lead · `skill_architect` ruleset | ✅ `5056796`, gate-approved |
 | C4.2 | `rules/django_backend_standard.md` (new), `agents.md`, `README.md`, `skills/django-expert-3rd/SKILL.md` | create/modify | **high** — relocating governance content | lead · `rule_validator` ruleset | ✅ `955eb5d`, gate-approved |
-| C5 | `agents/devops_agent.md`, `agents.md` §6 role table | modify | medium — role map | lead · `agent_orchestrator` ruleset | 🔄 `R1` applied, **UN-GATED** — re-gate died on an account quota, not on a verdict |
+| C5 | `agents/devops_agent.md`, `agents.md` §6 role table | modify | medium — role map | lead · `agent_orchestrator` ruleset | ✅ `aa2b11d` + `R1` — both gates APPROVED |
 | C6 | `agents.md`, `start_workflow.md` | modify | medium | lead · `rule_validator` ruleset | ⏳ |
 | C7 | `requirements-freeze.txt` | modify | low | lead · `devops_agent` ruleset | ⏳ |
 | C8 | `origin/contrib/host-findings` | modify | low | lead · `doc_orchestrator` ruleset | ⏳ |
@@ -457,8 +457,10 @@ It replaces the current row, which ends after *"Docker health."*
 > rejected it (finding #5): the bare `scripts/` collides with
 > `skills/[name]/scripts/`, which `skill_architect` forges, and with
 > `token_economy_agent`'s ownership of three named scripts. **The applied,
-> gate-corrected row is the one live in `agents.md:118`** — read it there, not
-> here. This paragraph exists because the block above tells a resuming session
+> gate-corrected row is the `devops_agent` row live in `agents.md` §6** — find it
+> by its content, which begins *"Sole holder of `Write`/`Edit` for the
+> **framework-root** …"*, not by line number, which drifts on any edit above it.
+> Read it there, not here. This paragraph exists because the block above tells a resuming session
 > that the row "existed nowhere else and would otherwise have to be re-invented",
 > which was true when session #4 wrote it and would now walk a session #6
 > straight back into the rejected text. `RA-14` names exactly this: a correction
@@ -532,20 +534,41 @@ reproduction byte-for-byte, and all three factual assertions in the profile's ne
 table were verified true against `claude/settings.hooks.json`,
 `hooks/on_commit.py:766` and `agents/topology_mapper.md`.
 
-### `R1` remediation is applied and **un-gated** — the re-gate died, it did not pass
+### `R1` is APPROVED by both gates — and the re-gate had to be dispatched twice
 
-**State, stated plainly so no reader infers a verdict that was never given.** The
-six findings above were remediated and the re-gate was dispatched to both agents,
-resumed with their context intact. **Both terminated on an account-level monthly
-spend limit before returning a verdict.** Their last transcript lines show them
-mid-work — QA re-deriving the six-file diff for the deletion check, Tester about
-to run `docs_freshness_check.py`. Neither approved and neither rejected.
-`C5` therefore stands as: **`R1` applied, independently un-verified.**
+**Verdict: `C5` clears the Double Gate at `R1`.** `qa_agent` → `APPROVED`,
+`tester_agent` → `APPROVED`, both against the committed tree `aa2b11d`.
 
-**What the lead session verified itself afterwards.** Deterministic checks only —
-this is the mechanical half of a gate and explicitly **not** a substitute for the
-independent one, which is the whole point of the author/reviewer split this
-sprint has paid for twice (`C2`, `C4`):
+**The first re-gate produced no verdict at all.** Both agents were dispatched,
+worked, and **terminated on an account-level monthly spend limit mid-task** — QA
+re-deriving the six-file diff, Tester about to run `docs_freshness_check.py`.
+Neither approved and neither rejected. The lead session recorded that state as
+un-gated rather than inferring a pass, the human re-authorized, and both were
+**resumed with their context intact** rather than respawned — which cost a
+fraction of a fresh dispatch and is the reason the second attempt fit inside the
+remaining budget. Worth keeping as operational knowledge: a gate that dies is not
+a gate that passed, and resuming beats restarting when budget is the binding
+constraint.
+
+**What each gate added beyond a verdict:**
+
+| Gate | Contribution |
+| :--- | :--- |
+| QA | **Answered the tier question it died holding, and strengthened it.** It read the roadmap paragraph to its end, where this session had stopped at its middle: `021-030-program-queue.md:501-503` forbids pre-assigning a high tier as "the speculative generality `rules/code_craft.md §1` prohibits". So keeping `haiku` was not the conservative option — changing it would have **breached** the roadmap. Folded into the plan |
+| QA | **Hunted the `RA-14` sibling.** The lead session fixed the verbatim row at `:451`; QA found the **imperative** form of the same trap in the session-#5 "Next unit" row and verified it is neutralized twice (the session-#6 table declares the older one spent by name, plus a dedicated `Do NOT` row). No further sibling |
+| Tester | **Proved the freshness check passes for a real reason**, which was the one result it was asked not to take on trust. In a disposable worktree it deleted `IMPLEMENTATION_PLAN.md` and got `[WARN] … Phase 1 (Planning) — Principal Agent left no artifact`. The check is live, reaches this sprint's directory, and asserts existence only (`docs_freshness_check.py:416-480`), so a new section cannot trip it |
+| Tester | **Re-derived the consumer set against the enlarged diff instead of reusing its own.** `verify_references.py:45` excludes `docs/roadmaps/` and `docs/sprints/` entirely, so four of the six changed files are invisible to it; nothing in `scripts/` or `hooks/` asserts structure, length or heading shape over them; and `loop_guard.py:42` reads a root-level `task_scope.md`, not the sprint one — so the file that grew by 134 lines has **no consumer at all** |
+| Tester | **Argued its own §9 finding should be routed, not blocking**, on its own measurement: the bogus-tools experiment ran in a worktree at `HEAD`, **pre-`C5`**, so the gap exists identically with and without this unit. `C5` neither creates nor widens it, and *"a gate that blocks a fix because an unrelated pre-existing hole was discovered while inspecting it is demanding a feature as the price of a correction"* |
+
+**One distinction the Tester drew and it is kept rather than smoothed over**: on
+the tier verdict it records that it *found no factual error*, and says explicitly
+that this is weaker than endorsing it. The endorsement is QA's, on the ground
+above. Two gates agreeing is not two gates asserting the same thing.
+
+**What the lead session had verified before the second dispatch.** Deterministic
+checks only — the mechanical half of a gate and explicitly **not** a substitute
+for the independent one, which is the whole point of the author/reviewer split
+this sprint has paid for twice (`C2`, `C4`):
 
 | Check | Result, exit code read with `$?` directly |
 | :--- | :--- |
@@ -556,12 +579,15 @@ sprint has paid for twice (`C2`, `C4`):
 | `make verify` | **0** — 372 passed. Unchanged from the pre-edit count, which the Tester already established means **nothing pins `C5`** |
 | `RA-14` over the remediation's own prose | **Found one defect, fixed.** See the `⚠️ SUPERSEDED` warning above `## Where session #5 resumes` — the verbatim row session #4 recorded is the version the QA gate rejected, and the block containing it instructs a resuming session to re-apply it. Fixing the count in `agents.md` while that reproduction drifted is the precise failure `RA-14` describes |
 
-**What remains unverified and must not be treated as done**: everything requiring
-judgment rather than a command — whether the remediation's *new* prose is itself
-sound, whether the tier verdict's basis holds, and whether the six fixes actually
-answer the findings rather than merely touching the lines they named. The QA gate
-was explicitly asked to reject the tier reasoning if it did not hold, and never
-answered.
+**All of it is now independently confirmed.** The judgment half — whether the new
+prose is sound, whether the tier basis holds, and whether the six fixes *answer*
+the findings rather than touch the lines they named — was the whole mandate of
+the second dispatch, and both gates returned on it. QA ruled all six answered on
+substance and three exceeded the ask; Tester verified the three new factual
+claims in the `scope_boundaries` row against `agents/token_economy_agent.md:4,19,20`
+and `agents/skill_architect.md:3,18`, and re-ran the RA-16 mask check against the
+final diff (none of the 23 executable skill names appears in any added line, so no
+orphan was masked).
 
 ### Found by the `C5` gates — routed, not folded in
 
@@ -571,6 +597,7 @@ answered.
 | **`RA-16` cannot see the installed bridge**, so three mandated commands are unreachable while `verify_references.py` exits 0 | Recorded in the session-start findings above. Same candidate unit or its own |
 | `021-030-program-queue.md:597-599` states `F-086-A1` and `F-021-A2` as open with no closure marker. The **finding statement** is a record of what was found and must not be rewritten; what it lacks is a closure marker for `F-086-A1` | **`RA-05` closeout obligation**, not a `C5` blocker. Named here so the close does not have to rediscover it |
 | `agents/devops_agent.md` uses "here" twice in explanatory prose, which `§1 unambiguous_action` names as prohibited | Non-blocking per the QA gate: `agents.md` itself uses explanatory "here" in `§5` and `RA-16`, so corpus precedent permits it in prose rather than in instructions. Left as-is deliberately |
+| **The `token_economy_agent` precedence is recorded one-directionally.** `agents/devops_agent.md`'s new `scope_boundaries` row names it, but `agents/token_economy_agent.md:19-20` still declares it "Owns `scripts/check_model_tiers.py`…" with no reciprocal pointer | **Unrouted, and deliberately not folded into `C5`** — that file is outside this unit's declared scope, and editing it would have re-opened the QA gate's own finding #3. Worth one line when a future unit next opens it. Raised by the gate that specified the precedence rule in the first place |
 | The profile's one-file `jurisdictional_lock` limit has **no enforcing mechanism** — `claude/settings.hooks.json` registers a `PreToolUse` matcher on `Bash` only, none on `Write`/`Edit`. The profile text says "check**able**", not "checked", so it is honest | Non-blocking, and not an `RA-16` violation (a profile row is not a workflow, script, skill, hook or gate). Unrouted |
 
 ## Where session #6 resumes
@@ -581,10 +608,10 @@ instructions ("re-apply the `agents.md §6` row", "dispatch `qa_agent` and
 
 | | |
 | :--- | :--- |
-| **Next action** | **Re-gate `C5` at `R1`.** The remediation is in the working tree across 6 files and is un-gated for the reason recorded above — the gates died on a spend limit, not on a verdict. Do **not** re-run the deterministic checks; they are recorded above with their exit codes. Dispatch for the **judgment** half: is the remediation's new prose sound, does the tier verdict's basis hold, do the six fixes answer the findings rather than touch the lines they named |
-| **Delegation** | Must be asked again. The human's session-#5 lift was granted for `C5`'s gates and **was spent** — both agents were dispatched under it and both returned. That they died mid-work does not restore an unspent lift, and a record claiming otherwise is the record deciding a question reserved to the human (the reasoning is under `## Declared deviation — delegation`) |
-| **Blocked on** | An account-level monthly spend limit. Nothing in the repository is broken and nothing needs reverting; `make verify` is green at 372. This is an external quota, not a defect |
-| **Do NOT** | Re-apply the `agents.md §6` row reproduced under `### C5 is in the working tree` — it is the version the QA gate **rejected**. The live, corrected row is `agents.md:118`. That block carries a `⚠️ SUPERSEDED` warning; heed it |
+| **Next action** | **`C6`.** `C5` is closed — both gates APPROVED at `R1`. `C6` is the nucleus's own `.claude/` bridge and `agents.md`/`start_workflow.md`; session #5's start findings supply it measured evidence it did not have before (three mandated commands unreachable, `RA-16` blind to the installed bridge) |
+| **Delegation** | Must be asked again. The session-#5 lift was granted for `C5`'s gates and is **spent** |
+| **Blocked on** | Nothing. `make verify` green at 372 on `aa2b11d` |
+| **Do NOT** | Re-apply the `agents.md §6` row reproduced under `### C5 is in the working tree` — it is the version the QA gate **rejected**. The live, corrected row is the `devops_agent` row in `agents.md` §6, identifiable by its opening *"Sole holder of `Write`/`Edit` for the **framework-root** …"* rather than by a line number. That block carries a `⚠️ SUPERSEDED` warning; heed it |
 | **Remaining after `C5`** | `C6`, `C7`, `C8`, `C10` |
 | **Highest-severity open item** | Unchanged: **`F8`** — a literal `.env` holding live credentials passes `hooks/on_commit.py` today. Routed, unowned, defeats `RA-09`. It deserves a unit before the sprint closes |
 | **Newly unrouted, from session #5** | `tools:` frontmatter is unvalidated (three fake tool names keep the suite green, proven by the Tester); `RA-16` cannot see the installed bridge, so `/agents:reconcile`, `/agents:harden` and `/agents:revdoc` are unreachable here while `verify_references.py` exits 0 |
