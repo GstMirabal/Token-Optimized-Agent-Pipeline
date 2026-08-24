@@ -245,8 +245,11 @@ a gate.
 **Still open, and not covered by this entry — see `F-023-S4` below.** A literal
 `.env` holding live credentials still passes this hook **after** the fix above.
 The reason is not that the new forms require quotes — three of them do not. It is
-that they are **selected by file type**, and the two that accept an unquoted
-`NAME=value` are never selected for a `.env`. `F-023-S4` carries the measurement;
+that they are **selected by file type**, and **no form selected for a `.env`
+covers an unquoted `NAME=value` at all**: the two that accept unquoted values,
+`YAML_SECRET` and `DOCKERFILE_SECRET`, accept them only in their own shapes
+(`key: value`, `ENV`/`ARG`), and are never selected for a `.env` regardless.
+Selecting them for it would close nothing. `F-023-S4` carries the measurement;
 this note exists so a reader of *this* entry does not conclude the gap closed
 here.
 
