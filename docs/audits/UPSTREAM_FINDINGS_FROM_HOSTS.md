@@ -15,7 +15,7 @@ business logic. Where a measurement is quoted it is a count, not an identity.
 | :--- | :--- | :--- |
 | *Reported by a host* | The original seven | Reproduced against `v4.4.0` when this file was written, and **re-measured again** when each was closed |
 | *Added by Sprint 023* | Three items the nucleus found in itself | Measured against the tree at the time each was written. **Not** `v4.4.0` |
-| *Added by Sprint 026* | Two items the nucleus found in itself: one at the Agent Assignment phase, one at the Phase 4 tier audit, neither while repairing another entry | Measured against the tree at `b5bfb6a`, the commit `docs/sprints/026-core-pipeline/task_scope.md` names as Sprint 026's base |
+| *Added by Sprint 026* | Three items the nucleus found in itself: one at the Agent Assignment phase, one at the Phase 4 tier audit, one during Hito 1 execution, none while repairing another entry | Measured against the tree at `b5bfb6a`, the commit `docs/sprints/026-core-pipeline/task_scope.md` names as Sprint 026's base |
 | *Inherited from host sprint records* | Leads from a host's sprint history | **Not** re-measured when written. Treat each as a lead, reproduce it first, and delete it if it no longer holds |
 
 A finding carried forward on the strength of an old record is exactly the defect
@@ -638,15 +638,17 @@ which is the same shape as the loss this whole file was written to repair.
 
 ## Added by Sprint 026 — measured against the tree, not against a host report
 
-Two items, found by the framework's own Agent Assignment and Phase 4 tier-audit
-passes rather than by a host or by another entry's repair. Recorded here, not
-folded into the Sprint 023 section above, because their provenance is a
-different sprint and this file's own convention (see `F-021-A2`'s provenance
-note) treats provenance as load-bearing rather than cosmetic. Framework-class
-under `agents.md §4 feedback_upstream`: every host that dispatches `qa_agent`
-or `tester_agent` inherits `F-026-A1`; every host that dispatches a
-`mechanical`-tier role at a difficulty its default does not fit inherits
-`F-026-A2`.
+Three items, found by the framework's own Agent Assignment phase, Phase 4
+tier-audit pass, and Hito 1 census execution respectively — none of the three
+while a host was running the pipeline and none while repairing another entry.
+Recorded here, not folded into the Sprint 023 section above, because their
+provenance is a different sprint and this file's own convention (see
+`F-021-A2`'s provenance note) treats provenance as load-bearing rather than
+cosmetic. Framework-class under `agents.md §4 feedback_upstream`: every host
+that dispatches `qa_agent` or `tester_agent` inherits `F-026-A1`; every host
+that dispatches a `mechanical`-tier role at a difficulty its default does not
+fit inherits `F-026-A2`; every host whose checkout runs `hooks/on_init.py`
+inherits `F-026-A3`.
 
 ### - [ ] `F-026-A1` — two gate profiles are assigned writes their own `tools:` grant refuses, and one already claims the capability in its own description
 
@@ -917,6 +919,106 @@ nothing for either sprint. The third returns the attribution finding at
 `18`. The fifth shows the `## Declared escalations` section and its five-row
 table. The sixth shows `check_invocation_coverage` scoped to `workflows/` and
 `scripts/`, never `agents/`.
+
+---
+
+### - [ ] `F-026-A3` — `hooks/on_init.py` hardcodes host-relative paths, and the resolver that exists for exactly this class of problem goes unused
+
+**Evidence.** `hooks/on_init.py:13-23`:
+
+```python
+CONFIG_PATH = Path(".env")
+ENV_TEMPLATE = Path(".env.template")
+BRIDGE_LOCK = Path(".agents/.claude_bridge.lock")
+INSTALL_SCRIPT = Path(".agents/scripts/install.py")
+
+BRIDGE_ANCHORS = [
+    Path(".claude/commands/agents/start.md"),
+    Path(".claude/agents/principal_agent.md"),
+]
+```
+
+Every path constant is a literal, host-relative string. The file's import
+block — `os`, `subprocess`, `json`, `datetime`, `pathlib`, `sys`,
+`hooks.telemetry` — names neither `scripts/_root` nor `scripts/_mode`.
+`scripts/_root.py` (`agents_root()`) and `scripts/_mode.py` (`is_nucleus()`)
+are the framework's sanctioned mode/root resolvers for exactly this class of
+problem: `agents_root()` was built as Sprint 023 unit `C0.3`, and its own
+docstring names `check_readme_counts.py` resolving `Path("skills")` against
+the working directory and crashing in every host as the defect it exists to
+close (`F-093-N2`, above).
+
+**Documented, not undetected — and that is the finding, not the hardcoding by
+itself.** `workflows/start_workflow.md` Phase 1.5 `bridge_check` already
+states the asymmetry in its own cell: *"in a host, `hooks/on_init.py`
+performs this same check ... automatically at session start ... In the
+nucleus no hook runs at all"*, and in the same sentence, *"`hooks/on_init.py`
+also resolves `.agents/`-prefixed paths that do not exist here."* So a reader
+of that workflow cell is told the limitation. Nothing states which of two
+readings is the intended end state, and this register names both rather than
+choosing:
+
+1. The hook is host-only by design and the hardcoding is correct — in which
+   case `hooks/on_init.py` should say so in its own docstring, the way
+   `scripts/_root.py:21` states host-scoped scripts "MUST NOT adopt
+   `agents_root()`", rather than leaving a reader to infer scope from a
+   workflow cell three files away.
+2. The hook should resolve through `scripts/_root.py`/`scripts/_mode.py` like
+   every other framework-scoped or mixed script listed in `scripts/_root.py`'s
+   own `invoked_by:` block — in which case the nucleus gains the session-start
+   bridge automation whose absence is what let the nucleus bridge go stale for
+   a month (`start_workflow.md`, same cell; `F-093-N1`'s second defect,
+   above).
+
+**How it was found, and the mechanism matters more than the file.** During
+Sprint 026 unit `P3.2.1`, a census rename inside `INSTALL_SCRIPT`
+(`hooks/on_init.py:16`; row at
+`docs/sprints/026-core-pipeline/task_scope.md:304`; committed `88a1e65`), the
+dispatched `devops_agent` read the file's mixed path styles — some
+`.agents/`-prefixed, some not — as an inconsistency, "fixed" it by dropping
+the `.agents/` prefix from `INSTALL_SCRIPT`, and verified with
+`Path(...).exists()` from the nucleus root, where this hook never executes.
+**The check printed `True`, and the file was broken in the only context it
+runs in** — a host, at session start, per `start_workflow.md`'s own cell
+above. The change was caught in review and reverted; the corrected rename is
+the one committed at `88a1e65`.
+
+Record the mechanism, not only the file: **a verification run in the wrong
+context produces a false green, and a file whose deployment context is
+stated only in a distant workflow cell — never in its own docstring — invites
+exactly that error.** This is the same failure signature as `F-026-A2`,
+cross-referenced above: a control (there, a charter row nobody was prompted
+to reread; here, an `.exists()` check run from the wrong root) that answers
+confidently about something it did not actually inspect. It is also adjacent
+to, and not the same defect as, the class Sprint 026 unit `A4.2` is scheduled
+to repair: `docs/sprints/026-core-pipeline/task_scope.md:346,458` name
+`hooks/on_init.py` as an `RA-16` hooks-blindness repair target (the missing
+`invoked_by:` declaration), deferred to Hito 2 (`⏳→H2`). `A4.2`'s declared
+scope is the missing invoker declaration; this entry's scope is the
+host-relative paths inside the file that declaration would then cover.
+
+**Noted, not inflated.** `hooks/on_init.py:18` still comments that
+`install_claude.py` links the bridge artifacts — a script that no longer
+exists under that name (`INSTALL_SCRIPT` two lines above names
+`scripts/install.py`). This is inside Sprint 026's own declared deferral set
+(`docs/sprints/026-core-pipeline/task_scope.md` §`Declared deferral`, the
+`P3.2` prose subset), scheduled for Hito 2, not an omission this entry adds
+weight to.
+
+**How to reproduce.**
+
+```bash
+grep -n "^import\|^from" hooks/on_init.py
+grep -n "CONFIG_PATH\|ENV_TEMPLATE\|BRIDGE_LOCK\|INSTALL_SCRIPT\|BRIDGE_ANCHORS" hooks/on_init.py
+grep -n "def agents_root\|def is_nucleus" scripts/_root.py scripts/_mode.py
+grep -n "performs this same check.*automatically at session start\|resolves \`.agents/\`-prefixed paths" workflows/start_workflow.md
+sed -n '304p' docs/sprints/026-core-pipeline/task_scope.md
+```
+
+The first returns no `_root`/`_mode` import. The second returns five literal,
+host-relative constants. The third shows both resolvers defined and exported.
+The fourth shows `start_workflow.md`'s own documented asymmetry. The fifth
+shows unit `P3.2.1`'s row and its committed hash, `88a1e65`.
 
 ---
 

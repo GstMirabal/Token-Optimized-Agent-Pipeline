@@ -5,10 +5,15 @@
 **Phase**: 4.3 (Rule Audit) — produced after `agent_assignment.md` (4.1) and
 `skill_assignment.md` (4.2). Every unit below is one commit whose structural
 subject is one physical file (`agents.md §2 jurisdictional_lock`), reproduced
-from `## Work`. **Every `Status` is `⏳`**: Phase 5 has not run and
-`agents.md §2 triple_lock` forbids execution before it. **Patched again,
-2026-08-24**: 33 of those rows also carry `⏳→H2` — deferred out of Hito 1's
-dispatch scope by human decision, not executed either way yet. See
+from `## Work`. **Status legend, current as of the 2026-08-24 suspension**:
+`⏳` pending; `⏳→H2` deferred out of Hito 1's dispatch scope by human decision;
+`✅ <sha>` executed and committed, with the commit that carries it. Phase 5's
+approval was recorded on 2026-08-24 over the plan text at `1da9641`, so
+`agents.md §2 triple_lock` no longer blocks execution. **Nine rows are `✅`** —
+`A1`, `P8`, `P8.1`, `P2`, `P8.2`, `P2.1`, `P3.0`, `P3.2.1`, `P3.2.9`. `A1` carries
+no SHA because `docs/active_state.json` is deliberately not versioned
+(`.gitignore`, Sprint 024: the file mixes durable and volatile lifetimes, and
+tracking it would ship the nucleus's live session into every host checkout). See
 **Declared deferral** below.
 
 **Patched after `c07bc46`.** `IMPLEMENTATION_PLAN.md §H1.c` gained three
@@ -261,12 +266,12 @@ scoped to their originally-assigned Hito.
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| A1 | `docs/active_state.json` | modify | low | `devops_agent` | ⏳ |
-| P8 | `scripts/session_state.py` | modify | **high** | `devops_agent` — escalated (mechanical/haiku → author/sonnet, effort medium; see Declared escalations) | ⏳ |
-| P8.1 | `tests/test_session_protocol.py` | modify | medium | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ⏳ |
-| P2 | `scripts/session_state.py` | modify | medium | `devops_agent` | ⏳ |
-| P8.2 | `workflows/start_workflow.md` | modify | medium | `orchestrator` | ⏳ |
-| P2.1 | `workflows/start_workflow.md` | modify | medium | `orchestrator` | ⏳ |
+| A1 | `docs/active_state.json` | modify | low | `devops_agent` |✅ `—` |
+| P8 | `scripts/session_state.py` | modify | **high** | `devops_agent` — escalated (mechanical/haiku → author/sonnet, effort medium; see Declared escalations) |✅ `cce4f90` |
+| P8.1 | `tests/test_session_protocol.py` | modify | medium | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) |✅ `c16cd4b` |
+| P2 | `scripts/session_state.py` | modify | medium | `devops_agent` |✅ `832d2a1` |
+| P8.2 | `workflows/start_workflow.md` | modify | medium | `orchestrator` |✅ `6b9c3e3` |
+| P2.1 | `workflows/start_workflow.md` | modify | medium | `orchestrator` |✅ `977c9f2` |
 
 `scripts/session_state.py` (`P8`, `P2`) and `workflows/start_workflow.md`
 (`P8.2`, `P2.1`) are each the structural subject of two rows here — see
@@ -277,7 +282,7 @@ sequenced, not concurrent.
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| P3.0 | `scripts/install.py` (`git mv` from `scripts/install_claude.py`) | create | **high** | `devops_agent` | ⏳ |
+| P3.0 | `scripts/install.py` (`git mv` from `scripts/install_claude.py`) | create | **high** | `devops_agent` |✅ `a107b36` |
 | P3.1 | `scripts/install.sh` (`git mv` from `scripts/install_claude.sh`) | create | medium | `devops_agent` | ⏳ |
 | P3.1b | `scripts/install_claude.sh` | create (deprecation shim) | low | `devops_agent` | ⏳ |
 | P3.3 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `orchestrator` | ⏳→H2 |
@@ -296,7 +301,7 @@ does not substitute its own judgment for that.
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| P3.2.1 | `hooks/on_init.py:16` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳ |
+| P3.2.1 | `hooks/on_init.py:16` | modify | **high** — RA-14 census (P3.2) | `devops_agent` |✅ `88a1e65` |
 | P3.2.2 | `hooks/on_commit_msg.py:14` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳→H2 |
 | P3.2.3 | `scripts/merge_json.py:4` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳→H2 |
 | P3.2.4 | `scripts/_root.py:71` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳→H2 |
@@ -304,7 +309,7 @@ does not substitute its own judgment for that.
 | P3.2.6 | `scripts/render_readme.py:3,66,113` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳→H2 |
 | P3.2.7 | `scripts/verify_references.py:160` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳→H2 |
 | P3.2.8 | `skills/compliance-checker/scripts/distill.py:10` | modify | **high** — RA-14 census (P3.2) | `skill_architect` | ⏳→H2 |
-| P3.2.9 | `tests/test_installer.sh:31,67,83,93,112` | modify | **high** — RA-14 census (P3.2) | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ⏳ |
+| P3.2.9 | `tests/test_installer.sh:31,67,83,93,112` | modify | **high** — RA-14 census (P3.2) | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) |✅ `bf53b46` |
 | P3.2.10 | `tests/test_mass_standardizer.py:297` | modify | **high** — RA-14 census (P3.2) | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ⏳→H2 |
 | P3.2.11 | `tests/test_invocation_coverage.py:70` | modify | **high** — RA-14 census (P3.2) | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ⏳→H2 |
 | P3.2.12 | `tests/test_root_resolution.py:57` | modify | **high** — RA-14 census (P3.2) | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ⏳→H2 |
@@ -541,7 +546,18 @@ is first-party and editable — `P3.2.27`, `P3.2.28` — while
 
 ## Status
 
-Every row above is `⏳`. No unit has executed; Phase 5 (Approval Gate) has
-not run. 33 of those rows additionally carry `⏳→H2`: deferred out of Hito
-1's dispatch scope by human decision (2026-08-24, see **Declared
-deferral**), not yet executed under either Hito.
+As of the 2026-08-24 suspension: **9 rows `✅`**, 29 `⏳`, 36 `⏳→H2`.
+
+Phase 5 (Approval Gate) ran on 2026-08-24 and its authorization is recorded in
+`IMPLEMENTATION_PLAN.md` over the plan text at `1da9641`. Phase 6 executed `H1.a`
+in full (`A1`, `P8`, `P8.1`, `P2`, `P8.2`, `P2.1`) and part of `H1.b` (`P3.0`,
+`P3.2.1`, `P3.2.9`).
+
+The session was **suspended, not closed**, and the sprint continues under Cursor.
+`SPRINT_LOG.md` §`Session handoff` carries the resume brief and the ordered list
+of what remains before the Migration Gate can be attempted. **The Migration Gate
+has not been attempted and cannot pass yet**: `P4` has not landed, so `M4`, `M5`
+and `M6` are unobservable.
+
+The 36 `⏳→H2` rows are deferred out of Hito 1's dispatch scope by human decision
+(see **Declared deferral**) and are executed under Hito 2, not abandoned.
