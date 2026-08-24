@@ -1,12 +1,12 @@
-"""Portable installer for the .agents -> Claude Code bridge.
+"""Portable installer for the .agents bridge.
 
-invoked_by: scripts/install_claude.sh, start_workflow.md#bridge_check, hooks/on_init.py.
+invoked_by: scripts/install.sh, start_workflow.md#bridge_check, hooks/on_init.py.
 
-Cross-platform port of the original bash installer (install_claude.sh is now a
+Cross-platform port of the original bash installer (install.sh is now a
 thin wrapper around this). Idempotent: safe to re-run any time.
 
 Usage:
-    python3 .agents/scripts/install_claude.py [--profile <name>]
+    python3 .agents/scripts/install.py [--profile <name>] [--target claude|cursor|both]
 
 What it does:
   1. Symlinks agents/*.md, commands/*.md and skills/*/ into the host's .claude/
@@ -204,7 +204,7 @@ def install_git_commit_msg() -> None:
     hook_path = hooks_dir / "commit-msg"
     body = (
         "#!/usr/bin/env bash\n"
-        "# Installed by .agents/scripts/install_claude.py\n"
+        "# Installed by .agents/scripts/install.py\n"
         "#\n"
         "# Conventional Commit format, regression-test and dependency-\n"
         "# justification gates. pre-commit cannot run these: the message does\n"
@@ -248,7 +248,7 @@ def install_git_pre_commit() -> None:
     hook_path = hooks_dir / "pre-commit"
     body = (
         "#!/usr/bin/env bash\n"
-        "# Installed by .agents/scripts/install_claude.py\n"
+        "# Installed by .agents/scripts/install.py\n"
         "#\n"
         "# The Claude Code PreToolUse hook only sees commits the agent makes.\n"
         "# This covers every other path into the repository.\n"
@@ -274,9 +274,23 @@ def install_git_pre_commit() -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Install the .agents Claude Code bridge.")
+    parser = argparse.ArgumentParser(description="Install the .agents bridge.")
     parser.add_argument("--profile", help="Optional project profile to install (profiles/<name>)")
+    parser.add_argument(
+        "--target",
+        choices=["claude", "cursor", "both"],
+        default="claude",
+        help="Installation target: 'claude' (Claude Code, default), 'cursor' (Cursor), or 'both'"
+    )
     args = parser.parse_args()
+
+    if args.target != "claude":
+        print(
+            f"🛑 --target {args.target} is not yet implemented. "
+            "The Cursor adapter (scripts/cursor_adapter.py) will wire this in Sprint 026 unit P4.",
+            file=sys.stderr
+        )
+        return 1
 
     # Nucleus mode (agents.md §5 nucleus_neutrality): the full host bridge is
     # refused, but the minimal self-bridge (commands/agents/constitution) is
