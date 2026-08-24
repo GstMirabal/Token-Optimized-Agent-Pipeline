@@ -307,11 +307,17 @@ def install_git_pre_commit() -> None:
     print("🪝 Installed .git/hooks/pre-commit (scans terminal commits too)")
 
 
-def install_git_pre_push() -> None:
+def install_git_pre_push(
+    *,
+    hooks_dir: Path | None = None,
+    script_path: str = ".agents/hooks/on_push.py",
+) -> None:
     """Install a native pre-push hook so force-push is blocked under any tool."""
-    hooks_dir = HOST_DIR / ".git" / "hooks"
-    if not hooks_dir.is_dir():
+    if hooks_dir is None:
+        hooks_dir = HOST_DIR / ".git" / "hooks"
+    if not hooks_dir.parent.is_dir():
         return
+    hooks_dir.mkdir(parents=True, exist_ok=True)
 
     hook_path = hooks_dir / "pre-push"
     body = (
@@ -321,8 +327,8 @@ def install_git_pre_push() -> None:
         "# Blocks force-push and non-fast-forward updates. Claude Code\n"
         "# permissions.deny does not apply under Cursor.\n"
         "set -euo pipefail\n"
-        "[ -f .agents/hooks/on_push.py ] || exit 0\n"
-        "exec python3 .agents/hooks/on_push.py \"$@\"\n"
+        f"[ -f {script_path} ] || exit 0\n"
+        f'exec python3 {script_path} "$@"\n'
     )
 
     if hook_path.exists():
@@ -346,6 +352,12 @@ def install_host_git_hooks() -> None:
     install_git_pre_commit()
     install_git_commit_msg()
     install_git_pre_push()
+
+
+def install_nucleus_git_hooks() -> None:
+    """Install git hooks into the nucleus repo (repo-relative hook script paths)."""
+    hooks_dir = AGENTS_DIR / ".git" / "hooks"
+    install_git_pre_push(hooks_dir=hooks_dir, script_path="hooks/on_push.py")
 
 
 def install_host_claude_bridge(profile: str | None) -> int:
@@ -417,9 +429,11 @@ def main() -> int:
             return install_nucleus_bridge()
         if args.target == "cursor":
             install_cursor_bridge(AGENTS_DIR, nucleus=True)
+            install_nucleus_git_hooks()
             return 0
         install_nucleus_bridge()
         install_cursor_bridge(AGENTS_DIR, nucleus=True)
+        install_nucleus_git_hooks()
         return 0
 
     if args.target in ("claude", "both"):

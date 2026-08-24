@@ -93,6 +93,11 @@ grep -qx "@agents.md" "$NUCLEUS/CLAUDE.md" || fail "nucleus: constitution import
 [ ! -e "$NUCLEUS/.bridge_cursor.lock" ] || fail "nucleus: must write no cursor bridge lock"
 ( cd "$NUCLEUS" && python3 scripts/install.py --profile example-project > /dev/null 2>&1 ) \
   && fail "nucleus: profile install must be refused" || true
+mkdir -p "$NUCLEUS/.git/hooks"
+( cd "$NUCLEUS" && python3 scripts/install.py --target cursor > /dev/null )
+[ -x "$NUCLEUS/.git/hooks/pre-push" ] || fail "nucleus cursor: pre-push hook missing"
+grep -q "hooks/on_push.py" "$NUCLEUS/.git/hooks/pre-push" \
+  || fail "nucleus cursor: pre-push hook must use repo-relative path"
 echo "✅ nucleus self-bridge test PASSED"
 
 # ---------------------------------------------------------------------------
