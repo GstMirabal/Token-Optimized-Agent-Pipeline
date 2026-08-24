@@ -6,7 +6,10 @@
 `skill_assignment.md` (4.2). Every unit below is one commit whose structural
 subject is one physical file (`agents.md §2 jurisdictional_lock`), reproduced
 from `## Work`. **Every `Status` is `⏳`**: Phase 5 has not run and
-`agents.md §2 triple_lock` forbids execution before it.
+`agents.md §2 triple_lock` forbids execution before it. **Patched again,
+2026-08-24**: 33 of those rows also carry `⏳→H2` — deferred out of Hito 1's
+dispatch scope by human decision, not executed either way yet. See
+**Declared deferral** below.
 
 **Patched after `c07bc46`.** `IMPLEMENTATION_PLAN.md §H1.c` gained three
 units (`A4.1`, `A4.2`, `A4`) repairing the `RA-16` hooks-coverage gap this
@@ -143,6 +146,115 @@ deviations` item 3 already gave the `tester_agent` self-contradiction.
 
 ---
 
+## Declared deferral — Hito 1 scope reduction, human decision (2026-08-24)
+
+**Decision.** To reach the Migration Gate sooner, the human deferred a subset
+of `## Work` from Hito 1 to Hito 2 (executed under Cursor). This is a
+deviation from `IMPLEMENTATION_PLAN.md` as approved. Recorded here per this
+sprint's own `Declared deviations`/`Declared escalations` convention — not
+reopened, not argued. The deferred units are prose and documentation
+propagation; none is inspected by the Migration Gate's observations `M1`–`M7`
+(audited below). `IMPLEMENTATION_PLAN.md` itself is not edited by this patch.
+
+**Deferred units, by ID.**
+
+1. **`P3.2` prose subset — 27 of the 29 census rows** (`H1.b`): `P3.2.2`–
+   `P3.2.8`, `P3.2.10`–`P3.2.29`. Docstrings, comments, `README.md`
+   (`P3.2.19`), `SECURITY.md` (`P3.2.20`), `docs/` (`P3.2.22`–`P3.2.26`),
+   `skills/slash-commander/` (`P3.2.27`, `P3.2.28`),
+   `profiles/example-project/README.md` (`P3.2.29`), and governance/workflow
+   prose (`agents.md` `P3.2.16`, `workflows/start_workflow.md` `P3.2.17`,
+   `workflows/audit_workflow.md` `P3.2.18`). **Kept in Hito 1**: `P3.2.1`
+   (`hooks/on_init.py:16`) and `P3.2.9` (`tests/test_installer.sh:31,67,83,
+   93,112`) — the two files measured to break at runtime (below).
+2. **`P3.3`** (`H1.b`, `docs/roadmaps/core/pipeline/021-030-program-queue.md:1284`).
+3. **`P9.2`** (`H1.c`, `tests/test_on_push.py`).
+4. **`P4.1`** (`H1.d`, `tests/test_installer.sh` — the `--target cursor`/
+   `--target both` block; a distinct unit from `P3.2.9` on the same file,
+   sequenced after it per **Isolation** below).
+5. **`A4`, `A4.1`, `A4.2`** (`H1.c`, the `RA-16` hooks-blindness repair:
+   `scripts/verify_references.py`, `hooks/on_commit.py`, `hooks/on_init.py`).
+
+**33 rows total** carry the deferral marker in `## Work` below: 27 + 1 + 1 +
+1 + 3.
+
+**The measurement that justifies keeping exactly two `P3.2` files in Hito 1
+— load-bearing.** Measured against the tree at `977c9f2`: of the 32 Class A
+census files `Design §D2` names, exactly two break at runtime once `P3.0`
+performs `git mv scripts/install_claude.py scripts/install.py`:
+
+- `hooks/on_init.py:16` — `INSTALL_SCRIPT =
+  Path(".agents/scripts/install_claude.py")` is a live constant, not a
+  mention.
+- `tests/test_installer.sh:83, 93, 112` — three direct
+  `python3 .../install_claude.py` invocations. `tests/test_installer.sh`
+  runs inside `make verify`, so leaving these stale turns the build red.
+
+Verified safe to defer: `tests/test_installer.sh:31, 67` invoke
+`install_claude.sh`, preserved by `P3.1b` as a deprecation shim;
+`claude/settings.hooks.json:16` also names the `.sh` form;
+`config/invocation_exceptions.json:55` carries the string inside a `note`
+field, not a `path`.
+
+**The plan's own objection — recorded, not softened.**
+`IMPLEMENTATION_PLAN.md Design §D2` explicitly considered and rejected this
+split: *"Se consideró y se rechaza partirlo: dejar la mitad documental para
+el Hito 2 significaría propagar un renombrado a caballo de una frontera de
+herramienta y de contexto, con la segunda mitad ejecutada por un agente que
+no vivió la primera. Esa es literalmente la forma que RA-14 describe."* The
+human overrode this knowingly, on 2026-08-24. **Mitigation, stated plainly
+and not oversold**: `Design §D2`'s objection is against an *implicit*
+handover; the deferred set is enumerated by filename in this artifact (item
+1 above) before any of it is deferred, so the Hito 2 agent under Cursor
+inherits a list, not a memory. This reduces the `RA-14` risk. **It does not
+eliminate it.**
+
+**Consequence for `P3.2`'s done-criterion — moved, not silently dropped.**
+`P3.2`'s done-criterion (`grep -rn "install_claude"` filtered of
+`Design §D2`'s Class B history, returning exactly one line — the shim) is
+**not satisfiable at the Migration Gate** under this decision: 27 of 29
+census rows remain unexecuted at that point. It becomes a **Hito 2 closing
+condition** instead, to be checked at `A3` (the Hito 2 gate) rather than at
+`H1.f`.
+
+**`P1`/`P1.1` — considered for deferral, deliberately kept in Hito 1.**
+`Design §D4b`: without `P1`, the Hito 2 units would run under Cursor in live
+contradiction with `agents.md §6`'s eight-role mandate — Cursor cannot
+instantiate 8 roles, so leaving `P1` unlanded would let Hito 2 run without
+constitutional permission for its own execution mode. Keeping `P1` (and its
+dependent regeneration, `P1.1`) in Hito 1 is what gives that constitutional
+edit a native eight-role gate (`H1.f`) rather than a Cursor-context one.
+
+**Audit — Migration Gate coverage, checked against `M1`–`M7`
+(`IMPLEMENTATION_PLAN.md` lines 381–387).** `M1`/`M7` read
+`docs/active_state.json` and `resume_pointer`; `M2` reads `session_id`/
+`session_tool` (`P8`, kept in Hito 1); `M3` reads `delegation_mode` (`P2`,
+kept); `M4` counts `.cursor/commands`/`.cursor/rules`/`mcp.json` (`P4`,
+kept); `M5` questions the Cursor session on `agents.md §2
+jurisdictional_lock`, loaded via `P5`/`P4` (both kept) — not via any
+deferred `P3.2` prose row; `M6` runs `git push --force` against the hook
+installed by `P9`/`P9.1` (both kept — `P9.2` is a test file for that hook,
+not the hook itself, and is not read by `M6`). **Conclusion: no unit in the
+deferred set is inspected by the Migration Gate.**
+
+One adjacent effect, flagged for the record though outside this section's
+mandate to fix: deferring `A4` means `H1.f`'s `make verify` no longer
+proves `RA-16` compliance for `hooks/on_push.py` — this artifact's own
+`RA-16 INVOCATION_COVERAGE` section above states that guarantee depends on
+`A4` landing before `H1.f`. That guarantee now lands with Hito 2 instead.
+**This does not affect `M1`–`M7`**, which check the hook's live behavior
+directly (`M6`), not `make verify`'s exit code.
+
+**Status marker.** Rows deferred by this decision carry `⏳→H2` in the
+`Status` column below, in place of the plain `⏳` used elsewhere in this
+document. Meaning: pending, not executed, **and** out of Hito 1's dispatch
+scope by this human decision (2026-08-24) — to be dispatched in Hito 2,
+under Cursor, `delegation_mode: sequential`. Rows without this suffix keep
+the file's original `⏳` meaning: pending, awaiting Phase 5 approval, still
+scoped to their originally-assigned Hito.
+
+---
+
 ## HITO 1 — Bootstrap, under Claude Code, native 8-role pipeline
 
 ### H1.a — State and session
@@ -168,7 +280,7 @@ sequenced, not concurrent.
 | P3.0 | `scripts/install.py` (`git mv` from `scripts/install_claude.py`) | create | **high** | `devops_agent` | ⏳ |
 | P3.1 | `scripts/install.sh` (`git mv` from `scripts/install_claude.sh`) | create | medium | `devops_agent` | ⏳ |
 | P3.1b | `scripts/install_claude.sh` | create (deprecation shim) | low | `devops_agent` | ⏳ |
-| P3.3 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `orchestrator` | ⏳ |
+| P3.3 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `orchestrator` | ⏳→H2 |
 | P10 | `scripts/install.py` | modify | medium | `devops_agent` | ⏳ |
 | P10.1 | `.gitignore` | modify | low | `devops_agent` | ⏳ |
 
@@ -185,34 +297,34 @@ does not substitute its own judgment for that.
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | P3.2.1 | `hooks/on_init.py:16` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳ |
-| P3.2.2 | `hooks/on_commit_msg.py:14` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳ |
-| P3.2.3 | `scripts/merge_json.py:4` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳ |
-| P3.2.4 | `scripts/_root.py:71` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳ |
-| P3.2.5 | `scripts/_mode.py:4,26` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳ |
-| P3.2.6 | `scripts/render_readme.py:3,66,113` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳ |
-| P3.2.7 | `scripts/verify_references.py:160` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳ |
-| P3.2.8 | `skills/compliance-checker/scripts/distill.py:10` | modify | **high** — RA-14 census (P3.2) | `skill_architect` | ⏳ |
+| P3.2.2 | `hooks/on_commit_msg.py:14` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳→H2 |
+| P3.2.3 | `scripts/merge_json.py:4` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳→H2 |
+| P3.2.4 | `scripts/_root.py:71` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳→H2 |
+| P3.2.5 | `scripts/_mode.py:4,26` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳→H2 |
+| P3.2.6 | `scripts/render_readme.py:3,66,113` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳→H2 |
+| P3.2.7 | `scripts/verify_references.py:160` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳→H2 |
+| P3.2.8 | `skills/compliance-checker/scripts/distill.py:10` | modify | **high** — RA-14 census (P3.2) | `skill_architect` | ⏳→H2 |
 | P3.2.9 | `tests/test_installer.sh:31,67,83,93,112` | modify | **high** — RA-14 census (P3.2) | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ⏳ |
-| P3.2.10 | `tests/test_mass_standardizer.py:297` | modify | **high** — RA-14 census (P3.2) | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ⏳ |
-| P3.2.11 | `tests/test_invocation_coverage.py:70` | modify | **high** — RA-14 census (P3.2) | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ⏳ |
-| P3.2.12 | `tests/test_root_resolution.py:57` | modify | **high** — RA-14 census (P3.2) | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ⏳ |
-| P3.2.13 | `claude/settings.hooks.json:16` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳ |
-| P3.2.14 | `config/invocation_exceptions.json:55` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳ |
-| P3.2.15 | `.gitignore:100` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳ |
-| P3.2.16 | `agents.md:77,83,110,163` | modify | **high** — RA-14 census (P3.2) | `rule_validator` | ⏳ |
-| P3.2.17 | `workflows/start_workflow.md:23,25` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳ |
-| P3.2.18 | `workflows/audit_workflow.md:18` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳ |
-| P3.2.19 | `README.md:60,101,107,123,164,198` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳ |
-| P3.2.20 | `SECURITY.md:17` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳ |
-| P3.2.21 | `.github/ISSUE_TEMPLATE/bug_report.yml:26` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳ |
-| P3.2.22 | `docs/standards/templates/SYSTEM_OVERVIEW_TEMPLATE.md:41` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳ |
-| P3.2.23 | `docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md:12,21,70,81,83` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳ |
-| P3.2.24 | `docs/architecture/global_topology.md:53` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳ |
-| P3.2.25 | `docs/architecture/topology_map.md:17,21` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳ |
-| P3.2.26 | `docs/plans/README.md:51` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳ |
-| P3.2.27 | `skills/slash-commander/SKILL.md:12,30` | modify | **high** — RA-14 census (P3.2) | `skill_architect` | ⏳ |
-| P3.2.28 | `skills/slash-commander/README.md:49` | modify | **high** — RA-14 census (P3.2) | `skill_architect` | ⏳ |
-| P3.2.29 | `profiles/example-project/README.md:18` | modify | **high** — RA-14 census (P3.2) | `skill_architect` | ⏳ |
+| P3.2.10 | `tests/test_mass_standardizer.py:297` | modify | **high** — RA-14 census (P3.2) | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ⏳→H2 |
+| P3.2.11 | `tests/test_invocation_coverage.py:70` | modify | **high** — RA-14 census (P3.2) | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ⏳→H2 |
+| P3.2.12 | `tests/test_root_resolution.py:57` | modify | **high** — RA-14 census (P3.2) | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ⏳→H2 |
+| P3.2.13 | `claude/settings.hooks.json:16` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳→H2 |
+| P3.2.14 | `config/invocation_exceptions.json:55` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳→H2 |
+| P3.2.15 | `.gitignore:100` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳→H2 |
+| P3.2.16 | `agents.md:77,83,110,163` | modify | **high** — RA-14 census (P3.2) | `rule_validator` | ⏳→H2 |
+| P3.2.17 | `workflows/start_workflow.md:23,25` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳→H2 |
+| P3.2.18 | `workflows/audit_workflow.md:18` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳→H2 |
+| P3.2.19 | `README.md:60,101,107,123,164,198` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳→H2 |
+| P3.2.20 | `SECURITY.md:17` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳→H2 |
+| P3.2.21 | `.github/ISSUE_TEMPLATE/bug_report.yml:26` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳→H2 |
+| P3.2.22 | `docs/standards/templates/SYSTEM_OVERVIEW_TEMPLATE.md:41` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳→H2 |
+| P3.2.23 | `docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md:12,21,70,81,83` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳→H2 |
+| P3.2.24 | `docs/architecture/global_topology.md:53` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳→H2 |
+| P3.2.25 | `docs/architecture/topology_map.md:17,21` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳→H2 |
+| P3.2.26 | `docs/plans/README.md:51` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳→H2 |
+| P3.2.27 | `skills/slash-commander/SKILL.md:12,30` | modify | **high** — RA-14 census (P3.2) | `skill_architect` | ⏳→H2 |
+| P3.2.28 | `skills/slash-commander/README.md:49` | modify | **high** — RA-14 census (P3.2) | `skill_architect` | ⏳→H2 |
+| P3.2.29 | `profiles/example-project/README.md:18` | modify | **high** — RA-14 census (P3.2) | `skill_architect` | ⏳→H2 |
 
 Four of the 29 (`P3.2.7`, `P3.2.15`, `P3.2.16`, `P3.2.17`) are additional
 multi-unit files not named in the task's own four examples — see
@@ -224,10 +336,10 @@ multi-unit files not named in the task's own four examples — see
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | P9 | `hooks/on_push.py` | create | **high** | `devops_agent` — escalated (mechanical/haiku → author/sonnet; see Declared escalations) | ⏳ |
 | P9.1 | `scripts/install.py` | modify | medium | `devops_agent` | ⏳ |
-| P9.2 | `tests/test_on_push.py` | create | medium | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ⏳ |
-| A4.1 | `hooks/on_commit.py` | modify | low | `devops_agent` | ⏳ |
-| A4.2 | `hooks/on_init.py` | modify | low | `devops_agent` | ⏳ |
-| A4 | `scripts/verify_references.py` | modify | **high** | `devops_agent` | ⏳ |
+| P9.2 | `tests/test_on_push.py` | create | medium | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ⏳→H2 |
+| A4.1 | `hooks/on_commit.py` | modify | low | `devops_agent` | ⏳→H2 |
+| A4.2 | `hooks/on_init.py` | modify | low | `devops_agent` | ⏳→H2 |
+| A4 | `scripts/verify_references.py` | modify | **high** | `devops_agent` | ⏳→H2 |
 
 `scripts/install.py` is now the structural subject of three rows across this
 sprint (`P3.0`, `P10`, `P9.1`) — see **Isolation**.
@@ -261,7 +373,7 @@ is now a third-touch file (`P3.2.7`, `P5.1`, `A4`).
 | P4.0 | `docs/sprints/026-core-pipeline/cursor_mdc_schema.md` | create | **high** | `devops_agent` — escalated (mechanical/haiku → author/sonnet; see Declared escalations) | ⏳ |
 | P4.0b | `docs/sprints/026-core-pipeline/cursor_mdc_schema.md` | modify | low | `devops_agent` | ⏳ |
 | P4 | `scripts/cursor_adapter.py` | create | **high** | `devops_agent` — escalated (mechanical/haiku → author/sonnet; see Declared escalations) | ⏳ |
-| P4.1 | `tests/test_installer.sh` | modify | medium | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ⏳ |
+| P4.1 | `tests/test_installer.sh` | modify | medium | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ⏳→H2 |
 
 `.gitignore` (`P10.1`, `P11`, and `P3.2.15`), `scripts/verify_references.py`
 (`P5.1` and `P3.2.7`), `agents.md` (`P5.2`, and `P3.2.16`, and `P7` in HITO 2),
@@ -430,4 +542,6 @@ is first-party and editable — `P3.2.27`, `P3.2.28` — while
 ## Status
 
 Every row above is `⏳`. No unit has executed; Phase 5 (Approval Gate) has
-not run.
+not run. 33 of those rows additionally carry `⏳→H2`: deferred out of Hito
+1's dispatch scope by human decision (2026-08-24, see **Declared
+deferral**), not yet executed under either Hito.
