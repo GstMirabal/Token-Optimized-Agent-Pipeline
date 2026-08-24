@@ -218,7 +218,7 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | `ki_index.json`, per-domain `memory_index.json` | `Flat summary-only `memory_index.json` | ? |
 | Numbered roadmaps (`NNN-title.md`) | `Untouched if closed history; Option B rename (`[MODULE]_ROADMAP.md`) only for ACTIVE ones` | ? |
 | `violation_log.md`, `PROCEDURAL_DEVIATION_*.md` | `memory/telemetry/` → distillation → purge` | ? |
-| Other frameworks' files (`.cursor/rules`, `.windsurfrules`, …) | `Proposed for archive in the snapshot` | write |
+| Other frameworks' files (`.windsurfrules`, `copilot-instructions.md`, …) | `Proposed for archive in the snapshot` | write |
 | Pre-arc42-lite `*_BLUEPRINT.md` (missing Runtime View/Crosscutting Concepts/Glossary, or with rationale inlined instead of an ADR link) | `Inventoried in the reconciliation report as a migration candidate` | ? |
 | Scenario | `Detection signals` | ? |
 | A. Greenfield | `Short/empty git history, no `docs/`, no substantial source code.` | verify |
