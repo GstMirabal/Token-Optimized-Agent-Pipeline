@@ -9,8 +9,8 @@ version: 1.0.0
 ## Status
 
 - **Strategy Lock:** `OPEN`
-- **Delivered:** `024` and `025`, released as `v4.5.0`
-- **Next:** `021` (`cost-instrumentation`)
+- **Delivered:** `024` and `025` (`v4.5.0`), `021` (`v4.6.0`), `022` (`v4.7.0`), `023` (`v4.8.0`)
+- **Next:** `026` (`tool-portability`), then the `F8` hotfix below
 - **Origin:** drafted in an IDE planning mode across one long session, then migrated
   into this repository. That migration is the point: the same session opened with a
   host having lost an approved plan to ephemeral storage, and this document was
@@ -43,14 +43,14 @@ the program's own opening command.
 | :--- | :--- | :--- | :--- |
 | ✅ | **024** | `close-machinery-verdicts` | Delivered `v4.5.0` (PR #40). Three close-machinery controls returned the wrong verdict; the first blocked this program's opening command |
 | ✅ | **025** | `jurisdiction` | Delivered `v4.5.0` (PR #41). The rule that a host session never dirties the submodule became a mechanism instead of a sentence |
-| **1st** | **021** | `cost-instrumentation` | **A context cycle climbs to 45× its first turn, and compaction resets the axis without reducing the area.** Bounding the climb yields ~50%, tiering ~40% — and without a meter nothing else is measurable |
-| **2nd** | **022** | `model-tiering` | **Makes everything after it cheaper.** Doing it last means paying the top tier during the two longest sprints |
-| **Closed, awaiting deployment** | **023** | `upstream-findings` | **All fourteen units delivered and gate-approved**; sprint sealed 2026-08-24 on `ai-sprint/023`, unmerged. `C8`'s deliverable merged separately as PR #48. Not marked ✅ because that mark means *in `main`*, and `deployment_workflow.md` Phase 1 has not run. Seven framework-class findings a host reported and could not patch, plus the Implementation Plan's missing location, plus two gates that answered when they did not know |
-| **4th** | **026** | `tool-portability` (Cursor) | Depends on the artifact registry (`C0.2` of `023`): portability requires specifying artifacts, not mechanisms |
-| **5th** | **027** | `autonomy-posture` | Replaces bypass mode with `auto` mode plus limits intent cannot clear. Depends on `C0.2` for the `SubagentStop` hook |
-| **6th** | **028** | `self-improvement-unblock` | Self-improvement is blocked by absent host-side destinations, not by any single rule |
-| **7th** | **029** | `documentation-truth` | **Closes the queue.** The sprints above add scripts and config registries that no verified README figure counts |
-| **8th** | **030** | `token-economy-enforcement` | Reassigned from `025`, which shipped as `jurisdiction`. The auditor with no body, and the consumption-based trigger |
+| ✅ | **021** | `cost-instrumentation` | Delivered `v4.6.0` (PR #44). **A context cycle climbs to 45× its first turn, and compaction resets the axis without reducing the area.** Bounding the climb yields ~50%, tiering ~40% — and without a meter nothing else is measurable |
+| ✅ | **022** | `model-tiering` | Delivered `v4.7.0` (PR #45). **Makes everything after it cheaper.** Doing it last means paying the top tier during the two longest sprints |
+| ✅ | **023** | `upstream-findings` | Delivered `v4.8.0` (PR #49). **All fourteen units delivered and gate-approved**; sealed 2026-08-24, deployed the same day. `C8`'s deliverable merged separately as PR #48. Its merge gate found a CodeQL alert on `hooks/on_commit.py` — read, verified a false positive, dismissed with its proof — and three siblings on `main` that no one has read; those are in `CHANGELOG.md` under `[4.8.0]` `Known open`. Seven framework-class findings a host reported and could not patch, plus the Implementation Plan's missing location, plus two gates that answered when they did not know |
+| **1st** | **026** | `tool-portability` (Cursor) | Depends on the artifact registry (`C0.2` of `023`): portability requires specifying artifacts, not mechanisms |
+| **2nd** | **027** | `autonomy-posture` | Replaces bypass mode with `auto` mode plus limits intent cannot clear. Depends on `C0.2` for the `SubagentStop` hook |
+| **3rd** | **028** | `self-improvement-unblock` | Self-improvement is blocked by absent host-side destinations, not by any single rule |
+| **4th** | **029** | `documentation-truth` | **Closes the queue.** The sprints above add scripts and config registries that no verified README figure counts |
+| **5th** | **030** | `token-economy-enforcement` | Reassigned from `025`, which shipped as `jurisdiction`. The auditor with no body, and the consumption-based trigger |
 
 ### Carried out of `023` — routed to a hotfix, scheduled after `026`
 
