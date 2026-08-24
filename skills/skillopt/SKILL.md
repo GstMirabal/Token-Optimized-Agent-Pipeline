@@ -18,7 +18,7 @@ The session bootstrap only installs the lean core (`requirements-core.txt`). Bef
 ```bash
 .agents/venv_skillopt/bin/pip install -r .agents/requirements-skillopt.txt
 ```
-This transitively pulls in `azure-*` packages (visible in `requirements-freeze.txt`) — the vendored `skillopt` package ships an `azure_openai` backend module by default. It is never called: `train_runner.py apply_monkeypatches()` imports that module only as a patch target and overwrites its functions to route to `gemini_backend.py` (or the Claude Agent SDK, via `model_backend: claude` in the config — see `configs/agents_opt.yaml`). Do not "clean up" the azure packages; they are a real, if unused, transitive dependency of the pinned `skillopt` version.
+This transitively pulls in `azure-*` packages (recorded in `docs/audits/SKILLOPT_TRANSITIVE_CLOSURE.md`, which replaced `requirements-freeze.txt` in Sprint 023 `C7` so that a scanner stops reading an optional closure as this framework's own manifest) — the vendored `skillopt` package ships an `azure_openai` backend module by default. It is never called: `train_runner.py apply_monkeypatches()` imports that module only as a patch target and overwrites its functions to route to `gemini_backend.py` (or the Claude Agent SDK, via `model_backend: claude` in the config — see `configs/agents_opt.yaml`). Do not "clean up" the azure packages; they are a real, if unused, transitive dependency of the pinned `skillopt` version.
 
 ## Commands
 ```bash

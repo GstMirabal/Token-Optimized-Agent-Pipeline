@@ -45,12 +45,92 @@ the program's own opening command.
 | ✅ | **025** | `jurisdiction` | Delivered `v4.5.0` (PR #41). The rule that a host session never dirties the submodule became a mechanism instead of a sentence |
 | **1st** | **021** | `cost-instrumentation` | **A context cycle climbs to 45× its first turn, and compaction resets the axis without reducing the area.** Bounding the climb yields ~50%, tiering ~40% — and without a meter nothing else is measurable |
 | **2nd** | **022** | `model-tiering` | **Makes everything after it cheaper.** Doing it last means paying the top tier during the two longest sprints |
-| **3rd** | **023** | `upstream-findings` | Seven framework-class findings a host reported and could not patch, plus the Implementation Plan's missing location |
+| **Closed, awaiting deployment** | **023** | `upstream-findings` | **All fourteen units delivered and gate-approved**; sprint sealed 2026-08-24 on `ai-sprint/023`, unmerged. `C8`'s deliverable merged separately as PR #48. Not marked ✅ because that mark means *in `main`*, and `deployment_workflow.md` Phase 1 has not run. Seven framework-class findings a host reported and could not patch, plus the Implementation Plan's missing location, plus two gates that answered when they did not know |
 | **4th** | **026** | `tool-portability` (Cursor) | Depends on the artifact registry (`C0.2` of `023`): portability requires specifying artifacts, not mechanisms |
 | **5th** | **027** | `autonomy-posture` | Replaces bypass mode with `auto` mode plus limits intent cannot clear. Depends on `C0.2` for the `SubagentStop` hook |
 | **6th** | **028** | `self-improvement-unblock` | Self-improvement is blocked by absent host-side destinations, not by any single rule |
 | **7th** | **029** | `documentation-truth` | **Closes the queue.** The sprints above add scripts and config registries that no verified README figure counts |
 | **8th** | **030** | `token-economy-enforcement` | Reassigned from `025`, which shipped as `jurisdiction`. The auditor with no body, and the consumption-based trigger |
+
+### Carried out of `023` — routed to a hotfix, scheduled after `026`
+
+**`F8` / `F-023-S4` — a literal `.env` holding live credentials passes
+`hooks/on_commit.py`, defeating `RA-09 SECRET_SOVEREIGNTY`.** Written here rather
+than left in a sprint record because that is precisely how it has been lost
+before: it has now survived **four** sessions as *routed, unowned*, which is the
+pattern `023`'s own `Context` names as the original loss this program exists to
+repair. It is the highest-severity open item this program carries.
+
+**Disposition, decided 2026-08-24: `RA-03 HOTFIX_FLAT`, executed after `026`.**
+Not a sprint unit. `026`–`030` are themed and none of them is a secret gate, so
+slotting it into `tool-portability` would be the same category error as `C3`
+accepting it as a rider — and opening `031` for it contradicts `029`, which
+closes this queue. `RA-03` is the route the framework already has for a defect
+that fits no sprint, and it is `RA-06`'s sanctioned naming exception.
+
+**Why this was not obvious for four sessions.** It was treated as a sprint unit
+throughout, so every session asked *which sprint* and none asked *whether a
+sprint*. The question that resolved it took one exchange once it was put.
+
+**Destination**: `docs/hotfixes/[H-ID]-secrets.md`, from
+`docs/standards/templates/HOTFIX_TEMPLATE.md`. The measurement, the two
+mechanisms, the repair hazard and both fixture traps below transfer verbatim —
+this section is the hotfix's source material, not a summary of it.
+
+**Ordering is deliberate and is the human's call, recorded with its cost.**
+`RA-03` exists for emergency speed, and scheduling a hotfix *behind* a full sprint
+is a departure from that. It is taken knowingly: `026` is already unblocked by
+`C0.2`, and interleaving a secret-gate repair into a portability sprint is what
+`C3` and this very finding's history argue against. **The cost of the departure**:
+the gate stays open across `026`, so any host committing a literal `.env` in that
+window is unprotected by `hooks/on_commit.py` and protected only by
+`.gitignore`. Whoever opens `026` should read this paragraph before deciding the
+order still holds.
+
+| | |
+| :--- | :--- |
+| **Files** | `hooks/on_commit.py`, `tests/` |
+| **Risk** | **High** — a secret gate. Same class as `023`'s `C3`, which took four rounds and a mid-unit remediation halt |
+| **Owner** | `devops_agent` ruleset (`hooks/` is its tree per `agents.md §6`, `F-086-A1`) |
+| **Reproduces** | Measured on the repaired tree at `023` session #7, after `C3` and `C3.2` landed |
+
+**Two independent mechanisms, and a file need only beat one.** Both were
+re-measured rather than carried from the record:
+
+| # | Mechanism | Evidence |
+| :--- | :--- | :--- |
+| 1 | The forbidden-extension branch never fires | `Path(".env").suffix` is `''`, not `".env"`. `.env.production` is worse — its suffix is `".production"`. `prod.env` **is** blocked, which is the sharpest demonstration: the gate catches the filename nobody uses and misses the three that are used |
+| 2 | **Form selection**, not quoting | `secret_forms_for(Path('.env'))` returns `SECRET_ASSIGNMENT`, `QUERY_STRING_SECRET`, `PRIVATE_KEY_BLOCK`. Only `SECRET_ASSIGNMENT` addresses `NAME=value`, and it is the one form of five requiring a quoted value. `YAML_SECRET` and `DOCKERFILE_SECRET` accept unquoted values **only in their own shapes** (`key: value`, `ENV`/`ARG`) and are never selected for a `.env` |
+
+**Do not repair on the obvious diagnosis.** *"The patterns require quotes"* is
+**false** — three of the four accept unquoted values. Repairing on it adds
+quote-optionality to three patterns that already have it and ships the bug. This
+is recorded because the finding's own upstream entry stated it that way for one
+round before a gate measured it.
+
+**Scope note that follows from the measurement, not from the report.** The
+unquoted `NAME=value` shape is missed in **every** file type, not only `.env` —
+`settings.py`, `app.yml` and `Dockerfile` all return no finding against a bare
+`API_KEY=<value>`. So the fix is two changes: match `.env` and its variants **by
+name** (a suffix test structurally cannot see a filename that begins with its own
+dot — `C3` already taught the auditor this for `Dockerfile`), and add a
+`NAME=value` form with an end-of-line terminator to the set selected for every
+file type.
+
+**Two traps when writing the tests, in opposite directions.** A value that is a
+documented placeholder is correctly rejected — AWS's own `…EXAMPLEKEY` returns
+nothing quoted *or* unquoted — so a fixture using one produces a false negative
+that looks like the finding. And a PEM block or a URL query secret **is** caught
+in a `.env`, so a fixture using either produces a blocked commit that looks like
+the finding failing to reproduce. A gate reviewing this unit hit the second trap
+with a low-entropy PEM fixture and retracted the finding itself; both traps are
+recorded because `023` shows this unit's tests are where it will be decided.
+
+**Provenance.** Found end to end by a dispatched `tester_agent` while gating
+`023`'s `C3`, and correctly refused as a rider on that unit — `C3`'s declared
+scope was the file list and three named alternations, and this is neither. The
+refusal was right and is not the reason it was lost; being routed without an
+owner is.
 
 ---
 
@@ -743,6 +823,15 @@ pass identically, and additionally pass from any other cwd.
   it is.
 - **C8** — tick each closed finding's box **keeping the entry** (rule 3 of the document); add
   `F-021-A2` and the three measurement corrections.
+  **Scope extended during execution, by human authorization, after the structural gate refused the
+  addition as undeclared**: also record **`F-023-S4`** — the literal `.env` that still passes
+  `hooks/on_commit.py` after `C3` repaired the secret gate, tracked as `F8` in `023`'s
+  `task_scope.md`. The gate was right to refuse it: `C3` had already declined the same finding as a
+  rider on a unit whose scope did not name it, and `C8` was taking it on identical terms. It is
+  recorded rather than dropped because `agents.md §4 feedback_upstream` mandates routing a
+  framework-class finding, and this one had survived **three sessions** as *routed, unowned* — the
+  precise pattern this sprint's `Context` identifies as the original loss. Recording it in the
+  upstream register is **not** the unit `F8` still needs; that unit remains outstanding.
 
 ### C9-C10 — two gates that answer when they do not know
 
@@ -808,6 +897,12 @@ either.* One rule covers both units.
 under `scripts/` or `hooks/`. Writes are emitted by the lead agent **under the ruleset of the
 profile governing each artifact**, and the deviation is recorded in `task_scope.md` so the
 structural gate **audits** it instead of discovering it.
+
+**Valid until `C5`.** `C5` closed `F-086-A1`, so `devops_agent` now holds `Write`/`Edit` for
+the framework-root `scripts/` and `hooks/` trees. The practice above survives unchanged from
+`C5` onward, but its **reason** does not: writes stay with the lead session because this
+session's configuration forbids dispatching subagents for authoring, **not** because the role
+map lacks an owner. `F-021-A2` — the absence of an implementer role — remains open.
 
 One atomic commit per concern (`RA-08`), all on `ai-sprint/023`, one sprint PR.
 

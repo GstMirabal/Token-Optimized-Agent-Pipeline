@@ -10,20 +10,37 @@ protocols that should mirror each other shows up there first.
 
 ## 1. Artifact x Workflow matrix
 
-| Workflow | active_state.json | task_scope.md | CHANGELOG.md | graph.json | memory_index.json | mirror.json |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `audit_workflow` | — | — | — | — | — | — |
-| `close_workflow` | write | write | write | — | verify/write | — |
-| `deployment_workflow` | — | — | write | — | — | — |
-| `extract_workflow` | — | — | — | — | ?/write | — |
-| `pipeline_workflow` | — | ?/verify | write | — | — | — |
-| `reconciliation_workflow` | write | — | write | — | — | write |
-| `remediation_workflow` | write | — | — | — | — | — |
-| `repository_hardening_workflow` | — | — | — | — | — | — |
-| `reverse_documentation_workflow` | — | — | — | — | — | — |
-| `skill_forge_workflow` | — | — | — | — | — | — |
-| `standardization_workflow` | verify | — | write | — | write | — |
-| `start_workflow` | read/write | write | write | write | — | read |
+| Workflow | IMPLEMENTATION_PLAN.md | SPRINT_LOG.md | agent_assignment.md | skill_assignment.md | task_scope.md | graph_stats.json | PHASE_REGISTER.md | active_state.json | CHANGELOG.md | memory_index.json | graph.json | mirror.json |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `audit_workflow` | — | — | — | — | — | — | — | — | — | — | — | — |
+| `close_workflow` | write | write | write | write | write | write | write | write | write | verify/write | — | — |
+| `deployment_workflow` | — | — | — | — | — | — | — | — | write | — | — | — |
+| `extract_workflow` | — | — | — | — | — | — | — | — | — | ?/write | — | — |
+| `pipeline_workflow` | write | write | write | write | verify/write | — | write | — | write | — | — | — |
+| `reconciliation_workflow` | — | — | — | — | — | — | — | write | write | — | — | write |
+| `remediation_workflow` | — | — | — | — | — | — | — | write | — | — | — | — |
+| `repository_hardening_workflow` | — | — | — | — | — | — | — | — | — | — | — | — |
+| `reverse_documentation_workflow` | — | — | — | — | — | — | — | — | — | — | — | — |
+| `skill_forge_workflow` | — | — | — | — | — | — | — | — | — | — | — | — |
+| `standardization_workflow` | — | — | — | — | — | — | — | verify | write | write | — | — |
+| `start_workflow` | — | — | — | — | write | — | — | read/write | write | — | write | read |
+
+**Columns**, from `config/artifact_registry.json` — the artifact and the phase
+that leaves it. A phase is defined by the artifact it leaves, which is what makes
+the matrix portable across tools rather than tied to one runner's agent names.
+
+- `IMPLEMENTATION_PLAN.md` — Phase 1 (Planning)
+- `SPRINT_LOG.md` — Phase 3 (Roadmap Drafting)
+- `agent_assignment.md` — Phase 4.1 (Agent Assignment)
+- `skill_assignment.md` — Phase 4.2 (Skill Assignment)
+- `task_scope.md` — Phase 4.3 (Rule Audit)
+- `graph_stats.json` — close_workflow.md Phase 1 (docs_freshness_gate)
+- `PHASE_REGISTER.md` — Phase 8 (Sprint Closeout)
+- `active_state.json` — start_workflow.md Phase 0.5 (State Claim) and close_workflow.md Phase 4 (State Sync)
+- `CHANGELOG.md` — Phase 8 (Sprint Closeout)
+- `memory_index.json` — extract_workflow.md Phase 3 (Semantic Indexing)
+- `graph.json` — close_workflow.md Phase 1 (graph_rebuild)
+- `mirror.json` — hooks/state_mirror.py (Stop hook, and close_workflow.md Phase 4)
 
 ## 2. Steps, by protocol
 
@@ -96,13 +113,13 @@ protocols that should mirror each other shows up there first.
 
 | Phase | Step | Effect |
 | :--- | :--- | :--- |
-| 1. Planning | `principal_agent` | ? |
+| 1. Planning | `principal_agent` | write |
 | 2. Environment Readiness | `devops_agent` | verify |
 | 3. Roadmap Drafting | `orchestrator` | write |
-| 4.1 Agent Assignment | `agent_orchestrator` | ? |
-| 4.2 Skill Assignment | `skill_architect` | verify |
+| 4.1 Agent Assignment | `agent_orchestrator` | write |
+| 4.2 Skill Assignment | `skill_architect` | write |
 | 4.3 Rule Audit | `rule_validator` | verify |
-| 5. Approval Gate | `principal_agent` | ? |
+| 5. Approval Gate | `principal_agent` | write |
 | 6. Execution | `Subagents` | write |
 | 7. Quality Gate | `qa_agent` → `tester_agent` | verify |
 | 8. Sprint Closeout | `principal_agent` | write |

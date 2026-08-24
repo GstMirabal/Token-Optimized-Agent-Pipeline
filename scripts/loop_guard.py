@@ -1,5 +1,9 @@
 """Enforce the stop conditions of an unattended loop, and fail closed.
 
+**Host-scoped**: the root is the project being worked, not the framework. The
+loop block and the sprint it measures progress against belong to the host, so
+this script MUST NOT adopt `scripts/_root.py` (Sprint 023 `C0.3`).
+
 `pipeline_workflow.md` allowed `/loop` to wrap Phases 6-8 in a single line of
 boundary text: it may not wrap the Approval Gate. That is where the governance
 ended. Nothing capped iterations, nothing detected a loop making no progress,

@@ -17,9 +17,13 @@ invoked_by: Makefile `verify` target (and therefore .github/workflows/ci.yml).
 """
 import ast
 import json
+import os
 import re
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _root import agents_root  # noqa: E402
 
 CONCORDANCE = Path("rules/LEGACY_RULE_CONCORDANCE.md")
 TEMPLATES_DIR = Path("docs/standards/templates")
@@ -42,11 +46,22 @@ SCAN_EXCLUDE = ("docs/roadmaps/", "docs/sprints/", "node_modules/", ".git/",
                 "venv_skillopt/", "venv/", "graphify-out/", ".claude/",
                 "CHANGELOG.md", str(CONCORDANCE))
 
-LOADABLE = [Path("agents.md"), *Path("workflows").glob("*.md"), *Path("commands").glob("*.md")]
+def loadable() -> list[Path]:
+    """Every document a session can load: the ruleset, the protocols, the commands.
+
+    A function rather than a module constant, because the globs used to run at
+    import — before `main()` sets the framework root — so the list was built
+    against whatever directory the caller was standing in and came back empty
+    from anywhere but the repository root.
+
+    Returns:
+        list[Path]: Paths relative to the framework root.
+    """
+    return [Path("agents.md"), *Path("workflows").glob("*.md"), *Path("commands").glob("*.md")]
 
 
 def loadable_text() -> str:
-    return "\n".join(p.read_text(encoding="utf-8") for p in LOADABLE)
+    return "\n".join(p.read_text(encoding="utf-8") for p in loadable())
 
 
 def scan_files():
@@ -200,6 +215,11 @@ def check_invocation_coverage(corpus: str) -> list[str]:
 
 
 def main() -> int:
+    # Framework-scoped: every path below is this repository's. See
+    # `scripts/_root.py` — the cwd is set once so the messages stay relative and
+    # a path added later cannot silently reintroduce the cwd dependency.
+    os.chdir(agents_root())
+
     corpus = loadable_text()
     errors = (check_rules_reachable(corpus) + check_templates_exist(corpus)
               + check_rule_citations() + check_invocation_coverage(corpus))

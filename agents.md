@@ -7,10 +7,11 @@ It dictates in an absolute and transversal manner the behavior of subagents, cod
 
 | Rule | Value / Constraint |
 | :--- | :--- |
-| **Entry Point** | Every session MUST start by reading `docs/0_SYSTEM_OVERVIEW.md`. |
+| **Entry Point** | Every session MUST start by reading `docs/0_SYSTEM_OVERVIEW.md`. **It is host-only by design** and does not exist in the nucleus: `standardization_workflow.md` scaffolds it into a host at onboarding, and `close_workflow.md` already says the same of it and its sibling anchor. **A nucleus session reads `agents.md` plus `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` instead** — stated here rather than left to inference, because five consecutive sessions of Sprint 023 found the absence and each re-derived the same substitute. That guide is **generated** by `scripts/map_workflows.py` and its staleness is gated by `make verify`: regenerate it, never hand-edit it, and never resolve a discrepancy by deleting it. |
 | **Hierarchy** | `architecture/` (Law), `roadmaps/` (Future), `walkthroughs/` (Achievements), `sprints/` (History). |
 | **Traceability** | Every module MUST have a `[MODULE]_BLUEPRINT.md` in `architecture/` before coding (template: `docs/standards/templates/BLUEPRINT_TEMPLATE.md`). |
 | **Execution** | Every task must be recorded in the current Sprint folder. |
+| **Implementation Plan** | Every sprint MUST leave `IMPLEMENTATION_PLAN.md` inside the sprint directory named in `§5 mandatory_topology` (template: `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md`). Authored at Phase 1, extracted to that path at Phase 3, **committed before Phase 5 approves it** (`§2 triple_lock`). It is mentioned seven times across this corpus and until Sprint 023 **no document said where it is written**: a host lost an approved plan to ephemeral storage and nothing detected it, and this repository held two Implementation Plans from April 2026 untracked for four months. `plansDirectory` → `docs/plans/` is a safety net against loss, **not the canonical location** — files there carry IDE-generated names, and `close_workflow.md` Phase 2.6 asks whether *this sprint* left its plan, which cannot be asked of a file named by an editor. |
 | **Master Ledger** | The host root `CHANGELOG.md` (Keep a Changelog format; template: `docs/standards/templates/CHANGELOG_TEMPLATE.md`). Every Sprint Closeout appends its sprint entry under `[Unreleased]`; every deployment seals it as `[vX.Y.Z]` before tagging. Strictly separate jurisdiction from `.agents/CHANGELOG.md` (framework evolution) — the only crossover allowed is a pin-bump entry (`chore(deps): pin .agents to vX.Y.Z`). |
 | **Certification** | Closing a Sprint requires updating Blueprints, Global Roadmap, Walkthroughs, and the Master Ledger. |
 | **Open upstream findings** | **Nucleus sessions only.** `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` holds framework-class defects reported by hosts under `§4 feedback_upstream` — the ones `strict_rule` forbade the host from patching. Read it before planning nucleus work, because several are blocking a shipped mechanism rather than proposing a new one. Announced here rather than left to be discovered: in nucleus mode `docs/active_state.json` does not exist (by design, see `§5`) and neither does `docs/0_SYSTEM_OVERVIEW.md` (finding `F-093-N1` in that file), so **this document is the only file a nucleus session is guaranteed to read**. |
@@ -27,6 +28,7 @@ Domain rules live in `rules/` and are loaded **on demand** at these triggers —
 | `rules/project_topology.md` | Running local commands, choosing interpreters/paths, or touching DB containers. |
 | `rules/skills_and_integrations.md` | Searching, registering, or forging skills/tools. |
 | `rules/frontend_modular_standard.md` | Touching `frontend/src/modules/`. |
+| `rules/django_backend_standard.md` | Writing or modifying Django code — models, views, serializers, `signals.py`, app layout, or DRF endpoints. |
 | `rules/graphify.md` | Querying or rebuilding the knowledge graph. |
 | `rules/documentation_standard.md` | Creating/updating any document under `docs/`, authoring an ADR, or running `docs-freshness-check`. |
 | `rules/LEGACY_RULE_CONCORDANCE.md` | Encountering a numbered `Rule NN` citation in any document. |
@@ -57,7 +59,7 @@ Domain rules live in `rules/` and are loaded **on demand** at these triggers —
 
 | Category | Rule (Key) | Value / Constraint (Value) |
 | :--- | :--- | :--- |
-| **Security** | `triple_lock` | Approved Implementation Plan + Active Sprint + QA/Tester Approval + Human OK. |
+| **Security** | `triple_lock` | Approved Implementation Plan + Active Sprint + QA/Tester Approval + Human OK. **Lock 1 has a path and an ordering**: the plan is at `IMPLEMENTATION_PLAN.md` inside the canonical sprint directory (`§0`, `§5 mandatory_topology`) and is committed **before** Phase 5 runs. A lock cannot close over an artifact that does not exist, and an approval whose object vanished cannot be audited afterwards — which is the failure this rule was written against. |
 | **Context** | `token_saver` | Files >200 lines MUST NOT be fully dumped. Targeted partial reads (offset/limit on the affected function) are the sanctioned mechanism. Decision ladder in `rules/token_economy.md`. |
 | **Context** | `ast_skeleton` | For structural discovery on large files, invoke `omni_minimizer.py` to extract the skeleton before any partial read. |
 | **Context** | `anti_amnesia` | Re-read `agents.md` and `active_state.json` once per session (at start) and after any context compaction — not after every execution step. |
@@ -114,7 +116,7 @@ The pipeline operates under a rigid sequential process. Role usurpation is stric
 | Category | Rule (Key) | Value / Constraint (Value) |
 | :--- | :--- | :--- |
 | **Subagent Roles** | `principal_agent` | Lead Agent. Creates Implementation Plan (informed by graphify), manages the Approval Gate. |
-| **Subagent Roles** | `devops_agent` | Environment Agent. Manages venv, .env export, and Docker health. |
+| **Subagent Roles** | `devops_agent` | Environment Agent. Manages venv, .env export, and Docker health. **Sole holder of `Write`/`Edit` for the framework-root `scripts/` and `hooks/` trees** (`F-086-A1`, Sprint 023) — not `skills/[name]/scripts/`, which `skill_architect` forges. It gives those trees an owner without creating the implementer role the map still lacks (`F-021-A2`, declared in that profile). |
 | **Subagent Roles** | `orchestrator` | Roadmap Author. Drafts Initial Roadmap and instantiates Sprint Hierarchy. |
 | **Subagent Roles** | `agent_orchestrator`| Agent Assignment. Assigns specific subagents to the Initial Roadmap steps. |
 | **Subagent Roles** | `skill_architect` | Skill Builder. Prepares/injects skills for the assigned subagents. |

@@ -31,6 +31,7 @@ Exit codes:
 
 import argparse
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -118,14 +119,368 @@ def probe_docs(state: dict) -> str | None:
             "record it in `acknowledged_gaps.docs` in the anchor with a reason.")
 
 
-def gh_json(*args: str) -> dict | list | None:
+def probe_anchor_sprint(state: dict) -> str | None:
+    """Does the anchor name the sprint the checked-out branch is working?
+
+    Opening a sprint updates neither field: `session_state.py claim` takes only
+    a session id, so `current_sprint.id` is a hand edit with no gate. Found on
+    the resume of Sprint 023 — the anchor still read `22` while `ai-sprint/023`
+    and its sprint directory both existed, which is exactly what a cold session
+    reads first and trusts.
+
+    Compared against the BRANCH, not against the newest sprint directory. That
+    other comparison looks equivalent and is not: measured on this repository,
+    `docs/sprints/` holds `024` and `025` while `023` is legitimately in flight,
+    so "a directory newer than the anchor" fires on a correct state. The branch
+    is the sprint being worked, by `RA-12`.
+
+    Args:
+        state (dict): Parsed `docs/active_state.json`.
+
+    Returns:
+        str | None: The finding, or None when the two agree or nothing can be
+            compared. A branch outside `ai-sprint/*` is not a mismatch — it is
+            no evidence either way, and is reported as neither.
+    """
+    result = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"],
+                            capture_output=True, text=True)
+    branch = result.stdout.strip()
+    if result.returncode != 0 or not branch.startswith("ai-sprint/"):
+        return None
+
+    suffix = branch.split("/", 1)[1]
+    if not suffix.isdigit():
+        return None
+
+    anchored = state.get("current_sprint", {}).get("id")
+    if anchored is None or int(anchored) == int(suffix):
+        return None
+
+    return (f"Anchor names sprint {anchored} while the checked-out branch is `{branch}`. "
+            "Opening a sprint writes neither field — no script does — so the anchor a cold "
+            f"session reads first is behind the work.\n   Propose: set `current_sprint.id` "
+            f"to {int(suffix)} in `docs/active_state.json` and refresh the mirror.")
+
+
+# Three answers, because two cannot express doubt — the same shape `C9` gave
+# branch integration. A security report is the last place where "I could not
+# find out" may be rendered as "it is off".
+ENABLED, DISABLED, UNDETERMINED, PAUSED = "enabled", "disabled", "undetermined", "paused"
+
+# `gh` appends the status as `(HTTP nnn)`. Read it, never search stderr for the
+# substring "404": measured with the real binary, a dead proxy on a repository
+# whose NAME contains 404 emits `dial tcp … /repos/acme/tools404/… connection
+# refused`, and a 503 body reading `upstream cache miss for /404/handler` comes
+# back as `gh: upstream cache miss for /404/handler (HTTP 503)`. Both were
+# classified as "the feature is off" by the substring test.
+HTTP_STATUS_RE = re.compile(r"\(HTTP (\d{3})\)")
+
+
+def gh_call(*args: str) -> tuple[int, str, str]:
+    """Raw `gh` invocation.
+
+    Args:
+        *args: Arguments passed straight to `gh`.
+
+    Returns:
+        tuple[int, str, str]: return code, stdout, stderr.
+    """
     result = subprocess.run(["gh", *args], capture_output=True, text=True)
-    if result.returncode != 0:
+    return result.returncode, result.stdout, result.stderr
+
+
+def gh_json(*args: str) -> dict | list | None:
+    rc, stdout, _ = gh_call(*args)
+    if rc != 0:
         return None
     try:
-        return json.loads(result.stdout)
+        return json.loads(stdout)
     except json.JSONDecodeError:
         return None
+
+
+def http_status(stderr: str) -> int | None:
+    """The HTTP status `gh` reported, or None when it reported none.
+
+    Args:
+        stderr (str): `gh` standard error.
+
+    Returns:
+        int | None: The status code, or None for a transport-level failure that
+            never reached an HTTP response.
+    """
+    match = HTTP_STATUS_RE.search(stderr)
+    return int(match.group(1)) if match else None
+
+
+def state_from_exit(rc: int, stderr: str, is_admin: bool | None) -> str:
+    """Classify an endpoint whose reachability is itself the answer.
+
+    **A 404 means two different things, and only the caller's permission
+    separates them.** For an administrator the endpoint exists and the feature
+    is off. For everyone else GitHub answers 404 on an admin-only endpoint
+    whether the feature is on or off — measured live against `cli/cli` and
+    `torvalds/linux`, both demonstrably hardened, which answered 404 on all
+    three probed endpoints for a non-admin token. Reading that as `disabled`
+    told a hardened repository it was exposed and offered to patch a repository
+    the caller cannot administer.
+
+    Args:
+        rc (int): `gh` exit code.
+        stderr (str): `gh` standard error, carrying the `(HTTP nnn)` status.
+        is_admin (bool | None): Whether the token administers this repository.
+            None when that could not be established, which is itself doubt.
+
+    Returns:
+        str: `ENABLED`, `DISABLED` or `UNDETERMINED`.
+    """
+    if rc == 0:
+        return ENABLED
+    if http_status(stderr) == 404 and is_admin is True:
+        return DISABLED
+    return UNDETERMINED
+
+
+def undetermined_cause(rc: int, stderr: str, is_admin: bool | None) -> str:
+    """Why an endpoint check could not be answered, measured rather than assumed.
+
+    Args:
+        rc (int): `gh` exit code.
+        stderr (str): `gh` standard error.
+        is_admin (bool | None): Whether the token administers this repository.
+
+    Returns:
+        str: A short cause. Every doubt line used to read "field not returned"
+            regardless of what actually happened — the same defect one level
+            down, inside the unit written to remove it.
+    """
+    status = http_status(stderr)
+    if status == 404 and is_admin is not True:
+        return "admin-only endpoint, and this token does not administer the repository"
+    if status is not None:
+        return f"HTTP {status}"
+    return f"no HTTP response (rc={rc})"
+
+
+def dependabot_updates_state(rc: int, stdout: str, stderr: str,
+                             is_admin: bool | None) -> str:
+    """Whether Dependabot security updates are on, from the endpoint that says so.
+
+    `automated-security-fixes` is the only endpoint carrying `paused`, which
+    `security_and_analysis` cannot express — verified against the live API, it
+    returns `{"enabled": true, "paused": false}`.
+
+    **The caller fetches, this classifies.** It used to issue its own request
+    while the caller issued the same one to derive the doubt line, so the state
+    and the cause explaining it came from two different responses and a failure
+    between them made the report annotate an answer it had not received.
+
+    Args:
+        rc (int): `gh` exit code for `repos/{slug}/automated-security-fixes`.
+        stdout (str): `gh` standard output, the JSON body when `rc` is 0.
+        stderr (str): `gh` standard error, carrying the `(HTTP nnn)` status.
+        is_admin (bool | None): Whether the token administers this repository.
+
+    Returns:
+        str: `ENABLED`, `PAUSED`, `DISABLED` or `UNDETERMINED`. A body without a
+            boolean `enabled` is `UNDETERMINED`, never `DISABLED`: absence is
+            treated the same way here as in `analysis_state`, and it was not —
+            one unit held two opposite rules for a missing field, and the branch
+            that failed was the security one.
+    """
+    if rc != 0:
+        return state_from_exit(rc, stderr, is_admin)
+    try:
+        data = json.loads(stdout)
+    except json.JSONDecodeError:
+        return UNDETERMINED
+    if not isinstance(data, dict) or not isinstance(data.get("enabled"), bool):
+        return UNDETERMINED
+    if data["enabled"] is not True:
+        return DISABLED
+    return PAUSED if data.get("paused") is True else ENABLED
+
+
+def branch_protection_state(rc: int, stdout: str, stderr: str,
+                            is_admin: bool | None) -> str:
+    """Whether a branch is protected, read from the field a non-admin can see.
+
+    `branches/{branch}/protection` is admin-only and answers 404 to everyone
+    else, so asking it alone cannot tell an unprotected branch from an
+    unprivileged caller. `branches/{branch}` carries a public `protected`
+    boolean — measured on `cli/cli` with a non-admin token, `.protected` is
+    `true` while `.../protection` returns 404.
+
+    **The caller fetches, this classifies** — same reason as
+    `dependabot_updates_state`. The branch name is no longer needed here: it is
+    the caller that builds the URL, and it does so unescaped, verified against
+    GitHub routing `branches/ai-sprint/023` with the slash intact.
+
+    Args:
+        rc (int): `gh` exit code for `repos/{slug}/branches/{branch}`.
+        stdout (str): `gh` standard output, the JSON body when `rc` is 0.
+        stderr (str): `gh` standard error, carrying the `(HTTP nnn)` status.
+        is_admin (bool | None): Whether the token administers this repository.
+
+    Returns:
+        str: `ENABLED`, `DISABLED` or `UNDETERMINED`.
+    """
+    if rc != 0:
+        return state_from_exit(rc, stderr, is_admin)
+    try:
+        data = json.loads(stdout)
+    except json.JSONDecodeError:
+        return UNDETERMINED
+    if not isinstance(data, dict) or not isinstance(data.get("protected"), bool):
+        return UNDETERMINED
+    return ENABLED if data["protected"] else DISABLED
+
+
+def analysis_state(security: dict | None, control: str) -> str:
+    """One `security_and_analysis` control, with absence kept distinct from off.
+
+    Args:
+        security (dict | None): The `security_and_analysis` object, or None when
+            the call did not answer.
+        control (str): Control key, e.g. `secret_scanning`.
+
+    Returns:
+        str: `ENABLED`, `DISABLED` or `UNDETERMINED`. Only an explicit
+            `"disabled"` is reported as off. A key that is absent, a value that
+            is not an object, or a `status` that is missing or unrecognised are
+            all `UNDETERMINED` — the two-value collapse this function was
+            written to remove had merely moved one level in. Safe because a
+            genuinely-off control is stated explicitly: this repository's live
+            payload returns `secret_scanning_validity_checks: disabled` in full.
+    """
+    if not isinstance(security, dict) or control not in security:
+        return UNDETERMINED
+    entry = security[control]
+    if not isinstance(entry, dict):
+        return UNDETERMINED
+    status = entry.get("status")
+    if status == "enabled":
+        return ENABLED
+    return DISABLED if status == "disabled" else UNDETERMINED
+
+
+def collect_security_controls(slug: str, security: dict | None,
+                              is_admin: bool | None, branch: str | None) -> tuple[list[str], list[str]]:
+    """Interrogate every platform security control, sorting answers from doubt.
+
+    Args:
+        slug (str): `owner/name` of the repository.
+        security (dict | None): The repository's `security_and_analysis` object.
+        is_admin (bool | None): Whether the token administers this repository.
+        branch (str | None): Default branch name, or None if none was reported.
+
+    Returns:
+        tuple[list[str], list[str]]: (findings, undetermined). A control is
+            named in exactly one of them, and never in both.
+    """
+    findings: list[str] = []
+    undetermined: list[str] = []
+
+    def record(control: str, control_state: str, off_text: str, cause: str) -> None:
+        """File one control under the heading its state actually warrants."""
+        if control_state == DISABLED:
+            findings.append(off_text)
+        elif control_state == PAUSED:
+            findings.append(f"{control} enabled but PAUSED — no updates are being applied")
+        elif control_state == UNDETERMINED:
+            undetermined.append(f"{control} — cannot determine ({cause})")
+
+    for control in ("secret_scanning", "secret_scanning_push_protection"):
+        record(control, analysis_state(security, control), f"{control} disabled",
+               "field not returned" if security is not None
+               else "the repository payload did not answer")
+
+    # One request per endpoint, feeding both the state and the doubt line that
+    # explains it. Asking twice let a transient failure between the two calls
+    # pair a cause with a state that a different response had produced.
+    rc, out, err = gh_call("api", f"repos/{slug}/automated-security-fixes")
+    record("dependabot_security_updates", dependabot_updates_state(rc, out, err, is_admin),
+           "dependabot_security_updates disabled", undetermined_cause(rc, err, is_admin))
+
+    rc, out, err = gh_call("api", f"repos/{slug}/vulnerability-alerts")
+    record("Dependabot alerts", state_from_exit(rc, err, is_admin),
+           "Dependabot alerts off", undetermined_cause(rc, err, is_admin))
+
+    # The default branch is asked for, not assumed to be `main`: on a repository
+    # that never had one, the old check reported "main not protected" forever
+    # while the branch that IS protected went uninspected.
+    if not branch:
+        undetermined.append("branch protection — cannot determine (no default branch reported)")
+    else:
+        rc, out, err = gh_call("api", f"repos/{slug}/branches/{branch}")
+        record(f"{branch} protection", branch_protection_state(rc, out, err, is_admin),
+               f"{branch} not protected", undetermined_cause(rc, err, is_admin))
+
+    return findings, undetermined
+
+
+def collect_repo_hygiene(repo: dict) -> list[str]:
+    """Repository metadata and community files, all of which are simply present or not.
+
+    Args:
+        repo (dict): The `gh repo view` payload.
+
+    Returns:
+        list[str]: Findings. No doubt bucket: these are read from a payload
+            already in hand or from the working tree, so there is nothing here
+            that can fail to answer.
+    """
+    findings = []
+    if not repo.get("description"):
+        findings.append("no description")
+    if not repo.get("homepageUrl"):
+        findings.append("no homepage")
+
+    # Community files are checked against the TREE, never against
+    # `community/profile`: that endpoint reports issue_template as null whenever
+    # templates live in a directory, which is the current form — this repository
+    # ships three and still scores null at 100% health.
+    for name in ("CONTRIBUTING.md", "SECURITY.md", "CODE_OF_CONDUCT.md"):
+        if not Path(name).exists():
+            findings.append(f"{name} missing")
+    if not Path(".github/ISSUE_TEMPLATE").is_dir() and not Path(".github/ISSUE_TEMPLATE.md").exists():
+        findings.append("no issue templates")
+    return findings
+
+
+def platform_report(findings: list[str], undetermined: list[str]) -> str | None:
+    """Render the two buckets as two separately-remediable blocks.
+
+    Args:
+        findings (list[str]): Controls measured to be in the wrong state.
+        undetermined (list[str]): Questions this probe could not answer.
+
+    Returns:
+        str | None: The report, or None when there is nothing to say.
+    """
+    if not findings and not undetermined:
+        return None
+
+    report = []
+    if findings:
+        report.append("Platform controls not in the state "
+                      "`repository_hardening_workflow.md` mandates:\n   • "
+                      + "\n   • ".join(findings) +
+                      "\n   Propose: `/agents:harden` (it has an ordering that exists "
+                      "so it does not lock you out).")
+    if undetermined:
+        # Reported apart from the accusations above, and with a different
+        # remedy, because the two are different problems: a disabled control
+        # needs turning on, an unanswered question needs a token that can see
+        # the answer. GitHub answers 404 on admin-only endpoints to any caller
+        # without administrative access, and reading that as "disabled" told
+        # `cli/cli` and `torvalds/linux` — both hardened — that they were exposed.
+        report.append("Platform controls this probe could NOT determine — "
+                      "not a finding, an unanswered question:\n   • "
+                      + "\n   • ".join(undetermined) +
+                      "\n   Check `gh auth status` and whether the token administers this "
+                      "repository. Re-run before treating any of these as disabled.")
+    return "\n\n • ".join(report)
 
 
 def probe_platform(state: dict, force: bool) -> str | None:
@@ -145,44 +500,25 @@ def probe_platform(state: dict, force: bool) -> str | None:
             except ValueError:
                 pass
 
-    repo = gh_json("repo", "view", "--json", "nameWithOwner,description,homepageUrl")
-    if repo is None:
+    repo = gh_json("repo", "view", "--json",
+                   "nameWithOwner,description,homepageUrl,defaultBranchRef")
+    if not isinstance(repo, dict):
         return None  # Not a GitHub remote, or unauthenticated: skip silently.
     slug = repo["nameWithOwner"]
 
-    findings = []
-    security = gh_json("api", f"repos/{slug}", "--jq", ".security_and_analysis") or {}
-    for control in ("secret_scanning", "secret_scanning_push_protection",
-                    "dependabot_security_updates"):
-        if security.get(control, {}).get("status") != "enabled":
-            findings.append(f"{control} disabled")
+    # One call carries both the permission that interprets every 404 below and
+    # the controls themselves. `permissions.admin` is readable without admin —
+    # measured: true here, false on `cli/cli` and `torvalds/linux`.
+    detail = gh_json("api", f"repos/{slug}")
+    detail = detail if isinstance(detail, dict) else {}
+    is_admin = (detail.get("permissions") or {}).get("admin")
+    security = detail.get("security_and_analysis")
+    branch = (repo.get("defaultBranchRef") or {}).get("name")
 
-    if subprocess.run(["gh", "api", f"repos/{slug}/vulnerability-alerts"],
-                      capture_output=True).returncode != 0:
-        findings.append("Dependabot alerts off")
-    if gh_json("api", f"repos/{slug}/branches/main/protection") is None:
-        findings.append("main not protected")
-    if not repo.get("description"):
-        findings.append("no description")
-    if not repo.get("homepageUrl"):
-        findings.append("no homepage")
-
-    # Community files are checked against the TREE, never against
-    # `community/profile`: that endpoint reports issue_template as null whenever
-    # templates live in a directory, which is the current form — this repository
-    # ships three and still scores null at 100% health.
-    for name in ("CONTRIBUTING.md", "SECURITY.md", "CODE_OF_CONDUCT.md"):
-        if not Path(name).exists():
-            findings.append(f"{name} missing")
-    if not Path(".github/ISSUE_TEMPLATE").is_dir() and not Path(".github/ISSUE_TEMPLATE.md").exists():
-        findings.append("no issue templates")
-
-    if not findings:
-        return None
-    return ("Platform controls not in the state `repository_hardening_workflow.md` "
-            "mandates:\n   • " + "\n   • ".join(findings) +
-            "\n   Propose: `/agents:harden` (it has an ordering that exists so it "
-            "does not lock you out).")
+    findings, undetermined = collect_security_controls(
+        slug, security if isinstance(security, dict) else None, is_admin, branch)
+    findings += collect_repo_hygiene(repo)
+    return platform_report(findings, undetermined)
 
 
 def probe_cost(state: dict) -> str | None:
@@ -237,6 +573,7 @@ def main() -> int:
 
     state = load_state()
     findings = [f for f in (probe_graph(),
+                            probe_anchor_sprint(state),
                             probe_docs(state),
                             probe_platform(state, args.force_platform),
                             probe_cost(state)) if f]

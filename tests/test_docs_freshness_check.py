@@ -283,3 +283,125 @@ def test_unreadable_sprint_number_is_reported(tmp_path):
     report = dfc.run(tmp_path, 4)
     messages = " ".join(f.message for f in report.findings)
     assert "last_audit_sprint" in messages
+
+
+# --- phase artifacts (a phase that left no artifact did not run) --------
+#
+# check_phase_artifacts shipped in PR #37 with no direct test of its own.
+# Sprint 023 C0 adds IMPLEMENTATION_PLAN.md to the map it reads, so the map
+# stops being the only thing standing between a skipped phase and silence.
+
+def _sprint_dir(repo: Path, sprint_id: int, *artifacts: str) -> Path:
+    """Build docs/sprints/{NNN}-core-pipeline/ holding only `artifacts`."""
+    path = repo / "docs" / "sprints" / f"{sprint_id:03d}-core-pipeline"
+    path.mkdir(parents=True, exist_ok=True)
+    for name in artifacts:
+        (path / name).write_text("body\n", encoding="utf-8")
+    return path
+
+
+def test_a_missing_plan_names_the_phase_that_should_have_written_it(tmp_path):
+    """Reporting by phase is the whole point: a filename tells you what is
+    absent, a phase tells you which step to go run."""
+    _sprint_dir(tmp_path, 23, "SPRINT_LOG.md", "task_scope.md")
+    report = dfc.FreshnessReport()
+    dfc.check_phase_artifacts(tmp_path, 23, report)
+    messages = " ".join(f.message for f in report.findings)
+    assert "IMPLEMENTATION_PLAN.md" in messages
+    assert "Phase 1" in messages
+
+
+def test_a_sprint_with_every_artifact_is_silent(tmp_path):
+    _sprint_dir(tmp_path, 23, *dfc.load_phase_artifacts())
+    report = dfc.FreshnessReport()
+    dfc.check_phase_artifacts(tmp_path, 23, report)
+    assert report.findings == []
+
+
+def test_each_missing_artifact_is_reported_separately(tmp_path):
+    """Skipped phases are separate problems with separate remedies, not one.
+
+    The count is read from the registry rather than pinned to a literal: the
+    literal `3` here was the same hand-maintained duplicate of the artifact list
+    that `C0.2` removed from the script itself.
+    """
+    _sprint_dir(tmp_path, 23)
+    report = dfc.FreshnessReport()
+    dfc.check_phase_artifacts(tmp_path, 23, report)
+    assert len(report.findings) == len(dfc.load_phase_artifacts())
+
+
+def test_the_report_reads_in_phase_order(tmp_path):
+    """The dict order is a contract, not an accident: a sprint that skipped
+    several steps should be read in the order they should have run."""
+    _sprint_dir(tmp_path, 23)
+    report = dfc.FreshnessReport()
+    dfc.check_phase_artifacts(tmp_path, 23, report)
+    phases = [f.message.split(" — ")[1].split(" (")[0] for f in report.findings]
+    assert phases == ["Phase 1", "Phase 3", "Phase 4.1", "Phase 4.2", "Phase 4.3"]
+
+
+def test_a_sprint_with_no_directory_is_not_accused_of_a_missing_plan(tmp_path):
+    """The cause is a different one — Phase 3 never instantiated the
+    hierarchy — and naming the plan here would send the reader to the wrong
+    phase."""
+    (tmp_path / "docs" / "sprints").mkdir(parents=True)
+    report = dfc.FreshnessReport()
+    dfc.check_phase_artifacts(tmp_path, 23, report)
+    messages = " ".join(f.message for f in report.findings)
+    assert "Phase 3 instantiates" in messages
+    assert "IMPLEMENTATION_PLAN.md" not in messages
+
+
+def test_the_demanded_list_comes_from_the_registry(tmp_path):
+    """`C0.2`: the artifact list is the registry's, not this script's.
+
+    The script held its own copy of three filenames. Two consumers and a
+    workflow held three more copies of overlapping lists, which is how
+    `agent_assignment.md` and `skill_assignment.md` were produced by four
+    sprints while no gate could see them.
+    """
+    registry = json.loads(
+        (dfc.ARTIFACT_REGISTRY).read_text(encoding="utf-8")
+    )
+    expected = [
+        entry["filename"]
+        for entry in registry["artifacts"]
+        if entry["scope"] == "sprint" and entry["required"]
+    ]
+    assert list(dfc.load_phase_artifacts()) == expected
+
+
+def test_artifacts_written_during_the_close_are_not_demanded_before_it(tmp_path):
+    """`PHASE_REGISTER.md` and `graph_stats.json` are sprint-scoped and real,
+    and demanding them here would fail every sprint that is still open — which
+    is every sprint at the moment this check fires."""
+    demanded = dfc.load_phase_artifacts()
+    assert "PHASE_REGISTER.md" not in demanded
+    assert "graph_stats.json" not in demanded
+
+
+def test_an_unreadable_registry_reports_doubt_instead_of_passing(tmp_path, monkeypatch):
+    """The defect class this sprint exists to remove, one level up.
+
+    With the list externalised, a missing registry would make the loop iterate
+    over nothing and the gate report green on a sprint that left no artifact at
+    all. Absence of evidence is reported as absence of evidence.
+    """
+    _sprint_dir(tmp_path, 23)
+    monkeypatch.setattr(dfc, "ARTIFACT_REGISTRY", tmp_path / "no_such_registry.json")
+    report = dfc.FreshnessReport()
+    dfc.check_phase_artifacts(tmp_path, 23, report)
+    messages = " ".join(f.message for f in report.findings)
+    assert "did not run" in messages
+    assert "IMPLEMENTATION_PLAN.md" not in messages
+
+
+def test_sprint_zero_is_not_inspected(tmp_path):
+    """`SPRINT_ID` unset used to fall back to 0, and this check returned on
+    its first line — so it never ran from `make`, in any project. Pinning the
+    early return keeps that failure visible as a deliberate boundary."""
+    _sprint_dir(tmp_path, 0)
+    report = dfc.FreshnessReport()
+    dfc.check_phase_artifacts(tmp_path, 0, report)
+    assert report.findings == []

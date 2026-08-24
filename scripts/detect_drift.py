@@ -1,5 +1,10 @@
 """Detect work that happened outside the protocol, before trusting the anchor.
 
+**Host-scoped**: the root is the project being worked. The git history, the
+anchor and the Master Ledger it compares all belong to the host, so this script
+MUST NOT adopt `scripts/_root.py` — anchored to the framework it would report
+drift in the wrong repository (Sprint 023 `C0.3`).
+
 The case: commits were made without `start`, without `close`, or without
 either. The recorded state and the repository then disagree, and every workflow
 that follows reasons from a false premise.

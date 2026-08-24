@@ -34,6 +34,22 @@ extracted from whatever lands here, deliberately, before Phase 5 approves it.
 
 - **Cursor does not read this setting** (`settings.json` is Claude Code's).
   Sprint `026` `P4` covers the other tool.
-- **The close gate does not read it either.** Sprint `023` `C0` still has to
-  declare the canonical path, ship its template, and gate on it. This covers the
-  Claude Code half of that concern, not the whole of it.
+- **The close gate now reads the canonical path** — Sprint `023` `C0` declared it in
+  `agents.md §0`, shipped `IMPLEMENTATION_PLAN_TEMPLATE.md`, and added
+  `IMPLEMENTATION_PLAN.md` to the phase-artifact map in
+  `scripts/docs_freshness_check.py`, which `close_workflow.md` Phase 2.6 demands.
+  **It still does not read *this* directory, and it should not**: a file named by an
+  editor cannot answer "did *this sprint* leave its plan".
+- **What the gate proves is existence, not ordering.** It cannot show the plan was
+  written before it was approved; that is held by the Phase 5 precondition in
+  `pipeline_workflow.md`, an attended human step.
+- **In nucleus mode `plansDirectory` never applies.** The conclusion is unchanged and
+  still measured — this repository has no `.claude/settings.json`, and `C0`'s own plan
+  was drafted under `~/.claude/plans/` — but **the reason recorded here was wrong**, and
+  Sprint `023` `C6` corrected it. `nucleus_neutrality` does **not** prohibit installing
+  the bridge: it prohibits *structural scaffolding* (`agents.md §5`), and
+  `scripts/install_claude.py` ships `install_nucleus_bridge()` for exactly this case.
+  What that self-bridge deliberately omits is hooks, skills, MCP and settings — so no
+  `.claude/settings.json` reaches the nucleus, and `plansDirectory`, which lives in that
+  file, never arrives. Absent by omission, not by prohibition. **Routing discharged by
+  `C6`.**

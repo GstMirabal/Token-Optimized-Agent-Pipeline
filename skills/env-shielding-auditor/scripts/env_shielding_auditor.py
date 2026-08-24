@@ -15,14 +15,64 @@ SECRET_PATTERNS = {
     "Generic Password": r"(?i)(password|passwd|pwd)['\"]?\s*[:=]\s*['\"]?[a-z0-9@#$%^&*()_+]{8,}['\"]?"
 }
 
+# Credentials live in configuration far more often than in source, and the
+# original list read source only: Compose, Helm values, Terraform, `.ini`,
+# `.cfg`, `.conf` and `.toml` were all unread (F-086-S1). `.example` covers the
+# `config.toml.example` form the sanctioned RA-09 pattern uses.
+# `.env.example` is deliberately absent: `endswith` is suffix matching, so
+# `.example` already covers it, and keeping both would be an entry that can
+# never be the one that matched.
+SCANNED_SUFFIXES = (
+    ".py", ".js", ".ts", ".json", ".env", ".sh", ".bash",
+    ".yml", ".yaml", ".toml", ".cfg", ".ini", ".conf", ".tf", ".example",
+)
+
+# Files whose whole name is the identifier: a suffix test cannot see them,
+# because they have no suffix. `docker-compose.yml` is already reachable via
+# `.yml` and is named anyway, so grepping this tuple answers the question of
+# whether Compose is covered.
+SCANNED_NAMES = ("Dockerfile", "Makefile", "docker-compose.yml")
+
+# `Dockerfile.prod` and `api.Dockerfile`: splitting the build file leaves an
+# affix that is not a format suffix, so neither test above sees it. Matched
+# here so this auditor and hooks/on_commit.py agree on what a build file is
+# called — the two halves of this unit disagreed until the gates said so, in
+# two successive rounds.
+BUILD_FILE_NAME = "dockerfile"
+
+
+def is_scanned(filename: str) -> bool:
+    """Reports whether a file is one this auditor reads.
+
+    Comparison is lowercased throughout: `endswith` is case-sensitive, so
+    `values.YAML` was skipped here while hooks/on_commit.py, which lowercases,
+    read it — the same rule disagreeing with itself across the two halves.
+
+    Args:
+        filename: Bare filename, without its directory.
+
+    Returns:
+        True when the file matches a scanned suffix, an exact name, or one of
+        the container build-file spellings.
+    """
+    lowered = filename.lower()
+    return (
+        lowered.endswith(SCANNED_SUFFIXES)
+        or lowered in tuple(n.lower() for n in SCANNED_NAMES)
+        or lowered == BUILD_FILE_NAME
+        or lowered.startswith(f"{BUILD_FILE_NAME}.")
+        or lowered.endswith(f".{BUILD_FILE_NAME}")
+    )
+
+
 def scan_files(directory):
     leaks = []
     for root, _, files in os.walk(directory):
         if any(x in root for x in [".git", ".agents", "venv", "node_modules", ".agent_state"]):
             continue
-            
+
         for file in files:
-            if file.endswith((".py", ".js", ".ts", ".json", ".env", ".env.example", ".sh", ".bash")):
+            if is_scanned(file):
                 file_path = os.path.join(root, file)
                 try:
                     with open(file_path, "r", encoding="utf-8") as f:

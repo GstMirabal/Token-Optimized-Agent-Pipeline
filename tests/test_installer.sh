@@ -85,6 +85,11 @@ rm -f "$NUCLEUS/.claude_bridge.lock" "$NUCLEUS/CLAUDE.md"
 [ -e "$NUCLEUS/.claude/agents/principal_agent.md" ] || fail "nucleus: agents not linked"
 grep -qx "@agents.md" "$NUCLEUS/CLAUDE.md" || fail "nucleus: constitution import missing"
 [ ! -e "$NUCLEUS/.claude/skills" ] || fail "nucleus: skills must NOT be linked (minimal bridge)"
+# start_workflow.md `bridge_check` keys the nucleus trigger on symlink-per-source
+# rather than on a lock, BECAUSE the nucleus path writes none. Nothing pinned that
+# fact until Sprint 023 C6, so a future edit could have written one and left the
+# workflow silently wrong with the whole suite green.
+[ ! -e "$NUCLEUS/.claude_bridge.lock" ] || fail "nucleus: must write no bridge lock (start_workflow bridge_check depends on this)"
 ( cd "$NUCLEUS" && python3 scripts/install_claude.py --profile example-project > /dev/null 2>&1 ) \
   && fail "nucleus: profile install must be refused" || true
 echo "✅ nucleus self-bridge test PASSED"

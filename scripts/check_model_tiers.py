@@ -33,10 +33,10 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _mode import agents_dir  # noqa: E402
+from _root import agents_root  # noqa: E402
 
-TIERS_FILE = agents_dir() / "config" / "model_tiers.json"
-PROFILES = agents_dir() / "agents"
+TIERS_FILE = agents_root() / "config" / "model_tiers.json"
+PROFILES = agents_root() / "agents"
 
 FIELD = re.compile(r"^(model|tier): *(\S+) *$", re.MULTILINE)
 # A family alias has no date; a pinned release ends in one. The {6,} is what

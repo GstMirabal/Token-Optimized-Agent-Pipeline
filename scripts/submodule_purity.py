@@ -45,7 +45,8 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _mode import agents_dir, is_nucleus  # noqa: E402
+from _mode import is_nucleus  # noqa: E402
+from _root import agents_root  # noqa: E402
 
 UNTRACKED = "??"
 
@@ -60,7 +61,7 @@ def porcelain() -> list[str]:
     the real paths, and this check exists to be acted on.
     """
     result = subprocess.run(
-        ["git", "-C", str(agents_dir()), "status", "--porcelain", "-uall"],
+        ["git", "-C", str(agents_root()), "status", "--porcelain", "-uall"],
         capture_output=True, text=True,
     )
     if result.returncode != 0:

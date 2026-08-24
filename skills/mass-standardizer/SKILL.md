@@ -28,7 +28,7 @@ This skill implements a **Template-Driven Scaffolding** pattern. It scans the sk
 ### 3. Template Injection
 - **README Synthesis**: Apply the official `readme-standardizer/assets/template.md`.
 - **SKILL Synthesis**: Generate the YAML frontmatter and standard sections (Base Profile, Cycles, Governance).
-- **Structure Enforcement**: Instantiate the `/scripts/` directory and ensure a valid `__init__.py` exists for Python package compliance.
+- **Structure Enforcement**: For **executable** skills only — those already shipping `/scripts/`, per the split declared in §1 above — ensure a valid `__init__.py` exists for Python package compliance. A knowledge skill's `/scripts/` directory is never instantiated: `agents.md §3` prohibits padding it with empty scaffolding, so shipping one is what makes a skill executable rather than something this protocol can confer.
 
 ### 4. Manifest Synchronization
 - **Strict Parity**: Verify that every standardized skill has its path, category, and tags correctly reflected in `manifest_skills.json`.

@@ -19,6 +19,25 @@ for a squash workflow is the pull request state, so that is consulted first and
 not assumed — and a false positive is answered with a recorded waiver rather
 than by weakening the check.
 
+**That promise used to be broken by this file's own code.** The pull-request
+lookup returned a plain bool and mapped any non-zero exit to `False`, so
+"I could not find out" became "no merged PR exists". Measured against the live
+API: **2 of 12 calls returned `rc=1`, `HTTP 503`**. Since `content_is_integrated`
+already returns `False` for every squash-merged branch, one 503 was enough to
+flip an *integrated* branch to unintegrated. Two triple-runs of `audit` on an
+unchanged tree exited `0,2,0` and `0,0,2`, **accusing a different branch each
+time** — the signature of a per-call failure rather than a property of any
+branch. The verdict was therefore assumed, not reported, and the operator was
+steered toward a permanent waiver for a healthy branch: exactly the "weakening
+the check" this docstring warns against, produced by the check itself.
+
+So the lookup is now **three-valued** — `YES` / `NO` / `UNKNOWN` — and `UNKNOWN`
+is carried through to the report as its own category. **It still blocks**, and
+that is deliberate: a real outage that passed the gate would be a false green,
+which is the same defect inverted. What changes is that the report names the
+cause. A retry with backoff makes the state rare; the third value makes it
+honest.
+
 invoked_by: close_workflow.md#branch_audit (audit), close_workflow.md#local_prune
 (prune).
 
@@ -28,7 +47,8 @@ Usage:
 
 Exit codes:
     0 — nothing unintegrated (audit), or pruning finished
-    2 — unintegrated branches remain: the session must not be sealed
+    2 — unintegrated branches remain, or integration could not be determined:
+        the session must not be sealed either way (RA-11)
 """
 
 import argparse
@@ -36,9 +56,46 @@ import json
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 
-WAIVERS = Path("config/abandoned_branches.json")
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _root import agents_root  # noqa: E402
+
+# **Mixed scope, deliberately**: every git command below runs against the HOST
+# repository in the cwd, while the waiver list is FRAMEWORK data. As a bare
+# relative path this was read from wherever the caller stood, so running the
+# gate from any other directory found no waivers and said nothing about it —
+# a declared exception silently ignored reads exactly like no exception.
+WAIVERS = agents_root() / "config" / "abandoned_branches.json"
+
+# Three answers, because two cannot express doubt. The whole finding behind this
+# file's second docstring paragraph is that `NO` and `UNKNOWN` were the same value.
+YES, NO, UNKNOWN = "yes", "no", "unknown"
+
+# A transient API failure is common enough to be worth retrying and rare enough
+# that three attempts collapse it: 2-in-12 per call becomes roughly 1-in-200.
+ATTEMPTS = 3
+BACKOFF_SECONDS = 1.5
+
+# `gh` exiting non-zero does not always mean the lookup failed — sometimes it
+# means there is nothing to look up, and the two must not share a verdict.
+# Where no GitHub repository is reachable at all, no merged pull request can
+# exist, so the honest answer is NO rather than UNKNOWN. Getting this wrong
+# would trade an intermittently-wrong gate for a permanently-closed one: every
+# local-only repository, and every test running in a bare temporary repo, would
+# refuse its own seal forever.
+#
+# These strings are empirical — each was produced by running the exact query
+# against a repository in that state, not recalled. Deliberately absent:
+# `Could not resolve to a Repository`, which means either the repository does
+# not exist or the token cannot see it. That is genuinely undetermined, and a
+# misconfigured remote should surface rather than read as clean.
+NO_GITHUB_SIDE = (
+    "no git remotes found",
+    "not a git repository",
+    "none of the git remotes",
+)
 
 
 def git(*args: str) -> subprocess.CompletedProcess:
@@ -91,20 +148,57 @@ def load_waivers() -> dict[str, str]:
     return {entry["branch"]: entry["reason"] for entry in data.get("abandoned", [])}
 
 
-def merged_pr_exists(branch: str) -> bool:
-    """Authoritative for a squash workflow; unavailable offline."""
+def merged_pr_exists(branch: str) -> str:
+    """Whether a merged pull request exists for `branch` — or that it is unknown.
+
+    Authoritative for a squash workflow, and the only signal that recognises one.
+    Returns a **three-valued** answer rather than a bool, because the two things
+    this used to conflate are not the same fact: "no merged PR exists" is a
+    finding about the repository, while "the lookup failed" is a finding about
+    the network. Reporting the second as the first is what made this gate
+    intermittently accuse healthy branches.
+
+    Args:
+        branch: local branch name, used as the pull request's head ref.
+
+    Returns:
+        str: `YES`, `NO`, or `UNKNOWN`. `NO` also covers every state in which no
+            GitHub repository can be reached at all (see `NO_GITHUB_SIDE`), since
+            no pull request can exist there. `UNKNOWN` covers `gh` being absent,
+            a request that kept failing, and unparseable output — each logged
+            with its cause rather than silently folded into a verdict
+            (`agents.md §1 exception_handling`).
+    """
     if not shutil.which("gh"):
-        return False
-    result = subprocess.run(
-        ["gh", "pr", "list", "--state", "merged", "--head", branch, "--json", "number"],
-        capture_output=True, text=True,
-    )
-    if result.returncode != 0:
-        return False
-    try:
-        return bool(json.loads(result.stdout or "[]"))
-    except json.JSONDecodeError:
-        return False
+        print(f"   ℹ️  {branch}: `gh` is not installed, so pull request state "
+              f"cannot be read here.", file=sys.stderr)
+        return UNKNOWN
+
+    last_error = ""
+    for attempt in range(1, ATTEMPTS + 1):
+        result = subprocess.run(
+            ["gh", "pr", "list", "--state", "merged", "--head", branch, "--json", "number"],
+            capture_output=True, text=True,
+        )
+        if result.returncode == 0:
+            try:
+                return YES if json.loads(result.stdout or "[]") else NO
+            except json.JSONDecodeError:
+                last_error = f"unparseable output: {result.stdout.strip()[:120]}"
+                break
+
+        stderr = result.stderr.strip()
+        # Retrying will not conjure a remote. This is an answer, not a failure.
+        if any(marker in stderr for marker in NO_GITHUB_SIDE):
+            return NO
+
+        last_error = stderr.splitlines()[0][:120] if stderr else f"exit {result.returncode}"
+        if attempt < ATTEMPTS:
+            time.sleep(BACKOFF_SECONDS * attempt)
+
+    print(f"   ⚠️  {branch}: pull request state undetermined after {ATTEMPTS} "
+          f"attempt(s) — {last_error}", file=sys.stderr)
+    return UNKNOWN
 
 
 def content_is_integrated(branch: str, base: str) -> bool:
@@ -119,22 +213,50 @@ def content_is_integrated(branch: str, base: str) -> bool:
     return not any(line.startswith("+") for line in result.stdout.splitlines())
 
 
-def classify(base: str) -> tuple[list[str], list[str], dict[str, str]]:
-    """Split local branches into integrated, unintegrated and waived."""
+def classify(base: str) -> tuple[list[str], list[str], list[str], dict[str, str]]:
+    """Split local branches into integrated, unintegrated, indeterminate and waived.
+
+    The two signals are asked in cost order: `git cherry` is local and free, so a
+    branch it can already prove never reaches the network. Only what it cannot
+    prove — every squash-merged branch — costs a pull request lookup.
+
+    **The condition is spelled out rather than chained**, because the previous
+    `content_is_integrated(...) or merged_pr_exists(...)` cannot survive a
+    three-valued answer: `NO` and `UNKNOWN` are non-empty strings, so both are
+    truthy and *every* branch would be reported integrated. A silent inversion of
+    this gate is worse than the flakiness it replaces.
+
+    Returns:
+        tuple: (integrated, unintegrated, indeterminate, waivers).
+    """
     waivers = load_waivers()
-    integrated, unintegrated = [], []
+    integrated, unintegrated, indeterminate = [], [], []
     for branch in local_branches(base):
         if branch in waivers:
             continue
-        if content_is_integrated(branch, base) or merged_pr_exists(branch):
+        if content_is_integrated(branch, base):
             integrated.append(branch)
-        else:
+            continue
+        state = merged_pr_exists(branch)
+        if state == YES:
+            integrated.append(branch)
+        elif state == NO:
             unintegrated.append(branch)
-    return integrated, unintegrated, waivers
+        else:
+            indeterminate.append(branch)
+    return integrated, unintegrated, indeterminate, waivers
 
 
 def audit(base: str) -> int:
-    integrated, unintegrated, waivers = classify(base)
+    """Report each branch's integration state; refuse the seal unless all are proven.
+
+    Both failure categories exit `2` (`RA-11`), and they are reported separately
+    on purpose. An unintegrated branch is a finding about the repository and has
+    a remedy the operator can act on. An indeterminate one is a finding about the
+    network and has a different remedy — retry — so offering the waiver there
+    would invite disabling the check for a branch that was never at fault.
+    """
+    integrated, unintegrated, indeterminate, waivers = classify(base)
 
     for branch, reason in waivers.items():
         print(f"⚪ {branch} — waived: {reason}")
@@ -158,21 +280,50 @@ def audit(base: str) -> int:
             f"disabled instead of answered.",
             file=sys.stderr,
         )
+
+    if indeterminate:
+        print(
+            f"\n⚠️  {len(indeterminate)} branch(es) could NOT be determined; "
+            f"the seal is refused because unproven is not the same as clean:",
+            file=sys.stderr,
+        )
+        for branch in indeterminate:
+            print(f"   • {branch}", file=sys.stderr)
+        print(
+            f"\n   This is not an accusation. `git cherry` cannot see a squash "
+            f"merge, and the pull request lookup did not answer — so nothing "
+            f"here says the work is missing, only that it is unproven.\n"
+            f"   Re-run this check: the cause is usually transient. Do NOT record "
+            f"a waiver for these — a waiver is permanent and would silence a "
+            f"branch that may be perfectly integrated.",
+            file=sys.stderr,
+        )
+
+    if unintegrated or indeterminate:
         return 2
 
-    print(f"\n✅ No unintegrated branches. Safe to seal.")
+    print("\n✅ No unintegrated branches. Safe to seal.")
     return 0
 
 
 def prune(base: str) -> int:
-    """Delete only branches whose integration was proven."""
-    integrated, unintegrated, _ = classify(base)
+    """Delete only branches whose integration was proven.
+
+    Deletion is irreversible, so `integrated` is the only category acted on.
+    Indeterminate branches are left alone and named — the third value costs one
+    extra run here, and buys never deleting a branch on the strength of a lookup
+    that did not answer.
+    """
+    integrated, unintegrated, indeterminate, _ = classify(base)
     for branch in integrated:
         result = git("branch", "-D", branch)
         print(f"🧹 deleted {branch}" if result.returncode == 0 else f"⚠️  {branch}: {result.stderr.strip()}")
     git("remote", "prune", "origin")
     if unintegrated:
-        print(f"⚠️  Left untouched (not proven integrated): {', '.join(unintegrated)}")
+        print(f"⚠️  Left untouched (not integrated): {', '.join(unintegrated)}")
+    if indeterminate:
+        print(f"⚠️  Left untouched (integration undetermined, re-run to resolve): "
+              f"{', '.join(indeterminate)}")
     return 0
 
 

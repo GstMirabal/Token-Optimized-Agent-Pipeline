@@ -16,6 +16,7 @@ import _mode  # noqa: E402
 import session_cost as sc  # noqa: E402
 import branch_sovereignty as bs  # noqa: E402
 import detect_drift as dd  # noqa: E402
+import session_probe as spr  # noqa: E402
 import session_state as ss  # noqa: E402
 import submodule_purity as sp  # noqa: E402
 
@@ -35,14 +36,14 @@ def _tiny_repo(path: Path) -> None:
 
 
 def test_a_git_directory_is_the_nucleus(tmp_path, monkeypatch):
-    monkeypatch.setattr(_mode, "agents_dir", lambda: tmp_path)
+    monkeypatch.setattr(_mode, "agents_root", lambda: tmp_path)
     (tmp_path / ".git").mkdir()
     assert _mode.is_nucleus() is True
 
 
 def test_a_git_pointer_file_is_a_submodule_checkout(tmp_path, monkeypatch):
     """git's own layout is the discriminator; nothing has to be configured."""
-    monkeypatch.setattr(_mode, "agents_dir", lambda: tmp_path)
+    monkeypatch.setattr(_mode, "agents_root", lambda: tmp_path)
     (tmp_path / ".git").write_text("gitdir: ../.git/modules/.agents\n")
     assert _mode.is_nucleus() is False
 
@@ -58,14 +59,14 @@ def test_nucleus_mode_never_blocks_even_on_a_dirty_tree(tmp_path, monkeypatch):
     (tmp_path / "docs").mkdir()
     (tmp_path / "docs" / "loose.md").write_text("uncommitted work\n")
     monkeypatch.setattr(sp, "is_nucleus", lambda: True)
-    monkeypatch.setattr(sp, "agents_dir", lambda: tmp_path)
+    monkeypatch.setattr(sp, "agents_root", lambda: tmp_path)
     assert sp.main() == 0
 
 
 def test_a_clean_submodule_passes(tmp_path, monkeypatch):
     _tiny_repo(tmp_path)
     monkeypatch.setattr(sp, "is_nucleus", lambda: False)
-    monkeypatch.setattr(sp, "agents_dir", lambda: tmp_path)
+    monkeypatch.setattr(sp, "agents_root", lambda: tmp_path)
     assert sp.main() == 0
 
 
@@ -78,7 +79,7 @@ def test_host_sprint_records_written_into_the_submodule_are_refused(
     sprint.mkdir(parents=True)
     (sprint / "task_scope.md").write_text("a host's sprint scope\n")
     monkeypatch.setattr(sp, "is_nucleus", lambda: False)
-    monkeypatch.setattr(sp, "agents_dir", lambda: tmp_path)
+    monkeypatch.setattr(sp, "agents_root", lambda: tmp_path)
 
     assert sp.main() == 2
     err = capsys.readouterr().err
@@ -94,7 +95,7 @@ def test_editing_the_framework_in_place_is_classified_separately(
     _tiny_repo(tmp_path)
     (tmp_path / "agents.md").write_text("# constitution, patched by a host\n")
     monkeypatch.setattr(sp, "is_nucleus", lambda: False)
-    monkeypatch.setattr(sp, "agents_dir", lambda: tmp_path)
+    monkeypatch.setattr(sp, "agents_root", lambda: tmp_path)
 
     assert sp.main() == 2
     err = capsys.readouterr().err
@@ -112,7 +113,7 @@ def test_an_ignored_only_dirty_state_is_not_contamination(tmp_path, monkeypatch)
     (tmp_path / "venv_skillopt").mkdir()
     (tmp_path / "venv_skillopt" / "pyvenv.cfg").write_text("home = /usr\n")
     monkeypatch.setattr(sp, "is_nucleus", lambda: False)
-    monkeypatch.setattr(sp, "agents_dir", lambda: tmp_path)
+    monkeypatch.setattr(sp, "agents_root", lambda: tmp_path)
     assert sp.main() == 0
 
 
@@ -175,6 +176,298 @@ def repo(tmp_path, monkeypatch):
     return tmp_path
 
 
+# --- anchor vs. the branch being worked --------------------------------
+#
+# Opening a sprint updates no field of the anchor — `claim` takes only a
+# session id — so a cold session reads a sprint number nobody wrote. Found on
+# the resume of Sprint 023, where the anchor said 22.
+
+def _checkout(repo: Path, branch: str) -> None:
+    subprocess.run(["git", "checkout", "-q", "-b", branch], cwd=repo, check=True,
+                   capture_output=True)
+
+
+def test_an_anchor_behind_the_branch_is_reported(repo):
+    _checkout(repo, "ai-sprint/023")
+    finding = spr.probe_anchor_sprint({"current_sprint": {"id": 22}})
+    assert finding is not None
+    assert "22" in finding and "ai-sprint/023" in finding
+
+
+def test_an_anchor_that_agrees_is_silent(repo):
+    _checkout(repo, "ai-sprint/023")
+    assert spr.probe_anchor_sprint({"current_sprint": {"id": 23}}) is None
+
+
+def test_a_branch_outside_the_convention_is_no_evidence_either_way(repo):
+    """`main`, a hotfix branch or a detached HEAD say nothing about which
+    sprint is active. Reporting a mismatch from them would be inventing one."""
+    assert spr.probe_anchor_sprint({"current_sprint": {"id": 23}}) is None
+
+
+def test_a_newer_sprint_directory_is_not_a_mismatch(repo, tmp_path):
+    """The comparison deliberately ignores `docs/sprints/`.
+
+    That looks like the equivalent signal and is not: measured on this
+    repository, `024` and `025` exist as directories while `023` is
+    legitimately in flight, so a directory-based check fires on a correct
+    state. The branch is the sprint being worked (`RA-12`).
+    """
+    _checkout(repo, "ai-sprint/023")
+    (tmp_path / "docs" / "sprints" / "025-core-pipeline").mkdir(parents=True)
+    assert spr.probe_anchor_sprint({"current_sprint": {"id": 23}}) is None
+
+
+def test_an_anchor_with_no_sprint_recorded_is_not_accused(repo):
+    """A first run has no `current_sprint` yet. Absent is not wrong."""
+    _checkout(repo, "ai-sprint/023")
+    assert spr.probe_anchor_sprint({}) is None
+
+
+# --- the platform probe answers in more than two values ----------------
+#
+# Sprint 023 C2. `security.get(control, {}).get("status") != "enabled"` made a
+# field that was never returned indistinguishable from a control that is off,
+# in a SECURITY report. `security_and_analysis` is omitted wholesale for a
+# caller without administrative access, so the whole object going missing told
+# a hardened repository that all three controls were disabled.
+
+def test_a_control_that_is_on_reads_enabled():
+    assert spr.analysis_state({"secret_scanning": {"status": "enabled"}},
+                              "secret_scanning") == spr.ENABLED
+
+
+def test_a_control_that_is_off_reads_disabled():
+    assert spr.analysis_state({"secret_scanning": {"status": "disabled"}},
+                              "secret_scanning") == spr.DISABLED
+
+
+@pytest.mark.parametrize("payload", [
+    {},                                          # key absent
+    {"secret_scanning": {}},                     # present, no status
+    {"secret_scanning": {"status": None}},       # present, null status
+    {"secret_scanning": {"status": "not_set"}},  # a value this code does not know
+    {"secret_scanning": None},                   # not an object at all
+    None,                                        # the call did not answer
+])
+def test_only_an_explicit_disabled_is_reported_as_disabled(payload):
+    """The defect, and the second version of it the Tester gate found.
+
+    Absence became `disabled` at first. The repair then collapsed *everything
+    that is not the string "enabled"* into `disabled`, which moved the same
+    two-value collapse one level in rather than removing it. Safe to report all
+    of these as doubt because a genuinely-off control is stated explicitly:
+    this repository's live payload returns `secret_scanning_validity_checks:
+    disabled` in full.
+    """
+    assert spr.analysis_state(payload, "secret_scanning") == spr.UNDETERMINED
+
+
+def test_an_explicitly_disabled_control_is_still_an_accusation():
+    """Doubt must not swallow the real finding — the inverse failure."""
+    assert spr.analysis_state({"secret_scanning": {"status": "disabled"}},
+                              "secret_scanning") == spr.DISABLED
+
+
+def test_a_404_is_only_off_for_a_caller_who_could_have_seen_it():
+    """Reproduced live by the Tester gate, and the reason this unit was rejected.
+
+    GitHub answers `404` on an admin-only endpoint to any caller without
+    administrative access, whether the feature is on or off. `cli/cli` and
+    `torvalds/linux` — both demonstrably hardened — returned 404 on all three
+    probed endpoints for a non-admin token, so mapping 404 to `disabled` told
+    them they were exposed and offered to patch repositories the caller cannot
+    administer. The first version of this test asserted the defect.
+    """
+    assert spr.state_from_exit(1, "gh: Not Found (HTTP 404)", True) == spr.DISABLED
+    assert spr.state_from_exit(1, "gh: Not Found (HTTP 404)", False) == spr.UNDETERMINED
+    assert spr.state_from_exit(1, "gh: Not Found (HTTP 404)", None) == spr.UNDETERMINED
+
+
+def test_the_status_comes_from_the_status_not_from_a_substring():
+    """Also reproduced with the real binary: a dead proxy on a repository whose
+    NAME contains 404 emitted a transport error carrying the URL, and a 503 body
+    read `upstream cache miss for /404/handler`. Both were classified as off."""
+    proxy_failure = ('Get "https://api.github.com/repos/acme/tools404/vulnerability-alerts": '
+                     'proxyconnect tcp: dial tcp 127.0.0.1:1: connect: connection refused')
+    assert spr.state_from_exit(1, proxy_failure, True) == spr.UNDETERMINED
+    assert spr.state_from_exit(
+        1, "gh: upstream cache miss for /404/handler (HTTP 503)", True) == spr.UNDETERMINED
+    assert spr.state_from_exit(0, "", False) == spr.ENABLED
+    assert spr.http_status("gh: Not Found (HTTP 404)") == 404
+    assert spr.http_status("dial tcp: no such host") is None
+
+
+@pytest.mark.parametrize("payload,expected", [
+    ('{"enabled": true, "paused": false}', "enabled"),
+    ('{"enabled": true, "paused": true}', "paused"),
+    ('{"enabled": false, "paused": false}', "disabled"),
+    ('{"paused": false}', "undetermined"),        # no `enabled` at all
+    ('{}', "undetermined"),
+    ('{"enabled": null}', "undetermined"),
+    ('{"enabled": "false"}', "undetermined"),     # truthiness would say ENABLED
+    ('["not", "an", "object"]', "undetermined"),
+    ("not json at all", "undetermined"),
+])
+def test_dependabot_updates_come_from_the_endpoint_that_answers_them(
+    payload, expected, monkeypatch
+):
+    """`{"enabled": true, "paused": false}` is the live shape, verified against
+    the API. `paused` is its own finding: enabled-but-paused applies nothing.
+
+    The last six rows are the Tester gate's `D2` and `D3`. A missing `enabled`
+    read as `disabled` while `analysis_state` read a missing key as doubt — two
+    opposite rules for absence inside one unit, and the branch that failed was
+    the security one. `{"enabled": "false"}` reported the control ON, the only
+    false green in the unit.
+    """
+    assert spr.dependabot_updates_state(0, payload, "", True) == expected
+
+
+def test_a_transient_failure_does_not_report_dependabot_as_off():
+    assert spr.dependabot_updates_state(
+        1, "", "gh: Server Error (HTTP 503)", True) == spr.UNDETERMINED
+
+
+def test_branch_protection_reads_the_field_a_non_admin_can_see():
+    """`branches/{b}/protection` is admin-only and 404s to everyone else, so it
+    cannot tell an unprotected branch from an unprivileged caller. The public
+    `protected` boolean can — measured on `cli/cli`, true while the admin
+    endpoint returned 404."""
+    assert spr.branch_protection_state(0, '{"protected": true}', "", False) == spr.ENABLED
+    assert spr.branch_protection_state(0, '{"protected": false}', "", False) == spr.DISABLED
+    assert spr.branch_protection_state(0, '{}', "", False) == spr.UNDETERMINED
+    # `D6` on this function specifically. Its twin `dependabot_updates_state`
+    # had the non-dict row and this one did not, so dropping the isinstance
+    # guard here survived a green suite while raising AttributeError out of a
+    # `main()` that has no try/except — every probe dies, not just this one.
+    assert spr.branch_protection_state(0, '[]', "", True) == spr.UNDETERMINED
+    assert spr.branch_protection_state(0, 'null', "", True) == spr.UNDETERMINED
+
+
+def test_each_gated_endpoint_is_asked_exactly_once(monkeypatch):
+    """The QA gate's `G-1`, round 2: `collect_security_controls` fetched an
+    endpoint to derive the doubt line and the state function fetched the same
+    endpoint again, so the cause explained a response that had not produced the
+    state it annotated. Measured before the fix: 5 calls for 3 endpoints,
+    `automated-security-fixes` and `branches/main` twice each.
+
+    Counting calls rather than asserting a rendered string, because the defect
+    was invisible in the output — both responses were identical under a healthy
+    network, and only a failure between them diverged.
+
+    The identity assertion is the Tester gate's `T-1`. Counting alone let `D2`
+    be reverted in full while the suite stayed green: swapping
+    `branches/{branch}` back to the admin-only `branches/{branch}/protection`
+    keeps the count at three. That URL used to live inside
+    `branch_protection_state`, where its own test could see it; moving the
+    fetch to the caller moved it out of every test's reach, so the assertion
+    belongs here now.
+    """
+    calls: list[str] = []
+
+    def counting_gh_call(*args: str) -> tuple[int, str, str]:
+        calls.append(" ".join(args))
+        return 1, "", "gh: Not Found (HTTP 404)"
+
+    monkeypatch.setattr(spr, "gh_call", counting_gh_call)
+    spr.collect_security_controls("o/r", {}, True, "main")
+
+    assert calls == [
+        "api repos/o/r/automated-security-fixes",
+        "api repos/o/r/vulnerability-alerts",
+        "api repos/o/r/branches/main",
+    ], calls
+
+
+def test_a_doubt_line_states_the_cause_it_measured(monkeypatch):
+    """Every doubt line used to read "field not returned" whatever had actually
+    happened — the unit's own thesis violated one level down."""
+    assert "HTTP 503" in spr.undetermined_cause(1, "gh: Server Error (HTTP 503)", True)
+    assert "does not administer" in spr.undetermined_cause(
+        1, "gh: Not Found (HTTP 404)", False)
+    assert "no HTTP response" in spr.undetermined_cause(1, "dial tcp: no such host", True)
+
+
+def test_a_non_dict_control_does_not_take_down_the_whole_probe():
+    """`security[control].get("status")` raised AttributeError on a null value,
+    and `probe_platform` has no try/except, so the graph, docs, anchor and cost
+    findings would never print."""
+    assert spr.analysis_state({"secret_scanning": None}, "secret_scanning") == spr.UNDETERMINED
+
+
+def test_doubt_is_reported_apart_from_accusation_and_never_as_disabled(monkeypatch):
+    """The two belong under different headings because they have different
+    remedies: a disabled control needs `/agents:harden`, an unanswered question
+    needs a token that can see the answer."""
+    monkeypatch.setattr(spr.shutil, "which", lambda _: "/usr/bin/gh")
+    monkeypatch.setattr(spr, "gh_json", lambda *a: (
+        {"nameWithOwner": "o/r", "description": "d", "homepageUrl": "h",
+         "defaultBranchRef": {"name": "main"}}
+        if a[:2] == ("repo", "view") else None
+    ))
+    monkeypatch.setattr(spr, "gh_call", lambda *a: (1, "", "gh: Server Error (HTTP 503)"))
+    monkeypatch.setattr(spr.Path, "exists", lambda self: True)
+    monkeypatch.setattr(spr.Path, "is_dir", lambda self: True)
+
+    report = spr.probe_platform({}, force=True)
+
+    assert report is not None
+    assert "cannot determine" in report
+    assert "an unanswered question" in report
+    # The accusation block must be absent entirely — asserted on its heading
+    # rather than on the word "disabled", which legitimately appears in the
+    # remedy sentence telling the reader not to treat doubt as a disabled control.
+    assert "not in the state" not in report
+    assert "/agents:harden" not in report
+    assert "Re-run before treating any of these as disabled" in report
+
+
+@pytest.mark.parametrize("admin,accuses", [(True, True), (False, False), (None, False)])
+def test_the_admin_discriminator_is_read_from_the_repository_payload(
+    admin, accuses, monkeypatch
+):
+    """The Tester gate's `T-2`. `permissions.admin` is what separates a 404
+    meaning "off" from a 404 meaning "you cannot see this", so it is the whole
+    of `D1`. Nothing pinned its extraction: replacing the lookup with a literal
+    `None` passed the entire suite while turning the probe into the permanently
+    closed gate the Implementation Plan names as an abort criterion.
+
+    The pre-existing integration test cannot catch it — it stubs `gh_json` to
+    return None for `api repos/{slug}`, so `is_admin` is already None inside it
+    and a broken extraction is indistinguishable from a working one.
+
+    Every endpoint answers 404 here, so the verdict is decided by `admin` alone:
+    an administrator is told the controls are off, everyone else is told the
+    probe could not see them.
+
+    The two `security_and_analysis` controls are supplied as enabled so they
+    contribute neither bucket. Left absent they land in doubt on their own —
+    correctly, since the payload genuinely did not answer — and an admin would
+    then produce both buckets at once, which measures the payload rather than
+    the discriminator this test exists to pin.
+    """
+    monkeypatch.setattr(spr.shutil, "which", lambda _: "/usr/bin/gh")
+    monkeypatch.setattr(spr, "gh_json", lambda *a: (
+        {"nameWithOwner": "o/r", "description": "d", "homepageUrl": "h",
+         "defaultBranchRef": {"name": "main"}}
+        if a[:2] == ("repo", "view")
+        else {"permissions": {"admin": admin},
+              "security_and_analysis": {
+                  "secret_scanning": {"status": "enabled"},
+                  "secret_scanning_push_protection": {"status": "enabled"}}}
+    ))
+    monkeypatch.setattr(spr, "gh_call", lambda *a: (1, "", "gh: Not Found (HTTP 404)"))
+    monkeypatch.setattr(spr.Path, "exists", lambda self: True)
+    monkeypatch.setattr(spr.Path, "is_dir", lambda self: True)
+
+    report = spr.probe_platform({}, force=True)
+
+    assert report is not None
+    assert ("Propose: `/agents:harden`" in report) is accuses, report
+    assert ("an unanswered question" in report) is not accuses, report
+
+
 def test_branch_with_unique_work_is_reported(repo):
     subprocess.run(["git", "checkout", "-qb", "feature"], check=True)
     (repo / "f.txt").write_text("changed\n")
@@ -192,15 +485,26 @@ def test_branch_whose_commits_are_in_main_passes(repo):
     assert bs.audit("main") == 0
 
 
-def test_waived_branch_does_not_block(repo):
+def test_waived_branch_does_not_block(repo, monkeypatch):
+    """The waiver list is patched, not written where the constant points.
+
+    It used to be a bare relative path, so writing it landed inside the test's
+    own `tmp_path`. Sprint 023 `C0.3` anchored it to the framework root — which
+    is correct, and made this test overwrite the repository's real
+    `config/abandoned_branches.json` with fixture data, destroying the three
+    explanatory keys it ships with. Caught by reading a commit's diff rather
+    than by any assertion, so the fixture is pinned here instead.
+    """
     subprocess.run(["git", "checkout", "-qb", "abandoned"], check=True)
     (repo / "f.txt").write_text("changed\n")
     subprocess.run(["git", "commit", "-aqm", "work"], check=True)
     subprocess.run(["git", "checkout", "-q", "main"], check=True)
     (repo / "config").mkdir()
-    bs.WAIVERS.write_text(json.dumps(
+    waivers = repo / "config" / "abandoned_branches.json"
+    waivers.write_text(json.dumps(
         {"abandoned": [{"branch": "abandoned", "reason": "superseded experiment"}]}
     ))
+    monkeypatch.setattr(bs, "WAIVERS", waivers)
     assert bs.audit("main") == 0
 
 
@@ -241,6 +545,129 @@ def test_prune_never_deletes_unproven_work(repo):
         capture_output=True, text=True,
     ).stdout.split()
     assert "unmerged" in branches
+
+
+# --- branch sovereignty: "could not determine" is not a verdict --------
+#
+# The pull request lookup used to return a bool and map every non-zero exit to
+# False, so a transient API failure read as "no merged PR exists". Measured
+# against the live API: 2 of 12 calls returned rc=1, HTTP 503. Because
+# content_is_integrated already returns False for every squash-merged branch,
+# one 503 was enough to flip an integrated branch to unintegrated — reproduced
+# as two triple-runs on an unchanged tree exiting 0,2,0 and 0,0,2, accusing a
+# different branch each time.
+
+REAL_RUN = subprocess.run
+
+
+def _gh_returning(returncode, stderr="", stdout=""):
+    """A stand-in for `gh` that leaves real `git` calls alone."""
+    def run(cmd, **kwargs):
+        if cmd and cmd[0] == "gh":
+            return subprocess.CompletedProcess(cmd, returncode, stdout, stderr)
+        return REAL_RUN(cmd, **kwargs)
+    return run
+
+
+@pytest.fixture
+def gh_installed(monkeypatch):
+    """Pretend `gh` is on PATH and remove the retry sleep."""
+    monkeypatch.setattr(bs, "BACKOFF_SECONDS", 0)
+    monkeypatch.setattr(bs.shutil, "which", lambda _: "/usr/bin/gh")
+
+
+def test_a_transient_failure_is_undetermined_not_a_verdict(repo, gh_installed, monkeypatch):
+    """HTTP 503 says nothing about whether a pull request was merged."""
+    monkeypatch.setattr(bs.subprocess, "run",
+                        _gh_returning(1, "HTTP 503: No server is currently available"))
+    assert bs.merged_pr_exists("feature") == bs.UNKNOWN
+
+
+def test_a_transient_failure_is_retried_before_giving_up(repo, gh_installed, monkeypatch):
+    """The retry is what makes UNKNOWN rare enough to be worth blocking on."""
+    calls = []
+
+    def run(cmd, **kwargs):
+        if cmd and cmd[0] == "gh":
+            calls.append(1)
+            if len(calls) < bs.ATTEMPTS:
+                return subprocess.CompletedProcess(cmd, 1, "", "HTTP 503: unavailable")
+            return subprocess.CompletedProcess(cmd, 0, '[{"number": 41}]', "")
+        return REAL_RUN(cmd, **kwargs)
+
+    monkeypatch.setattr(bs.subprocess, "run", run)
+    assert bs.merged_pr_exists("feature") == bs.YES
+    assert len(calls) == bs.ATTEMPTS
+
+
+def test_no_github_side_is_a_definitive_no(repo, gh_installed, monkeypatch):
+    """A repository with no remote can hold no pull requests, and that is an answer.
+
+    Reporting it as UNKNOWN would refuse the seal forever in every local-only
+    repository — trading an intermittently wrong gate for a permanently closed
+    one, which is strictly worse. Retrying cannot conjure a remote either.
+    """
+    monkeypatch.setattr(bs.subprocess, "run", _gh_returning(1, "no git remotes found"))
+    assert bs.merged_pr_exists("feature") == bs.NO
+
+
+def test_missing_gh_is_declared_rather_than_assumed(repo, monkeypatch):
+    monkeypatch.setattr(bs.shutil, "which", lambda _: None)
+    assert bs.merged_pr_exists("feature") == bs.UNKNOWN
+
+
+def test_a_negative_lookup_does_not_read_as_integrated(repo, monkeypatch):
+    """Regression guard for the truthiness trap the three-valued answer introduces.
+
+    The condition used to be `content_is_integrated(...) or merged_pr_exists(...)`.
+    With strings, `NO` is non-empty and therefore truthy, so that chain would have
+    reported *every* branch integrated — silently inverting the gate, which is far
+    worse than the flakiness this change removes.
+    """
+    subprocess.run(["git", "checkout", "-qb", "feature"], check=True)
+    (repo / "f.txt").write_text("changed\n")
+    subprocess.run(["git", "commit", "-aqm", "work"], check=True)
+    subprocess.run(["git", "checkout", "-q", "main"], check=True)
+    monkeypatch.setattr(bs, "merged_pr_exists", lambda _: bs.NO)
+    integrated, unintegrated, indeterminate, _ = bs.classify("main")
+    assert unintegrated == ["feature"]
+    assert integrated == [] and indeterminate == []
+
+
+def test_undetermined_is_reported_as_such_and_offered_no_waiver(repo, capsys, monkeypatch):
+    """It still blocks — but as doubt, not as an accusation.
+
+    The waiver is permanent. Offering it here would invite silencing a branch
+    whose work may be perfectly integrated, which is how a gate gets disabled
+    instead of answered.
+    """
+    subprocess.run(["git", "checkout", "-qb", "feature"], check=True)
+    (repo / "f.txt").write_text("changed\n")
+    subprocess.run(["git", "commit", "-aqm", "work"], check=True)
+    subprocess.run(["git", "checkout", "-q", "main"], check=True)
+    monkeypatch.setattr(bs, "merged_pr_exists", lambda _: bs.UNKNOWN)
+
+    assert bs.audit("main") == 2
+    err = capsys.readouterr().err
+    assert "could NOT be determined" in err
+    assert "unintegrated work" not in err
+    assert str(bs.WAIVERS) not in err
+
+
+def test_prune_never_deletes_an_undetermined_branch(repo, monkeypatch):
+    """Deletion is irreversible; a lookup that did not answer must not authorise it."""
+    subprocess.run(["git", "checkout", "-qb", "maybe-merged"], check=True)
+    (repo / "f.txt").write_text("changed\n")
+    subprocess.run(["git", "commit", "-aqm", "work"], check=True)
+    subprocess.run(["git", "checkout", "-q", "main"], check=True)
+    monkeypatch.setattr(bs, "merged_pr_exists", lambda _: bs.UNKNOWN)
+
+    bs.prune("main")
+    branches = REAL_RUN(
+        ["git", "for-each-ref", "--format=%(refname:short)", "refs/heads/"],
+        capture_output=True, text=True,
+    ).stdout.split()
+    assert "maybe-merged" in branches
 
 
 # --- drift detection ---------------------------------------------------

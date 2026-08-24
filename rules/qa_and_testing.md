@@ -18,3 +18,25 @@ This rule bounds deployment scopes, establishing testing thresholds and failsafe
 ## 4. The Double-Gate Review Protocol
 - **Structural Halt**: No execution block may proceed to functional testing without the explicit, documented sign-off from the `QA Agent`, guaranteeing absolute governance, linguistic, and syntactic compliance.
 - **Functional Lock**: The `Tester Agent` operates downstream of QA. If functional integration tests or isolated `:memory:` tests fail, it must forcefully trigger the global **Remediation Loop** — the protocol in `workflows/remediation_workflow.md`, named here rather than alluded to, because a transition nothing names is a transition no verifier can check (`RA-16`) — routing the exact failure trace back to the initiating node. Under no circumstances may functional gaps be presented to the Human User for resolution.
+
+## 5. Waiving a secret-scan finding
+
+`hooks/on_commit.py` blocks a commit when it finds a credential assigned to a
+secret-named identifier. Value shape cannot always separate a credential from a
+**pointer** at one — the same string is either, depending on what reads it —
+so the gate is deliberately imperfect and ships an escape rather than a fourth
+round of heuristic tuning.
+
+| Rule | Value |
+| :--- | :--- |
+| **Marker** | `# secret-scan: allow <reason>`, appended to the offending line |
+| **Scope** | That line only. There is no file-level or blanket waiver |
+| **Reason** | **Mandatory.** A marker with no reason suppresses nothing |
+| **Visibility** | Every waiver that actually suppressed a finding is printed at commit time, naming the identifier and the reason |
+| **Not waivable** | A forbidden file (`.pem`, `.key`, `secrets.json`, `credentials.json`). The marker narrows a heuristic; it does not unlock the hard boundary |
+
+A silent bypass is how `RA-09 SECRET_SOVEREIGNTY` gets defeated by the control
+built to enforce it. A declared one is an audit trail. Precedent: the gate was
+rejected four consecutive times in Sprint 023 for blocking legitimate pointers,
+and the deciding argument each round was not the false positive but that **a
+host had no way to comply except to disable the hook**.

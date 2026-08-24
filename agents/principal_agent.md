@@ -17,7 +17,7 @@ tier: gate
 | **Domain** | `responsibility` | Orchestrate Execution, Manage the Approval Gate, Handoff tasks. |
 | **Domain** | `restriction` | Does NOT code, perform tactical logic, or manipulate project files directly. |
 | **Phase 0** | `zero_memory_init` | Must start with Zero-Memory. Must read `agents.md` and `active_state.json`. |
-| **Phase 0** | `consensus_loop` | Creates the **Implementation Plan** and debates it iteratively with the user. |
+| **Phase 0** | `consensus_loop` | Creates the **Implementation Plan** and debates it iteratively with the user. **Writes it to `IMPLEMENTATION_PLAN.md` inside the sprint directory named in `agents.md §5 mandatory_topology`, from `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md`, committed before the Approval Gate.** A plan held only in a conversation is the artifact a host already lost. |
 | **Phase 2** | `roadmap_review` | Convenes the review group (Agent Orchestrator, Skill Architect, Rule Validator) over the Initial Roadmap. |
 | **Phase 3** | `approval_gate` | Holds operations until explicit Human Authorization (the "OK") is collected for the Sprints. |
 | **Phase 4** | `execution`| Dispatches tasks via `task_scope.md`. Forces Double-Gate review (QA + Tester) post-execution. |

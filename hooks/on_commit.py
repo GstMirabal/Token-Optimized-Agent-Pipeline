@@ -1,5 +1,6 @@
 import subprocess
 import sys
+import itertools
 import json
 import re
 from datetime import datetime
@@ -79,8 +80,15 @@ def audit_three_file_standard() -> bool:
 # handling authentication can avoid — the gate then blocks every commit and
 # stops meaning anything. The literal on the right-hand side is what
 # distinguishes a leak from a lookup.
+# `ACCESS_TOKEN` and `REFRESH_TOKEN` are the OAuth pair and were both absent:
+# the list held `AUTH_?TOKEN` and `ACCESS_?KEY`, so `access_token` — among the
+# commonest credential parameter names there is — matched no form. It went
+# unnoticed because the query-string form briefly used a loose `token`
+# substring that covered it by accident, and removing that loose list is what
+# exposed the real gap underneath.
 SECRET_WORDS = (
     r"API_?KEY|SECRET|PASSWORD|PASSWD|PRIVATE_?KEY|AUTH_?TOKEN"
+    r"|ACCESS_?TOKEN|REFRESH_?TOKEN"
     r"|MASTER_?KEY|SIGNING_?KEY|ACCESS_?KEY|PEPPER|CREDENTIAL"
 )
 
@@ -95,6 +103,238 @@ SECRET_ASSIGNMENT = re.compile(
     """,
     re.IGNORECASE | re.MULTILINE | re.VERBOSE,
 )
+
+# The quoted-literal assignment above is the Python/JS form and only that form.
+# Three others carry credentials just as directly and read as clean against it
+# (F-086-S2), so each gets its own alternation rather than one regex widened
+# until it matches everything: a Dockerfile `ENV`/`ARG`, a YAML `key: value`,
+# and a credential in a URL query string. Every one of them is filtered by the
+# same exclusions in find_hardcoded_secret — the gate has already blocked a
+# real host once on a false positive, and widening what it reads is exactly
+# when that risk returns.
+
+# `ENV API_KEY=x`, `ARG API_KEY=x`, and the legacy space-separated `ENV KEY x`.
+# The `=` form is not anchored to the first pair on the line: `ENV` accepts
+# several pairs at once (`ENV APP_HOME=/srv API_KEY=…`), and anchoring examined
+# only the first, so the documented multi-pair syntax hid every later one.
+DOCKERFILE_SECRET = re.compile(
+    rf"""^[ \t]*(?:ENV|ARG)[ \t]+
+        (?:\S+[ \t]+)*?
+        (?P<name>[A-Za-z0-9_]*(?:{SECRET_WORDS})[A-Za-z0-9_]*)
+        (?:[ \t]*=[ \t]*|[ \t]+)
+        (?P<value>"[^"\n]*"|'[^'\n]*'|[^\s#]+)
+    """,
+    re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+)
+
+# YAML `api_key: value`, including a list item (`- api_key: value`). The value
+# is a single token deliberately: `password: str = None` is a Python type
+# annotation, not a mapping, and a token-bounded value reads `str` there —
+# under MIN_SECRET_LENGTH, so it is dropped instead of blocking the commit.
+YAML_SECRET = re.compile(
+    rf"""^[ \t]*(?:-[ \t]+)?
+        (?P<name>[A-Za-z0-9_-]*(?:{SECRET_WORDS})[A-Za-z0-9_-]*)
+        [ \t]*:[ \t]+
+        (?P<value>"[^"\n]*"|'[^'\n]*'|[^\s#]+)
+    """,
+    re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+)
+
+# `?api_key=…` / `&access_token=…` anywhere in a line: a credential pasted into
+# a URL is not an assignment and so was never matched.
+#
+# The name uses SECRET_WORDS like every other form, and ENDS on it. A bare
+# substring list (`key|token|secret|password`) read `?keywords=`, `?tokenizer=`,
+# `?sort_key=`, `?utm_token=` and `?monkey=` as credentials — this form is the
+# one that applies to every file type including prose, so it is also the one
+# that could not afford a loose word list. Ending on the word is what separates
+# a parameter that CARRIES a credential (`?api_key=`) from one that merely
+# contains the letters (`?passwordless=`).
+QUERY_STRING_SECRET = re.compile(
+    rf"""[?&](?P<name>[A-Za-z0-9_-]*(?:{SECRET_WORDS}))=
+        (?P<value>[^&\s'"#]+)
+    """,
+    re.IGNORECASE | re.VERBOSE,
+)
+
+# A PEM private key is the highest-value leak there is, and it reaches a values
+# file as a YAML block scalar (`private_key: |`) whose value token on the key
+# line is one character — dropped under MIN_SECRET_LENGTH before anything looks
+# at the block. Matched on its own header instead, which is format-agnostic and
+# so covers the folded, flow and multi-line spellings in one rule.
+#
+# The BODY is captured, not just the header, for two reasons. It made this a
+# form like any other, filtered by the same exclusions — the first version
+# returned early and so bypassed all of them, blocking a setup guide whose
+# body was literally `YOUR_PRIVATE_KEY_HERE`, a phrase already in
+# PLACEHOLDER_MARKERS. And requiring a base64-shaped body is what distinguishes
+# a key from prose that merely quotes the header, which has no closing
+# delimiter at all.
+# The closing `-----END` is NOT required: a key pasted into a diff hunk or
+# truncated mid-file is still a key, and requiring the delimiter lost exactly
+# that case. Sixteen unbroken base64 characters after the header carry the
+# whole distinction on their own — `YOUR_PRIVATE_KEY_HERE` breaks at the
+# underscore, prose quoting the header is followed by prose, and neither
+# reaches sixteen.
+PRIVATE_KEY_BLOCK = re.compile(
+    r"-----BEGIN (?:[A-Z][A-Z0-9 ]*[ ])?(?P<name>PRIVATE KEY)-----"
+    r"\s*(?P<value>[A-Za-z0-9+/=]{16,})"
+)
+
+# A mapping form is only a mapping in a file that uses mappings. Applied to
+# every staged file regardless of type, YAML_SECRET reads JavaScript object
+# literals inside Markdown code blocks as leaks — measured against this
+# repository: five false positives across its own skill documentation, among
+# them `password: process.env.DB_PASSWORD`, which is the sanctioned RA-09
+# pattern. So the format-specific forms are selected by path, and the
+# format-agnostic ones always apply.
+YAML_SUFFIXES = (".yml", ".yaml")
+
+# `Dockerfile`, plus the `Dockerfile.prod` and `api.Dockerfile` spellings a
+# real deployment splits it into — the second is the monorepo convention and
+# was missed by both halves of this unit until the Tester gate said so. Held
+# as one name rather than a list: `Containerfile` was carried here briefly and
+# no file of that name exists in this repository, which `rules/code_craft.md
+# §1` calls configuring what nobody asked to vary.
+DOCKERFILE_NAME = "dockerfile"
+
+
+def _is_build_file(name: str) -> bool:
+    """Reports whether a lowercased filename is a container build file.
+
+    Args:
+        name: A filename, already lowercased and stripped of `.example`.
+
+    Returns:
+        True for `dockerfile`, `dockerfile.prod` and `api.dockerfile`.
+    """
+    return (
+        name == DOCKERFILE_NAME
+        or name.startswith(f"{DOCKERFILE_NAME}.")
+        or name.endswith(f".{DOCKERFILE_NAME}")
+    )
+
+
+def secret_forms_for(path: Path | None) -> tuple[re.Pattern[str], ...]:
+    """Selects the secret patterns that apply to one file.
+
+    Args:
+        path: Path of the file being scanned, or None when it is not known.
+
+    Returns:
+        The applicable compiled patterns. A format-specific form is omitted
+        when the path does not identify that format, including when the path
+        is unknown: a leak missed in an unidentified file is caught by the
+        next scan, whereas a gate that blocks a legitimate commit gets
+        disabled and then catches nothing at all.
+    """
+    forms = [SECRET_ASSIGNMENT, QUERY_STRING_SECRET, PRIVATE_KEY_BLOCK]
+    if path is None:
+        return tuple(forms)
+    # `config.yml.example` is a YAML file whose suffix says `.example`, and it
+    # is the spelling agents.md §3 secret_sovereignty sanctions for a committed
+    # template. Stripping the marker first is what makes this half agree with
+    # the auditor half, which reaches the same file through `.example`.
+    name = path.name.lower().removesuffix(".example")
+    if Path(name).suffix in YAML_SUFFIXES:
+        forms.append(YAML_SECRET)
+    if _is_build_file(name):
+        forms.append(DOCKERFILE_SECRET)
+    return tuple(forms)
+
+# A key that NAMES a secret is not a key that CONTAINS one. In Kubernetes,
+# Helm and Compose the dominant use of a secret-worded key is a reference —
+# the name of a Secret object, the path of a mounted secret file, the id of a
+# signing key — and every one of them was read as a leak. Measured on stock
+# manifests: 16 of 20 legitimate lines flagged, including
+# `POSTGRES_PASSWORD_FILE: /run/secrets/db_password`, which is the RECOMMENDED
+# secure pattern. Blocking a host for doing it correctly is the failure this
+# gate's abort criterion is written against.
+REFERENCE_KEY_SUFFIXES = (
+    "name", "file", "path", "paths", "ref", "id", "policy",
+    "dir", "url", "uri", "arn", "provider",
+)
+REFERENCE_KEY_PREFIXES = ("existing",)
+
+# The name side above cannot cover every pointer, because not every pointer is
+# named for what it points WITH. `GOOGLE_APPLICATION_CREDENTIALS` — the
+# canonical Google Cloud variable — is named for what it points AT, ends in a
+# SECRET_WORD, and always holds a path to a mounted key file. So a value-side
+# test is needed after all, and this is the narrow one.
+#
+# It is narrow because the wide version was wrong twice. Exempting anything
+# containing `://` dropped credentials that ARE URLs — a Slack webhook, a
+# MongoDB DSN with inline userinfo — including ones this gate caught before
+# this unit existed. And exempting anything merely starting with `/` was
+# justified by the claim that base64 does not begin with `/`, which is false:
+# 1 in 64 does.
+#
+# So: an absolute path of at least two segments, over a character set that
+# EXCLUDES `+` and `=`. That last part is what keeps base64 out, and it is
+# measured rather than argued — see the exemption rate quoted in
+# tests/test_on_commit.py. A URL fails on the leading `/`; a DSN fails on it
+# too; a Slack webhook fails on it too.
+# `./`, `../` and `~/` carry no base64 risk at all: neither `.` nor `~` is in
+# the base64 alphabet, so a key can never take these shapes. The leading-`/`
+# form is the only one that needs a guard, and it gets one below.
+RELATIVE_PATH_VALUE = re.compile(r"^(?:\./|\.\./|~/)[A-Za-z0-9._/-]*[A-Za-z0-9._-]$")
+ABSOLUTE_PATH_VALUE = re.compile(r"^/[A-Za-z0-9._/-]*[A-Za-z0-9._-]$")
+
+
+def _points_at_a_file(value: str) -> bool:
+    """Reports whether a value is a filesystem path rather than a credential.
+
+    Args:
+        value: The matched value, already unquoted.
+
+    Returns:
+        True for an absolute multi-segment path. A file extension or a third
+        segment is required on top of the shape, because base64 contains no
+        `.` at all and rarely carries three `/`.
+
+        Measured over 200,000 random values per size, not reasoned about,
+        which is the mistake the deleted `/`-prefix rule made: it wrongly
+        exempted 1.54% of 24-byte base64 while its comment asserted it
+        exempted none.
+
+        This test exempts 0.080% at 24 bytes, 0.121% at 32 and 0.153% at 48,
+        **with `=` padding stripped**. That clause is not decoration: a padded
+        32-byte value ends in `=`, which is outside this charset, so the
+        padded rate at that size is exactly 0% and the figure above is
+        unreachable without it. An earlier version of this docstring omitted
+        the method and did not reproduce — the same defect as the rule it
+        replaced, one round later. Deliberately not claimed to be zero.
+
+        The third-segment threshold is kept strict rather than relaxed to two,
+        which was measured at 0.35% — five times worse — for the sake of
+        `/etc/azure-creds`. Shapes this test declines are what ALLOW_MARKER is
+        for; loosening the heuristic to chase each one is what failed three
+        times before the marker existed.
+    """
+    if RELATIVE_PATH_VALUE.match(value):
+        return True
+    if not ABSOLUTE_PATH_VALUE.match(value):
+        return False
+    return "." in value or value.count("/") >= 3
+
+
+def _names_a_reference(name: str) -> bool:
+    """Reports whether an identifier refers to a secret rather than holds one.
+
+    Args:
+        name: The matched identifier, in its original casing.
+
+    Returns:
+        True when the name ends in a reference word (`secretName`,
+        `vault_password_file`, `SIGNING_KEY_ID`) or begins with one
+        (`existingSecret`), in which case its value is a pointer.
+    """
+    lowered = name.lower().rstrip("_-")
+    return (
+        lowered.startswith(REFERENCE_KEY_PREFIXES)
+        or lowered.endswith(REFERENCE_KEY_SUFFIXES)
+    )
+
 
 # Values that are obviously not live credentials.
 PLACEHOLDER_MARKERS = (
@@ -122,30 +362,139 @@ def _is_test_artifact(path: Path) -> bool:
     )
 
 
-def find_hardcoded_secret(content: str) -> str | None:
-    """Returns the identifier of the first hardcoded secret found, if any.
+# A gate with no way to comply is a gate that gets disabled, and then it
+# catches nothing. Three value-side rules in three rounds of this unit each
+# narrowed the last and each was wrong in a new direction — exempting every
+# URL dropped real credentials, exempting nothing blocked real pointers,
+# exempting absolute paths blocked relative ones. Value shape cannot separate
+# a pointer from a credential, because the same string is either one depending
+# on what reads it. Every production secret scanner ships an allowlist for
+# that reason; this one ships a marker.
+#
+# The reason is MANDATORY and the marker is printed at commit time. A silent
+# bypass is how RA-09 gets defeated by the control meant to enforce it; a
+# declared one is an audit trail.
+ALLOW_MARKER = re.compile(
+    r"#[ \t]*secret-scan:[ \t]*allow[ \t]+(?P<reason>\S.*?)[ \t]*$",
+    re.IGNORECASE | re.MULTILINE,
+)
+
+
+def _suppression_reason(content: str, offset: int) -> str | None:
+    """Returns the declared reason waiving a finding, if one is on its line.
+
+    Args:
+        content: Full text of the file being scanned.
+        offset: Character offset where the candidate match begins.
+
+    Returns:
+        The reason text, or None when the line carries no marker.
+    """
+    start = content.rfind("\n", 0, offset) + 1
+    end = content.find("\n", offset)
+    line = content[start:] if end == -1 else content[start:end]
+    marker = ALLOW_MARKER.search(line)
+    return marker.group("reason") if marker else None
+
+
+def _unquote(value: str) -> str:
+    """Strips one matched pair of surrounding quotes, if present.
+
+    Args:
+        value: A captured value, quoted or bare depending on the form matched.
+
+    Returns:
+        The value without its surrounding quotes.
+    """
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in "'\"":
+        return value[1:-1]
+    return value
+
+
+def _credible_findings(content: str, path: Path | None):
+    """Yields every match that survives the exclusions, with its waiver.
+
+    One filter chain shared by the detector and the waiver announcer, so the
+    two can never disagree about what counts as a finding.
 
     Args:
         content: Full text of a staged file.
+        path: Path of that file, used to select the format-specific patterns.
 
-    Returns:
-        The offending variable name, or None when nothing credible is found.
+    Yields:
+        Tuples of the offending identifier and the reason waiving it, or None
+        when no waiver is declared on that line.
     """
-    for match in SECRET_ASSIGNMENT.finditer(content):
-        value = match.group("value")
+    matches = itertools.chain.from_iterable(
+        form.finditer(content) for form in secret_forms_for(path)
+    )
+    for match in matches:
+        value = _unquote(match.group("value"))
 
         if len(value) < MIN_SECRET_LENGTH:
             continue
+        if _names_a_reference(match.group("name")):
+            continue
+        # A PEM body is never a filesystem path, so the path test can only
+        # cost detection there: 0.142% of generated key first lines took a
+        # path shape, roughly 1 private key in 706.
+        if match.re is not PRIVATE_KEY_BLOCK and _points_at_a_file(value):
+            continue
         # "$VAR" / "${VAR}" are environment interpolation placeholders, which is
         # exactly the sanctioned pattern in config.toml.example (RA-09).
-        if value.startswith("$") or value.startswith("{"):
+        # "[" and "{" additionally open a YAML flow collection: Compose's
+        # `secrets: [db_password]` declares which secrets a service consumes
+        # and is a list of names, never a credential.
+        if value.startswith(("$", "{", "[")):
             continue
         if any(marker in value.lower() for marker in PLACEHOLDER_MARKERS):
             continue
 
-        return match.group("name")
+        # LAST, because it is the only filter that scans backwards through the
+        # file. Ordered before the cheap tests it made the whole scan
+        # quadratic: every surviving match paid a `rfind` that, on a single
+        # long line, walks to position 0. Measured on a 200 KB single-line
+        # JSON export whose values are env placeholders — 259 ms against
+        # 0.83 ms, a 313x regression — and it doubled fourfold from there.
+        yield match.group("name"), _suppression_reason(content, match.start())
 
+
+def find_hardcoded_secret(content: str, path: Path | None = None) -> str | None:
+    """Returns the identifier of the first unwaived hardcoded secret, if any.
+
+    Args:
+        content: Full text of a staged file.
+        path: Path of that file, used to select the format-specific patterns.
+
+    Returns:
+        The offending variable name, or None when nothing credible is found.
+    """
+    for name, waiver in _credible_findings(content, path):
+        if waiver is None:
+            return name
     return None
+
+
+def announce_waivers(content: str, path: Path, file_path: str) -> None:
+    """Prints every waiver that actually suppressed a finding.
+
+    Announcing `ALLOW_MARKER` matches instead would report a waiver for any
+    line that merely mentions the marker — the row of IMPLEMENTATION_PLAN.md
+    documenting it, for one — so the gate would claim to have waived something
+    it never found. A control asserting an outcome it cannot support is the
+    defect class this whole sprint exists to remove.
+
+    Args:
+        content: Full text of the staged file.
+        path: Path of that file, for format selection.
+        file_path: Path as staged, used in the message.
+    """
+    for name, waiver in _credible_findings(content, path):
+        if waiver:
+            print(
+                f"ℹ️  [ON_COMMIT] Secret scan waived for '{name}' "
+                f"in {file_path}: {waiver}"
+            )
 
 
 def audit_secret_shielding() -> bool:
@@ -176,10 +525,19 @@ def audit_secret_shielding() -> bool:
             if _is_test_artifact(path):
                 continue
 
-            leak = find_hardcoded_secret(content)
+            announce_waivers(content, path, file_path)
+
+            leak = find_hardcoded_secret(content, path)
             if leak:
+                # The remedy travels with the refusal. A gate whose only
+                # visible option is to disable it gets disabled: the affordance
+                # existed one round before this message did, and a host that
+                # cannot find it is in the same position as a host without it.
                 violations.append(
-                    f"Hardcoded secret assigned to '{leak}' in {file_path}"
+                    f"Hardcoded secret assigned to '{leak}' in {file_path}. "
+                    "If this is a false positive, append "
+                    "`# secret-scan: allow <reason>` to that line — the reason "
+                    "is required and the waiver is printed on every commit."
                 )
         except Exception:
             # Skip binary files or git errors
