@@ -1236,6 +1236,60 @@ the next unit is a gate.
 | **`Esc-2` is a merge, not a new entry** | Line 213 of this file already recorded the same 176-error measurement and that nothing invokes the declared linter. Route **one** unit |
 | **Do NOT** | Re-run the lead's mutation harness without checking it asserts a green unmutated baseline first. It did not, for three rounds, and reported every mutant killed |
 
+## Suspended below the bound, a seventh time — session #7
+
+**`forced: false`.** Stopped at **12.3×** of the 15× bound, measured with
+`scripts/session_cost.py` as `rules/token_economy.md §3.1` requires:
+
+| Cycle | Messages | First turn | Peak | Ratio |
+| :--- | :--- | :--- | :--- | :--- |
+| 1 | 216 | 24,272 | 200,394 | 8.3× |
+| 2 | 139 | 24,272 | 297,423 | **12.3×** |
+
+**Why stop with no unit left.** What remains is not a unit but the **whole
+closeout** — `close_workflow.md` is fourteen steps, and this sprint's own record
+adds one it will not find in that protocol: six delivered units have no
+`SPRINT_LOG.md` narrative and writing them is part of closing. Pricing the *next*
+step rather than the last is the reasoning sessions #3 through #6 each used, and
+2.7× of headroom does not buy a closeout that includes six unit narratives, a
+graph rebuild and a docs-freshness gate.
+
+### A fourth confirmation of the per-project reset constant
+
+`§3.1` observed 22,174 three times; session #5 observed 24,272 three times;
+session #6 twice; this session **twice more, same value**. Three sessions, seven
+cycles, one number. The denominator `§3.1` chose is stable across sessions of the
+same project — that is now measured rather than assumed.
+
+### The calibration datum this session contributes
+
+**One unit at 12.3×, and it was the unit chosen for being cheap.** Session #6
+recorded that the bound is sensitive to **rejection count**, not unit count, and
+proposed it from `C10`'s six rounds. `C8` is the confirming case from the
+opposite end: classified low-risk, chosen in session #6 explicitly as *"the cheap
+alternative if budget is short"*, and it cost **5 rounds and 4 rejections**
+against `C10`'s 6 and 4. The two units bracket the claim — the sprint's hardest
+and its cheapest cost almost the same, and what they share is the rejection count.
+
+**What `§3.1` still does not say**, now supported by two units rather than one: a
+session planning by units-remaining will mis-plan whenever the next unit's
+artifact makes **assertions**, because assertions are what gates reject. `C7`, a
+git rename, cleared both gates in one round. `C8`, ten checkbox ticks, took five.
+
+## Where session #8 resumes
+
+| | |
+| :--- | :--- |
+| **Next action** | **`/agents:close`.** No unit remains. All fourteen are delivered and gate-approved |
+| **Blocked on** | Nothing. `make verify` green at 428, working tree clean, `HEAD` at `1d2fb50` on `ai-sprint/023` |
+| **Delegation** | Must be asked again. Session #7's lift was granted for `C8` only and is spent — five rounds used it |
+| **Closeout carries one task the protocol will not name** | Six delivered units (`C4.2`, `C5`, `C6`, `C7`, `C8`, `C10`) have **no `## Delivered` entry** in `SPRINT_LOG.md`. Declared in that file's header. `task_scope.md`'s status table is the authoritative per-unit record until they are written |
+| **`C8`'s deliverable is on another branch** | `contrib/host-findings` at `5e21538`, commits `7056c61` + `5e21538`, **not** on `ai-sprint/023`. It is unpushed. The close must handle two branches, and `deployment_workflow.md` Phase 1 merges only the sprint branch |
+| **Merge-order note from the Tester** | `agents.md §0`'s announcement of `UPSTREAM_FINDINGS_FROM_HOSTS.md` exists **only** on `contrib/host-findings` — not on `ai-sprint/023`, not on `origin/main`. `F-093-N1`'s claim is true on the branch the file lives on, so it is not a defect, but the announcement reaches `main` only if **both** branches merge |
+| **`F8` is no longer unowned** | Drafted as a ready-to-execute unit in `docs/roadmaps/core/pipeline/021-030-program-queue.md`, under *Carried out of `023`*. **No sprint number assigned** — that is a planning decision, and `026`–`030` are themed with no secret gate among them. It ships open in the upstream register as `F-023-S4` |
+| **Two governance findings route to a single unit in a later sprint** | The `RA-13` gap (nothing says the gate's object must be frozen for the gate's duration) and the `RA-14` gap (nothing greps a patched term across its artifact; the rule is enforced only by whoever remembers it). Both are in this session's findings table with candidate instruments |
+| **Do NOT** | Tick a box, or accept a gate's summary, without re-measuring. Four of `C8`'s defects were false claims that a record-based check would have shipped, and one was a published command returning a different number than the entry asserted |
+
 ## Declared deviation — delegation
 
 Unchanged from `022`: the session configuration forbids spawning subagents
