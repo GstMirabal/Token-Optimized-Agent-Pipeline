@@ -1,14 +1,39 @@
 # Task Scope — Sprint 023 (`upstream-findings`)
 
 **Branch**: `ai-sprint/023` · **Base**: `main` at `18696c5` (`v4.7.0`)
-**State**: **IN_PROGRESS**, resumed 2026-08-23 (session #6). Sprint open.
-**Twelve of fourteen units are delivered and gate-approved.** Remaining: `C8`
-and `C10`, plus `F8`, which still has no unit. **Next: `C10`** — the last
-high-risk unit, chosen over `C8` because it is the other half of this sprint's
-thesis (`C9` answers red when it does not know; `C10` answers green) and
-because `deployment_workflow.md` Phase 1 is the gate through which this sprint
-itself will merge. Delegation was lifted for `C10`'s QA + Tester passes only
-(see *Declared deviation — delegation*); `C8` onwards must ask again.
+**State**: **IN_PROGRESS**, resumed 2026-08-24 (session #7). Sprint open.
+**All fourteen units are delivered and gate-approved**, `C8` included. What
+remains before the sprint can close is **not a unit**: `F8` is now drafted as a
+ready-to-execute unit in `docs/roadmaps/core/pipeline/021-030-program-queue.md`
+with no sprint assigned, which is the disposition its severity and the queue's
+themes actually support. Delegation was lifted for `C8`'s QA + Tester passes only
+(see *Declared deviation — delegation*).
+
+### `C8` cost five rounds on a unit the plan called low-risk
+
+Recorded here because it is the sprint's sharpest calibration datum, and it is
+about **classification**, not effort. `C8` was chosen in session #6 precisely
+*because* it was the cheap one. It took **5 gate rounds and 4 rejections** —
+`C10`, the sprint's hardest unit, took 6 and 4.
+
+| Round | QA | Tester |
+| :--- | :--- | :--- |
+| 1 | REJECTED — 8 defects | REJECTED — 6 blocking |
+| 2 | REJECTED — 1 | **APPROVED** + 3 advisories |
+| 3 | **APPROVED** | — |
+| 4 | REJECTED — 1 (`RA-14`) | **APPROVED** on committed object |
+| 5 | **APPROVED** | **APPROVED** |
+
+**Why the classification was wrong, stated so the next planner can use it.** Risk
+was assessed on the *operation* — ticking checkboxes in a Markdown file, which is
+genuinely trivial — and not on **what the artifact asserts**. This artifact is
+nothing but claims: ten closure attributions, four commit citations, three
+published reproduction commands and a security mechanism. Every rejection but one
+was a false claim, not a formatting fault. **An artifact's risk is the cost of
+its assertions being wrong, not the difficulty of writing it** — and a findings
+register that misattributes a fix or publishes a recipe returning a different
+number than it claims is worse than no register, which is the thesis of the file
+itself.
 
 Fourteen units after `C3.2` was added mid-sprint at the remediation halt. `C9` ran first by design: this sprint's own
 close invokes `branch_sovereignty audit`, so leaving that gate intermittently
@@ -29,7 +54,7 @@ wrong meant the sprint would trip on the defect it came to repair.
 | C5 | `agents/devops_agent.md`, `agents.md` §6 role table | modify | medium — role map | lead · `agent_orchestrator` ruleset | ✅ `aa2b11d` + `R1` — both gates APPROVED |
 | C6 | `agents.md` §0, `start_workflow.md` (3 rows), `audit_workflow.md` (`federation_audit`), `docs/plans/README.md` (routing discharged), `tests/test_installer.sh` (+1 assertion), `.claude/commands/agents/` (untracked, regenerable) | modify | medium | lead · `rule_validator` ruleset | ✅ `R2` — both gates APPROVED |
 | C7 | `requirements-freeze.txt` → `docs/audits/SKILLOPT_TRANSITIVE_CLOSURE.md` (git rename), `skills/skillopt/SKILL.md` (reference) | move | low | lead · `devops_agent` ruleset | ✅ both gates APPROVED, first round |
-| C8 | `origin/contrib/host-findings` | modify | low | lead · `doc_orchestrator` ruleset | ⏳ |
+| C8 | `origin/contrib/host-findings` (`docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md`) | modify | low — **misclassified**; see below | lead · `doc_orchestrator` ruleset | ✅ `7056c61` + `5e21538` — both gates APPROVED, pinned to blob `d1ac87f` |
 | C10 | `scripts/ci_gate.py` (new), `tests/test_ci_gate.py` (new), `workflows/deployment_workflow.md:17` | create/modify | **high** — a gate | lead · `devops_agent` ruleset | ✅ `R6` — both gates APPROVED after 6 rounds, 4 rejections |
 
 ## Why this session stopped here
@@ -1189,6 +1214,16 @@ unit count, it is sensitive to **rejection count**, and nothing in `§3.1`
 currently says so. A session planning by units-remaining will mis-plan whenever
 the next unit is a gate.
 
+## Found at session start (2026-08-24, session #7)
+
+| Finding | Routing |
+| :--- | :--- |
+| **`detect_drift.py` verdict `A` fired a fifth time, and the count keeps tracking the sprint rather than a new problem.** Re-measured this session rather than inherited: **47 of 49** commits in the range reported as covered by no released section, where session #6 measured 45 of 47 and session #3 measured 24 of 26. Verified per commit: `git log --oneline 2d5f056..HEAD \| grep -c '#023'` returns **47**, and the only two commits without the suffix are `b7f6741` (the Sprint 022 merge) and `e5b5fbd` (the `[4.7.0]` seal) — the two the script reports as covered. No commit outside the open sprint is unaccounted for. `[Unreleased]` still holds exactly **one** bullet, the `C9`/`C10` planning entry; the delivery entries are written by `close_workflow.md`, which has not run because the sprint is open | **Still unrouted, and the human decision was re-taken this session rather than inherited: record and proceed to `C8`.** Same terms as sessions #3–#6, asked again on the standing reasoning that a decision is granted to the session that receives it. The fix remains a fourth verdict or an `A`-suppression when `HEAD` is on `ai-sprint/[ID]` and the anchor's `current_sprint.id` matches — a candidate unit for `024`, not for this sprint |
+| **`SPRINT_LOG.md:4` still read `9 of 14 units delivered and gated. Remaining: C5, C6, C7, C8, C10` after four of those five had closed.** Found by running the `RA-14` propagation grep on this file's own header edit rather than by reading `SPRINT_LOG.md`. The sprint's live status header in one artifact contradicted the live status header in another, and both are read by a cold session. Corrected to `13 of 14 … Remaining: C8` | **Fixed in place.** This is the fourth `RA-14` instance in this sprint (`C4` twice, session #5's handoff table, now this) and the first found in a *different file* from the one being edited — the propagation grep is what caught it, which is the argument for `RA-14` naming the whole corpus and not the artifact under the cursor |
+| **The nucleus bridge `C6` repaired is still intact.** Measured, because three consecutive sessions recorded it broken and the repair is one session old: `.claude/commands/agents/` holds **13** symlinks against `commands/`'s 13, no dangling entry, `skeleton.md` gone. `/agents:reconcile` is invocable here for the first time in this sprint | **Closed.** `C6`'s deliverable verified from the outside a session after it landed |
+| **The coordinator edited `C8`'s deliverable while the Tester gate was auditing it, and `RA-13 SEQUENTIAL_GATES` is what that violates.** Raised by the Tester, not by the author. The QA gate rejected round 2 while the Tester was mid-pass; the fix was applied to the file immediately and the Tester was notified **after** the edit rather than before. It detected the mutation independently — content at one line differed between its read and a later re-read, with an mtime **8 seconds** old — and pinned a `sha256` before continuing. The pin matched, so its APPROVED does attach to the final state, **by timing rather than by design**: had the edit landed seconds later it would have returned a verdict against an object that no longer existed, and no gate, hook or human check in this framework would have caught it. **The author's reasoning was wrong in a specific and reusable way**: the edits were judged safe because they touched no measurement, but `RA-13` fixes the gate's *object*, not the gate's *subject matter*. Same defect class as the sprint's thesis — a control reporting clean because of how it was run — committed by the session documenting that class | **Unrouted, and it belongs to `024`, not here.** The correct sequence, which the Tester states and the session then followed for the final round, is **halt the in-flight gate, land the patch, re-dispatch against a committed object** — never patch underneath a running reviewer and reconcile after. Two candidate instruments, neither cheap enough to improvise at close: a gate brief that pins the artifact's blob SHA and requires the verdict to name it, or a dispatch rule in `pipeline_workflow.md` Phase 7 forbidding writes to a file while a gate holds it, enforced the way `no_interference` already is for subtasks. **`RA-13`'s text describes a gate and an irreversible action in sequence; it does not say the object must be frozen for the gate's duration**, which is the gap that let this reasoning look sound. **The QA gate then supplied the argument this row was missing, and it is stronger than "wrong property":** the very next patch — made under the same "no measurement touched" justification — corrected a measurement's wording at one site and left its twin standing two hundred lines away, and **no re-read of "did this touch a measurement" could have caught that**, because both sites passed that test. The test is not merely the wrong one; it is one that cannot work. Fixing the object is what makes the question unnecessary. Recorded in the gate's words because the author's own formulation admitted the finding without establishing it |
+| **Two of `C8`'s five gate rounds were the same `RA-14` omission, not two different mistakes.** Stated by the QA gate at close, and it sharpens what the rule actually asks. Round 4: the mechanism correction in `F-023-S4` was applied at one site while its twin stood in `F-086-S2`'s closing note, 330 lines away, asserting the opposite. Round 5 was that same single-site-fix-to-a-two-site-claim shape again. **`RA-14` does not ask for a re-read of the patched region — it asks for the *term* to be grepped across the whole artifact before the patch is considered closed**, and the author re-read instead of grepping both times. The sweep that finally cleared it (`grep -n 'accept unquoted\|require quotes\|selected for a\|that shape\|NAME=value'`) would have caught both misses **before** the commit rather than after the rejection, and cost seconds | **Route to `024` with the `RA-13` row above; they are one unit's worth of work.** The instrument is not a new rule — `RA-14` already says this — but a *check*: nothing in `make verify` or the hooks greps a patched term across its artifact, so the rule is enforced only by whoever remembers it. Precedent for the cost of not having it: this sprint now carries **four** `RA-14` instances (`C4` twice, session #5's handoff table, `C8` twice), and `C8`'s two were found by a gate rather than by the author both times |
+
 ## Where session #7 resumes
 
 | | |
@@ -1234,6 +1269,13 @@ since `022`, and the account-level monthly spend limit that killed both agents
 mid-work in session #5. The second may make the lift unusable in practice; that
 is a different outcome from not having asked, and if the gates cannot be
 dispatched the session reports it rather than substituting itself for them.
+
+**Session #7 asked again and the human lifted it on the same terms: QA and
+Tester gates only, for `C8`.** Reported at `start_workflow.md` Phase 2 before
+Phase 1, as that step requires, and for the same two causes session #6 named:
+the session policy standing since `022`, and the account-level monthly spend
+limit that killed both agents mid-round in session #5. Authoring stays with this
+session. Any unit after `C8` must ask again.
 
 **Session #5's lift was spent.** Both agents were dispatched under it, both returned
 findings, both were resumed for the re-gate, and both died on an account-level

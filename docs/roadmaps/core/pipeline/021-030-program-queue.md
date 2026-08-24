@@ -52,6 +52,66 @@ the program's own opening command.
 | **7th** | **029** | `documentation-truth` | **Closes the queue.** The sprints above add scripts and config registries that no verified README figure counts |
 | **8th** | **030** | `token-economy-enforcement` | Reassigned from `025`, which shipped as `jurisdiction`. The auditor with no body, and the consumption-based trigger |
 
+### Carried out of `023` — a declared unit with no sprint assigned
+
+**`F8` / `F-023-S4` — a literal `.env` holding live credentials passes
+`hooks/on_commit.py`, defeating `RA-09 SECRET_SOVEREIGNTY`.** Written here rather
+than left in a sprint record because that is precisely how it has been lost
+before: it has now survived **four** sessions as *routed, unowned*, which is the
+pattern `023`'s own `Context` names as the original loss this program exists to
+repair. It is the highest-severity open item this program carries.
+
+**No sprint number is assigned here**, because `026`–`030` are themed and none of
+them is a secret gate; slotting it into `tool-portability` to give it a home
+would be the same category error as `C3` accepting it as a rider. Assignment is a
+planning decision. What follows is the unit, ready to execute the moment one is
+made.
+
+| | |
+| :--- | :--- |
+| **Files** | `hooks/on_commit.py`, `tests/` |
+| **Risk** | **High** — a secret gate. Same class as `023`'s `C3`, which took four rounds and a mid-unit remediation halt |
+| **Owner** | `devops_agent` ruleset (`hooks/` is its tree per `agents.md §6`, `F-086-A1`) |
+| **Reproduces** | Measured on the repaired tree at `023` session #7, after `C3` and `C3.2` landed |
+
+**Two independent mechanisms, and a file need only beat one.** Both were
+re-measured rather than carried from the record:
+
+| # | Mechanism | Evidence |
+| :--- | :--- | :--- |
+| 1 | The forbidden-extension branch never fires | `Path(".env").suffix` is `''`, not `".env"`. `.env.production` is worse — its suffix is `".production"`. `prod.env` **is** blocked, which is the sharpest demonstration: the gate catches the filename nobody uses and misses the three that are used |
+| 2 | **Form selection**, not quoting | `secret_forms_for(Path('.env'))` returns `SECRET_ASSIGNMENT`, `QUERY_STRING_SECRET`, `PRIVATE_KEY_BLOCK`. Only `SECRET_ASSIGNMENT` addresses `NAME=value`, and it is the one form of five requiring a quoted value. `YAML_SECRET` and `DOCKERFILE_SECRET` accept unquoted values **only in their own shapes** (`key: value`, `ENV`/`ARG`) and are never selected for a `.env` |
+
+**Do not repair on the obvious diagnosis.** *"The patterns require quotes"* is
+**false** — three of the four accept unquoted values. Repairing on it adds
+quote-optionality to three patterns that already have it and ships the bug. This
+is recorded because the finding's own upstream entry stated it that way for one
+round before a gate measured it.
+
+**Scope note that follows from the measurement, not from the report.** The
+unquoted `NAME=value` shape is missed in **every** file type, not only `.env` —
+`settings.py`, `app.yml` and `Dockerfile` all return no finding against a bare
+`API_KEY=<value>`. So the fix is two changes: match `.env` and its variants **by
+name** (a suffix test structurally cannot see a filename that begins with its own
+dot — `C3` already taught the auditor this for `Dockerfile`), and add a
+`NAME=value` form with an end-of-line terminator to the set selected for every
+file type.
+
+**Two traps when writing the tests, in opposite directions.** A value that is a
+documented placeholder is correctly rejected — AWS's own `…EXAMPLEKEY` returns
+nothing quoted *or* unquoted — so a fixture using one produces a false negative
+that looks like the finding. And a PEM block or a URL query secret **is** caught
+in a `.env`, so a fixture using either produces a blocked commit that looks like
+the finding failing to reproduce. A gate reviewing this unit hit the second trap
+with a low-entropy PEM fixture and retracted the finding itself; both traps are
+recorded because `023` shows this unit's tests are where it will be decided.
+
+**Provenance.** Found end to end by a dispatched `tester_agent` while gating
+`023`'s `C3`, and correctly refused as a rider on that unit — `C3`'s declared
+scope was the file list and three named alternations, and this is neither. The
+refusal was right and is not the reason it was lost; being routed without an
+owner is.
+
 ---
 
 # Sprint 021 — `cost-instrumentation`
@@ -743,6 +803,15 @@ pass identically, and additionally pass from any other cwd.
   it is.
 - **C8** — tick each closed finding's box **keeping the entry** (rule 3 of the document); add
   `F-021-A2` and the three measurement corrections.
+  **Scope extended during execution, by human authorization, after the structural gate refused the
+  addition as undeclared**: also record **`F-023-S4`** — the literal `.env` that still passes
+  `hooks/on_commit.py` after `C3` repaired the secret gate, tracked as `F8` in `023`'s
+  `task_scope.md`. The gate was right to refuse it: `C3` had already declined the same finding as a
+  rider on a unit whose scope did not name it, and `C8` was taking it on identical terms. It is
+  recorded rather than dropped because `agents.md §4 feedback_upstream` mandates routing a
+  framework-class finding, and this one had survived **three sessions** as *routed, unowned* — the
+  precise pattern this sprint's `Context` identifies as the original loss. Recording it in the
+  upstream register is **not** the unit `F8` still needs; that unit remains outstanding.
 
 ### C9-C10 — two gates that answer when they do not know
 

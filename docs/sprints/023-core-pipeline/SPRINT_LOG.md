@@ -1,7 +1,20 @@
 # Sprint Log — 023 (`upstream-findings`)
 
 **Branch**: `ai-sprint/023` from `main` at `18696c5` (`v4.7.0`)
-**Status**: open. **9 of 14 units delivered and gated.** Remaining: `C5`, `C6`, `C7`, `C8`, `C10`.
+**Status**: open. **All 14 units delivered and gated.** No unit remains; `F8` is
+drafted as a unit in the program queue with no sprint assigned.
+
+> [!IMPORTANT]
+> **This file's `## Delivered` section narrates `C9`, `C0`–`C4` and stops there.**
+> `C4.2`, `C5`, `C6`, `C7`, `C8` and `C10` are delivered and gate-approved but
+> have **no entry below**. The authoritative per-unit record is the status table
+> in `task_scope.md`, which carries every unit, its commits and its gate verdicts.
+> Stated rather than patched with one catch-up entry: writing `C8`'s narrative
+> alone would leave five units missing while the header claims fourteen, which is
+> the drift this sprint has recorded four times under `RA-14`. **Closing the
+> sprint requires writing the six missing entries** — that is closeout work, not
+> a footnote, and it is named here so the closeout meets it as a known task
+> rather than discovering it.
 
 ## Delivered
 

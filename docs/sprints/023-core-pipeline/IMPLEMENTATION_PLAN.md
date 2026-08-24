@@ -90,7 +90,7 @@ to be discovered.
 | C5 | `agents/devops_agent.md`, `agents.md` §6 role table | modify | medium — role map | lead · `agent_orchestrator` ruleset | ✅ `aa2b11d` + `R1` — both gates APPROVED |
 | C6 | `agents.md` §0, `start_workflow.md` (3 rows), `audit_workflow.md` (`federation_audit`), `docs/plans/README.md` (routing discharged), `tests/test_installer.sh` (+1 assertion), `.claude/commands/agents/` (untracked, regenerable) | modify | medium | lead · `rule_validator` ruleset | ✅ `R2` — both gates APPROVED |
 | C7 | `requirements-freeze.txt` → `docs/audits/SKILLOPT_TRANSITIVE_CLOSURE.md` (git rename), `skills/skillopt/SKILL.md` (reference) | move | low | lead · `devops_agent` ruleset | ✅ both gates APPROVED, first round |
-| C8 | `origin/contrib/host-findings` | modify | low | lead · `doc_orchestrator` ruleset | ⏳ |
+| C8 | `origin/contrib/host-findings` | modify | low — **the classification was wrong**: 5 rounds, 4 rejections | lead · `doc_orchestrator` ruleset | ✅ `7056c61` + `5e21538` — both gates APPROVED, pinned to blob `d1ac87f` |
 | C10 | `scripts/ci_gate.py` (new), `tests/test_ci_gate.py` (new), `deployment_workflow.md:17` | create/modify | **high** — a gate | lead · `devops_agent` ruleset | ✅ `R6` — both gates APPROVED after 6 rounds, 4 rejections |
 
 ---
