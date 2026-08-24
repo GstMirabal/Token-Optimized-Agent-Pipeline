@@ -1,0 +1,104 @@
+{
+  "rules": [
+    {
+      "path": "rules/code_craft.md",
+      "globs": [
+        "**/*.py",
+        "**/*.js",
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.jsx",
+        "**/*.sh"
+      ],
+      "trigger_prose": "Writing or modifying source code in any language (not documentation or governance edits)."
+    },
+    {
+      "path": "rules/loop_governance.md",
+      "globs": [
+        "workflows/**/*.md",
+        "commands/**/*.md"
+      ],
+      "trigger_prose": "Before wrapping any phase in `/loop` or `/schedule`, or authoring an unattended routine."
+    },
+    {
+      "path": "rules/token_economy.md",
+      "globs": [
+        "**/*"
+      ],
+      "trigger_prose": "Reading source files, planning subagent context, or auditing a plan's cost."
+    },
+    {
+      "path": "rules/qa_and_testing.md",
+      "globs": [
+        "tests/**",
+        "**/test_*.py",
+        "**/*_test.py",
+        "**/test_*.sh"
+      ],
+      "trigger_prose": "Writing/running tests, entering the Quality Gate, or after 3 consecutive failures."
+    },
+    {
+      "path": "rules/project_topology.md",
+      "globs": [
+        "Makefile",
+        "docker-compose*.yml",
+        "**/Dockerfile",
+        "scripts/**",
+        "hooks/**"
+      ],
+      "trigger_prose": "Running local commands, choosing interpreters/paths, or touching DB containers."
+    },
+    {
+      "path": "rules/skills_and_integrations.md",
+      "globs": [
+        "skills/**",
+        "config/invocation_exceptions.json"
+      ],
+      "trigger_prose": "Searching, registering, or forging skills/tools."
+    },
+    {
+      "path": "rules/frontend_modular_standard.md",
+      "globs": [
+        "frontend/src/modules/**"
+      ],
+      "trigger_prose": "Touching `frontend/src/modules/`."
+    },
+    {
+      "path": "rules/django_backend_standard.md",
+      "globs": [
+        "**/models.py",
+        "**/views.py",
+        "**/serializers.py",
+        "**/signals.py",
+        "**/urls.py"
+      ],
+      "trigger_prose": "Writing or modifying Django code — models, views, serializers, `signals.py`, app layout, or DRF endpoints."
+    },
+    {
+      "path": "rules/graphify.md",
+      "globs": [
+        "graphify-out/**",
+        "**/graph.json",
+        "skills/graphify/**"
+      ],
+      "trigger_prose": "Querying or rebuilding the knowledge graph."
+    },
+    {
+      "path": "rules/documentation_standard.md",
+      "globs": [
+        "docs/**",
+        "architecture/**",
+        "roadmaps/**",
+        "walkthroughs/**"
+      ],
+      "trigger_prose": "Creating/updating any document under `docs/`, authoring an ADR, or running `docs-freshness-check`."
+    },
+    {
+      "path": "rules/LEGACY_RULE_CONCORDANCE.md",
+      "globs": [
+        "**/*.md"
+      ],
+      "trigger_prose": "Encountering a numbered `Rule NN` citation in any document."
+    }
+  ]
+}
