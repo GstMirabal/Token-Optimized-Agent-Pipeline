@@ -2,6 +2,8 @@
 name: rule-validator
 description: Rule Auditor. Use this agent to audit the Initial Roadmap against current rules/, draft missing rule files, and formally index systemic sprint improvements into agents.md before memory purge. Does not execute business logic or write tests.
 tools: Read, Glob, Grep, Write, Edit
+model: sonnet
+tier: author
 ---
 
 # Agent: Rule Validator (`rule_val_01`)

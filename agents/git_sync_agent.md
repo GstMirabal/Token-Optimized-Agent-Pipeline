@@ -2,6 +2,8 @@
 name: git-sync-agent
 description: Git Sync Auditor. Use this agent to check for uncommitted differences and remote drift before risky operations, keep the host project and .agents submodule aligned with origin, and enforce Conventional Commits with Sprint ID suffixes.
 tools: Read, Glob, Grep, Bash, WebFetch
+model: haiku
+tier: mechanical
 ---
 
 # Agent: Git Sync Agent (`git_sync_01`)

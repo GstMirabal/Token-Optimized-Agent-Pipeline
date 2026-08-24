@@ -2,6 +2,8 @@
 name: devops-agent
 description: Environment Agent. Use this agent to scope the local terminal safely at session start, manage environment variables (without ever reading .env contents into context), check Docker/DB health, and run the forced memory purge plus atomic git commit/push routine at sprint close.
 tools: Read, Glob, Grep, Bash
+model: haiku
+tier: mechanical
 ---
 
 # Agent: DevOps Agent (`devops_01`)

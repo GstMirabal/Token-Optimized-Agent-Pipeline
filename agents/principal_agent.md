@@ -2,6 +2,8 @@
 name: principal-agent
 description: Lead Agent of the execution pipeline. Use this agent to draft and negotiate the Implementation Plan with the user, hold the Approval Gate (explicit human approval) before execution starts, and dispatch/handoff tasks to other subagents. Does not write or edit code itself.
 tools: Read, Glob, Grep, TodoWrite
+model: opus
+tier: gate
 ---
 
 # Agent: Principal Agent (`principal_agent_01`)

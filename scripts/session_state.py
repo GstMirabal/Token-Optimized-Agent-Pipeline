@@ -15,11 +15,12 @@ Claiming the lock and recording the session are the same act, so they are one
 command rather than two steps that both rewrite the same file.
 
 invoked_by: start_workflow.md#state_claim (claim), close_workflow.md#state_sync
-(release).
+(release), rules/token_economy.md#3.1 (suspend, at the hard threshold).
 
 Usage:
     python3 scripts/session_state.py claim --session-id <uid> [--takeover]
-    python3 scripts/session_state.py release
+    python3 scripts/session_state.py release   # seals the SPRINT
+    python3 scripts/session_state.py suspend   # ends the SESSION only
 
 Exit codes:
     0 — lock claimed or released
@@ -39,6 +40,7 @@ from hooks.state_mirror import mirror_active_state  # noqa: E402
 ACTIVE_STATE = Path("docs/active_state.json")
 IN_PROGRESS = "IN_PROGRESS"
 CLOSED = "CLOSED_SUCCESSFULLY"
+SUSPENDED = "SUSPENDED"  # session ended, sprint still open (token_economy.md §3.1)
 
 
 def now() -> str:
@@ -63,6 +65,54 @@ def save_state(state: dict) -> None:
     ACTIVE_STATE.parent.mkdir(parents=True, exist_ok=True)
     ACTIVE_STATE.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
     mirror_active_state()
+
+
+def resume_pointer() -> dict:
+    """Where a resuming session picks up.
+
+    Degraded on purpose, and declared: the durable form derives the last
+    completed phase from `config/artifact_registry.json`, which Sprint 023
+    `C0.2` builds. Until then this records the branch and its last commit, which
+    is real but coarser. Faking the richer form would be worse than saying so.
+    """
+    return {"branch": git_branch(), "at": head_sha(), "derived_from": "git (registry pending C0.2)"}
+
+
+def git_branch() -> str | None:
+    """The checked-out branch, or None on a detached HEAD."""
+    result = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"],
+                            capture_output=True, text=True)
+    return result.stdout.strip() if result.returncode == 0 else None
+
+
+def suspend() -> int:
+    """End the session without sealing the sprint.
+
+    The counterpart `release()` did not have. `rules/token_economy.md §3.1` makes
+    the session bound binding per context cycle, so a sprint can now be cut
+    mid-flight — and the protocol needs an exit for that which does not lie.
+
+    **It deliberately does not write `last_close_commit`.** That field means "the
+    commit where the last close sealed"; writing it here would set a false
+    baseline and `detect_drift.py` would treat everything after as conformant,
+    blinding the detector Sprint 024 repaired.
+
+    Returns:
+        int: 0 — suspending is never refused; the work is preserved, not judged.
+    """
+    state = load_state()
+    state.update({
+        "status": SUSPENDED,
+        "end_time": now(),
+        "last_updated": now(),
+        "resume_pointer": resume_pointer(),
+    })
+    save_state(state)
+    pointer = state["resume_pointer"]
+    print(f"⏸️  Session suspended — the sprint stays open. Resume on "
+          f"{pointer['branch']} at {(pointer['at'] or '?')[:7]}.")
+    print("   `last_close_commit` deliberately untouched: only a sprint close seals it.")
+    return 0
 
 
 def claim(session_id: str, takeover: bool) -> int:
@@ -91,15 +141,29 @@ def claim(session_id: str, takeover: bool) -> int:
         )
         return 2
 
+    resuming = state.get("status") == SUSPENDED
+    # The collision guard above already lets SUSPENDED through: it blocks only on
+    # IN_PROGRESS. What was missing is that nothing ever wrote this state, and
+    # that resuming left no trace — so a sprint spanning sessions was invisible.
     state.update({
         "session_id": session_id,
         "status": IN_PROGRESS,
         "start_time": now(),
         "last_updated": now(),
+        "session_count": state.get("session_count", 0) + 1,
     })
     state.pop("end_time", None)
     save_state(state)
-    print(f"✅ Session lock claimed by {session_id}.")
+
+    if resuming:
+        pointer = state.get("resume_pointer") or {}
+        print(f"▶️  Resuming a suspended sprint (session #{state['session_count']}) — "
+              f"{pointer.get('branch', 'unknown branch')} at "
+              f"{(pointer.get('at') or '?')[:7]}.")
+        print("   Read the Implementation Plan and `task_scope.md` before new work: "
+              "the conversation did not survive, the record did.")
+    else:
+        print(f"✅ Session lock claimed by {session_id}.")
     return 0
 
 
@@ -132,11 +196,14 @@ def main() -> int:
         "--takeover", action="store_true",
         help="Seize a lock left behind by a crashed session.",
     )
-    sub.add_parser("release", help="Release the lock at session close.")
+    sub.add_parser("release", help="Seal the SPRINT at close.")
+    sub.add_parser("suspend", help="End the SESSION with the sprint still open.")
 
     args = parser.parse_args()
     if args.command == "claim":
         return claim(args.session_id, args.takeover)
+    if args.command == "suspend":
+        return suspend()
     return release()
 
 

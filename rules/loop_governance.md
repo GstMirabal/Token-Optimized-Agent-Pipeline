@@ -24,7 +24,7 @@ Declared **before** the first iteration, via `scripts/loop_guard.py start`:
 | Machine-checkable success condition | **Binding** | The guard refuses to arm a loop without one |
 | Iteration cap | **Binding** | Observable and enforced |
 | No-progress detector | **Binding** | Two consecutive iterations with no new commit on the sprint branch **and** no change in the `task_scope.md` `Status` column |
-| Token budget | **Advisory** | No agent reads its own spend reliably. Making it binding would force a field nobody can fill truthfully — the same defect as a gate that cannot fail. Declare it if a human sets it; the guard does not arbitrate it |
+| Token budget | **Advisory** | Declare it if a human sets it; the guard does not arbitrate it. The original reason — *"no agent reads its own spend reliably, and making it binding would force a field nobody can fill truthfully"* — **stopped being true in Sprint 021**: `scripts/session_cost.py` reads spend from the transcript on disk, not from an agent's estimate. What remains advisory is the *budget for a loop*, which is a human's cost decision. What became **binding** is the **session bound** (`rules/token_economy.md §3.1`), whose datum no longer depends on anyone estimating it. Leaving the old justification standing while the fact changed is the drift `RA-14` pursues |
 
 `scripts/loop_guard.py check` runs as the **first action of every iteration** and **fails closed**: a `loop` block that is missing, incomplete or stale exits `2`. An agent that forgets to increment the counter gets a stop, not a free pass.
 

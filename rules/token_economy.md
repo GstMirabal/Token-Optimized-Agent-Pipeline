@@ -26,6 +26,25 @@ Full-dumping a file >200 lines is PROHIBITED (`agents.md §2 token_saver`). Skip
 - **State over rediscovery**: `docs/active_state.json` and `graphify-out/graph.json` are the memory — re-deriving what they already record is a violation, not diligence.
 - **Workflows are lazy-loaded**: protocols live behind `/agents:*` commands and are only pulled into context when invoked.
 
+### 3.1 The session bound — binding, and measured per context cycle
+
+**Unit: the ratio of a turn's `cache_read` against the first turn of the current context cycle**, never of the session. Self-calibrating per project — a large repository starts with more base context, but "10× your first turn" means the same everywhere, and nothing is configured per host.
+
+| Threshold | Trigger | Action |
+| :--- | :--- | :--- |
+| **Soft** | turn > **5×** the cycle's first | `session_probe.py` suggests closing at the next commit boundary. **Observational only** while the calibration baseline builds |
+| **Hard** | turn > **15×** the cycle's first | No new work starts. Sprint complete → close it; sprint open → **suspend** (`session_state.py suspend`) and continue in a fresh session |
+
+**Why the cycle and not the session.** A session is a **sawtooth**: compaction rebuilds the window from a summary and `cache_read` collapses back to the start-up cost. Measured over one full session of this repository — four cycles, peaks of 849K, 995K, 361K and 631K against reset points of **22,174 tokens, identical three times** — a ratio taken against the session's first turn would collapse at the first reset and never fire again.
+
+**Compaction is not a cost control, and this rule exists because of that.** Those four resets happened and the session still spent 423M `cache_read`. Cycle 2 is the proof: **113 messages cost 99.5M**, nearly matching a 414-message cycle, because it climbed to 995K. **Cost tracks peak height, not message count** — cost is the area under the sawtooth, and compaction only resets the x axis.
+
+**Break-even is an observed constant, not an estimate.** Restarting costs ~22K, measured identically three times. The hard threshold would have fired in **3 of those 4 cycles**.
+
+**Calibration that does not destroy its own data.** A binding hard threshold means the sprint always closes at the bound and the natural close is never observed. So the soft threshold **records and does not act** while the distribution builds, and the hard one records `forced: true` plus whether `task_scope.md` still held unfinished work. A forced close with pending work is the "too tight" signal; one on a complete sprint is not.
+
+**Provenance: n=1**, and of one kind — intensive planning, many reads, little code execution. A file-editing sprint will have a different curve. `scripts/session_cost.py --json` is the reproducing command; a figure without it is memory, not evidence.
+
 ## 4. Tool-Result Economics
 
 `§3` forbids re-deriving state that is already recorded. This section is about the other accumulation: tool call/response pairs piling up across a long session.

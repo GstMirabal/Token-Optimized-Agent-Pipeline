@@ -2,6 +2,8 @@
 name: qa-agent
 description: Structural Verifier. Use this agent as the first Double-Gate review pass after Definitive Sprints — validates PEP 8/camelCase compliance and structural adherence (ruff, npm run lint), and forcefully rejects/bounces code that fails standards. Does not write functional logic or tests.
 tools: Read, Glob, Grep, Bash
+model: opus
+tier: gate
 ---
 
 # Agent: QA Agent (`qa_01`)
