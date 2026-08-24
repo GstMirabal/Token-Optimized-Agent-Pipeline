@@ -307,34 +307,8 @@ def install_git_pre_commit() -> None:
     print("🪝 Installed .git/hooks/pre-commit (scans terminal commits too)")
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Install the .agents bridge.")
-    parser.add_argument("--profile", help="Optional project profile to install (profiles/<name>)")
-    parser.add_argument(
-        "--target",
-        choices=["claude", "cursor", "both"],
-        default="claude",
-        help="Installation target: 'claude' (Claude Code, default), 'cursor' (Cursor), or 'both'"
-    )
-    args = parser.parse_args()
-
-    if args.target != "claude":
-        print(
-            f"🛑 --target {args.target} is not yet implemented. "
-            "The Cursor adapter (scripts/cursor_adapter.py) will wire this in Sprint 026 unit P4.",
-            file=sys.stderr
-        )
-        return 1
-
-    # Nucleus mode (agents.md §5 nucleus_neutrality): the full host bridge is
-    # refused, but the minimal self-bridge (commands/agents/constitution) is
-    # installed so the framework's own workflows are invocable while developing it.
-    if (AGENTS_DIR / ".git").is_dir():
-        if args.profile:
-            print("🛑 Profiles cannot be installed into the nucleus.", file=sys.stderr)
-            return 1
-        return install_nucleus_bridge()
-
+def install_host_claude_bridge(profile: str | None) -> int:
+    """Install the full Claude Code bridge into a host checkout."""
     print(f"🌉 Installing Claude Code bridge for .agents into {HOST_DIR} ...")
 
     for f in sorted((AGENTS_DIR / "agents").glob("*.md")):
@@ -358,25 +332,63 @@ def main() -> int:
     install_git_pre_commit()
     install_git_commit_msg()
 
-    if args.profile:
-        profile_dir = AGENTS_DIR / "profiles" / args.profile
+    if profile:
+        profile_dir = AGENTS_DIR / "profiles" / profile
         if not profile_dir.is_dir():
             print(f"🛑 Profile not found: {profile_dir}", file=sys.stderr)
             return 1
-        print(f"📦 Installing profile: {args.profile}")
+        print(f"📦 Installing profile: {profile}")
         for f in sorted((profile_dir / "agents").glob("*.md")):
-            link_one(f"../../.agents/profiles/{args.profile}/agents/{f.name}",
+            link_one(f"../../.agents/profiles/{profile}/agents/{f.name}",
                      HOST_DIR / ".claude" / "agents" / f.name)
         if (profile_dir / "skills").is_dir():
             for d in sorted((profile_dir / "skills").iterdir()):
                 if d.is_dir():
-                    link_one(f"../../.agents/profiles/{args.profile}/skills/{d.name}",
+                    link_one(f"../../.agents/profiles/{profile}/skills/{d.name}",
                              HOST_DIR / ".claude" / "skills" / d.name)
         for r in sorted((profile_dir / "rules").glob("*.md")):
-            add_claude_import(f"@.agents/profiles/{args.profile}/rules/{r.name}")
+            add_claude_import(f"@.agents/profiles/{profile}/rules/{r.name}")
         if (profile_dir / "mcp" / "registry.json").exists():
-            print(f"ℹ️  Profile MCP servers listed in profiles/{args.profile}/mcp/registry.json "
+            print(f"ℹ️  Profile MCP servers listed in profiles/{profile}/mcp/registry.json "
                   "— add the ones you need to .mcp.json manually (they may require API keys).")
+    return 0
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Install the .agents bridge.")
+    parser.add_argument("--profile", help="Optional project profile to install (profiles/<name>)")
+    parser.add_argument(
+        "--target",
+        choices=["claude", "cursor", "both"],
+        default="claude",
+        help="Installation target: 'claude' (Claude Code, default), 'cursor' (Cursor), or 'both'"
+    )
+    args = parser.parse_args()
+    from cursor_adapter import install_cursor_bridge  # noqa: E402
+
+    # Nucleus mode (agents.md §5 nucleus_neutrality): the full host bridge is
+    # refused, but the minimal self-bridge (commands/agents/constitution) is
+    # installed so the framework's own workflows are invocable while developing it.
+    if (AGENTS_DIR / ".git").is_dir():
+        if args.profile:
+            print("🛑 Profiles cannot be installed into the nucleus.", file=sys.stderr)
+            return 1
+        if args.target == "claude":
+            return install_nucleus_bridge()
+        if args.target == "cursor":
+            install_cursor_bridge(AGENTS_DIR, nucleus=True)
+            return 0
+        install_nucleus_bridge()
+        install_cursor_bridge(AGENTS_DIR, nucleus=True)
+        return 0
+
+    if args.target in ("claude", "both"):
+        rc = install_host_claude_bridge(args.profile)
+        if rc != 0:
+            return rc
+
+    if args.target in ("cursor", "both"):
+        install_cursor_bridge(HOST_DIR, nucleus=False)
 
     write_bridge_locks(args.target)
     return 0
