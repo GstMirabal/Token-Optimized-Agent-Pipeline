@@ -3,11 +3,11 @@
 **Branch**: `ai-sprint/023` · **Base**: `main` at `18696c5` (`v4.7.0`)
 **State**: **IN_PROGRESS**, resumed 2026-08-24 (session #7). Sprint open.
 **All fourteen units are delivered and gate-approved**, `C8` included. What
-remains before the sprint can close is **not a unit**: `F8` is now drafted as a
-ready-to-execute unit in `docs/roadmaps/core/pipeline/021-030-program-queue.md`
-with no sprint assigned, which is the disposition its severity and the queue's
-themes actually support. Delegation was lifted for `C8`'s QA + Tester passes only
-(see *Declared deviation — delegation*).
+remains before the sprint can close is **not a unit**: `F8` is written up in
+`docs/roadmaps/core/pipeline/021-030-program-queue.md` and, by human decision of
+2026-08-24, is **routed to an `RA-03` hotfix executed after `026`** — not to any
+sprint. Delegation was lifted for `C8`'s QA + Tester passes only (see *Declared
+deviation — delegation*).
 
 ### `C8` cost five rounds on a unit the plan called low-risk
 
@@ -1286,7 +1286,7 @@ git rename, cleared both gates in one round. `C8`, ten checkbox ticks, took five
 | **Closeout carries one task the protocol will not name** | Six delivered units (`C4.2`, `C5`, `C6`, `C7`, `C8`, `C10`) have **no `## Delivered` entry** in `SPRINT_LOG.md`. Declared in that file's header. `task_scope.md`'s status table is the authoritative per-unit record until they are written |
 | **`C8`'s deliverable is on another branch** | `contrib/host-findings` at `5e21538`, commits `7056c61` + `5e21538`, **not** on `ai-sprint/023`. It is unpushed. The close must handle two branches, and `deployment_workflow.md` Phase 1 merges only the sprint branch |
 | **Merge-order note from the Tester** | `agents.md §0`'s announcement of `UPSTREAM_FINDINGS_FROM_HOSTS.md` exists **only** on `contrib/host-findings` — not on `ai-sprint/023`, not on `origin/main`. `F-093-N1`'s claim is true on the branch the file lives on, so it is not a defect, but the announcement reaches `main` only if **both** branches merge |
-| **`F8` is no longer unowned** | Drafted as a ready-to-execute unit in `docs/roadmaps/core/pipeline/021-030-program-queue.md`, under *Carried out of `023`*. **No sprint number assigned** — that is a planning decision, and `026`–`030` are themed with no secret gate among them. It ships open in the upstream register as `F-023-S4` |
+| **`F8` is routed, and this time to a mechanism rather than a queue position** | **Human decision, 2026-08-24: `RA-03` hotfix, executed after `026`.** Written up in `docs/roadmaps/core/pipeline/021-030-program-queue.md` under *Carried out of `023`*, which is the hotfix's source material. It ships open in the upstream register as `F-023-S4`, whose text makes only the historical claim that it survived three sessions unowned — still true, so that gate-approved artifact needs no patch. **The reason four sessions missed this**: it was treated as a sprint unit throughout, so each asked *which sprint* and none asked *whether a sprint* |
 | **Two governance findings route to a single unit in a later sprint** | The `RA-13` gap (nothing says the gate's object must be frozen for the gate's duration) and the `RA-14` gap (nothing greps a patched term across its artifact; the rule is enforced only by whoever remembers it). Both are in this session's findings table with candidate instruments |
 | **Do NOT** | Tick a box, or accept a gate's summary, without re-measuring. Four of `C8`'s defects were false claims that a record-based check would have shipped, and one was a published command returning a different number than the entry asserted |
 

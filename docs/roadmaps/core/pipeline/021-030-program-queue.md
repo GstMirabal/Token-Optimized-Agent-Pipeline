@@ -52,7 +52,7 @@ the program's own opening command.
 | **7th** | **029** | `documentation-truth` | **Closes the queue.** The sprints above add scripts and config registries that no verified README figure counts |
 | **8th** | **030** | `token-economy-enforcement` | Reassigned from `025`, which shipped as `jurisdiction`. The auditor with no body, and the consumption-based trigger |
 
-### Carried out of `023` — a declared unit with no sprint assigned
+### Carried out of `023` — routed to a hotfix, scheduled after `026`
 
 **`F8` / `F-023-S4` — a literal `.env` holding live credentials passes
 `hooks/on_commit.py`, defeating `RA-09 SECRET_SOVEREIGNTY`.** Written here rather
@@ -61,11 +61,31 @@ before: it has now survived **four** sessions as *routed, unowned*, which is the
 pattern `023`'s own `Context` names as the original loss this program exists to
 repair. It is the highest-severity open item this program carries.
 
-**No sprint number is assigned here**, because `026`–`030` are themed and none of
-them is a secret gate; slotting it into `tool-portability` to give it a home
-would be the same category error as `C3` accepting it as a rider. Assignment is a
-planning decision. What follows is the unit, ready to execute the moment one is
-made.
+**Disposition, decided 2026-08-24: `RA-03 HOTFIX_FLAT`, executed after `026`.**
+Not a sprint unit. `026`–`030` are themed and none of them is a secret gate, so
+slotting it into `tool-portability` would be the same category error as `C3`
+accepting it as a rider — and opening `031` for it contradicts `029`, which
+closes this queue. `RA-03` is the route the framework already has for a defect
+that fits no sprint, and it is `RA-06`'s sanctioned naming exception.
+
+**Why this was not obvious for four sessions.** It was treated as a sprint unit
+throughout, so every session asked *which sprint* and none asked *whether a
+sprint*. The question that resolved it took one exchange once it was put.
+
+**Destination**: `docs/hotfixes/[H-ID]-secrets.md`, from
+`docs/standards/templates/HOTFIX_TEMPLATE.md`. The measurement, the two
+mechanisms, the repair hazard and both fixture traps below transfer verbatim —
+this section is the hotfix's source material, not a summary of it.
+
+**Ordering is deliberate and is the human's call, recorded with its cost.**
+`RA-03` exists for emergency speed, and scheduling a hotfix *behind* a full sprint
+is a departure from that. It is taken knowingly: `026` is already unblocked by
+`C0.2`, and interleaving a secret-gate repair into a portability sprint is what
+`C3` and this very finding's history argue against. **The cost of the departure**:
+the gate stays open across `026`, so any host committing a literal `.env` in that
+window is unprotected by `hooks/on_commit.py` and protected only by
+`.gitignore`. Whoever opens `026` should read this paragraph before deciding the
+order still holds.
 
 | | |
 | :--- | :--- |

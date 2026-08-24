@@ -2,7 +2,8 @@
 
 **Branch**: `ai-sprint/023` from `main` at `18696c5` (`v4.7.0`)
 **Status**: open. **All 14 units delivered and gated.** No unit remains; `F8` is
-drafted as a unit in the program queue with no sprint assigned.
+written up in the program queue and routed by human decision to an `RA-03`
+hotfix, to be executed after Sprint `026`.
 
 > [!IMPORTANT]
 > **This file's `## Delivered` section narrates `C9`, `C0`–`C4` and stops there.**
