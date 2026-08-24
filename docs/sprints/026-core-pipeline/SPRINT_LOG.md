@@ -73,6 +73,45 @@ Measured by `devops_agent` at `main` `b5bfb6a`, before any unit of Sprint `026` 
 
 ## Next Phase
 
-Phase 4 (Rule Audit / `task_scope.md`) is next, pending Phase 5's human approval of `IMPLEMENTATION_PLAN.md`. No unit in `Work` may start before that approval is recorded (`agents.md §2 triple_lock`).
+Phases 4 and 5 are complete. Phase 5's human approval was recorded on 2026-08-24 over the plan text at commit `1da9641`. Phase 6 (Execution) is in progress on Hito 1.
+
+---
+
+## Session handoff — suspended 2026-08-24, resuming under Cursor
+
+**This is a `suspend`, NOT the Migration Gate.** The gate has not been attempted and cannot pass yet: `scripts/cursor_adapter.py` (unit `P4`) does not exist, `.cursor/` does not exist, and `scripts/install.py --target cursor` exits `1` by design until `P4` lands. Observations `M4`, `M5` and `M6` are therefore unobservable. Do not record any gate result.
+
+`release` was NOT used and must not be: it seals the sprint and writes a false `last_close_commit` that blinds `scripts/detect_drift.py` (`Design §D0b`).
+
+### First actions for the resuming session
+
+1. `python3 scripts/session_state.py claim --tool cursor` — the anchor is `SUSPENDED`, so this reports a resume and increments `session_count`. It does not need `--session-id`: unit `P8` made it optional and mints `<compact UTC ISO-8601>-<PID>` when omitted. `delegation_mode` derives to `sequential` from `--tool cursor`.
+2. **Read `agents.md` in full, explicitly.** Governance is NOT auto-loaded: `.cursor/rules/00-constitution.mdc` is unit `P4`'s output and `P4` has not run. This is the single largest difference from a Claude Code session and it is a consequence of suspending before `P4`, not a defect.
+3. Read `docs/sprints/026-core-pipeline/IMPLEMENTATION_PLAN.md`, then `task_scope.md` — in particular its `Declared deviations`, `Declared escalations` and `Declared deferral` sections.
+4. Read `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` (the nucleus substitute for `docs/0_SYSTEM_OVERVIEW.md`, which does not exist here by design).
+
+### State at suspension
+
+| | |
+| :--- | :--- |
+| Branch | `ai-sprint/026`, 13 commits, tree clean |
+| HEAD | `bf53b46` |
+| `make verify` | exits `0`; 432 tests pass; both installer sub-tests pass |
+| Base | `main` at `b5bfb6a`, unchanged |
+| Pushed | **No.** `RA-12` puts the push in `close_workflow.md` Phase 5 |
+
+### Delivered in Phase 6 so far
+
+`H1.a` complete — `P8`, `A1`, `P8.1`, `P2`, `P8.2`, `P2.1`. The day-one blocker is closed end to end: a session can claim the anchor without a harness UID, record `session_tool`, declare `delegation_mode`, and find the per-harness invocation written out in `workflows/start_workflow.md` without inferring it.
+
+`H1.b` partial — `P3.0` (`install_claude.py` → `install.py`, `--target claude|cursor|both`, `diff -r` proving the `claude` target unchanged), `P3.2.1` (`hooks/on_init.py`), `P3.2.9` (`tests/test_installer.sh`), and the `install_claude.sh` exec line.
+
+### Remaining before the Migration Gate can be attempted
+
+In dependency order: `P3.1` (`git mv install.sh`), `P3.1b` (the two-line deprecation shim with its `stderr` notice — **only the exec target has been fixed so far, the deprecation notice is not written**), `P10` (per-target lock), `P10.1` and `P11` (`.gitignore`), `P6` (repeal `standardization_workflow.md:45` — **must precede `P4`** or the standardization protocol proposes archiving what `P4` just created), `P5`/`P5.1`/`P5.2` (`config/rule_triggers.json`, which feeds `P4`'s `globs:`), `P4.0` and `P4.0b` (measure the real `.mdc` schema — `Abort criterion §4` aborts any unit that writes a frontmatter key not read from a file Cursor produced), `P4` (the adapter), `P9`/`P9.1` (`pre-push`), `P1`/`P1.1` (the constitutional enablement; `Design §D4b` requires `P1` before any Hito 2 unit runs under Cursor).
+
+### Correction to the record, made at suspension
+
+The Hito 1 deferral rests on a measurement that claimed **exactly two** census files break at runtime. It was **three**: `scripts/install_claude.sh` execs the renamed script on its last line and was misclassified as a file being renamed rather than a caller. Corrected in commit `bf53b46`. The 28 deferred prose files were re-checked against this and none of them executes — but whoever resumes should treat the deferral list as measured-once, not proven.
 
 *Certified under conventional commit standard: `docs(sprint): open Sprint 026 roadmap #026`*
