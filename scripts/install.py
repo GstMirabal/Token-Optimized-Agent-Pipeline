@@ -307,6 +307,47 @@ def install_git_pre_commit() -> None:
     print("🪝 Installed .git/hooks/pre-commit (scans terminal commits too)")
 
 
+def install_git_pre_push() -> None:
+    """Install a native pre-push hook so force-push is blocked under any tool."""
+    hooks_dir = HOST_DIR / ".git" / "hooks"
+    if not hooks_dir.is_dir():
+        return
+
+    hook_path = hooks_dir / "pre-push"
+    body = (
+        "#!/usr/bin/env bash\n"
+        "# Installed by .agents/scripts/install.py\n"
+        "#\n"
+        "# Blocks force-push and non-fast-forward updates. Claude Code\n"
+        "# permissions.deny does not apply under Cursor.\n"
+        "set -euo pipefail\n"
+        "[ -f .agents/hooks/on_push.py ] || exit 0\n"
+        "exec python3 .agents/hooks/on_push.py \"$@\"\n"
+    )
+
+    if hook_path.exists():
+        current = hook_path.read_text(encoding="utf-8", errors="replace")
+        if "on_push.py" in current:
+            return
+        print(
+            "ℹ️  A pre-push hook already exists and was left alone. To block "
+            "force-push too, add:\n"
+            '      python3 .agents/hooks/on_push.py "$@"'
+        )
+        return
+
+    hook_path.write_text(body, encoding="utf-8")
+    hook_path.chmod(0o755)
+    print("🪝 Installed .git/hooks/pre-push (blocks force-push for every tool)")
+
+
+def install_host_git_hooks() -> None:
+    """Install native git hooks that must cover terminal and Cursor paths."""
+    install_git_pre_commit()
+    install_git_commit_msg()
+    install_git_pre_push()
+
+
 def install_host_claude_bridge(profile: str | None) -> int:
     """Install the full Claude Code bridge into a host checkout."""
     print(f"🌉 Installing Claude Code bridge for .agents into {HOST_DIR} ...")
@@ -329,8 +370,7 @@ def install_host_claude_bridge(profile: str | None) -> int:
     add_claude_import("@.agents/agents.md")
     ensure_gitignore_entries()
     scaffold_identity_config()
-    install_git_pre_commit()
-    install_git_commit_msg()
+    install_host_git_hooks()
 
     if profile:
         profile_dir = AGENTS_DIR / "profiles" / profile
@@ -389,6 +429,8 @@ def main() -> int:
 
     if args.target in ("cursor", "both"):
         install_cursor_bridge(HOST_DIR, nucleus=False)
+        if args.target == "cursor":
+            install_host_git_hooks()
 
     write_bridge_locks(args.target)
     return 0
