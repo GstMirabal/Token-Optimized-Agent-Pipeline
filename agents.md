@@ -17,7 +17,7 @@ It dictates in an absolute and transversal manner the behavior of subagents, cod
 | **Open upstream findings** | **Nucleus sessions only.** `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` holds framework-class defects reported by hosts under `§4 feedback_upstream` — the ones `strict_rule` forbade the host from patching. Read it before planning nucleus work, because several are blocking a shipped mechanism rather than proposing a new one. Announced here rather than left to be discovered: in nucleus mode `docs/active_state.json` does not exist (by design, see `§5`) and neither does `docs/0_SYSTEM_OVERVIEW.md` (finding `F-093-N1` in that file), so **this document is the only file a nucleus session is guaranteed to read**. |
 
 ### Rule Contexts (lazy-load index)
-Domain rules live in `rules/` and are loaded **on demand** at these triggers — never preloaded (token economy):
+Domain rules live in `rules/` and are loaded **on demand** at these triggers — never preloaded (token economy). The machine-readable mirror of this table is `config/rule_triggers.json`; check `(e)` in `scripts/verify_references.py` keeps both in sync.
 
 | Rule file | Load when… |
 | :--- | :--- |
