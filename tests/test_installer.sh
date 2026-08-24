@@ -98,6 +98,8 @@ mkdir -p "$NUCLEUS/.git/hooks"
 [ -x "$NUCLEUS/.git/hooks/pre-push" ] || fail "nucleus cursor: pre-push hook missing"
 grep -q "hooks/on_push.py" "$NUCLEUS/.git/hooks/pre-push" \
   || fail "nucleus cursor: pre-push hook must use repo-relative path"
+[ -x "$NUCLEUS/.git/hooks/pre-commit" ] || fail "nucleus cursor: pre-commit hook missing"
+[ -x "$NUCLEUS/.git/hooks/commit-msg" ] || fail "nucleus cursor: commit-msg hook missing"
 echo "✅ nucleus self-bridge test PASSED"
 
 # ---------------------------------------------------------------------------

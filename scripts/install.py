@@ -219,7 +219,11 @@ def install_nucleus_bridge() -> int:
     return 0
 
 
-def install_git_commit_msg() -> None:
+def install_git_commit_msg(
+    *,
+    hooks_dir: Path | None = None,
+    script_path: str = ".agents/hooks/on_commit_msg.py",
+) -> None:
     """Install a native commit-msg hook so message gates cover every commit.
 
     `on_commit.py` runs at pre-commit time, where the message does not yet
@@ -231,9 +235,11 @@ def install_git_commit_msg() -> None:
     Same ownership rule as the pre-commit installer: an existing hook belongs
     to the project and is never overwritten.
     """
-    hooks_dir = HOST_DIR / ".git" / "hooks"
-    if not hooks_dir.is_dir():
+    if hooks_dir is None:
+        hooks_dir = HOST_DIR / ".git" / "hooks"
+    if not hooks_dir.parent.is_dir():
         return
+    hooks_dir.mkdir(parents=True, exist_ok=True)
 
     hook_path = hooks_dir / "commit-msg"
     body = (
@@ -244,8 +250,8 @@ def install_git_commit_msg() -> None:
         "# justification gates. pre-commit cannot run these: the message does\n"
         "# not exist yet at that point.\n"
         "set -euo pipefail\n"
-        "[ -f .agents/hooks/on_commit_msg.py ] || exit 0\n"
-        'exec python3 .agents/hooks/on_commit_msg.py "$1"\n'
+        f"[ -f {script_path} ] || exit 0\n"
+        f'exec python3 {script_path} "$1"\n'
     )
 
     if hook_path.exists():
@@ -255,7 +261,7 @@ def install_git_commit_msg() -> None:
         print(
             "ℹ️  A commit-msg hook already exists and was left alone. To gate "
             "commit messages too, add:\n"
-            '      python3 .agents/hooks/on_commit_msg.py "$1"'
+            f'      python3 {script_path} "$1"'
         )
         return
 
@@ -264,7 +270,11 @@ def install_git_commit_msg() -> None:
     print("🪝 Installed .git/hooks/commit-msg (message gates on every commit path)")
 
 
-def install_git_pre_commit() -> None:
+def install_git_pre_commit(
+    *,
+    hooks_dir: Path | None = None,
+    script_path: str = ".agents/hooks/on_commit.py",
+) -> None:
     """Install a native pre-commit hook so a terminal commit is scanned too.
 
     The secret scanner runs as a Claude Code `PreToolUse` hook, which sees only
@@ -275,9 +285,11 @@ def install_git_pre_commit() -> None:
     Written only when no pre-commit hook exists. An existing one belongs to the
     project and is never overwritten; the path to add is printed instead.
     """
-    hooks_dir = HOST_DIR / ".git" / "hooks"
-    if not hooks_dir.is_dir():
+    if hooks_dir is None:
+        hooks_dir = HOST_DIR / ".git" / "hooks"
+    if not hooks_dir.parent.is_dir():
         return
+    hooks_dir.mkdir(parents=True, exist_ok=True)
 
     hook_path = hooks_dir / "pre-commit"
     body = (
@@ -287,8 +299,8 @@ def install_git_pre_commit() -> None:
         "# The Claude Code PreToolUse hook only sees commits the agent makes.\n"
         "# This covers every other path into the repository.\n"
         "set -euo pipefail\n"
-        "[ -f .agents/hooks/on_commit.py ] || exit 0\n"
-        "exec python3 .agents/hooks/on_commit.py\n"
+        f"[ -f {script_path} ] || exit 0\n"
+        f"exec python3 {script_path}\n"
     )
 
     if hook_path.exists():
@@ -298,7 +310,7 @@ def install_git_pre_commit() -> None:
         print(
             "ℹ️  A pre-commit hook already exists and was left alone. To scan "
             "terminal commits too, add:\n"
-            "      python3 .agents/hooks/on_commit.py"
+            f"      python3 {script_path}"
         )
         return
 
@@ -357,6 +369,8 @@ def install_host_git_hooks() -> None:
 def install_nucleus_git_hooks() -> None:
     """Install git hooks into the nucleus repo (repo-relative hook script paths)."""
     hooks_dir = AGENTS_DIR / ".git" / "hooks"
+    install_git_pre_commit(hooks_dir=hooks_dir, script_path="hooks/on_commit.py")
+    install_git_commit_msg(hooks_dir=hooks_dir, script_path="hooks/on_commit_msg.py")
     install_git_pre_push(hooks_dir=hooks_dir, script_path="hooks/on_push.py")
 
 
