@@ -9,12 +9,13 @@ that were not, and each of those states its own provenance.
 Genericized per `RA-15`: no host project name, no absolute paths, no host
 business logic. Where a measurement is quoted it is a count, not an identity.
 
-**Three sections, and the differences are load-bearing.**
+**Four sections, and the differences are load-bearing.**
 
 | Section | What it holds | Reproduction status |
 | :--- | :--- | :--- |
 | *Reported by a host* | The original seven | Reproduced against `v4.4.0` when this file was written, and **re-measured again** when each was closed |
 | *Added by Sprint 023* | Three items the nucleus found in itself | Measured against the tree at the time each was written. **Not** `v4.4.0` |
+| *Added by Sprint 026* | Two items the nucleus found in itself: one at the Agent Assignment phase, one at the Phase 4 tier audit, neither while repairing another entry | Measured against the tree at `b5bfb6a`, the commit `docs/sprints/026-core-pipeline/task_scope.md` names as Sprint 026's base |
 | *Inherited from host sprint records* | Leads from a host's sprint history | **Not** re-measured when written. Treat each as a lead, reproduce it first, and delete it if it no longer holds |
 
 A finding carried forward on the strength of an old record is exactly the defect
@@ -632,6 +633,290 @@ end rather than by reading the pattern, and correctly refused as a rider on that
 unit: `C3`'s declared scope was the file list and three named alternations, and
 this is neither. It then survived **three** sessions as *routed, unowned* —
 which is the same shape as the loss this whole file was written to repair.
+
+---
+
+## Added by Sprint 026 — measured against the tree, not against a host report
+
+Two items, found by the framework's own Agent Assignment and Phase 4 tier-audit
+passes rather than by a host or by another entry's repair. Recorded here, not
+folded into the Sprint 023 section above, because their provenance is a
+different sprint and this file's own convention (see `F-021-A2`'s provenance
+note) treats provenance as load-bearing rather than cosmetic. Framework-class
+under `agents.md §4 feedback_upstream`: every host that dispatches `qa_agent`
+or `tester_agent` inherits `F-026-A1`; every host that dispatches a
+`mechanical`-tier role at a difficulty its default does not fit inherits
+`F-026-A2`.
+
+### - [ ] `F-026-A1` — two gate profiles are assigned writes their own `tools:` grant refuses, and one already claims the capability in its own description
+
+**Evidence.** `agents/tester_agent.md:3-4`:
+
+```
+description: Test Verifier. Use this agent as the second Double-Gate review pass (after QA Agent) to write and execute unit/integration tests against an in-memory DB, and to bounce code back for remediation on functional failures.
+tools: Read, Glob, Grep, Bash
+```
+
+Its own `description` line asserts a write — "write ... unit/integration
+tests" — as half the role. Its `tools:` line holds neither `Write` nor
+`Edit`, so the profile cannot create the artefact its own frontmatter says it
+produces.
+
+`agents/qa_agent.md:4` carries the identical grant — `tools: Read, Glob, Grep,
+Bash` — and its own `description` does not itself claim a write. The same
+contradiction reaches it one layer down, at the point a plan assigns it work:
+`docs/sprints/026-core-pipeline/agent_assignment.md:190-204` ("Disagreements
+found," item 2) records that Sprint 026's own design (`Design §D9`) assigned
+`G1.q`, `G1.t` and `A3` — verdict writes into
+`docs/sprints/026-core-pipeline/SPRINT_LOG.md` — to `qa_agent` and
+`tester_agent`, neither of which can perform the write under its `tools:`
+line. The same note names the authority the assignment contradicts:
+`config/artifact_registry.json:33-39` declares `SPRINT_LOG.md`'s `role` as
+**Orchestrator** (`agents/orchestrator.md`, which does hold `Write`/`Edit`),
+not either gate. `Design §D9` names the registry as its own cited basis for
+the sprint directory and then diverges from what the registry says.
+
+**Distinct from `F-021-A2`, cross-referenced and not folded in.** `F-021-A2`
+(above, open) states that 8 of 13 profiles hold `Write`/`Edit` and none is an
+implementer — a gap in the role map. This is the inverse defect: a profile
+that describes, or is assigned, a capability its own frontmatter refuses.
+`F-021-A2` closes by adding a role; this closes by making description or
+assignment agree with the grant, in whichever direction is correct. The two
+fixes do not overlap and neither entry substitutes for the other.
+
+**Do not resolve this by granting `Write` to the gates.** `qa_agent` and
+`tester_agent` both declare `tier: gate` (`agents/qa_agent.md:6`,
+`agents/tester_agent.md:6`), and their read-only grant is sound design — a
+gate that can edit what it judges is not a gate. The defect is in the
+description (`tester_agent.md`) or in the assumption that the gate authors the
+artefact it verifies (both profiles, via `SPRINT_LOG.md`), not in the grant.
+Two candidate resolutions, not chosen between here:
+
+1. Correct each profile's `description` / `Profile Rules` to state what it
+   actually does — verify and reject, never write — and route every write it
+   currently implies (test files, verdict lines) through a profile that holds
+   `Write`/`Edit`.
+2. Formalize routing through an authoring profile as the design: the gate
+   produces the verdict, a writing profile transcribes it.
+   `config/artifact_registry.json` already names `SPRINT_LOG.md`'s `role` as
+   Orchestrator, which is evidence the second reading was already the
+   intended design somewhere in the corpus — the profile prose in
+   `agents/qa_agent.md`, `agents/tester_agent.md`, and the plan that assigned
+   `G1.q`/`G1.t`/`A3` never caught up to it.
+
+**How it was found, which says something about which controls work.** It
+surfaced at Phase 4.1 of Sprint 026
+(`docs/sprints/026-core-pipeline/agent_assignment.md`), when the Agent
+Orchestrator assigned every unit to a named role and reconciled each against
+the profile's actual `tools:` frontmatter. It did not surface in the three
+prior sprints that dispatched the same two roles:
+`docs/sprints/023-core-pipeline/agent_assignment.md`,
+`docs/sprints/024-core-pipeline/agent_assignment.md` and
+`docs/sprints/025-core-pipeline/agent_assignment.md` name neither a
+disagreement nor a `Write`/`Edit` check (`grep -in
+'disagreement\|write/edit' docs/sprints/02{3,4,5}-core-pipeline/agent_assignment.md`
+returns nothing). An assignment phase that checks the grant is what caught
+it; reading the profile was not enough, in three prior readings, because the
+profile's own prose is the thing that is wrong.
+
+**Concrete consequence, measured on this sprint, not hypothetical.**
+`docs/sprints/026-core-pipeline/task_scope.md:19-38` records the affected
+units under the assigned map: `P8.1`, `P9.2`, `P4.1` and `A2` target
+`tests/`; `G1.q`, `G1.t` and `A3` target verdict writes into `SPRINT_LOG.md` —
+seven line items in total. Under the profile map as written, every one of
+them is assigned to a role that cannot perform the write.
+`docs/sprints/026-core-pipeline/task_scope.md` records the workaround the
+human chose **for this sprint only**, as a declared deviation: `tests/`
+writes reassigned to `devops_agent` (already holding `Write`/`Edit` on
+`scripts/`/`hooks/` per `F-086-A1`, treated as a sibling tree for this sprint
+only, with `agents.md §6` explicitly **not** amended), and gate verdicts
+routed as `<gate role> (verdict) → orchestrator (transcribes)`. Record this
+as the sprint-local workaround it is, not as the framework fix — the
+framework fix is the open question two paragraphs above.
+
+**How to reproduce.**
+
+```bash
+for f in agents/tester_agent.md agents/qa_agent.md; do
+  echo "== $f =="
+  grep -m1 '^description:' "$f"
+  grep -m1 '^tools:' "$f"
+done
+grep -n '"filename": "SPRINT_LOG.md"' -A6 config/artifact_registry.json
+```
+
+The first loop shows `tester_agent.md`'s `description` naming a write its
+`tools:` line refuses, and shows `qa_agent.md` carrying the same read-only
+grant. The second command shows `SPRINT_LOG.md`'s registered `role` is
+`Orchestrator`, not either gate.
+
+---
+
+### - [ ] `F-026-A2` — `tier_escalation` shipped in `v4.7.0`, lay dormant for three sprints, and fired in Sprint 026 only because a human noticed a missing column
+
+**Evidence.** `agents/token_economy_agent.md:21`:
+
+```
+| **Domain** | `tier_escalation` | When a task's difficulty diverges from its role's default — the `mechanical`-tier profile asked to author a deployment artifact — the role **proposes** the escalation in `task_scope.md`, the record notes it, and the human sees it. This is the sanctioned exception, and it is a declaration rather than a dispatch. |
+```
+
+This row shipped in **Sprint 022** (closed as upstream lead `#12`, above), released
+as **`v4.7.0`** — `CHANGELOG.md:36`, the same `### Changed` entry that gives
+`token_economy_agent` its three charter rows (`tier_ownership`,
+`tier_escalation`, `no_selector_agent`). `task_scope.md` is the artifact the
+row itself names as where the declaration lives.
+
+**Reproduced against three sprints, and dormant in all three.**
+
+```bash
+grep -inE 'tier|model' docs/sprints/024-core-pipeline/task_scope.md
+grep -inE 'tier|model' docs/sprints/025-core-pipeline/task_scope.md
+```
+
+Both return nothing — `024` and `025` do not mention tiers at all. `023` does
+discuss tiers, but as a finding about attribution, not an exercised
+escalation: `docs/sprints/023-core-pipeline/task_scope.md:97` records, **Unrouted**,
+that *"the declared tier and the model that actually ran are not the same
+fact"* — a real defect, correctly left unresolved by that sprint because it is
+not the `tier_escalation` row and folding it in would have misfiled it.
+
+> **Correction — this entry's own first pass measured a moving target, and
+> the conclusion it drew was false.** The draft version of this entry, written
+> before this correction, reported that Sprint 026 *also* left the mechanism
+> dormant — reproduced by grepping
+> `docs/sprints/026-core-pipeline/task_scope.md` for `escalat|sonnet|haiku`
+> and finding nothing. That grep was accurate at the moment it ran and wrong
+> about the sprint, because the file was **being written by the
+> `rule_validator` concurrently with this file being read** — a collision
+> `agents.md §2 no_interference` exists to prevent, missed here because the
+> dispatch checked for concurrent *writes* to this register, not concurrent
+> *reads* of a file still being written elsewhere. Re-run after both writes
+> completed:
+>
+> ```bash
+> grep -icE 'escalat' docs/sprints/026-core-pipeline/task_scope.md
+> ```
+>
+> Returns **18**, not 0. `docs/sprints/026-core-pipeline/task_scope.md:75`
+> carries the section `## Declared escalations — token_economy_agent audit,
+> transcribed per its tier_escalation charter row`, and lines 92-96 carry the
+> five-row table — `P8`, `P4`, `P9`, `P4.2`, `P4.0`, each `mechanical/haiku →
+> author/sonnet` (`P8` additionally `effort medium`), each with a stated
+> justification. Lines 98-101 record the inline `Assignee` annotation applied
+> to those five rows in the sprint's own Work table, and each of the five now
+> reads there as `devops_agent — escalated (mechanical/haiku → author/sonnet…;
+> see Declared escalations)` — confirmed directly at
+> `docs/sprints/026-core-pipeline/task_scope.md:153,225,261,263,305`. **Sprint
+> 026 did exercise `tier_escalation`, and it is the first sprint to do so.**
+> The lesson is the register's own rule 1 applied to opening an entry, not
+> only to closing one: a report is not a measurement, and neither is a
+> measurement taken while its target is still being written.
+
+**The dormancy is three sprints, not four — and Sprint 026 breaking it does
+not close the gap.** `023`, `024` and `025` each carried the same structural
+condition the row exists to catch — `devops_agent`, `mechanical` tier,
+assigned units both `023`'s own finding (line 97, above) and `026`'s later
+audit treat as harder than the tier's default — and none produced a
+declaration. `026` is the first exception, and it is a sharper finding than
+total dormancy, not a milder one: **a dormant mechanism might be broken; this
+one is demonstrably functional and still went unused for three sprints.**
+Measured, per `docs/sprints/026-core-pipeline/task_scope.md:103-108`:
+`devops_agent` carries **high** risk on 22 of the sprint's 67 rows, and only
+the five named above were escalated — the other 17 were audited and kept
+`mechanical` on stated grounds, not skipped.
+
+**The trigger was a human noticing an absent column, not a control.** Per
+`docs/sprints/026-core-pipeline/task_scope.md:75-86`: a human noticed
+`task_scope.md` carried no model or tier column and asked; `token_economy_agent`
+(owner of the tier map, `tier_ownership`) then audited all 67 units and
+proposed the five escalations; `token_economy_agent` holds no `Write`/`Edit`
+of its own, so `rule_validator` transcribed the audit into `task_scope.md` —
+the same issues-decides/transcribes pattern `task_scope.md`'s gate-verdict
+deviation already used. No gate, check or protocol step surfaced the gap in
+any of the three prior sprints, and none is what surfaced it here either.
+
+**Why this belongs beside `RA-16` rather than inside it.**
+`agents.md RA-16 INVOCATION_COVERAGE` exists for exactly this failure shape —
+*"a mechanism nothing calls is a regression, not a pending feature"* — and it
+is enforced: `scripts/verify_references.py check (d)` (`:177-204`) walks
+`workflows/*.md` and `scripts/*.py`, rejecting any file missing `invoked_by:`
+with no exception. That walk is scoped to two directories; `agents/*.md` is
+folded into the same check's text corpus only as a source of references to
+verify (`:186-190`), never as a set of mechanisms that must themselves declare
+an invoker. `tier_escalation` is a table row inside
+`agents/token_economy_agent.md`, not a workflow, script, skill or hook — there
+is no `invoked_by:` field for a charter row, and no glob in `check (d)` that
+would find one if there were. **`RA-16` covers mechanisms that can declare an
+invoker; it says nothing about obligations that can only be remembered** — by
+a human or an agent, at Phase 4.3, rereading a profile nobody is prompted to
+reread. This is that class's first confirmed member with a proof that it can
+work when invoked, not only a proof that it can lie dormant; whoever picks
+this up should ask how many others there are.
+
+**`F-021-A2` is why the escalation was needed, not why it went unused.**
+`agents.md §6` names `devops_agent` **"Sole holder of `Write`/`Edit` for the
+framework-root `scripts/` and `hooks/` trees"**, and `F-021-A2` (above, open)
+states the wider gap: 8 of 13 profiles hold `Write`/`Edit` and none is an
+implementer. Because no `author`-tier profile holds `Write`/`Edit` on
+`scripts/`/`hooks/`, every code unit those trees produce — regardless of
+difficulty — is authored by the one `mechanical`-tier profile that can write
+them at all; `tier_escalation` is the sanctioned way to compensate for that
+*without* redesigning the role map, by escalating the **model** `devops_agent`
+runs on for one task while its jurisdiction stays put — confirmed exactly at
+`docs/sprints/026-core-pipeline/task_scope.md:77-79`, "Assignee and
+jurisdiction are unchanged for every row below… each entry here is a model
+escalation for one task, not a reassignment." So `F-021-A2` is not a blocker
+that left `tier_escalation` with nowhere to route — Sprint 026 shows the
+route works. `F-021-A2` is the reason the same structural condition (a
+`mechanical`-tier profile absorbing every `scripts/`/`hooks/` unit,
+high-risk ones included) recurred in all four sprints, and the reason the
+compensating mechanism had three chances to fire before it did.
+
+**Distinct from, and meeting, both open findings above.** `F-021-A2` is the
+missing implementer role — the reason `devops_agent` carries every
+`scripts/`/`hooks/` unit regardless of difficulty. `F-026-A1` is two gate
+profiles assigned or described writes their own grant refuses. This is a
+charter obligation that worked exactly once, unprompted by anything but a
+human's question. Three different defects, meeting on the same rows: Sprint
+026's five escalated units are `devops_agent` work only because of
+`F-021-A2`, escalated only because a human asked rather than because
+anything checks for it (`F-026-A2`), on a profile that the same sprint also
+routed gate-adjacent writes to because the actual gate profiles cannot hold
+them (`F-026-A1`).
+
+**Two candidate directions, named and not chosen between** — choosing is a
+governance decision behind `agents.md §2 triple_lock`:
+
+1. Make the declaration a testable artifact — for example a `Tier`/`Model`
+   column `task_scope.md`'s own shape check can require whenever `Risk`
+   diverges from the assignee's declared default, so the absence is a
+   deterministic finding rather than something a human has to notice and ask
+   about.
+2. Fold the tier-difficulty check into a phase's stated deliverable —
+   `rule_validator`'s own Phase 4.3 audit is already the pass that produced
+   `F-026-A1` by reconciling assignment against grant, and is the same pass
+   that transcribed Sprint 026's five escalations; reconciling assignment
+   against tier in the same pass would make the check's own declared scope,
+   not a human's memory, the thing that fails loudly when the reconciliation
+   is skipped.
+
+**How to reproduce.**
+
+```bash
+grep -n "tier_escalation" agents/token_economy_agent.md
+grep -inE 'tier|model' docs/sprints/024-core-pipeline/task_scope.md docs/sprints/025-core-pipeline/task_scope.md
+grep -n "Unrouted" docs/sprints/023-core-pipeline/task_scope.md
+grep -icE 'escalat' docs/sprints/026-core-pipeline/task_scope.md
+sed -n '75,101p' docs/sprints/026-core-pipeline/task_scope.md
+sed -n '177,209p' scripts/verify_references.py
+```
+
+The first returns one row, the charter declaration. The second returns
+nothing for either sprint. The third returns the attribution finding at
+`023-core-pipeline/task_scope.md:97`, not an escalation. The fourth returns
+`18`. The fifth shows the `## Declared escalations` section and its five-row
+table. The sixth shows `check_invocation_coverage` scoped to `workflows/` and
+`scripts/`, never `agents/`.
 
 ---
 
