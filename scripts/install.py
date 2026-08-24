@@ -24,7 +24,9 @@ What it does:
      clone for SessionStart to ever bootstrap the rest.
   5. With --profile: additionally links profiles/<name>/{agents,skills} and
      imports the profile's rules. Profiles are opt-in only.
-  6. Marks .agents/.claude_bridge.lock so hooks/on_init.py knows not to re-run.
+  6. Marks .agents/.bridge_claude.lock and/or .agents/.bridge_cursor.lock
+     (per --target) so hooks/on_init.py and start_workflow bridge_check
+     can detect a deliberate submodule update and re-link automatically.
 """
 import argparse
 import re
@@ -162,6 +164,38 @@ def scaffold_identity_config() -> None:
     print("📝 Fill in identity.config.json with your project's details, then run "
           "`.agents/scripts/render_readme.py` manually to generate your README — "
           "the installer never does this automatically.")
+
+
+BRIDGE_LOCKS_BY_TARGET = {
+    "claude": (".bridge_claude.lock",),
+    "cursor": (".bridge_cursor.lock",),
+    "both": (".bridge_claude.lock", ".bridge_cursor.lock"),
+}
+
+
+def current_submodule_commit() -> str:
+    """HEAD of the .agents submodule, or ``unknown`` outside a git context."""
+    try:
+        return subprocess.run(
+            ["git", "-C", str(AGENTS_DIR), "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+    except (subprocess.CalledProcessError, OSError):
+        return "unknown"
+
+
+def write_bridge_locks(target: str) -> None:
+    """Record the installed submodule commit in per-target lock files."""
+    commit = current_submodule_commit()
+    legacy_lock = AGENTS_DIR / ".claude_bridge.lock"
+    if legacy_lock.exists():
+        legacy_lock.unlink()
+    for lock_name in BRIDGE_LOCKS_BY_TARGET[target]:
+        lock_path = AGENTS_DIR / lock_name
+        lock_path.write_text(commit + "\n")
+        print(f"🔒 Bridge installed at commit {commit[:12]}. Marked {lock_path}")
 
 
 def install_nucleus_bridge() -> int:
@@ -344,18 +378,7 @@ def main() -> int:
             print(f"ℹ️  Profile MCP servers listed in profiles/{args.profile}/mcp/registry.json "
                   "— add the ones you need to .mcp.json manually (they may require API keys).")
 
-    # Record the installed submodule commit so hooks/on_init.py (and the
-    # start_workflow bridge_check) can detect a deliberate submodule update
-    # and re-link any new agents/commands/skills automatically.
-    try:
-        commit = subprocess.run(
-            ["git", "-C", str(AGENTS_DIR), "rev-parse", "HEAD"],
-            capture_output=True, text=True, check=True,
-        ).stdout.strip()
-    except (subprocess.CalledProcessError, OSError):
-        commit = "unknown"
-    (AGENTS_DIR / ".claude_bridge.lock").write_text(commit + "\n")
-    print(f"🔒 Bridge installed at commit {commit[:12]}. Marked {AGENTS_DIR / '.claude_bridge.lock'}")
+    write_bridge_locks(args.target)
     return 0
 
 
