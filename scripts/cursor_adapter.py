@@ -81,9 +81,34 @@ def _write_constitution(cursor_dir: Path, *, nucleus: bool) -> None:
     (rules_dir / CONSTITUTION_RULE).write_text(text, encoding="utf-8")
 
 
-def _write_mcp(cursor_dir: Path) -> None:
+def _rewrite_mcp_value(value: str, *, nucleus: bool) -> str:
+    if not nucleus:
+        return value
+    if value.startswith(".agents/"):
+        return value[len(".agents/") :]
+    return value
+
+
+def _rewrite_mcp_config(data: dict, *, nucleus: bool) -> dict:
+    if not nucleus:
+        return data
+    rewritten = json.loads(json.dumps(data))
+    for server in rewritten.get("mcpServers", {}).values():
+        if "command" in server:
+            server["command"] = _rewrite_mcp_value(server["command"], nucleus=nucleus)
+        if "args" in server:
+            server["args"] = [
+                _rewrite_mcp_value(arg, nucleus=nucleus) if isinstance(arg, str) else arg
+                for arg in server["args"]
+            ]
+    return rewritten
+
+
+def _write_mcp(cursor_dir: Path, *, nucleus: bool) -> None:
     cursor_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(MCP_TEMPLATE, cursor_dir / "mcp.json")
+    data = json.loads(MCP_TEMPLATE.read_text(encoding="utf-8"))
+    data = _rewrite_mcp_config(data, nucleus=nucleus)
+    (cursor_dir / "mcp.json").write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
 
 def install_cursor_bridge(host_dir: Path, *, nucleus: bool) -> None:
@@ -99,5 +124,5 @@ def install_cursor_bridge(host_dir: Path, *, nucleus: bool) -> None:
     _write_commands(cursor_dir, nucleus=nucleus)
     _write_rules(cursor_dir)
     _write_constitution(cursor_dir, nucleus=nucleus)
-    _write_mcp(cursor_dir)
+    _write_mcp(cursor_dir, nucleus=nucleus)
     print(f"✅ Cursor bridge written under {cursor_dir}")
