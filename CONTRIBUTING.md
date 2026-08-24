@@ -6,6 +6,7 @@ This repo governs its own development the same way it governs any host project �
 
 - All work happens on a branch named `ai-sprint/[ID]`, never directly on `main` (`RA-12 BRANCH_DISCIPLINE`, `agents.md §7`). Pick the next sequential ID after the latest `docs/roadmaps/core/pipeline/NNN-*.md` file.
 - Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) and must end with a `#[Sprint_ID]` reference, e.g. `fix(hooks): resolve X #018`. This is mechanically enforced by `hooks/on_commit.py` when running under Claude Code.
+- **The same hook scans staged content for hardcoded secrets and will refuse the commit.** Since Sprint 023 it recognises `ENV`/`ARG` lines in a `Dockerfile`, `key: value` pairs in YAML, and secrets embedded in URL query strings — not only quoted `NAME = "value"` assignments — so a contribution that legitimately contains a credential-shaped **example** can now be blocked where it previously passed. When the value really is an example, waive that one finding with the documented `ALLOW_MARKER` rather than rewording it until the scanner stops noticing: the procedure and what a valid justification looks like are in `rules/qa_and_testing.md §5`. A gate that gets tuned down to pass is not a gate.
 - Open a PR from your `ai-sprint/[ID]` branch into `main`. CI (`.github/workflows/ci.yml`) must pass before merge.
 
 ## Adding a new skill

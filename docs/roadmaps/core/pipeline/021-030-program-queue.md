@@ -45,7 +45,7 @@ the program's own opening command.
 | ✅ | **025** | `jurisdiction` | Delivered `v4.5.0` (PR #41). The rule that a host session never dirties the submodule became a mechanism instead of a sentence |
 | **1st** | **021** | `cost-instrumentation` | **A context cycle climbs to 45× its first turn, and compaction resets the axis without reducing the area.** Bounding the climb yields ~50%, tiering ~40% — and without a meter nothing else is measurable |
 | **2nd** | **022** | `model-tiering` | **Makes everything after it cheaper.** Doing it last means paying the top tier during the two longest sprints |
-| **3rd** | **023** | `upstream-findings` | Seven framework-class findings a host reported and could not patch, plus the Implementation Plan's missing location |
+| **Closed, awaiting deployment** | **023** | `upstream-findings` | **All fourteen units delivered and gate-approved**; sprint sealed 2026-08-24 on `ai-sprint/023`, unmerged. `C8`'s deliverable merged separately as PR #48. Not marked ✅ because that mark means *in `main`*, and `deployment_workflow.md` Phase 1 has not run. Seven framework-class findings a host reported and could not patch, plus the Implementation Plan's missing location, plus two gates that answered when they did not know |
 | **4th** | **026** | `tool-portability` (Cursor) | Depends on the artifact registry (`C0.2` of `023`): portability requires specifying artifacts, not mechanisms |
 | **5th** | **027** | `autonomy-posture` | Replaces bypass mode with `auto` mode plus limits intent cannot clear. Depends on `C0.2` for the `SubagentStop` hook |
 | **6th** | **028** | `self-improvement-unblock` | Self-improvement is blocked by absent host-side destinations, not by any single rule |

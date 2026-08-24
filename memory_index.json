@@ -1,6 +1,6 @@
 {
-  "last_update": "2026-07-26",
-  "sprint_id": "016",
+  "last_update": "2026-08-24",
+  "sprint_id": "023",
   "_schema": "Entries are summary-only Knowledge Items. The 'file' field is omitted once the raw log has been purged (agents.md §4 definitive_amnesia) — the 1-line summary IS the retained knowledge.",
   "items": [
     {
@@ -26,6 +26,18 @@
     {
       "id": "F-20260726-RN04",
       "summary": "Editing docs/active_state.json directly (not via a workflow step) leaves .agent_state/mirror.json stale — always re-run hooks/state_mirror.py after any manual edit to the active state."
+    },
+    {
+      "id": "F-20260824-UF01",
+      "summary": "Counting membership in a frontmatter list needs word boundaries, not a substring grep: `grep -qE 'Write|Edit'` over a `tools:` line also matches TodoWrite in agents/principal_agent.md, whose role explicitly does not write, returning 9 where the answer is 8."
+    },
+    {
+      "id": "F-20260824-UF02",
+      "summary": "A low-entropy secret fixture (a repeated character run) or a documented placeholder (AWS's …EXAMPLEKEY) is rejected by hooks/on_commit.py's credibility filter, so testing a secret-gate finding with either yields a false negative that looks exactly like the finding reproducing — use real-shaped random key material."
+    },
+    {
+      "id": "F-20260824-UF03",
+      "summary": "An artifact's risk is the cost of its assertions being wrong, not the difficulty of writing it: Sprint 023's C8 was ten checkbox ticks in Markdown, classified low-risk, and cost 5 gate rounds and 4 rejections that were all false claims, while C7 (a git mv) cleared both gates in one round."
     }
   ]
 }

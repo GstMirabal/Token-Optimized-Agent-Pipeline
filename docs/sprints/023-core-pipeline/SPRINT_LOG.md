@@ -5,17 +5,10 @@
 written up in the program queue and routed by human decision to an `RA-03`
 hotfix, to be executed after Sprint `026`.
 
-> [!IMPORTANT]
-> **This file's `## Delivered` section narrates `C9`, `C0`–`C4` and stops there.**
-> `C4.2`, `C5`, `C6`, `C7`, `C8` and `C10` are delivered and gate-approved but
-> have **no entry below**. The authoritative per-unit record is the status table
-> in `task_scope.md`, which carries every unit, its commits and its gate verdicts.
-> Stated rather than patched with one catch-up entry: writing `C8`'s narrative
-> alone would leave five units missing while the header claims fourteen, which is
-> the drift this sprint has recorded four times under `RA-14`. **Closing the
-> sprint requires writing the six missing entries** — that is closeout work, not
-> a footnote, and it is named here so the closeout meets it as a known task
-> rather than discovering it.
+All fourteen units have a `## Delivered` entry. The six that were missing at
+session #7's suspension — `C4.2`, `C5`, `C6`, `C7`, `C8`, `C10` — were written
+during this close, which is why they read as one pass rather than as six
+session-by-session records.
 
 ## Delivered
 
@@ -467,6 +460,179 @@ destructive regression without it.
 Both gates were applied by the lead session under the respective rulesets, not
 dispatched as subagents. That is the declared deviation recorded below, and it
 is stated here rather than left for a reader to infer from a green verdict.
+
+### `C4.2` — the Django directives get a home, and the skill stops shadowing itself (`955eb5d`)
+
+`C4` established that `F-086-S3` could not be closed by any unit acting alone,
+and this is the unit the human decision produced. Two rejections.
+
+**The trap `C4` walked into.** `skills/django-expert-3rd/SKILL.md` was 20 lines of
+scaffolding-shaped prose sitting above a 247-line vendored skill. Whatever is at
+a skill's root is what `generate_manifest.py` reads and what skill discovery
+finds, so the framework had been loading the shadow instead of the skill. But the
+root file was **not** generated: it carried three authored directives, one of
+them the mandate `RA-02` states. Both routes out were forbidden — deleting it is
+`agents.md §2 destructive_flags`, copying vendor content into the framework's tree
+is `rules/skills_and_integrations.md §3` — and **both gates ratified that reading
+independently** before it went to the human.
+
+**The resolution separates the two things the file was doing.** The three
+directives moved to a new `rules/django_backend_standard.md`, registered in
+`agents.md §0`'s lazy-load index; the root became a **relative symlink** to the
+vendored `skills/django-expert-3rd/skills/SKILL.md`. Governance content now lives
+where governance content is loaded from, and the skill's root surfaces the skill.
+
+**This introduced the repository's first tracked symlink**, which is recorded
+because it is a new class of object in this tree and `agents.md §5` had never
+addressed one.
+
+### `C5` — the profile that owns deployment artifacts can write one (`aa2b11d` + `R1`)
+
+One line closes `F-086-A1`: `agents/devops_agent.md:4` gains `Write, Edit`. The
+unit's substance is the sentence added beside it.
+
+**A grant with no stated scope is a grant nobody can audit.** `agents.md §6` was
+amended in the same unit to say what the grant covers — the framework-root
+`scripts/` and `hooks/` trees, and **not** `skills/[name]/scripts/`, which
+`skill_architect` forges. Without that, the role map would have had two profiles
+with overlapping and undeclared write claims over anything named `scripts/`.
+
+**`F-021-A2` is declared here and explicitly not resolved.** Eight of thirteen
+profiles now hold `Write`/`Edit` and **not one is an implementer**: they are
+documentation, governance, skill, topology and environment roles. This unit gives
+`scripts/` and `hooks/` *an* owner; it does not create the missing role, and it
+does not make a `mechanical`/`haiku` tier the right author for a governance gate.
+Splitting an implementer profile is a role-map redesign and belongs to its own
+sprint. Until then code in those trees is written by the lead session — which is
+why every unit of this sprint was self-authored, and why `C4` needed dispatched
+gates to catch a destructive regression its author could not see.
+
+### `C6` — the nucleus gets an entry point, and its bridge stops rotting (`fcd80ed`)
+
+Two rejections. `F-093-N1` reported that `agents.md §0` mandates reading
+`docs/0_SYSTEM_OVERVIEW.md` and the nucleus has no such file. Declaring the
+exception was the cheap half.
+
+**Declaring an exception is not enough, and five sessions proved it.** A session
+told only *"this does not apply here"* still has nothing to read. So `agents.md §0`
+and `start_workflow.md` `read_ruleset` **name the substitute** — `agents.md` plus
+the generated `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md`. The evidence was in this
+sprint's own record: sessions #2 through #5 each hit the gap and each re-derived
+the same answer independently.
+
+**The second defect came from the finding's own premise.** `F-093-N1` observes
+that `agents.md` is the only file a nucleus session is guaranteed to read.
+Working that observation found the nucleus `.claude/` bridge had been installed
+once in July and never refreshed: `commands/` held 13 files, `.claude/commands/agents/`
+held **11 stale symlinks**, and `/agents:reconcile`, `/agents:harden` and
+`/agents:revdoc` were therefore **not invocable in the nucleus** — including the
+one `drift_check` mandates on exit `2` — beside a dangling link to a deleted
+`skeleton.md`. It had been that way for a month.
+
+**The cause was a belief, not a bug.** Four documents stated that
+`nucleus_neutrality` prohibited Phase 1.5. It prohibits *structural scaffolding*,
+and a bridge install is not that — `scripts/install_claude.py` says so in the
+code that implements it. `start_workflow.md`'s three affected rows were corrected,
+`tests/test_installer.sh` gained an assertion, and the bridge was measured at
+**13 of 13, zero dangling** at session #7.
+
+### `C7` — the transitive closure stops posing as this framework's manifest (`7966964`)
+
+**Both gates on the first round** — the only one of the six units in this section
+to manage it, though `C9`, `C0`, `C0.2` and `C1` did so earlier in the sprint. A
+`git mv` with a paragraph of reasoning attached.
+
+**What was believed.** 26 Dependabot alerts, 19 high, standing against this
+repository as debt the nucleus carried.
+
+**What reproduction found.** All 26 came from `requirements-freeze.txt`, and **no
+install path reads it**: `start_workflow.md` installs `requirements-core.txt` (1
+package) and the skillopt stack installs `requirements-skillopt.txt` (3, on
+demand). The file was a transitive-closure snapshot — documentation — sitting in
+a filename the scanner reads as a lockfile.
+
+**Configuration could not fix it.** Dependabot **alerts cannot be excluded by
+path**; `.github/dependabot.yml` governs *updates*. So the fix is the name:
+`docs/audits/SKILLOPT_TRANSITIVE_CLOSURE.md`, content in a code block, with
+`skills/skillopt/SKILL.md` repointed. **This does not claim there is no
+exposure** — it changes whose debt it is. A host installing the skillopt stack
+resolves its own dependencies and owns the result.
+
+### `C10` — the merge gate stops waiting for checks it cannot see (`3046f25`)
+
+**Six rounds, four rejections** — the most contested unit of the sprint. The
+other half of its thesis: where `C9` answers red when it does not know, this one
+answered green.
+
+`deployment_workflow.md` Phase 1 merged on a check state it had not confirmed was
+complete. `scripts/ci_gate.py` (new) reads the base branch's **required** check
+set from branch protection, waits for every one of them to *report*, and only
+then judges. A required check that has not reported is not a pass.
+
+**It proved itself in this sprint's own close.** Integrating `C8`'s deliverable
+(PR #48) was the gate's first real use: it named the three checks `main`
+requires, waited, and returned the sentence the six rounds were spent on — *"the
+merge may now be issued as a separate command (`RA-13`)"*. The gate and the
+irreversible action it guards stayed separate invocations, which is the whole
+point of `RA-13` and the reason a red CI reached `main` in a prior sprint.
+
+### `C8` — the upstream loop closes, and every tick is a re-measurement (`7056c61` + `5e21538`)
+
+**Five rounds, four rejections**, on the unit the plan classified low-risk. Merged
+to `main` as **PR #48** (`7a167d3`) during this close, because
+`branch_sovereignty audit` correctly refused to seal a sprint while the branch
+holding its deliverable was unintegrated.
+
+Ten findings ticked closed in `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` — all
+seven host-reported, plus `G-03` and `#12` from the inherited leads, plus
+`F-023-D5` which this sprint opened and closed. Three added. Every entry kept, per
+the document's rule 3: across five rounds the only tokens removed are nine `[ ]`
+characters and a rewritten intro.
+
+**Rule 1 of that file — *reproduce before repairing* — was applied to closing an
+item, not only to opening one.** That is the unit's substance, and it caught four
+defects a record-based tick would have shipped: `F-086-S3` was closed by `C4.2`
+and not `C4`; `G-03`'s column half landed in `C0.2` and not `C0`; the `.env`
+finding named **quoting** as its mechanism when the real cause is **form selection
+by file type**; and a reproduction command the entry published returned **9**
+while the entry asserted **8**, because it matched `TodoWrite` — the exact defect
+its own prose warned against.
+
+**The third was the dangerous one.** Repairing on the false diagnosis would have
+added quote-optionality to three patterns that already have it and shipped the
+bug intact. The Tester verified the correction by **executing the false repair** —
+forcing all five forms to be selected for a `.env` — and confirming the file
+still passes.
+
+**A fourth correction records that an entry's Evidence was disproved.**
+`F-086-S3` asserted a file's provenance from its own body text; a repair built on
+that assertion deleted authored governance. *"It says it is generated"* is not
+evidence that it is.
+
+### Gate rounds — `C4.2`, `C5`, `C6`, `C7`, `C8`, `C10`
+
+| Unit | Rounds | Rejections | Verdict |
+| :--- | :--- | :--- | :--- |
+| `C7` | 1 | 0 | Both **APPROVED**, first round |
+| `C5` | not recorded (`R1`) | 1 | Both **APPROVED** |
+| `C6` | not recorded | 2 | Both **APPROVED** |
+| `C4.2` | not recorded | 2 | Both **APPROVED** |
+| `C8` | 5 | 4 | Both **APPROVED**, pinned to blob `d1ac87f` |
+| `C10` | 6 | 4 | Both **APPROVED** |
+
+Three cells read *not recorded* rather than carrying an inferred number. Each of
+those units states its rejection count in the entry above and no round count
+anywhere, and a first draft of this table inferred one for each — two of the
+three inferences were wrong against the entries they summarised. A register that
+guesses its own metrics is the defect `C8` spent five rounds on.
+
+**`C5`, `C10` and `C8` were gated by dispatched `qa_agent` and `tester_agent`
+subagents**, under a per-unit human lift of the session's standing delegation
+prohibition. The rest were gated by the lead session under the respective
+rulesets. The distinction matters and is why it is recorded per unit rather than
+once: the defects neither author could reach — `C4`'s deletion of authored
+governance, `C8`'s four false claims — were found by dispatched gates, and `C4`
+is the unit that would have shipped a destructive regression without one.
 
 ## Suspended, not closed
 

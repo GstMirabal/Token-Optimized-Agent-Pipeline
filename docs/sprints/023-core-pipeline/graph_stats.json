@@ -1,0 +1,22 @@
+{
+  "sprint": 23,
+  "date": "2026-08-24",
+  "nodes": 4879,
+  "edges": 5507,
+  "communities": 552,
+  "previous": {
+    "nodes": 4676,
+    "edges": 5187,
+    "note": "Read from graphify-out/graph.json before this close's rebuild. No prior sprint persisted a snapshot, so 023 is the first tracked point and no delta threshold can be enforced against it yet."
+  },
+  "extraction": {
+    "mode": "ast",
+    "files": 433,
+    "semantic_rebuild": "NOT RUN",
+    "why": "close_workflow.md Phase 1 graph_rebuild calls for a semantic rebuild when documentation changed, and this sprint changed a great deal of it. `make graphify-rebuild` exits 1 in this environment: no LLM API key is present (GEMINI_API_KEY, GOOGLE_API_KEY, MOONSHOT_API_KEY, ANTHROPIC_API_KEY, OPENAI_API_KEY or DEEPSEEK_API_KEY). Recorded rather than skipped silently, on the same reasoning close_workflow.md gives for `memory_wipe`: a step that does nothing is indistinguishable from a step that failed unless it says which. The AST layer above is current; the semantic layer is stale as of this snapshot."
+  },
+  "verification": {
+    "snapshot_moved": true,
+    "note": "close_workflow.md Phase 1 requires checking that the counts actually changed — a graph 'rebuilt' into identical numbers is a rebuild that silently no-opped. Node count moved 4676 -> 4879 and edges 5187 -> 5507, so the AST rebuild did run."
+  }
+}
