@@ -12,7 +12,7 @@ from hooks.telemetry import log_error
 # Configuration
 CONFIG_PATH = Path(".env")
 ENV_TEMPLATE = Path(".env.template")
-BRIDGE_LOCK = Path(".agents/.claude_bridge.lock")
+BRIDGE_LOCK = Path(".agents/.bridge_claude.lock")
 INSTALL_SCRIPT = Path(".agents/scripts/install.py")
 
 # A small, representative sample of the artifacts install_claude.py links into
@@ -46,7 +46,7 @@ def current_submodule_commit() -> str:
 def bridge_intact() -> bool:
     """Confirms the linked artifacts actually survive on disk, independent of
     the commit-hash lock. A `git clean -fd` (or manual `rm`) wipes the host's
-    untracked `.claude/` bridge without touching `.claude_bridge.lock` — the
+    untracked `.claude/` bridge without touching `.bridge_claude.lock` — the
     lock lives inside the `.agents` submodule, which `git clean` skips by
     default — leaving the lock trusting a bridge that no longer exists."""
     return all(p.exists() for p in BRIDGE_ANCHORS)
