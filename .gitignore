@@ -100,3 +100,8 @@ memory/
 
 # Nucleus self-bridge (regenerable via scripts/install_claude.sh)
 .claude/
+
+# Cursor bridge output (regenerable via scripts/install.py --target cursor)
+.cursor/commands/
+.cursor/rules/
+.cursor/mcp.json
