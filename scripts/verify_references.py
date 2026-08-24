@@ -214,6 +214,24 @@ def check_invocation_coverage(corpus: str) -> list[str]:
     return errors
 
 
+def check_rule_triggers_sync() -> list[str]:
+    """(e) config/rule_triggers.json must mirror rules/*.md exactly."""
+    triggers_path = Path("config/rule_triggers.json")
+    if not triggers_path.exists():
+        return ["(e) config/rule_triggers.json is missing."]
+    data = json.loads(triggers_path.read_text(encoding="utf-8"))
+    declared = {entry["path"] for entry in data.get("rules", [])}
+    on_disk = {f"rules/{p.name}" for p in sorted(Path("rules").glob("*.md"))}
+    errors: list[str] = []
+    missing = on_disk - declared
+    extra = declared - on_disk
+    for path in sorted(missing):
+        errors.append(f"(e) rules/{Path(path).name} has no entry in config/rule_triggers.json.")
+    for path in sorted(extra):
+        errors.append(f"(e) config/rule_triggers.json lists {path}, which is not in rules/.")
+    return errors
+
+
 def main() -> int:
     # Framework-scoped: every path below is this repository's. See
     # `scripts/_root.py` — the cwd is set once so the messages stay relative and
@@ -222,7 +240,8 @@ def main() -> int:
 
     corpus = loadable_text()
     errors = (check_rules_reachable(corpus) + check_templates_exist(corpus)
-              + check_rule_citations() + check_invocation_coverage(corpus))
+              + check_rule_citations() + check_invocation_coverage(corpus)
+              + check_rule_triggers_sync())
     if errors:
         for e in errors:
             print(f"❌ {e}", file=sys.stderr)
