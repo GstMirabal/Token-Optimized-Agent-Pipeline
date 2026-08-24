@@ -80,7 +80,7 @@ rsync -a --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
       --exclude='graphify-out' --exclude='.claude' "$AGENTS_SRC/" "$NUCLEUS/"
 mkdir -p "$NUCLEUS/.git"   # real dir -> nucleus detection
 rm -f "$NUCLEUS/.claude_bridge.lock" "$NUCLEUS/CLAUDE.md"
-( cd "$NUCLEUS" && python3 scripts/install_claude.py > /dev/null )
+( cd "$NUCLEUS" && python3 scripts/install.py > /dev/null )
 [ -e "$NUCLEUS/.claude/commands/agents/start.md" ] || fail "nucleus: /agents:start not linked"
 [ -e "$NUCLEUS/.claude/agents/principal_agent.md" ] || fail "nucleus: agents not linked"
 grep -qx "@agents.md" "$NUCLEUS/CLAUDE.md" || fail "nucleus: constitution import missing"
@@ -90,7 +90,7 @@ grep -qx "@agents.md" "$NUCLEUS/CLAUDE.md" || fail "nucleus: constitution import
 # fact until Sprint 023 C6, so a future edit could have written one and left the
 # workflow silently wrong with the whole suite green.
 [ ! -e "$NUCLEUS/.claude_bridge.lock" ] || fail "nucleus: must write no bridge lock (start_workflow bridge_check depends on this)"
-( cd "$NUCLEUS" && python3 scripts/install_claude.py --profile example-project > /dev/null 2>&1 ) \
+( cd "$NUCLEUS" && python3 scripts/install.py --profile example-project > /dev/null 2>&1 ) \
   && fail "nucleus: profile install must be refused" || true
 echo "✅ nucleus self-bridge test PASSED"
 
@@ -109,6 +109,6 @@ test_existing_pre_commit_hook_is_not_overwritten() {
     local repo="$1"
     printf '#!/bin/sh\necho project-owned\n' > "$repo/.git/hooks/pre-commit"
     chmod +x "$repo/.git/hooks/pre-commit"
-    python3 "$repo/.agents/scripts/install_claude.py" >/dev/null 2>&1
+    python3 "$repo/.agents/scripts/install.py" >/dev/null 2>&1
     grep -q "project-owned" "$repo/.git/hooks/pre-commit" || return 1
 }
