@@ -555,9 +555,9 @@ El **Corte A** de la revisión 1 (diferir `P4.2`–`P4.4`) **se retira**: bajo l
 
 | Field | Value |
 | :--- | :--- |
-| **Approved by** | *(pendiente — Phase 5)* |
-| **Date** | *(pendiente)* |
-| **Plan commit at approval** | *(pendiente — commit de este fichero en `ai-sprint/026`)* |
+| **Approved by** | Human operator, autorización atendida única en Phase 5 |
+| **Date** | 2026-08-24 |
+| **Plan commit at approval** | `1da9641` en `ai-sprint/026`. El texto aprobado es el de ese commit, no el de `c07bc46`, que precede al parche de `A4`, `A3`, los cinco done-criteria y `Design §D9` |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 *Phase 5 es una única autorización humana atendida. NO DEBE envolverse en un `/loop` desatendido. Bajo esta ordenación, la aprobación cubre **ambos** hitos y la Puerta de Migración; no se abre una segunda puerta de aprobación al migrar, porque la migración es una observación verificable y no una renegociación del alcance.*
