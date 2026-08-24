@@ -72,7 +72,8 @@ docs/active_task.md
 
 # Machine-local install markers and environments
 installed.lock
-.claude_bridge.lock
+.bridge_claude.lock
+.bridge_cursor.lock
 .deploy_unlock
 venv_skillopt/
 venv/
