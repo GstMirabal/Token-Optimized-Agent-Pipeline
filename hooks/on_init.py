@@ -13,7 +13,7 @@ from hooks.telemetry import log_error
 CONFIG_PATH = Path(".env")
 ENV_TEMPLATE = Path(".env.template")
 BRIDGE_LOCK = Path(".agents/.claude_bridge.lock")
-INSTALL_SCRIPT = Path(".agents/scripts/install_claude.py")
+INSTALL_SCRIPT = Path(".agents/scripts/install.py")
 
 # A small, representative sample of the artifacts install_claude.py links into
 # the host. Cheap enough to stat on every session start.
