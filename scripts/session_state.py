@@ -19,9 +19,10 @@ invoked_by: start_workflow.md#state_claim (claim), close_workflow.md#state_sync
 
 Usage:
     python3 scripts/session_state.py claim [--session-id <uid>] [--takeover]
-        [--tool claude-code|cursor|terminal]
+        [--tool claude-code|cursor|terminal] [--delegation-mode native|sequential]
         # --session-id is generated (see generate_session_id()) when the
         # harness exposes none, e.g. Cursor.
+        # --delegation-mode defaults: cursor→sequential, others→native.
     python3 scripts/session_state.py release   # seals the SPRINT
     python3 scripts/session_state.py suspend   # ends the SESSION only
 
@@ -105,6 +106,21 @@ def git_branch() -> str | None:
     return result.stdout.strip() if result.returncode == 0 else None
 
 
+def derive_delegation_mode(tool: str, explicit_mode: str | None) -> str:
+    """Determine the delegation mode from tool and explicit argument.
+
+    Args:
+        tool: The tool claiming the lock (`claude-code`, `cursor`, or `terminal`).
+        explicit_mode: Explicit `--delegation-mode` value, or None.
+
+    Returns:
+        str: `native` or `sequential`.
+    """
+    if explicit_mode is not None:
+        return explicit_mode
+    return "sequential" if tool == "cursor" else "native"
+
+
 def suspend() -> int:
     """End the session without sealing the sprint.
 
@@ -135,7 +151,7 @@ def suspend() -> int:
     return 0
 
 
-def claim(session_id: str | None, takeover: bool, tool: str) -> int:
+def claim(session_id: str | None, takeover: bool, tool: str, delegation_mode: str | None = None) -> int:
     """Record this session as the holder of the lock.
 
     Args:
@@ -147,6 +163,9 @@ def claim(session_id: str | None, takeover: bool, tool: str) -> int:
         tool: Which harness is claiming the lock — `claude-code`, `cursor`,
             or `terminal`. Recorded as `session_tool` alongside `session_id`
             so forensics can tell which tool left a session open.
+        delegation_mode: Execution mode — `native` (8 roles) or `sequential`
+            (manual). When None, derived from tool: `cursor` → `sequential`,
+            others → `native`.
 
     Returns:
         int: 0 when claimed, 2 when another live session holds the lock.
@@ -174,9 +193,11 @@ def claim(session_id: str | None, takeover: bool, tool: str) -> int:
     # The collision guard above already lets SUSPENDED through: it blocks only on
     # IN_PROGRESS. What was missing is that nothing ever wrote this state, and
     # that resuming left no trace — so a sprint spanning sessions was invisible.
+    resolved_mode = derive_delegation_mode(tool, delegation_mode)
     state.update({
         "session_id": session_id,
         "session_tool": tool,
+        "delegation_mode": resolved_mode,
         "status": IN_PROGRESS,
         "start_time": now(),
         "last_updated": now(),
@@ -234,12 +255,17 @@ def main() -> int:
         "--tool", choices=["claude-code", "cursor", "terminal"], default="terminal",
         help="Harness claiming the lock, recorded as session_tool.",
     )
+    claim_parser.add_argument(
+        "--delegation-mode", choices=["native", "sequential"], default=None,
+        help="Execution mode (native: 8 roles; sequential: manual). "
+             "If omitted, derived from --tool: cursor→sequential, others→native.",
+    )
     sub.add_parser("release", help="Seal the SPRINT at close.")
     sub.add_parser("suspend", help="End the SESSION with the sprint still open.")
 
     args = parser.parse_args()
     if args.command == "claim":
-        return claim(args.session_id, args.takeover, args.tool)
+        return claim(args.session_id, args.takeover, args.tool, args.delegation_mode)
     if args.command == "suspend":
         return suspend()
     return release()
