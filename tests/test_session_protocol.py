@@ -409,6 +409,7 @@ def test_doubt_is_reported_apart_from_accusation_and_never_as_disabled(monkeypat
     monkeypatch.setattr(spr, "gh_call", lambda *a: (1, "", "gh: Server Error (HTTP 503)"))
     monkeypatch.setattr(spr.Path, "exists", lambda self: True)
     monkeypatch.setattr(spr.Path, "is_dir", lambda self: True)
+    monkeypatch.setattr(spr, "stamp_last_platform_probe", lambda: None)
 
     report = spr.probe_platform({}, force=True)
 
@@ -460,6 +461,7 @@ def test_the_admin_discriminator_is_read_from_the_repository_payload(
     monkeypatch.setattr(spr, "gh_call", lambda *a: (1, "", "gh: Not Found (HTTP 404)"))
     monkeypatch.setattr(spr.Path, "exists", lambda self: True)
     monkeypatch.setattr(spr.Path, "is_dir", lambda self: True)
+    monkeypatch.setattr(spr, "stamp_last_platform_probe", lambda: None)
 
     report = spr.probe_platform({}, force=True)
 
