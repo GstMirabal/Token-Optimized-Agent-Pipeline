@@ -10,7 +10,7 @@ version: 1.0.0
 
 - **Strategy Lock:** `OPEN`
 - **Delivered:** `024` and `025` (`v4.5.0`), `021` (`v4.6.0`), `022` (`v4.7.0`), `023` (`v4.8.0`), `026` (`v4.9.0`, PR #50)
-- **Next:** `027` (`autonomy-posture`). `F8` / `F-023-S4` closed by hotfix `H-002` (`hotfix/H-002`)
+- **Next:** `027` (`autonomy-posture`) — **in flight** on `ai-sprint/027` (Olas 0–2 executed; close seals delivery → then `028`). `F8` / `F-023-S4` closed by hotfix `H-002` (`hotfix/H-002`); `F-026-A1` / `F-026-A3` closed in 027
 - **Origin:** drafted in an IDE planning mode across one long session, then migrated
   into this repository. That migration is the point: the same session opened with a
   host having lost an approved plan to ephemeral storage, and this document was
