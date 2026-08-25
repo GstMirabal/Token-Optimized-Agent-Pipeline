@@ -117,7 +117,7 @@ The pipeline operates under a rigid sequential process. Role usurpation is stric
 | Category | Rule (Key) | Value / Constraint (Value) |
 | :--- | :--- | :--- |
 | **Subagent Roles** | `principal_agent` | Lead Agent. Creates Implementation Plan (informed by graphify), manages the Approval Gate. |
-| **Subagent Roles** | `devops_agent` | Environment Agent. Manages venv, .env export, and Docker health. **Sole holder of `Write`/`Edit` for the framework-root `scripts/` and `hooks/` trees** (`F-086-A1`, Sprint 023) — not `skills/[name]/scripts/`, which `skill_architect` forges. It gives those trees an owner without creating the implementer role the map still lacks (`F-021-A2`, declared in that profile). |
+| **Subagent Roles** | `devops_agent` | Environment Agent. Manages venv, .env export, and Docker health. Retains `Bash` for those routines; does **not** hold `Write`/`Edit` for framework-root `scripts/`/`hooks/`/`tests/` — those trees are authored by `implementer_agent` (`ADR-0009`, Sprint 033; `F-086-A1` ownership preserved under the new profile). Not `skills/[name]/scripts/`, which `skill_architect` forges. |
 | **Subagent Roles** | `orchestrator` | Roadmap Author. Drafts Initial Roadmap and instantiates Sprint Hierarchy. |
 | **Subagent Roles** | `agent_orchestrator`| Agent Assignment. Assigns specific subagents to the Initial Roadmap steps. |
 | **Subagent Roles** | `skill_architect` | Skill Builder. Prepares/injects skills for the assigned subagents. |
@@ -126,7 +126,7 @@ The pipeline operates under a rigid sequential process. Role usurpation is stric
 | **Subagent Roles** | `tester_agent` | Test Verifier. Ensures logic stability and zero regression. |
 
 > [!NOTE]
-> **Core vs. Auxiliary.** The 8 roles above are the *Core Pipeline Roles* (mandatory in every Planning → Sprint Closeout cycle). `governance_learner`, `doc_orchestrator`, `topology_mapper`, `git_sync_agent`, and `token_economy_agent` (see `agents/*.md`) are **Auxiliary Agents** — invoked as needed (knowledge distillation, documentation, topology, upstream sync) but not a mandatory stop on every pipeline pass. **Project-specific specialists** (e.g. `backend_identity_specialist`, `frontend_ux_hardener`) live in `profiles/[name]/agents/` and only join the pipeline when their profile is installed. Their absence from this table is intentional, not an omission.
+> **Core vs. Auxiliary.** The 8 roles above are the *Core Pipeline Roles* (mandatory in every Planning → Sprint Closeout cycle). `governance_learner`, `doc_orchestrator`, `topology_mapper`, `git_sync_agent`, `token_economy_agent`, and `implementer_agent` (see `agents/*.md`) are **Auxiliary Agents** — invoked as needed (knowledge distillation, documentation, topology, upstream sync, **code/test authorship**) but not a mandatory stop on every pipeline pass. **Project-specific specialists** (e.g. `backend_identity_specialist`, `frontend_ux_hardener`) live in `profiles/[name]/agents/` and only join the pipeline when their profile is installed. Their absence from this table is intentional, not an omission.
 
 ### 🚀 The Execution Pipeline
 

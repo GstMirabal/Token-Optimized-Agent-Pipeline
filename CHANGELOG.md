@@ -4,6 +4,14 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Added
+- **Sprint 033 (`implementer-role`)** — Auxiliary `implementer-agent` (`tier: author`) owns framework-root `scripts/`, `hooks/`, and `tests/`. `devops_agent` keeps `Bash` for environment/close and no longer holds `Write`/`Edit`. ADR-0009. `agent_orchestrator` must assign those trees to `implementer_agent`. Closes **`F-021-A2`**. Pin: `tests/test_implementer_role.py`. #033
+
+### Changed
+- **`agents.md` §6** — Core vs Auxiliary lists `implementer_agent`; `devops_agent` row no longer claims sole write ownership of `scripts/`/`hooks/`.
+- **`config/model_tiers.json`** — `implementer_agent` on the `author` profile list (14 profiles).
+- **`README.md`** — 14 role-segregated agents, 6 auxiliary.
+
 ## [4.15.0] - 2026-08-25
 
 ### Added

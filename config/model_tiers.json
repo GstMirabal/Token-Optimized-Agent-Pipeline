@@ -57,7 +57,8 @@
         "doc_orchestrator",
         "agent_orchestrator",
         "governance_learner",
-        "token_economy_agent"
+        "token_economy_agent",
+        "implementer_agent"
       ],
       "basis": "Structured authorship against a stated rule; downstream gates catch their errors."
     },
