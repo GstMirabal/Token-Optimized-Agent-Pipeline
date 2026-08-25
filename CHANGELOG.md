@@ -4,6 +4,17 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Added
+- **Sprint 027 (`autonomy-posture`) — in flight on `ai-sprint/027`.** Portable Memory/Drift scripts (`persist_session_context.py`, `check_role_artifact.py` + `make role-artifacts`, `session_end_hook.py` → suspend only); Claude template `claude/settings.hooks.json` with `defaultMode: auto`, `autoMode` hard/soft deny (`$defaults`), sandbox + `.env` denyRead, `disableBypassPermissionsMode`, and PreCompact/PostCompact/SubagentStop/SessionEnd hooks; how-to `docs/guides/AUTONOMY_POSTURE_GUIDE.md`; `start_workflow.md` Phase 1.6 Cursor counterparts.
+
+### Fixed
+- **`F-026-A1`** — gate profiles stay read-only; descriptions no longer claim writes; Orchestrator transcribes Phase 7 verdicts (`verdict_routing` / `gate_transcription`).
+- **`F-026-A3`** — `hooks/on_init.py` documents host scope; framework paths use `agents_root()`.
+
+### Known open
+- **`F-021-A2`**, **`F-026-A2`** remain open (upstream register).
+- **Three CodeQL alerts on `main`** remain untriaged (carried from `[4.8.0]`).
+
 ## [4.9.2] - 2026-08-25
 
 ### Fixed

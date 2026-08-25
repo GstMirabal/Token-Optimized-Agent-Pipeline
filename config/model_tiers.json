@@ -14,11 +14,12 @@
     "The `cursor` column is derived by scripts/audit_cursor_models.py (make cursor-tiers)",
     "from the on-disk catalogue. Cursor has no subagents, so the tier applies per",
     "PHASE (authoring vs gate) rather than per agent.",
-    "cursor.gate and cursor.author stay \"model\": null because a sprint milestone is",
-    "not proven history (Design §D7): promotion to gate requires measured cost per",
-    "accepted unit under Cursor, and author fills only after a human accepts a",
-    "proposal from audit_cursor_models.py. cursor.mechanical stays null for the",
-    "same reason until an accepted proposal lands."
+    "Sprint 027 human acceptance (2026-08-25): cursor.mechanical=composer-2.5,",
+    "cursor.author=grok-4.6 (effort high at acceptance). cursor.gate stays null —",
+    "Design §D7 / not proven history; operational gate logs may still record Composer",
+    "as Sprint 026 did without writing the config cell (F-20260825-027).",
+    "cursor.gate remains \"model\": null because promotion to gate requires measured",
+    "cost per accepted unit under Cursor beyond a single sprint milestone."
   ],
   "tiers": {
     "gate": {
@@ -43,8 +44,9 @@
         "effort": "medium"
       },
       "cursor": {
-        "model": null,
-        "family": null
+        "model": "grok-4.6",
+        "family": "xai",
+        "effort": "high"
       },
       "profiles": [
         "orchestrator",
@@ -63,8 +65,8 @@
         "effort": "low"
       },
       "cursor": {
-        "model": null,
-        "family": null
+        "model": "composer-2.5",
+        "family": "cursor"
       },
       "profiles": [
         "devops_agent",

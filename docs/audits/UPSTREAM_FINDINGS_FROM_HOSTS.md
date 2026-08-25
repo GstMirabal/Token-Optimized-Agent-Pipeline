@@ -31,12 +31,19 @@ inferred from where the section sits.
 | **Opened, still open** | **`F-023-S4`** — it defeats `agents.md RA-09 SECRET_SOVEREIGNTY` and survived the repair of `F-086-S1`/`F-086-S2`. **`F-021-A2`** was *declared* by Sprint 023, not opened by it; its entry says where |
 | **Ticked on what basis** | Re-measurement against the current tree, **never** on the sprint record that claimed the fix. Rule 1 of this file governs closing an item exactly as it governs opening one |
 
+**Status at Sprint 027 (2026-08-25).**
+
+| | |
+| :--- | :--- |
+| **Closed** | **`F-026-A1`**, **`F-026-A3`** — gate profiles stay read-only with `verdict_routing` / Orchestrator transcription; `on_init` is host-scoped with `agents_root()` for framework paths. Re-measured on `ai-sprint/027` (commits `ab521b7` / `bbdfe59` / `c524794` / `573660e`; `tests/test_on_init.py` 4 passed) |
+| **Still open** | **`F-021-A2`**, **`F-026-A2`** |
+
 **Status at Hotfix H-002 (2026-08-25).**
 
 | | |
 | :--- | :--- |
 | **Closed** | **`F-023-S4`** — dotenv files matched by name; `UNQUOTED_ASSIGNMENT` selected for every file type. Re-measured: `tests/test_on_commit.py` F-023-S4 cases, 152 passed on `hotfix/H-002` |
-| **Still open** | **`F-021-A2`**, **`F-026-A1`**, **`F-026-A2`**, **`F-026-A3`** |
+| **Still open** | **`F-021-A2`**, **`F-026-A1`**, **`F-026-A2`**, **`F-026-A3`** — A1/A3 closed later in Sprint 027 (see status table above) |
 
 **The corrections reproduction produced are recorded where a reader needs them**,
 not collected in a list. `F-086-S3` carries three: it was **narrower** than
@@ -669,7 +676,7 @@ that dispatches a `mechanical`-tier role at a difficulty its default does not
 fit inherits `F-026-A2`; every host whose checkout runs `hooks/on_init.py`
 inherits `F-026-A3`.
 
-### - [ ] `F-026-A1` — two gate profiles are assigned writes their own `tools:` grant refuses, and one already claims the capability in its own description
+### - [x] `F-026-A1` — two gate profiles are assigned writes their own `tools:` grant refuses, and one already claims the capability in its own description
 
 **Evidence.** `agents/tester_agent.md:3-4`:
 
@@ -770,6 +777,15 @@ The first loop shows `tester_agent.md`'s `description` naming a write its
 `tools:` line refuses, and shows `qa_agent.md` carrying the same read-only
 grant. The second command shows `SPRINT_LOG.md`'s registered `role` is
 `Orchestrator`, not either gate.
+
+**Closed** — Sprint 027 Ola 0 units `A1` / `A1.1` / `A1.2`, commits `ab521b7`
+(`tester_agent`), `bbdfe59` (`qa_agent`), `c524794` (`orchestrator`) (PR pending
+027). Option 2 taken: gates stay read-only; descriptions no longer claim writes;
+`verdict_routing` / `gate_transcription` route Phase 7 ledger lines through
+Orchestrator. Re-measured: `grep -m1 '^description:\|^tools:'
+agents/tester_agent.md agents/qa_agent.md` — no write claim; both `tools:` lines
+remain `Read, Glob, Grep, Bash`; `orchestrator.md` holds `Write, Edit` and
+`gate_transcription`.
 
 ---
 
@@ -941,7 +957,7 @@ table. The sixth shows `check_invocation_coverage` scoped to `workflows/` and
 
 ---
 
-### - [ ] `F-026-A3` — `hooks/on_init.py` hardcodes host-relative paths, and the resolver that exists for exactly this class of problem goes unused
+### - [x] `F-026-A3` — `hooks/on_init.py` hardcodes host-relative paths, and the resolver that exists for exactly this class of problem goes unused
 
 **Evidence.** `hooks/on_init.py:13-23`:
 
@@ -1038,6 +1054,13 @@ The first returns no `_root`/`_mode` import. The second returns five literal,
 host-relative constants. The third shows both resolvers defined and exported.
 The fourth shows `start_workflow.md`'s own documented asymmetry. The fifth
 shows unit `P3.2.1`'s row and its committed hash, `88a1e65`.
+
+**Closed** — Sprint 027 Ola 0 units `A3` / `A3.1`, commit `573660e` (PR pending
+027). Reading 1 taken and stated in the hook docstring: host-scoped by design;
+`.env` and `.claude/` anchors stay cwd-relative; framework paths (`BRIDGE_LOCK`,
+`INSTALL_SCRIPT`, sync roots) resolve via `agents_root()`. Re-measured:
+`from _root import agents_root` present; `tests/test_on_init.py` 4 passed on
+`ai-sprint/027`.
 
 ---
 

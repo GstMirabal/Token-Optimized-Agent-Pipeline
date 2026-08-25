@@ -1,0 +1,7 @@
+{
+  "nodes": 5704,
+  "edges": 6571,
+  "communities": 597,
+  "source": "graphify-out/graph.json",
+  "sprint": 27
+}
