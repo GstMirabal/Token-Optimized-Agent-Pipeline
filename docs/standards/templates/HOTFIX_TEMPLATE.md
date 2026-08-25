@@ -16,7 +16,7 @@ The actual defect (not the symptom). Reference exact files/lines.
 | :--- | :--- |
 | {{PATH}} | {{ONE_LINE_CHANGE}} |
 
-Branch/commit: `hotfix/{{H-ID}}` → `{{COMMIT}}` (hotfixes may merge outside the sprint cycle, but never unreviewed).
+Branch/commit: `hotfix/{{H-ID}}` → `{{COMMIT}}` (hotfixes may merge outside the sprint cycle, but never unreviewed). **Branch prefix is mandatory (`agents.md` RA-03)** — `fix/`, `feat/`, and `chore/` branch names are protocol loss even when the Conventional Commits message type is `fix`.
 
 ## 4. Verification
 Exact commands/tests proving the fix, and the regression test added (mandatory — a hotfix without a pinning test WILL recur).

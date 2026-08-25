@@ -1,6 +1,6 @@
 ---
 description: "Deployment and Production Release Protocol (Keyword: deploy)"
-version: 3.0.0
+version: 3.1.0
 invoked_by: human:/agents:deployment
 ---
 
@@ -19,7 +19,9 @@ The terminal sequence for graduating verified pipeline code from the localized s
 | **2. Environment** | `production_bridge`| Map/mount production environment variables securely. Apply pending `.sql` migrations. |
 | **3. Remote Sync** | `ci_cd_handover` | Run local health checks. Confirm the merge landed on origin and remote pipelines triggered. |
 | **4. Closure** | `ledger_seal` | Seal the Master Ledger: rename `CHANGELOG.md`'s `[Unreleased]` section to `[vX.Y.Z] - date` (leaving a fresh empty `[Unreleased]`). This commit lands with the release. |
-| **4. Closure** | `release_tagging` | Assign a semantic `git tag -a vX.Y.Z` identifying the sprint release — the tag must match the ledger section just sealed. |
+| **4. Closure** | `release_tagging` | Assign a semantic `git tag -a vX.Y.Z` identifying the sprint release — the tag must match the ledger section just sealed. Push the tag (`git push origin vX.Y.Z`). Do not create the GitHub Release in this step. |
+| **4. Closure** | `github_release` | After `release_tagging` has pushed tag `vX.Y.Z`, run `python3 .agents/scripts/publish_github_release.py vX.Y.Z` and observe exit `0` as a **separate invocation** (RA-13 — never chain tag-and-release). The script creates the GitHub Release from `CHANGELOG.md`'s `## [X.Y.Z]` section, failing if that section is missing (never `--notes-from-tag`), and passes `--verify-tag` so `gh` cannot mint a tag from `main`. `--latest` is set only when that section is the newest sealed version. A tag with no ledger section is not a release. To fill tags that predate this step: `python3 .agents/scripts/publish_github_release.py --missing`. |
+| **4. Closure** | `local_prune` | After the seal and Release land, run `python3 .agents/scripts/branch_sovereignty.py prune` as a **separate invocation**. `close_workflow.md` 5.5 already ran prune **before** `gh pr merge --squash`, so it could not delete the branch just published (`HEAD`, still unmerged). This is the post-merge call: it deletes proven-integrated local heads **and** their `origin` heads when still present. GitHub `delete_branch_on_merge` is independent and may be `false`. |
 
 ---
-*Optimized for Pipeline Production Integrity — PR-based merge with CI gate (v3.0.0).*
+*Optimized for Pipeline Production Integrity — PR-based merge with CI gate (v3.1.0); Hotfix H-003 wires `github_release` and post-merge `local_prune`.*

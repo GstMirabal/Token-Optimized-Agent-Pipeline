@@ -4,6 +4,9 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Fixed
+- **Hotfix H-003 (`deployment` closure)** — `/agents:deployment` sealed and tagged without creating the GitHub Release the README promises, and without re-running prune after squash-merge. Latest stayed on `v4.3.0` while `v4.4.0`…`v4.9.1` were bare tags; `hotfix/H-002` and `release/4.9.1` survived on local and origin (`delete_branch_on_merge: false`; close's `local_prune` runs before the merge). Phase 4 now has `github_release` (`scripts/publish_github_release.py`, notes from `## [X.Y.Z]`, RA-13 separate from the tag) and post-merge `local_prune`; `prune` deletes proven-integrated origin heads before local refs. `--missing` backfilled `v4.4.0`…`v4.9.1` from the ledger on 2026-08-25 (Latest `v4.9.1`). **`RA-03` amended** so the branch MUST be `hotfix/[H-ID]` (never `fix/`) — H-003 was first opened as `fix/github-release-in-deploy` because the rule had named only the doc path. Pin: `tests/test_publish_github_release.py`, `tests/test_session_protocol.py`. Record: `docs/hotfixes/H-003-deployment.md`. KI: `F-20260825-H003`.
+
 ## [4.9.1] - 2026-08-25
 
 ### Fixed

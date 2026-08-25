@@ -39,7 +39,9 @@ cause. A retry with backoff makes the state rare; the third value makes it
 honest.
 
 invoked_by: close_workflow.md#branch_audit (audit), close_workflow.md#local_prune
-(prune).
+(prune), deployment_workflow.md#local_prune (prune after merge). Close runs
+prune *before* the branch is integrated, so it cannot delete the branch just
+published; deployment re-invokes prune after `gh pr merge --squash`.
 
 Usage:
     python3 scripts/branch_sovereignty.py audit
@@ -306,6 +308,38 @@ def audit(base: str) -> int:
     return 0
 
 
+def origin_has_head(branch: str) -> bool:
+    """True when `origin` still holds a head named `branch`.
+
+    `git remote prune origin` only drops stale tracking refs after the remote
+    head is already gone. GitHub `delete_branch_on_merge` is an independent
+    remote-side setting and is `false` on this nucleus (measured 2026-08-25
+    with `gh api repos/:owner/:repo --jq .delete_branch_on_merge`), so a
+    squash-merged origin head survives unless something deletes it.
+    """
+    remotes = git("remote")
+    if remotes.returncode != 0 or "origin" not in remotes.stdout.split():
+        return False
+    result = git("ls-remote", "--heads", "origin", branch)
+    if result.returncode != 0:
+        cause = (result.stderr.strip() or f"exit {result.returncode}")[:120]
+        print(f"   ℹ️  {branch}: origin lookup failed — {cause}", file=sys.stderr)
+        return False
+    return bool(result.stdout.strip())
+
+
+def delete_origin_head(branch: str) -> None:
+    """Delete `origin/<branch>` when that head still exists."""
+    if not origin_has_head(branch):
+        return
+    result = git("push", "origin", "--delete", branch)
+    if result.returncode == 0:
+        print(f"🧹 deleted origin/{branch}")
+        return
+    cause = (result.stderr.strip() or f"exit {result.returncode}")[:120]
+    print(f"⚠️  origin/{branch}: {cause}", file=sys.stderr)
+
+
 def prune(base: str) -> int:
     """Delete only branches whose integration was proven.
 
@@ -313,9 +347,14 @@ def prune(base: str) -> int:
     Indeterminate branches are left alone and named — the third value costs one
     extra run here, and buys never deleting a branch on the strength of a lookup
     that did not answer.
+
+    Proven-integrated origin heads are deleted first (`git push origin --delete`).
+    `git remote prune origin` then drops leftover tracking refs; it cannot
+    delete a live origin head, which is why origin survived PRs #51 and #52.
     """
     integrated, unintegrated, indeterminate, _ = classify(base)
     for branch in integrated:
+        delete_origin_head(branch)
         result = git("branch", "-D", branch)
         print(f"🧹 deleted {branch}" if result.returncode == 0 else f"⚠️  {branch}: {result.stderr.strip()}")
     git("remote", "prune", "origin")

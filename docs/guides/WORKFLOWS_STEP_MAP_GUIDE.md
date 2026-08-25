@@ -94,6 +94,8 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 3. Remote Sync | `ci_cd_handover` | verify |
 | 4. Closure | `ledger_seal` | write |
 | 4. Closure | `release_tagging` | write |
+| 4. Closure | `github_release` | write |
+| 4. Closure | `local_prune` | write |
 
 ### `extract_workflow.md`
 
