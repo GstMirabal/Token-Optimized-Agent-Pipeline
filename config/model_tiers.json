@@ -11,9 +11,14 @@
     "stale the day it was written -- the defect this program pursues. The dated",
     "record lives in docs/roadmaps/core/pipeline/021-030-program-queue.md, and",
     "`verified_at` below makes its age visible instead of letting it rot quietly.",
-    "The `cursor` column is derived by audit_cursor_models.py in Sprint 026 from the",
-    "catalogue on disk. Cursor has no subagents, so the tier applies per PHASE",
-    "(authoring vs gate) rather than per agent."
+    "The `cursor` column is derived by scripts/audit_cursor_models.py (make cursor-tiers)",
+    "from the on-disk catalogue. Cursor has no subagents, so the tier applies per",
+    "PHASE (authoring vs gate) rather than per agent.",
+    "cursor.gate and cursor.author stay \"model\": null because a sprint milestone is",
+    "not proven history (Design §D7): promotion to gate requires measured cost per",
+    "accepted unit under Cursor, and author fills only after a human accepts a",
+    "proposal from audit_cursor_models.py. cursor.mechanical stays null for the",
+    "same reason until an accepted proposal lands."
   ],
   "tiers": {
     "gate": {
