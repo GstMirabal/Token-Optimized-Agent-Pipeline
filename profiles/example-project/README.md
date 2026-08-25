@@ -14,11 +14,23 @@ Illustrative project-family pack, kept in the public repo purely to demonstrate 
 ## Installation (opt-in only)
 The base installer never links profiles. From the host project root:
 
+**Illustrative pack inside the submodule** (this repo only):
+
 ```bash
 .agents/scripts/install.sh --profile example-project
 ```
 
-This additionally symlinks the profile's `agents/` and `skills/` into the host `.claude/` tree and appends `@`-imports for the profile's `rules/` to the host `CLAUDE.md`.
+**Production / private profile outside the submodule** (RA-15 — your real project pack):
+
+```bash
+# Convention: host-root/.agents-profile/ or any path you control
+.agents/scripts/install.sh --profile-path .agents-profile
+# or
+.agents/scripts/install.sh --profile-path /path/to/your-profile
+```
+
+The profile directory MUST contain the same layout: `agents/`, optional `skills/`,
+`rules/`, optional `mcp/registry.json`.
 
 ## Governance
 - Profile contents follow the same governance ruleset (`agents.md`) as the core framework.
