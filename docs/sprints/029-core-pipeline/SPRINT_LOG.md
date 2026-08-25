@@ -63,5 +63,9 @@ Work units commit on `ai-sprint/029`. Oldest → newest:
 | R0 | `08dbdb4` | register host finding F-093-G1 without a patch |
 | R1 | `8d55f25` | record 028 post-release seal 84201d2 |
 | R2 | `fb97de5` | carry F-093-G1 to 031 and mark 029 first |
+| T1.0 | `f424c7e` | test scripts/config CHECKS regression-first |
+| T1.1 | `6ab14f9` | extend check_readme_counts + fenced writer |
+| T1.2 | `aa05938` | At a Glance infrastructure row + Cursor badge |
+| T1.3 | `b16cdde` | close readme_counts prose for seven counts |
 
 *Phase 7 QA/Tester gate entries append below.*
