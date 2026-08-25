@@ -2,7 +2,7 @@
 
 **Canonical path**: `docs/sprints/029-core-pipeline/IMPLEMENTATION_PLAN.md`
 **Branch**: `ai-sprint/029` · **Base**: `main` at `84201d2`
-**Status**: `DRAFT` → Phase 5 Human OK after this file is committed (`triple_lock` lock 1)
+**Status**: `APPROVED` — Phase 5 Human OK 2026-08-25 (`triple_lock` lock 1)
 
 > Authored at Phase 1 (Planning) by `principal_agent`, extracted to this path at
 > Phase 3, and **committed before Phase 5 approves it**: `agents.md §2 triple_lock`
@@ -250,12 +250,14 @@ Filter 5 (`token_economy_agent` `pre_approval_audit`): no se añade auditor-agen
 
 | Field | Value |
 | :--- | :--- |
-| **Approved by** | *(Phase 5 — after this file is committed)* |
+| **Approved by** | Gustavo |
 | **Date** | 2026-08-25 |
-| **Plan commit at approval** | *(filled when Phase 5 runs)* |
+| **Plan commit at approval** | `2f7ec90` |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
-Human draft OK 2026-08-25: *"ok"*, then *"no, seguimos así. Continua"* (`F-093-G1` stays out of 029). Phase 5 still requires a second OK on the **committed** file.
+Human draft OK 2026-08-25: *"ok"*, then *"no, seguimos así. Continua"* (`F-093-G1` stays out of 029).
+Phase 5 Human OK 2026-08-25: *"ok"* on committed plan `2f7ec90` after `make cursor-tiers`
+correction landed (`1ffff56` / `db9e7a1` / `da14cf5`).
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an
 unattended `/loop` (`workflows/pipeline_workflow.md`, `rules/loop_governance.md`).*
