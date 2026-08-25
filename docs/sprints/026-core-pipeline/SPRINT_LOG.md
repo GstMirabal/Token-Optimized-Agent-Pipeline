@@ -1,7 +1,7 @@
 # Sprint Log — 026 (`tool-portability`)
 
 **Branch**: `ai-sprint/026` from `main` at `b5bfb6a`
-**Status**: open. A3.1 remediates the A3 delator (`cursor_mdc_schema.md` absorbed into `scripts/cursor_adapter.py` and removed from the sprint directory). **A3 re-run pending** before closeout may affirm portability.
+**Status**: open. A3.r blind partition **passed** (no Cursor-primary artifact identified). Portability may be affirmed at Sprint Closeout.
 
 ---
 
@@ -75,7 +75,7 @@ Measured by `devops_agent` at `main` `b5bfb6a`, before any unit of Sprint `026` 
 
 ## Next Phase
 
-**A3 re-run** after A3.1 (schema absorption). If the blind judge no longer names a Cursor-primary artifact, closeout may affirm portability.
+Sprint Closeout (`close_workflow.md`) may affirm portability. A3.r passed after A3.1.
 
 ---
 
@@ -213,6 +213,27 @@ Human decision: pursue complete portability (Abort §3 option: add a unit), not 
 | Lock contract with `tests/test_cursor_adapter.py` | ✅ `3464d8a` / path fix `25baebc` |
 
 Historical Phase-4 rows in `agent_assignment.md` / `skill_assignment.md` / `IMPLEMENTATION_PLAN.md` still name the former path — that is audit of what `P4.0` produced, not a live artifact.
+
+---
+
+## A3.r — Blind partition re-run (2026-08-25)
+
+Executed under Cursor with `delegation_mode: sequential`. Orchestrator transcribed the `qa_agent` verdict per `Design §D9`.
+
+Fresh `qa_agent` context received `/tmp/a3-blind-026-r/` (sprint directory copy **without** `cursor_mdc_schema.md`; Hito 2 gate table's **Tool** column removed). Asked to bucket each of six artifacts as Claude Code / Cursor / Mixed|cannot tell.
+
+| Artifact | Blind bucket |
+| :--- | :--- |
+| `IMPLEMENTATION_PLAN.md` | Claude Code |
+| `agent_assignment.md` | Claude Code |
+| `skill_assignment.md` | Claude Code |
+| `SPRINT_LOG.md` | Mixed\|cannot tell |
+| `task_scope.md` | Mixed\|cannot tell |
+| `graph_stats.json` | Mixed\|cannot tell |
+
+**Portability judgment:** Did the judge identify any artifact as **primarily Cursor** with confidence? **NO** (NONE).
+
+**Result: the judge did not correctly identify Cursor-produced work.** Per `IMPLEMENTATION_PLAN.md` A3 done-criterion / Abort §3 inverse: **portability may be affirmed** at Sprint Closeout. A3.1 removed the prior delator; this re-run is the evidence.
 
 ---
 

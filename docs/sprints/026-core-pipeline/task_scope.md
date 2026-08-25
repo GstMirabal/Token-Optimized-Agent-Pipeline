@@ -424,7 +424,7 @@ no profile is named to run the commands or record `M1`–`M7`.
 | P4.4 | `config/model_tiers.json` | modify | medium | `rule_validator` |✅ `8f8ff73` |
 | A3 | `docs/sprints/026-core-pipeline/SPRINT_LOG.md` | modify (Hito 2 gate) | medium — gate, closes Hito 2 | `qa_agent` (verdict) → `orchestrator` (transcribes) | ✅ `3a92130` — blind judge ID'd `cursor_mdc_schema.md`; portability **not** affirmed |
 | A3.1 | `scripts/cursor_adapter.py` (+ delete sprint `cursor_mdc_schema.md`; `tests/test_cursor_adapter.py`) | modify + delete + create | medium — remediates A3 delator | `devops_agent` | ✅ `3464d8a` / `25baebc` |
-| A3.r | `docs/sprints/026-core-pipeline/SPRINT_LOG.md` | modify (A3 re-run) | medium — gate | `qa_agent` (verdict) → `orchestrator` (transcribes) | ⏳ |
+| A3.r | `docs/sprints/026-core-pipeline/SPRINT_LOG.md` | modify (A3 re-run) | medium — gate | `qa_agent` (verdict) → `orchestrator` (transcribes) | ✅ pending SHA — judge named NONE Cursor-primary; portability affirmable |
 
 `agents.md` here (`P7`) is the file's **third** touch this sprint, after
 `P3.2.16` and `P5.2` — see **Isolation**.
@@ -550,7 +550,7 @@ is first-party and editable — `P3.2.27`, `P3.2.28` — while
 
 As of 2026-08-25 (post–Hito 2 deferred batch): Hito 1 + deferred census
 (`P3.2.*`, `P3.3`), `A4*`, `P9.2`, `P4.1`, and named Hito 2 units through
-`P4.4`, **`A3`**, and **`A3.1`** are `✅`. Remaining: **`A3.r`** (blind partition re-run after schema absorption).
+`P4.4`, **`A3`**, **`A3.1`**, and **`A3.r`** are `✅`. A3.r: blind judge named **NONE** Cursor-primary — portability affirmable at close.
 
 Phase 5 approval: `1da9641`. Migration Gate: PASS. P3.2 done-criterion:
 exactly one `install_claude` line outside excluded paths — the shim.
