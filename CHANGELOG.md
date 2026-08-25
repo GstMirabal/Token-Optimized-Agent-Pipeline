@@ -4,8 +4,10 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.13.0] - 2026-08-25
+
 ### Added
-- **Sprint 030 (`token-economy-enforcement`)** — `skills/token-saver-auditor/scripts/audit_plan.py` (Filters 1–4/6 + Cost/Mechanisms); consumption-scoped `rules/token_economy.md` globs (no `**/*`); `scripts/check_task_scope.py` closes `F-026-A2`; `session_cost.measure_previous` excludes live session id and skips Claude transcripts under `session_tool: cursor`; Cost section in Implementation Plan template (from 030); `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` (first author-tier trial declared for 031).
+- **Sprint 030 (`token-economy-enforcement`)** — `skills/token-saver-auditor/scripts/audit_plan.py` (Filters 1–4/6 + Cost/Mechanisms); consumption-scoped `rules/token_economy.md` globs (no `**/*`); `scripts/check_task_scope.py` closes `F-026-A2`; `session_cost.measure_previous` excludes live session id and skips Claude transcripts under `session_tool: cursor`; Cost section in Implementation Plan template (from 030); `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` (first author-tier trial declared for 031). Merged as PR #61.
 
 ### Changed
 - **`pipeline_workflow.md` / `close_workflow.md` / `Makefile` `verify`** — invoke `audit_plan.py` and `check_task_scope.py` on the current sprint.

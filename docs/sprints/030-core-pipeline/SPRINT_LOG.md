@@ -1,7 +1,7 @@
 # Sprint Log — 030 (`token-economy-enforcement`)
 
 **Branch**: `ai-sprint/030` from `main` at `65dbaaf`
-**Status**: **GATES PASSED** — Phase 7 Double-Gate APPROVED 2026-08-25. Ready for `/agents:close`.
+**Status**: **SESSION LOCKED** — Sprint 030 closed and deployed `v4.13.0` (2026-08-25).
 
 ---
 
@@ -93,10 +93,21 @@ In progress (`close_workflow.md`):
 | `docs-freshness-check SPRINT_ID=030` | ✅ exit 0 (WARN only on historical 024/025 gaps) |
 | `check_task_scope` | ✅ exit 0 |
 | Repo docs presence | ✅ CONTRIBUTING / SECURITY / CODE_OF_CONDUCT / NOTICE (no content invalidation this sprint) |
-| Master Ledger | ✅ `[Unreleased]` already has 030 |
-| Program queue | ✅ status → gates PASS / close pending |
+| Master Ledger | ✅ sealed as `[4.13.0]` at deploy |
+| Program queue | ✅ 030 delivered `v4.13.0`; next `031` |
 | Heuristic Pulse Gate (Phase 2.5) | ✅ human *"aceptar"* 2026-08-25 |
-| memory wipe | ✅ no-op (`memory/` absent) |
-| release / push / deploy | ✅ sealed `79a2b0d`; pushed `origin/ai-sprint/030`; deploy next |
+| memory wipe | ✅ wiped `memory/telemetry/` (raw_errors only); otherwise no-op |
+| release / push / deploy | ✅ close tip `2eb6472`; PR #61; deploy seal `v4.13.0` |
 
-**SESSION LOCKED** 2026-08-25 — tip `79a2b0d`. Handoff: `/agents:deployment`.
+**SESSION LOCKED** 2026-08-25 — close tip `2eb6472`. Deployed `v4.13.0`.
+
+---
+
+## Deployment seal (2026-08-25)
+
+| Item | Value |
+| :--- | :--- |
+| PR #61 | Squash-merge `72959d9` |
+| Seal commit | Ledger `[4.13.0]` (this commit) |
+| Tag / Release | `v4.13.0` |
+| Deploy preflight | `require-released` exit 0 at close tip `2eb6472` |
