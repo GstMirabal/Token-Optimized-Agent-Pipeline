@@ -139,11 +139,11 @@ row for that intent (`A1`–`A1.2`, `C2`–`C3`, `D1`–`D2` → `grok-4.6`/`hig
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| A1 | `agents/tester_agent.md` | modify | medium | `agent_orchestrator`; Cursor `grok-4.6`, effort `high` | ⏳ |
-| A1.1 | `agents/qa_agent.md` | modify | low | `agent_orchestrator`; Cursor `grok-4.6`, effort `high` | ⏳ |
-| A1.2 | `agents/orchestrator.md` | modify | low | `agent_orchestrator`; Cursor `grok-4.6`, effort `high` | ⏳ |
-| A3 | `hooks/on_init.py` | modify | high | `devops_agent` — escalated (mechanical → author; Cursor `grok-4.6`, effort `high`; see Declared escalations) | ⏳ |
-| A3.1 | `tests/test_on_init.py` | create | medium | `devops_agent` — deviation (tests/); Cursor `composer-2.5` | ⏳ |
+| A1 | `agents/tester_agent.md` | modify | medium | `agent_orchestrator`; Cursor `grok-4.6`, effort `high` | ✅ `ab521b7` |
+| A1.1 | `agents/qa_agent.md` | modify | low | `agent_orchestrator`; Cursor `grok-4.6`, effort `high` | ✅ `bbdfe59` |
+| A1.2 | `agents/orchestrator.md` | modify | low | `agent_orchestrator`; Cursor `grok-4.6`, effort `high` | ✅ `c524794` |
+| A3 | `hooks/on_init.py` | modify | high | `devops_agent` — escalated (mechanical → author; Cursor `grok-4.6`, effort `high`; see Declared escalations) | ✅ `573660e` (with A3.1; `fix(`+test gate) |
+| A3.1 | `tests/test_on_init.py` | create | medium | `devops_agent` — deviation (tests/); Cursor `composer-2.5` | ✅ `573660e` |
 
 ## Ola 1 — Portable
 
