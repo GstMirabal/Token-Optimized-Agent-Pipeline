@@ -2,40 +2,42 @@
 
 ## About The Project
 
-The **Token-Saver Auditor (CFO)** acts as the pipeline's financial supervisor. It is an automated safeguard that analyzes implementation plans to guarantee minimal token consumption, prioritizing the `omni-context-minimizer` and preventing redundant context scans (enforces `rules/token_economy.md`).
+The **Token-Saver Auditor** is the pipeline's structural cost gate for
+Implementation Plans. It enforces `rules/token_economy.md` before Phase 5
+approval: anti-patterns in the plan fail with exit `2`.
 
-**Key Features:**
-*   **Economic Oversight:** Cost analysis before any massive task execution.
-*   **Context Optimization:** Forces AST skeletons on large files.
-*   **Budget Guard:** Prevents infinite reasoning loops that drain API quotas.
+Filter 5 (script vs agent judgment on recurring workflow steps) lives in
+`scripts/scan_workflow_determinism.py` (`make verify`). This skill owns Filters
+1–4 and 6 plus the Cost / Mechanisms checks on the plan artifact.
 
 ### Built With
 
-![Governance](https://img.shields.io/badge/governance-logic-blue)
-![CFO](https://img.shields.io/badge/CFO-audit-orange)
+Governance logic · Three-File Skill Standard (`agents.md §3`)
 
 ## Getting Started
 
 ### Prerequisites
 
-*   **Token-Optimized Agent Pipeline Core**: Requires the governance rules (`agents.md` + `rules/`) to be active.
+* Token-Optimized Agent Pipeline core (`agents.md` + `rules/`)
 
-### Installation & Configuration
+### Installation
 
-1. **Submodule Integration**
-   Located at `.agents/skills/token-saver-auditor/`.
-
-2. **Activation**
-   Activates automatically during the tactical planning phase (Orchestration Phase).
+Located at `skills/token-saver-auditor/` (Three-File: `README.md`, `SKILL.md`,
+`scripts/`).
 
 ## Usage
 
-The Auditor reviews every **Orchestrator** proposal before the **DevOps Agent** may execute physical changes. If the plan is inefficient (e.g. recursive scan without the minimizer), the Auditor blocks execution.
-
 ```bash
-# Example: activating the Auditor during the debate phase
-Principal Agent: "The Auditor must certify this Phase 2 plan before proceeding."
+# Audit a specific plan (exit 2 = reject)
+python3 skills/token-saver-auditor/scripts/audit_plan.py \
+  docs/sprints/030-core-pipeline/IMPLEMENTATION_PLAN.md
+
+# Current sprint only (skips when sprint id < 30 or no plan)
+python3 skills/token-saver-auditor/scripts/audit_plan.py --current-sprint
 ```
+
+Invoked by `workflows/pipeline_workflow.md` Phases 1 and 5, and by
+`Makefile` `verify` via `--current-sprint`.
 
 ## Contributing
 

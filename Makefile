@@ -50,6 +50,8 @@ verify:
 	  [json.load(open(f)) for f in glob.glob('**/*.json', recursive=True) \
 	   if not any(p in f for p in ('node_modules', '.git/', 'venv_skillopt'))]; print('JSON OK')"
 	cd $(AGENTS_DIR) && python3 scripts/scan_workflow_determinism.py .
+	cd $(AGENTS_DIR) && python3 skills/token-saver-auditor/scripts/audit_plan.py --current-sprint
+	cd $(AGENTS_DIR) && python3 scripts/check_task_scope.py --current-sprint
 	cd $(AGENTS_DIR) && python3 scripts/verify_references.py
 	cd $(AGENTS_DIR) && $(PY) scripts/check_model_tiers.py
 	cd $(AGENTS_DIR) && $(PY) scripts/detect_new_models.py --check

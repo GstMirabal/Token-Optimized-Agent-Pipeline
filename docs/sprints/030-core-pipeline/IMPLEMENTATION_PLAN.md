@@ -227,7 +227,7 @@ Tras I1/I2: `python3 scripts/map_workflows.py` regenera
 | :--- | :--- |
 | **Approved by** | Gustavo |
 | **Date** | 2026-08-25 |
-| **Plan commit at approval** | pending commit on `ai-sprint/030` |
+| **Plan commit at approval** | 9d5ce94 |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 Human draft OK 2026-08-25: *"ok"* (plan attached). Phase 5 Human OK same day: *"ok"*.

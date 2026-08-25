@@ -23,9 +23,18 @@
     {
       "path": "rules/token_economy.md",
       "globs": [
-        "**/*"
+        "docs/sprints/**/IMPLEMENTATION_PLAN.md",
+        "docs/sprints/**/task_scope.md",
+        "docs/plans/**",
+        "workflows/*.md",
+        "skills/token-saver-auditor/**",
+        "scripts/session_cost.py",
+        "scripts/check_task_scope.py",
+        "config/model_tiers.json",
+        "agents/token_economy_agent.md",
+        "rules/token_economy.md"
       ],
-      "trigger_prose": "Reading source files, planning subagent context, or auditing a plan's cost."
+      "trigger_prose": "Authoring or auditing an Implementation Plan or task_scope, measuring session cost, or changing model tiers / token-economy instruments."
     },
     {
       "path": "rules/qa_and_testing.md",

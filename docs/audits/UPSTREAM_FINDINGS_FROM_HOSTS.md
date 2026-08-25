@@ -45,12 +45,19 @@ inferred from where the section sits.
 | **Closed** | **`F-023-S4`** — dotenv files matched by name; `UNQUOTED_ASSIGNMENT` selected for every file type. Re-measured: `tests/test_on_commit.py` F-023-S4 cases, 152 passed on `hotfix/H-002` |
 | **Still open** | **`F-021-A2`**, **`F-026-A1`**, **`F-026-A2`**, **`F-026-A3`** — A1/A3 closed later in Sprint 027 (see status table above) |
 
+**Status at Sprint 030 (2026-08-25, `ai-sprint/030`).**
+
+| | |
+| :--- | :--- |
+| **Closed** | **`F-026-A2`** — `scripts/check_task_scope.py` fails when Model/Effort are required and missing, or mechanical+high lacks escalation/keep. Re-measured: fixture without columns exits `2`; `docs/sprints/024-core-pipeline` skips exit `0` |
+| **Still open** | **`F-021-A2`**, **`F-093-G1`** |
+
 **Status at 2026-08-25 (`84201d2`, intake of `F-093-G1`).**
 
 | | |
 | :--- | :--- |
 | **Opened, still open** | **`F-093-G1`** — Double-Gate has no severity class. Reproduced against `84201d2` (commands in that entry). Not patched |
-| **Still open (unchanged)** | **`F-021-A2`**, **`F-026-A2`** |
+| **Still open (unchanged)** | **`F-021-A2`**, **`F-026-A2`** (closed later in Sprint 030 — see status table above) |
 
 **The corrections reproduction produced are recorded where a reader needs them**,
 not collected in a list. `F-086-S3` carries three: it was **narrower** than
@@ -878,7 +885,21 @@ remain `Read, Glob, Grep, Bash`; `orchestrator.md` holds `Write, Edit` and
 
 ---
 
-### - [ ] `F-026-A2` — `tier_escalation` shipped in `v4.7.0`, lay dormant for three sprints, and fired in Sprint 026 only because a human noticed a missing column
+### - [x] `F-026-A2` — `tier_escalation` shipped in `v4.7.0`, lay dormant for three sprints, and fired in Sprint 026 only because a human noticed a missing column
+
+**Closed in Sprint 030** by `scripts/check_task_scope.py` (invoked from
+`pipeline_workflow.md` Phase 4.3, `close_workflow.md` Phase 2.6, and
+`Makefile` `verify` via `--current-sprint`). Choice taken: candidate (1) from
+this entry — Model/Effort become a testable artifact; mechanical+high without
+escalation/keep exits `2`. Historical sprints before 028 skip.
+
+**Re-measure (closed):**
+
+```bash
+python3 scripts/check_task_scope.py --sprint-dir docs/sprints/024-core-pipeline; echo $?
+# → 0 (skip)
+# Fixture: Cursor task_scope claiming Model/Effort but omitting those columns → exit 2
+```
 
 **Evidence.** `agents/token_economy_agent.md:21`:
 

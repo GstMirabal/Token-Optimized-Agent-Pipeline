@@ -23,7 +23,7 @@ Domain rules live in `rules/` and are loaded **on demand** at these triggers —
 | :--- | :--- |
 | `rules/code_craft.md` | Writing or modifying source code in any language (not documentation or governance edits). |
 | `rules/loop_governance.md` | Before wrapping any phase in `/loop` or `/schedule`, or authoring an unattended routine. |
-| `rules/token_economy.md` | Reading source files, planning subagent context, or auditing a plan's cost. |
+| `rules/token_economy.md` | Authoring/auditing a plan or `task_scope`, measuring session cost, or changing model tiers / token-economy instruments (not every source edit). |
 | `rules/qa_and_testing.md` | Writing/running tests, entering the Quality Gate, or after 3 consecutive failures. |
 | `rules/project_topology.md` | Running local commands, choosing interpreters/paths, or touching DB containers. |
 | `rules/skills_and_integrations.md` | Searching, registering, or forging skills/tools. |
