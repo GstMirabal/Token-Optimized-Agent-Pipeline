@@ -32,7 +32,9 @@
 
 ## Phase 4 — Assignment
 
-- Pending same-session writes: `agent_assignment.md`, `skill_assignment.md`, `task_scope.md`.
+- `agent_assignment.md` `5853bd7`, `skill_assignment.md` `7d07ba7`, `task_scope.md` `113b8b2`.
+- Cursor `delegation_mode: sequential`. `make cursor-tiers` run this session before Model/Effort (exit `0`).
+- `F-026-A2`: Model/Effort + mechanical-high escalation on M1; `check_task_scope.py` exit `0`.
 
 ## Phase 5 — Approval Gate
 
