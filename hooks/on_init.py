@@ -29,7 +29,7 @@ ENV_TEMPLATE = Path(".env.template")
 BRIDGE_LOCK = Path(".agents/.bridge_claude.lock")
 INSTALL_SCRIPT = Path(".agents/scripts/install.py")
 
-# A small, representative sample of the artifacts install_claude.py links into
+# A small, representative sample of the artifacts install.py links into
 # the host. Cheap enough to stat on every session start.
 BRIDGE_ANCHORS = [
     Path(".claude/commands/agents/start.md"),
