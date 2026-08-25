@@ -59,9 +59,9 @@ Measured by `devops_agent` at `main` `b5bfb6a`, before any unit of Sprint `026` 
 | `P7` | APPROVED (done-criteria greps + verify_references) | Cursor | Composer (sequential session) |
 | `P7.1` | APPROVED (open `[ ]` findings 10→9) | Cursor | Composer (sequential session) |
 | `A2` | APPROVED — commit exit 1; hook named `Dockerfile` / `API_KEY` | Cursor | Composer (sequential session) |
-| `P4.2` | | | |
-| `P4.3` | | | |
-| `P4.4` | | | |
+| `P4.2` | APPROVED — catalogue+filters; gate proposals empty | Cursor | Composer (sequential) |
+| `P4.3` | APPROVED — `make cursor-tiers` | Cursor | Composer (sequential) |
+| `P4.4` | APPROVED — `_comment` contains not proven history | Cursor | Composer (sequential) |
 
 ---
 
