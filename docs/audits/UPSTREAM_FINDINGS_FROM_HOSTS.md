@@ -13,7 +13,7 @@ business logic. Where a measurement is quoted it is a count, not an identity.
 
 | Section | What it holds | Reproduction status |
 | :--- | :--- | :--- |
-| *Reported by a host* | The original seven, plus **`F-093-G1`** (opened 2026-08-25) | Original seven: reproduced against `v4.4.0` when this file was written, and **re-measured again** when each was closed. **`F-093-G1`**: reproduced against `84201d2` (`v4.11.0` + post-release seal), **not** against `v4.4.0` |
+| *Reported by a host* | The original seven, plus **`F-093-G1`** (opened 2026-08-25, **closed Sprint 031**) | Original seven: reproduced against `v4.4.0` when this file was written, and **re-measured again** when each was closed. **`F-093-G1`**: reproduced against `84201d2` (`v4.11.0` + post-release seal), **not** against `v4.4.0`; closed against `ai-sprint/031` |
 | *Added by Sprint 023* | Three items the nucleus found in itself | Measured against the tree at the time each was written. **Not** `v4.4.0` |
 | *Added by Sprint 026* | Three items the nucleus found in itself: one at the Agent Assignment phase, one at the Phase 4 tier audit, one during Hito 1 execution, none while repairing another entry | Measured against the tree at `b5bfb6a`, the commit `docs/sprints/026-core-pipeline/task_scope.md` names as Sprint 026's base |
 | *Inherited from host sprint records* | Leads from a host's sprint history | **Not** re-measured when written. Treat each as a lead, reproduce it first, and delete it if it no longer holds |
@@ -50,7 +50,14 @@ inferred from where the section sits.
 | | |
 | :--- | :--- |
 | **Closed** | **`F-026-A2`** — `scripts/check_task_scope.py` fails when Model/Effort are required and missing, or mechanical+high lacks escalation/keep. Re-measured: fixture without columns exits `2`; `docs/sprints/024-core-pipeline` skips exit `0` |
-| **Still open** | **`F-021-A2`**, **`F-093-G1`** |
+| **Still open** | **`F-021-A2`** |
+
+**Status at Sprint 031 (2026-08-25, `ai-sprint/031`).**
+
+| | |
+| :--- | :--- |
+| **Closed** | **`F-093-G1`** — emitible set `APPROVED` \| `REJECTED` \| `RECORD`; `scripts/check_gate_log.py` skip id < 31; `RECORD` excluded from remediation count. Re-measured: `qa_and_testing.md` §4 names `RECORD`; fixture `REJECTED` without class exits `2`; `docs/sprints/030-core-pipeline` skip exit `0` |
+| **Still open** | **`F-021-A2`** |
 
 **Status at 2026-08-25 (`84201d2`, intake of `F-093-G1`).**
 
@@ -487,15 +494,15 @@ definition rather than a rewrite at each call site.
 > Recorded because the entry's own framing — *"a mandatory close step crashes"* —
 > invites exactly the repair that would have shipped the worse defect.
 
-### - [ ] `F-093-G1` — the Double-Gate has no severity class, so a round cap cannot fire
+### - [x] `F-093-G1` — the Double-Gate has no severity class, so a round cap cannot fire
 
 **Provenance.** Reported by a host under `agents.md §4 feedback_upstream`. Genericized
 per `RA-15`: no host project name, no absolute paths, no host business logic.
 **Not** one of the original seven: those were verified against `v4.4.0`. This
 entry was reproduced against `84201d2` (`v4.11.0` plus the post-release seal
-commit) on 2026-08-25, **before** any patch. The three-verdict split has **not**
-landed — if a later sprint ships it, close this entry against that commit and
-do not re-open it.
+commit) on 2026-08-25, **before** any patch. The three-verdict split **landed
+in Sprint 031** (`ai-sprint/031`, `scripts/check_gate_log.py`, `RA-17`). Do not
+re-open this entry.
 
 **Evidence.** `rules/qa_and_testing.md` §4, `agents/qa_agent.md` (`rejection_trigger`),
 `agents/tester_agent.md`, `workflows/pipeline_workflow.md` Phase 7, `workflows/remediation_workflow.md` Phase 0.
