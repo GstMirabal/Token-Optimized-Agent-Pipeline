@@ -1,7 +1,7 @@
 # Sprint Log — 032 (`author-tier-trial`)
 
 **Branch**: `ai-sprint/032` from `main` at `0429f03` (`v4.14.0`)
-**Status**: **IN PROGRESS** — Phase 6 EXECUTING under human attestation (option B): chat = Cursor Grok 4.5.
+**Status**: **SESSION LOCKED** — Sprint 032 closed 2026-08-25; `cursor.author` promoted to `grok-4.5`; awaiting `/agents:deployment`.
 **Session**: `20260825T162044Z-31194` · tool `cursor` · `delegation_mode: sequential`
 
 ---
