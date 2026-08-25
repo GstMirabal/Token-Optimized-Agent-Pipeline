@@ -11,6 +11,8 @@ Every probe carries a way to stop repeating itself, because that is the
 difference between a check and background noise:
   * the platform probe caches for 7 days (`last_platform_probe`) — repository
     configuration changes a couple of times a year, not once a session;
+    written by ``stamp_last_platform_probe`` after a real interrogation
+    (Sprint 032);
   * any probe can be acknowledged (`acknowledged_gaps` in the anchor) when the
     human has seen the gap and accepted it.
 
@@ -40,6 +42,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import session_cost  # noqa: E402
+import session_state  # noqa: E402
 from _mode import is_nucleus as _is_nucleus  # noqa: E402
 
 HARD_RATIO = 15  # rules/token_economy.md §3.1
@@ -483,6 +486,23 @@ def platform_report(findings: list[str], undetermined: list[str]) -> str | None:
     return "\n\n • ".join(report)
 
 
+def stamp_last_platform_probe() -> None:
+    """Write ``last_platform_probe`` after a real platform interrogation.
+
+    Skips that never call GitHub (no ``gh``, non-GitHub remote, acknowledged
+    gap, fresh TTL) must not call this — a false stamp defeats the 7-day cache
+    declared in ``start_workflow.md`` Phase 0.7. Uses ``session_state.save_state``
+    so the mirror refreshes with the anchor.
+    """
+    if not session_state.ACTIVE_STATE.is_file():
+        return
+    state = session_state.load_state()
+    stamp = session_state.now()
+    state["last_platform_probe"] = stamp
+    state["last_updated"] = stamp
+    session_state.save_state(state)
+
+
 def probe_platform(state: dict, force: bool) -> str | None:
     """Are the controls `repository_hardening_workflow.md` mandates enabled?"""
     if acknowledged(state, "platform") is not None:
@@ -518,6 +538,8 @@ def probe_platform(state: dict, force: bool) -> str | None:
     findings, undetermined = collect_security_controls(
         slug, security if isinstance(security, dict) else None, is_admin, branch)
     findings += collect_repo_hygiene(repo)
+    # Interrogation completed — stamp even when the report is empty (clean).
+    stamp_last_platform_probe()
     return platform_report(findings, undetermined)
 
 

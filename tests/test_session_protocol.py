@@ -409,6 +409,7 @@ def test_doubt_is_reported_apart_from_accusation_and_never_as_disabled(monkeypat
     monkeypatch.setattr(spr, "gh_call", lambda *a: (1, "", "gh: Server Error (HTTP 503)"))
     monkeypatch.setattr(spr.Path, "exists", lambda self: True)
     monkeypatch.setattr(spr.Path, "is_dir", lambda self: True)
+    monkeypatch.setattr(spr, "stamp_last_platform_probe", lambda: None)
 
     report = spr.probe_platform({}, force=True)
 
@@ -460,6 +461,7 @@ def test_the_admin_discriminator_is_read_from_the_repository_payload(
     monkeypatch.setattr(spr, "gh_call", lambda *a: (1, "", "gh: Not Found (HTTP 404)"))
     monkeypatch.setattr(spr.Path, "exists", lambda self: True)
     monkeypatch.setattr(spr.Path, "is_dir", lambda self: True)
+    monkeypatch.setattr(spr, "stamp_last_platform_probe", lambda: None)
 
     report = spr.probe_platform({}, force=True)
 
@@ -1493,3 +1495,70 @@ def test_measure_previous_skips_claude_transcripts_under_cursor(tmp_path, monkey
     }
     (claude_dir / "any.jsonl").write_text(json.dumps(turn) + "\n", encoding="utf-8")
     assert sc.measure_previous(project, session_tool="cursor") is None
+
+
+# --- Sprint 032: last_platform_probe writer (F-023 unrouted cache) --------
+
+def _mock_platform_interrogation(monkeypatch, *, clean: bool = False) -> None:
+    """Stub gh so probe_platform reaches a real interrogation."""
+    monkeypatch.setattr(spr.shutil, "which", lambda _: "/usr/bin/gh")
+    if clean:
+        monkeypatch.setattr(spr, "gh_json", lambda *a: (
+            {"nameWithOwner": "o/r", "description": "d", "homepageUrl": "h",
+             "defaultBranchRef": {"name": "main"}}
+            if a[:2] == ("repo", "view")
+            else {"permissions": {"admin": True},
+                  "security_and_analysis": {
+                      "secret_scanning": {"status": "enabled"},
+                      "secret_scanning_push_protection": {"status": "enabled"},
+                      "dependabot_security_updates": {"status": "enabled"}}}
+        ))
+        monkeypatch.setattr(spr, "gh_call", lambda *a: (0, "", ""))
+        monkeypatch.setattr(spr, "collect_repo_hygiene", lambda repo: [])
+        monkeypatch.setattr(spr, "collect_security_controls",
+                            lambda *a, **k: ([], []))
+    else:
+        monkeypatch.setattr(spr, "gh_json", lambda *a: (
+            {"nameWithOwner": "o/r", "description": "d", "homepageUrl": "h",
+             "defaultBranchRef": {"name": "main"}}
+            if a[:2] == ("repo", "view")
+            else {"permissions": {"admin": True},
+                  "security_and_analysis": {
+                      "secret_scanning": {"status": "enabled"},
+                      "secret_scanning_push_protection": {"status": "enabled"}}}
+        ))
+        monkeypatch.setattr(spr, "gh_call", lambda *a: (1, "", "gh: Not Found (HTTP 404)"))
+    monkeypatch.setattr(spr.Path, "exists", lambda self: True)
+    monkeypatch.setattr(spr.Path, "is_dir", lambda self: True)
+
+
+def test_platform_interrogation_stamps_last_platform_probe(anchor, monkeypatch):
+    """After a real platform call, the anchor carries last_platform_probe."""
+    anchor.write_text(json.dumps({"session_id": "s1", "status": "IN_PROGRESS"}) + "\n")
+    _mock_platform_interrogation(monkeypatch)
+    spr.probe_platform(json.loads(anchor.read_text()), force=True)
+    state = json.loads(anchor.read_text())
+    assert "last_platform_probe" in state, state
+    assert state["last_platform_probe"].endswith("Z")
+    # ISO-8601 basic form used by session_state.now()
+    assert len(state["last_platform_probe"]) == 20
+
+
+def test_missing_gh_does_not_stamp_last_platform_probe(anchor, monkeypatch):
+    """Skip when gh is absent — no false cache entry."""
+    anchor.write_text(json.dumps({"session_id": "s1"}) + "\n")
+    monkeypatch.setattr(spr.shutil, "which", lambda _: None)
+    assert spr.probe_platform(json.loads(anchor.read_text()), force=True) is None
+    assert "last_platform_probe" not in json.loads(anchor.read_text())
+
+
+def test_fresh_ttl_does_not_rewrite_last_platform_probe(anchor, monkeypatch):
+    """Within the 7-day TTL, the stamp is left alone."""
+    prior = "2026-08-25T12:00:00Z"
+    anchor.write_text(json.dumps({
+        "session_id": "s1",
+        "last_platform_probe": prior,
+    }) + "\n")
+    _mock_platform_interrogation(monkeypatch)
+    assert spr.probe_platform(json.loads(anchor.read_text()), force=False) is None
+    assert json.loads(anchor.read_text())["last_platform_probe"] == prior
