@@ -1,7 +1,7 @@
 # Sprint Log — 029 (`documentation-truth`)
 
 **Branch**: `ai-sprint/029` from `main` at `84201d2`
-**Status**: **OPEN** — Phase 5 Approval Gate **PASSED** 2026-08-25; Phase 6 in progress.
+**Status**: **OPEN** — Phase 6 execution **complete** for planned units; Phase 7 Double-Gate pending.
 
 ---
 
@@ -67,5 +67,16 @@ Work units commit on `ai-sprint/029`. Oldest → newest:
 | T1.1 | `6ab14f9` | extend check_readme_counts + fenced writer |
 | T1.2 | `aa05938` | At a Glance infrastructure row + Cursor badge |
 | T1.3 | `b16cdde` | close readme_counts prose for seven counts |
+| (G1 pre) | `9428739` | name guide in audit link_audit (registry contract) |
+| G1 | `25b3ddf` | register AGENTS_SLASH_COMMANDS_GUIDE.md |
+| G2 | `1e84603` | two-tool slash-commands guide |
+| G3 | `a47e89a` | verify_commands requires §3.2 stems |
+| A3–A7 | `e36a5ba`…`e9e46df` | ADR-0003…0007 |
+| J6.0 | `732e5b3` | file:line range test regression-first |
+| (T1.1 fix) | `296f5f4` | argparse must ignore pytest argv |
+| J6.1 | `b2f2a09` | verify_references check (f) |
+| P1 | `d98ddee` | Implementation Plan T5 section |
+| P2 | `d70a599` | documentation_standard §6 T5 |
+| C1 | `29198b5` | Unreleased Sprint 029 changelog entry |
 
 *Phase 7 QA/Tester gate entries append below.*
