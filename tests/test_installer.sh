@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# End-to-end sandbox test for scripts/install_claude.sh (and its Python core).
+# End-to-end sandbox test for scripts/install.sh (and its Python core).
 # Simulates a host project with .agents as a submodule and asserts:
 #   - symlinks resolve, host content is never clobbered, JSON merges are valid,
 #   - CLAUDE.md import is added exactly once (idempotency),
@@ -28,7 +28,7 @@ printf 'node_modules/\n*.pyc\n' > "$WORK/host/.gitignore"
 cd "$WORK/host"
 
 # --- Act ---------------------------------------------------------------------
-bash .agents/scripts/install_claude.sh --profile example-project > /dev/null
+bash .agents/scripts/install.sh --profile example-project > /dev/null
 
 # --- Assert ------------------------------------------------------------------
 [ -L .claude/agents/orchestrator.md ] || fail "agent symlink missing"
@@ -65,7 +65,7 @@ grep -qxF "/.claude/settings.json" .gitignore \
   && fail ".gitignore: settings.json must stay trackable, not ignored"
 
 # Idempotency: re-run must not duplicate imports nor error out.
-bash .agents/scripts/install_claude.sh --profile example-project > /dev/null
+bash .agents/scripts/install.sh --profile example-project > /dev/null
 [ "$(grep -cxF "@.agents/agents.md" CLAUDE.md)" = "1" ] || fail "duplicate import on re-run"
 [ "$(grep -cxF "/graphify-out/" .gitignore)" = "1" ] || fail "duplicate .gitignore entry on re-run"
 
