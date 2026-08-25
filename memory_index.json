@@ -1,6 +1,6 @@
 {
-  "last_update": "2026-08-24",
-  "sprint_id": "023",
+  "last_update": "2026-08-25",
+  "sprint_id": "026",
   "_schema": "Entries are summary-only Knowledge Items. The 'file' field is omitted once the raw log has been purged (agents.md §4 definitive_amnesia) — the 1-line summary IS the retained knowledge.",
   "items": [
     {
@@ -38,6 +38,14 @@
     {
       "id": "F-20260824-UF03",
       "summary": "An artifact's risk is the cost of its assertions being wrong, not the difficulty of writing it: Sprint 023's C8 was ten checkbox ticks in Markdown, classified low-risk, and cost 5 gate rounds and 4 rejections that were all false claims, while C7 (a git mv) cleared both gates in one round."
+    },
+    {
+      "id": "F-20260825-A2",
+      "summary": "PLACEHOLDER_MARKERS includes \"test\", so an ENV API_KEY=\"…test…\" Dockerfile never trips on_commit; for real violation exercises use opaque non-placeholder values."
+    },
+    {
+      "id": "F-20260825-A3",
+      "summary": "A tool-specific measurement receipt left in the sprint directory (e.g. cursor_mdc_schema.md) fails blind portability partition; absorb the contract into the product generator and remove the receipt before A3."
     }
   ]
 }

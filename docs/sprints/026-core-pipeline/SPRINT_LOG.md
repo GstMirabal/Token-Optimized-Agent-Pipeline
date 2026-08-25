@@ -1,7 +1,7 @@
 # Sprint Log — 026 (`tool-portability`)
 
 **Branch**: `ai-sprint/026` from `main` at `b5bfb6a`
-**Status**: open. A3.r blind partition **passed** (no Cursor-primary artifact identified). Portability may be affirmed at Sprint Closeout.
+**Status**: closing. A3.r passed; portability affirmed; Heuristic Pulse Gate confirmed both KIs (`F-20260825-A2`, `F-20260825-A3`).
 
 ---
 
@@ -75,7 +75,7 @@ Measured by `devops_agent` at `main` `b5bfb6a`, before any unit of Sprint `026` 
 
 ## Next Phase
 
-Sprint Closeout (`close_workflow.md`) may affirm portability. A3.r passed after A3.1.
+Sprint Closeout in progress → next protocol after seal: `workflows/deployment_workflow.md` (`/agents:deployment`). Do **not** merge `ai-sprint/026` into `main` from close.
 
 ---
 
@@ -234,6 +234,12 @@ Fresh `qa_agent` context received `/tmp/a3-blind-026-r/` (sprint directory copy 
 **Portability judgment:** Did the judge identify any artifact as **primarily Cursor** with confidence? **NO** (NONE).
 
 **Result: the judge did not correctly identify Cursor-produced work.** Per `IMPLEMENTATION_PLAN.md` A3 done-criterion / Abort §3 inverse: **portability may be affirmed** at Sprint Closeout. A3.1 removed the prior delator; this re-run is the evidence.
+
+---
+
+## Closeout seal (2026-08-25)
+
+Heuristic Pulse Gate: human confirmed indexing **`F-20260825-A2`** and **`F-20260825-A3`** into `memory_index.json`. Portability **affirmed**. Next protocol: `workflows/deployment_workflow.md` (merge/tag — not this close).
 
 ---
 

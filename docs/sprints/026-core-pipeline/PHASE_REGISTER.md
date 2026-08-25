@@ -13,7 +13,7 @@ What `close_workflow.md` Phase 2.6 `double_gate_evidence` reads: **did this phas
 | 5 · Approval Gate | Human authorisation | ✅ 2026-08-24 over plan at `1da9641` |
 | 6 · Execution | Hito 1 + Migration Gate + Hito 2 (+ A3.1 / A3.r) | ✅ on `ai-sprint/026` |
 | 7 · Quality Gate | `make verify` + G1.q / G1.t | ✅ APPROVED (transcribed in `SPRINT_LOG.md`) |
-| 8 · Closeout | `CHANGELOG.md` `[Unreleased]`, roadmap, `graph_stats.json`, this register | ⏳ in progress |
+| 8 · Closeout | `CHANGELOG.md` `[Unreleased]`, roadmap, `graph_stats.json`, this register | ✅ this close |
 
 ## Gate rounds
 
