@@ -57,7 +57,7 @@ The Token-Optimized Agent Pipeline is an AI agent governance framework designed 
 *   **100% Coverage Mandate:** Strategic requirement enforced by the **Tester Agent**, ensuring zero-defect integration before any code commitment.
 *   **Token-Saver Auditor:** An automated safeguard that prevents inefficient plans and reduces API costs by optimizing context windows.
 *   **Omni-Context Minimizer:** Smart AST-based code skeleton extraction that allows AI to understand massive files (1000+ lines) while only consuming 10% of the normal token cost.
-*   **Skill Forge & Flat Skill Mapping:** Universal, deterministic tooling governed by the Three-File Skill Standard and external nomenclature (`-3rd`), bridged to real Claude Code slash commands via `scripts/install_claude.sh` + the `slash-commander` skill.
+*   **Skill Forge & Flat Skill Mapping:** Universal, deterministic tooling governed by the Three-File Skill Standard and external nomenclature (`-3rd`), bridged to real Claude Code slash commands via `scripts/install.sh` + the `slash-commander` skill.
 *   **Knowledge Extraction & Memory:** Automatic heuristic distillation via `extract_workflow.md`, indexing lessons into atomic Knowledge Items (KIs) inside `/memory/`.
 *   **Persistent Compliance Roadmap:** Integrated topology via `docs/roadmaps/`, anchored by the unbreakable `docs/active_state.json`.
 *   **Documentation Standard:** Deterministic freshness-gate (Diátaxis + C4 + ADR) that keeps architecture docs from silently going stale — enforced at sprint close, not by agent memory.
@@ -98,13 +98,13 @@ The Token-Optimized Agent Pipeline is an AI agent governance framework designed 
 2. **Install the Claude Code bridge**
    Claude Code only auto-discovers agents/commands/skills/hooks from `.claude/` and `.mcp.json` at your **project root** — it never reads inside a submodule. Run the installer once (idempotent, safe to re-run):
    ```bash
-   .agents/scripts/install_claude.sh
+   .agents/scripts/install.sh
    ```
    This symlinks `.agents/agents/*.md` → `.claude/agents/`, `.agents/commands/*.md` → `.claude/commands/agents/` (exposed as `/agents:*`), `.agents/skills/*/` → `.claude/skills/`, merges hooks + MCP servers into your `.claude/settings.json` / `.mcp.json`, and adds the `@.agents/agents.md` import to your `CLAUDE.md` so the governance rules auto-load every session. It never overwrites non-symlinked host content.
 
    **Project profiles (opt-in)**: project-family packs (extra rules, specialist agents, domain skills) live under `profiles/` and are only linked when explicitly requested:
    ```bash
-   .agents/scripts/install_claude.sh --profile example-project
+   .agents/scripts/install.sh --profile example-project
    ```
    > [!NOTE]
    > Real production profiles are never committed to this public repo (`RA-15`) — they live in a private location the host controls. `profiles/example-project/` is illustrative only.
@@ -120,7 +120,7 @@ The Token-Optimized Agent Pipeline is an AI agent governance framework designed 
    To upgrade later: check the [CHANGELOG](CHANGELOG.md), check out the new tag, and re-run the installer to pick up new agents/commands/skills:
    ```bash
    git submodule update --remote --merge   # only if you deliberately track main
-   .agents/scripts/install_claude.sh
+   .agents/scripts/install.sh
    ```
 
 4. **Audit & configure**
@@ -161,7 +161,7 @@ See the full command reference → [`docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md`
 If you are adding the framework to an **already established repository**, follow this sequence to align your architectural roadmap:
 
 1.  **Submodule insertion:** In your root folder: `git submodule add https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline .agents`
-2.  **Bridge installation:** `.agents/scripts/install_claude.sh` (creates `.claude/agents`, `.claude/commands/agents`, `.claude/skills`, and merges hooks/MCP config).
+2.  **Bridge installation:** `.agents/scripts/install.sh` (creates `.claude/agents`, `.claude/commands/agents`, `.claude/skills`, and merges hooks/MCP config).
 3.  **AI session trigger:** Tell the AI: *"Initialize session using governance protocols in `.agents/` and execute `/agents:start`."*
 4.  **Roadmap discovery:** The topology mapper will map `docs/active_state.json` (scaffolding it on first run — see `start_workflow.md`).
 5.  **Then follow the canonical onboarding order**, defined once in [`agents.md §6`](agents.md) and deliberately not restated here: **`/agents:harden`** (platform controls, changes no code) → **`/agents:standardization`** (artifacts and topology) → **`/agents:revdoc`** (documentation of the code, verified against the graph) → **`/agents:pipeline`** (change).
@@ -195,7 +195,7 @@ Working *inside* this repo (not a host project) is a different case: the full ho
 ```bash
 git clone https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline.git
 cd Token-Optimized-Agent-Pipeline
-python3 scripts/install_claude.py
+python3 scripts/install.py
 ```
 
 This links `.claude/commands/agents/*` and `.claude/agents/*` (so `/agents:start`, `/agents:close`, etc. work while you develop) and adds `@agents.md` to a nucleus-local `CLAUDE.md` — no hooks, skills, MCP, or scaffolding (those assume a host root; `.claude/` here is git-ignored, regenerate anytime by re-running the script). **Restart your Claude Code session** afterward — commands are discovered at session start, not live.
