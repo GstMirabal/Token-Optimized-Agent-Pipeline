@@ -998,7 +998,7 @@ scope is the missing invoker declaration; this entry's scope is the
 host-relative paths inside the file that declaration would then cover.
 
 **Noted, not inflated.** `hooks/on_init.py:18` still comments that
-`install_claude.py` links the bridge artifacts — a script that no longer
+`install.py` links the bridge artifacts — a script that no longer
 exists under that name (`INSTALL_SCRIPT` two lines above names
 `scripts/install.py`). This is inside Sprint 026's own declared deferral set
 (`docs/sprints/026-core-pipeline/task_scope.md` §`Declared deferral`, the
