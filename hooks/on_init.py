@@ -1,7 +1,10 @@
-"""Session-start bridge sync for Claude Code hosts.
+"""Session-start bridge sync for Claude Code **hosts**.
 
-Runs at ``SessionStart`` to re-link commands/agents when the submodule moves
-and to refuse a session whose bridge artifacts are gone.
+Host-scoped: the process cwd is the host project. Framework paths resolve
+through ``scripts._root.agents_root()``; host paths (``.env``, bridge anchors
+under ``.claude/``) stay relative to cwd. ``SessionStart`` does not run in the
+nucleus — portable counterpart is ``workflows/start_workflow.md`` Phase 1.5
+``bridge_check`` (`F-026-A3`).
 
 invoked_by: claude/settings.hooks.json SessionStart, merged by scripts/install.py.
 
@@ -12,91 +15,111 @@ Exit codes:
     0 — session may proceed (warnings are non-blocking)
 """
 
-import os
+from __future__ import annotations
+
 import subprocess
-import json
-from datetime import datetime
+import sys
 from pathlib import Path
 
-import sys
-# Add parent directory to path so 'hooks' module can be found if run directly
-sys.path.append(str(Path(__file__).parent.parent))
-from hooks.telemetry import log_error
+# Package import for telemetry; scripts/ for agents_root.
+_REPO = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(_REPO))
+sys.path.insert(0, str(_REPO / "scripts"))
 
-# Configuration
+from _root import agents_root  # noqa: E402
+from hooks.telemetry import log_error  # noqa: E402
+
+# Host-scoped (cwd = host project).
 CONFIG_PATH = Path(".env")
 ENV_TEMPLATE = Path(".env.template")
-BRIDGE_LOCK = Path(".agents/.bridge_claude.lock")
-INSTALL_SCRIPT = Path(".agents/scripts/install.py")
-
-# A small, representative sample of the artifacts install.py links into
-# the host. Cheap enough to stat on every session start.
 BRIDGE_ANCHORS = [
     Path(".claude/commands/agents/start.md"),
     Path(".claude/agents/principal_agent.md"),
 ]
 
+
+def bridge_lock_path() -> Path:
+    """Framework lock file inside the agents checkout."""
+    return agents_root() / ".bridge_claude.lock"
+
+
+def install_script_path() -> Path:
+    """Framework installer entrypoint."""
+    return agents_root() / "scripts" / "install.py"
+
+
 def check_environment() -> bool:
-    """Secret sovereignty (agents.md §3 secret_sovereignty) governs *not reading* .env into context —
-    it does not require every host to have one. Only warn when the project
-    declares it needs secrets (an .env.template exists) but .env is missing."""
+    """Warn when a secrets template exists but ``.env`` does not.
+
+    Secret sovereignty governs *not reading* ``.env`` into context — it does
+    not require every host to have one.
+    """
     if ENV_TEMPLATE.exists() and not CONFIG_PATH.exists():
-        print(f"⚠️ [ON_INIT] {ENV_TEMPLATE} exists but {CONFIG_PATH} is missing — "
-              "copy the template and export your secrets before running workflows that need them.")
+        print(
+            f"⚠️ [ON_INIT] {ENV_TEMPLATE} exists but {CONFIG_PATH} is missing — "
+            "copy the template and export your secrets before running workflows "
+            "that need them."
+        )
         return False
     return True
 
+
 def current_submodule_commit() -> str:
-    """HEAD of the .agents submodule, or "unknown" outside a git context."""
+    """HEAD of the agents checkout, or \"unknown\" outside a git context."""
+    root = agents_root()
     try:
         return subprocess.run(
-            ["git", "-C", ".agents", "rev-parse", "HEAD"],
-            capture_output=True, text=True, check=True,
+            ["git", "-C", str(root), "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=True,
         ).stdout.strip()
     except (subprocess.CalledProcessError, OSError):
         return "unknown"
 
 
 def bridge_intact() -> bool:
-    """Confirms the linked artifacts actually survive on disk, independent of
-    the commit-hash lock. A `git clean -fd` (or manual `rm`) wipes the host's
-    untracked `.claude/` bridge without touching `.bridge_claude.lock` — the
-    lock lives inside the `.agents` submodule, which `git clean` skips by
-    default — leaving the lock trusting a bridge that no longer exists."""
-    return all(p.exists() for p in BRIDGE_ANCHORS)
+    """Confirm linked host artifacts survive on disk, independent of the lock."""
+    return all(path.exists() for path in BRIDGE_ANCHORS)
 
 
 def sync_commands() -> bool:
-    """Ensures the Claude Code bridge (.claude/agents, commands, skills, hooks,
-    MCP) is installed AND current. Re-runs the (idempotent) installer when the
-    lock is missing, its linked artifacts are gone, or the submodule commit
-    changed since the last install — a deliberate `.agents` update ships new
-    assets that need linking."""
-    if BRIDGE_LOCK.exists():
+    """Install or refresh the Claude Code bridge when the lock or artifacts drift."""
+    lock = bridge_lock_path()
+    installer = install_script_path()
+
+    if lock.exists():
         if not bridge_intact():
-            print("🔄 [ON_INIT] Bridge lock present but linked artifacts are missing "
-                  "(likely wiped by `git clean` or a manual deletion). Re-linking bridge...")
+            print(
+                "🔄 [ON_INIT] Bridge lock present but linked artifacts are missing "
+                "(likely wiped by `git clean` or a manual deletion). Re-linking bridge..."
+            )
         else:
-            recorded = BRIDGE_LOCK.read_text().strip()
+            recorded = lock.read_text().strip()
             current = current_submodule_commit()
             if current == "unknown" or recorded == current:
                 return True
-            print(f"🔄 [ON_INIT] .agents updated ({recorded[:12]} -> {current[:12]}). Re-linking bridge...")
+            print(
+                f"🔄 [ON_INIT] .agents updated ({recorded[:12]} -> {current[:12]}). "
+                "Re-linking bridge..."
+            )
 
-    if not INSTALL_SCRIPT.exists():
-        print(f"⚠️ [ON_INIT] Warning: {INSTALL_SCRIPT} not found. Skipping bridge install.")
+    if not installer.is_file():
+        print(f"⚠️ [ON_INIT] Warning: {installer} not found. Skipping bridge install.")
         return True
 
     try:
-        subprocess.run([sys.executable, str(INSTALL_SCRIPT)], check=True)
+        subprocess.run([sys.executable, str(installer)], check=True)
         return True
     except subprocess.CalledProcessError:
         print("❌ [ON_INIT] Failed to install the Claude Code bridge.")
         return False
 
-def main():
+
+def main() -> None:
+    """Run environment and bridge checks for a host SessionStart."""
     print("🛡️ [DEVOPS AGENT] Initializing Pipeline Session Protocol...")
-    
+
     env_ok = check_environment()
     if not env_ok:
         log_error("on_init", "ENVIRONMENT_VIOLATION", ".env file missing")
@@ -104,11 +127,12 @@ def main():
     sync_ok = sync_commands()
     if not sync_ok:
         log_error("on_init", "SYNC_VIOLATION", "Slash Command sync failed")
-    
+
     if env_ok and sync_ok:
         print("✅ [DEVOPS AGENT] DEPLOYMENT_READY: PASSED. Pipeline integrity certified.")
     else:
         print("⚠️ [DEVOPS AGENT] DEPLOYMENT_READY: SEMI-PASSED. Review alerts above.")
+
 
 if __name__ == "__main__":
     main()
