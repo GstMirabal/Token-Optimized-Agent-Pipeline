@@ -1,6 +1,6 @@
 {
   "last_update": "2026-08-25",
-  "sprint_id": "026",
+  "sprint_id": "H-003",
   "_schema": "Entries are summary-only Knowledge Items. The 'file' field is omitted once the raw log has been purged (agents.md §4 definitive_amnesia) — the 1-line summary IS the retained knowledge.",
   "items": [
     {
@@ -46,6 +46,11 @@
     {
       "id": "F-20260825-A3",
       "summary": "A tool-specific measurement receipt left in the sprint directory (e.g. cursor_mdc_schema.md) fails blind portability partition; absorb the contract into the product generator and remove the receipt before A3."
+    },
+    {
+      "id": "F-20260825-H003",
+      "file": "memory/H-003-protocol-loss.md",
+      "summary": "CRITICAL/HIGH work outside a sprint is RA-03: branch hotfix/[H-ID] (never fix/), docs/hotfixes/ before the first commit; agents.md used to name only the doc path so an agent opened fix/github-release-in-deploy for H-003."
     }
   ]
 }

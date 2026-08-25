@@ -670,6 +670,107 @@ def test_prune_never_deletes_an_undetermined_branch(repo, monkeypatch):
     assert "maybe-merged" in branches
 
 
+def _heads() -> list[str]:
+    return REAL_RUN(
+        ["git", "for-each-ref", "--format=%(refname:short)", "refs/heads/"],
+        capture_output=True, text=True,
+    ).stdout.split()
+
+
+def _squash_feature_onto_main(repo: Path, branch: str) -> None:
+    """Two commits on `branch`, collapsed onto main as one new SHA.
+
+    Reproduces `gh pr merge --squash`: the branch tip is not an ancestor of
+    main and `git branch --merged main` does not list it.
+    """
+    subprocess.run(["git", "checkout", "-qb", branch], check=True)
+    (repo / "f.txt").write_text("one\n")
+    subprocess.run(["git", "commit", "-aqm", "one"], check=True)
+    (repo / "f.txt").write_text("two\n")
+    subprocess.run(["git", "commit", "-aqm", "two"], check=True)
+    subprocess.run(["git", "checkout", "-q", "main"], check=True)
+    subprocess.run(["git", "merge", "-q", "--squash", branch], check=True)
+    subprocess.run(["git", "commit", "-aqm", "squash"], check=True)
+
+
+def test_git_branch_merged_misses_a_squash_merge(repo):
+    """The instrument that would have left hotfix/H-002 and release/4.9.1 forever.
+
+    Measured on this repository after PRs #51/#52:
+    `git merge-base --is-ancestor hotfix/H-002 main` exits 1, and
+    `git branch --merged main` lists neither leftover. A squash commit is a
+    new SHA, not a descendant of the branch.
+    """
+    _squash_feature_onto_main(repo, "feature")
+    ancestor = REAL_RUN(["git", "merge-base", "--is-ancestor", "feature", "main"])
+    assert ancestor.returncode == 1
+    merged = REAL_RUN(
+        ["git", "branch", "--merged", "main"], capture_output=True, text=True,
+    ).stdout
+    assert "feature" not in merged
+    assert bs.content_is_integrated("feature", "main") is False
+
+
+def test_prune_deletes_a_squash_merged_branch_when_a_merged_pr_exists(
+        repo, monkeypatch):
+    """merged-PR state, not `git branch --merged`, authorises the delete."""
+    _squash_feature_onto_main(repo, "feature")
+    monkeypatch.setattr(bs, "merged_pr_exists", lambda _: bs.YES)
+    bs.prune("main")
+    assert "feature" not in _heads()
+
+
+def _bare_origin(repo: Path, tmp_path: Path) -> Path:
+    origin = tmp_path / "origin.git"
+    REAL_RUN(["git", "init", "-q", "--bare", str(origin)], check=True)
+    REAL_RUN(["git", "remote", "add", "origin", str(origin)], check=True)
+    REAL_RUN(["git", "push", "-q", "origin", "main"], check=True)
+    return origin
+
+
+def test_prune_deletes_origin_head_of_a_proven_integrated_branch(repo, tmp_path):
+    """`git remote prune origin` cannot delete a live origin head.
+
+    GitHub `delete_branch_on_merge` is false on this nucleus
+    (`gh api repos/:owner/:repo --jq .delete_branch_on_merge`). After a
+    squash-merge the origin ref survives unless prune deletes it.
+    """
+    _bare_origin(repo, tmp_path)
+    subprocess.run(["git", "checkout", "-qb", "feature"], check=True)
+    (repo / "f.txt").write_text("changed\n")
+    subprocess.run(["git", "commit", "-aqm", "work"], check=True)
+    subprocess.run(["git", "push", "-q", "origin", "feature"], check=True)
+    subprocess.run(["git", "checkout", "-q", "main"], check=True)
+    subprocess.run(["git", "merge", "-q", "feature"], check=True)
+
+    bs.prune("main")
+
+    assert "feature" not in _heads()
+    remote = REAL_RUN(
+        ["git", "ls-remote", "--heads", "origin", "feature"],
+        capture_output=True, text=True,
+    )
+    assert remote.stdout.strip() == ""
+
+
+def test_prune_does_not_delete_origin_head_of_unproven_work(repo, tmp_path):
+    _bare_origin(repo, tmp_path)
+    subprocess.run(["git", "checkout", "-qb", "unmerged"], check=True)
+    (repo / "f.txt").write_text("changed\n")
+    subprocess.run(["git", "commit", "-aqm", "work"], check=True)
+    subprocess.run(["git", "push", "-q", "origin", "unmerged"], check=True)
+    subprocess.run(["git", "checkout", "-q", "main"], check=True)
+
+    bs.prune("main")
+
+    assert "unmerged" in _heads()
+    remote = REAL_RUN(
+        ["git", "ls-remote", "--heads", "origin", "unmerged"],
+        capture_output=True, text=True,
+    )
+    assert "unmerged" in remote.stdout
+
+
 # --- drift detection ---------------------------------------------------
 
 def test_no_baseline_is_reported_not_silently_passed(anchor, capsys):
