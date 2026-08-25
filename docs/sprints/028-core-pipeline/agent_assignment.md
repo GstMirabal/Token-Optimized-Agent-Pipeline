@@ -72,3 +72,6 @@ and `hooks/` (`agents.md §6`). Ola 1 installer work stays on `devops_agent`.
 2. **P1.1 target file** left to implementer: extend `tests/test_installer.sh` if
    sufficient, else create `tests/test_install_profile_path.py` — one physical
    file per commit.
+3. **Correction 2026-08-25.** First `task_scope.md` omitted explicit `Model`/`Effort`
+   columns and a full `token_economy_agent` audit — corrected in a follow-up commit
+   by `rule_validator` transcription (see `task_scope.md` § Failure analysis).
