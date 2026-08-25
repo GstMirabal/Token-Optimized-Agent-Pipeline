@@ -31,6 +31,13 @@ inferred from where the section sits.
 | **Opened, still open** | **`F-023-S4`** — it defeats `agents.md RA-09 SECRET_SOVEREIGNTY` and survived the repair of `F-086-S1`/`F-086-S2`. **`F-021-A2`** was *declared* by Sprint 023, not opened by it; its entry says where |
 | **Ticked on what basis** | Re-measurement against the current tree, **never** on the sprint record that claimed the fix. Rule 1 of this file governs closing an item exactly as it governs opening one |
 
+**Status at Hotfix H-002 (2026-08-25).**
+
+| | |
+| :--- | :--- |
+| **Closed** | **`F-023-S4`** — dotenv files matched by name; `UNQUOTED_ASSIGNMENT` selected for every file type. Re-measured: `tests/test_on_commit.py` F-023-S4 cases, 152 passed on `hotfix/H-002` |
+| **Still open** | **`F-021-A2`**, **`F-026-A1`**, **`F-026-A2`**, **`F-026-A3`** |
+
 **The corrections reproduction produced are recorded where a reader needs them**,
 not collected in a list. `F-086-S3` carries three: it was **narrower** than
 reported in one respect, **wider** in another, and its Evidence block was
@@ -469,7 +476,8 @@ a sprint log because they are framework-class under
 not where a host looks.
 
 **Their provenance differs, and the difference is not cosmetic.** `F-023-D5` was
-opened and closed by this sprint. `F-023-S4` was opened by it and is open.
+opened and closed by this sprint. `F-023-S4` was opened by it and closed by
+hotfix `H-002`.
 `F-021-A2` was **declared** in the sprint's own premise — written before any unit
 ran — and Sprint 023 unit `C5` restated it rather than discovering it; it is listed here
 because this is where an open framework-class item belongs, not because this
@@ -557,7 +565,7 @@ the exact defect its own prose warns against. The word-boundary form above is
 what the count of 8 rests on, and it was reached by checking profile by profile
 rather than by trusting either command.
 
-### - [ ] `F-023-S4` — a literal `.env` still passes the commit hook, after the secret gate was repaired
+### - [x] `F-023-S4` — a literal `.env` still passes the commit hook, after the secret gate was repaired
 
 **It defeats `agents.md RA-09 SECRET_SOVEREIGNTY`**, and it **survived** the fix
 recorded under `F-086-S1`/`F-086-S2` above.
@@ -633,6 +641,17 @@ end rather than by reading the pattern, and correctly refused as a rider on that
 unit: `C3`'s declared scope was the file list and three named alternations, and
 this is neither. It then survived **three** sessions as *routed, unowned* —
 which is the same shape as the loss this whole file was written to repair.
+
+**Closed** — Hotfix `H-002`, branch `hotfix/H-002`. Both measured mechanisms
+closed: `is_forbidden_secret_file` matches `.env` / `.env.local` /
+`.env.production` by name (and still matches `prod.env` by suffix);
+`.env.example` remains the sanctioned RA-09 template. `UNQUOTED_ASSIGNMENT`
+(`NAME=value` with an end-of-line terminator) is selected for every file type.
+Quote-optionality was **not** added to `SECRET_ASSIGNMENT`. Re-measured:
+`find_hardcoded_secret` on unquoted `API_KEY=<LIVE>` against `Path('.env')`
+returns `'API_KEY'`; the same line is detected in `settings.py`, `app.yml`
+and `Dockerfile`; lookups (`config["EMAIL_HOST_PASSWORD"]`) and placeholders
+still miss. `tests/test_on_commit.py`: 152 passed.
 
 ---
 

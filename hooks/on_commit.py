@@ -121,6 +121,25 @@ SECRET_ASSIGNMENT = re.compile(
     re.IGNORECASE | re.MULTILINE | re.VERBOSE,
 )
 
+# Unquoted `NAME=value` with an end-of-line terminator. SECRET_ASSIGNMENT is
+# the Python/JS quoted-literal form and must stay that: making it
+# quote-optional would not close F-023-S4 (three of the four other forms
+# already accept unquoted values, each in a different shape) and would
+# re-flag lookups (`EMAIL_HOST_PASSWORD = config["EMAIL_HOST_PASSWORD"]`).
+# Brackets and parentheses are excluded from the value so those lookups
+# still miss; `$` / placeholder filters in `_credible_findings` cover the
+# sanctioned template spellings. Selected for every file type — the shape
+# was covered nowhere, including `settings.py` and `Dockerfile`.
+UNQUOTED_ASSIGNMENT = re.compile(
+    rf"""^[ \t]*
+        (?P<name>[A-Za-z0-9_]*(?:{SECRET_WORDS})[A-Za-z0-9_]*)
+        [ \t]*=[ \t]*
+        (?P<value>[^\s#'"\[\]()]+)
+        [ \t]*(?:\#[^\n]*)?$
+    """,
+    re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+)
+
 # The quoted-literal assignment above is the Python/JS form and only that form.
 # Three others carry credentials just as directly and read as clean against it
 # (F-086-S2), so each gets its own alternation rather than one regex widened
@@ -232,6 +251,45 @@ def _is_build_file(name: str) -> bool:
     )
 
 
+def _is_dotenv_file(name: str) -> bool:
+    """Reports whether a lowercased filename is a live dotenv file.
+
+    A suffix test cannot see `.env`: `Path(".env").suffix` is `''`, and
+    `.env.production` has suffix `.production`. Matched by name, the way
+    `_is_build_file` matches `Dockerfile`. `.env.example` is the sanctioned
+    RA-09 template and is excluded — it is scanned as content, not banned
+    as a file.
+
+    Args:
+        name: A filename, already lowercased. `.example` is still present.
+
+    Returns:
+        True for `.env`, `.env.local`, `.env.production`. False for
+        `.env.example` and for `prod.env` (that one is a suffix).
+    """
+    if name.endswith(".example"):
+        return False
+    return name == ".env" or name.startswith(".env.")
+
+
+def is_forbidden_secret_file(path: Path) -> bool:
+    """Reports whether staging this path is a hard secret-shielding violation.
+
+    Args:
+        path: Path of a staged file.
+
+    Returns:
+        True for dotenv files matched by name, for `.env`/`.pem`/`.key`
+        suffixes, and for `secrets.json` / `credentials.json`. The
+        `ALLOW_MARKER` does not unlock this boundary.
+    """
+    return (
+        path.suffix in (".env", ".pem", ".key")
+        or path.name in ("secrets.json", "credentials.json")
+        or _is_dotenv_file(path.name.lower())
+    )
+
+
 def secret_forms_for(path: Path | None) -> tuple[re.Pattern[str], ...]:
     """Selects the secret patterns that apply to one file.
 
@@ -245,7 +303,12 @@ def secret_forms_for(path: Path | None) -> tuple[re.Pattern[str], ...]:
         next scan, whereas a gate that blocks a legitimate commit gets
         disabled and then catches nothing at all.
     """
-    forms = [SECRET_ASSIGNMENT, QUERY_STRING_SECRET, PRIVATE_KEY_BLOCK]
+    forms = [
+        SECRET_ASSIGNMENT,
+        UNQUOTED_ASSIGNMENT,
+        QUERY_STRING_SECRET,
+        PRIVATE_KEY_BLOCK,
+    ]
     if path is None:
         return tuple(forms)
     # `config.yml.example` is a YAML file whose suffix says `.example`, and it
@@ -518,15 +581,11 @@ def audit_secret_shielding() -> bool:
     """Certifies secret shielding (agents.md §3 secret_sovereignty / RA-09)."""
     staged_files = get_staged_files()
     
-    forbidden_extensions = [".env", ".pem", ".key"]
-    forbidden_names = ["secrets.json", "credentials.json"]
-    
     violations = []
     for file_path in staged_files:
         path = Path(file_path)
-        
-        # Check by filename/extension
-        if path.suffix in forbidden_extensions or path.name in forbidden_names:
+
+        if is_forbidden_secret_file(path):
             violations.append(f"Forbidden file staged: {file_path}")
             continue
 

@@ -350,18 +350,19 @@ def test_compose_secrets_list_is_not_a_credential():
 # --- secret_forms_for: the selector itself ----------------------------------
 
 @pytest.mark.parametrize("filename,expected", [
-    ("values.yaml",        {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "PRIVATE_KEY_BLOCK", "YAML_SECRET"}),
-    ("values.YAML",        {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "PRIVATE_KEY_BLOCK", "YAML_SECRET"}),
-    ("config.yml.example", {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "PRIVATE_KEY_BLOCK", "YAML_SECRET"}),
-    ("Dockerfile",         {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "PRIVATE_KEY_BLOCK", "DOCKERFILE_SECRET"}),
-    ("Dockerfile.prod",    {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "PRIVATE_KEY_BLOCK", "DOCKERFILE_SECRET"}),
-    ("api.Dockerfile",     {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "PRIVATE_KEY_BLOCK", "DOCKERFILE_SECRET"}),
-    ("settings.py",        {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "PRIVATE_KEY_BLOCK"}),
-    ("Makefile",           {"SECRET_ASSIGNMENT", "QUERY_STRING_SECRET", "PRIVATE_KEY_BLOCK"}),
+    ("values.yaml",        {"SECRET_ASSIGNMENT", "UNQUOTED_ASSIGNMENT", "QUERY_STRING_SECRET", "PRIVATE_KEY_BLOCK", "YAML_SECRET"}),
+    ("values.YAML",        {"SECRET_ASSIGNMENT", "UNQUOTED_ASSIGNMENT", "QUERY_STRING_SECRET", "PRIVATE_KEY_BLOCK", "YAML_SECRET"}),
+    ("config.yml.example", {"SECRET_ASSIGNMENT", "UNQUOTED_ASSIGNMENT", "QUERY_STRING_SECRET", "PRIVATE_KEY_BLOCK", "YAML_SECRET"}),
+    ("Dockerfile",         {"SECRET_ASSIGNMENT", "UNQUOTED_ASSIGNMENT", "QUERY_STRING_SECRET", "PRIVATE_KEY_BLOCK", "DOCKERFILE_SECRET"}),
+    ("Dockerfile.prod",    {"SECRET_ASSIGNMENT", "UNQUOTED_ASSIGNMENT", "QUERY_STRING_SECRET", "PRIVATE_KEY_BLOCK", "DOCKERFILE_SECRET"}),
+    ("api.Dockerfile",     {"SECRET_ASSIGNMENT", "UNQUOTED_ASSIGNMENT", "QUERY_STRING_SECRET", "PRIVATE_KEY_BLOCK", "DOCKERFILE_SECRET"}),
+    ("settings.py",        {"SECRET_ASSIGNMENT", "UNQUOTED_ASSIGNMENT", "QUERY_STRING_SECRET", "PRIVATE_KEY_BLOCK"}),
+    ("Makefile",           {"SECRET_ASSIGNMENT", "UNQUOTED_ASSIGNMENT", "QUERY_STRING_SECRET", "PRIVATE_KEY_BLOCK"}),
 ])
 def test_secret_forms_for_selects_by_format(filename, expected):
     by_pattern = {
         id(on_commit.SECRET_ASSIGNMENT): "SECRET_ASSIGNMENT",
+        id(on_commit.UNQUOTED_ASSIGNMENT): "UNQUOTED_ASSIGNMENT",
         id(on_commit.QUERY_STRING_SECRET): "QUERY_STRING_SECRET",
         id(on_commit.PRIVATE_KEY_BLOCK): "PRIVATE_KEY_BLOCK",
         id(on_commit.YAML_SECRET): "YAML_SECRET",
@@ -375,6 +376,7 @@ def test_secret_forms_for_without_a_path_takes_the_safe_subset():
     selected = on_commit.secret_forms_for(None)
     assert on_commit.YAML_SECRET not in selected
     assert on_commit.DOCKERFILE_SECRET not in selected
+    assert on_commit.UNQUOTED_ASSIGNMENT in selected
 
 
 # --- audit_secret_shielding: the integration layer --------------------------
@@ -526,3 +528,80 @@ def test_the_block_message_carries_the_remedy(tmp_path, monkeypatch, capsys):
     monkeypatch.chdir(tmp_path)
     assert not on_commit.audit_secret_shielding()
     assert "secret-scan: allow" in capsys.readouterr().out
+
+
+# --- F-023-S4: dotenv by name, and unquoted NAME=value everywhere -----------
+#
+# Two independent mechanisms, and a file need only beat one. The suffix
+# `.env` never matches Path(".env").suffix (that is ''), and no selected
+# form covers unquoted NAME=value. Reproduction uses LIVE, not a
+# documented placeholder (AWS …EXAMPLEKEY is correctly dropped) and not
+# a PEM or query-string secret (those ARE caught in a .env).
+
+
+@pytest.mark.parametrize("filename,forbidden", [
+    (".env", True),
+    (".env.local", True),
+    (".env.production", True),
+    (".env.example", False),
+    ("prod.env", True),
+    ("deploy/server.pem", True),
+    ("secrets.json", True),
+    ("credentials.json", True),
+    ("settings.py", False),
+])
+def test_forbidden_secret_files_match_by_name_and_suffix(filename, forbidden):
+    """Mechanism 1 is a name test; `.env.example` stays a scannable template."""
+    assert on_commit.is_forbidden_secret_file(Path(filename)) is forbidden
+
+
+@pytest.mark.parametrize("filename", [".env", ".env.local", ".env.production"])
+def test_audit_blocks_a_dotenv_file_by_name(tmp_path, monkeypatch, filename):
+    """Path('.env').suffix is '' — the suffix branch never sees these names."""
+    _repo_with_staged(tmp_path, {filename: f"API_KEY={LIVE}\n"})
+    monkeypatch.chdir(tmp_path)
+    assert not on_commit.audit_secret_shielding()
+
+
+def test_audit_still_blocks_prod_env_by_suffix(tmp_path, monkeypatch):
+    """prod.env is the filename the suffix test already caught; keep it."""
+    _repo_with_staged(tmp_path, {"prod.env": f"API_KEY={LIVE}\n"})
+    monkeypatch.chdir(tmp_path)
+    assert not on_commit.audit_secret_shielding()
+
+
+def test_audit_does_not_forbid_the_env_example_template(tmp_path, monkeypatch):
+    """`.env.example` is the sanctioned RA-09 template, not a dotenv file."""
+    _repo_with_staged(tmp_path, {".env.example": "API_KEY=your-api-key-here\n"})
+    monkeypatch.chdir(tmp_path)
+    assert on_commit.audit_secret_shielding()
+
+
+@pytest.mark.parametrize("filename,content,expected_name", [
+    (".env",        f"API_KEY={LIVE}\n",       "API_KEY"),
+    (".env",        f"DB_PASSWORD={LIVE}\n",   "DB_PASSWORD"),
+    ("settings.py", f"API_KEY={LIVE}\n",       "API_KEY"),
+    ("app.yml",     f"API_KEY={LIVE}\n",       "API_KEY"),
+    ("Dockerfile",  f"API_KEY={LIVE}\n",       "API_KEY"),
+])
+def test_unquoted_name_value_is_detected_in_every_file_type(
+        filename, content, expected_name):
+    found = on_commit.find_hardcoded_secret(content, Path(filename))
+    assert found == expected_name
+
+
+@pytest.mark.parametrize("filename,content", [
+    ("settings.py", 'EMAIL_HOST_PASSWORD = config["EMAIL_HOST_PASSWORD"]\n'),
+    ("settings.py", 'API_KEY = os.environ.get("API_KEY")\n'),
+    (".env",        "API_KEY=changeme\n"),
+    (".env",        "API_KEY=${OPENAI_API_KEY}\n"),
+    (".env",        "API_KEY=your-api-key-here\n"),
+    (".env",        "API_KEY=abc\n"),
+])
+def test_unquoted_form_does_not_flag_lookups_or_placeholders(filename, content):
+    assert on_commit.find_hardcoded_secret(content, Path(filename)) is None
+
+
+def test_quoted_dotenv_assignment_is_still_caught():
+    assert on_commit.find_hardcoded_secret(
+        f'API_KEY="{LIVE}"\n', Path(".env")) == "API_KEY"
