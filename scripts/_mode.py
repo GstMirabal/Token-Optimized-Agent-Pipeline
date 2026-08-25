@@ -1,7 +1,7 @@
 """Which repository is the work: the framework, or the host that installs it.
 
 Two files already answered this independently — `session_probe.py` with
-`is_nucleus()` and `install_claude.py` with an inline `(AGENTS_DIR / ".git").is_dir()`
+`is_nucleus()` and `install.py` with an inline `(AGENTS_DIR / ".git").is_dir()`
 — and a third was about to. `rules/code_craft.md §1` puts the extraction
 threshold at two call sites, so this is one site late rather than speculative.
 
@@ -23,7 +23,7 @@ the mode, and a module named for one question is the wrong place to answer the
 other.
 
 invoked_by: scripts/submodule_purity.py, scripts/session_probe.py,
-scripts/install_claude.py.
+scripts/install.py.
 
 Usage:
     from _mode import is_nucleus
