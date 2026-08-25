@@ -9,7 +9,7 @@ Discover and invoke the `/agents:*` slash commands that map every `workflows/*.m
 
 ## 2. Prerequisites
 - `.agents` added as a Git submodule at the host project root (`git submodule add https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline .agents`).
-- The Claude Code bridge installed at least once via `.agents/scripts/install_claude.sh` (symlinks `.agents/commands/*.md` into `.claude/commands/agents/`, exposing the `/agents:*` namespace so host-defined commands never collide with framework ones).
+- The Claude Code bridge installed at least once via `.agents/scripts/install.sh` (symlinks `.agents/commands/*.md` into `.claude/commands/agents/`, exposing the `/agents:*` namespace so host-defined commands never collide with framework ones).
 - A restarted Claude Code session after installation — commands are discovered at session start, not live.
 
 ## 3. Steps
@@ -18,7 +18,7 @@ Discover and invoke the `/agents:*` slash commands that map every `workflows/*.m
 If you are adding the framework to an **already established repository**, follow this sequence to align your architectural roadmap:
 
 1. **Submodule Insertion:** In your root folder: `git submodule add https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline .agents`
-2. **Bridge Installation:** `.agents/scripts/install_claude.sh` (creates `.claude/agents`, `.claude/commands/agents`, `.claude/skills`, and merges hooks/MCP config).
+2. **Bridge Installation:** `.agents/scripts/install.sh` (creates `.claude/agents`, `.claude/commands/agents`, `.claude/skills`, and merges hooks/MCP config).
 3. **AI Session Trigger:** Tell the AI: *"Initialize session using governance protocols in `.agents/` and execute `/agents:start`."*
 4. **Roadmap Discovery:** The topology mapper will map `docs/active_state.json` (scaffolding it on first run — see `start_workflow.md`).
 5. **Then follow the canonical onboarding order**, defined once in `agents.md §6` and referenced rather than repeated (`RA-14`): **`/agents:harden`** → **`/agents:standardization`** → **`/agents:revdoc`** → **`/agents:pipeline`**. Each owns a different object — platform controls, artifacts and topology, documentation of the code, and change itself — and running them out of order produces documentation of a layout that is about to move.
@@ -67,7 +67,7 @@ The Orchestrator statically routes external tools using **`.agents/skills/manife
 Check the `/workflows/` directory for automated protocols like project scaffolding. Explore `/mcp_servers/` for bridging external LLM data nodes.
 
 If there's more than one valid path:
-- **If working inside the `.agents` repo itself (Nucleus Mode)**: the full host bridge is refused (`agents.md §5 nucleus_neutrality`); run the installer's minimal self-bridge instead — `python3 scripts/install_claude.py` — which links only `.claude/commands/agents/*` and `.claude/agents/*` (no hooks, skills, MCP, or scaffolding), then restart the session.
+- **If working inside the `.agents` repo itself (Nucleus Mode)**: the full host bridge is refused (`agents.md §5 nucleus_neutrality`); run the installer's minimal self-bridge instead — `python3 scripts/install.py` — which links only `.claude/commands/agents/*` and `.claude/agents/*` (no hooks, skills, MCP, or scaffolding), then restart the session.
 
 ## 4. Verify it worked
 ```bash
@@ -78,9 +78,9 @@ Expected output: one `.md` file per command listed in §3.2 (`start.md`, `pipeli
 ## 5. If something goes wrong
 | Symptom | Likely cause | Fix |
 | :--- | :--- | :--- |
-| `/agents:*` commands don't autocomplete in Claude Code | Session started before the bridge was installed | Re-run `.agents/scripts/install_claude.sh` (or `scripts/install_claude.py` in Nucleus Mode), then restart the Claude Code session — commands are discovered at session start, not live. |
+| `/agents:*` commands don't autocomplete in Claude Code | Session started before the bridge was installed | Re-run `.agents/scripts/install.sh` (or `scripts/install.py` in Nucleus Mode), then restart the Claude Code session — commands are discovered at session start, not live. |
 | `/agents:pipeline` fails to find project context | `docs/active_state.json` not yet scaffolded | Run `/agents:start` first; it scaffolds `docs/active_state.json` on first run per `start_workflow.md`. |
-| Commands collide with host-defined commands of the same name | Bridge installed outside the `/agents:*` namespace, or a non-symlink mechanism was used to inject config | Reinstall exclusively via `.agents/scripts/install_claude.sh` — it is the only sanctioned bridge (`agents.md §3 federation`) and never overwrites non-symlinked host content. |
+| Commands collide with host-defined commands of the same name | Bridge installed outside the `/agents:*` namespace, or a non-symlink mechanism was used to inject config | Reinstall exclusively via `.agents/scripts/install.sh` — it is the only sanctioned bridge (`agents.md §3 federation`) and never overwrites non-symlinked host content. |
 | Orchestrator ignores a new skill | `manifest_skills.json` not updated | Register the skill's `name`/`category`/`tags` entry in `.agents/skills/manifest_skills.json` (see §3.3). |
 
 ---

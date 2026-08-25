@@ -48,7 +48,7 @@ extracted from whatever lands here, deliberately, before Phase 5 approves it.
   was drafted under `~/.claude/plans/` — but **the reason recorded here was wrong**, and
   Sprint `023` `C6` corrected it. `nucleus_neutrality` does **not** prohibit installing
   the bridge: it prohibits *structural scaffolding* (`agents.md §5`), and
-  `scripts/install_claude.py` ships `install_nucleus_bridge()` for exactly this case.
+  `scripts/install.py` ships `install_nucleus_bridge()` for exactly this case.
   What that self-bridge deliberately omits is hooks, skills, MCP and settings — so no
   `.claude/settings.json` reaches the nucleus, and `plansDirectory`, which lives in that
   file, never arrives. Absent by omission, not by prohibition. **Routing discharged by

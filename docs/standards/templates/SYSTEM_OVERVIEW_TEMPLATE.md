@@ -38,7 +38,7 @@ Component-level (Level 3) detail, where required, lives per-module in the releva
 ## 4. How a session starts
 Run `/agents:start`. It will:
 1. Read `agents.md` and this file (Zero-Memory anchor).
-2. Install/verify the Claude Code bridge (`.agents/scripts/install_claude.sh`) if not already done.
+2. Install/verify the Claude Code bridge (`.agents/scripts/install.sh`) if not already done.
 3. On a brand-new project, scaffold `docs/active_state.json` and the rest of the `docs/` tree — see `.agents/workflows/start_workflow.md`.
 4. Hand off to the Principal Agent for Planning (drafting the Implementation Plan with you).
 

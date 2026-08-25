@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# End-to-end sandbox test for scripts/install_claude.sh (and its Python core).
+# End-to-end sandbox test for scripts/install.sh (and its Python core).
 # Simulates a host project with .agents as a submodule and asserts:
 #   - symlinks resolve, host content is never clobbered, JSON merges are valid,
 #   - CLAUDE.md import is added exactly once (idempotency),
@@ -17,7 +17,7 @@ mkdir -p "$WORK/host/.agents"
 rsync -a --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
   "$AGENTS_SRC/" "$WORK/host/.agents/"
 echo "gitdir: ../.git/modules/.agents" > "$WORK/host/.agents/.git"
-rm -f "$WORK/host/.agents/.claude_bridge.lock"
+rm -f "$WORK/host/.agents/.bridge_claude.lock" "$WORK/host/.agents/.bridge_cursor.lock"
 
 # Pre-existing host content that must survive untouched:
 mkdir -p "$WORK/host/.claude/agents"
@@ -28,7 +28,7 @@ printf 'node_modules/\n*.pyc\n' > "$WORK/host/.gitignore"
 cd "$WORK/host"
 
 # --- Act ---------------------------------------------------------------------
-bash .agents/scripts/install_claude.sh --profile example-project > /dev/null
+bash .agents/scripts/install.sh --profile example-project > /dev/null
 
 # --- Assert ------------------------------------------------------------------
 [ -L .claude/agents/orchestrator.md ] || fail "agent symlink missing"
@@ -57,19 +57,20 @@ grep -q "domain_example_standard" CLAUDE.md || fail "profile rule import missing
 grep -qxF "node_modules/" .gitignore || fail ".gitignore: pre-existing host entry was lost"
 grep -qxF "*.pyc" .gitignore || fail ".gitignore: pre-existing host entry was lost"
 for entry in "/CLAUDE.md" "/.claude/agents/" "/.claude/commands/" "/.claude/skills/" \
-             "/.claude/settings.local.json" "/graphify-out/"; do
+             "/.claude/settings.local.json" "/.cursor/commands/" "/.cursor/rules/" \
+             "/.cursor/mcp.json" "/graphify-out/"; do
   grep -qxF "$entry" .gitignore || fail ".gitignore: missing bridge entry '$entry'"
 done
 grep -qxF "/.claude/settings.json" .gitignore \
   && fail ".gitignore: settings.json must stay trackable, not ignored"
 
 # Idempotency: re-run must not duplicate imports nor error out.
-bash .agents/scripts/install_claude.sh --profile example-project > /dev/null
+bash .agents/scripts/install.sh --profile example-project > /dev/null
 [ "$(grep -cxF "@.agents/agents.md" CLAUDE.md)" = "1" ] || fail "duplicate import on re-run"
 [ "$(grep -cxF "/graphify-out/" .gitignore)" = "1" ] || fail "duplicate .gitignore entry on re-run"
 
-[ -f .agents/.claude_bridge.lock ] || fail "bridge lock not created"
-[ -s .agents/.claude_bridge.lock ] || fail "bridge lock is empty (must record the submodule commit)"
+[ -f .agents/.bridge_claude.lock ] || fail "bridge lock not created"
+[ -s .agents/.bridge_claude.lock ] || fail "bridge lock is empty (must record the submodule commit)"
 
 echo "✅ installer sandbox test PASSED"
 
@@ -79,8 +80,8 @@ mkdir -p "$NUCLEUS"
 rsync -a --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
       --exclude='graphify-out' --exclude='.claude' "$AGENTS_SRC/" "$NUCLEUS/"
 mkdir -p "$NUCLEUS/.git"   # real dir -> nucleus detection
-rm -f "$NUCLEUS/.claude_bridge.lock" "$NUCLEUS/CLAUDE.md"
-( cd "$NUCLEUS" && python3 scripts/install_claude.py > /dev/null )
+rm -f "$NUCLEUS/.bridge_claude.lock" "$NUCLEUS/.bridge_cursor.lock" "$NUCLEUS/CLAUDE.md"
+( cd "$NUCLEUS" && python3 scripts/install.py > /dev/null )
 [ -e "$NUCLEUS/.claude/commands/agents/start.md" ] || fail "nucleus: /agents:start not linked"
 [ -e "$NUCLEUS/.claude/agents/principal_agent.md" ] || fail "nucleus: agents not linked"
 grep -qx "@agents.md" "$NUCLEUS/CLAUDE.md" || fail "nucleus: constitution import missing"
@@ -89,10 +90,64 @@ grep -qx "@agents.md" "$NUCLEUS/CLAUDE.md" || fail "nucleus: constitution import
 # rather than on a lock, BECAUSE the nucleus path writes none. Nothing pinned that
 # fact until Sprint 023 C6, so a future edit could have written one and left the
 # workflow silently wrong with the whole suite green.
-[ ! -e "$NUCLEUS/.claude_bridge.lock" ] || fail "nucleus: must write no bridge lock (start_workflow bridge_check depends on this)"
-( cd "$NUCLEUS" && python3 scripts/install_claude.py --profile example-project > /dev/null 2>&1 ) \
+[ ! -e "$NUCLEUS/.bridge_claude.lock" ] || fail "nucleus: must write no bridge lock (start_workflow bridge_check depends on this)"
+[ ! -e "$NUCLEUS/.bridge_cursor.lock" ] || fail "nucleus: must write no cursor bridge lock"
+( cd "$NUCLEUS" && python3 scripts/install.py --profile example-project > /dev/null 2>&1 ) \
   && fail "nucleus: profile install must be refused" || true
+mkdir -p "$NUCLEUS/.git/hooks"
+( cd "$NUCLEUS" && python3 scripts/install.py --target cursor > /dev/null )
+[ -x "$NUCLEUS/.git/hooks/pre-push" ] || fail "nucleus cursor: pre-push hook missing"
+grep -q "hooks/on_push.py" "$NUCLEUS/.git/hooks/pre-push" \
+  || fail "nucleus cursor: pre-push hook must use repo-relative path"
+[ -x "$NUCLEUS/.git/hooks/pre-commit" ] || fail "nucleus cursor: pre-commit hook missing"
+[ -x "$NUCLEUS/.git/hooks/commit-msg" ] || fail "nucleus cursor: commit-msg hook missing"
 echo "✅ nucleus self-bridge test PASSED"
+
+# ── P4.1: --target cursor and --target both on a host with a real .git ───────
+HOST_CURSOR="$WORK/host-cursor"
+mkdir -p "$HOST_CURSOR/.agents"
+rsync -a --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
+  "$AGENTS_SRC/" "$HOST_CURSOR/.agents/"
+echo "gitdir: ../.git/modules/.agents" > "$HOST_CURSOR/.agents/.git"
+rm -f "$HOST_CURSOR/.agents/.bridge_claude.lock" "$HOST_CURSOR/.agents/.bridge_cursor.lock"
+( cd "$HOST_CURSOR" && git init -q && git config user.email t@t && git config user.name t )
+( cd "$HOST_CURSOR" && python3 .agents/scripts/install.py --target cursor > /dev/null )
+[ -d "$HOST_CURSOR/.cursor/commands" ] || fail "cursor host: .cursor/commands missing"
+[ "$(ls -1 "$HOST_CURSOR/.cursor/commands" | wc -l | tr -d ' ')" = "13" ] \
+  || fail "cursor host: expected 13 commands"
+[ "$(ls -1 "$HOST_CURSOR/.cursor/rules" | wc -l | tr -d ' ')" = "12" ] \
+  || fail "cursor host: expected 12 rules"
+[ -f "$HOST_CURSOR/.cursor/mcp.json" ] || fail "cursor host: mcp.json missing"
+[ -x "$HOST_CURSOR/.git/hooks/pre-push" ] || fail "cursor host: pre-push missing"
+grep -q "on_push.py" "$HOST_CURSOR/.git/hooks/pre-push" \
+  || fail "cursor host: pre-push must call on_push.py"
+[ -f "$HOST_CURSOR/.agents/.bridge_cursor.lock" ] || fail "cursor host: cursor lock missing"
+[ ! -f "$HOST_CURSOR/.agents/.bridge_claude.lock" ] \
+  || fail "cursor host: must not write claude lock"
+for entry in "/.cursor/commands/" "/.cursor/rules/" "/.cursor/mcp.json"; do
+  grep -qxF "$entry" "$HOST_CURSOR/.gitignore" \
+    || fail "cursor host: .gitignore missing $entry"
+done
+echo "✅ host --target cursor test PASSED"
+
+HOST_BOTH="$WORK/host-both"
+mkdir -p "$HOST_BOTH/.agents"
+rsync -a --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
+  "$AGENTS_SRC/" "$HOST_BOTH/.agents/"
+echo "gitdir: ../.git/modules/.agents" > "$HOST_BOTH/.agents/.git"
+rm -f "$HOST_BOTH/.agents/.bridge_claude.lock" "$HOST_BOTH/.agents/.bridge_cursor.lock"
+( cd "$HOST_BOTH" && git init -q && git config user.email t@t && git config user.name t )
+( cd "$HOST_BOTH" && python3 .agents/scripts/install.py --target both > /dev/null )
+[ -L "$HOST_BOTH/.claude/commands/agents/start.md" ] || fail "both: claude command missing"
+[ -d "$HOST_BOTH/.cursor/commands" ] || fail "both: cursor commands missing"
+[ "$(ls -1 "$HOST_BOTH/.cursor/commands" | wc -l | tr -d ' ')" = "13" ] \
+  || fail "both: expected 13 cursor commands"
+[ -f "$HOST_BOTH/.agents/.bridge_claude.lock" ] || fail "both: claude lock missing"
+[ -f "$HOST_BOTH/.agents/.bridge_cursor.lock" ] || fail "both: cursor lock missing"
+# --target both installs cursor bridge but git hooks only on cursor-only path;
+# claude path already installs hooks via install_host_claude_bridge.
+[ -x "$HOST_BOTH/.git/hooks/pre-push" ] || fail "both: pre-push missing"
+echo "✅ host --target both test PASSED"
 
 # ---------------------------------------------------------------------------
 # Native pre-commit hook. The Claude Code PreToolUse hook only sees commits the
@@ -109,6 +164,6 @@ test_existing_pre_commit_hook_is_not_overwritten() {
     local repo="$1"
     printf '#!/bin/sh\necho project-owned\n' > "$repo/.git/hooks/pre-commit"
     chmod +x "$repo/.git/hooks/pre-commit"
-    python3 "$repo/.agents/scripts/install_claude.py" >/dev/null 2>&1
+    python3 "$repo/.agents/scripts/install.py" >/dev/null 2>&1
     grep -q "project-owned" "$repo/.git/hooks/pre-commit" || return 1
 }

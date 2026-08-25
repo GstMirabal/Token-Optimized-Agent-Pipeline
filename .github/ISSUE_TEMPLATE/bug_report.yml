@@ -23,7 +23,7 @@ body:
       label: How to reproduce
       description: The exact commands or the slash command / workflow phase where it appeared.
       placeholder: |
-        1. Installed via `.agents/scripts/install_claude.sh`
+        1. Installed via `.agents/scripts/install.sh`
         2. Ran `/agents:start`
         3. ...
     validations:

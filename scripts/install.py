@@ -1,12 +1,12 @@
-"""Portable installer for the .agents -> Claude Code bridge.
+"""Portable installer for the .agents bridge.
 
-invoked_by: scripts/install_claude.sh, start_workflow.md#bridge_check, hooks/on_init.py.
+invoked_by: scripts/install.sh, start_workflow.md#bridge_check, hooks/on_init.py.
 
-Cross-platform port of the original bash installer (install_claude.sh is now a
+Cross-platform port of the original bash installer (install.sh is now a
 thin wrapper around this). Idempotent: safe to re-run any time.
 
 Usage:
-    python3 .agents/scripts/install_claude.py [--profile <name>]
+    python3 .agents/scripts/install.py [--profile <name>] [--target claude|cursor|both]
 
 What it does:
   1. Symlinks agents/*.md, commands/*.md and skills/*/ into the host's .claude/
@@ -24,7 +24,9 @@ What it does:
      clone for SessionStart to ever bootstrap the rest.
   5. With --profile: additionally links profiles/<name>/{agents,skills} and
      imports the profile's rules. Profiles are opt-in only.
-  6. Marks .agents/.claude_bridge.lock so hooks/on_init.py knows not to re-run.
+  6. Marks .agents/.bridge_claude.lock and/or .agents/.bridge_cursor.lock
+     (per --target) so hooks/on_init.py and start_workflow bridge_check
+     can detect a deliberate submodule update and re-link automatically.
 """
 import argparse
 import re
@@ -105,6 +107,9 @@ GITIGNORE_ENTRIES = [
     "/.claude/commands/",
     "/.claude/skills/",
     "/.claude/settings.local.json",
+    "/.cursor/commands/",
+    "/.cursor/rules/",
+    "/.cursor/mcp.json",
     "/graphify-out/",
 ]
 
@@ -123,7 +128,10 @@ def ensure_gitignore_entries() -> None:
     with gitignore.open("a") as f:
         if existing_lines and existing_lines[-1] != "":
             f.write("\n")
-        f.write("\n# .agents Claude Code bridge + graphify output (regenerated locally, never commit)\n")
+        f.write(
+            "\n# .agents Claude/Cursor bridge + graphify output "
+            "(regenerated locally, never commit)\n"
+        )
         for entry in missing:
             f.write(entry + "\n")
     print(f"✅ Added {len(missing)} missing .gitignore entr{'y' if len(missing) == 1 else 'ies'} "
@@ -164,6 +172,38 @@ def scaffold_identity_config() -> None:
           "the installer never does this automatically.")
 
 
+BRIDGE_LOCKS_BY_TARGET = {
+    "claude": (".bridge_claude.lock",),
+    "cursor": (".bridge_cursor.lock",),
+    "both": (".bridge_claude.lock", ".bridge_cursor.lock"),
+}
+
+
+def current_submodule_commit() -> str:
+    """HEAD of the .agents submodule, or ``unknown`` outside a git context."""
+    try:
+        return subprocess.run(
+            ["git", "-C", str(AGENTS_DIR), "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+    except (subprocess.CalledProcessError, OSError):
+        return "unknown"
+
+
+def write_bridge_locks(target: str) -> None:
+    """Record the installed submodule commit in per-target lock files."""
+    commit = current_submodule_commit()
+    legacy_lock = AGENTS_DIR / ".claude_bridge.lock"
+    if legacy_lock.exists():
+        legacy_lock.unlink()
+    for lock_name in BRIDGE_LOCKS_BY_TARGET[target]:
+        lock_path = AGENTS_DIR / lock_name
+        lock_path.write_text(commit + "\n")
+        print(f"🔒 Bridge installed at commit {commit[:12]}. Marked {lock_path}")
+
+
 def install_nucleus_bridge() -> int:
     """Minimal self-bridge for the nucleus repo itself: commands + agents +
     constitution import, so `/agents:*` works while developing the framework.
@@ -185,7 +225,11 @@ def install_nucleus_bridge() -> int:
     return 0
 
 
-def install_git_commit_msg() -> None:
+def install_git_commit_msg(
+    *,
+    hooks_dir: Path | None = None,
+    script_path: str = ".agents/hooks/on_commit_msg.py",
+) -> None:
     """Install a native commit-msg hook so message gates cover every commit.
 
     `on_commit.py` runs at pre-commit time, where the message does not yet
@@ -197,21 +241,23 @@ def install_git_commit_msg() -> None:
     Same ownership rule as the pre-commit installer: an existing hook belongs
     to the project and is never overwritten.
     """
-    hooks_dir = HOST_DIR / ".git" / "hooks"
-    if not hooks_dir.is_dir():
+    if hooks_dir is None:
+        hooks_dir = HOST_DIR / ".git" / "hooks"
+    if not hooks_dir.parent.is_dir():
         return
+    hooks_dir.mkdir(parents=True, exist_ok=True)
 
     hook_path = hooks_dir / "commit-msg"
     body = (
         "#!/usr/bin/env bash\n"
-        "# Installed by .agents/scripts/install_claude.py\n"
+        "# Installed by .agents/scripts/install.py\n"
         "#\n"
         "# Conventional Commit format, regression-test and dependency-\n"
         "# justification gates. pre-commit cannot run these: the message does\n"
         "# not exist yet at that point.\n"
         "set -euo pipefail\n"
-        "[ -f .agents/hooks/on_commit_msg.py ] || exit 0\n"
-        'exec python3 .agents/hooks/on_commit_msg.py "$1"\n'
+        f"[ -f {script_path} ] || exit 0\n"
+        f'exec python3 {script_path} "$1"\n'
     )
 
     if hook_path.exists():
@@ -221,7 +267,7 @@ def install_git_commit_msg() -> None:
         print(
             "ℹ️  A commit-msg hook already exists and was left alone. To gate "
             "commit messages too, add:\n"
-            '      python3 .agents/hooks/on_commit_msg.py "$1"'
+            f'      python3 {script_path} "$1"'
         )
         return
 
@@ -230,7 +276,11 @@ def install_git_commit_msg() -> None:
     print("🪝 Installed .git/hooks/commit-msg (message gates on every commit path)")
 
 
-def install_git_pre_commit() -> None:
+def install_git_pre_commit(
+    *,
+    hooks_dir: Path | None = None,
+    script_path: str = ".agents/hooks/on_commit.py",
+) -> None:
     """Install a native pre-commit hook so a terminal commit is scanned too.
 
     The secret scanner runs as a Claude Code `PreToolUse` hook, which sees only
@@ -241,20 +291,22 @@ def install_git_pre_commit() -> None:
     Written only when no pre-commit hook exists. An existing one belongs to the
     project and is never overwritten; the path to add is printed instead.
     """
-    hooks_dir = HOST_DIR / ".git" / "hooks"
-    if not hooks_dir.is_dir():
+    if hooks_dir is None:
+        hooks_dir = HOST_DIR / ".git" / "hooks"
+    if not hooks_dir.parent.is_dir():
         return
+    hooks_dir.mkdir(parents=True, exist_ok=True)
 
     hook_path = hooks_dir / "pre-commit"
     body = (
         "#!/usr/bin/env bash\n"
-        "# Installed by .agents/scripts/install_claude.py\n"
+        "# Installed by .agents/scripts/install.py\n"
         "#\n"
         "# The Claude Code PreToolUse hook only sees commits the agent makes.\n"
         "# This covers every other path into the repository.\n"
         "set -euo pipefail\n"
-        "[ -f .agents/hooks/on_commit.py ] || exit 0\n"
-        "exec python3 .agents/hooks/on_commit.py\n"
+        f"[ -f {script_path} ] || exit 0\n"
+        f"exec python3 {script_path}\n"
     )
 
     if hook_path.exists():
@@ -264,7 +316,7 @@ def install_git_pre_commit() -> None:
         print(
             "ℹ️  A pre-commit hook already exists and was left alone. To scan "
             "terminal commits too, add:\n"
-            "      python3 .agents/hooks/on_commit.py"
+            f"      python3 {script_path}"
         )
         return
 
@@ -273,20 +325,63 @@ def install_git_pre_commit() -> None:
     print("🪝 Installed .git/hooks/pre-commit (scans terminal commits too)")
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Install the .agents Claude Code bridge.")
-    parser.add_argument("--profile", help="Optional project profile to install (profiles/<name>)")
-    args = parser.parse_args()
+def install_git_pre_push(
+    *,
+    hooks_dir: Path | None = None,
+    script_path: str = ".agents/hooks/on_push.py",
+) -> None:
+    """Install a native pre-push hook so force-push is blocked under any tool."""
+    if hooks_dir is None:
+        hooks_dir = HOST_DIR / ".git" / "hooks"
+    if not hooks_dir.parent.is_dir():
+        return
+    hooks_dir.mkdir(parents=True, exist_ok=True)
 
-    # Nucleus mode (agents.md §5 nucleus_neutrality): the full host bridge is
-    # refused, but the minimal self-bridge (commands/agents/constitution) is
-    # installed so the framework's own workflows are invocable while developing it.
-    if (AGENTS_DIR / ".git").is_dir():
-        if args.profile:
-            print("🛑 Profiles cannot be installed into the nucleus.", file=sys.stderr)
-            return 1
-        return install_nucleus_bridge()
+    hook_path = hooks_dir / "pre-push"
+    body = (
+        "#!/usr/bin/env bash\n"
+        "# Installed by .agents/scripts/install.py\n"
+        "#\n"
+        "# Blocks force-push and non-fast-forward updates. Claude Code\n"
+        "# permissions.deny does not apply under Cursor.\n"
+        "set -euo pipefail\n"
+        f"[ -f {script_path} ] || exit 0\n"
+        f'exec python3 {script_path} "$@"\n'
+    )
 
+    if hook_path.exists():
+        current = hook_path.read_text(encoding="utf-8", errors="replace")
+        if "on_push.py" in current:
+            return
+        print(
+            "ℹ️  A pre-push hook already exists and was left alone. To block "
+            "force-push too, add:\n"
+            '      python3 .agents/hooks/on_push.py "$@"'
+        )
+        return
+
+    hook_path.write_text(body, encoding="utf-8")
+    hook_path.chmod(0o755)
+    print("🪝 Installed .git/hooks/pre-push (blocks force-push for every tool)")
+
+
+def install_host_git_hooks() -> None:
+    """Install native git hooks that must cover terminal and Cursor paths."""
+    install_git_pre_commit()
+    install_git_commit_msg()
+    install_git_pre_push()
+
+
+def install_nucleus_git_hooks() -> None:
+    """Install git hooks into the nucleus repo (repo-relative hook script paths)."""
+    hooks_dir = AGENTS_DIR / ".git" / "hooks"
+    install_git_pre_commit(hooks_dir=hooks_dir, script_path="hooks/on_commit.py")
+    install_git_commit_msg(hooks_dir=hooks_dir, script_path="hooks/on_commit_msg.py")
+    install_git_pre_push(hooks_dir=hooks_dir, script_path="hooks/on_push.py")
+
+
+def install_host_claude_bridge(profile: str | None) -> int:
+    """Install the full Claude Code bridge into a host checkout."""
     print(f"🌉 Installing Claude Code bridge for .agents into {HOST_DIR} ...")
 
     for f in sorted((AGENTS_DIR / "agents").glob("*.md")):
@@ -307,41 +402,72 @@ def main() -> int:
     add_claude_import("@.agents/agents.md")
     ensure_gitignore_entries()
     scaffold_identity_config()
-    install_git_pre_commit()
-    install_git_commit_msg()
+    install_host_git_hooks()
 
-    if args.profile:
-        profile_dir = AGENTS_DIR / "profiles" / args.profile
+    if profile:
+        profile_dir = AGENTS_DIR / "profiles" / profile
         if not profile_dir.is_dir():
             print(f"🛑 Profile not found: {profile_dir}", file=sys.stderr)
             return 1
-        print(f"📦 Installing profile: {args.profile}")
+        print(f"📦 Installing profile: {profile}")
         for f in sorted((profile_dir / "agents").glob("*.md")):
-            link_one(f"../../.agents/profiles/{args.profile}/agents/{f.name}",
+            link_one(f"../../.agents/profiles/{profile}/agents/{f.name}",
                      HOST_DIR / ".claude" / "agents" / f.name)
         if (profile_dir / "skills").is_dir():
             for d in sorted((profile_dir / "skills").iterdir()):
                 if d.is_dir():
-                    link_one(f"../../.agents/profiles/{args.profile}/skills/{d.name}",
+                    link_one(f"../../.agents/profiles/{profile}/skills/{d.name}",
                              HOST_DIR / ".claude" / "skills" / d.name)
         for r in sorted((profile_dir / "rules").glob("*.md")):
-            add_claude_import(f"@.agents/profiles/{args.profile}/rules/{r.name}")
+            add_claude_import(f"@.agents/profiles/{profile}/rules/{r.name}")
         if (profile_dir / "mcp" / "registry.json").exists():
-            print(f"ℹ️  Profile MCP servers listed in profiles/{args.profile}/mcp/registry.json "
+            print(f"ℹ️  Profile MCP servers listed in profiles/{profile}/mcp/registry.json "
                   "— add the ones you need to .mcp.json manually (they may require API keys).")
+    return 0
 
-    # Record the installed submodule commit so hooks/on_init.py (and the
-    # start_workflow bridge_check) can detect a deliberate submodule update
-    # and re-link any new agents/commands/skills automatically.
-    try:
-        commit = subprocess.run(
-            ["git", "-C", str(AGENTS_DIR), "rev-parse", "HEAD"],
-            capture_output=True, text=True, check=True,
-        ).stdout.strip()
-    except (subprocess.CalledProcessError, OSError):
-        commit = "unknown"
-    (AGENTS_DIR / ".claude_bridge.lock").write_text(commit + "\n")
-    print(f"🔒 Bridge installed at commit {commit[:12]}. Marked {AGENTS_DIR / '.claude_bridge.lock'}")
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Install the .agents bridge.")
+    parser.add_argument("--profile", help="Optional project profile to install (profiles/<name>)")
+    parser.add_argument(
+        "--target",
+        choices=["claude", "cursor", "both"],
+        default="claude",
+        help="Installation target: 'claude' (Claude Code, default), 'cursor' (Cursor), or 'both'"
+    )
+    args = parser.parse_args()
+    from cursor_adapter import install_cursor_bridge  # noqa: E402
+
+    # Nucleus mode (agents.md §5 nucleus_neutrality): the full host bridge is
+    # refused, but the minimal self-bridge (commands/agents/constitution) is
+    # installed so the framework's own workflows are invocable while developing it.
+    if (AGENTS_DIR / ".git").is_dir():
+        if args.profile:
+            print("🛑 Profiles cannot be installed into the nucleus.", file=sys.stderr)
+            return 1
+        if args.target == "claude":
+            return install_nucleus_bridge()
+        if args.target == "cursor":
+            install_cursor_bridge(AGENTS_DIR, nucleus=True)
+            install_nucleus_git_hooks()
+            return 0
+        install_nucleus_bridge()
+        install_cursor_bridge(AGENTS_DIR, nucleus=True)
+        install_nucleus_git_hooks()
+        return 0
+
+    if args.target in ("claude", "both"):
+        rc = install_host_claude_bridge(args.profile)
+        if rc != 0:
+            return rc
+
+    if args.target in ("cursor", "both"):
+        install_cursor_bridge(HOST_DIR, nucleus=False)
+        ensure_gitignore_entries()
+        if args.target == "cursor":
+            install_host_git_hooks()
+
+    write_bridge_locks(args.target)
     return 0
 
 

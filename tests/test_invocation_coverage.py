@@ -67,7 +67,7 @@ def test_skill_named_by_governance_passes(tree):
 def test_module_imported_by_another_script_is_not_orphan(tree):
     """A script imported as a module has an invoker even though its filename
     appears nowhere. Missing this nearly deleted `merge_json.py`, which
-    `install_claude.py` imports and the bridge installer depends on."""
+    `install.py` imports and the bridge installer depends on."""
     (tree / "scripts" / "helper.py").write_text("VALUE = 1\n", encoding="utf-8")
     (tree / "scripts" / "caller.py").write_text(
         '"""invoked_by: Makefile."""\nfrom helper import VALUE\n', encoding="utf-8"

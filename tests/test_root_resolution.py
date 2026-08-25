@@ -54,7 +54,7 @@ def test_the_root_is_the_directory_holding_the_ruleset():
 
 
 def test_the_root_is_absolute_and_symlink_resolved():
-    """`.resolve()` is load-bearing: `install_claude.sh` exposes commands and
+    """`.resolve()` is load-bearing: `install.sh` exposes commands and
     agents into a host's `.claude/` as symlinks, and an unresolved root would
     point at the link's directory instead of the real tree."""
     root = agents_root()

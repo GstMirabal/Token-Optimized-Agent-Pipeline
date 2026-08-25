@@ -18,7 +18,11 @@ invoked_by: start_workflow.md#state_claim (claim), close_workflow.md#state_sync
 (release), rules/token_economy.md#3.1 (suspend, at the hard threshold).
 
 Usage:
-    python3 scripts/session_state.py claim --session-id <uid> [--takeover]
+    python3 scripts/session_state.py claim [--session-id <uid>] [--takeover]
+        [--tool claude-code|cursor|terminal] [--delegation-mode native|sequential]
+        # --session-id is generated (see generate_session_id()) when the
+        # harness exposes none, e.g. Cursor.
+        # --delegation-mode defaults: cursor→sequential, others→native.
     python3 scripts/session_state.py release   # seals the SPRINT
     python3 scripts/session_state.py suspend   # ends the SESSION only
 
@@ -29,6 +33,7 @@ Exit codes:
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -45,6 +50,22 @@ SUSPENDED = "SUSPENDED"  # session ended, sprint still open (token_economy.md §
 
 def now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def generate_session_id() -> str:
+    """Mint a UID for a caller that supplies none (`--session-id` omitted).
+
+    Form: `<compact UTC ISO-8601>-<PID>`, e.g. `20260824T094910Z-48213`.
+    The collision guard in `claim()` compares UIDs as opaque strings, never
+    their provenance, so any unique string satisfies it — `uuid4()` was
+    rejected in favor of this form because a timestamp with a PID is legible
+    in forensics without a tool.
+
+    Returns:
+        str: the generated UID.
+    """
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    return f"{stamp}-{os.getpid()}"
 
 
 def head_sha() -> str | None:
@@ -85,6 +106,21 @@ def git_branch() -> str | None:
     return result.stdout.strip() if result.returncode == 0 else None
 
 
+def derive_delegation_mode(tool: str, explicit_mode: str | None) -> str:
+    """Determine the delegation mode from tool and explicit argument.
+
+    Args:
+        tool: The tool claiming the lock (`claude-code`, `cursor`, or `terminal`).
+        explicit_mode: Explicit `--delegation-mode` value, or None.
+
+    Returns:
+        str: `native` or `sequential`.
+    """
+    if explicit_mode is not None:
+        return explicit_mode
+    return "sequential" if tool == "cursor" else "native"
+
+
 def suspend() -> int:
     """End the session without sealing the sprint.
 
@@ -115,16 +151,28 @@ def suspend() -> int:
     return 0
 
 
-def claim(session_id: str, takeover: bool) -> int:
+def claim(session_id: str | None, takeover: bool, tool: str, delegation_mode: str | None = None) -> int:
     """Record this session as the holder of the lock.
 
     Args:
-        session_id: UID of the session claiming the lock.
+        session_id: UID of the session claiming the lock. Some harnesses
+            (Cursor) expose no session UID to the caller; when this arrives
+            `None`, `generate_session_id()` mints one so the claim can still
+            proceed.
         takeover: Seize a lock held by another session (crash recovery).
+        tool: Which harness is claiming the lock — `claude-code`, `cursor`,
+            or `terminal`. Recorded as `session_tool` alongside `session_id`
+            so forensics can tell which tool left a session open.
+        delegation_mode: Execution mode — `native` (8 roles) or `sequential`
+            (manual). When None, derived from tool: `cursor` → `sequential`,
+            others → `native`.
 
     Returns:
         int: 0 when claimed, 2 when another live session holds the lock.
     """
+    if session_id is None:
+        session_id = generate_session_id()
+
     state = load_state()
     holder = state.get("session_id")
 
@@ -145,8 +193,11 @@ def claim(session_id: str, takeover: bool) -> int:
     # The collision guard above already lets SUSPENDED through: it blocks only on
     # IN_PROGRESS. What was missing is that nothing ever wrote this state, and
     # that resuming left no trace — so a sprint spanning sessions was invisible.
+    resolved_mode = derive_delegation_mode(tool, delegation_mode)
     state.update({
         "session_id": session_id,
+        "session_tool": tool,
+        "delegation_mode": resolved_mode,
         "status": IN_PROGRESS,
         "start_time": now(),
         "last_updated": now(),
@@ -191,17 +242,30 @@ def main() -> int:
     sub = parser.add_subparsers(dest="command", required=True)
 
     claim_parser = sub.add_parser("claim", help="Record this session as lock holder.")
-    claim_parser.add_argument("--session-id", required=True)
+    claim_parser.add_argument(
+        "--session-id", required=False, default=None,
+        help="UID of the claiming session. Omit under harnesses (Cursor) "
+             "that expose none; a UID is generated.",
+    )
     claim_parser.add_argument(
         "--takeover", action="store_true",
         help="Seize a lock left behind by a crashed session.",
+    )
+    claim_parser.add_argument(
+        "--tool", choices=["claude-code", "cursor", "terminal"], default="terminal",
+        help="Harness claiming the lock, recorded as session_tool.",
+    )
+    claim_parser.add_argument(
+        "--delegation-mode", choices=["native", "sequential"], default=None,
+        help="Execution mode (native: 8 roles; sequential: manual). "
+             "If omitted, derived from --tool: cursor→sequential, others→native.",
     )
     sub.add_parser("release", help="Seal the SPRINT at close.")
     sub.add_parser("suspend", help="End the SESSION with the sprint still open.")
 
     args = parser.parse_args()
     if args.command == "claim":
-        return claim(args.session_id, args.takeover)
+        return claim(args.session_id, args.takeover, args.tool, args.delegation_mode)
     if args.command == "suspend":
         return suspend()
     return release()

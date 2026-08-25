@@ -1,3 +1,17 @@
+"""Session-start bridge sync for Claude Code hosts.
+
+Runs at ``SessionStart`` to re-link commands/agents when the submodule moves
+and to refuse a session whose bridge artifacts are gone.
+
+invoked_by: claude/settings.hooks.json SessionStart, merged by scripts/install.py.
+
+Usage:
+    python3 hooks/on_init.py
+
+Exit codes:
+    0 — session may proceed (warnings are non-blocking)
+"""
+
 import os
 import subprocess
 import json
@@ -12,10 +26,10 @@ from hooks.telemetry import log_error
 # Configuration
 CONFIG_PATH = Path(".env")
 ENV_TEMPLATE = Path(".env.template")
-BRIDGE_LOCK = Path(".agents/.claude_bridge.lock")
-INSTALL_SCRIPT = Path(".agents/scripts/install_claude.py")
+BRIDGE_LOCK = Path(".agents/.bridge_claude.lock")
+INSTALL_SCRIPT = Path(".agents/scripts/install.py")
 
-# A small, representative sample of the artifacts install_claude.py links into
+# A small, representative sample of the artifacts install.py links into
 # the host. Cheap enough to stat on every session start.
 BRIDGE_ANCHORS = [
     Path(".claude/commands/agents/start.md"),
@@ -46,7 +60,7 @@ def current_submodule_commit() -> str:
 def bridge_intact() -> bool:
     """Confirms the linked artifacts actually survive on disk, independent of
     the commit-hash lock. A `git clean -fd` (or manual `rm`) wipes the host's
-    untracked `.claude/` bridge without touching `.claude_bridge.lock` — the
+    untracked `.claude/` bridge without touching `.bridge_claude.lock` — the
     lock lives inside the `.agents` submodule, which `git clean` skips by
     default — leaving the lock trusting a bridge that no longer exists."""
     return all(p.exists() for p in BRIDGE_ANCHORS)

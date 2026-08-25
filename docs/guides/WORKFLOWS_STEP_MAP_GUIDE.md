@@ -16,7 +16,7 @@ protocols that should mirror each other shows up there first.
 | `close_workflow` | write | write | write | write | write | write | write | write | write | verify/write | — | — |
 | `deployment_workflow` | — | — | — | — | — | — | — | — | write | — | — | — |
 | `extract_workflow` | — | — | — | — | — | — | — | — | — | ?/write | — | — |
-| `pipeline_workflow` | write | write | write | write | verify/write | — | write | — | write | — | — | — |
+| `pipeline_workflow` | write | write | write | write | read/write | — | write | — | write | — | — | — |
 | `reconciliation_workflow` | — | — | — | — | — | — | — | write | write | — | — | write |
 | `remediation_workflow` | — | — | — | — | — | — | — | write | — | — | — | — |
 | `repository_hardening_workflow` | — | — | — | — | — | — | — | — | — | — | — | — |
@@ -118,10 +118,10 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 3. Roadmap Drafting | `orchestrator` | write |
 | 4.1 Agent Assignment | `agent_orchestrator` | write |
 | 4.2 Skill Assignment | `skill_architect` | write |
-| 4.3 Rule Audit | `rule_validator` | verify |
+| 4.3 Rule Audit | `rule_validator` | read |
 | 5. Approval Gate | `principal_agent` | write |
 | 6. Execution | `Subagents` | write |
-| 7. Quality Gate | `qa_agent` → `tester_agent` | verify |
+| 7. Quality Gate | `qa_agent` → `tester_agent` | write |
 | 8. Sprint Closeout | `principal_agent` | write |
 
 ### `reconciliation_workflow.md`
@@ -218,7 +218,7 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | `ki_index.json`, per-domain `memory_index.json` | `Flat summary-only `memory_index.json` | ? |
 | Numbered roadmaps (`NNN-title.md`) | `Untouched if closed history; Option B rename (`[MODULE]_ROADMAP.md`) only for ACTIVE ones` | ? |
 | `violation_log.md`, `PROCEDURAL_DEVIATION_*.md` | `memory/telemetry/` → distillation → purge` | ? |
-| Other frameworks' files (`.cursor/rules`, `.windsurfrules`, …) | `Proposed for archive in the snapshot` | write |
+| Other frameworks' files (`.windsurfrules`, `copilot-instructions.md`, …) | `Proposed for archive in the snapshot` | write |
 | Pre-arc42-lite `*_BLUEPRINT.md` (missing Runtime View/Crosscutting Concepts/Glossary, or with rationale inlined instead of an ADR link) | `Inventoried in the reconciliation report as a migration candidate` | ? |
 | Scenario | `Detection signals` | ? |
 | A. Greenfield | `Short/empty git history, no `docs/`, no substantial source code.` | verify |

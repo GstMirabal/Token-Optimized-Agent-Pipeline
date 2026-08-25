@@ -68,7 +68,7 @@ def agents_root() -> Path:
     """The framework repository root, resolved from this file, never from the cwd.
 
     `.resolve()` is not decoration: without it a script invoked through a
-    symlinked path — which is exactly how `install_claude.sh` exposes commands
+    symlinked path — which is exactly how `install.sh` exposes commands
     and agents into a host's `.claude/` — resolves the root to the symlink's
     directory rather than to the real tree.
 

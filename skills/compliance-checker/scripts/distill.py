@@ -7,7 +7,7 @@ from datetime import datetime
 # so 4 parents reach AGENTS_ROOT. Telemetry, though, lives at the *host's* root,
 # not inside .agents/ (submodule_purity — .agents/memory/ must never exist as a
 # host artifact). In nucleus mode AGENTS_ROOT already *is* the host (real .git
-# dir, same detection install_claude.py/render_readme.py already use); in a
+# dir, same detection install.py/render_readme.py already use); in a
 # normal host install, AGENTS_ROOT is the `.agents/` submodule and the real
 # root is one level up. The previous unconditional 4-parent count always
 # landed inside .agents/ for a host install, so this script had never once

@@ -72,7 +72,8 @@ docs/active_task.md
 
 # Machine-local install markers and environments
 installed.lock
-.claude_bridge.lock
+.bridge_claude.lock
+.bridge_cursor.lock
 .deploy_unlock
 venv_skillopt/
 venv/
@@ -97,5 +98,10 @@ __pycache__/
 # Ephemeral memory (agents.md §4) — purged at close, never versioned
 memory/
 
-# Nucleus self-bridge (regenerable via scripts/install_claude.sh)
+# Nucleus self-bridge (regenerable via scripts/install.sh)
 .claude/
+
+# Cursor bridge output (regenerable via scripts/install.py --target cursor)
+.cursor/commands/
+.cursor/rules/
+.cursor/mcp.json

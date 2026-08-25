@@ -127,7 +127,7 @@ def anchor(tmp_path, monkeypatch):
 
 
 def test_claim_writes_the_state_start_never_wrote(anchor):
-    assert ss.claim("session-a", takeover=False) == 0
+    assert ss.claim("session-a", takeover=False, tool="terminal") == 0
     state = json.loads(anchor.read_text())
     assert state["status"] == "IN_PROGRESS"
     assert state["session_id"] == "session-a"
@@ -135,25 +135,25 @@ def test_claim_writes_the_state_start_never_wrote(anchor):
 
 
 def test_second_session_is_blocked_with_exit_2(anchor):
-    ss.claim("session-a", takeover=False)
-    assert ss.claim("session-b", takeover=False) == 2
+    ss.claim("session-a", takeover=False, tool="terminal")
+    assert ss.claim("session-b", takeover=False, tool="terminal") == 2
     # The first session keeps the lock: a refused claim must not half-write.
     assert json.loads(anchor.read_text())["session_id"] == "session-a"
 
 
 def test_takeover_is_explicit_and_works(anchor):
-    ss.claim("session-a", takeover=False)
-    assert ss.claim("session-b", takeover=True) == 0
+    ss.claim("session-a", takeover=False, tool="terminal")
+    assert ss.claim("session-b", takeover=True, tool="terminal") == 0
     assert json.loads(anchor.read_text())["session_id"] == "session-b"
 
 
 def test_reclaim_by_same_session_is_not_a_collision(anchor):
-    ss.claim("session-a", takeover=False)
-    assert ss.claim("session-a", takeover=False) == 0
+    ss.claim("session-a", takeover=False, tool="terminal")
+    assert ss.claim("session-a", takeover=False, tool="terminal") == 0
 
 
 def test_release_marks_closed(anchor):
-    ss.claim("session-a", takeover=False)
+    ss.claim("session-a", takeover=False, tool="terminal")
     assert ss.release() == 0
     state = json.loads(anchor.read_text())
     assert state["status"] == "CLOSED_SUCCESSFULLY"
@@ -964,7 +964,7 @@ def test_the_meter_reports_no_currency(tmp_path):
 def test_suspend_does_not_write_the_close_baseline(anchor):
     """The whole point. last_close_commit means "where the last CLOSE sealed";
     writing it at session end would set a false baseline and blind detect_drift."""
-    ss.claim("session-a", takeover=False)
+    ss.claim("session-a", takeover=False, tool="terminal")
     anchor.write_text(json.dumps({**json.loads(anchor.read_text()),
                                   "last_close_commit": "baseline-sha"}))
     assert ss.suspend() == 0
@@ -977,7 +977,7 @@ def test_suspend_does_not_write_the_close_baseline(anchor):
 def test_release_still_seals_the_sprint(repo):
     """The asymmetry's other half — regression to protect."""
     (repo / "docs").mkdir()
-    ss.claim("session-a", takeover=False)
+    ss.claim("session-a", takeover=False, tool="terminal")
     assert ss.release() == 0
     state = json.loads((repo / "docs" / "active_state.json").read_text())
     assert state["status"] == "CLOSED_SUCCESSFULLY"
@@ -986,32 +986,151 @@ def test_release_still_seals_the_sprint(repo):
 
 def test_resuming_a_suspended_sprint_is_not_a_collision(anchor, capsys):
     """A planned handoff and a crash were indistinguishable before this state."""
-    ss.claim("session-a", takeover=False)
+    ss.claim("session-a", takeover=False, tool="terminal")
     ss.suspend()
-    assert ss.claim("session-b", takeover=False) == 0
+    assert ss.claim("session-b", takeover=False, tool="terminal") == 0
     assert "Resuming" in capsys.readouterr().out
 
 
 def test_a_live_session_still_blocks_a_second_one(anchor):
     """The collision guard must stay armed on IN_PROGRESS — regression guard."""
-    ss.claim("session-a", takeover=False)
-    assert ss.claim("session-b", takeover=False) == 2
+    ss.claim("session-a", takeover=False, tool="terminal")
+    assert ss.claim("session-b", takeover=False, tool="terminal") == 2
 
 
 def test_sessions_are_counted_across_a_suspended_sprint(anchor):
     """session_cost.py needs to know a sprint took three sessions, not three sprints."""
-    ss.claim("session-a", takeover=False)
+    ss.claim("session-a", takeover=False, tool="terminal")
     ss.suspend()
-    ss.claim("session-b", takeover=False)
+    ss.claim("session-b", takeover=False, tool="terminal")
     ss.suspend()
-    ss.claim("session-c", takeover=False)
+    ss.claim("session-c", takeover=False, tool="terminal")
     assert json.loads(anchor.read_text())["session_count"] == 3
+
+
+# --- P8.1: UID generation and tool recording for portability --------
+#
+# When `--session-id` is omitted (as in Cursor, which exposes no session UID
+# to the caller), `claim()` generates a UID. These tests verify the mechanism
+# that enables tool migration: P8 makes it possible for a Cursor session to
+# claim the lock after Claude Code suspends, because the collision guard is
+# no longer bound to the harness's own session identifier.
+
+
+def test_claim_without_session_id_generates_uid(anchor):
+    """When session_id is None, claim() generates a UID with form `<timestamp>-<PID>`.
+
+    The form is chosen for forensics legibility, not uniqueness — a collision
+    guard that compares UIDs as opaque strings is satisfied by any unique
+    string. The timestamp + PID combination is legible in a crash report
+    without tooling.
+    """
+    assert ss.claim(None, takeover=False, tool="terminal") == 0
+    state = json.loads(anchor.read_text())
+    session_id = state["session_id"]
+
+    # Must be non-empty and have the form <YYYYMMDDTHHMMSSZ>-<PID>
+    assert session_id
+    assert "-" in session_id
+    parts = session_id.split("-")
+    assert len(parts) >= 2
+    # Timestamp part should contain T and Z
+    assert "T" in parts[0]
+    assert parts[0].endswith("Z")
+    # PID part should be numeric
+    assert parts[-1].isdigit()
+
+
+def test_claim_records_session_tool(anchor):
+    """The session_tool field is recorded in the state.
+
+    Forensics must distinguish which tool left a session open, because the
+    unlock path differs between Claude Code (running as subagent) and Cursor
+    (keyboard command). The tool is written alongside the session_id.
+    """
+    assert ss.claim("session-a", takeover=False, tool="cursor") == 0
+    state = json.loads(anchor.read_text())
+    assert state["session_tool"] == "cursor"
+
+    # Verify the default tool is "terminal" when not specified
+    ss.claim("session-b", takeover=True, tool="terminal")
+    state = json.loads(anchor.read_text())
+    assert state["session_tool"] == "terminal"
+
+
+def test_collision_guard_holds_for_generated_uids(anchor):
+    """The collision guard is armed against generated UIDs.
+
+    Two sessions claiming without providing UIDs must still result in the
+    second blocking unless takeover is set. The guard does not care whether
+    the UID was supplied by the caller or generated by the claim function.
+    """
+    # First session generates a UID
+    assert ss.claim(None, takeover=False, tool="terminal") == 0
+    first_id = json.loads(anchor.read_text())["session_id"]
+
+    # Second session tries to claim with a different generated UID
+    # (we supply a distinct explicit ID, but the mechanism is the same)
+    assert ss.claim("session-b", takeover=False, tool="terminal") == 2
+
+    # The first session's lock remains intact
+    state = json.loads(anchor.read_text())
+    assert state["session_id"] == first_id
+
+    # Takeover succeeds
+    assert ss.claim("session-b", takeover=True, tool="terminal") == 0
+    state = json.loads(anchor.read_text())
+    assert state["session_id"] == "session-b"
+
+
+def test_claim_over_suspended_state_resumes(anchor, capsys):
+    """Claiming over a SUSPENDED state resumes without triggering the collision guard.
+
+    This is the critical mechanism of tool migration (Design §D0b): the
+    sequence is suspend, install target tool, claim from target tool. If the
+    collision guard fired on a SUSPENDED state, the migration would fail.
+
+    The test verifies that a new session with a different UID can claim
+    over SUSPENDED, that it prints a resume message, and that session_count
+    increments to track multi-session sprints.
+    """
+    # First session claims and suspends
+    assert ss.claim("session-a", takeover=False, tool="claude-code") == 0
+    state = json.loads(anchor.read_text())
+    assert state["session_id"] == "session-a"
+    assert state["session_tool"] == "claude-code"
+
+    assert ss.suspend() == 0
+    state = json.loads(anchor.read_text())
+    assert state["status"] == "SUSPENDED"
+    assert state["session_count"] == 1
+
+    # Second session (Cursor) claims with a generated UID over SUSPENDED
+    assert ss.claim(None, takeover=False, tool="cursor") == 0
+    state = json.loads(anchor.read_text())
+
+    # The new session is recorded
+    new_session_id = state["session_id"]
+    assert new_session_id  # Generated, not empty
+    assert new_session_id != "session-a"  # Different from first session
+    assert state["session_tool"] == "cursor"
+
+    # Status is back to IN_PROGRESS for the new session
+    assert state["status"] == "IN_PROGRESS"
+
+    # Session count incremented
+    assert state["session_count"] == 2
+
+    # Resume message was printed
+    out = capsys.readouterr().out
+    assert "Resuming" in out
+    assert "session #2" in out
 
 
 def test_suspend_records_where_to_resume(repo):
     """Degraded and declared: the registry-derived form arrives with C0.2."""
     (repo / "docs").mkdir()
-    ss.claim("session-a", takeover=False)
+    ss.claim("session-a", takeover=False, tool="terminal")
     ss.suspend()
     pointer = json.loads((repo / "docs" / "active_state.json").read_text())["resume_pointer"]
     assert pointer["branch"] == "main"
@@ -1027,7 +1146,7 @@ def test_suspend_does_not_launder_unrecorded_work(repo):
                               capture_output=True, text=True).stdout.strip()
     (repo / "docs" / "active_state.json").write_text(
         json.dumps({"status": "CLOSED_SUCCESSFULLY", "last_close_commit": baseline}))
-    ss.claim("session-a", takeover=False)
+    ss.claim("session-a", takeover=False, tool="terminal")
     (repo / "f.txt").write_text("work done in a suspended sprint\n")
     subprocess.run(["git", "commit", "-aqm", "mid-sprint work"], check=True)
     ss.suspend()

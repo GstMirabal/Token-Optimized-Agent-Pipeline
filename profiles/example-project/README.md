@@ -15,7 +15,7 @@ Illustrative project-family pack, kept in the public repo purely to demonstrate 
 The base installer never links profiles. From the host project root:
 
 ```bash
-.agents/scripts/install_claude.sh --profile example-project
+.agents/scripts/install.sh --profile example-project
 ```
 
 This additionally symlinks the profile's `agents/` and `skills/` into the host `.claude/` tree and appends `@`-imports for the profile's `rules/` to the host `CLAUDE.md`.
