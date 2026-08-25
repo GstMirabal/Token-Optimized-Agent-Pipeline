@@ -121,7 +121,7 @@ def readme_tree(tmp_path, monkeypatch):
     test that steers it by cwd is steering the thing the unit deliberately
     removed — so the root itself is what gets substituted.
     """
-    for name in ("rules", "agents", "skills", "workflows", "commands"):
+    for name in ("rules", "agents", "skills", "workflows", "commands", "scripts", "config"):
         (tmp_path / name).mkdir()
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(crc, "agents_root", lambda: tmp_path)
@@ -135,6 +135,8 @@ def declare(counts: dict[str, int]) -> str:
         f"| **Skills** | {counts['skills']} flat skills in `skills/` |\n"
         f"| **Workflows** | {counts['workflows']} protocols in `workflows/`, "
         f"exposed as {counts['commands']} `/agents:*` slash commands |\n"
+        f"| **Infrastructure** | {counts['scripts']} Python scripts in [`scripts/`](scripts/) · "
+        f"{counts['config']} JSON registries in [`config/`](config/) |\n"
     )
 
 
@@ -145,17 +147,27 @@ def populate(tree, counts: dict[str, int]) -> None:
             (tree / name / f"f{i}.md").write_text("x")
     for i in range(counts["skills"]):
         (tree / "skills" / f"s{i}").mkdir()
+    for i in range(counts["scripts"]):
+        (tree / "scripts" / f"s{i}.py").write_text("x = 1\n")
+    for i in range(counts["config"]):
+        (tree / "config" / f"c{i}.json").write_text("{}\n")
 
 
 def test_matching_counts_pass(readme_tree):
-    counts = {"rules": 2, "agents": 3, "skills": 4, "workflows": 5, "commands": 6}
+    counts = {
+        "rules": 2, "agents": 3, "skills": 4, "workflows": 5, "commands": 6,
+        "scripts": 2, "config": 1,
+    }
     populate(readme_tree, counts)
     (readme_tree / "README.md").write_text(declare(counts))
     assert crc.main() == 0
 
 
 def test_drifted_count_fails_the_build(readme_tree):
-    counts = {"rules": 2, "agents": 3, "skills": 4, "workflows": 5, "commands": 6}
+    counts = {
+        "rules": 2, "agents": 3, "skills": 4, "workflows": 5, "commands": 6,
+        "scripts": 2, "config": 1,
+    }
     populate(readme_tree, counts)
     (readme_tree / "README.md").write_text(declare({**counts, "workflows": 99}))
     assert crc.main() == 2
@@ -163,7 +175,10 @@ def test_drifted_count_fails_the_build(readme_tree):
 
 def test_vanished_claim_is_not_a_silent_pass(readme_tree):
     """A README rewritten past the check's patterns must fail, not pass."""
-    counts = {"rules": 2, "agents": 3, "skills": 4, "workflows": 5, "commands": 6}
+    counts = {
+        "rules": 2, "agents": 3, "skills": 4, "workflows": 5, "commands": 6,
+        "scripts": 2, "config": 1,
+    }
     populate(readme_tree, counts)
     (readme_tree / "README.md").write_text("# No counts declared here at all\n")
     assert crc.main() == 2
