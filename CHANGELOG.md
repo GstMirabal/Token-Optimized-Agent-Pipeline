@@ -4,8 +4,10 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.10.0] - 2026-08-25
+
 ### Added
-- **Sprint 027 (`autonomy-posture`) — in flight on `ai-sprint/027`.** Portable Memory/Drift scripts (`persist_session_context.py`, `check_role_artifact.py` + `make role-artifacts`, `session_end_hook.py` → suspend only); Claude template `claude/settings.hooks.json` with `defaultMode: auto`, `autoMode` hard/soft deny (`$defaults`), sandbox + `.env` denyRead, `disableBypassPermissionsMode`, and PreCompact/PostCompact/SubagentStop/SessionEnd hooks; how-to `docs/guides/AUTONOMY_POSTURE_GUIDE.md`; `start_workflow.md` Phase 1.6 Cursor counterparts.
+- **Sprint 027 (`autonomy-posture`)** — Portable Memory/Drift scripts (`persist_session_context.py`, `check_role_artifact.py` + `make role-artifacts`, `session_end_hook.py` → suspend only); Claude template `claude/settings.hooks.json` with `defaultMode: auto`, `autoMode` hard/soft deny (`$defaults`), sandbox + `.env` denyRead, `disableBypassPermissionsMode`, and PreCompact/PostCompact/SubagentStop/SessionEnd hooks; how-to `docs/guides/AUTONOMY_POSTURE_GUIDE.md`; `start_workflow.md` Phase 1.6 Cursor counterparts. Merged as PR #55.
 
 ### Fixed
 - **`F-026-A1`** — gate profiles stay read-only; descriptions no longer claim writes; Orchestrator transcribes Phase 7 verdicts (`verdict_routing` / `gate_transcription`).
