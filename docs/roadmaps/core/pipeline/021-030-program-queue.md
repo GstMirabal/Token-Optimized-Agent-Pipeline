@@ -10,7 +10,7 @@ version: 1.0.0
 
 - **Strategy Lock:** `OPEN`
 - **Delivered:** `024` and `025` (`v4.5.0`), `021` (`v4.6.0`), `022` (`v4.7.0`), `023` (`v4.8.0`), `026` (`v4.9.0`, PR #50), `027` (`v4.10.0`, PR #55), `028` (`v4.11.0`, PR #57), `029` (`documentation-truth`, `v4.12.0`, PR #59), `030` (`token-economy-enforcement`, `v4.13.0`, PR #61)
-- **Next / in flight:** `031` (`gate-verdict-classes`) — owns **`F-093-G1`**. `F-021-A2` remains open. First author-tier model trial: **declared for 031** (`docs/guides/MODEL_TIER_TRIAL_GUIDE.md`). `030` **deployed** `v4.13.0` (PR #61 + seal, 2026-08-25).
+- **Next / in flight:** `031` (`gate-verdict-classes`) **closed**, awaiting `/agents:deployment`. Owns **`F-093-G1`** (closed on this branch). `F-021-A2` remains open. First author-tier model trial: **declared for 032**. `030` **deployed** `v4.13.0` (PR #61). H-004 **deployed** `v4.13.1` (PR #62).
 - **Origin:** drafted in an IDE planning mode across one long session, then migrated
   into this repository. That migration is the point: the same session opened with a
   host having lost an approved plan to ephemeral storage, and this document was
@@ -50,7 +50,7 @@ the program's own opening command.
 | ✅ | **027** | `autonomy-posture` | Deployed `v4.10.0` (PR #55, seal #56, 2026-08-25). Portable Memory/Drift scripts + Claude template (`auto`/`hard_deny`/sandbox/hooks); `F-026-A1` / `F-026-A3` closed |
 | ✅ | **028** | `self-improvement-unblock` | Deployed `v4.11.0` (PR #57 + seal #58, 2026-08-25). Host-side agent destinations, `--profile-path`, `routing_class` |
 | ✅ | **029** | `documentation-truth` | **Deployed** `v4.12.0` (PR #59, 2026-08-25). README counted set + slash-commands guide + ADR-0003…0007 + T5 + file:line check (f) + deploy-seal gate. `F-093-G1` carried → `031` |
-| ✅ | **030** | `token-economy-enforcement` | **Deployed** `v4.13.0` (PR #61, 2026-08-25). Auditor body + consumption trigger + `check_task_scope.py` (`F-026-A2`); trial guide; first author-tier trial → 031 |
+| ✅ | **030** | `token-economy-enforcement` | **Deployed** `v4.13.0` (PR #61, 2026-08-25). Auditor body + consumption trigger + `check_task_scope.py` (`F-026-A2`); trial guide; first author-tier trial destaged 031 → **032** |
 
 ### Carried out of `023` — routed to a hotfix, scheduled after `026`
 

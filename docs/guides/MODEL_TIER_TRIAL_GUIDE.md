@@ -39,9 +39,9 @@ round evidence — never by announcement alone.
 **If Cursor `session_tool`:** use `make cursor-tiers` as the binding catalogue;
 do not copy `claude_code` aliases into `task_scope.md`.
 
-**First trial (declared, not executed in Sprint 030):** Sprint **031**
-(`gate-verdict-classes` may share the cycle, but the author-tier trial is a
-named unit of 031's plan). Sprint 030 ships this guide only.
+**First trial (declared in Sprint 030, destaged in 031):** Sprint **032**.
+Mixing verdict classes and a cheaper `author` in 031 would prevent attributing
+gate rounds to either change. Sprint 030 shipped this guide; 031 retargets it.
 
 ## 4. Verify it worked
 
