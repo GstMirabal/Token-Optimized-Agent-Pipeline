@@ -176,7 +176,7 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Rewrite only the <!-- COUNTED_START -->…<!-- COUNTED_END --> region.",
     )
-    args = parser.parse_args(argv)
+    args = parser.parse_args([] if argv is None else argv)
 
     os.chdir(agents_root())
 

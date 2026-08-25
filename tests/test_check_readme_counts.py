@@ -41,3 +41,12 @@ def test_config_counter_counts_json_files(check_mod, monkeypatch: pytest.MonkeyP
     expected = len(list(Path("config").glob("*.json")))
     assert actual == expected
     assert actual >= 1
+
+
+def test_main_ignores_pytest_argv(check_mod, monkeypatch: pytest.MonkeyPatch) -> None:
+    """T1.1 argparse must not treat pytest's sys.argv as script flags."""
+    monkeypatch.chdir(REPO)
+    monkeypatch.setattr(
+        sys, "argv", ["pytest", "tests/test_check_readme_counts.py", "-q"]
+    )
+    assert check_mod.main() == 0
