@@ -1,7 +1,7 @@
 # Sprint Log — 027 (`autonomy-posture`)
 
 **Branch**: `ai-sprint/027` from `main` at `980f149`
-**Status**: Phase 7 Double-Gate PASSED 2026-08-25 — ready for Phase 8 closeout.
+**Status**: **SESSION LOCKED** — Sprint 027 closeout sealed 2026-08-25.
 
 ---
 
@@ -59,7 +59,7 @@ Measured at `main` `980f149`, before any Work unit of Sprint `027`:
 | 5 Approval Gate | ✅ Human OK 2026-08-25 (*"ok"*) over plan lineage `d874d7a`…`8bd62b9` |
 | 6 Execution | ✅ Olas 0–3 complete (`task_scope` units ✅ through `D3`) |
 | 7 Quality Gate | ✅ Gate-1 PASS / Gate-2 PASS (see Phase 7 below) |
-| 8 Closeout | ⏳ |
+| 8 Closeout | ✅ sealed 2026-08-25 |
 
 ## Phase 6 — Execution summary
 
@@ -97,3 +97,41 @@ Verdict: **PASS**. No functional regression on the portable scripts or merge abo
 
 *Orchestrator transcription of gate verdicts into this file — `F-026-A1` / `gate_transcription`.*
 
+---
+
+## Phase 8 — Closeout (2026-08-25)
+
+### Phase 2.6 — artifact registry
+
+| Artifact | Present |
+| :--- | :--- |
+| `IMPLEMENTATION_PLAN.md` | yes |
+| `SPRINT_LOG.md` | yes |
+| `agent_assignment.md` | yes |
+| `skill_assignment.md` | yes |
+| `task_scope.md` | yes |
+| QA verdict (G1.q) | PASS (above) |
+| Tester verdict (G1.t) | PASS (above) |
+
+### Topographic audit
+
+| Step | Result |
+| :--- | :--- |
+| `make graphify-update` | **5704 nodes, 6571 edges, 597 communities** (incremental; deep rebuild skipped — no LLM key in nucleus) |
+| `graph_stats.json` | Written to this directory |
+| `python3 scripts/docs_freshness_check.py . 027` | WARN only (024/025 missing snapshots; `code_containers` undeclared — carried) |
+| `python3 scripts/check_readme_counts.py` | PASS |
+| `python3 scripts/submodule_purity.py` | PASS (nucleus) |
+| `python3 scripts/branch_sovereignty.py audit` | PASS |
+
+### Heuristic Pulse Gate
+
+Human confirmed (*"ok"*) retaining **`F-20260825-027`** in `memory_index.json` (Cursor tier ownership). Raw log purged from `/memory/`.
+
+### Next protocol
+
+`workflows/deployment_workflow.md` (`/agents:deployment`) — squash-merge `ai-sprint/027` into `main`, tag, GitHub Release.
+
+---
+
+*Certified under conventional commit standard for Sprint 027 closeout.*
