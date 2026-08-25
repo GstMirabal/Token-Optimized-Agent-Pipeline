@@ -10,20 +10,20 @@ protocols that should mirror each other shows up there first.
 
 ## 1. Artifact x Workflow matrix
 
-| Workflow | IMPLEMENTATION_PLAN.md | SPRINT_LOG.md | agent_assignment.md | skill_assignment.md | task_scope.md | graph_stats.json | PHASE_REGISTER.md | active_state.json | CHANGELOG.md | memory_index.json | graph.json | mirror.json |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `audit_workflow` | — | — | — | — | — | — | — | — | — | — | — | — |
-| `close_workflow` | write | write | write | write | write | write | write | write | write | verify/write | — | — |
-| `deployment_workflow` | — | — | — | — | — | — | — | — | write | — | — | — |
-| `extract_workflow` | — | — | — | — | — | — | — | — | — | ?/verify/write | — | — |
-| `pipeline_workflow` | write | write | write | write | read/write | — | write | — | write | — | — | — |
-| `reconciliation_workflow` | — | — | — | — | — | — | — | write | write | — | — | write |
-| `remediation_workflow` | — | — | — | — | — | — | — | write | — | — | — | — |
-| `repository_hardening_workflow` | — | — | — | — | — | — | — | — | — | — | — | — |
-| `reverse_documentation_workflow` | — | — | — | — | — | — | — | — | — | — | — | — |
-| `skill_forge_workflow` | — | — | — | — | — | — | — | — | — | — | — | — |
-| `standardization_workflow` | — | — | — | — | — | — | — | verify | write | write | — | — |
-| `start_workflow` | — | — | — | — | write | — | — | read/write | write | — | write | read |
+| Workflow | IMPLEMENTATION_PLAN.md | SPRINT_LOG.md | agent_assignment.md | skill_assignment.md | task_scope.md | graph_stats.json | PHASE_REGISTER.md | active_state.json | CHANGELOG.md | memory_index.json | graph.json | mirror.json | AGENTS_SLASH_COMMANDS_GUIDE.md |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `audit_workflow` | — | — | — | — | — | — | — | — | — | — | — | — | verify |
+| `close_workflow` | write | write | write | write | write | write | write | write | write | verify/write | — | — | — |
+| `deployment_workflow` | — | — | — | — | — | — | — | — | write | — | — | — | — |
+| `extract_workflow` | — | — | — | — | — | — | — | — | — | ?/verify/write | — | — | — |
+| `pipeline_workflow` | write | write | write | write | read/write | — | write | — | write | — | — | — | — |
+| `reconciliation_workflow` | — | — | — | — | — | — | — | write | write | — | — | write | — |
+| `remediation_workflow` | — | — | — | — | — | — | — | write | — | — | — | — | — |
+| `repository_hardening_workflow` | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| `reverse_documentation_workflow` | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| `skill_forge_workflow` | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| `standardization_workflow` | — | — | — | — | — | — | — | verify | write | write | — | — | — |
+| `start_workflow` | — | — | — | — | write | — | — | read/write | write | — | write | read | — |
 
 **Columns**, from `config/artifact_registry.json` — the artifact and the phase
 that leaves it. A phase is defined by the artifact it leaves, which is what makes
@@ -41,6 +41,7 @@ the matrix portable across tools rather than tied to one runner's agent names.
 - `memory_index.json` — extract_workflow.md Phase 3 (Semantic Indexing)
 - `graph.json` — close_workflow.md Phase 1 (graph_rebuild)
 - `mirror.json` — hooks/state_mirror.py (Stop hook, and close_workflow.md Phase 4)
+- `AGENTS_SLASH_COMMANDS_GUIDE.md` — Sprint 029 (documentation-truth) — living how-to; refresh when commands/ changes
 
 ## 2. Steps, by protocol
 
