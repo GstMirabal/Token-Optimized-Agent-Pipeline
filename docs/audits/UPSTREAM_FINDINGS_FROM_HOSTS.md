@@ -1083,7 +1083,7 @@ Recorded by a host against phase enforcement and the delegation rules. Note that
 ground and was written from the same incident; check what remains before
 drafting.
 
-### - [ ] `C5` — a tracked symlink into the submodule enters host gate scope
+### - [x] `C5` — a tracked symlink into the submodule enters host gate scope
 
 > **Identifier collision, stated because both objects appear in this file.** This
 > entry's `C5` is a **host's finding ID**. Sprint 023 also had a unit of the same
@@ -1103,6 +1103,11 @@ host's own document rules.
 
 Proposed: state whether symlinked nucleus content is in or out of host gate scope,
 so hosts exclude it deliberately rather than discovering the conflict.
+
+**Closed** — Sprint 026 unit `P7`, commit `435db07`. `agents.md §3` now carries
+`symlink_gate_exclusion`: host-root `AGENTS.md` is out of host documentary-gate
+scope; the host excludes the symlink path in its own gate configuration.
+`F-021-A2` and `F-023-S4` are intentionally left open.
 
 ### - [x] `#12` — agent profiles declare `tools:` and no model tier
 
