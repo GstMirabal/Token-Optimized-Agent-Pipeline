@@ -38,7 +38,8 @@
 
 ## Phase 5 — Approval Gate
 
-- **NOT YET ASKED.** Precondition: plan committed (`61581b6`); `audit_plan.py` exit `0`.
+- **PASSED** 2026-08-25. Human OK (`ok`) on committed plan `61581b6` (`triple_lock` lock 1).
+- Precondition: `audit_plan.py` on this plan exits `0`.
 
 ## Settled human decisions
 
@@ -47,3 +48,4 @@
 | 1 | Open Sprint 031 (`gate-verdict-classes`) | This branch and directory |
 | 2 | Author-tier trial stays out of 031 | Destination **032**; D2 retargets the trial guide |
 | 3 | Three emitible verdicts, not a round cap | `APPROVED` \| `REJECTED` \| `RECORD` |
+| 4 | Authorize execution (`ok`) | Phase 6 starts at T1 |
