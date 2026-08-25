@@ -4,6 +4,8 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.9.0] - 2026-08-25
+
 ### Added
 - **Sprint 026 (`tool-portability`) — Cursor and Claude Code share one portable nucleus** (`docs/sprints/026-core-pipeline/`). Session claim works without a harness UID (`scripts/session_state.py` `--tool` / generated IDs); the installer is `scripts/install.py --target {claude,cursor,both}` with a two-line `install_claude.sh` deprecation shim; Cursor receives `.cursor/commands/`, `.cursor/rules/*.mdc` (from `config/rule_triggers.json`), constitution, MCP, and git hooks via `scripts/cursor_adapter.py`; `hooks/on_push.py` blocks force-push/history rewrite under Cursor the way Claude Code `permissions.deny` did; Migration Gate `M1`–`M7` passed; Hito 2 ran under Cursor (`delegation_mode: sequential`). Blind indistinguishability (`A3` → remediating `A3.1` → `A3.r`) **passed** after the sprint-local `.mdc` probe receipt was absorbed into the adapter — portability affirmed for closeout.
 - **`scripts/audit_cursor_models.py` and `make cursor-tiers`** catalogue Cursor models from local `state.vscdb` (read-only); `config/model_tiers.json` documents why Cursor `gate`/`author` stay `null` (*not proven history*).
