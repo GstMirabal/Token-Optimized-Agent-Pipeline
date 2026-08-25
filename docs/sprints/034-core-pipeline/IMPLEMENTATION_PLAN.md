@@ -826,7 +826,7 @@ prueba de que el mapa de jurisdicciones falta.
 I3: `staffing_injection` dice hoy «Takes **unassigned** Initial Roadmap»
 (`agents/agent_orchestrator.md:21`). Con I1 el roadmap llega pre-propuesto, así
 que la regla queda falsa si no se toca. Auto-asignado y **legal**, a diferencia
-de 030/031: este perfil sí declara `Write, Edit`, y hay precedente en
+de las 32 filas de 028–032: este perfil sí declara `Write, Edit`, y hay precedente en
 `docs/sprints/028-core-pipeline/IMPLEMENTATION_PLAN.md:125`.
 
 I4: nueva comprobación de **capacidad del asignatario**. Para cada fila con
