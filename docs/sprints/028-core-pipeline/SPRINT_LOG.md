@@ -1,7 +1,7 @@
 # Sprint Log — 028 (`self-improvement-unblock`)
 
 **Branch**: `ai-sprint/028` from `main` at `0a175a2`
-**Status**: **GATES PASSED** — Phase 7 complete; Phase 8 closeout pending human OK.
+**Status**: **SESSION LOCKED** — Sprint 028 closed on `ai-sprint/028` (2026-08-25); awaiting `/agents:deployment`.
 
 ---
 
@@ -89,4 +89,43 @@ All Work units committed on `ai-sprint/028`. Oldest → newest:
 
 ---
 
-*Phase 8 closeout pending human OK.*
+## Phase 8 — Closeout (2026-08-25)
+
+Human OK: *"ok"*.
+
+### Phase 2.6 — artifact registry
+
+| Artifact | Present |
+| :--- | :--- |
+| `IMPLEMENTATION_PLAN.md` | yes |
+| `SPRINT_LOG.md` | yes |
+| `agent_assignment.md` | yes |
+| `skill_assignment.md` | yes |
+| `task_scope.md` | yes |
+| QA verdict (G1.q) | PASS (above) |
+| Tester verdict (G1.t) | PASS (above) |
+| `PHASE_REGISTER.md` | written this close |
+| `graph_stats.json` | 5879 nodes / 6779 edges / 606 communities |
+
+### Topographic audit
+
+| Step | Result |
+| :--- | :--- |
+| `make graphify-update` | **5879 nodes, 6779 edges, 606 communities** (incremental; deep rebuild skipped — no LLM key in nucleus) |
+| `python3 scripts/docs_freshness_check.py . 028` | WARN only (024/025 missing snapshots; `code_containers` undeclared — carried) |
+| `python3 scripts/check_readme_counts.py` | PASS |
+| `python3 scripts/submodule_purity.py` | PASS (nucleus) |
+| `python3 scripts/session_probe.py --force-platform` | Advisory (exit 1): unrelated session `1e5516f9` exceeded 15× cost bound — not a 028 defect |
+
+### Heuristic Pulse Gate
+
+No new host-class KI (empty survivor list). Recurring Model/Effort omission remains `F-20260825-027`. Dead installer-hook tests: `routing_class=discard`. Human close OK 2026-08-25 (*"ok"*). `/memory/` empty — wipe is a no-op (`rmdir` of empty `memory/` if present).
+
+### Next protocol
+
+`workflows/deployment_workflow.md` (`/agents:deployment`) — squash-merge `ai-sprint/028` into `main`, tag, GitHub Release.
+
+---
+
+*Certified under conventional commit standard for Sprint 028 closeout.*
+

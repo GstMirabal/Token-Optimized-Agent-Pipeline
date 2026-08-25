@@ -10,7 +10,7 @@ version: 1.0.0
 
 - **Strategy Lock:** `OPEN`
 - **Delivered:** `024` and `025` (`v4.5.0`), `021` (`v4.6.0`), `022` (`v4.7.0`), `023` (`v4.8.0`), `026` (`v4.9.0`, PR #50)
-- **Next:** `028` (`self-improvement-unblock`) **in flight** on `ai-sprint/028` (2026-08-25). `029` (`documentation-truth`) follows. `027` (`autonomy-posture`) **deployed** `v4.10.0` (PR #55 + seal #56, 2026-08-25). `F-026-A1` / `F-026-A3` closed in 027; `F-021-A2` / `F-026-A2` remain open
+- **Next:** `029` (`documentation-truth`). `028` (`self-improvement-unblock`) **closed** on `ai-sprint/028` (2026-08-25), pending `/agents:deployment`. `027` (`autonomy-posture`) **deployed** `v4.10.0` (PR #55 + seal #56, 2026-08-25). `F-026-A1` / `F-026-A3` closed in 027; `F-021-A2` / `F-026-A2` remain open
 - **Origin:** drafted in an IDE planning mode across one long session, then migrated
   into this repository. That migration is the point: the same session opened with a
   host having lost an approved plan to ephemeral storage, and this document was
@@ -1206,7 +1206,7 @@ applies in only one of its two tools, and is declared as such or not admitted.
 
 ---
 
-## Appendix — Sprint 028 (`self-improvement-unblock`), proposed
+## Appendix — Sprint 028 (`self-improvement-unblock`), delivered
 
 **The framework cannot improve itself from a host.** Not because of any single rule, but through
 the **absence of host-side destinations**: every learning artifact has its destination inside the
