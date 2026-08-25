@@ -243,6 +243,7 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 1. Collision Guard | `lightweight_sync` | write |
 | 1.5 Bridge Provision | `bridge_check` | write |
 | 1.5 Bridge Provision | `first_run_scaffold` | read |
+| 1.6 Autonomy posture (Cursor) | `cursor_memory_drift` | write |
 | 2. Pipeline Handoff | `pipeline_invocation` | ? |
 | 2. Pipeline Handoff | `delegation_conflict` | write |
 
