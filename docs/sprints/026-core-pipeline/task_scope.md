@@ -418,7 +418,7 @@ no profile is named to run the commands or record `M1`–`M7`.
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | P7 | `agents.md` | modify | medium | `rule_validator` |✅ `435db07` |
 | P7.1 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | low | `rule_validator` |✅ `0d3a134` |
-| A2 | `tests/fixtures/` (sandbox under `/private/tmp`) | create + delete | **high** | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ⏳ |
+| A2 | `tests/fixtures/` (sandbox under `/private/tmp`) | create + delete | **high** | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) |✅ measured 2026-08-25 |
 | P4.2 | `scripts/audit_cursor_models.py` | create | **high** | `devops_agent` — escalated (mechanical/haiku → author/sonnet; see Declared escalations) | ⏳ |
 | P4.3 | `Makefile` | modify | low | `devops_agent` | ⏳ |
 | P4.4 | `config/model_tiers.json` | modify | medium | `rule_validator` | ⏳ |

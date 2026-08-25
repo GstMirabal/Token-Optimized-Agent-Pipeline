@@ -56,9 +56,9 @@ Measured by `devops_agent` at `main` `b5bfb6a`, before any unit of Sprint `026` 
 
 | Unit | Verdict | Tool | Model (read from disk) |
 | :--- | :--- | :--- | :--- |
-| `P7` | | | |
-| `P7.1` | | | |
-| `A2` | | | |
+| `P7` | APPROVED (done-criteria greps + verify_references) | Cursor | Composer (sequential session) |
+| `P7.1` | APPROVED (open `[ ]` findings 10→9) | Cursor | Composer (sequential session) |
+| `A2` | APPROVED — commit exit 1; hook named `Dockerfile` / `API_KEY` | Cursor | Composer (sequential session) |
 | `P4.2` | | | |
 | `P4.3` | | | |
 | `P4.4` | | | |
@@ -67,7 +67,9 @@ Measured by `devops_agent` at `main` `b5bfb6a`, before any unit of Sprint `026` 
 
 ## Rule Amendments & Heuristic Harvest
 
-*Empty — no unit has executed. `agents.md §4 zero_tolerance` applies once a friction point is found during Work.*
+| ID | Finding | Injection |
+| :--- | :--- | :--- |
+| H-026-A2 | A2 first attempt used `ENV API_KEY="…test…"` and the commit passed: `PLACEHOLDER_MARKERS` includes `"test"`, so the quoted Dockerfile form was waived. Opaque non-placeholder values are required for a real violation exercise. | Recorded here; do not “fix” the marker list for A2 — the filter is load-bearing against false positives. |
 
 ---
 
