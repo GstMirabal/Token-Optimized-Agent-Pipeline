@@ -4,6 +4,9 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Fixed
+- **Hotfix H-004 (`cursor`)** — Cursor Plan mode (`SwitchMode`) is PROHIBITED for pipeline Phase 1 (`RA-18`). That mode cannot write `IMPLEMENTATION_PLAN.md`; `~/.cursor/plans/` is input, not the `triple_lock` lock. Record: `docs/hotfixes/H-004-cursor.md`.
+
 ## [4.13.0] - 2026-08-25
 
 ### Added

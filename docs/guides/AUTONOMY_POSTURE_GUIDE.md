@@ -42,6 +42,7 @@ Binding rule: a control whose only instance is `settings.json` is not admitted a
 | `SessionEnd` → suspend | `python3 .agents/scripts/session_state.py suspend` (never `release` mid-session) |
 | `hard_deny` / sandbox / bypass lock | Git hooks + human `destructive_flags`; no Cursor equivalent for classifier or sandbox — declared gap, not silent omission |
 | Effectiveness (`auto`) | Not portable — Cursor keeps its own approval UX |
+| IDE Plan mode / `SwitchMode` | **PROHIBITED for Phase 1 (`RA-18`).** Cursor Plan mode cannot write `IMPLEMENTATION_PLAN.md`. Write that file in Agent mode at the canonical sprint path. A `~/.cursor/plans/` draft is input, not the lock |
 
 **If** the session tool is `cursor`: treat Memory/Drift as protocol steps in `/agents:start` and close, not as settings that already ran.
 

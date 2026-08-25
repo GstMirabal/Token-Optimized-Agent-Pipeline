@@ -33,7 +33,12 @@ extracted from whatever lands here, deliberately, before Phase 5 approves it.
 ## Limits
 
 - **Cursor does not read this setting** (`settings.json` is Claude Code's).
-  Sprint `026` `P4` covers the other tool.
+  Sprint `026` `P4` covers the other tool. **Cursor Plan mode is a second, worse
+  hole (`RA-18` / H-004):** it writes `~/.cursor/plans/<generated>.plan.md` and
+  forbids repo edits, so Phase 1 cannot leave the `triple_lock` artifact.
+  Under `session_tool: cursor`, do not `SwitchMode` to plan; write
+  `docs/sprints/[Sprint_ID]-[Stack]-[Layer]/IMPLEMENTATION_PLAN.md` in the
+  current session. A Plan mode draft is input to extract, not the lock.
 - **The close gate now reads the canonical path** — Sprint `023` `C0` declared it in
   `agents.md §0`, shipped `IMPLEMENTATION_PLAN_TEMPLATE.md`, and added
   `IMPLEMENTATION_PLAN.md` to the phase-artifact map in

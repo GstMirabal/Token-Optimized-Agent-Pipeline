@@ -747,6 +747,10 @@ vanished be audited afterwards.
 **Mandatory plan mode, stated verifiably.** Written in terms the framework can check, not in
 terms of one IDE's feature: *Phase 1 produces a plan written and versioned in the repository
 before Phase 5, and where the environment offers a planning mode, Phase 1 runs in it.*
+**Cursor exception (H-004 / `RA-18`, 2026-08-25):** that second clause is Claude Code
+only. Under `session_tool: cursor`, `SwitchMode` to plan is PROHIBITED — the mode
+forbids writing the deliverable. The verifiable half is unchanged: the canonical
+`IMPLEMENTATION_PLAN.md`.
 
 **No new mechanism.** Enforcement reuses what PR `#37` built: the `artifact → producing phase`
 map in `scripts/docs_freshness_check.py` gains `IMPLEMENTATION_PLAN.md → "Phase 1 (Planning) —
