@@ -52,7 +52,7 @@
     {
       "path": "skills/mcp-registry",
       "reason": "model-invoked",
-      "note": "Used when registering an MCP server (agents.md §5 discovery_manifest). The merge itself is install_claude.sh's job; this skill is for authoring the entry."
+      "note": "Used when registering an MCP server (agents.md §5 discovery_manifest). The merge itself is install.sh's job; this skill is for authoring the entry."
     },
     {
       "path": "skills/topology-scaffolder",
