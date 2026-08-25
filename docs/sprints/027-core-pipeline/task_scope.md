@@ -177,10 +177,10 @@ row for that intent (`A1`–`A1.2`, `C2`–`C3`, `D1`–`D2` → `grok-4.6`/`hig
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| G1.q | `docs/sprints/027-core-pipeline/SPRINT_LOG.md` | emit verdict | medium | `qa_agent`; Cursor gate config `null` (log model from disk) | ⏳ |
-| G1.q | `docs/sprints/027-core-pipeline/SPRINT_LOG.md` | transcribe | medium | `orchestrator`; Cursor `grok-4.6`, effort `high` | ⏳ |
-| G1.t | `docs/sprints/027-core-pipeline/SPRINT_LOG.md` | emit verdict | medium | `tester_agent`; Cursor gate config `null` (log model from disk) | ⏳ |
-| G1.t | `docs/sprints/027-core-pipeline/SPRINT_LOG.md` | transcribe | medium | `orchestrator`; Cursor `grok-4.6`, effort `high` | ⏳ |
+| G1.q | `docs/sprints/027-core-pipeline/SPRINT_LOG.md` | emit verdict | medium | `qa_agent`; Cursor gate config `null` (log model from disk) | ✅ emit PASS |
+| G1.q | `docs/sprints/027-core-pipeline/SPRINT_LOG.md` | transcribe | medium | `orchestrator`; Cursor `grok-4.6`, effort `high` | ✅ (this commit) |
+| G1.t | `docs/sprints/027-core-pipeline/SPRINT_LOG.md` | emit verdict | medium | `tester_agent`; Cursor gate config `null` (log model from disk) | ✅ emit PASS |
+| G1.t | `docs/sprints/027-core-pipeline/SPRINT_LOG.md` | transcribe | medium | `orchestrator`; Cursor `grok-4.6`, effort `high` | ✅ (this commit) |
 
 ---
 
