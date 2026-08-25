@@ -52,6 +52,13 @@ inferred from where the section sits.
 | **Closed** | **`F-026-A2`** — `scripts/check_task_scope.py` fails when Model/Effort are required and missing, or mechanical+high lacks escalation/keep. Re-measured: fixture without columns exits `2`; `docs/sprints/024-core-pipeline` skips exit `0` |
 | **Still open** | **`F-021-A2`** |
 
+**Status at Sprint 033 (2026-08-25, `ai-sprint/033`).**
+
+| | |
+| :--- | :--- |
+| **Closed** | **`F-021-A2`** — auxiliary `implementer-agent`; `Write`/`Edit` for `scripts/`/`hooks/`/`tests/` transferred from `devops_agent`; ADR-0009; pin `tests/test_implementer_role.py` (4 passed). Re-measured: recipe includes `implementer_agent.md`, excludes `devops_agent.md` |
+| **Still open** | *(none in this file's open set)* |
+
 **Status at Sprint 031 (2026-08-25, `ai-sprint/031`).**
 
 | | |
@@ -627,17 +634,11 @@ that cleared both gates on the first round.
 
 ---
 
-### - [ ] `F-021-A2` — the role map has eight profiles that can write and no implementer
+### - [x] `F-021-A2` — the role map has eight profiles that can write and no implementer
 
-**Evidence.** `agents/devops_agent.md:35`, where it is **declared and explicitly
-not resolved**.
-
-Of the 13 profiles in `agents/`, **8** hold `Write`/`Edit` on their `tools:`
-line. Not one of them is an implementer: they are documentation, governance,
-skill, topology and environment roles. `F-086-A1` above closed by granting the
-environment role `Write` over the framework-root `scripts/` and `hooks/` trees —
-that gives those two trees *an* owner. It does not create the role, and it does
-not make a `mechanical`/`haiku` tier the right author for a governance gate.
+**Evidence (as opened).** `agents/devops_agent.md` declared the gap after
+Sprint 023 `C5`. Of the profiles then in `agents/`, **8** held `Write`/`Edit`
+on their `tools:` line and none was an implementer.
 
 **Consequence, measured over one sprint.** Every unit of Sprint 023 was authored
 by the lead session, because there is no profile to dispatch authoring to. The
@@ -674,6 +675,12 @@ asserted 8**, which is the failure this file exists to record: a recipe carrying
 the exact defect its own prose warns against. The word-boundary form above is
 what the count of 8 rests on, and it was reached by checking profile by profile
 rather than by trusting either command.
+
+**Closed** — Sprint 033 (`ai-sprint/033`). Re-measured 2026-08-25 against the
+branch: the recipe returns 8 names **including** `implementer_agent.md` and
+**excluding** `devops_agent.md`; `agents/implementer_agent.md` declares
+`tier: author` / `model: sonnet` / Write+Edit items; `tests/test_implementer_role.py`
+4 passed; `ADR-0009` accepted. Pin commit: `b53e629`.
 
 ### - [x] `F-023-S4` — a literal `.env` still passes the commit hook, after the secret gate was repaired
 
