@@ -285,7 +285,7 @@ sequenced, not concurrent.
 | P3.0 | `scripts/install.py` (`git mv` from `scripts/install_claude.py`) | create | **high** | `devops_agent` |✅ `a107b36` |
 | P3.1 | `scripts/install.sh` (`git mv` from `scripts/install_claude.sh`) | create | medium | `devops_agent` |✅ `26b6532` |
 | P3.1b | `scripts/install_claude.sh` | create (deprecation shim) | low | `devops_agent` |✅ `3e6a243` |
-| P3.3 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `orchestrator` | ⏳→H2 |
+| P3.3 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `orchestrator` | ✅ `60d9364` |
 | P10 | `scripts/install.py` | modify | medium | `devops_agent` |✅ `30cc63e` |
 | P10.1 | `.gitignore` | modify | low | `devops_agent` |✅ `aa35b78` |
 
@@ -302,34 +302,34 @@ does not substitute its own judgment for that.
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | P3.2.1 | `hooks/on_init.py:16` | modify | **high** — RA-14 census (P3.2) | `devops_agent` |✅ `88a1e65` |
-| P3.2.2 | `hooks/on_commit_msg.py:14` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳→H2 |
-| P3.2.3 | `scripts/merge_json.py:4` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳→H2 |
-| P3.2.4 | `scripts/_root.py:71` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳→H2 |
-| P3.2.5 | `scripts/_mode.py:4,26` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳→H2 |
-| P3.2.6 | `scripts/render_readme.py:3,66,113` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳→H2 |
-| P3.2.7 | `scripts/verify_references.py:160` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳→H2 |
-| P3.2.8 | `skills/compliance-checker/scripts/distill.py:10` | modify | **high** — RA-14 census (P3.2) | `skill_architect` | ⏳→H2 |
+| P3.2.2 | `hooks/on_commit_msg.py:14` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ✅ `ab220ac` |
+| P3.2.3 | `scripts/merge_json.py:4` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ✅ `5c554d3` |
+| P3.2.4 | `scripts/_root.py:71` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ✅ `969fd6d` |
+| P3.2.5 | `scripts/_mode.py:4,26` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ✅ `ff4740a` |
+| P3.2.6 | `scripts/render_readme.py:3,66,113` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ✅ `53850e4` |
+| P3.2.7 | `scripts/verify_references.py:160` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ✅ `436f1b1` |
+| P3.2.8 | `skills/compliance-checker/scripts/distill.py:10` | modify | **high** — RA-14 census (P3.2) | `skill_architect` | ✅ `1cf8611` |
 | P3.2.9 | `tests/test_installer.sh:31,67,83,93,112` | modify | **high** — RA-14 census (P3.2) | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) |✅ `bf53b46` |
-| P3.2.10 | `tests/test_mass_standardizer.py:297` | modify | **high** — RA-14 census (P3.2) | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ⏳→H2 |
-| P3.2.11 | `tests/test_invocation_coverage.py:70` | modify | **high** — RA-14 census (P3.2) | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ⏳→H2 |
-| P3.2.12 | `tests/test_root_resolution.py:57` | modify | **high** — RA-14 census (P3.2) | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ⏳→H2 |
-| P3.2.13 | `claude/settings.hooks.json:16` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳→H2 |
-| P3.2.14 | `config/invocation_exceptions.json:55` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳→H2 |
-| P3.2.15 | `.gitignore:100` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ⏳→H2 |
-| P3.2.16 | `agents.md:77,83,110,163` | modify | **high** — RA-14 census (P3.2) | `rule_validator` | ⏳→H2 |
-| P3.2.17 | `workflows/start_workflow.md:23,25` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳→H2 |
-| P3.2.18 | `workflows/audit_workflow.md:18` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳→H2 |
-| P3.2.19 | `README.md:60,101,107,123,164,198` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳→H2 |
-| P3.2.20 | `SECURITY.md:17` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳→H2 |
-| P3.2.21 | `.github/ISSUE_TEMPLATE/bug_report.yml:26` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳→H2 |
-| P3.2.22 | `docs/standards/templates/SYSTEM_OVERVIEW_TEMPLATE.md:41` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳→H2 |
-| P3.2.23 | `docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md:12,21,70,81,83` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳→H2 |
-| P3.2.24 | `docs/architecture/global_topology.md:53` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳→H2 |
-| P3.2.25 | `docs/architecture/topology_map.md:17,21` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳→H2 |
-| P3.2.26 | `docs/plans/README.md:51` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ⏳→H2 |
-| P3.2.27 | `skills/slash-commander/SKILL.md:12,30` | modify | **high** — RA-14 census (P3.2) | `skill_architect` | ⏳→H2 |
-| P3.2.28 | `skills/slash-commander/README.md:49` | modify | **high** — RA-14 census (P3.2) | `skill_architect` | ⏳→H2 |
-| P3.2.29 | `profiles/example-project/README.md:18` | modify | **high** — RA-14 census (P3.2) | `skill_architect` | ⏳→H2 |
+| P3.2.10 | `tests/test_mass_standardizer.py:297` | modify | **high** — RA-14 census (P3.2) | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ✅ `76c01fa` |
+| P3.2.11 | `tests/test_invocation_coverage.py:70` | modify | **high** — RA-14 census (P3.2) | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ✅ `87c1fca` |
+| P3.2.12 | `tests/test_root_resolution.py:57` | modify | **high** — RA-14 census (P3.2) | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ✅ `a046187` |
+| P3.2.13 | `claude/settings.hooks.json:16` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ✅ `7c14973` |
+| P3.2.14 | `config/invocation_exceptions.json:55` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ✅ `96bcfeb` |
+| P3.2.15 | `.gitignore:100` | modify | **high** — RA-14 census (P3.2) | `devops_agent` | ✅ `0bd8dee` |
+| P3.2.16 | `agents.md:77,83,110,163` | modify | **high** — RA-14 census (P3.2) | `rule_validator` | ✅ `dcf1ed7` |
+| P3.2.17 | `workflows/start_workflow.md:23,25` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ✅ `020e0d3` |
+| P3.2.18 | `workflows/audit_workflow.md:18` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ✅ `efb2d40` |
+| P3.2.19 | `README.md:60,101,107,123,164,198` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ✅ `9a3d57f` |
+| P3.2.20 | `SECURITY.md:17` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ✅ `1339ed0` |
+| P3.2.21 | `.github/ISSUE_TEMPLATE/bug_report.yml:26` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ✅ `29c12f6` |
+| P3.2.22 | `docs/standards/templates/SYSTEM_OVERVIEW_TEMPLATE.md:41` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ✅ `969eee5` |
+| P3.2.23 | `docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md:12,21,70,81,83` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ✅ `1ef8bc6` |
+| P3.2.24 | `docs/architecture/global_topology.md:53` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ✅ `f9aa38a` |
+| P3.2.25 | `docs/architecture/topology_map.md:17,21` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ✅ `8f30f5d` |
+| P3.2.26 | `docs/plans/README.md:51` | modify | **high** — RA-14 census (P3.2) | `orchestrator` | ✅ `986c34b` |
+| P3.2.27 | `skills/slash-commander/SKILL.md:12,30` | modify | **high** — RA-14 census (P3.2) | `skill_architect` | ✅ `4b82663` |
+| P3.2.28 | `skills/slash-commander/README.md:49` | modify | **high** — RA-14 census (P3.2) | `skill_architect` | ✅ `9b81306` |
+| P3.2.29 | `profiles/example-project/README.md:18` | modify | **high** — RA-14 census (P3.2) | `skill_architect` | ✅ `eba5a1c` |
 
 Four of the 29 (`P3.2.7`, `P3.2.15`, `P3.2.16`, `P3.2.17`) are additional
 multi-unit files not named in the task's own four examples — see
@@ -341,10 +341,10 @@ multi-unit files not named in the task's own four examples — see
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | P9 | `hooks/on_push.py` | create | **high** | `devops_agent` — escalated (mechanical/haiku → author/sonnet; see Declared escalations) |✅ `e00f81e` |
 | P9.1 | `scripts/install.py` | modify | medium | `devops_agent` |✅ `b3b0e9a` |
-| P9.2 | `tests/test_on_push.py` | create | medium | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ⏳→H2 |
-| A4.1 | `hooks/on_commit.py` | modify | low | `devops_agent` | ⏳→H2 |
-| A4.2 | `hooks/on_init.py` | modify | low | `devops_agent` | ⏳→H2 |
-| A4 | `scripts/verify_references.py` | modify | **high** | `devops_agent` | ⏳→H2 |
+| P9.2 | `tests/test_on_push.py` | create | medium | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ✅ `e1591d1` |
+| A4.1 | `hooks/on_commit.py` | modify | low | `devops_agent` | ✅ `5837e3e` |
+| A4.2 | `hooks/on_init.py` | modify | low | `devops_agent` | ✅ `e3be78a` |
+| A4 | `scripts/verify_references.py` | modify | **high** | `devops_agent` | ✅ `768cf56` |
 
 `scripts/install.py` is now the structural subject of three rows across this
 sprint (`P3.0`, `P10`, `P9.1`) — see **Isolation**.
@@ -378,7 +378,7 @@ is now a third-touch file (`P3.2.7`, `P5.1`, `A4`).
 | P4.0 | `docs/sprints/026-core-pipeline/cursor_mdc_schema.md` | create | **high** | `devops_agent` — escalated (mechanical/haiku → author/sonnet; see Declared escalations) |✅ `9cacb4a` |
 | P4.0b | `docs/sprints/026-core-pipeline/cursor_mdc_schema.md` | modify | low | `devops_agent` |✅ `9cacb4a` |
 | P4 | `scripts/cursor_adapter.py` | create | **high** | `devops_agent` — escalated (mechanical/haiku → author/sonnet; see Declared escalations) |✅ `7a18145` |
-| P4.1 | `tests/test_installer.sh` | modify | medium | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ⏳→H2 |
+| P4.1 | `tests/test_installer.sh` | modify | medium | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ✅ `7ec83a6` |
 
 `.gitignore` (`P10.1`, `P11`, and `P3.2.15`), `scripts/verify_references.py`
 (`P5.1` and `P3.2.7`), `agents.md` (`P5.2`, and `P3.2.16`, and `P7` in HITO 2),
@@ -546,12 +546,9 @@ is first-party and editable — `P3.2.27`, `P3.2.28` — while
 
 ## Status
 
-As of 2026-08-25 (pre–Migration Gate): Hito 1 dispatch rows are `✅` except
-human-deferred `⏳→H2` (33 rows after the recorded deferral) and Hito 2 units
-still `⏳`. `G1.q` / `G1.t` are `APPROVED` in `SPRINT_LOG.md`.
+As of 2026-08-25 (post–Hito 2 deferred batch): Hito 1 + deferred census
+(`P3.2.*`, `P3.3`), `A4*`, `P9.2`, `P4.1`, and named Hito 2 units through
+`P4.4` are `✅`. Remaining: **`A3`** (final indistinguishability gate).
 
-Phase 5 (Approval Gate) ran on 2026-08-24 over the plan text at `1da9641`.
-Phase 6 completed Hito 1 scope through `P1`/`P1.1` plus Bugbot remediations;
-HEAD at gate entry: `7bf2cb4`.
-
-The 33 `⏳→H2` rows execute under Hito 2 after the Migration Gate, not abandoned.
+Phase 5 approval: `1da9641`. Migration Gate: PASS. P3.2 done-criterion:
+exactly one `install_claude` line outside excluded paths — the shim.
