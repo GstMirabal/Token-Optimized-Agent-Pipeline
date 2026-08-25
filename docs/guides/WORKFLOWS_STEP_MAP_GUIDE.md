@@ -23,7 +23,7 @@ protocols that should mirror each other shows up there first.
 | `reverse_documentation_workflow` | — | — | — | — | — | — | — | — | — | — | — | — | — |
 | `skill_forge_workflow` | — | — | — | — | — | — | — | — | — | — | — | — | — |
 | `standardization_workflow` | — | — | — | — | — | — | — | verify | write | write | — | — | — |
-| `start_workflow` | — | — | — | — | write | — | — | read/write | write | — | write | read | — |
+| `start_workflow` | write | — | — | — | write | — | — | read/write | write | — | write | read | — |
 
 **Columns**, from `config/artifact_registry.json` — the artifact and the phase
 that leaves it. A phase is defined by the artifact it leaves, which is what makes
@@ -247,7 +247,7 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 1.5 Bridge Provision | `bridge_check` | write |
 | 1.5 Bridge Provision | `first_run_scaffold` | read |
 | 1.6 Autonomy posture (Cursor) | `cursor_memory_drift` | write |
-| 2. Pipeline Handoff | `pipeline_invocation` | ? |
+| 2. Pipeline Handoff | `pipeline_invocation` | write |
 | 2. Pipeline Handoff | `delegation_conflict` | write |
 
 ---
