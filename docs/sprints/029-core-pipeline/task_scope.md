@@ -161,31 +161,31 @@ Default by profile tier (`config/model_tiers.json` + accepted Cursor column):
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| G1 | `config/artifact_registry.json` | modify | medium | `devops_agent` | `composer-2.5` | N/A | ⏳ |
-| G2 | `docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md` | modify | medium | `doc_orchestrator` | `grok-4.6` | `high` | ⏳ |
-| G3 | `skills/slash-commander/scripts/verify_commands.py` | modify | medium | `devops_agent` | `composer-2.5` | N/A | ⏳ |
+| G1 | `config/artifact_registry.json` | modify | medium | `devops_agent` | `composer-2.5` | N/A | ✅ `25b3ddf` |
+| G2 | `docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md` | modify | medium | `doc_orchestrator` | `grok-4.6` | `high` | ✅ `1e84603` |
+| G3 | `skills/slash-commander/scripts/verify_commands.py` | modify | medium | `devops_agent` | `composer-2.5` | N/A | ✅ `a47e89a` |
 
 ## Ola 3 — T4 ADRs
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| A3 | `docs/decisions/ADR-0003-gates-never-drop-tier.md` | create | low | `doc_orchestrator` | `grok-4.6` | `high` | ⏳ |
-| A4 | `docs/decisions/ADR-0004-no-model-selector-agent.md` | create | low | `doc_orchestrator` | `grok-4.6` | `high` | ⏳ |
-| A5 | `docs/decisions/ADR-0005-prices-stay-out-of-config.md` | create | low | `doc_orchestrator` | `grok-4.6` | `high` | ⏳ |
-| A6 | `docs/decisions/ADR-0006-session-bound-before-tiering.md` | create | low | `doc_orchestrator` | `grok-4.6` | `high` | ⏳ |
-| A7 | `docs/decisions/ADR-0007-cursor-without-api-delegation.md` | create | low | `doc_orchestrator` | `grok-4.6` | `high` | ⏳ |
+| A3 | `docs/decisions/ADR-0003-gates-never-drop-tier.md` | create | low | `doc_orchestrator` | `grok-4.6` | `high` | ✅ `e36a5ba` |
+| A4 | `docs/decisions/ADR-0004-no-model-selector-agent.md` | create | low | `doc_orchestrator` | `grok-4.6` | `high` | ✅ `7d584eb` |
+| A5 | `docs/decisions/ADR-0005-prices-stay-out-of-config.md` | create | low | `doc_orchestrator` | `grok-4.6` | `high` | ✅ `38afc82` |
+| A6 | `docs/decisions/ADR-0006-session-bound-before-tiering.md` | create | low | `doc_orchestrator` | `grok-4.6` | `high` | ✅ `e9c5ba1` |
+| A7 | `docs/decisions/ADR-0007-cursor-without-api-delegation.md` | create | low | `doc_orchestrator` | `grok-4.6` | `high` | ✅ `e9e46df` |
 
 ## Ola 4 — T5, J1, J6
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| P1 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify | medium | `governance_learner` | `grok-4.6` | `high` | ⏳ |
-| P2 | `rules/documentation_standard.md` | modify | medium | `governance_learner` | `grok-4.6` | `high` | ⏳ |
-| J6.0 | `tests/test_verify_references.py` | modify/create | medium | `devops_agent` — deviation (tests/) | `composer-2.5` | N/A | ⏳ |
-| J6.1 | `scripts/verify_references.py` | modify | high | `devops_agent` | `grok-4.6` | `high` | ⏳ |
+| P1 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify | medium | `governance_learner` | `grok-4.6` | `high` | ✅ `d98ddee` |
+| P2 | `rules/documentation_standard.md` | modify | medium | `governance_learner` | `grok-4.6` | `high` | ✅ `d70a599` |
+| J6.0 | `tests/test_verify_references.py` | modify/create | medium | `devops_agent` — deviation (tests/) | `composer-2.5` | N/A | ✅ `732e5b3` |
+| J6.1 | `scripts/verify_references.py` | modify | high | `devops_agent` | `grok-4.6` | `high` | ✅ `b2f2a09` |
 
 ## Ola 5 — Close ledger
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| C1 | `CHANGELOG.md` | modify | low | `principal_agent` | log from disk | N/A | ⏳ |
+| C1 | `CHANGELOG.md` | modify | low | `principal_agent` | log from disk | N/A | ✅ `29198b5` |
