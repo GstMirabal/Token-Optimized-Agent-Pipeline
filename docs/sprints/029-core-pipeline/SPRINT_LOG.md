@@ -1,7 +1,7 @@
 # Sprint Log — 029 (`documentation-truth`)
 
 **Branch**: `ai-sprint/029` from `main` at `84201d2`
-**Status**: **OPEN** — Phase 6 execution **complete** for planned units; Phase 7 Double-Gate pending.
+**Status**: **OPEN** — Phase 7 Double-Gate **PASSED** (Gate 1 after one remediation round; Gate 2 first pass). Phase 8 Closeout pending Human OK.
 
 ---
 
@@ -78,5 +78,29 @@ Work units commit on `ai-sprint/029`. Oldest → newest:
 | P1 | `d98ddee` | Implementation Plan T5 section |
 | P2 | `d70a599` | documentation_standard §6 T5 |
 | C1 | `29198b5` | Unreleased Sprint 029 changelog entry |
+| G1.r1 fix | `37a141c` | drop unused E402 noqa (Gate 1 round 1) |
+| G1.r1 fix | `bd44345` | regenerate WORKFLOWS_STEP_MAP (Gate 1 round 1) |
 
-*Phase 7 QA/Tester gate entries append below.*
+## Phase 7 — Quality Gate
+
+**Applied Cursor model (from `state.vscdb` / `make cursor-tiers`):** `grok-4.6`
+(`cursor.gate.model` remains `null` in config — Design §D7).
+
+### Gate 1 — QA Agent (Structural Verification)
+
+| Round | Verdict | Evidence |
+| :--- | :--- | :--- |
+| 1 | **REJECTED** | `ruff check` on touched tests: 2× `RUF100` unused `# noqa: E402` in `tests/test_invocation_coverage.py`. `make verify` → `map_workflows.py --check` exit non-zero: `WORKFLOWS_STEP_MAP_GUIDE.md` stale after `AGENTS_SLASH_COMMANDS_GUIDE.md` registry row |
+| 2 | **PASS** | Remediation `37a141c` + `bd44345`. Re-run: `ruff check` on sprint Python → clean. `make verify` → **exit 0**. `agents.md` 174 lines (≤200). No `TODO`/`FIXME` in sprint Python. No absolute paths. Commits carry `#029` |
+
+### Gate 2 — Tester Agent (Functional Verification): **PASS**
+
+| Check | Result |
+| :--- | :--- |
+| `make verify` pytest step | **507 passed** in 9.45s |
+| `bash tests/test_installer.sh` | **5/5** (sandbox, nucleus, cursor, both, `--profile-path`) |
+| Tracked `config/`/`hooks/`/`scripts/` dirty after suite | none |
+
+Supplementary (already inside `make verify`): `verify_commands` 13 stems, `check_readme_counts` 7 figures, `verify_references` including check (f), `check_model_tiers` 13 profiles.
+
+---
