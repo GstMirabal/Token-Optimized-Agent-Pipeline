@@ -42,8 +42,12 @@
 
 ## Phase 5 — Approval Gate
 
-- Pending: Human OK on committed plan `b078360` (`triple_lock` lock 1).
-- Precondition: `audit_plan.py` on this plan exits `0`.
+- **PASSED** 2026-08-25. Human OK (`ok`) on committed plan `b078360` (`triple_lock` lock 1).
+- Precondition: `audit_plan.py` on this plan exits `0` (re-verified at gate).
+
+## Phase 6 — Execution
+
+- Hold lifted 2026-08-25. Units land on `ai-sprint/033` in plan order A0→Q1.
 
 ## Gate log
 

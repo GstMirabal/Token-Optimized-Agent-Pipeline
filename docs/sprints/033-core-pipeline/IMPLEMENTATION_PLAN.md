@@ -2,7 +2,7 @@
 
 **Canonical path**: `docs/sprints/033-core-pipeline/IMPLEMENTATION_PLAN.md`
 **Branch**: `ai-sprint/033` · **Base**: `main` at `8b3fb6d` (`v4.15.0`)
-**Status**: `DRAFT`
+**Status**: `EXECUTING`
 
 > Authored at Phase 1 (Planning) by `principal_agent`, extracted to this path at
 > Phase 3, and **committed before Phase 5 approves it**: `agents.md §2 triple_lock`
@@ -268,9 +268,9 @@ palabra — comandos en Context.
 
 | Field | Value |
 | :--- | :--- |
-| **Approved by** | _pending Phase 5_ |
-| **Date** | _pending_ |
-| **Plan commit at approval** | _pending Phase 3 commit_ |
+| **Approved by** | Gustavo |
+| **Date** | 2026-08-25 |
+| **Plan commit at approval** | `b078360` |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an
