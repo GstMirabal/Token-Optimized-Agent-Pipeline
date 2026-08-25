@@ -283,11 +283,11 @@ sequenced, not concurrent.
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | P3.0 | `scripts/install.py` (`git mv` from `scripts/install_claude.py`) | create | **high** | `devops_agent` |✅ `a107b36` |
-| P3.1 | `scripts/install.sh` (`git mv` from `scripts/install_claude.sh`) | create | medium | `devops_agent` | ⏳ |
-| P3.1b | `scripts/install_claude.sh` | create (deprecation shim) | low | `devops_agent` | ⏳ |
+| P3.1 | `scripts/install.sh` (`git mv` from `scripts/install_claude.sh`) | create | medium | `devops_agent` |✅ `26b6532` |
+| P3.1b | `scripts/install_claude.sh` | create (deprecation shim) | low | `devops_agent` |✅ `3e6a243` |
 | P3.3 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `orchestrator` | ⏳→H2 |
-| P10 | `scripts/install.py` | modify | medium | `devops_agent` | ⏳ |
-| P10.1 | `.gitignore` | modify | low | `devops_agent` | ⏳ |
+| P10 | `scripts/install.py` | modify | medium | `devops_agent` |✅ `30cc63e` |
+| P10.1 | `.gitignore` | modify | low | `devops_agent` |✅ `aa35b78` |
 
 **`P3.2` — 29 files, expanded one row per physical file
 (`jurisdictional_lock`).** The plan's own mitigation — `P3.0` lands and is
@@ -339,8 +339,8 @@ multi-unit files not named in the task's own four examples — see
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| P9 | `hooks/on_push.py` | create | **high** | `devops_agent` — escalated (mechanical/haiku → author/sonnet; see Declared escalations) | ⏳ |
-| P9.1 | `scripts/install.py` | modify | medium | `devops_agent` | ⏳ |
+| P9 | `hooks/on_push.py` | create | **high** | `devops_agent` — escalated (mechanical/haiku → author/sonnet; see Declared escalations) |✅ `e00f81e` |
+| P9.1 | `scripts/install.py` | modify | medium | `devops_agent` |✅ `b3b0e9a` |
 | P9.2 | `tests/test_on_push.py` | create | medium | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ⏳→H2 |
 | A4.1 | `hooks/on_commit.py` | modify | low | `devops_agent` | ⏳→H2 |
 | A4.2 | `hooks/on_init.py` | modify | low | `devops_agent` | ⏳→H2 |
@@ -370,14 +370,14 @@ is now a third-touch file (`P3.2.7`, `P5.1`, `A4`).
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| P6 | `workflows/standardization_workflow.md` | modify | low | `orchestrator` | ⏳ |
-| P11 | `.gitignore` | modify | low | `devops_agent` | ⏳ |
-| P5 | `config/rule_triggers.json` | create | medium | `rule_validator` | ⏳ |
-| P5.1 | `scripts/verify_references.py` | modify | medium | `devops_agent` | ⏳ |
-| P5.2 | `agents.md` | modify | medium | `rule_validator` | ⏳ |
-| P4.0 | `docs/sprints/026-core-pipeline/cursor_mdc_schema.md` | create | **high** | `devops_agent` — escalated (mechanical/haiku → author/sonnet; see Declared escalations) | ⏳ |
-| P4.0b | `docs/sprints/026-core-pipeline/cursor_mdc_schema.md` | modify | low | `devops_agent` | ⏳ |
-| P4 | `scripts/cursor_adapter.py` | create | **high** | `devops_agent` — escalated (mechanical/haiku → author/sonnet; see Declared escalations) | ⏳ |
+| P6 | `workflows/standardization_workflow.md` | modify | low | `orchestrator` |✅ `7528467` |
+| P11 | `.gitignore` | modify | low | `devops_agent` |✅ `ed22923` |
+| P5 | `config/rule_triggers.json` | create | medium | `rule_validator` |✅ `b6b4c25` |
+| P5.1 | `scripts/verify_references.py` | modify | medium | `devops_agent` |✅ `8d3cc3a` |
+| P5.2 | `agents.md` | modify | medium | `rule_validator` |✅ `30798e3` |
+| P4.0 | `docs/sprints/026-core-pipeline/cursor_mdc_schema.md` | create | **high** | `devops_agent` — escalated (mechanical/haiku → author/sonnet; see Declared escalations) |✅ `9cacb4a` |
+| P4.0b | `docs/sprints/026-core-pipeline/cursor_mdc_schema.md` | modify | low | `devops_agent` |✅ `9cacb4a` |
+| P4 | `scripts/cursor_adapter.py` | create | **high** | `devops_agent` — escalated (mechanical/haiku → author/sonnet; see Declared escalations) |✅ `7a18145` |
 | P4.1 | `tests/test_installer.sh` | modify | medium | `devops_agent` — deviation (tests/, tester_agent has no Write/Edit) | ⏳→H2 |
 
 `.gitignore` (`P10.1`, `P11`, and `P3.2.15`), `scripts/verify_references.py`
@@ -392,15 +392,15 @@ adjacent rows).
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| P1 | `workflows/pipeline_workflow.md` | modify | **high** | `orchestrator` | ⏳ |
-| P1.1 | `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` | regenerate | low | `devops_agent` | ⏳ |
+| P1 | `workflows/pipeline_workflow.md` | modify | **high** | `orchestrator` |✅ `d55b828` |
+| P1.1 | `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` | regenerate | low | `devops_agent` |✅ `d55b828` |
 
 ### H1.f — Hito 1 gate (fresh context, native 8-role, under Claude Code)
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| G1.q | `docs/sprints/026-core-pipeline/SPRINT_LOG.md` | append (QA verdict) | **high** — gate, `triple_lock` lock 3 | `qa_agent` (verdict) → `orchestrator` (transcribes) | ⏳ |
-| G1.t | `docs/sprints/026-core-pipeline/SPRINT_LOG.md` | append (Tester verdict) | **high** — gate, `triple_lock` lock 3 | `tester_agent` (verdict) → `orchestrator` (transcribes) | ⏳ |
+| G1.q | `docs/sprints/026-core-pipeline/SPRINT_LOG.md` | append (QA verdict) | **high** — gate, `triple_lock` lock 3 | `qa_agent` (verdict) → `orchestrator` (transcribes) |✅ `7bf2cb4` (verdict 2026-08-25) |
+| G1.t | `docs/sprints/026-core-pipeline/SPRINT_LOG.md` | append (Tester verdict) | **high** — gate, `triple_lock` lock 3 | `tester_agent` (verdict) → `orchestrator` (transcribes) |✅ `7bf2cb4` (verdict 2026-08-25) |
 
 **Migration Gate — not a row.** The three-command sequence (`suspend` →
 `install.py --target cursor` → `claim --tool cursor`) and the recording of
@@ -546,18 +546,12 @@ is first-party and editable — `P3.2.27`, `P3.2.28` — while
 
 ## Status
 
-As of the 2026-08-24 suspension: **9 rows `✅`**, 29 `⏳`, 36 `⏳→H2`.
+As of 2026-08-25 (pre–Migration Gate): Hito 1 dispatch rows are `✅` except
+human-deferred `⏳→H2` (33 rows after the recorded deferral) and Hito 2 units
+still `⏳`. `G1.q` / `G1.t` are `APPROVED` in `SPRINT_LOG.md`.
 
-Phase 5 (Approval Gate) ran on 2026-08-24 and its authorization is recorded in
-`IMPLEMENTATION_PLAN.md` over the plan text at `1da9641`. Phase 6 executed `H1.a`
-in full (`A1`, `P8`, `P8.1`, `P2`, `P8.2`, `P2.1`) and part of `H1.b` (`P3.0`,
-`P3.2.1`, `P3.2.9`).
+Phase 5 (Approval Gate) ran on 2026-08-24 over the plan text at `1da9641`.
+Phase 6 completed Hito 1 scope through `P1`/`P1.1` plus Bugbot remediations;
+HEAD at gate entry: `7bf2cb4`.
 
-The session was **suspended, not closed**, and the sprint continues under Cursor.
-`SPRINT_LOG.md` §`Session handoff` carries the resume brief and the ordered list
-of what remains before the Migration Gate can be attempted. **The Migration Gate
-has not been attempted and cannot pass yet**: `P4` has not landed, so `M4`, `M5`
-and `M6` are unobservable.
-
-The 36 `⏳→H2` rows are deferred out of Hito 1's dispatch scope by human decision
-(see **Declared deferral**) and are executed under Hito 2, not abandoned.
+The 33 `⏳→H2` rows execute under Hito 2 after the Migration Gate, not abandoned.

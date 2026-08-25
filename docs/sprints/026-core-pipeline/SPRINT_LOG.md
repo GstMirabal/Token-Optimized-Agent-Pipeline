@@ -79,39 +79,61 @@ Phases 4 and 5 are complete. Phase 5's human approval was recorded on 2026-08-24
 
 ## Session handoff — suspended 2026-08-24, resuming under Cursor
 
-**This is a `suspend`, NOT the Migration Gate.** The gate has not been attempted and cannot pass yet: `scripts/cursor_adapter.py` (unit `P4`) does not exist, `.cursor/` does not exist, and `scripts/install.py --target cursor` exits `1` by design until `P4` lands. Observations `M4`, `M5` and `M6` are therefore unobservable. Do not record any gate result.
+**Historical.** That suspend was NOT the Migration Gate. Hito 1 units through `P1`/`P1.1` and Bugbot follow-ups later landed under Cursor; see sections below. The 2026-08-24 brief is preserved for audit trail only.
 
-`release` was NOT used and must not be: it seals the sprint and writes a false `last_close_commit` that blinds `scripts/detect_drift.py` (`Design §D0b`).
+### Correction to the record, made at suspension (2026-08-24)
 
-### First actions for the resuming session
+The Hito 1 deferral rests on a measurement that claimed **exactly two** census files break at runtime. It was **three**: `scripts/install_claude.sh` execs the renamed script on its last line and was misclassified as a file being renamed rather than a caller. Corrected in commit `bf53b46`. The deferred prose files were re-checked against this and none of them executes — but whoever resumes should treat the deferral list as measured-once, not proven.
 
-1. `python3 scripts/session_state.py claim --tool cursor` — the anchor is `SUSPENDED`, so this reports a resume and increments `session_count`. It does not need `--session-id`: unit `P8` made it optional and mints `<compact UTC ISO-8601>-<PID>` when omitted. `delegation_mode` derives to `sequential` from `--tool cursor`.
-2. **Read `agents.md` in full, explicitly.** Governance is NOT auto-loaded: `.cursor/rules/00-constitution.mdc` is unit `P4`'s output and `P4` has not run. This is the single largest difference from a Claude Code session and it is a consequence of suspending before `P4`, not a defect.
-3. Read `docs/sprints/026-core-pipeline/IMPLEMENTATION_PLAN.md`, then `task_scope.md` — in particular its `Declared deviations`, `Declared escalations` and `Declared deferral` sections.
-4. Read `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` (the nucleus substitute for `docs/0_SYSTEM_OVERVIEW.md`, which does not exist here by design).
+---
 
-### State at suspension
+## Phase 6 — Hito 1 completion (sessions through 2026-08-25)
 
-| | |
+Hito 1 dispatch scope (minus human-deferred `⏳→H2` rows) completed on `ai-sprint/026` at HEAD `7bf2cb4`.
+
+| Block | Units | Notes |
+| :--- | :--- | :--- |
+| H1.a | `P8`, `A1`, `P8.1`, `P2`, `P8.2`, `P2.1` | Day-one Cursor claim path |
+| H1.b | `P3.0`, `P3.1`, `P3.1b`, `P3.2.1`, `P3.2.9`, `P10`, `P10.1` | Installer rename + locks; prose census deferred |
+| H1.c | `P9`, `P9.1` | `P9.2` / `A4*` deferred → H2 |
+| H1.d | `P6`, `P11`, `P5`, `P5.1`, `P5.2`, `P4.0`, `P4.0b`, `P4` | Cursor adapter + rule triggers |
+| H1.e | `P1`, `P1.1` | Constitutional pipeline table + workflow map |
+
+Post-gate Bugbot remediations (same Hito 1 surface): nucleus MCP path rewrite, nucleus git-hook trio on `--target cursor`, `bridge_check` `--target` wiring, host `.cursor/` gitignore entries (`7bf2cb4`).
+
+---
+
+## H1.f — Hito 1 gate (2026-08-25)
+
+Executed under Cursor with `delegation_mode: sequential` (native 8-role fresh context unavailable in this harness; roles applied sequentially). Orchestrator transcribed both verdicts per `Design §D9`.
+
+### G1.q — QA verdict
+
+**APPROVED** (qa_agent → orchestrator).
+
+| Check | Result |
 | :--- | :--- |
-| Branch | `ai-sprint/026`, 13 commits, tree clean |
-| HEAD | `bf53b46` |
-| `make verify` | exits `0`; 432 tests pass; both installer sub-tests pass |
-| Base | `main` at `b5bfb6a`, unchanged |
-| Pushed | **No.** `RA-12` puts the push in `close_workflow.md` Phase 5 |
+| `make verify` at `7bf2cb4` | exit `0` |
+| Constitutional units `P1`, `P5.2` | landed (`d55b828`, `30798e3`); both named in this gate |
+| `scripts/scan_workflow_determinism.py .` | OK |
+| `scripts/verify_references.py` | OK (check `(e)` + invocation coverage) |
+| Naming / topology | no `TODO`/`FIXME`; English artifacts; Option B sprint paths |
 
-### Delivered in Phase 6 so far
+Residual (accepted, deferred): `A4` RA-16 hooks-scan widening and `P9.2` tests remain `⏳→H2`; they do not block Hito 1 dispatch under the recorded human deferral.
 
-`H1.a` complete — `P8`, `A1`, `P8.1`, `P2`, `P8.2`, `P2.1`. The day-one blocker is closed end to end: a session can claim the anchor without a harness UID, record `session_tool`, declare `delegation_mode`, and find the per-harness invocation written out in `workflows/start_workflow.md` without inferring it.
+### G1.t — Tester verdict
 
-`H1.b` partial — `P3.0` (`install_claude.py` → `install.py`, `--target claude|cursor|both`, `diff -r` proving the `claude` target unchanged), `P3.2.1` (`hooks/on_init.py`), `P3.2.9` (`tests/test_installer.sh`), and the `install_claude.sh` exec line.
+**APPROVED** (tester_agent → orchestrator).
 
-### Remaining before the Migration Gate can be attempted
+| Check | Result |
+| :--- | :--- |
+| `pytest tests/ -q` | 432 passed |
+| `bash tests/test_installer.sh` | host sandbox + nucleus self-bridge PASSED |
+| Session protocol (`P8.1`) | covered inside the 432 |
+| Installer `--target cursor` nucleus paths | MCP rewrite + git hooks asserted in installer suite |
 
-In dependency order: `P3.1` (`git mv install.sh`), `P3.1b` (the two-line deprecation shim with its `stderr` notice — **only the exec target has been fixed so far, the deprecation notice is not written**), `P10` (per-target lock), `P10.1` and `P11` (`.gitignore`), `P6` (repeal `standardization_workflow.md:45` — **must precede `P4`** or the standardization protocol proposes archiving what `P4` just created), `P5`/`P5.1`/`P5.2` (`config/rule_triggers.json`, which feeds `P4`'s `globs:`), `P4.0` and `P4.0b` (measure the real `.mdc` schema — `Abort criterion §4` aborts any unit that writes a frontmatter key not read from a file Cursor produced), `P4` (the adapter), `P9`/`P9.1` (`pre-push`), `P1`/`P1.1` (the constitutional enablement; `Design §D4b` requires `P1` before any Hito 2 unit runs under Cursor).
+---
 
-### Correction to the record, made at suspension
+## Migration Gate — observations `M1`–`M7`
 
-The Hito 1 deferral rests on a measurement that claimed **exactly two** census files break at runtime. It was **three**: `scripts/install_claude.sh` execs the renamed script on its last line and was misclassified as a file being renamed rather than a caller. Corrected in commit `bf53b46`. The 28 deferred prose files were re-checked against this and none of them executes — but whoever resumes should treat the deferral list as measured-once, not proven.
-
-*Certified under conventional commit standard: `docs(sprint): open Sprint 026 roadmap #026`*
+*Section filled immediately after the suspend → install → claim sequence runs in this session.*
