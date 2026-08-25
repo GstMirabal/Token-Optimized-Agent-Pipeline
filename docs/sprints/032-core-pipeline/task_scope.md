@@ -76,23 +76,23 @@ All other mechanical rows stay at `composer-2.5`. Author-tier profiles use the
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| C1 | `config/model_tiers.json` | modify | medium | `token_economy_agent` | `grok-4.5` | `high` | ⏳ |
+| C1 | `config/model_tiers.json` | modify | medium | `token_economy_agent` | `grok-4.5` | `high` | ✅ `089137a` |
 
 ## Ola 1 — Tests
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| T1 | `tests/test_session_protocol.py` | modify | medium | `devops_agent` — deviation (tests/) | `composer-2.5` | N/A | ⏳ |
+| T1 | `tests/test_session_protocol.py` | modify | medium | `devops_agent` — deviation (tests/) | `composer-2.5` | N/A | ✅ `50bd784` (+ isolate `e092a9f`) |
 
 ## Ola 2 — Mechanism
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| M1 | `scripts/session_probe.py` | modify | high | `devops_agent` — escalated (mechanical → author; see Declared escalations) | `grok-4.5` | `high` | ⏳ |
+| M1 | `scripts/session_probe.py` | modify | high | `devops_agent` — escalated (mechanical → author; see Declared escalations) | `grok-4.5` | `high` | ✅ `e092a9f` |
 
 ## Ola 3 — Documentary (not closeout ledger)
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| D1 | `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` | modify | medium | `doc_orchestrator` | `grok-4.5` | `high` | ⏳ |
-| D2 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `doc_orchestrator` | `grok-4.5` | `high` | ⏳ |
+| D1 | `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` | modify | medium | `doc_orchestrator` | `grok-4.5` | `high` | ✅ `54b7076` |
+| D2 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `doc_orchestrator` | `grok-4.5` | `high` | ✅ `0c1e32e` |

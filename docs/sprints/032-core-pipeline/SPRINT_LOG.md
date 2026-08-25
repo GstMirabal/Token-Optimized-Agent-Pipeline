@@ -48,7 +48,8 @@
 
 - **Hold lifted** 2026-08-25 option **B**: human attests this chat authors under **Cursor Grok 4.5**.
 - Global `applicationOpenModelAppliedConfig` still reported `grok-4.6` after chat selection (measured); medidor does not see per-chat override. Plan D2 amended.
-- Units C1 → T1 → M1 → D1 → D2 in progress.
+- Units landed: C1 `089137a`, T1 `50bd784`, M1 `e092a9f`, D1 `54b7076`, D2 `0c1e32e`.
+- Ready for Phase 7 Double-Gate.
 
 ## Settled human decisions
 
