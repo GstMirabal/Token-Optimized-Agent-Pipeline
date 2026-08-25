@@ -22,7 +22,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from hooks.state_mirror import mirror_active_state  # noqa: E402
+from hooks.state_mirror import mirror_active_state
 
 ACTIVE_STATE = Path("docs/active_state.json")
 
