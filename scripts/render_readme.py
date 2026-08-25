@@ -1,6 +1,6 @@
 """Config-driven README tag-substitution engine.
 
-invoked_by: human, during host onboarding — `scripts/install_claude.py` prints
+invoked_by: human, during host onboarding — `scripts/install.py` prints
 the instruction to run it after scaffolding `identity.config.json`. Deliberately
 NOT wired into `close_workflow.md`: this renders a README from a template, and
 the nucleus's own README is hand-written (it contains no `{{TAG}}` markers), so
@@ -63,7 +63,7 @@ REQUIRED_FIELDS = ("owner_name", "repo_slug", "project_name")
 def is_nucleus_mode() -> bool:
     """Detects whether this script runs inside the .agents nucleus itself.
 
-    Uses the exact criterion install_claude.py's main() applies: the repo
+    Uses the exact criterion install.py's main() applies: the repo
     root that contains this script (AGENTS_DIR) has its OWN real `.git`
     directory, as opposed to being checked out as a submodule (where `.git`
     is a plain gitlink file, not a directory).
@@ -110,7 +110,7 @@ def resolve_host_data(host_config_path: Path, framework_data: dict) -> dict:
 
     if not host_config_path.exists():
         print(f"ERROR: host config not found at {host_config_path}. "
-              "Run install_claude.py first, or pass --host-config.", file=sys.stderr)
+              "Run install.py first, or pass --host-config.", file=sys.stderr)
         sys.exit(1)
     return load_json(host_config_path)
 
