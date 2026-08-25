@@ -2,7 +2,7 @@
 
 **Canonical path**: `docs/sprints/032-core-pipeline/IMPLEMENTATION_PLAN.md`
 **Branch**: `ai-sprint/032` · **Base**: `main` at `0429f03` (`v4.14.0`)
-**Status**: `APPROVED`
+**Status**: `EXECUTING`
 
 > Authored at Phase 1 (Planning) by `principal_agent`, extracted to this path at
 > Phase 3, and **committed before Phase 5 approves it**: `agents.md §2 triple_lock`
@@ -68,15 +68,20 @@ Rechazado: `grok-4.6` + `effort` `medium` (cambia la palanca, no el modelo);
 familia (Gemini/GPT/Claude) en el primer trial (segunda variable); bajar
 gates.
 
-**D2 — El trial es vinculante solo si el modelo aplicado en autoría es el candidato.**
+**D2 — Evidencia del modelo de autoría: medidor global **o** atestación humana.**
 
-`config/model_tiers.json` no cambia el modelo del chat. Antes de Phase 6 el
-humano selecciona `grok-4.5` en Cursor. Cada unidad de autoría abre con
-`python3 scripts/audit_cursor_models.py` y comprueba que
-`Applied model (author cold-start candidate):` sea `grok-4.5`. Las fases de
-gate no usan ese modelo (ADR-0003). Planificación de este documento ocurrió
-bajo `grok-4.6` (Phase 1 = `principal_agent` / gate); eso no contamina el
-trial.
+`config/model_tiers.json` no cambia el modelo del chat.
+`scripts/audit_cursor_models.py` lee solo
+`cursor/applicationOpenModelAppliedConfig` (default global). Un override
+**por chat** a `Cursor Grok 4.5` no escribe ese key — medido 2026-08-25:
+tras selección manual del chat, el key seguía `grok-4.6` y cero filas con
+`modelId: "grok-4.5"`.
+
+**Decisión humana (Phase 6, opción B, 2026-08-25):** el trial sigue en este
+hilo bajo atestación humana de que la autoría corre en **Cursor Grok 4.5**.
+Evidencia: fila en `SPRINT_LOG.md` + C1 en el mapa. El medidor global puede
+seguir mostrando `grok-4.6` sin invalidar el trial. Las fases de gate no usan
+ese modelo (ADR-0003). Planificación Phase 1 bajo `grok-4.6` no contamina.
 
 **D3 — Payload: writer de `last_platform_probe`, no más RA-16.**
 
@@ -207,7 +212,7 @@ Leer exit codes con `$?` directamente; nunca a través de un pipe.
 
 | Command | Expected |
 | :--- | :--- |
-| `python3 scripts/audit_cursor_models.py` (antes de cada unidad de autoría) | `Applied model` = `grok-4.5` |
+| `python3 scripts/audit_cursor_models.py` (antes de cada unidad de autoría) | Informativo. Tras decisión B: el default global puede seguir `grok-4.6`; evidencia de trial = atestación en `SPRINT_LOG` |
 | `python3 -c "import json; print(json.load(open('config/model_tiers.json'))['tiers']['author']['cursor']['model'])"` | `grok-4.5` mientras el trial está en vuelo |
 | Fixture: `probe_platform` mockeado con `gh`; `echo $?` del test | `last_platform_probe` presente, formato `%Y-%m-%dT%H:%M:%SZ` |
 | Fixture: `which("gh")` → `None` | clave ausente |
@@ -253,9 +258,10 @@ sesión 2026-08-25. Baseline 031: 2 veredictos, ronda 1, ambos `APPROVED`.
 
 ## Abort criterion
 
-1. El modelo aplicado durante una unidad de autoría no es `grok-4.5` → no
-   contar esa unidad como evidencia del trial; restaurar el mapa si C1 ya
-   aterrizó y el humano no cambia el modelo.
+1. El humano retira la atestación de `Cursor Grok 4.5` en este hilo, o se
+   demuestra que la autoría no fue 4.5 → no contar unidades posteriores;
+   revertir C1 si ya aterrizó. (El medidor global en `grok-4.6` **no** dispara
+   este abort tras la decisión B de Phase 6.)
 2. La calidad del gate se hunde (p. ej. `REJECTED` `instructing` en ronda 2+
    que 031 no tuvo en trabajo comparable) → abortar el trial; revertir C1;
    dejar `grok-4.5` como candidato, no como mapa.
