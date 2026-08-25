@@ -146,7 +146,7 @@ the matrix portable across tools rather than tied to one runner's agent names.
 
 | Phase | Step | Effect |
 | :--- | :--- | :--- |
-| 0. Trigger | `auto_invocation` | verify |
+| 0. Trigger | `auto_invocation` | write |
 | 1. Deadlock Term | `reversibility` | verify |
 | 1. Deadlock Term | `state_nuke` | ? |
 | 2. Extraction | `error_mining` | ? |
