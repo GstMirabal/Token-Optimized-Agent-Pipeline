@@ -103,6 +103,52 @@ grep -q "hooks/on_push.py" "$NUCLEUS/.git/hooks/pre-push" \
 [ -x "$NUCLEUS/.git/hooks/commit-msg" ] || fail "nucleus cursor: commit-msg hook missing"
 echo "✅ nucleus self-bridge test PASSED"
 
+# ── P4.1: --target cursor and --target both on a host with a real .git ───────
+HOST_CURSOR="$WORK/host-cursor"
+mkdir -p "$HOST_CURSOR/.agents"
+rsync -a --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
+  "$AGENTS_SRC/" "$HOST_CURSOR/.agents/"
+echo "gitdir: ../.git/modules/.agents" > "$HOST_CURSOR/.agents/.git"
+rm -f "$HOST_CURSOR/.agents/.bridge_claude.lock" "$HOST_CURSOR/.agents/.bridge_cursor.lock"
+( cd "$HOST_CURSOR" && git init -q && git config user.email t@t && git config user.name t )
+( cd "$HOST_CURSOR" && python3 .agents/scripts/install.py --target cursor > /dev/null )
+[ -d "$HOST_CURSOR/.cursor/commands" ] || fail "cursor host: .cursor/commands missing"
+[ "$(ls -1 "$HOST_CURSOR/.cursor/commands" | wc -l | tr -d ' ')" = "13" ] \
+  || fail "cursor host: expected 13 commands"
+[ "$(ls -1 "$HOST_CURSOR/.cursor/rules" | wc -l | tr -d ' ')" = "12" ] \
+  || fail "cursor host: expected 12 rules"
+[ -f "$HOST_CURSOR/.cursor/mcp.json" ] || fail "cursor host: mcp.json missing"
+[ -x "$HOST_CURSOR/.git/hooks/pre-push" ] || fail "cursor host: pre-push missing"
+grep -q "on_push.py" "$HOST_CURSOR/.git/hooks/pre-push" \
+  || fail "cursor host: pre-push must call on_push.py"
+[ -f "$HOST_CURSOR/.agents/.bridge_cursor.lock" ] || fail "cursor host: cursor lock missing"
+[ ! -f "$HOST_CURSOR/.agents/.bridge_claude.lock" ] \
+  || fail "cursor host: must not write claude lock"
+for entry in "/.cursor/commands/" "/.cursor/rules/" "/.cursor/mcp.json"; do
+  grep -qxF "$entry" "$HOST_CURSOR/.gitignore" \
+    || fail "cursor host: .gitignore missing $entry"
+done
+echo "✅ host --target cursor test PASSED"
+
+HOST_BOTH="$WORK/host-both"
+mkdir -p "$HOST_BOTH/.agents"
+rsync -a --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
+  "$AGENTS_SRC/" "$HOST_BOTH/.agents/"
+echo "gitdir: ../.git/modules/.agents" > "$HOST_BOTH/.agents/.git"
+rm -f "$HOST_BOTH/.agents/.bridge_claude.lock" "$HOST_BOTH/.agents/.bridge_cursor.lock"
+( cd "$HOST_BOTH" && git init -q && git config user.email t@t && git config user.name t )
+( cd "$HOST_BOTH" && python3 .agents/scripts/install.py --target both > /dev/null )
+[ -L "$HOST_BOTH/.claude/commands/agents/start.md" ] || fail "both: claude command missing"
+[ -d "$HOST_BOTH/.cursor/commands" ] || fail "both: cursor commands missing"
+[ "$(ls -1 "$HOST_BOTH/.cursor/commands" | wc -l | tr -d ' ')" = "13" ] \
+  || fail "both: expected 13 cursor commands"
+[ -f "$HOST_BOTH/.agents/.bridge_claude.lock" ] || fail "both: claude lock missing"
+[ -f "$HOST_BOTH/.agents/.bridge_cursor.lock" ] || fail "both: cursor lock missing"
+# --target both installs cursor bridge but git hooks only on cursor-only path;
+# claude path already installs hooks via install_host_claude_bridge.
+[ -x "$HOST_BOTH/.git/hooks/pre-push" ] || fail "both: pre-push missing"
+echo "✅ host --target both test PASSED"
+
 # ---------------------------------------------------------------------------
 # Native pre-commit hook. The Claude Code PreToolUse hook only sees commits the
 # agent makes; every other path into the repository bypassed the scanner.
