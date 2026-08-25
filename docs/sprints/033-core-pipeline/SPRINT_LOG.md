@@ -30,7 +30,7 @@
 ## Phase 3 — Roadmap extraction
 
 - Branch `ai-sprint/033` created from `main` at `8b3fb6d` (`RA-12`).
-- `IMPLEMENTATION_PLAN.md` + this `SPRINT_LOG.md` committed (see git log on branch).
+- `IMPLEMENTATION_PLAN.md` + this `SPRINT_LOG.md` committed `b078360`.
 - Anchor: `current_sprint.id` = 33; `resume_pointer.branch` = `ai-sprint/033`.
 
 ## Phase 4 — Assignment
