@@ -1,7 +1,7 @@
 # Sprint Log — 031 (`gate-verdict-classes`)
 
 **Branch**: `ai-sprint/031` from `main` at `85f338e` (`v4.13.1`)
-**Status**: OPEN — Phase 7 APPROVED/APPROVED; awaiting `/agents:close`.
+**Status**: **SESSION LOCKED** — Sprint 031 closed 2026-08-25, awaiting `/agents:deployment`.
 **Session**: `20260825T145000Z-15189` · tool `cursor` · `delegation_mode: sequential`
 
 ---
@@ -81,3 +81,25 @@ Follow-on: `task_scope.md` SHAs `ffcb8ce`; workflow map `dcb96a0`; README counts
 | Tester (functional) | 1 | **APPROVED** | | `tests/test_check_gate_log.py` 5 passed. Fixture `REJECTED` without class exit 2. `RECORD`+`testifying` exit 0. Three `RECORD` rows exit 0. `qa_and_testing.md` §4 names `RECORD`. |
 
 Orchestrator transcription: both gates `APPROVED` same session (Cursor sequential; fresh-context commands above). `RECORD` was not used.
+
+---
+
+## Phase 8 — Closeout
+
+| Step | Status |
+| :--- | :--- |
+| Topographic / README counts | ✅ no empty sprint dirs; counts match (30 scripts) |
+| `graphify-update` | ✅ 6496 nodes / 7584 edges / 645 communities (was 6332/7370/628) |
+| `graphify-rebuild` | ⏭ skipped — no LLM API key (same as 030) |
+| `graph_stats.json` + `PHASE_REGISTER.md` | ✅ this directory |
+| `docs-freshness-check SPRINT_ID=031` | ✅ exit 0 (WARN only on historical 024/025 gaps) |
+| `check_task_scope` / `check_gate_log` | ✅ both exit 0 |
+| Repo docs presence | ✅ CONTRIBUTING / SECURITY / CODE_OF_CONDUCT / NOTICE (no content invalidation) |
+| Master Ledger | ✅ `[Unreleased]` #031; seal is deploy |
+| Program queue | ✅ 031 closed, awaiting deploy; trial → 032 |
+| Heuristic Pulse Gate (Phase 2.5) | ✅ `/agents:close` 2026-08-25; candidates classified below |
+| memory wipe | ✅ no-op (`memory/` empty; no `telemetry/`) |
+| release / push / deploy | ⏳ this close; deploy chained after `release` |
+
+**SESSION LOCKED** 2026-08-25 — close tip is HEAD at `session_state.py release`.
+

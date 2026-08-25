@@ -13,7 +13,7 @@ What `close_workflow.md` Phase 2.6 `double_gate_evidence` reads: **did this phas
 | 5 · Approval Gate | Human authorisation | ✅ 2026-08-25 over plan at `61581b6` |
 | 6 · Execution | Verdict classes, `check_gate_log.py`, ADR-0008 | ✅ T1–D3 SHAs in `SPRINT_LOG.md` |
 | 7 · Quality Gate | G1.q / G1.t in `SPRINT_LOG.md` | ✅ `APPROVED` / `APPROVED` (round 1, empty Class) |
-| 8 · Closeout | `CHANGELOG.md` `[Unreleased]`, roadmap, this register | ⏳ ledger written; `/agents:close` not yet run |
+| 8 · Closeout | `CHANGELOG.md` `[Unreleased]`, roadmap, this register | ✅ this close |
 
 ## Gate rounds
 
@@ -31,7 +31,7 @@ Nucleus mode: no per-module Walkthroughs and no host `0_SYSTEM_OVERVIEW.md` /
 
 | Candidate | routing_class |
 | :--- | :--- |
-| No raw `memory/` sprint logs this session (directory absent) | `discard` |
-| `RA-17` + ADR-0008 + `check_gate_log.py` already committed as product | `nucleus` (not a KI-index leftover) |
+| No raw `memory/` sprint logs this session (`memory/` empty; no `telemetry/`) | `discard` |
+| `RA-17`, ADR-0008, `check_gate_log.py`, `F-093-G1` closed — already committed as product | `nucleus` (not a KI-index leftover) |
 
-No new host-class KI. Close Human OK not yet asked.
+No new host-class KI. Human close OK 2026-08-25 (`/agents:close`).
