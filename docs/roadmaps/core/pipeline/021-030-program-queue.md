@@ -10,7 +10,7 @@ version: 1.0.0
 
 - **Strategy Lock:** `OPEN`
 - **Delivered:** `024` and `025` (`v4.5.0`), `021` (`v4.6.0`), `022` (`v4.7.0`), `023` (`v4.8.0`), `026` (`v4.9.0`, PR #50)
-- **Next:** `027` (`autonomy-posture`) — **in flight** on `ai-sprint/027` (Olas 0–2 executed; close seals delivery → then `028`). `F8` / `F-023-S4` closed by hotfix `H-002` (`hotfix/H-002`); `F-026-A1` / `F-026-A3` closed in 027
+- **Next:** `028` (`self-improvement-unblock`). `027` (`autonomy-posture`) **delivered** on `ai-sprint/027` (close 2026-08-25; deployment pending). `F-026-A1` / `F-026-A3` closed in 027; `F-021-A2` / `F-026-A2` remain open
 - **Origin:** drafted in an IDE planning mode across one long session, then migrated
   into this repository. That migration is the point: the same session opened with a
   host having lost an approved plan to ephemeral storage, and this document was
@@ -47,8 +47,8 @@ the program's own opening command.
 | ✅ | **022** | `model-tiering` | Delivered `v4.7.0` (PR #45). **Makes everything after it cheaper.** Doing it last means paying the top tier during the two longest sprints |
 | ✅ | **023** | `upstream-findings` | Delivered `v4.8.0` (PR #49). **All fourteen units delivered and gate-approved**; sealed 2026-08-24, deployed the same day. `C8`'s deliverable merged separately as PR #48. Its merge gate found a CodeQL alert on `hooks/on_commit.py` — read, verified a false positive, dismissed with its proof — and three siblings on `main` that no one has read; those are in `CHANGELOG.md` under `[4.8.0]` `Known open`. Seven framework-class findings a host reported and could not patch, plus the Implementation Plan's missing location, plus two gates that answered when they did not know |
 | ✅ | **026** | `tool-portability` (Cursor) | Delivered `v4.9.0` (PR #50). Migration Gate `M1`–`M7` passed; A3.r affirmed indistinguishability after A3.1 absorbed the `.mdc` probe receipt. Depends on the artifact registry (`C0.2` of `023`) |
-| **1st** | **027** | `autonomy-posture` | Replaces bypass mode with `auto` mode plus limits intent cannot clear. Depends on `C0.2` for the `SubagentStop` hook |
-| **2nd** | **028** | `self-improvement-unblock` | Self-improvement is blocked by absent host-side destinations, not by any single rule |
+| ✅ | **027** | `autonomy-posture` | Delivered on `ai-sprint/027` (close 2026-08-25; deployment pending). Portable Memory/Drift scripts + Claude template (`auto`/`hard_deny`/sandbox/hooks); `F-026-A1` / `F-026-A3` closed |
+| **1st** | **028** | `self-improvement-unblock` | Self-improvement is blocked by absent host-side destinations, not by any single rule |
 | **3rd** | **029** | `documentation-truth` | **Closes the queue.** The sprints above add scripts and config registries that no verified README figure counts |
 | **4th** | **030** | `token-economy-enforcement` | Reassigned from `025`, which shipped as `jurisdiction`. The auditor with no body, and the consumption-based trigger |
 
