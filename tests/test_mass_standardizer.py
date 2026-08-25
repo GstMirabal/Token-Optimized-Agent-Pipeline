@@ -294,7 +294,7 @@ def test_a_vendored_skill_md_is_pointed_at_rather_than_scaffolded_over(tmp_path)
 
 
 def test_the_pointer_is_relative_so_it_survives_the_bridge(tmp_path):
-    """`install_claude.py` links each skill directory into a host's `.claude/`.
+    """`install.py` links each skill directory into a host's `.claude/`.
 
     An absolute target would point back into whichever checkout generated it,
     which is precisely the class of leak `RA-15` exists to prevent.
