@@ -16,8 +16,20 @@ This rule bounds deployment scopes, establishing testing thresholds and failsafe
 - **Tracking Deviations**: Any structural detour forced by environmental variables must be explicitly marked as `:tech-debt:` inside active implementation plans, immediately rendering the block a high-priority vulnerability for retroactive analysis.
 
 ## 4. The Double-Gate Review Protocol
-- **Structural Halt**: No execution block may proceed to functional testing without the explicit, documented sign-off from the `QA Agent`, guaranteeing absolute governance, linguistic, and syntactic compliance.
-- **Functional Lock**: The `Tester Agent` operates downstream of QA. If functional integration tests or isolated `:memory:` tests fail, it must forcefully trigger the global **Remediation Loop** — the protocol in `workflows/remediation_workflow.md`, named here rather than alluded to, because a transition nothing names is a transition no verifier can check (`RA-16`) — routing the exact failure trace back to the initiating node. Under no circumstances may functional gaps be presented to the Human User for resolution.
+
+Phase 7 emits exactly one of `APPROVED` | `REJECTED` | `RECORD` per gate
+(QA, then Tester). The class is declared on the `SPRINT_LOG.md` row (`RA-17`).
+C6's operational table lives here, not in a sprint log.
+
+| Class | When | Verdict | After the verdict |
+| :--- | :--- | :--- | :--- |
+| *(none)* | No findings | `APPROVED` | Proceed |
+| `charter` | Plan/ADR unmet, functional suite red, secret, or missing `task_scope.md` | `REJECTED` | Bounce. Counts toward consecutive rejections of the same block |
+| `instructing` | A file that tells an agent what to do states a false procedure (`agents.md`, `rules/`, `workflows/`, skill `SKILL.md`) | `REJECTED` | Bounce. Counts toward consecutive rejections of the same block |
+| `testifying` | Sprint logs, comments, Makefile observations, claims about a mechanism that already works | `RECORD` | instruct; annotate. Does **not** increment the consecutive-rejection count. Does **not** invoke `remediation_workflow.md` |
+
+- **Structural Halt**: No execution block may proceed to functional testing without the explicit, documented sign-off from the `QA Agent`, guaranteeing absolute governance, linguistic, and syntactic compliance. A `RECORD` on Gate-1 is a documented sign-off, not a missing gate.
+- **Functional Lock**: The `Tester Agent` operates downstream of QA. If functional integration tests or isolated `:memory:` tests fail (`charter`), it must forcefully trigger the global **Remediation Loop** — the protocol in `workflows/remediation_workflow.md`, named here rather than alluded to, because a transition nothing names is a transition no verifier can check (`RA-16`) — routing the exact failure trace back to the initiating node. Under no circumstances may functional gaps be presented to the Human User for resolution. A `RECORD` on Gate-2 is not a functional gap.
 
 ## 5. Waiving a secret-scan finding
 
