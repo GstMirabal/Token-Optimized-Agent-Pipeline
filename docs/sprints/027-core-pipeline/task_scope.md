@@ -149,13 +149,13 @@ row for that intent (`A1`–`A1.2`, `C2`–`C3`, `D1`–`D2` → `grok-4.6`/`hig
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| P1 | `scripts/persist_session_context.py` | create | medium | `devops_agent` — escalated (mechanical → author; Cursor `grok-4.6`, effort `high`; see Declared escalations) | ⏳ |
-| P1.1 | `tests/test_persist_session_context.py` | create | medium | `devops_agent` — deviation (tests/); Cursor `composer-2.5` | ⏳ |
-| P2 | `scripts/check_role_artifact.py` | create | medium | `devops_agent` — escalated (mechanical → author; Cursor `grok-4.6`, effort `high`; see Declared escalations) | ⏳ |
-| P2.1 | `tests/test_check_role_artifact.py` | create | medium | `devops_agent` — deviation (tests/); Cursor `composer-2.5` | ⏳ |
-| P2.2 | `Makefile` | modify | medium | `devops_agent`; Cursor `composer-2.5` | ⏳ |
-| P3 | `scripts/session_end_hook.py` | create | medium | `devops_agent` — escalated (mechanical → author; Cursor `grok-4.6`, effort `high`; see Declared escalations) | ⏳ |
-| P3.1 | `tests/test_session_end_hook.py` | create | low | `devops_agent` — deviation (tests/); Cursor `composer-2.5` | ⏳ |
+| P1 | `scripts/persist_session_context.py` | create | medium | `devops_agent` — escalated (mechanical → author; Cursor `grok-4.6`, effort `high`; see Declared escalations) | ✅ `3a630e3` |
+| P1.1 | `tests/test_persist_session_context.py` | create | medium | `devops_agent` — deviation (tests/); Cursor `composer-2.5` | ✅ `5ae353e` |
+| P2 | `scripts/check_role_artifact.py` | create | medium | `devops_agent` — escalated (mechanical → author; Cursor `grok-4.6`, effort `high`; see Declared escalations) | ✅ `9d5c68c` |
+| P2.1 | `tests/test_check_role_artifact.py` | create | medium | `devops_agent` — deviation (tests/); Cursor `composer-2.5` | ✅ `7a80479` |
+| P2.2 | `Makefile` | modify | medium | `devops_agent`; Cursor `composer-2.5` | ✅ `c30c3a0` |
+| P3 | `scripts/session_end_hook.py` | create | medium | `devops_agent` — escalated (mechanical → author; Cursor `grok-4.6`, effort `high`; see Declared escalations) | ✅ `bbb48aa` |
+| P3.1 | `tests/test_session_end_hook.py` | create | low | `devops_agent` — deviation (tests/); Cursor `composer-2.5` | ✅ `e499b71` |
 
 ## Ola 2 — Template Claude Code
 
