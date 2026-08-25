@@ -10,7 +10,7 @@ version: 1.0.0
 
 - **Strategy Lock:** `OPEN`
 - **Delivered:** `024` and `025` (`v4.5.0`), `021` (`v4.6.0`), `022` (`v4.7.0`), `023` (`v4.8.0`), `026` (`v4.9.0`, PR #50), `027` (`v4.10.0`, PR #55), `028` (`v4.11.0`, PR #57), `029` (`documentation-truth`, `v4.12.0`, PR #59), `030` (`token-economy-enforcement`, `v4.13.0`, PR #61), `031` (`gate-verdict-classes`, `v4.14.0`, PR #63)
-- **Next / in flight:** `032` — first author-tier model trial (`docs/guides/MODEL_TIER_TRIAL_GUIDE.md`). `F-021-A2` remains open. `031` **deployed** `v4.14.0` (PR #63, 2026-08-25). H-004 **deployed** `v4.13.1` (PR #62).
+- **Next / in flight:** `032` (`author-tier-trial`) on `ai-sprint/032` — Cursor `cursor.author` trial `grok-4.5` / `high` + `last_platform_probe` writer. Human attestation option B (chat model; global medidor may lag). `F-021-A2` remains open. `031` **deployed** `v4.14.0` (PR #63, 2026-08-25). H-004 **deployed** `v4.13.1` (PR #62).
 - **Origin:** drafted in an IDE planning mode across one long session, then migrated
   into this repository. That migration is the point: the same session opened with a
   host having lost an approved plan to ephemeral storage, and this document was
