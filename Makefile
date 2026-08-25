@@ -23,7 +23,8 @@ PY_EXCLUDES := -not -path "*/.git/*" -not -path "*/node_modules/*" -not -path "*
 VENV_PY := $(AGENTS_DIR)/venv_skillopt/bin/python3
 PY := $(if $(wildcard $(VENV_PY)),$(VENV_PY),python3)
 
-.PHONY: graphify-update graphify-rebuild verify docs-freshness-check cursor-tiers
+.PHONY: graphify-update graphify-rebuild verify docs-freshness-check cursor-tiers role-artifacts
+
 
 # Incremental AST sync after code changes (close_workflow Phase 1, no LLM cost).
 graphify-update:
@@ -95,3 +96,13 @@ docs-freshness-check:
 # empty until proven history exists.
 cursor-tiers:
 	cd $(AGENTS_DIR) && python3 scripts/audit_cursor_models.py
+
+# Sprint 027: verify a role left its required sprint-scoped artifacts (portable
+# SubagentStop counterpart). SPRINT_DIR must be the canonical sprint path.
+# Example: make role-artifacts ROLE='Orchestrator' SPRINT_DIR=docs/sprints/027-core-pipeline
+ROLE ?=
+SPRINT_DIR ?=
+role-artifacts:
+	@test -n "$(ROLE)" || (echo "ROLE= is required (registry role display name)"; exit 2)
+	@test -n "$(SPRINT_DIR)" || (echo "SPRINT_DIR= is required"; exit 2)
+	cd $(AGENTS_DIR) && python3 scripts/check_role_artifact.py --role "$(ROLE)" --sprint-dir "$(SPRINT_DIR)"
