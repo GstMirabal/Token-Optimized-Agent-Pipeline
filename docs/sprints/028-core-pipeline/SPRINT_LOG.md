@@ -1,7 +1,7 @@
 # Sprint Log — 028 (`self-improvement-unblock`)
 
 **Branch**: `ai-sprint/028` from `main` at `0a175a2`
-**Status**: **SESSION LOCKED** — Sprint 028 closed on `ai-sprint/028` (2026-08-25); awaiting `/agents:deployment`.
+**Status**: **SESSION LOCKED** — Sprint 028 closed and deployed `v4.11.0` (2026-08-25).
 
 ---
 
@@ -124,6 +124,19 @@ No new host-class KI (empty survivor list). Recurring Model/Effort omission rema
 ### Next protocol
 
 `workflows/deployment_workflow.md` (`/agents:deployment`) — squash-merge `ai-sprint/028` into `main`, tag, GitHub Release.
+
+## Deployment seal (2026-08-25)
+
+| Step | Result |
+| :--- | :--- |
+| PR #57 | Sprint 028 merged to `main` (`1281936`) |
+| `ci_gate.py` #57 | exit `0` (Analyze, CodeQL, audit) |
+| PR #58 | Ledger sealed `[4.11.0]` (`9da899c`) |
+| `ci_gate.py` #58 | exit `0` |
+| Tag / Release | `v4.11.0` — GitHub Latest |
+| Post-merge prune | exit `0` |
+
+Anchor refreshed at close: `last_close_commit` → `9da899c`.
 
 ---
 
