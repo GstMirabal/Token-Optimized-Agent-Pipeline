@@ -6,7 +6,8 @@ Cross-platform port of the original bash installer (install.sh is now a
 thin wrapper around this). Idempotent: safe to re-run any time.
 
 Usage:
-    python3 .agents/scripts/install.py [--profile <name>] [--target claude|cursor|both]
+    python3 .agents/scripts/install.py [--profile <name>] [--profile-path <path>]
+        [--target claude|cursor|both]
 
 What it does:
   1. Symlinks agents/*.md, commands/*.md and skills/*/ into the host's .claude/
@@ -22,13 +23,17 @@ What it does:
      committed. .claude/settings.json itself is left trackable on purpose:
      it degrades gracefully without the submodule and must survive a fresh
      clone for SessionStart to ever bootstrap the rest.
-  5. With --profile: additionally links profiles/<name>/{agents,skills} and
-     imports the profile's rules. Profiles are opt-in only.
+  5. With --profile or --profile-path: additionally links the profile's
+     {agents,skills} and imports its rules. --profile resolves
+     profiles/<name> inside the submodule (illustrative packs only). --profile-path
+     accepts a host-controlled directory outside the submodule (RA-15 production
+     profiles). The two flags are mutually exclusive.
   6. Marks .agents/.bridge_claude.lock and/or .agents/.bridge_cursor.lock
      (per --target) so hooks/on_init.py and start_workflow bridge_check
      can detect a deliberate submodule update and re-link automatically.
 """
 import argparse
+import os
 import re
 import shutil
 import subprocess
@@ -380,7 +385,58 @@ def install_nucleus_git_hooks() -> None:
     install_git_pre_push(hooks_dir=hooks_dir, script_path="hooks/on_push.py")
 
 
-def install_host_claude_bridge(profile: str | None) -> int:
+def install_profile_from_dir(profile_dir: Path) -> None:
+    """Link a profile pack's agents/skills into the host bridge and import rules."""
+    profile_dir = profile_dir.resolve()
+    agents_src = profile_dir / "agents"
+    if agents_src.is_dir():
+        for agent_file in sorted(agents_src.glob("*.md")):
+            dest = HOST_DIR / ".claude" / "agents" / agent_file.name
+            link_one(os.path.relpath(agent_file, dest.parent), dest)
+    skills_src = profile_dir / "skills"
+    if skills_src.is_dir():
+        for skill_dir in sorted(skills_src.iterdir()):
+            if skill_dir.is_dir():
+                dest = HOST_DIR / ".claude" / "skills" / skill_dir.name
+                link_one(os.path.relpath(skill_dir, dest.parent), dest)
+    rules_src = profile_dir / "rules"
+    if rules_src.is_dir():
+        for rule_file in sorted(rules_src.glob("*.md")):
+            import_path = os.path.relpath(rule_file, HOST_DIR)
+            add_claude_import(f"@{import_path}")
+    registry = profile_dir / "mcp" / "registry.json"
+    if registry.exists():
+        print(
+            f"ℹ️  Profile MCP servers listed in {registry} "
+            "— add the ones you need to .mcp.json manually (they may require API keys)."
+        )
+
+
+def resolve_profile_dir(profile: str | None, profile_path: str | None) -> Path | None:
+    """Resolve --profile (submodule) or --profile-path (host/external) to a directory."""
+    if profile and profile_path:
+        print("🛑 Use only one of --profile or --profile-path.", file=sys.stderr)
+        sys.exit(1)
+    if profile_path:
+        candidate = Path(profile_path)
+        if not candidate.is_absolute():
+            candidate = (HOST_DIR / candidate).resolve()
+        else:
+            candidate = candidate.resolve()
+        if not candidate.is_dir():
+            print(f"🛑 Profile path not found: {candidate}", file=sys.stderr)
+            sys.exit(1)
+        return candidate
+    if profile:
+        profile_dir = AGENTS_DIR / "profiles" / profile
+        if not profile_dir.is_dir():
+            print(f"🛑 Profile not found: {profile_dir}", file=sys.stderr)
+            sys.exit(1)
+        return profile_dir
+    return None
+
+
+def install_host_claude_bridge(profile_dir: Path | None) -> int:
     """Install the full Claude Code bridge into a host checkout."""
     print(f"🌉 Installing Claude Code bridge for .agents into {HOST_DIR} ...")
 
@@ -404,31 +460,23 @@ def install_host_claude_bridge(profile: str | None) -> int:
     scaffold_identity_config()
     install_host_git_hooks()
 
-    if profile:
-        profile_dir = AGENTS_DIR / "profiles" / profile
-        if not profile_dir.is_dir():
-            print(f"🛑 Profile not found: {profile_dir}", file=sys.stderr)
-            return 1
-        print(f"📦 Installing profile: {profile}")
-        for f in sorted((profile_dir / "agents").glob("*.md")):
-            link_one(f"../../.agents/profiles/{profile}/agents/{f.name}",
-                     HOST_DIR / ".claude" / "agents" / f.name)
-        if (profile_dir / "skills").is_dir():
-            for d in sorted((profile_dir / "skills").iterdir()):
-                if d.is_dir():
-                    link_one(f"../../.agents/profiles/{profile}/skills/{d.name}",
-                             HOST_DIR / ".claude" / "skills" / d.name)
-        for r in sorted((profile_dir / "rules").glob("*.md")):
-            add_claude_import(f"@.agents/profiles/{profile}/rules/{r.name}")
-        if (profile_dir / "mcp" / "registry.json").exists():
-            print(f"ℹ️  Profile MCP servers listed in profiles/{profile}/mcp/registry.json "
-                  "— add the ones you need to .mcp.json manually (they may require API keys).")
+    if profile_dir is not None:
+        print(f"📦 Installing profile: {profile_dir}")
+        install_profile_from_dir(profile_dir)
     return 0
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Install the .agents bridge.")
-    parser.add_argument("--profile", help="Optional project profile to install (profiles/<name>)")
+    parser.add_argument(
+        "--profile",
+        help="Illustrative profile name under .agents/profiles/<name> (submodule)",
+    )
+    parser.add_argument(
+        "--profile-path",
+        dest="profile_path",
+        help="Host-controlled profile directory outside the submodule (absolute or relative to host root)",
+    )
     parser.add_argument(
         "--target",
         choices=["claude", "cursor", "both"],
@@ -442,7 +490,7 @@ def main() -> int:
     # refused, but the minimal self-bridge (commands/agents/constitution) is
     # installed so the framework's own workflows are invocable while developing it.
     if (AGENTS_DIR / ".git").is_dir():
-        if args.profile:
+        if args.profile or args.profile_path:
             print("🛑 Profiles cannot be installed into the nucleus.", file=sys.stderr)
             return 1
         if args.target == "claude":
@@ -456,8 +504,10 @@ def main() -> int:
         install_nucleus_git_hooks()
         return 0
 
+    profile_dir = resolve_profile_dir(args.profile, args.profile_path)
+
     if args.target in ("claude", "both"):
-        rc = install_host_claude_bridge(args.profile)
+        rc = install_host_claude_bridge(profile_dir)
         if rc != 0:
             return rc
 
