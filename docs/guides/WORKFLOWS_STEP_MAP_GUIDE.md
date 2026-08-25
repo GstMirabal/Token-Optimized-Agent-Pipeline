@@ -80,13 +80,14 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 5. Git Sovereignty | `submodule_purity` | write |
 | 5.5 Branch Sovereignty | `branch_audit` | write |
 | 5.5 Branch Sovereignty | `local_prune` | write |
-| 6. Session Lock | `deployment_handoff` | verify |
+| 6. Session Lock | `deployment_handoff` | write |
 | 6. Session Lock | `session_lock` | ? |
 
 ### `deployment_workflow.md`
 
 | Phase | Step | Effect |
 | :--- | :--- | :--- |
+| 0. Sprint Seal Gate | `sprint_seal_gate` | write |
 | 0. Git State Gate | `git_state_gate` | ? |
 | 1. Branch Merge | `test_audit` | verify |
 | 1. Branch Merge | `pr_flow` | write |

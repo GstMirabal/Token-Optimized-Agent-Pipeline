@@ -8,6 +8,7 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 - **Sprint 029 (`documentation-truth`)** — Widen README counted set (`scripts/*.py`, `config/*.json`) via fenced `COUNTED_*` block + `check_readme_counts.py --write`; Cursor badge; two-tool `AGENTS_SLASH_COMMANDS_GUIDE.md` + registry entry + `verify_commands.py` §3.2 stem check; ADR-0003…0007 (gates never drop tier, no model-selector agent, prices out of config, session bound before tiering, Cursor without API delegation); T5 documentary-impact template + `documentation_standard.md` §6; `verify_references.py` check (f) for out-of-range `file:line` in living docs; Phase 4.3 requires same-session `make cursor-tiers`. `F-093-G1` registered and carried to `031` (not patched here).
 
 ### Changed
+- **Deploy only after sprint `release`, never after `suspend`** — `session_state.py require-released` (deployment Phase 0 `sprint_seal_gate`); `close_workflow.md` `deployment_handoff` auto-invokes `/agents:deployment` only after `release`.
 - **Post-release 028 deployment seal record** (`84201d2`) — SPRINT_LOG, program-queue status, and `SELF_IMPROVEMENT_GUIDE.md` audit SHA after PR #57/#58.
 
 ### Fixed
