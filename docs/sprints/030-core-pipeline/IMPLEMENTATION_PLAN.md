@@ -2,7 +2,7 @@
 
 **Canonical path**: `docs/sprints/030-core-pipeline/IMPLEMENTATION_PLAN.md`
 **Branch**: `ai-sprint/030` · **Base**: `main` at `65dbaaf`
-**Status**: `APPROVED` — Phase 5 Human OK 2026-08-25 (`triple_lock` lock 1)
+**Status**: `EXECUTING` → gates passed — Phase 5 Human OK 2026-08-25 (`triple_lock` lock 1)
 
 > Authored at Phase 1 (Planning) by `principal_agent`, extracted to this path at
 > Phase 3, and **committed before Phase 5 approves it**: `agents.md §2 triple_lock`
@@ -69,29 +69,29 @@ Una unidad = un fichero = un commit (`RA-08`, `jurisdictional_lock`).
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| A0 | `tests/test_token_saver_auditor.py` | create | medium | `devops_agent` | ⏳ |
-| T0 | `tests/test_check_task_scope.py` | create | medium | `devops_agent` | ⏳ |
-| C0 | `tests/test_session_protocol.py` | modify | medium | `devops_agent` | ⏳ |
+| A0 | `tests/test_token_saver_auditor.py` | create | medium | `devops_agent` | ✅ `f794b19` |
+| T0 | `tests/test_check_task_scope.py` | create | medium | `devops_agent` | ✅ `f794b19` |
+| C0 | `tests/test_session_protocol.py` | modify | medium | `devops_agent` | ✅ `f794b19` |
 
 ### Ola 1 — Auditor
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| A1 | `skills/token-saver-auditor/scripts/__init__.py` | create | low | `skill_architect` | ⏳ |
-| A2 | `skills/token-saver-auditor/scripts/audit_plan.py` | create | high | `devops_agent` | ⏳ |
-| A3 | `skills/token-saver-auditor/SKILL.md` | modify | medium | `token_economy_agent` | ⏳ |
-| A4 | `skills/token-saver-auditor/README.md` | modify | low | `skill_architect` | ⏳ |
+| A1 | `skills/token-saver-auditor/scripts/__init__.py` | create | low | `skill_architect` | ✅ `f794b19` |
+| A2 | `skills/token-saver-auditor/scripts/audit_plan.py` | create | high | `devops_agent` | ✅ `f794b19` |
+| A3 | `skills/token-saver-auditor/SKILL.md` | modify | medium | `token_economy_agent` | ✅ `f794b19` |
+| A4 | `skills/token-saver-auditor/README.md` | modify | low | `skill_architect` | ✅ `f794b19` |
 
 ### Ola 2 — Consumo
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| C1 | `scripts/session_cost.py` | modify | high | `devops_agent` | ⏳ |
-| C2 | `scripts/session_probe.py` | modify | high | `devops_agent` | ⏳ |
-| C3 | `config/rule_triggers.json` | modify | medium | `devops_agent` | ⏳ |
-| C4 | `rules/token_economy.md` | modify | medium | `token_economy_agent` | ⏳ |
-| C5 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify | medium | `governance_learner` | ⏳ |
-| C6 | `agents.md` | modify | high | `governance_learner` | ⏳ |
+| C1 | `scripts/session_cost.py` | modify | high | `devops_agent` | ✅ `f794b19` |
+| C2 | `scripts/session_probe.py` | modify | high | `devops_agent` | ✅ `f794b19` |
+| C3 | `config/rule_triggers.json` | modify | medium | `devops_agent` | ✅ `f794b19` |
+| C4 | `rules/token_economy.md` | modify | medium | `token_economy_agent` | ✅ `f794b19` |
+| C5 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify | medium | `governance_learner` | ✅ `f794b19` |
+| C6 | `agents.md` | modify | high | `governance_learner` | ✅ `f794b19` |
 
 C6: una línea en la tabla §0. `wc -l agents.md` debe seguir `≤ 200`.
 
@@ -99,18 +99,18 @@ C6: una línea en la tabla §0. `wc -l agents.md` debe seguir `≤ 200`.
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| F1 | `scripts/check_task_scope.py` | create | high | `devops_agent` | ⏳ |
-| F2 | `agents/rule_validator.md` | modify | medium | `rule_validator` | ⏳ |
-| F3 | `agents/token_economy_agent.md` | modify | medium | `token_economy_agent` | ⏳ |
-| F4 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | low | `governance_learner` | ⏳ |
+| F1 | `scripts/check_task_scope.py` | create | high | `devops_agent` | ✅ `f794b19` |
+| F2 | `agents/rule_validator.md` | modify | medium | `rule_validator` | ✅ `f794b19` |
+| F3 | `agents/token_economy_agent.md` | modify | medium | `token_economy_agent` | ✅ `f794b19` |
+| F4 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | low | `governance_learner` | ✅ `f794b19` |
 
 ### Ola 4 — Invocadores
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| I1 | `workflows/pipeline_workflow.md` | modify | medium | `orchestrator` | ⏳ |
-| I2 | `workflows/close_workflow.md` | modify | medium | `orchestrator` | ⏳ |
-| I3 | `Makefile` | modify | medium | `devops_agent` | ⏳ |
+| I1 | `workflows/pipeline_workflow.md` | modify | medium | `orchestrator` | ✅ `f794b19` |
+| I2 | `workflows/close_workflow.md` | modify | medium | `orchestrator` | ✅ `f794b19` |
+| I3 | `Makefile` | modify | medium | `devops_agent` | ✅ `f794b19` |
 
 Tras I1/I2: `python3 scripts/map_workflows.py` regenera
 `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` (generado, no unidad aparte).
@@ -119,9 +119,9 @@ Tras I1/I2: `python3 scripts/map_workflows.py` regenera
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| E1 | `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` | create | low | `doc_orchestrator` | ⏳ |
-| E2 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `orchestrator` | ⏳ |
-| L1 | `CHANGELOG.md` | modify | low | `principal_agent` | ⏳ |
+| E1 | `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` | create | low | `doc_orchestrator` | ✅ `f794b19` |
+| E2 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `orchestrator` | ✅ `f794b19` |
+| L1 | `CHANGELOG.md` | modify | low | `principal_agent` | ✅ `f794b19` |
 
 ---
 
@@ -151,7 +151,7 @@ Tras I1/I2: `python3 scripts/map_workflows.py` regenera
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `sequential` (Cursor: one agent, eight phases) | `docs/active_state.json` `delegation_mode` |
-| Work units | 24 rows in Work above | `grep -c '| ⏳ |' docs/sprints/030-core-pipeline/IMPLEMENTATION_PLAN.md` after Status still pending; after execution, count `#` rows in Work tables |
+| Work units | 24 rows in Work above | `grep -c '| ✅ `f794b19` |' docs/sprints/030-core-pipeline/IMPLEMENTATION_PLAN.md` after Status still pending; after execution, count `#` rows in Work tables |
 | Subagents dispatched | 0 (Cursor cannot instantiate the eight roles) | `delegation_mode` |
 | `session_cost` this session | Not measurable (Cursor transcripts have no `cache_read`) | `python3 scripts/session_cost.py --from-anchor --json` must not name a Claude jsonl |
 | Remaining-cost rule | Soft 5× / hard 15× still apply when a Claude transcript for **this** tool exists | `rules/token_economy.md` §3.1 |
