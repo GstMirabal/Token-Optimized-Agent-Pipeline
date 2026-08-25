@@ -1,7 +1,7 @@
 # Sprint Log — 029 (`documentation-truth`)
 
 **Branch**: `ai-sprint/029` from `main` at `84201d2`
-**Status**: **OPEN** — Phase 3 extraction; Phase 5 Approval Gate pending committed plan.
+**Status**: **OPEN** — Phase 5 Approval Gate **PASSED** 2026-08-25; Phase 6 in progress.
 
 ---
 
@@ -40,7 +40,8 @@
 
 ## Phase 5 — Approval Gate
 
-- Pending: plan is committed (`2f7ec90`). Phase 5 needs explicit Human OK on that commit (`triple_lock` lock 1).
+- **PASSED** 2026-08-25. Human OK on committed plan `2f7ec90` (`triple_lock` lock 1).
+- Precondition: `make cursor-tiers` run + `task_scope` corrected (`1ffff56`) before OK.
 
 ## Settled human decisions
 
