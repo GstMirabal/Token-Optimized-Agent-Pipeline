@@ -422,7 +422,7 @@ no profile is named to run the commands or record `M1`–`M7`.
 | P4.2 | `scripts/audit_cursor_models.py` | create | **high** | `devops_agent` — escalated (mechanical/haiku → author/sonnet; see Declared escalations) |✅ `27ce35f` |
 | P4.3 | `Makefile` | modify | low | `devops_agent` |✅ `62db6b0` |
 | P4.4 | `config/model_tiers.json` | modify | medium | `rule_validator` |✅ `8f8ff73` |
-| A3 | `docs/sprints/026-core-pipeline/SPRINT_LOG.md` | modify (Hito 2 gate) | medium — gate, closes Hito 2 | `qa_agent` (verdict) → `orchestrator` (transcribes) | ✅ pending SHA — blind judge ID'd `cursor_mdc_schema.md`; portability **not** affirmed |
+| A3 | `docs/sprints/026-core-pipeline/SPRINT_LOG.md` | modify (Hito 2 gate) | medium — gate, closes Hito 2 | `qa_agent` (verdict) → `orchestrator` (transcribes) | ✅ `3a92130` — blind judge ID'd `cursor_mdc_schema.md`; portability **not** affirmed |
 
 `agents.md` here (`P7`) is the file's **third** touch this sprint, after
 `P3.2.16` and `P5.2` — see **Isolation**.
