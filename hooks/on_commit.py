@@ -1,3 +1,19 @@
+"""Secret and integrity gates for every commit path into the repository.
+
+The Claude Code ``PreToolUse`` hook only sees commits the agent makes through
+its Bash tool. A commit typed in a terminal, made from an IDE, or produced by
+any other tool bypasses that path — this native ``pre-commit`` hook covers them.
+
+invoked_by: .git/hooks/pre-commit, installed by scripts/install.py.
+
+Usage:
+    python3 hooks/on_commit.py
+
+Exit codes:
+    0 — commit allowed
+    1 — commit rejected (any non-zero exit blocks ``git commit``)
+"""
+
 import subprocess
 import sys
 import itertools
@@ -23,6 +39,7 @@ def get_staged_files() -> list[str]:
         return result.stdout.splitlines()
     except subprocess.CalledProcessError as e:
         print(f"⚠️ [DEVOPS AGENT] Git error: {e}")
+
         return []
 
 def audit_three_file_standard() -> bool:
