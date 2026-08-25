@@ -12,6 +12,10 @@ Checks (run from the .agents root; CI fails the PR on any violation):
       by the tabular refactor; unmapped numbers are phantom references).
   (d) Every workflow, script and executable skill has a declared invoker, or a
       declared exception (RA-16 INVOCATION_COVERAGE, agents.md §7).
+  (e) config/rule_triggers.json mirrors rules/*.md.
+  (f) Living docs (guides, decisions, audits) that cite ``path:line`` point at a
+      file whose line count is at least that line — Sprint 029 J6. Does **not**
+      scan docs/sprints/ or docs/roadmaps/ (historical records).
 
 invoked_by: Makefile `verify` target (and therefore .github/workflows/ci.yml).
 """
@@ -23,12 +27,28 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _root import agents_root  # noqa: E402
+from _root import agents_root
 
 CONCORDANCE = Path("rules/LEGACY_RULE_CONCORDANCE.md")
 TEMPLATES_DIR = Path("docs/standards/templates")
 EXCEPTIONS_FILE = Path("config/invocation_exceptions.json")
 
+# Living documentary corpus for check (f). Historical sprint/roadmap prose is
+# excluded by construction — abort criterion 3 of Sprint 029.
+FILE_LINE_CORPUS = (
+    Path("docs/guides"),
+    Path("docs/decisions"),
+    Path("docs/audits"),
+)
+
+# ``path/to/file.ext:123`` inside backticks or as a bare token. Requires a
+# known text/code suffix so bare ``12:34`` clocks and URL ports do not match.
+FILE_LINE_RE = re.compile(
+    r"(?<![\w./-])"  # not mid-token
+    r"((?:[\w.-]+/)*[\w.-]+\.(?:md|py|json|sh|yml|yaml|toml|txt|mdc))"
+    r":(\d+)"
+    r"(?![\w./-])"
+)
 # Reasons an artifact may legitimately have no invoker inside the framework.
 # A free-text reason is rejected: an exception nobody can categorise is an
 # exception nobody will ever revisit.
@@ -239,6 +259,53 @@ def check_rule_triggers_sync() -> list[str]:
     return errors
 
 
+def resolve_cited_path(cited: str) -> Path | None:
+    """Map a citation path to a real file under the framework root.
+
+    Bare basenames (``qa_agent.md``) resolve under ``agents/`` when unique there;
+    otherwise only an exact relative path that exists is accepted. Missing files
+    are skipped — check (f) is a **range** gate, not an existence gate (J6).
+    """
+    direct = Path(cited)
+    if direct.is_file():
+        return direct
+    matches = list(Path("agents").glob(cited)) if "/" not in cited else []
+    if len(matches) == 1 and matches[0].is_file():
+        return matches[0]
+    return None
+
+
+def check_file_line_citations() -> list[str]:
+    """(f) ``path:line`` citations in living docs must be inside the file.
+
+    Scans only ``docs/guides``, ``docs/decisions``, and ``docs/audits``. Does not
+    catch wrong-but-in-range line numbers — that mitigation is T5 (figure +
+    command), not this check.
+    """
+    errors: list[str] = []
+    for root in FILE_LINE_CORPUS:
+        if not root.is_dir():
+            continue
+        for path in sorted(root.rglob("*.md")):
+            text = path.read_text(encoding="utf-8", errors="ignore")
+            for match in FILE_LINE_RE.finditer(text):
+                cited, line_s = match.group(1), match.group(2)
+                line_no = int(line_s)
+                target = resolve_cited_path(cited)
+                if target is None:
+                    continue
+                try:
+                    n_lines = sum(1 for _ in target.open(encoding="utf-8", errors="ignore"))
+                except OSError:
+                    continue
+                if line_no < 1 or line_no > n_lines:
+                    errors.append(
+                        f"(f) {path}: cites `{cited}:{line_no}` but "
+                        f"{target} has {n_lines} lines."
+                    )
+    return sorted(set(errors))
+
+
 def main() -> int:
     # Framework-scoped: every path below is this repository's. See
     # `scripts/_root.py` — the cwd is set once so the messages stay relative and
@@ -246,15 +313,23 @@ def main() -> int:
     os.chdir(agents_root())
 
     corpus = loadable_text()
-    errors = (check_rules_reachable(corpus) + check_templates_exist(corpus)
-              + check_rule_citations() + check_invocation_coverage(corpus)
-              + check_rule_triggers_sync())
+    errors = (
+        check_rules_reachable(corpus)
+        + check_templates_exist(corpus)
+        + check_rule_citations()
+        + check_invocation_coverage(corpus)
+        + check_rule_triggers_sync()
+        + check_file_line_citations()
+    )
     if errors:
         for e in errors:
             print(f"❌ {e}", file=sys.stderr)
-        return 1
-    print("✅ Reference integrity OK — rules reachable, templates exist, "
-          "citations resolve, every mechanism has an invoker.")
+        return 2
+    print(
+        "✅ Reference integrity OK — rules reachable, templates exist, "
+        "citations resolve, every mechanism has an invoker, "
+        "living file:line citations in range."
+    )
     return 0
 
 
