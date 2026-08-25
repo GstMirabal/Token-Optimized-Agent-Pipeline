@@ -10,7 +10,8 @@ version: 1.0.0
 
 - **Strategy Lock:** `OPEN`
 - **Delivered:** `024` and `025` (`v4.5.0`), `021` (`v4.6.0`), `022` (`v4.7.0`), `023` (`v4.8.0`), `026` (`v4.9.0`, PR #50), `027` (`v4.10.0`, PR #55), `028` (`v4.11.0`, PR #57)
-- **Next:** `029` (`documentation-truth`). `028` (`self-improvement-unblock`) **deployed** `v4.11.0` (PR #57 + seal #58, 2026-08-25). `F-026-A1` / `F-026-A3` closed in 027; `F-021-A2` / `F-026-A2` remain open
+- **Next:** `029` (`documentation-truth`). `028` (`self-improvement-unblock`) **deployed** `v4.11.0` (PR #57 + seal #58, 2026-08-25). `F-026-A1` / `F-026-A3` closed in 027; `F-021-A2` / `F-026-A2` remain open. **`F-093-G1` opened 2026-08-25** (Double-Gate has no severity class) — carried, not a 029/030 unit; first sprint of the next program (`031` `gate-verdict-classes`)
+- **Reconciled 2026-08-25** from `9da899c..84201d2`: the post-release seal record (SPRINT_LOG, this Status block, guide audit SHA after PR #57/#58) landed after tag `v4.11.0` with an empty `[Unreleased]`. Ledger entry under `CHANGELOG.md` `[Unreleased]`.
 - **Origin:** drafted in an IDE planning mode across one long session, then migrated
   into this repository. That migration is the point: the same session opened with a
   host having lost an approved plan to ephemeral storage, and this document was
@@ -48,9 +49,9 @@ the program's own opening command.
 | ✅ | **023** | `upstream-findings` | Delivered `v4.8.0` (PR #49). **All fourteen units delivered and gate-approved**; sealed 2026-08-24, deployed the same day. `C8`'s deliverable merged separately as PR #48. Its merge gate found a CodeQL alert on `hooks/on_commit.py` — read, verified a false positive, dismissed with its proof — and three siblings on `main` that no one has read; those are in `CHANGELOG.md` under `[4.8.0]` `Known open`. Seven framework-class findings a host reported and could not patch, plus the Implementation Plan's missing location, plus two gates that answered when they did not know |
 | ✅ | **026** | `tool-portability` (Cursor) | Delivered `v4.9.0` (PR #50). Migration Gate `M1`–`M7` passed; A3.r affirmed indistinguishability after A3.1 absorbed the `.mdc` probe receipt. Depends on the artifact registry (`C0.2` of `023`) |
 | ✅ | **027** | `autonomy-posture` | Deployed `v4.10.0` (PR #55, seal #56, 2026-08-25). Portable Memory/Drift scripts + Claude template (`auto`/`hard_deny`/sandbox/hooks); `F-026-A1` / `F-026-A3` closed |
-| **1st** | **028** | `self-improvement-unblock` | Self-improvement is blocked by absent host-side destinations, not by any single rule |
-| **3rd** | **029** | `documentation-truth` | **Closes the queue.** The sprints above add scripts and config registries that no verified README figure counts |
-| **4th** | **030** | `token-economy-enforcement` | Reassigned from `025`, which shipped as `jurisdiction`. The auditor with no body, and the consumption-based trigger |
+| ✅ | **028** | `self-improvement-unblock` | Deployed `v4.11.0` (PR #57 + seal #58, 2026-08-25). Host-side agent destinations, `--profile-path`, `routing_class` |
+| **1st** | **029** | `documentation-truth` | **Closes this queue.** The sprints above add scripts and config registries that no verified README figure counts. `F-093-G1` is **not** a unit (carried → `031`) |
+| **2nd** | **030** | `token-economy-enforcement` | Reassigned from `025`, which shipped as `jurisdiction`. The auditor with no body, and the consumption-based trigger |
 
 ### Carried out of `023` — routed to a hotfix, scheduled after `026`
 
@@ -131,6 +132,41 @@ recorded because `023` shows this unit's tests are where it will be decided.
 scope was the file list and three named alternations, and this is neither. The
 refusal was right and is not the reason it was lost; being routed without an
 owner is.
+
+---
+
+### Carried — `F-093-G1`, after this queue
+
+**`F-093-G1` — the Double-Gate has no severity class, so a round cap cannot fire.**
+Reported by a host 2026-08-25. Full entry: `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md`
+under *Reported by a host*. Reproduced against `84201d2` before this line was
+written: `rules/qa_and_testing.md` §4 still has no named verdict set;
+`rejection_trigger` on both gate profiles is a binary bounce; the Sprint 023 `C6`
+sentence (*correct the documents that instruct; annotate the records that testify*)
+resolves only in `docs/sprints/023-core-pipeline/task_scope.md` (lines 714 and 817),
+not in `agents.md` §7 and not in `rules/qa_and_testing.md`.
+
+**Not a unit of `029` (`documentation-truth`) and not a unit of `030`
+(`token-economy-enforcement`).** Folding it into either is the same category
+error as carrying `F-023-S4` as a rider on a themed sprint. It is also **not**
+`RA-03`: this is a three-verdict design for the gates, not an emergency secret
+patch, and remediation's workspace-nuke is the wrong instrument for a stale
+comment.
+
+**Do not encode "max N rounds" as the fix.** The reporting host already had N=2
+and it did not fire, because every documentary nit was classified as charter.
+
+**Destination.** First sprint of the next program: **`031` (`gate-verdict-classes`)**.
+`029` still closes *this* queue (IDs are labels, not a ban on a later program).
+The Implementation Plan for `031` is written at that sprint's Phase 1 from this
+section and from the findings entry — not now.
+
+| | |
+| :--- | :--- |
+| **Files (when 031 extracts)** | `rules/qa_and_testing.md` §4, `agents/qa_agent.md`, `agents/tester_agent.md`, `workflows/pipeline_workflow.md` Phase 7 |
+| **Risk** | **High** — changes what a gate may reject; every host sprint runs Phase 7 |
+| **Owner** | `qa_agent` / `tester_agent` rulesets emit; `governance_learner` authors the rule. No implementer role (`F-021-A2`) |
+| **Reproduces** | Commands in the `F-093-G1` findings entry, against `84201d2` |
 
 ---
 
