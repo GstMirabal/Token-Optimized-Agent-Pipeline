@@ -9,9 +9,8 @@ version: 1.0.0
 ## Status
 
 - **Strategy Lock:** `OPEN`
-- **Delivered:** `024` and `025` (`v4.5.0`), `021` (`v4.6.0`), `022` (`v4.7.0`), `023` (`v4.8.0`), `026` (`v4.9.0`, PR #50), `027` (`v4.10.0`, PR #55), `028` (`v4.11.0`, PR #57)
-- **Next:** `029` (`documentation-truth`). `028` (`self-improvement-unblock`) **deployed** `v4.11.0` (PR #57 + seal #58, 2026-08-25). `F-026-A1` / `F-026-A3` closed in 027; `F-021-A2` / `F-026-A2` remain open. **`F-093-G1` opened 2026-08-25** (Double-Gate has no severity class) — carried, not a 029/030 unit; first sprint of the next program (`031` `gate-verdict-classes`)
-- **Reconciled 2026-08-25** from `9da899c..84201d2`: the post-release seal record (SPRINT_LOG, this Status block, guide audit SHA after PR #57/#58) landed after tag `v4.11.0` with an empty `[Unreleased]`. Ledger entry under `CHANGELOG.md` `[Unreleased]`.
+- **Delivered:** `024` and `025` (`v4.5.0`), `021` (`v4.6.0`), `022` (`v4.7.0`), `023` (`v4.8.0`), `026` (`v4.9.0`, PR #50), `027` (`v4.10.0`, PR #55), `028` (`v4.11.0`, PR #57), `029` (`documentation-truth` — sealed on `ai-sprint/029`, deployment pending)
+- **Next:** `030` (second of remaining queue after 029). `029` **closed** 2026-08-25 (Phase 7 PASS; deploy-seal gate landed). `F-021-A2` / `F-026-A2` remain open. **`F-093-G1`** carried → `031` `gate-verdict-classes` (not patched in 029).
 - **Origin:** drafted in an IDE planning mode across one long session, then migrated
   into this repository. That migration is the point: the same session opened with a
   host having lost an approved plan to ephemeral storage, and this document was
@@ -50,7 +49,7 @@ the program's own opening command.
 | ✅ | **026** | `tool-portability` (Cursor) | Delivered `v4.9.0` (PR #50). Migration Gate `M1`–`M7` passed; A3.r affirmed indistinguishability after A3.1 absorbed the `.mdc` probe receipt. Depends on the artifact registry (`C0.2` of `023`) |
 | ✅ | **027** | `autonomy-posture` | Deployed `v4.10.0` (PR #55, seal #56, 2026-08-25). Portable Memory/Drift scripts + Claude template (`auto`/`hard_deny`/sandbox/hooks); `F-026-A1` / `F-026-A3` closed |
 | ✅ | **028** | `self-improvement-unblock` | Deployed `v4.11.0` (PR #57 + seal #58, 2026-08-25). Host-side agent destinations, `--profile-path`, `routing_class` |
-| **1st** | **029** | `documentation-truth` | **Closes this queue.** The sprints above add scripts and config registries that no verified README figure counts. `F-093-G1` is **not** a unit (carried → `031`) |
+| ✅ | **029** | `documentation-truth` | **Closed** 2026-08-25 on `ai-sprint/029` (deployment pending). README counted set + slash-commands guide + ADR-0003…0007 + T5 + file:line check (f) + deploy-seal gate. `F-093-G1` carried → `031` |
 | **2nd** | **030** | `token-economy-enforcement` | Reassigned from `025`, which shipped as `jurisdiction`. The auditor with no body, and the consumption-based trigger |
 
 ### Carried out of `023` — routed to a hotfix, scheduled after `026`

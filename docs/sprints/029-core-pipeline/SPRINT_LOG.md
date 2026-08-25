@@ -1,7 +1,7 @@
 # Sprint Log — 029 (`documentation-truth`)
 
 **Branch**: `ai-sprint/029` from `main` at `84201d2`
-**Status**: **OPEN** — Phase 7 Double-Gate **PASSED** (Gate 1 after one remediation round; Gate 2 first pass). Phase 8 Closeout pending Human OK.
+**Status**: **SESSION LOCKED** — Sprint 029 sealed 2026-08-25; deployment pending.
 
 ---
 
@@ -80,6 +80,8 @@ Work units commit on `ai-sprint/029`. Oldest → newest:
 | C1 | `29198b5` | Unreleased Sprint 029 changelog entry |
 | G1.r1 fix | `37a141c` | drop unused E402 noqa (Gate 1 round 1) |
 | G1.r1 fix | `bd44345` | regenerate WORKFLOWS_STEP_MAP (Gate 1 round 1) |
+| Phase 7 | `dce488f` | Double-Gate verdicts transcribed |
+| Close rider | `4db2aba` | `require-released` + close→deploy handoff (not after suspend) |
 
 ## Phase 7 — Quality Gate
 
@@ -102,5 +104,16 @@ Work units commit on `ai-sprint/029`. Oldest → newest:
 | Tracked `config/`/`hooks/`/`scripts/` dirty after suite | none |
 
 Supplementary (already inside `make verify`): `verify_commands` 13 stems, `check_readme_counts` 7 figures, `verify_references` including check (f), `check_model_tiers` 13 profiles.
+
+## Phase 8 — Sprint Closeout
+
+- `PHASE_REGISTER.md`, `graph_stats.json` (AST: 6146 nodes / 7119 edges / 615 communities; deep semantic rebuild skipped — no LLM API key).
+- Master Ledger `[Unreleased]` includes Sprint 029 + deploy-seal gate.
+- Program queue Status → 029 closed; next `030`.
+- Heuristic pulse: one `discard` candidate (see `PHASE_REGISTER.md`).
+- `session_state.py release` → `CLOSED_SUCCESSFULLY` + `last_close_commit`.
+- Push `ai-sprint/029`; handoff `/agents:deployment` (auto after `release` only).
+
+**Status**: **SESSION LOCKED** — Sprint 029 sealed; deployment next.
 
 ---
