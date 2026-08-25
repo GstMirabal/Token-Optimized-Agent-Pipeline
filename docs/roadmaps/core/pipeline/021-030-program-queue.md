@@ -1003,7 +1003,7 @@ forensics gains a datum that does not exist today: **which of the two tools left
 | :--- | :--- | :--- |
 | P1 | **The pipeline is defined by artifacts**, with roles as a recommended per-tool implementation | Each phase declares artifact, path and done-criterion; the role becomes an advisory column |
 | P2 | **Delegation mode declared in state** | `delegation_mode: native \| sequential`. `delegation_conflict` stops being an incident and becomes a configuration read |
-| P3 | **Installer with a target** | `scripts/install_claude.py` → `install.py --target claude\|cursor\|both`. The current name stains the `federation` contract and is renamed there |
+| P3 | **Installer with a target** | `scripts/install.py` → `install.py --target claude\|cursor\|both`. The current name stains the `federation` contract and is renamed there |
 | P4 | **Cursor adapter** | `.cursor/commands/` from `commands/`, `.cursor/rules/*.mdc` from `rules/`, `.cursor/mcp.json` from `claude/mcp.json`. **Also yields `config/model_tiers.json`'s `cursor` column**, derived by `audit_cursor_models.py` |
 | P5 | **The rule trigger table becomes machine-readable** | Today triggers are prose — the same leak `C0.2` describes one level up. Structuring them feeds Cursor's `globs:` **and** makes Claude's lazy loading declarable |
 | P6 | **Repeal the line that archives Cursor** | `standardization_workflow.md:45` |
@@ -1217,7 +1217,7 @@ submodule, and `agents.md §3 strict_rule` forbids the host from writing there.
 | S1 | **Agent creation in hard contradiction** | `agents/agent_orchestrator.md:19` orders *"MUST author a new `.md` profile physically in `agents/`"*; `strict_rule` forbids it from a host. Deadlock |
 | S2 | **Skills already solved this; agents did not** | `workflows/skill_forge_workflow.md` Phase 0 `forge_destination` forces a choice between (a) host-only `.claude/skills/` — **default**, (b) profile, (c) framework-wide. No equivalent exists for agents, and Claude Code discovers `.claude/agents/` just as it does `.claude/skills/` |
 | S3 | **`RA-16` does NOT block new agents** | `scripts/verify_references.py` `check_invocation_coverage` audits `workflows/` and `scripts/` (requiring `invoked_by:`) and executable skills. **`agents/*.md` is only read to build the corpus**, never audited |
-| S4 | **The profile tier is uninstallable** | `scripts/install_claude.py:314` resolves `AGENTS_DIR / "profiles" / <name>` — only inside the submodule. `RA-15` forbids a real profile living there and names no alternative. **The middle tier of three has a destination and no address** |
+| S4 | **The profile tier is uninstallable** | `scripts/install.py:314` resolves `AGENTS_DIR / "profiles" / <name>` — only inside the submodule. `RA-15` forbids a real profile living there and names no alternative. **The middle tier of three has a destination and no address** |
 | S5 | **Memory is a purge pipeline** | Three deletion mandates (`ephemeral_memory`, `definitive_amnesia`, `redundant_ki_purge`) against one manual-judgment preservation path (`constitutional_escalation`) |
 | S6 | **The upstream route only fires under human pressure** | `extract_workflow` Phase 2 has the right design. Measured in a host: 13 findings, 8 sprints, 0 routed; sprint 087 recorded *"pending, scheduled after this closeout"* and it never happened |
 
@@ -1235,7 +1235,7 @@ submodule, and `agents.md §3 strict_rule` forbids the host from writing there.
 | :--- | :--- | :--- |
 | U1 | `agent_orchestrator.md` gains `forge_destination`'s equivalent: three destinations, **host-only by default** | `agents/agent_orchestrator.md` |
 | U2 | `pipeline_workflow.md` Phase 4.1 names the chosen destination in `agent_assignment.md` | `workflows/pipeline_workflow.md` |
-| U3 | `install.py` accepts `--profile <path>` outside the submodule; `RA-15` names the location convention instead of saying *"a private location"* | `scripts/install_claude.py`, `agents.md §7` |
+| U3 | `install.py` accepts `--profile <path>` outside the submodule; `RA-15` names the location convention instead of saying *"a private location"* | `scripts/install.py`, `agents.md §7` |
 | U4 | **Preservation counterweight**: the close does not purge a memory item without its class being routed (host / profile / nucleus). A deletion with no destination is loss, not hygiene | `close_workflow.md`, `extract_workflow.md` |
 | U5 | Promotion gate: a host-side agent or skill promoted to the nucleus passes `RA-16` and `RA-15` **in the PR**, not before | `scripts/verify_references.py` (documented) |
 
@@ -1281,7 +1281,7 @@ neither counted.
 | Document | What goes false |
 | :--- | :--- |
 | `README.md` §At a Glance | No row for `scripts/` or `config/`. Eight sprints of work invisible to the only verified table |
-| `README.md` line 60 | Cites `scripts/install_claude.sh`, which Sprint 026 (`P3`) renames to `install.py --target` |
+| `README.md` line 60 | Cites `scripts/install.sh`, which Sprint 026 (`P3`) renames to `install.py --target` |
 | `README.md` overall | **Does not mention Cursor.** After 026 the framework is a two-tool framework and the README describes one |
 | `docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md` | Already drifted once (documented 11 commands while the README said 13). Nothing in `close` names it |
 
