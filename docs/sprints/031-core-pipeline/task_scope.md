@@ -67,32 +67,32 @@ profiles use `grok-4.6` / `high`. Gate-tier rows use log-from-disk / N/A.
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| T1 | `tests/test_check_gate_log.py` | create | medium | `devops_agent` — deviation (tests/) | `composer-2.5` | N/A | ⏳ |
+| T1 | `tests/test_check_gate_log.py` | create | medium | `devops_agent` — deviation (tests/) | `composer-2.5` | N/A | ✅ `ebd3050` |
 
 ## Ola 1 — Documents that instruct
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| R1 | `rules/qa_and_testing.md` | modify | high | `governance_learner` | `grok-4.6` | `high` | ⏳ |
-| R2 | `agents/qa_agent.md` | modify | high | `qa_agent` | `grok-4.6` | `high` | ⏳ |
-| R3 | `agents/tester_agent.md` | modify | high | `tester_agent` | `grok-4.6` | `high` | ⏳ |
-| R4 | `workflows/pipeline_workflow.md` | modify | high | `governance_learner` | `grok-4.6` | `high` | ⏳ |
-| R5 | `workflows/remediation_workflow.md` | modify | high | `governance_learner` | `grok-4.6` | `high` | ⏳ |
-| R6 | `agents/orchestrator.md` | modify | medium | `orchestrator` | `grok-4.6` | `high` | ⏳ |
-| R7 | `agents.md` | modify | high | `governance_learner` | `grok-4.6` | `high` | ⏳ |
+| R1 | `rules/qa_and_testing.md` | modify | high | `governance_learner` | `grok-4.6` | `high` | ✅ `f62d193` |
+| R2 | `agents/qa_agent.md` | modify | high | `qa_agent` | `grok-4.6` | `high` | ✅ `4b3b030` |
+| R3 | `agents/tester_agent.md` | modify | high | `tester_agent` | `grok-4.6` | `high` | ✅ `5cd7cc2` |
+| R4 | `workflows/pipeline_workflow.md` | modify | high | `governance_learner` | `grok-4.6` | `high` | ✅ `19a6d80` |
+| R5 | `workflows/remediation_workflow.md` | modify | high | `governance_learner` | `grok-4.6` | `high` | ✅ `260b852` |
+| R6 | `agents/orchestrator.md` | modify | medium | `orchestrator` | `grok-4.6` | `high` | ✅ `5e1fea3` |
+| R7 | `agents.md` | modify | high | `governance_learner` | `grok-4.6` | `high` | ✅ `3dd3114` |
 
 ## Ola 2 — Mechanism
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| M1 | `scripts/check_gate_log.py` | create | high | `devops_agent` — escalated (mechanical → author; see Declared escalations) | `grok-4.6` | `high` | ⏳ |
-| M2 | `Makefile` | modify | medium | `devops_agent` | `composer-2.5` | N/A | ⏳ |
-| M3 | `workflows/close_workflow.md` | modify | high | `governance_learner` | `grok-4.6` | `high` | ⏳ |
+| M1 | `scripts/check_gate_log.py` | create | high | `devops_agent` — escalated (mechanical → author; see Declared escalations) | `grok-4.6` | `high` | ✅ `91d1d90` |
+| M2 | `Makefile` | modify | medium | `devops_agent` | `composer-2.5` | N/A | ✅ `2293287` |
+| M3 | `workflows/close_workflow.md` | modify | high | `governance_learner` | `grok-4.6` | `high` | ✅ `3f3481e` |
 
 ## Ola 3 — Documentary (not closeout ledger)
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| D1 | `docs/decisions/ADR-0008-gate-verdict-classes.md` | create | medium | `doc_orchestrator` | `grok-4.6` | `high` | ⏳ |
-| D2 | `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` | modify | medium | `doc_orchestrator` | `grok-4.6` | `high` | ⏳ |
-| D3 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `doc_orchestrator` | `grok-4.6` | `high` | ⏳ |
+| D1 | `docs/decisions/ADR-0008-gate-verdict-classes.md` | create | medium | `doc_orchestrator` | `grok-4.6` | `high` | ✅ `e1cae67` |
+| D2 | `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` | modify | medium | `doc_orchestrator` | `grok-4.6` | `high` | ✅ `a169b20` |
+| D3 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `doc_orchestrator` | `grok-4.6` | `high` | ✅ `cbcea1e` |
