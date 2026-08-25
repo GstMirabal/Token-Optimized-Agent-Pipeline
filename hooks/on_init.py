@@ -26,8 +26,9 @@ _REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_REPO))
 sys.path.insert(0, str(_REPO / "scripts"))
 
-from _root import agents_root  # noqa: E402
-from hooks.telemetry import log_error  # noqa: E402
+from _root import agents_root
+
+from hooks.telemetry import log_error
 
 # Host-scoped (cwd = host project).
 CONFIG_PATH = Path(".env")
