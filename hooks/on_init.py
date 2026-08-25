@@ -1,3 +1,17 @@
+"""Session-start bridge sync for Claude Code hosts.
+
+Runs at ``SessionStart`` to re-link commands/agents when the submodule moves
+and to refuse a session whose bridge artifacts are gone.
+
+invoked_by: claude/settings.hooks.json SessionStart, merged by scripts/install.py.
+
+Usage:
+    python3 hooks/on_init.py
+
+Exit codes:
+    0 — session may proceed (warnings are non-blocking)
+"""
+
 import os
 import subprocess
 import json
