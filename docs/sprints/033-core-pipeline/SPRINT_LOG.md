@@ -35,12 +35,15 @@
 
 ## Phase 4 — Assignment
 
-- Pending: `agent_assignment.md` → `skill_assignment.md` → `task_scope.md`.
-- Cursor `delegation_mode: sequential`. Run `make cursor-tiers` before Model/Effort columns.
+- `agent_assignment.md`, `skill_assignment.md`, `task_scope.md` written this session (Cursor `sequential`).
+- A1 Destination: `nucleus:PR`. T1 assignee `implementer_agent` after A1 lands.
+- `make cursor-tiers` exit `0` (2026-08-25): applied cold-start `grok-4.6`; map in force `cursor.author` = `grok-4.5` / `high` (Sprint 032).
+- No mechanical→author escalations. `check_task_scope.py` exit recorded at commit time.
 
 ## Phase 5 — Approval Gate
 
-- Pending: Human OK on committed plan (`triple_lock` lock 1).
+- Pending: Human OK on committed plan `b078360` (`triple_lock` lock 1).
+- Precondition: `audit_plan.py` on this plan exits `0`.
 
 ## Gate log
 
