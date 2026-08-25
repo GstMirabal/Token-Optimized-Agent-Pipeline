@@ -1,7 +1,7 @@
 # Sprint Log — 032 (`author-tier-trial`)
 
 **Branch**: `ai-sprint/032` from `main` at `0429f03` (`v4.14.0`)
-**Status**: **IN PROGRESS** — Phase 4 complete; awaiting Phase 5 Approval Gate.
+**Status**: **IN PROGRESS** — Phase 5 PASSED; Phase 6 blocked until Cursor applied model is `grok-4.5`.
 **Session**: `20260825T162044Z-31194` · tool `cursor` · `delegation_mode: sequential`
 
 ---
@@ -41,7 +41,14 @@
 
 ## Phase 5 — Approval Gate
 
-- Open. Precondition: plan at canonical path committed (`35f2331`); `audit_plan.py` exit `0` (re-verified).
+- **PASSED** 2026-08-25. Human OK (`ok`) on committed plan `35f2331` (`triple_lock` lock 1).
+- Precondition: `audit_plan.py` on this plan exits `0` (re-verified at gate).
+
+## Phase 6 — Execution hold (Design D2)
+
+- `make cursor-tiers` after Phase 5: **Applied model = `grok-4.6`**, not `grok-4.5`.
+- Abort criterion 1: do not count authoring units as trial evidence until applied is `grok-4.5`.
+- C1–D2 not started.
 
 ## Settled human decisions
 
