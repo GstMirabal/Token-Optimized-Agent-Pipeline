@@ -424,7 +424,7 @@ no profile is named to run the commands or record `M1`–`M7`.
 | P4.4 | `config/model_tiers.json` | modify | medium | `rule_validator` |✅ `8f8ff73` |
 | A3 | `docs/sprints/026-core-pipeline/SPRINT_LOG.md` | modify (Hito 2 gate) | medium — gate, closes Hito 2 | `qa_agent` (verdict) → `orchestrator` (transcribes) | ✅ `3a92130` — blind judge ID'd `cursor_mdc_schema.md`; portability **not** affirmed |
 | A3.1 | `scripts/cursor_adapter.py` (+ delete sprint `cursor_mdc_schema.md`; `tests/test_cursor_adapter.py`) | modify + delete + create | medium — remediates A3 delator | `devops_agent` | ✅ `3464d8a` / `25baebc` |
-| A3.r | `docs/sprints/026-core-pipeline/SPRINT_LOG.md` | modify (A3 re-run) | medium — gate | `qa_agent` (verdict) → `orchestrator` (transcribes) | ✅ pending SHA — judge named NONE Cursor-primary; portability affirmable |
+| A3.r | `docs/sprints/026-core-pipeline/SPRINT_LOG.md` | modify (A3 re-run) | medium — gate | `qa_agent` (verdict) → `orchestrator` (transcribes) | ✅ `94b57d5` — judge named NONE Cursor-primary; portability affirmable |
 
 `agents.md` here (`P7`) is the file's **third** touch this sprint, after
 `P3.2.16` and `P5.2` — see **Isolation**.
