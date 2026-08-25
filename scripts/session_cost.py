@@ -168,16 +168,37 @@ def measure(transcript: Path) -> dict:
     }
 
 
-def measure_previous(project: Path) -> dict | None:
+def measure_previous(
+    project: Path,
+    *,
+    exclude_session: str | None = None,
+    session_tool: str | None = None,
+) -> dict | None:
     """The most recent completed session for a project, for `session_probe.py`.
 
-    Returns None when there is no transcript to read — a first session in a new
-    project is not a finding.
+    Args:
+        project: Repository root (used to locate Claude Code transcripts).
+        exclude_session: Live session UID to skip — otherwise the probe measures
+            the session that is asking (Sprint 023 unrouted finding).
+        session_tool: Harness from the anchor (`claude-code` | `cursor` |
+            `terminal`). Claude Code transcripts live under
+            ``~/.claude/projects/``. When ``session_tool`` is ``cursor``, those
+            files are not this session's spend — return None rather than a
+            foreign Claude measurement.
+
+    Returns:
+        dict | None: Measurement, or None when nothing measurable exists.
     """
+    if session_tool == "cursor":
+        return None
     directory = PROJECTS / project_slug(project)
     if not directory.is_dir():
         return None
     transcripts = sorted(directory.glob("*.jsonl"), key=lambda p: p.stat().st_mtime)
+    if exclude_session:
+        skip = {exclude_session, f"{exclude_session}.jsonl"}
+        transcripts = [path for path in transcripts if path.name not in skip
+                       and path.stem != exclude_session]
     return measure(transcripts[-1]) if transcripts else None
 
 
@@ -221,13 +242,52 @@ def find_transcript(session: str | None, project: Path) -> Path | None:
     return transcripts[-1] if transcripts else None
 
 
+def load_anchor(project: Path) -> dict:
+    """Parse ``docs/active_state.json`` if present; else empty dict."""
+    path = project / "docs" / "active_state.json"
+    if not path.is_file():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {}
+
+
 def main() -> int:
     """Measure a session and report it in tokens, per context cycle."""
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--session", help="session UID; default is the newest")
     parser.add_argument("--project", type=Path, default=Path.cwd())
     parser.add_argument("--json", action="store_true", help="machine-readable output")
+    parser.add_argument(
+        "--from-anchor",
+        action="store_true",
+        help="Measure previous session using active_state.json (excludes live id; "
+             "skips when session_tool is cursor)",
+    )
     args = parser.parse_args()
+
+    if args.from_anchor:
+        state = load_anchor(args.project)
+        result = measure_previous(
+            args.project,
+            exclude_session=state.get("session_id"),
+            session_tool=state.get("session_tool"),
+        )
+        if result is None:
+            payload = {"measurable": False, "reason": "no prior Claude transcript",
+                       "session_tool": state.get("session_tool")}
+            if args.json:
+                print(json.dumps(payload, indent=2))
+            else:
+                print("⚠️  No prior Claude transcript to measure "
+                      f"(session_tool={state.get('session_tool')!r}).")
+            return 0
+        if args.json:
+            print(json.dumps(result, indent=2))
+        else:
+            render(result)
+        return 0
 
     transcript = find_transcript(args.session, args.project)
     if transcript is None:

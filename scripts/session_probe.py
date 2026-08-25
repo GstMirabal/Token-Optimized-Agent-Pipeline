@@ -542,7 +542,11 @@ def probe_cost(state: dict) -> str | None:
     if (note := acknowledged(state, "cost")):
         return None
     try:
-        result = session_cost.measure_previous(Path.cwd())
+        result = session_cost.measure_previous(
+            Path.cwd(),
+            exclude_session=state.get("session_id"),
+            session_tool=state.get("session_tool"),
+        )
     except Exception:
         # A probe that crashes on a malformed transcript would block every start.
         return None

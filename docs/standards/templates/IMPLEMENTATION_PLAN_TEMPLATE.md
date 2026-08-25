@@ -77,6 +77,25 @@ merges without a declared, verifiable invoker, or a typed exception in
 
 ---
 
+## Cost
+
+**Required from Sprint 030 onward** (`rules/token_economy.md` §3). Not retroactive
+to plans sealed before 030. Enforced by
+`skills/token-saver-auditor/scripts/audit_plan.py` (exit `2` if absent).
+
+| Field | Value | Reproduce |
+| :--- | :--- | :--- |
+| Delegation | `{{native\|sequential}}` | `docs/active_state.json` `delegation_mode` |
+| Work units | {{N}} | Count of rows in Work tables |
+| Subagents dispatched | {{N}} | `0` under Cursor `sequential` |
+| Prior session ratio | {{ratio or "n/a (Cursor / no transcript)"}} | `python3 scripts/session_cost.py --from-anchor --json` |
+
+Soft (5×) / hard (15×) thresholds force an update to this section before new
+work continues — they are not observational-only once a measurable Claude
+transcript exists for this tool.
+
+---
+
 ## Tests
 
 **Reproduce before repairing.** A test that passes against the current tree proves

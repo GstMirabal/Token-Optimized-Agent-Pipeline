@@ -32,8 +32,16 @@ Full-dumping a file >200 lines is PROHIBITED (`agents.md §2 token_saver`). Skip
 
 | Threshold | Trigger | Action |
 | :--- | :--- | :--- |
-| **Soft** | turn > **5×** the cycle's first | `session_probe.py` suggests closing at the next commit boundary. **Observational only** while the calibration baseline builds |
-| **Hard** | turn > **15×** the cycle's first | No new work starts. Sprint complete → close it; sprint open → **suspend** (`session_state.py suspend`) and continue in a fresh session |
+| **Soft** | turn > **5×** the cycle's first | Declare remaining cost in the plan's **Cost** section (work units left, delegation mode). `session_probe.py` surfaces the breach at the next start. Calibration may still record-only while the baseline builds |
+| **Hard** | turn > **15×** the cycle's first | No new work starts. Sprint complete → close it; sprint open → **suspend** (`session_state.py suspend`) and continue in a fresh session. Declare Cost before the next claim |
+
+**Portable Cost half (Cursor and Claude).** Every Implementation Plan from Sprint
+030 onward carries a **Cost** section: work-unit count, `delegation_mode`, and —
+when a Claude transcript exists for this tool — the prior cycle ratio from
+`python3 scripts/session_cost.py --from-anchor`. Cursor sessions must not invent
+`cache_read` from Claude jsonl files; the plan Cost section is the half that
+always runs. Structural plan wastes are rejected by
+`skills/token-saver-auditor/scripts/audit_plan.py` (exit `2`).
 
 **Why the cycle and not the session.** A session is a **sawtooth**: compaction rebuilds the window from a summary and `cache_read` collapses back to the start-up cost. Measured over one full session of this repository — four cycles, peaks of 849K, 995K, 361K and 631K against reset points of **22,174 tokens, identical three times** — a ratio taken against the session's first turn would collapse at the first reset and never fire again.
 

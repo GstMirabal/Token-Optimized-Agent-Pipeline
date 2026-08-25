@@ -4,6 +4,20 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Added
+- **Sprint 030 (`token-economy-enforcement`)** — `skills/token-saver-auditor/scripts/audit_plan.py` (Filters 1–4/6 + Cost/Mechanisms); consumption-scoped `rules/token_economy.md` globs (no `**/*`); `scripts/check_task_scope.py` closes `F-026-A2`; `session_cost.measure_previous` excludes live session id and skips Claude transcripts under `session_tool: cursor`; Cost section in Implementation Plan template (from 030); `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` (first author-tier trial declared for 031).
+
+### Changed
+- **`pipeline_workflow.md` / `close_workflow.md` / `Makefile` `verify`** — invoke `audit_plan.py` and `check_task_scope.py` on the current sprint.
+- **`agents.md` §0** — token_economy trigger prose narrowed to plan/cost/tier work.
+
+### Fixed
+- **`F-026-A2`** — Model/Effort absence and undeclared mechanical-high rows fail closed.
+- **`check_readme_counts.py --write`** — CLI now passes `sys.argv[1:]` into `main()`; calling `main()` with no args still ignores pytest's argv (029 regression that made `--write` a no-op).
+
+### Known open
+- **`F-021-A2`**, **`F-093-G1`** remain open (`F-093-G1` → `031` `gate-verdict-classes`).
+
 ## [4.12.0] - 2026-08-25
 
 ### Added

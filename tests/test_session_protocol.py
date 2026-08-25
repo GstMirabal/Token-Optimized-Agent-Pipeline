@@ -1440,3 +1440,56 @@ def test_a_dated_model_id_is_rejected_by_the_pattern():
     assert cmt.DATED_ID.search("claude-opus-4-1-20250805")
     assert not cmt.DATED_ID.search("claude-opus-4-1")
     assert not cmt.DATED_ID.search("claude-haiku-4-5")
+
+
+# --- session_cost: previous session must not be the live one (Sprint 030) ---
+
+def test_measure_previous_excludes_the_live_session(tmp_path, monkeypatch):
+    """probe_cost used to measure the session that was asking."""
+    project = tmp_path / "proj"
+    project.mkdir()
+    claude_dir = tmp_path / "claude_projects" / sc.project_slug(project)
+    claude_dir.mkdir(parents=True)
+    monkeypatch.setattr(sc, "PROJECTS", tmp_path / "claude_projects")
+
+    def _write(uid: str, cache_read: int) -> None:
+        turn = {
+            "message": {
+                "model": "claude-sonnet-4",
+                "usage": {
+                    "input_tokens": 1,
+                    "output_tokens": 1,
+                    "cache_read_input_tokens": cache_read,
+                    "cache_creation_input_tokens": 0,
+                },
+            }
+        }
+        (claude_dir / f"{uid}.jsonl").write_text(json.dumps(turn) + "\n", encoding="utf-8")
+
+    _write("older-session", 50_000)
+    _write("live-session", 200_000)
+    result = sc.measure_previous(project, exclude_session="live-session")
+    assert result is not None
+    assert result["session"] == "older-session"
+
+
+def test_measure_previous_skips_claude_transcripts_under_cursor(tmp_path, monkeypatch):
+    """A Cursor start must not report a foreign Claude Code session as prior spend."""
+    project = tmp_path / "proj"
+    project.mkdir()
+    claude_dir = tmp_path / "claude_projects" / sc.project_slug(project)
+    claude_dir.mkdir(parents=True)
+    monkeypatch.setattr(sc, "PROJECTS", tmp_path / "claude_projects")
+    turn = {
+        "message": {
+            "model": "claude-sonnet-4",
+            "usage": {
+                "input_tokens": 1,
+                "output_tokens": 1,
+                "cache_read_input_tokens": 50_000,
+                "cache_creation_input_tokens": 0,
+            },
+        }
+    }
+    (claude_dir / "any.jsonl").write_text(json.dumps(turn) + "\n", encoding="utf-8")
+    assert sc.measure_previous(project, session_tool="cursor") is None
