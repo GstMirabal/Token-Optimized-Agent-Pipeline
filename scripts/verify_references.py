@@ -157,7 +157,7 @@ def imported_modules() -> set[str]:
 
     A script imported as a module has an invoker even though its filename is
     never written anywhere. Missing this is not theoretical: `merge_json.py`
-    looked orphaned to a filename-only scan while `scripts/install_claude.py`
+    looked orphaned to a filename-only scan while `scripts/install.py`
     depends on it, and deleting it would have broken the bridge installer.
     """
     modules: set[str] = set()
