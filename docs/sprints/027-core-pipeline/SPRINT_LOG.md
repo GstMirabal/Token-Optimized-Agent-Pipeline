@@ -1,7 +1,7 @@
 # Sprint Log — 027 (`autonomy-posture`)
 
 **Branch**: `ai-sprint/027` from `main` at `980f149`
-**Status**: Phase 5 APPROVED 2026-08-25 — Execution (Phase 6) in progress.
+**Status**: Phase 7 Double-Gate PASSED 2026-08-25 — ready for Phase 8 closeout.
 
 ---
 
@@ -57,6 +57,43 @@ Measured at `main` `980f149`, before any Work unit of Sprint `027`:
 | 3 Roadmap | ✅ this file + branch |
 | 4.1–4.3 Assignment / skills / task_scope | ✅ `agent_assignment.md`, `skill_assignment.md`, `task_scope.md` |
 | 5 Approval Gate | ✅ Human OK 2026-08-25 (*"ok"*) over plan lineage `d874d7a`…`8bd62b9` |
-| 6 Execution | 🔄 Ola 0… |
-| 7 Quality Gate | ⏳ |
+| 6 Execution | ✅ Olas 0–3 complete (`task_scope` units ✅ through `D3`) |
+| 7 Quality Gate | ✅ Gate-1 PASS / Gate-2 PASS (see Phase 7 below) |
 | 8 Closeout | ⏳ |
+
+## Phase 6 — Execution summary
+
+| Ola | Outcome |
+| :--- | :--- |
+| 0 | `F-026-A1` / `F-026-A3`: gate profiles + `on_init`/`agents_root` |
+| 1 | Portable scripts + `make role-artifacts` + tests |
+| 2 | `claude/settings.hooks.json` autonomy template; `AUTONOMY_POSTURE_GUIDE.md`; `start_workflow` 1.6 |
+| 3 | Upstream ticks A1/A3; roadmap note; `[Unreleased]` changelog |
+
+## Phase 7 — Double-Gate
+
+### Gate-1 (QA Agent) — PASS
+
+| Check | Result |
+| :--- | :--- |
+| `ruff check` on sprint touchpoints (`hooks/on_init.py`, new scripts) | PASS after style commits `ffd8b71` / `2a7db71` / `97d837e` |
+| `scripts/verify_references.py` | PASS — every mechanism has an invoker |
+| `TODO`/`FIXME` in new scripts / template | Absent |
+| C1 keys (`SubagentStop`, `disableBypassPermissionsMode`, `defaultMode`) | Present |
+| `make role-artifacts ROLE=Orchestrator SPRINT_DIR=docs/sprints/027-core-pipeline` | PASS |
+| `make verify` `find \| xargs py_compile` | Known local `xargs: sysconf(_SC_ARG_MAX) failed` (not a tree defect; same class noted in plan Phase 2 baseline) — py_compile of sprint files OK |
+
+Verdict: **PASS**. Structural standards hold; no Write grant added to gates.
+
+### Gate-2 (Tester Agent) — PASS
+
+| Check | Result |
+| :--- | :--- |
+| `venv_skillopt/bin/python -m pytest tests/ -q` (unsandboxed) | **500 passed**, 0 failed (2026-08-25) |
+| Focused suite after style fixes | 24 passed (`on_init`, persist, role-artifact, session_end, merge) |
+| `tests/test_installer.sh` (via `make verify` pytest block when reachable) | PASSED on the unsandboxed run that executed the test target |
+
+Verdict: **PASS**. No functional regression on the portable scripts or merge abort criterion.
+
+*Orchestrator transcription of gate verdicts into this file — `F-026-A1` / `gate_transcription`.*
+
