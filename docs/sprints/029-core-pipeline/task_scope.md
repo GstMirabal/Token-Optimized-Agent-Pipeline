@@ -152,10 +152,10 @@ Default by profile tier (`config/model_tiers.json` + accepted Cursor column):
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| T1.0 | `tests/test_check_readme_counts.py` | create | medium | `devops_agent` — deviation (tests/) | `composer-2.5` | N/A | ⏳ |
-| T1.1 | `scripts/check_readme_counts.py` | modify | high | `devops_agent` | `grok-4.6` | `high` | ⏳ |
-| T1.2 | `README.md` | modify | medium | `doc_orchestrator` | `grok-4.6` | `high` | ⏳ |
-| T1.3 | `workflows/close_workflow.md` | modify | low | `governance_learner` | `grok-4.6` | `high` | ⏳ |
+| T1.0 | `tests/test_check_readme_counts.py` | create | medium | `devops_agent` — deviation (tests/) | `composer-2.5` | N/A | ✅ `f424c7e` |
+| T1.1 | `scripts/check_readme_counts.py` | modify | high | `devops_agent` | `grok-4.6` | `high` | ✅ `6ab14f9` |
+| T1.2 | `README.md` | modify | medium | `doc_orchestrator` | `grok-4.6` | `high` | ✅ `aa05938` |
+| T1.3 | `workflows/close_workflow.md` | modify | low | `governance_learner` | `grok-4.6` | `high` | ✅ `b16cdde` |
 
 ## Ola 2 — T3 guide + registry
 
