@@ -1,7 +1,7 @@
 # Sprint Log — 029 (`documentation-truth`)
 
 **Branch**: `ai-sprint/029` from `main` at `84201d2`
-**Status**: **SESSION LOCKED** — Sprint 029 sealed 2026-08-25; deployment pending.
+**Status**: **SESSION LOCKED** — Sprint 029 closed and deployed `v4.12.0` (2026-08-25).
 
 ---
 
@@ -114,6 +114,15 @@ Supplementary (already inside `make verify`): `verify_commands` 13 stems, `check
 - `session_state.py release` → `CLOSED_SUCCESSFULLY` + `last_close_commit`.
 - Push `ai-sprint/029`; handoff `/agents:deployment` (auto after `release` only).
 
-**Status**: **SESSION LOCKED** — Sprint 029 sealed; deployment next.
+**Status**: **SESSION LOCKED** — Sprint 029 sealed; deployed `v4.12.0`.
 
 ---
+
+## Deployment seal (2026-08-25)
+
+| Item | Value |
+| :--- | :--- |
+| PR #59 | Squash-merge `2b39027` |
+| Seal PR | Ledger `[4.12.0]` (this commit) |
+| Tag / Release | `v4.12.0` |
+| Deploy preflight | `require-released` exit 0 at close tip `006f613` |
