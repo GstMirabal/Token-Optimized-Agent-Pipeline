@@ -1,7 +1,7 @@
 # Sprint Log — 026 (`tool-portability`)
 
 **Branch**: `ai-sprint/026` from `main` at `b5bfb6a`
-**Status**: open. Hito 1, Migration Gate, and Hito 2 Work through **A3** complete. A3 blind partition **failed** portability affirmation (`cursor_mdc_schema.md`). Closeout must **not** claim indistinguishability until the human chooses follow-up unit or declared limitation.
+**Status**: open. A3.1 remediates the A3 delator (`cursor_mdc_schema.md` absorbed into `scripts/cursor_adapter.py` and removed from the sprint directory). **A3 re-run pending** before closeout may affirm portability.
 
 ---
 
@@ -75,7 +75,7 @@ Measured by `devops_agent` at `main` `b5bfb6a`, before any unit of Sprint `026` 
 
 ## Next Phase
 
-Phases 0–6 Work complete through A3. **Human decision required** before Sprint Closeout claims portability: remediate `cursor_mdc_schema.md` fingerprint, or close declaring portability unproven with that file named (A3 / Abort §3).
+**A3 re-run** after A3.1 (schema absorption). If the blind judge no longer names a Cursor-primary artifact, closeout may affirm portability.
 
 ---
 
@@ -198,7 +198,21 @@ Fresh `qa_agent` context received `/tmp/a3-blind-026/` (full sprint directory co
 
 Strongest blind signal cited: live Cursor `.mdc` key probe (`description` / `globs` / `alwaysApply`) from `.cursor/rules/`.
 
-**Sprint disposition:** Hito 2 Work units through A3 are complete. The sprint **does not close affirming portability**. Options for the human (plan Abort §3): (1) add a follow-up unit that removes or genericizes the fingerprint, or (2) close declaring portability **unproven** / limited, with this file named as the difference.
+**Sprint disposition (superseded by A3.1):** Hito 2 Work units through A3 completed with portability not affirmed. Human chose follow-up remediation (2026-08-25): absorb and remove the delating file, then re-run A3.
+
+---
+
+## A3.1 — Remediación de huella (2026-08-25)
+
+Human decision: pursue complete portability (Abort §3 option: add a unit), not declare limitation.
+
+| Step | Result |
+| :--- | :--- |
+| Absorb measured `.mdc` frontmatter contract into `scripts/cursor_adapter.py` (`MDC_RULE_FRONTMATTER_KEYS` + module docstring; `P4.0b` nucleus entry-point note) | ✅ `3464d8a` |
+| Delete `docs/sprints/026-core-pipeline/cursor_mdc_schema.md` | ✅ same commit |
+| Lock contract with `tests/test_cursor_adapter.py` | ✅ `3464d8a` / path fix `25baebc` |
+
+Historical Phase-4 rows in `agent_assignment.md` / `skill_assignment.md` / `IMPLEMENTATION_PLAN.md` still name the former path — that is audit of what `P4.0` produced, not a live artifact.
 
 ---
 
