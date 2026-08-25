@@ -68,27 +68,27 @@ None. Every Work unit assignee is already `tier: author` (`agent_orchestrator`,
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| A0 | `docs/decisions/ADR-0009-implementer-role.md` | create | high | `doc_orchestrator` | `grok-4.5` | `high` | ⏳ |
+| A0 | `docs/decisions/ADR-0009-implementer-role.md` | create | high | `doc_orchestrator` | `grok-4.5` | `high` | ✅ `3c47367` |
 
 ## Ola 1 — Role map
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| A1 | `agents/implementer_agent.md` | create | high | `agent_orchestrator` | `grok-4.5` | `high` | ⏳ |
-| A2 | `agents/devops_agent.md` | modify | high | `agent_orchestrator` | `grok-4.5` | `high` | ⏳ |
-| A3 | `agents.md` | modify | high | `agent_orchestrator` | `grok-4.5` | `high` | ⏳ |
-| A4 | `agents/agent_orchestrator.md` | modify | medium | `agent_orchestrator` | `grok-4.5` | `high` | ⏳ |
+| A1 | `agents/implementer_agent.md` | create | high | `agent_orchestrator` | `grok-4.5` | `high` | ✅ `bdc5b89` |
+| A2 | `agents/devops_agent.md` | modify | high | `agent_orchestrator` | `grok-4.5` | `high` | ✅ `a5b7eec` |
+| A3 | `agents.md` | modify | high | `agent_orchestrator` | `grok-4.5` | `high` | ✅ `546b5fa` |
+| A4 | `agents/agent_orchestrator.md` | modify | medium | `agent_orchestrator` | `grok-4.5` | `high` | ✅ `681d27b` |
 
 ## Ola 2 — Pin (after A1)
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| T1 | `tests/test_implementer_role.py` | create | medium | `implementer_agent` | `grok-4.5` | `high` | ⏳ |
+| T1 | `tests/test_implementer_role.py` | create | medium | `implementer_agent` | `grok-4.5` | `high` | ✅ `b53e629` |
 
 ## Ola 3 — Documentary (not closeout ledger)
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| R1 | `README.md` | modify | low | `doc_orchestrator` | `grok-4.5` | `high` | ⏳ |
-| F1 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | medium | `doc_orchestrator` | `grok-4.5` | `high` | ⏳ |
-| Q1 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `doc_orchestrator` | `grok-4.5` | `high` | ⏳ |
+| R1 | `README.md` | modify | low | `doc_orchestrator` | `grok-4.5` | `high` | ✅ `130431b` |
+| F1 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | medium | `doc_orchestrator` | `grok-4.5` | `high` | ✅ `fd5c7f8` |
+| Q1 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `doc_orchestrator` | `grok-4.5` | `high` | ✅ `ed876fa` |

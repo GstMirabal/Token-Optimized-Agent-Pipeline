@@ -47,7 +47,13 @@
 
 ## Phase 6 — Execution
 
-- Hold lifted 2026-08-25. Units land on `ai-sprint/033` in plan order A0→Q1.
+- Hold lifted 2026-08-25. Units landed on `ai-sprint/033`:
+  A0 `3c47367`, A1 `bdc5b89` (+ map companion `bc80c83`), A2 `a5b7eec`,
+  A3 `546b5fa`, A4 `681d27b`, T1 `b53e629`, R1 `130431b`, F1 `fd5c7f8`,
+  Q1 `ed876fa`.
+- Companion (not in original Work table): `config/model_tiers.json` lists
+  `implementer_agent` under `author` so `check_model_tiers.py` exits `0`.
+- Ready for Phase 7 Double-Gate.
 
 ## Gate log
 
