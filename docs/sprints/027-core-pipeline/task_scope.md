@@ -161,17 +161,17 @@ row for that intent (`A1`–`A1.2`, `C2`–`C3`, `D1`–`D2` → `grok-4.6`/`hig
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| C1 | `claude/settings.hooks.json` | modify | high | `devops_agent` — escalated (mechanical → author; Cursor `grok-4.6`, effort `high`; see Declared escalations) | ⏳ |
-| C2 | `docs/guides/AUTONOMY_POSTURE_GUIDE.md` | create | low | `doc_orchestrator`; Cursor `grok-4.6`, effort `high` | ⏳ |
-| C3 | `workflows/start_workflow.md` | modify | medium | `doc_orchestrator`; Cursor `grok-4.6`, effort `high` | ⏳ |
+| C1 | `claude/settings.hooks.json` | modify | high | `devops_agent` — escalated (mechanical → author; Cursor `grok-4.6`, effort `high`; see Declared escalations) | ✅ `eded4ef` |
+| C2 | `docs/guides/AUTONOMY_POSTURE_GUIDE.md` | create | low | `doc_orchestrator`; Cursor `grok-4.6`, effort `high` | ✅ `eeb895f` |
+| C3 | `workflows/start_workflow.md` | modify | medium | `doc_orchestrator`; Cursor `grok-4.6`, effort `high` | ✅ `3233536` |
 
 ## Ola 3 — Cierre
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| D1 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | low | `governance_learner`; Cursor `grok-4.6`, effort `high` | ⏳ |
-| D2 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `orchestrator`; Cursor `grok-4.6`, effort `high` | ⏳ |
-| D3 | `CHANGELOG.md` | modify | low | `principal_agent`; Cursor gate config `null` (log model from disk) | ⏳ |
+| D1 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | low | `governance_learner`; Cursor `grok-4.6`, effort `high` | ✅ `73f3658` |
+| D2 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `orchestrator`; Cursor `grok-4.6`, effort `high` | ✅ `639e80e` |
+| D3 | `CHANGELOG.md` | modify | low | `principal_agent`; Cursor gate config `null` (log model from disk) | ✅ `9170dc5` |
 
 ## Phase 7 — Quality Gate (transcription)
 
