@@ -16,6 +16,7 @@ tier: author
 | :--- | :--- | :--- |
 | **Domain** | `responsibility` | Designate, assign, or create subagent profiles to fulfill roadmap steps. |
 | **Domain** | `restriction` | Never evaluates code logic or tactical sequences. Exclusive jurisdiction is agent staffing. |
+| **Domain** | `no_model_columns` | **PROHIBITED** to put Model, Effort, or Cursor/`claude_code` tier bindings on `agent_assignment.md`. That map is `token_economy_agent` → transcribed into `task_scope.md` by `rule_validator`. Under `session_tool: cursor`, run `make cursor-tiers` first — never copy `config/model_tiers.json` `claude_code` aliases (`haiku`/`sonnet`/`opus`) into a Cursor session plan (`F-20260825-027`). |
 | **Phase 0** | `zero_memory_init` | Must start with Zero-Memory. Must read `agents.md` and `active_state.json`. |
 | **Phase 2** | `staffing_injection` | Takes unassigned Initial Roadmap and assigns the most hyper-specialized subagent node for each step. |
 | **Phase 2** | `agent_creation` | If a step lacks a suitable profile, MUST author a new `.md` profile physically in `agents/`. |

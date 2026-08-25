@@ -52,20 +52,21 @@ as filled cells in `model_tiers.json`.
 
 ---
 
-## Cursor tier map — proposals (PENDING HUMAN ACCEPTANCE)
+## Cursor tier map — **ACCEPTED** (human 2026-08-25)
 
-Until the human accepts rows below, **do not** treat `haiku`/`sonnet`/`opus` as
-Cursor session models. Select the accepted Cursor `modelId` in the UI before
-each unit; record the applied id from disk in `SPRINT_LOG.md` (026 pattern).
+Bindings written into `config/model_tiers.json` `cursor` column the same day.
+Select the `modelId` in the Cursor UI before each unit; re-read applied config
+from `state.vscdb` into `SPRINT_LOG.md` when gating (026 pattern).
 
-| Intent (phase) | Claude Code default (reference only) | Cursor proposal (`make cursor-tiers`) | Effort / depth |
+| Intent (phase) | Claude Code default (reference only) | Cursor (accepted) | Effort / depth |
 | :--- | :--- | :--- | :--- |
-| `mechanical` | `haiku` / `low` | **`composer-2.5`** (first mechanical proposal; no depth lever) | **N/A** — no `effort`/`thinking`/`reasoning` parameter |
-| `author` | `sonnet` / `medium` | **`grok-4.6`** (sole author cold-start proposal; currently applied) | Has `effort` lever — applied now: **`high`** (re-measure at unit start) |
-| `gate` | `opus` / `high` | **`(none)`** — stays null until proven history | Under sequential Cursor, 026 used **Composer** for gates and logged it; config cell remains null |
+| `mechanical` | `haiku` / `low` | **`composer-2.5`** | **N/A** — no depth lever |
+| `author` | `sonnet` / `medium` | **`grok-4.6`** | **`high`** |
+| `gate` | `opus` / `high` | **`null` in config** (Design §D7) | Operational: may log Composer as 026; do not invent a config cell |
 
-**Human decision required before Phase 6:** accept / replace the three Cursor
-proposals (especially whether gate stays Composer-as-logged vs remains unset).
+Anti-regression: `memory_index.json` `F-20260825-027`; durable rows on
+`agent_orchestrator` (`no_model_columns`), `rule_validator` (`tier_transcription`),
+`token_economy_agent` (`tier_escalation` Cursor clause).
 
 ---
 
@@ -111,28 +112,26 @@ Affected: `A3.1`, `P1.1`, `P2.1`, `P3.1`.
 
 ## Declared escalations — `token_economy_agent` audit (Cursor), transcribed by `rule_validator`
 
-**Assignee unchanged.** Escalation is **intent tier** (mechanical → author), then
-bound to a **Cursor model** from § Cursor tier map once the human accepts it.
+**Assignee unchanged.** Escalation is **intent tier** (mechanical → author), bound
+to accepted Cursor models from § Cursor tier map.
 
-Defaults for `devops_agent` intent: `mechanical`. Cursor binding pending
-acceptance: mechanical → `composer-2.5` (no effort lever).
+Defaults for `devops_agent`: intent `mechanical` → Cursor **`composer-2.5`** (effort N/A).
 
-| # | File | From (intent) | To (intent) | Cursor model (if proposals accepted) | Why |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| A3 | `hooks/on_init.py` | mechanical | **author** | `grok-4.6` + effort lever | `F-026-A3` path/false-green class |
-| P1 | `scripts/persist_session_context.py` | mechanical | **author** | `grok-4.6` + effort lever | New session-memory protocol |
-| P2 | `scripts/check_role_artifact.py` | mechanical | **author** | `grok-4.6` + effort lever | Drift gate vs registry |
-| P3 | `scripts/session_end_hook.py` | mechanical | **author** | `grok-4.6` + effort lever | `suspend`≠`release` |
-| C1 | `claude/settings.hooks.json` | mechanical | **author** | `grok-4.6` + effort lever | `hard_deny`/sandbox; Abort on deny loss |
+| # | File | From (intent) | To (intent) | Cursor model | Effort | Why |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| A3 | `hooks/on_init.py` | mechanical | **author** | `grok-4.6` | `high` | `F-026-A3` path/false-green class |
+| P1 | `scripts/persist_session_context.py` | mechanical | **author** | `grok-4.6` | `high` | New session-memory protocol |
+| P2 | `scripts/check_role_artifact.py` | mechanical | **author** | `grok-4.6` | `high` | Drift gate vs registry |
+| P3 | `scripts/session_end_hook.py` | mechanical | **author** | `grok-4.6` | `high` | `suspend`≠`release` |
+| C1 | `claude/settings.hooks.json` | mechanical | **author** | `grok-4.6` | `high` | `hard_deny`/sandbox; Abort on deny loss |
 
-**Not escalated (stay mechanical → `composer-2.5` if accepted):** `P2.2`, all
-`tests/` deviation rows, prose on profiles that are already `author`/`gate`
-intent (`A1`–`A1.2`, `C2`–`C3`, `D1`–`D3`, gates).
+**Not escalated (stay mechanical → `composer-2.5`):** `P2.2`, all `tests/`
+deviation rows. Profiles already on author/gate intent use the accepted Cursor
+row for that intent (`A1`–`A1.2`, `C2`–`C3`, `D1`–`D2` → `grok-4.6`/`high`;
+`D3` + gate emit → config `gate` null, log Composer if used).
 
-**Work-table annotation** (after human accepts Cursor map):  
-`devops_agent — escalated (mechanical → author; Cursor <modelId>[; effort <v>]; see Declared escalations)`.
-
-Until acceptance, Assignee cells name **profile only** (no fake Claude model).
+**Work-table annotation:**  
+`devops_agent — escalated (mechanical → author; Cursor grok-4.6, effort high; see Declared escalations)`.
 
 ---
 
@@ -140,48 +139,48 @@ Until acceptance, Assignee cells name **profile only** (no fake Claude model).
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| A1 | `agents/tester_agent.md` | modify | medium | `agent_orchestrator` | ⏳ |
-| A1.1 | `agents/qa_agent.md` | modify | low | `agent_orchestrator` | ⏳ |
-| A1.2 | `agents/orchestrator.md` | modify | low | `agent_orchestrator` | ⏳ |
-| A3 | `hooks/on_init.py` | modify | high | `devops_agent` — escalated (intent author; Cursor model PENDING ACCEPTANCE) | ⏳ |
-| A3.1 | `tests/test_on_init.py` | create | medium | `devops_agent` — deviation (tests/) | ⏳ |
+| A1 | `agents/tester_agent.md` | modify | medium | `agent_orchestrator`; Cursor `grok-4.6`, effort `high` | ⏳ |
+| A1.1 | `agents/qa_agent.md` | modify | low | `agent_orchestrator`; Cursor `grok-4.6`, effort `high` | ⏳ |
+| A1.2 | `agents/orchestrator.md` | modify | low | `agent_orchestrator`; Cursor `grok-4.6`, effort `high` | ⏳ |
+| A3 | `hooks/on_init.py` | modify | high | `devops_agent` — escalated (mechanical → author; Cursor `grok-4.6`, effort `high`; see Declared escalations) | ⏳ |
+| A3.1 | `tests/test_on_init.py` | create | medium | `devops_agent` — deviation (tests/); Cursor `composer-2.5` | ⏳ |
 
 ## Ola 1 — Portable
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| P1 | `scripts/persist_session_context.py` | create | medium | `devops_agent` — escalated (intent author; Cursor model PENDING ACCEPTANCE) | ⏳ |
-| P1.1 | `tests/test_persist_session_context.py` | create | medium | `devops_agent` — deviation (tests/) | ⏳ |
-| P2 | `scripts/check_role_artifact.py` | create | medium | `devops_agent` — escalated (intent author; Cursor model PENDING ACCEPTANCE) | ⏳ |
-| P2.1 | `tests/test_check_role_artifact.py` | create | medium | `devops_agent` — deviation (tests/) | ⏳ |
-| P2.2 | `Makefile` | modify | medium | `devops_agent` | ⏳ |
-| P3 | `scripts/session_end_hook.py` | create | medium | `devops_agent` — escalated (intent author; Cursor model PENDING ACCEPTANCE) | ⏳ |
-| P3.1 | `tests/test_session_end_hook.py` | create | low | `devops_agent` — deviation (tests/) | ⏳ |
+| P1 | `scripts/persist_session_context.py` | create | medium | `devops_agent` — escalated (mechanical → author; Cursor `grok-4.6`, effort `high`; see Declared escalations) | ⏳ |
+| P1.1 | `tests/test_persist_session_context.py` | create | medium | `devops_agent` — deviation (tests/); Cursor `composer-2.5` | ⏳ |
+| P2 | `scripts/check_role_artifact.py` | create | medium | `devops_agent` — escalated (mechanical → author; Cursor `grok-4.6`, effort `high`; see Declared escalations) | ⏳ |
+| P2.1 | `tests/test_check_role_artifact.py` | create | medium | `devops_agent` — deviation (tests/); Cursor `composer-2.5` | ⏳ |
+| P2.2 | `Makefile` | modify | medium | `devops_agent`; Cursor `composer-2.5` | ⏳ |
+| P3 | `scripts/session_end_hook.py` | create | medium | `devops_agent` — escalated (mechanical → author; Cursor `grok-4.6`, effort `high`; see Declared escalations) | ⏳ |
+| P3.1 | `tests/test_session_end_hook.py` | create | low | `devops_agent` — deviation (tests/); Cursor `composer-2.5` | ⏳ |
 
 ## Ola 2 — Template Claude Code
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| C1 | `claude/settings.hooks.json` | modify | high | `devops_agent` — escalated (intent author; Cursor model PENDING ACCEPTANCE) | ⏳ |
-| C2 | `docs/guides/AUTONOMY_POSTURE_GUIDE.md` | create | low | `doc_orchestrator` | ⏳ |
-| C3 | `workflows/start_workflow.md` | modify | medium | `doc_orchestrator` | ⏳ |
+| C1 | `claude/settings.hooks.json` | modify | high | `devops_agent` — escalated (mechanical → author; Cursor `grok-4.6`, effort `high`; see Declared escalations) | ⏳ |
+| C2 | `docs/guides/AUTONOMY_POSTURE_GUIDE.md` | create | low | `doc_orchestrator`; Cursor `grok-4.6`, effort `high` | ⏳ |
+| C3 | `workflows/start_workflow.md` | modify | medium | `doc_orchestrator`; Cursor `grok-4.6`, effort `high` | ⏳ |
 
 ## Ola 3 — Cierre
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| D1 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | low | `governance_learner` | ⏳ |
-| D2 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `orchestrator` | ⏳ |
-| D3 | `CHANGELOG.md` | modify | low | `principal_agent` | ⏳ |
+| D1 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | low | `governance_learner`; Cursor `grok-4.6`, effort `high` | ⏳ |
+| D2 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `orchestrator`; Cursor `grok-4.6`, effort `high` | ⏳ |
+| D3 | `CHANGELOG.md` | modify | low | `principal_agent`; Cursor gate config `null` (log model from disk) | ⏳ |
 
 ## Phase 7 — Quality Gate (transcription)
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| G1.q | `docs/sprints/027-core-pipeline/SPRINT_LOG.md` | emit verdict | medium | `qa_agent` | ⏳ |
-| G1.q | `docs/sprints/027-core-pipeline/SPRINT_LOG.md` | transcribe | medium | `orchestrator` | ⏳ |
-| G1.t | `docs/sprints/027-core-pipeline/SPRINT_LOG.md` | emit verdict | medium | `tester_agent` | ⏳ |
-| G1.t | `docs/sprints/027-core-pipeline/SPRINT_LOG.md` | transcribe | medium | `orchestrator` | ⏳ |
+| G1.q | `docs/sprints/027-core-pipeline/SPRINT_LOG.md` | emit verdict | medium | `qa_agent`; Cursor gate config `null` (log model from disk) | ⏳ |
+| G1.q | `docs/sprints/027-core-pipeline/SPRINT_LOG.md` | transcribe | medium | `orchestrator`; Cursor `grok-4.6`, effort `high` | ⏳ |
+| G1.t | `docs/sprints/027-core-pipeline/SPRINT_LOG.md` | emit verdict | medium | `tester_agent`; Cursor gate config `null` (log model from disk) | ⏳ |
+| G1.t | `docs/sprints/027-core-pipeline/SPRINT_LOG.md` | transcribe | medium | `orchestrator`; Cursor `grok-4.6`, effort `high` | ⏳ |
 
 ---
 
@@ -189,8 +188,7 @@ Until acceptance, Assignee cells name **profile only** (no fake Claude model).
 
 - `A3` before `A3.1`. Ola 1 scripts before tests; `P2` before `P2.2`.
 - Ola 2 `C1` after Ola 1. Ola 3 after `make verify` green.
-- **Before Phase 6:** human accepts or replaces § Cursor tier map; then patch
-  Assignee annotations with concrete `modelId` (+ effort when the model has a lever).
+- Cursor bindings accepted 2026-08-25 (`composer-2.5` / `grok-4.6`+`high` / gate null).
 
 ## RA-16
 
