@@ -2,7 +2,7 @@
 
 **Canonical path**: `docs/sprints/033-core-pipeline/IMPLEMENTATION_PLAN.md`
 **Branch**: `ai-sprint/033` · **Base**: `main` at `8b3fb6d` (`v4.15.0`)
-**Status**: `EXECUTING`
+**Status**: `CLOSED`
 
 > Authored at Phase 1 (Planning) by `principal_agent`, extracted to this path at
 > Phase 3, and **committed before Phase 5 approves it**: `agents.md §2 triple_lock`
