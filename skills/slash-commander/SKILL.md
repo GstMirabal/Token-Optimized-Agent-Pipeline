@@ -9,7 +9,7 @@ description: Bridges .agents workflows to real Claude Code slash commands and au
 Real Claude Code discovers slash commands by scanning `.claude/commands/**/*.md` in the host project root — there is no runtime generation step. The bridge is:
 
 1. **Source of truth**: each `workflows/<name>_workflow.md` has a matching, hand-authored `commands/<name>.md` in this submodule (frontmatter `description` + a body that `@`-references the workflow file).
-2. **Installation**: `.agents/scripts/install_claude.sh` symlinks `commands/<name>.md` into the host's `.claude/commands/agents/<name>.md`, which Claude Code then exposes as `/agents:<name>`.
+2. **Installation**: `.agents/scripts/install.sh` symlinks `commands/<name>.md` into the host's `.claude/commands/agents/<name>.md`, which Claude Code then exposes as `/agents:<name>`.
 3. **Drift check**: `scripts/verify_commands.py` (this skill) scans `commands/*.md` for `@.agents/workflows/...` references and fails if any points at a workflow file that doesn't exist. Run it after adding/renaming a workflow, or as part of `audit_workflow.md`'s `link_audit` step.
 
 ## 2. Command Mapping
@@ -27,7 +27,7 @@ Real Claude Code discovers slash commands by scanning `.claude/commands/**/*.md`
 
 ## 4. Error Handling
 - **Broken reference**: `verify_commands.py` exits non-zero and lists every command pointing at a missing workflow.
-- **Bridge not installed / desynced**: `hooks/on_init.py` triggers `install_claude.sh` automatically at session start whenever `.agents/.claude_bridge.lock` is missing, its recorded commit is stale, **or** the linked `.claude/` artifacts are missing despite a matching lock (`bridge_intact` sentinel check — catches a `git clean -fd`/manual deletion of the host's untracked bridge, which the lock alone can't detect).
+- **Bridge not installed / desynced**: `hooks/on_init.py` triggers `install.sh` automatically at session start whenever `.agents/.bridge_claude.lock` is missing, its recorded commit is stale, **or** the linked `.claude/` artifacts are missing despite a matching lock (`bridge_intact` sentinel check — catches a `git clean -fd`/manual deletion of the host's untracked bridge, which the lock alone can't detect).
 
 ---
 *Optimized for the Token-Optimized Agent Pipeline, Rule 113.*
