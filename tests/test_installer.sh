@@ -57,7 +57,8 @@ grep -q "domain_example_standard" CLAUDE.md || fail "profile rule import missing
 grep -qxF "node_modules/" .gitignore || fail ".gitignore: pre-existing host entry was lost"
 grep -qxF "*.pyc" .gitignore || fail ".gitignore: pre-existing host entry was lost"
 for entry in "/CLAUDE.md" "/.claude/agents/" "/.claude/commands/" "/.claude/skills/" \
-             "/.claude/settings.local.json" "/graphify-out/"; do
+             "/.claude/settings.local.json" "/.cursor/commands/" "/.cursor/rules/" \
+             "/.cursor/mcp.json" "/graphify-out/"; do
   grep -qxF "$entry" .gitignore || fail ".gitignore: missing bridge entry '$entry'"
 done
 grep -qxF "/.claude/settings.json" .gitignore \

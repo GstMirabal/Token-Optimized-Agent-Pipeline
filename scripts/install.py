@@ -107,6 +107,9 @@ GITIGNORE_ENTRIES = [
     "/.claude/commands/",
     "/.claude/skills/",
     "/.claude/settings.local.json",
+    "/.cursor/commands/",
+    "/.cursor/rules/",
+    "/.cursor/mcp.json",
     "/graphify-out/",
 ]
 
@@ -125,7 +128,10 @@ def ensure_gitignore_entries() -> None:
     with gitignore.open("a") as f:
         if existing_lines and existing_lines[-1] != "":
             f.write("\n")
-        f.write("\n# .agents Claude Code bridge + graphify output (regenerated locally, never commit)\n")
+        f.write(
+            "\n# .agents Claude/Cursor bridge + graphify output "
+            "(regenerated locally, never commit)\n"
+        )
         for entry in missing:
             f.write(entry + "\n")
     print(f"✅ Added {len(missing)} missing .gitignore entr{'y' if len(missing) == 1 else 'ies'} "
@@ -457,6 +463,7 @@ def main() -> int:
 
     if args.target in ("cursor", "both"):
         install_cursor_bridge(HOST_DIR, nucleus=False)
+        ensure_gitignore_entries()
         if args.target == "cursor":
             install_host_git_hooks()
 
