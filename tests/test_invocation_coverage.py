@@ -13,8 +13,8 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
-import check_readme_counts as crc  # noqa: E402
-import verify_references as vr  # noqa: E402
+import check_readme_counts as crc
+import verify_references as vr
 
 
 @pytest.fixture
