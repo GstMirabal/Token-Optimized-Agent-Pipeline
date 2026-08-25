@@ -422,7 +422,7 @@ no profile is named to run the commands or record `M1`–`M7`.
 | P4.2 | `scripts/audit_cursor_models.py` | create | **high** | `devops_agent` — escalated (mechanical/haiku → author/sonnet; see Declared escalations) |✅ `27ce35f` |
 | P4.3 | `Makefile` | modify | low | `devops_agent` |✅ `62db6b0` |
 | P4.4 | `config/model_tiers.json` | modify | medium | `rule_validator` |✅ `8f8ff73` |
-| A3 | `docs/sprints/026-core-pipeline/SPRINT_LOG.md` | modify (Hito 2 gate) | medium — gate, closes Hito 2 | `qa_agent` (verdict) → `orchestrator` (transcribes) | ⏳ |
+| A3 | `docs/sprints/026-core-pipeline/SPRINT_LOG.md` | modify (Hito 2 gate) | medium — gate, closes Hito 2 | `qa_agent` (verdict) → `orchestrator` (transcribes) | ✅ pending SHA — blind judge ID'd `cursor_mdc_schema.md`; portability **not** affirmed |
 
 `agents.md` here (`P7`) is the file's **third** touch this sprint, after
 `P3.2.16` and `P5.2` — see **Isolation**.
@@ -548,7 +548,7 @@ is first-party and editable — `P3.2.27`, `P3.2.28` — while
 
 As of 2026-08-25 (post–Hito 2 deferred batch): Hito 1 + deferred census
 (`P3.2.*`, `P3.3`), `A4*`, `P9.2`, `P4.1`, and named Hito 2 units through
-`P4.4` are `✅`. Remaining: **`A3`** (final indistinguishability gate).
+`P4.4` and **`A3`** are `✅`. A3's blind partition **correctly named** `cursor_mdc_schema.md` as Cursor-produced — portability is **not** claimed at close; human chooses follow-up unit vs declared limitation.
 
 Phase 5 approval: `1da9641`. Migration Gate: PASS. P3.2 done-criterion:
 exactly one `install_claude` line outside excluded paths — the shim.

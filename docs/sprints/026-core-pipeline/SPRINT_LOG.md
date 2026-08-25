@@ -1,7 +1,7 @@
 # Sprint Log — 026 (`tool-portability`)
 
 **Branch**: `ai-sprint/026` from `main` at `b5bfb6a`
-**Status**: open. Phases 0–3 complete. No unit of `Work` has started — `agents.md §2 triple_lock` blocks execution until Phase 5 records a human approval.
+**Status**: open. Hito 1, Migration Gate, and Hito 2 Work through **A3** complete. A3 blind partition **failed** portability affirmation (`cursor_mdc_schema.md`). Closeout must **not** claim indistinguishability until the human chooses follow-up unit or declared limitation.
 
 ---
 
@@ -75,7 +75,7 @@ Measured by `devops_agent` at `main` `b5bfb6a`, before any unit of Sprint `026` 
 
 ## Next Phase
 
-Phases 4 and 5 are complete. Phase 5's human approval was recorded on 2026-08-24 over the plan text at commit `1da9641`. Phase 6 (Execution) is in progress on Hito 1.
+Phases 0–6 Work complete through A3. **Human decision required** before Sprint Closeout claims portability: remediate `cursor_mdc_schema.md` fingerprint, or close declaring portability unproven with that file named (A3 / Abort §3).
 
 ---
 
@@ -155,6 +155,50 @@ Executed 2026-08-25 under Cursor. Sequence: `suspend` → `install.py --target c
 ### M5 verbatim answer (gate observation)
 
 > **1**
+
+---
+
+---
+
+## A3 — Hito 2 gate (2026-08-25)
+
+Executed under Cursor with `delegation_mode: sequential`. Orchestrator transcribed the `qa_agent` verdict per `Design §D9`.
+
+### Phase 2.6 — required sprint artifacts
+
+| Artifact | Present |
+| :--- | :--- |
+| `IMPLEMENTATION_PLAN.md` | yes |
+| `SPRINT_LOG.md` | yes |
+| `agent_assignment.md` | yes |
+| `skill_assignment.md` | yes |
+| `task_scope.md` | yes |
+| QA verdict (G1.q) | APPROVED (recorded above) |
+| Tester verdict (G1.t) | APPROVED (recorded above) |
+
+`python3 scripts/docs_freshness_check.py . 026` completed with advisory WARN only (prior sprints 024/025 missing `graph_stats.json` inside the populated range; `code_containers` undeclared). Sprint `026` snapshot written: `graph_stats.json` → **5216 nodes, 5947 edges, 567 communities**.
+
+### Blind partition — portability verdict
+
+Fresh `qa_agent` context received `/tmp/a3-blind-026/` (full sprint directory copy with the Hito 2 gate table's **Tool** column removed; Model column retained). Asked to bucket each of seven artifacts as Claude Code / Cursor / Mixed|cannot tell.
+
+| Artifact | Blind bucket | Ground-truth producer (orchestrator) |
+| :--- | :--- | :--- |
+| `IMPLEMENTATION_PLAN.md` | Claude Code | Claude Code (Phase 1) |
+| `agent_assignment.md` | Claude Code | Claude Code (Phase 4.1) |
+| `skill_assignment.md` | Claude Code | Claude Code (Phase 4.2) |
+| `SPRINT_LOG.md` | Mixed\|cannot tell | Mixed (correct) |
+| `task_scope.md` | Mixed\|cannot tell | Mixed (correct) |
+| `graph_stats.json` | Mixed\|cannot tell | Cursor (A3) — unlabeled; judge did not ID |
+| `cursor_mdc_schema.md` | **Cursor** | **Cursor (P4.0)** |
+
+**Result: the judge correctly identified a Cursor-produced artifact.** Per `IMPLEMENTATION_PLAN.md` A3 / Abort criterion §3: **portability has not been achieved** for closeout claims. The delating file is named:
+
+- **`docs/sprints/026-core-pipeline/cursor_mdc_schema.md`**
+
+Strongest blind signal cited: live Cursor `.mdc` key probe (`description` / `globs` / `alwaysApply`) from `.cursor/rules/`.
+
+**Sprint disposition:** Hito 2 Work units through A3 are complete. The sprint **does not close affirming portability**. Options for the human (plan Abort §3): (1) add a follow-up unit that removes or genericizes the fingerprint, or (2) close declaring portability **unproven** / limited, with this file named as the difference.
 
 ---
 
