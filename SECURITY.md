@@ -14,6 +14,6 @@ Only the latest tagged release receives security fixes. There is no backport pol
 
 ## Scope
 
-In scope: `hooks/`, `scripts/install_claude.sh`/`install_claude.py`, the CI workflow, and anything in the core framework that could let untrusted input execute code or exfiltrate secrets from a host project.
+In scope: `hooks/`, `scripts/install.sh`/`install.py`, the CI workflow, and anything in the core framework that could let untrusted input execute code or exfiltrate secrets from a host project.
 
 Out of scope: vulnerabilities in vendored third-party skills (`-3rd` suffix) — report those upstream to their original source instead. See `NOTICE.md` and `docs/audits/THIRD_PARTY_PROVENANCE_TODO.md` for what's vendored versus native.
