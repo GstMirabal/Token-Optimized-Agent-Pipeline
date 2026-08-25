@@ -5,16 +5,55 @@
 **Phase**: 4.3 (Rule Audit) — after `agent_assignment.md` (4.1) and
 `skill_assignment.md` (4.2).
 
-**Table shape.** `# | File | Operation | Risk | Assignee | Status`
+**Agent assignment (Phase 4.1) lives in**
+[`agent_assignment.md`](./agent_assignment.md). This file **repeats the assignee
+per unit** in the `Assignee` column (required shape below) and keeps a full
+index in § Agent assignment map so the ruleset is visible without leaving the
+scope artifact.
+
+**Table shape (Work units).** `# | File | Operation | Risk | Assignee | Status`
 
 **Status legend.** `⏳` pending Phase 5; `✅ <sha>` after execution.
+
+**Mode (all units).** Cursor `delegation_mode: sequential` — assignee = ruleset
+the single session adopts for that write; no subagent dispatch.
+
+---
+
+## Agent assignment map
+
+Canonical copy of Phase 4.1. If this table and `agent_assignment.md` disagree,
+**`agent_assignment.md` wins** and this file must be patched in the same commit.
+
+| # | File | Assignee | Ruleset file | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| A1 | `agents/tester_agent.md` | `agent_orchestrator` | `agents/agent_orchestrator.md` | Align prose to read-only grant (`F-026-A1`) |
+| A1.1 | `agents/qa_agent.md` | `agent_orchestrator` | `agents/agent_orchestrator.md` | Verdict routing row |
+| A1.2 | `agents/orchestrator.md` | `agent_orchestrator` | `agents/agent_orchestrator.md` | Phase 7 transcription ownership |
+| A3 | `hooks/on_init.py` | `devops_agent` | `agents/devops_agent.md` | `F-086-A1` / hooks tree |
+| A3.1 | `tests/test_on_init.py` | `devops_agent` | `agents/devops_agent.md` | **Deviation:** tests/; `tester_agent` has no Write/Edit |
+| P1 | `scripts/persist_session_context.py` | `devops_agent` | `agents/devops_agent.md` | `F-086-A1` / scripts tree |
+| P1.1 | `tests/test_persist_session_context.py` | `devops_agent` | `agents/devops_agent.md` | **Deviation:** tests/ |
+| P2 | `scripts/check_role_artifact.py` | `devops_agent` | `agents/devops_agent.md` | |
+| P2.1 | `tests/test_check_role_artifact.py` | `devops_agent` | `agents/devops_agent.md` | **Deviation:** tests/ |
+| P2.2 | `Makefile` | `devops_agent` | `agents/devops_agent.md` | One physical file at commit time |
+| P3 | `scripts/session_end_hook.py` | `devops_agent` | `agents/devops_agent.md` | |
+| P3.1 | `tests/test_session_end_hook.py` | `devops_agent` | `agents/devops_agent.md` | **Deviation:** tests/ |
+| C1 | `claude/settings.hooks.json` | `devops_agent` | `agents/devops_agent.md` | Template merge; Abort on deny loss |
+| C2 | `docs/guides/AUTONOMY_POSTURE_GUIDE.md` | `doc_orchestrator` | `agents/doc_orchestrator.md` | |
+| C3 | `workflows/start_workflow.md` | `doc_orchestrator` | `agents/doc_orchestrator.md` | Fixed to this path (not pipeline) |
+| D1 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | `governance_learner` | `agents/governance_learner.md` | |
+| D2 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | `orchestrator` | `agents/orchestrator.md` | |
+| D3 | `CHANGELOG.md` | `principal_agent` | `agents/principal_agent.md` | |
+| G1.q | `SPRINT_LOG.md` (verdict lines) | `qa_agent` → `orchestrator` | `agents/qa_agent.md` + `agents/orchestrator.md` | Gate emits; Orchestrator writes |
+| G1.t | `SPRINT_LOG.md` (verdict lines) | `tester_agent` → `orchestrator` | `agents/tester_agent.md` + `agents/orchestrator.md` | Gate emits; Orchestrator writes |
 
 ---
 
 ## Declared deviations
 
 **1. `tests/` writes → `devops_agent`.** Same as Sprint 026: `tester_agent` has no
-`Write`/`Edit`. Ola 0 will align tester prose (`A1`) but will **not** grant Write.
+`Write`/`Edit`. Ola 0 aligns tester prose (`A1`) but will **not** grant Write.
 Affected: `A3.1`, `P1.1`, `P2.1`, `P3.1`.
 
 **2. Gate verdicts → Orchestrator transcription.** Confirmed by
@@ -29,39 +68,48 @@ Affected at Phase 7: `G1.q`, `G1.t`.
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| A1 | `agents/tester_agent.md` | modify | medium | `agent_orchestrator` | ⏳ |
-| A1.1 | `agents/qa_agent.md` | modify | low | `agent_orchestrator` | ⏳ |
-| A1.2 | `agents/orchestrator.md` | modify | low | `agent_orchestrator` | ⏳ |
-| A3 | `hooks/on_init.py` | modify | high | `devops_agent` | ⏳ |
-| A3.1 | `tests/test_on_init.py` | create | medium | `devops_agent` — deviation (tests/) | ⏳ |
+| A1 | `agents/tester_agent.md` | modify | medium | `agent_orchestrator` (`agents/agent_orchestrator.md`) | ⏳ |
+| A1.1 | `agents/qa_agent.md` | modify | low | `agent_orchestrator` (`agents/agent_orchestrator.md`) | ⏳ |
+| A1.2 | `agents/orchestrator.md` | modify | low | `agent_orchestrator` (`agents/agent_orchestrator.md`) | ⏳ |
+| A3 | `hooks/on_init.py` | modify | high | `devops_agent` (`agents/devops_agent.md`) | ⏳ |
+| A3.1 | `tests/test_on_init.py` | create | medium | `devops_agent` — deviation (tests/, `tester_agent` has no Write/Edit) | ⏳ |
 
 ## Ola 1 — Portable
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| P1 | `scripts/persist_session_context.py` | create | medium | `devops_agent` | ⏳ |
+| P1 | `scripts/persist_session_context.py` | create | medium | `devops_agent` (`agents/devops_agent.md`) | ⏳ |
 | P1.1 | `tests/test_persist_session_context.py` | create | medium | `devops_agent` — deviation (tests/) | ⏳ |
-| P2 | `scripts/check_role_artifact.py` | create | medium | `devops_agent` | ⏳ |
+| P2 | `scripts/check_role_artifact.py` | create | medium | `devops_agent` (`agents/devops_agent.md`) | ⏳ |
 | P2.1 | `tests/test_check_role_artifact.py` | create | medium | `devops_agent` — deviation (tests/) | ⏳ |
-| P2.2 | `Makefile` | modify | medium | `devops_agent` | ⏳ |
-| P3 | `scripts/session_end_hook.py` | create | medium | `devops_agent` | ⏳ |
+| P2.2 | `Makefile` | modify | medium | `devops_agent` (`agents/devops_agent.md`) | ⏳ |
+| P3 | `scripts/session_end_hook.py` | create | medium | `devops_agent` (`agents/devops_agent.md`) | ⏳ |
 | P3.1 | `tests/test_session_end_hook.py` | create | low | `devops_agent` — deviation (tests/) | ⏳ |
 
 ## Ola 2 — Template Claude Code
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| C1 | `claude/settings.hooks.json` | modify | high | `devops_agent` | ⏳ |
-| C2 | `docs/guides/AUTONOMY_POSTURE_GUIDE.md` | create | low | `doc_orchestrator` | ⏳ |
-| C3 | `workflows/start_workflow.md` | modify | medium | `doc_orchestrator` | ⏳ |
+| C1 | `claude/settings.hooks.json` | modify | high | `devops_agent` (`agents/devops_agent.md`) | ⏳ |
+| C2 | `docs/guides/AUTONOMY_POSTURE_GUIDE.md` | create | low | `doc_orchestrator` (`agents/doc_orchestrator.md`) | ⏳ |
+| C3 | `workflows/start_workflow.md` | modify | medium | `doc_orchestrator` (`agents/doc_orchestrator.md`) | ⏳ |
 
 ## Ola 3 — Cierre
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| D1 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | low | `governance_learner` | ⏳ |
-| D2 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `orchestrator` | ⏳ |
-| D3 | `CHANGELOG.md` | modify | low | `principal_agent` | ⏳ |
+| D1 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | low | `governance_learner` (`agents/governance_learner.md`) | ⏳ |
+| D2 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `orchestrator` (`agents/orchestrator.md`) | ⏳ |
+| D3 | `CHANGELOG.md` | modify | low | `principal_agent` (`agents/principal_agent.md`) | ⏳ |
+
+## Phase 7 — Quality Gate (transcription)
+
+| # | File | Operation | Risk | Assignee | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| G1.q | `docs/sprints/027-core-pipeline/SPRINT_LOG.md` | modify (verdict lines) | medium | `qa_agent` (verdict) → `orchestrator` (write) | ⏳ |
+| G1.t | `docs/sprints/027-core-pipeline/SPRINT_LOG.md` | modify (verdict lines) | medium | `tester_agent` (verdict) → `orchestrator` (write) | ⏳ |
+
+---
 
 ## Isolation notes
 

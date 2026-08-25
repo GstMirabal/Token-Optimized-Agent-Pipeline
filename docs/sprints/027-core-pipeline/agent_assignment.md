@@ -49,7 +49,7 @@ Gate profiles keep read-only `tools:`. Test-file writes use
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | C1 | `claude/settings.hooks.json` | modify | sequential / ruleset | `devops_agent` | `agents/devops_agent.md` |
 | C2 | `docs/guides/AUTONOMY_POSTURE_GUIDE.md` | create | sequential / ruleset | `doc_orchestrator` | `agents/doc_orchestrator.md` |
-| C3 | `workflows/start_workflow.md` or `pipeline_workflow.md` | modify | sequential / ruleset | `doc_orchestrator` | `agents/doc_orchestrator.md` |
+| C3 | `workflows/start_workflow.md` | modify | sequential / ruleset | `doc_orchestrator` | `agents/doc_orchestrator.md` |
 
 ## Ola 3 — Cierre
 
@@ -70,4 +70,4 @@ Gate profiles keep read-only `tools:`. Test-file writes use
 
 1. **None new beyond `F-026-A1`.** Plan Ola 0 already schedules the prose fix; assignment applies the same `tests/` deviation as Sprint 026 rather than granting gate Write.
 2. **`P2.2` target file** may be `Makefile` or a workflow/verify script — fixed at execution to one physical file before the commit (`jurisdictional_lock`).
-3. **`C3` target** is one of two workflows; execution picks exactly one path per the plan's "o".
+3. **`C3` target** fixed in `task_scope.md` to `workflows/start_workflow.md` (portable Cursor counterpart cell).
