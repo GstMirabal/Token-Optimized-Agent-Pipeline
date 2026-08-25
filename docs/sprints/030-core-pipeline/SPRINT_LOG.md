@@ -97,6 +97,6 @@ In progress (`close_workflow.md`):
 | Program queue | ✅ status → gates PASS / close pending |
 | Heuristic Pulse Gate (Phase 2.5) | ✅ human *"aceptar"* 2026-08-25 |
 | memory wipe | ✅ no-op (`memory/` absent) |
-| release / push / deploy | in progress |
+| release / push / deploy | ✅ sealed `79a2b0d`; pushed `origin/ai-sprint/030`; deploy next |
 
-Heuristic Pulse: no host-class KI. Product lessons already in CHANGELOG / F-026-A2 / trial guide (`nucleus`, committed as product).
+**SESSION LOCKED** 2026-08-25 — tip `79a2b0d`. Handoff: `/agents:deployment`.
