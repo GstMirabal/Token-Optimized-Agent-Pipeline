@@ -23,7 +23,7 @@ PY_EXCLUDES := -not -path "*/.git/*" -not -path "*/node_modules/*" -not -path "*
 VENV_PY := $(AGENTS_DIR)/venv_skillopt/bin/python3
 PY := $(if $(wildcard $(VENV_PY)),$(VENV_PY),python3)
 
-.PHONY: graphify-update graphify-rebuild verify docs-freshness-check
+.PHONY: graphify-update graphify-rebuild verify docs-freshness-check cursor-tiers
 
 # Incremental AST sync after code changes (close_workflow Phase 1, no LLM cost).
 graphify-update:
@@ -89,3 +89,9 @@ verify:
 SPRINT_ID ?= $(shell python3 -c "import json;print(json.load(open('docs/active_state.json')).get('current_sprint',{}).get('id',0))" 2>/dev/null || echo 0)
 docs-freshness-check:
 	python3 $(AGENTS_DIR)/scripts/docs_freshness_check.py . $(SPRINT_ID)
+
+# Propose Cursor model↔tier assignments from the on-disk catalogue (Sprint 026).
+# Proposes only — never writes config/model_tiers.json. Design §D7: gate stays
+# empty until proven history exists.
+cursor-tiers:
+	cd $(AGENTS_DIR) && python3 scripts/audit_cursor_models.py
