@@ -134,32 +134,32 @@ Default by profile tier (`config/model_tiers.json` + accepted Cursor column):
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| A1 | `agents/agent_orchestrator.md` | modify | medium | `agent_orchestrator` | `grok-4.6` | `high` | ⏳ |
-| A2 | `workflows/pipeline_workflow.md` | modify | medium | `doc_orchestrator` | `grok-4.6` | `high` | ⏳ |
+| A1 | `agents/agent_orchestrator.md` | modify | medium | `agent_orchestrator` | `grok-4.6` | `high` | ✅ `ab6a55a` |
+| A2 | `workflows/pipeline_workflow.md` | modify | medium | `doc_orchestrator` | `grok-4.6` | `high` | ✅ `b1a9fac` |
 
 ## Ola 1 — Perfil instalable
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| P1 | `scripts/install.py` | modify | high | `devops_agent` | `grok-4.6` | `high` | ⏳ |
-| P1.1 | `tests/test_installer.sh` or `tests/test_install_profile_path.py` | modify/create | medium | `devops_agent` — deviation (tests/) | `composer-2.5` | N/A | ⏳ |
-| P2 | `agents.md` | modify | medium | `governance_learner` | `grok-4.6` | `high` | ⏳ |
-| P2.1 | `profiles/example-project/README.md` | modify | low | `doc_orchestrator` | `grok-4.6` | `high` | ⏳ |
+| P1 | `scripts/install.py` | modify | high | `devops_agent` | `grok-4.6` | `high` | ✅ `8a70550` |
+| P1.1 | `tests/test_installer.sh` or `tests/test_install_profile_path.py` | modify/create | medium | `devops_agent` — deviation (tests/) | `composer-2.5` | N/A | ✅ `05ba898` |
+| P2 | `agents.md` | modify | medium | `governance_learner` | `grok-4.6` | `high` | ✅ `3622e8b` |
+| P2.1 | `profiles/example-project/README.md` | modify | low | `doc_orchestrator` | `grok-4.6` | `high` | ✅ `9064bd8` |
 
 ## Ola 2 — Memoria
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| M1 | `workflows/extract_workflow.md` | modify | medium | `governance_learner` | `grok-4.6` | `high` | ⏳ |
-| M2 | `workflows/close_workflow.md` | modify | medium | `governance_learner` | `grok-4.6` | `high` | ⏳ |
+| M1 | `workflows/extract_workflow.md` | modify | medium | `governance_learner` | `grok-4.6` | `high` | ✅ `4e808dd` |
+| M2 | `workflows/close_workflow.md` | modify | medium | `governance_learner` | `grok-4.6` | `high` | ✅ `60e713b` |
 
 ## Ola 3 — Promoción y cierre
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| D1 | `docs/guides/SELF_IMPROVEMENT_GUIDE.md` | create | low | `doc_orchestrator` | `grok-4.6` | `high` | ⏳ |
-| D2 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `orchestrator` | `grok-4.6` | `high` | ⏳ |
-| D3 | `CHANGELOG.md` | modify | low | `principal_agent` | log from disk | N/A | ⏳ |
+| D1 | `docs/guides/SELF_IMPROVEMENT_GUIDE.md` | create | low | `doc_orchestrator` | `grok-4.6` | `high` | ✅ `d455987` |
+| D2 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `orchestrator` | `grok-4.6` | `high` | ✅ `e397016` |
+| D3 | `CHANGELOG.md` | modify | low | `principal_agent` | log from disk | N/A | ✅ `0f063c1` |
 
 ## Phase 7 — Quality Gate (transcription)
 

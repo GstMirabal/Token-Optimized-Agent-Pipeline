@@ -1,7 +1,7 @@
 # Sprint Log — 028 (`self-improvement-unblock`)
 
 **Branch**: `ai-sprint/028` from `main` at `0a175a2`
-**Status**: **EXECUTING** — Phase 5 approved 2026-08-25; Phase 6 not started.
+**Status**: **EXECUTING** — Phase 6 complete; Phase 7 (QA/Tester) pending.
 
 ---
 
@@ -24,7 +24,7 @@ Measured at `main` `0a175a2`, before any Work unit of Sprint `028`:
 
 | Check | Result |
 | :--- | :--- |
-| `venv_skillopt/bin/python -m pytest tests/ -q` | *(pending re-run at execution start)* |
+| `venv_skillopt/bin/python -m pytest tests/ -q` | 500 passed |
 | Sprint 027 | Closed and deployed `v4.10.0` |
 | `skill_forge_workflow forge_destination` | Present — template for agent destinations |
 
@@ -49,4 +49,30 @@ Measured at `main` `0a175a2`, before any Work unit of Sprint `028`:
 
 ---
 
-*Phase 6 execution entries append below as units land.*
+## Phase 6 — Execution
+
+All Work units committed on `ai-sprint/028`. Oldest → newest:
+
+| Unit | Commit | Summary |
+| :--- | :--- | :--- |
+| A1 | `ab6a55a` | `agent_forge_destination` in `agent_orchestrator.md` |
+| A2 | `b1a9fac` | Phase 4.1 Destination column in `pipeline_workflow.md` |
+| P1 | `8a70550` | `install.py --profile-path` for RA-15 profiles outside submodule |
+| P1.1 | `05ba898` | Installer test for `--profile-path` |
+| P2 | `3622e8b` | `--profile-path` convention in `agents.md` §3 + RA-15 |
+| P2.1 | `9064bd8` | Example profile README documents `--profile-path` |
+| M1 | `4e808dd` | `routing_class` gate in `extract_workflow.md` |
+| M2 | `60e713b` | `routing_class` counterweight in `close_workflow.md` |
+| D1 | `d455987` | `docs/guides/SELF_IMPROVEMENT_GUIDE.md` |
+| D2 | `e397016` | Roadmap queue marks 028 in flight |
+| D3 | `0f063c1` | `[Unreleased]` CHANGELOG entry |
+
+### Verification (Phase 6 close)
+
+| Check | Result |
+| :--- | :--- |
+| `venv_skillopt/bin/python -m pytest tests/ -q` | 500 passed |
+| `make verify` | PASSED (after regenerating `WORKFLOWS_STEP_MAP_GUIDE.md`) |
+| `tests/test_installer.sh` | PASSED (incl. `--profile-path`) |
+
+*Phase 7 QA/Tester gate entries append below.*
