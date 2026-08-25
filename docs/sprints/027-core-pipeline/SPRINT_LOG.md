@@ -1,7 +1,7 @@
 # Sprint Log — 027 (`autonomy-posture`)
 
 **Branch**: `ai-sprint/027` from `main` at `980f149`
-**Status**: **SESSION LOCKED** — Sprint 027 closeout sealed 2026-08-25.
+**Status**: **SESSION LOCKED** — Sprint 027 closed and deployed `v4.10.0` (2026-08-25).
 
 ---
 
@@ -131,6 +131,19 @@ Human confirmed (*"ok"*) retaining **`F-20260825-027`** in `memory_index.json` (
 ### Next protocol
 
 `workflows/deployment_workflow.md` (`/agents:deployment`) — squash-merge `ai-sprint/027` into `main`, tag, GitHub Release.
+
+## Deployment seal (2026-08-25)
+
+| Step | Result |
+| :--- | :--- |
+| PR #55 | Sprint 027 merged to `main` (`8a71ecf`) |
+| `ci_gate.py` #55 | exit `0` (Analyze, CodeQL, audit) |
+| PR #56 | Ledger sealed `[4.10.0]` (`f82e8eb`) |
+| `ci_gate.py` #56 | exit `0` |
+| Tag / Release | `v4.10.0` — GitHub Latest |
+| Post-merge prune | exit `0` |
+
+Anchor refreshed at close: `last_close_commit` → `f82e8eb`.
 
 ---
 
