@@ -4,8 +4,10 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.11.0] - 2026-08-25
+
 ### Added
-- **Sprint 028 (`self-improvement-unblock`)** — `agent_forge_destination` in `agent_orchestrator.md` (host `.claude/agents/` default); `install.py --profile-path` for RA-15 profiles outside the submodule; `routing_class` gate in `extract_workflow.md` and `close_workflow.md`; how-to `docs/guides/SELF_IMPROVEMENT_GUIDE.md`. Closed on `ai-sprint/028`; awaiting `/agents:deployment`.
+- **Sprint 028 (`self-improvement-unblock`)** — `agent_forge_destination` in `agent_orchestrator.md` (host `.claude/agents/` default); `install.py --profile-path` for RA-15 profiles outside the submodule; `routing_class` gate in `extract_workflow.md` and `close_workflow.md`; how-to `docs/guides/SELF_IMPROVEMENT_GUIDE.md`. Merged as PR #57.
 
 ## [4.10.0] - 2026-08-25
 
