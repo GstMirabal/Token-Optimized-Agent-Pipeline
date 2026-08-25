@@ -4,8 +4,10 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.15.0] - 2026-08-25
+
 ### Added
-- **Sprint 032 (`author-tier-trial`)** — First Cursor `author`-tier model trial: `cursor.author` **promoted** to `grok-4.5` / `high` (was `grok-4.6`) after Double-Gate round 1 matched Sprint 031 (`APPROVED`/`APPROVED`). `scripts/session_probe.py` writes `last_platform_probe` after a real platform interrogation (7-day cache; Sprint 023 gap). Trial guide records attestation when the global medidor lags a per-chat override. `F-021-A2` remains open. #032
+- **Sprint 032 (`author-tier-trial`)** — First Cursor `author`-tier model trial: `cursor.author` **promoted** to `grok-4.5` / `high` (was `grok-4.6`) after Double-Gate round 1 matched Sprint 031 (`APPROVED`/`APPROVED`). `scripts/session_probe.py` writes `last_platform_probe` after a real platform interrogation (7-day cache; Sprint 023 gap). Trial guide records attestation when the global medidor lags a per-chat override. `F-021-A2` remains open. Merged as PR #64. #032
 
 ### Known open
 - **`F-021-A2`** remains open (no implementer role).
