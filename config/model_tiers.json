@@ -19,7 +19,9 @@
     "Design §D7 / not proven history; operational gate logs may still record Composer",
     "as Sprint 026 did without writing the config cell (F-20260825-027).",
     "cursor.gate remains \"model\": null because promotion to gate requires measured",
-    "cost per accepted unit under Cursor beyond a single sprint milestone."
+    "cost per accepted unit under Cursor beyond a single sprint milestone.",
+    "Sprint 032 trial (2026-08-25): cursor.author temporarily grok-4.5 / high —",
+    "promote or revert at Phase 8 with Human OK (MODEL_TIER_TRIAL_GUIDE)."
   ],
   "tiers": {
     "gate": {
@@ -44,7 +46,7 @@
         "effort": "medium"
       },
       "cursor": {
-        "model": "grok-4.6",
+        "model": "grok-4.5",
         "family": "xai",
         "effort": "high"
       },
