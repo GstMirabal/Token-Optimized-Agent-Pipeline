@@ -94,6 +94,8 @@ grep -qx "@agents.md" "$NUCLEUS/CLAUDE.md" || fail "nucleus: constitution import
 [ ! -e "$NUCLEUS/.bridge_cursor.lock" ] || fail "nucleus: must write no cursor bridge lock"
 ( cd "$NUCLEUS" && python3 scripts/install.py --profile example-project > /dev/null 2>&1 ) \
   && fail "nucleus: profile install must be refused" || true
+( cd "$NUCLEUS" && python3 scripts/install.py --profile-path /tmp/x > /dev/null 2>&1 ) \
+  && fail "nucleus: external profile-path must be refused" || true
 mkdir -p "$NUCLEUS/.git/hooks"
 ( cd "$NUCLEUS" && python3 scripts/install.py --target cursor > /dev/null )
 [ -x "$NUCLEUS/.git/hooks/pre-push" ] || fail "nucleus cursor: pre-push hook missing"
@@ -148,6 +150,30 @@ rm -f "$HOST_BOTH/.agents/.bridge_claude.lock" "$HOST_BOTH/.agents/.bridge_curso
 # claude path already installs hooks via install_host_claude_bridge.
 [ -x "$HOST_BOTH/.git/hooks/pre-push" ] || fail "both: pre-push missing"
 echo "✅ host --target both test PASSED"
+
+# ── Sprint 028: --profile-path (host-controlled profile outside submodule) ───
+HOST_EXT="$WORK/host-ext-profile"
+EXTERNAL_PROFILE="$WORK/external-profile"
+mkdir -p "$HOST_EXT/.agents" "$EXTERNAL_PROFILE/agents" "$EXTERNAL_PROFILE/rules"
+rsync -a --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
+  "$AGENTS_SRC/" "$HOST_EXT/.agents/"
+echo "gitdir: ../.git/modules/.agents" > "$HOST_EXT/.agents/.git"
+cat > "$EXTERNAL_PROFILE/agents/custom_agent.md" <<'EOF'
+---
+name: custom-agent
+description: External profile fixture for install --profile-path.
+---
+# Custom agent (test fixture)
+EOF
+echo "# Custom rule (test fixture)" > "$EXTERNAL_PROFILE/rules/custom_rule.md"
+( cd "$HOST_EXT" && git init -q && git config user.email t@t && git config user.name t )
+( cd "$HOST_EXT" && python3 .agents/scripts/install.py --profile-path "$EXTERNAL_PROFILE" > /dev/null )
+[ -L "$HOST_EXT/.claude/agents/custom_agent.md" ] \
+  || fail "profile-path: external agent symlink missing"
+[ -f "$HOST_EXT/.claude/agents/custom_agent.md" ] \
+  || fail "profile-path: external agent symlink broken"
+grep -q "custom_rule" "$HOST_EXT/CLAUDE.md" || fail "profile-path: rule import missing"
+echo "✅ host --profile-path test PASSED"
 
 # ---------------------------------------------------------------------------
 # Native pre-commit hook. The Claude Code PreToolUse hook only sees commits the

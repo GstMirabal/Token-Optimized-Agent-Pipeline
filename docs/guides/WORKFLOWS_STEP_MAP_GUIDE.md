@@ -15,7 +15,7 @@ protocols that should mirror each other shows up there first.
 | `audit_workflow` | — | — | — | — | — | — | — | — | — | — | — | — |
 | `close_workflow` | write | write | write | write | write | write | write | write | write | verify/write | — | — |
 | `deployment_workflow` | — | — | — | — | — | — | — | — | write | — | — | — |
-| `extract_workflow` | — | — | — | — | — | — | — | — | — | ?/write | — | — |
+| `extract_workflow` | — | — | — | — | — | — | — | — | — | ?/verify/write | — | — |
 | `pipeline_workflow` | write | write | write | write | read/write | — | write | — | write | — | — | — |
 | `reconciliation_workflow` | — | — | — | — | — | — | — | write | write | — | — | write |
 | `remediation_workflow` | — | — | — | — | — | — | — | write | — | — | — | — |
@@ -106,6 +106,7 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 1. Strategic Extraction | `amnesia_test` | ? |
 | 2. Rule Integration Check | `rule_vs_ki` | write |
 | 2. Rule Integration Check | `upstream_feedback` | ? |
+| 3. Semantic Indexing | `routing_gate` | verify |
 | 3. Semantic Indexing | `index_update` | write |
 | 3. Semantic Indexing | `last_update` | write |
 | 4. Absolute Purge | `redundant_ki_purge` | write |
