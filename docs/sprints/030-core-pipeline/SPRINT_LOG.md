@@ -83,4 +83,20 @@ Orchestrator transcription: both gates APPROVED same session (Cursor sequential;
 
 ## Phase 8 — Closeout
 
-Not started. Handoff to `/agents:close` after Phase 7 APPROVED.
+In progress (`close_workflow.md`):
+
+| Step | Status |
+| :--- | :--- |
+| Topographic / README counts | ✅ clean tree; counts match |
+| `graphify-update` | ✅ 6332 nodes / 7370 edges / 628 communities (was 6146/7119/615) |
+| `graph_stats.json` + `PHASE_REGISTER.md` | ✅ this directory |
+| `docs-freshness-check SPRINT_ID=030` | ✅ exit 0 (WARN only on historical 024/025 gaps) |
+| `check_task_scope` | ✅ exit 0 |
+| Repo docs presence | ✅ CONTRIBUTING / SECURITY / CODE_OF_CONDUCT / NOTICE (no content invalidation this sprint) |
+| Master Ledger | ✅ `[Unreleased]` already has 030 |
+| Program queue | ✅ status → gates PASS / close pending |
+| Heuristic Pulse Gate (Phase 2.5) | ✅ human *"aceptar"* 2026-08-25 |
+| memory wipe | ✅ no-op (`memory/` absent) |
+| release / push / deploy | in progress |
+
+Heuristic Pulse: no host-class KI. Product lessons already in CHANGELOG / F-026-A2 / trial guide (`nucleus`, committed as product).
