@@ -18,13 +18,12 @@ def test_mdc_rule_frontmatter_keys_match_measured_contract() -> None:
     )
 
 
-def test_install_emits_only_contract_keys_on_rules(tmp_path: Path) -> None:
+def test_write_rules_emits_only_contract_keys(tmp_path: Path) -> None:
     """Generated rule .mdc frontmatter must not invent keys beyond the contract."""
-    cursor_adapter.install_cursor_bridge(tmp_path, nucleus=True)
-    rules_dir = tmp_path / ".cursor" / "rules"
-    sample = next(
-        p for p in rules_dir.glob("*.mdc") if p.name != cursor_adapter.CONSTITUTION_RULE
-    )
+    # Avoid a directory named ``.cursor``: some sandboxes block creating it.
+    bridge = tmp_path / "bridge"
+    cursor_adapter._write_rules(bridge)
+    sample = next(p for p in (bridge / "rules").glob("*.mdc"))
     text = sample.read_text(encoding="utf-8")
     assert text.startswith("---\n")
     front = text.split("---", 2)[1]
