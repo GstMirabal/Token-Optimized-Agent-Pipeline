@@ -1,7 +1,7 @@
 # Sprint Log — 032 (`author-tier-trial`)
 
 **Branch**: `ai-sprint/032` from `main` at `0429f03` (`v4.14.0`)
-**Status**: **IN PROGRESS** — Phase 3 complete; awaiting Phase 4 assignment and Phase 5 Approval Gate.
+**Status**: **IN PROGRESS** — Phase 4 complete; awaiting Phase 5 Approval Gate.
 **Session**: `20260825T162044Z-31194` · tool `cursor` · `delegation_mode: sequential`
 
 ---
@@ -34,11 +34,14 @@
 
 ## Phase 4 — Assignment
 
-- Pending.
+- `agent_assignment.md` `60efb62`, `skill_assignment.md` `2ebce0d`, `task_scope.md` `fbaf673`.
+- Cursor `delegation_mode: sequential`. `make cursor-tiers` run this session before Model/Effort (exit `0`).
+- Applied model still `grok-4.6` (pre-trial); Work rows name trial `grok-4.5` / `high`.
+- `F-026-A2`: Model/Effort + mechanical→author escalation on M1; `check_task_scope.py` exit `0`.
 
 ## Phase 5 — Approval Gate
 
-- Pending. Precondition: plan at canonical path committed (`35f2331`); re-run `audit_plan.py` before Human OK.
+- Open. Precondition: plan at canonical path committed (`35f2331`); `audit_plan.py` exit `0` (re-verified).
 
 ## Settled human decisions
 
