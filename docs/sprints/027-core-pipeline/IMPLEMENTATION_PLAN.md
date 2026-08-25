@@ -2,7 +2,7 @@
 
 **Canonical path**: `docs/sprints/027-core-pipeline/IMPLEMENTATION_PLAN.md`
 **Branch**: `ai-sprint/027` · **Base**: `main` at `980f149`
-**Status**: `DRAFT` (Phase 3 extracted · awaiting Phase 5 Human OK)
+**Status**: `APPROVED` (Phase 5 Human OK 2026-08-25 — *"ok"*)
 
 > Authored at Phase 1 (Planning) by `principal_agent`, extracted to this path at
 > Phase 3, and **committed before Phase 5 approves it**: `agents.md §2 triple_lock`
@@ -254,12 +254,13 @@ Parar el sprint entero si A1 se "resuelve" otorgando `Write` a un gate (viola D2
 
 **Phase 5** pide OK humano explícito sobre este documento **después** de Phase 3 (directorio + branch `ai-sprint/027` + plan committed).
 
-Decisiones que este DRAFT ya fija y que el humano confirma al aprobar:
+**APPROVED 2026-08-25.** Human reply: *"ok"*. Plan tip at approval includes post-Phase-3 commits through `8bd62b9` (Cursor tier ownership KI + accepted `composer-2.5` / `grok-4.6` bindings). Decisions confirmed:
 
-1. Alcance = `autonomy-posture` + `F-026-A1` + `F-026-A3` (no `F-021-A2`, no `F-026-A2`).
+1. Alcance = `autonomy-posture` + `F-026-A1` + `F-026-A3` (no `F-021-A2`, no `F-026-A2` as a separate redesign sprint — `tier_escalation` under Cursor exercised in `task_scope` via `F-20260825-027`).
 2. Gates sin `Write` (D2).
-3. `on_init` host-scoped con `agents_root` para rutas framework (D3).
+3. `on_init` host-scoped + `agents_root` for framework paths (D3).
 4. `SessionEnd` → `suspend` (D4).
+5. Cursor map: mechanical=`composer-2.5`, author=`grok-4.6`/effort `high`, gate config `null`.
 
 ---
 *Sprint 027 Phase 1 draft — Principal Agent — session `20260825T062801Z-24754`*
