@@ -4,6 +4,9 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Changed
+- **Post-release 028 deployment seal record** (`84201d2`) — SPRINT_LOG, program-queue status, and `SELF_IMPROVEMENT_GUIDE.md` audit SHA after PR #57/#58.
+
 ## [4.11.0] - 2026-08-25
 
 ### Added
