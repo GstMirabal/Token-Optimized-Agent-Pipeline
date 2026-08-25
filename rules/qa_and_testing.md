@@ -33,7 +33,7 @@ round of heuristic tuning.
 | **Scope** | That line only. There is no file-level or blanket waiver |
 | **Reason** | **Mandatory.** A marker with no reason suppresses nothing |
 | **Visibility** | Every waiver that actually suppressed a finding is printed at commit time, naming the identifier and the reason |
-| **Not waivable** | A forbidden file (`.pem`, `.key`, `secrets.json`, `credentials.json`). The marker narrows a heuristic; it does not unlock the hard boundary |
+| **Not waivable** | A forbidden file (`.env` and `.env.*` except `.env.example`, plus `.pem`, `.key`, `secrets.json`, `credentials.json`). The marker narrows a heuristic; it does not unlock the hard boundary |
 
 A silent bypass is how `RA-09 SECRET_SOVEREIGNTY` gets defeated by the control
 built to enforce it. A declared one is an audit trail. Precedent: the gate was
