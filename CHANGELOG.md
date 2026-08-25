@@ -4,8 +4,10 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.14.0] - 2026-08-25
+
 ### Added
-- **Sprint 031 (`gate-verdict-classes`)** — Double-Gate emitible set `APPROVED` \| `REJECTED` \| `RECORD` with class `charter` / `instructing` / `testifying` (`RA-17`, `rules/qa_and_testing.md` §4, ADR-0008). `RECORD` does not count toward remediation. `scripts/check_gate_log.py` pins vocabulary from sprint 31 (skip 021–030). First author-tier model trial destaged to **032**. Closes `F-093-G1`. #031
+- **Sprint 031 (`gate-verdict-classes`)** — Double-Gate emitible set `APPROVED` \| `REJECTED` \| `RECORD` with class `charter` / `instructing` / `testifying` (`RA-17`, `rules/qa_and_testing.md` §4, ADR-0008). `RECORD` does not count toward remediation. `scripts/check_gate_log.py` pins vocabulary from sprint 31 (skip 021–030). First author-tier model trial destaged to **032**. Closes `F-093-G1`. Merged as PR #63. #031
 
 ### Known open
 - **`F-021-A2`** remains open (no implementer role).
