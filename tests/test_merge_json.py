@@ -82,3 +82,36 @@ class TestDeprecatedHookPrune:
         assert "if [ -f .agents/hooks/on_init.py ]" in session_start[0]["hooks"][0]["command"]
         pre_cmds = [h["command"] for m in merged["hooks"]["PreToolUse"] for h in m["hooks"]]
         assert "python3 my_own_hook.py" in pre_cmds
+
+
+def test_merge_preserves_host_deny_and_adds_template_deny():
+    """Abort criterion for Sprint 027 C1: re-install must not drop host deny rules."""
+    dest = {
+        "permissions": {
+            "deny": [
+                "Bash(git push --force:*)",
+                "Bash(host-only-deny:*)",
+            ]
+        }
+    }
+    template = {
+        "permissions": {
+            "deny": [
+                "Bash(git push --force:*)",
+                "Bash(git push -f:*)",
+                "Bash(rm -rf /:*)",
+            ],
+            "defaultMode": "auto",
+        },
+        "autoMode": {
+            "hard_deny": ["$defaults", "Never force-push."],
+        },
+    }
+    result = merge(dest, template)
+    deny = result["permissions"]["deny"]
+    assert "Bash(host-only-deny:*)" in deny
+    assert "Bash(git push --force:*)" in deny
+    assert deny.count("Bash(git push --force:*)") == 1
+    assert "Bash(rm -rf /:*)" in deny
+    assert result["permissions"]["defaultMode"] == "auto"
+    assert result["autoMode"]["hard_deny"][0] == "$defaults"
