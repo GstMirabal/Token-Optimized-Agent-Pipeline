@@ -4,8 +4,15 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.9.1] - 2026-08-25
+
 ### Fixed
 - **Hotfix H-002 (`F-023-S4`)** — a literal `.env` with unquoted `NAME=value` credentials passed `hooks/on_commit.py`. Two mechanisms: `Path(".env").suffix` is `''` so the forbidden-extension branch never fired, and no selected form covered unquoted `NAME=value` in any file type. Dotenv files are now matched **by name** (`.env.example` stays the sanctioned template); `UNQUOTED_ASSIGNMENT` is selected for every file type. Pin: `tests/test_on_commit.py` F-023-S4 cases.
+
+### Known open
+- **`F-021-A2`** remains open: no implementer role with `Write`/`Edit` for general product code.
+- **`F-026-A1`**, **`F-026-A2`**, **`F-026-A3`** remain open (upstream register).
+- **Three CodeQL alerts on `main`** remain untriaged (carried from `[4.8.0]`).
 
 ## [4.9.0] - 2026-08-25
 
