@@ -190,10 +190,17 @@ def check_invocation_coverage(corpus: str) -> list[str]:
     )
     modules = imported_modules()
 
-    # Workflows and scripts are framework-owned: they declare their own invoker.
-    for path in [*sorted(Path("workflows").glob("*.md")), *sorted(Path("scripts").glob("*.py"))]:
+    # Workflows, scripts and hooks are framework-owned: they declare their own
+    # invoker. Package markers (``__init__.py``) are not mechanisms.
+    for path in [
+        *sorted(Path("workflows").glob("*.md")),
+        *sorted(Path("scripts").glob("*.py")),
+        *sorted(Path("hooks").glob("*.py")),
+    ]:
         key = str(path)
         if key in exceptions:
+            continue
+        if path.name == "__init__.py":
             continue
         if path.suffix == ".py" and path.stem in modules:
             continue
