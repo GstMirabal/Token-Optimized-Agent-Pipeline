@@ -884,12 +884,28 @@ la ejecución del gate no sea verificable.
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| K1 | `scripts/check_role_artifact.py` | modify | high | `implementer_agent` | ⏳ |
-| K2 | `config/artifact_registry.json` | modify | high | `rule_validator` | ⏳ |
+| K1 | `scripts/check_role_artifact.py` | modify | high | `implementer_agent` | ✅ `9e8c0d3` |
+| K2 | `config/artifact_registry.json` | modify | high | `rule_validator` | ✅ `ca203ce` |
 | K3 | `scripts/check_task_scope.py` | modify | medium | `implementer_agent` | ⏳ |
-| K4 | `tests/test_check_role_artifact.py` | modify | medium | `implementer_agent` | ⏳ |
-| K5 | `tests/test_check_task_scope.py` | modify | medium | `implementer_agent` | ⏳ |
+| K4 | `tests/test_check_role_artifact.py` | modify | medium | `implementer_agent` | ✅ `9e8c0d3` (con K1) |
+| K5 | `tests/test_check_task_scope.py` | modify | medium | `implementer_agent` | ⏳ (irá con K3) |
 | K6 | `workflows/pipeline_workflow.md` | modify | high | `orchestrator` | ⏳ |
+
+**Corrección de granularidad, descubierta al ejecutar.** Separar el arreglo de
+su test en dos unidades es **imposible**: `hooks/on_commit.py` rechaza todo
+commit `fix(` que no traiga el test que prueba el bug (`rules/code_craft.md §6`),
+y lo hizo con K1. Un arreglo y su test son una sola unidad. Afecta a los pares
+ya escritos así en este plan: K1+K4 (ya fusionado), K3+K5, B1+B2, C1+C4, E2+E4 y
+H3+H4. La tabla los mantiene como filas distintas porque son archivos distintos
+—`jurisdictional_lock` sigue siendo por archivo— pero **comparten commit**.
+
+Dos decisiones de implementación que se apartaron de lo escrito arriba, ambas
+por evidencia encontrada al ejecutar:
+
+| Escrito en el plan | Ejecutado | Motivo |
+| :--- | :--- | :--- |
+| K2 añade entradas `artifacts` requeridas para `QA Agent` y `Tester Agent` | K2 añade un bloque `gate_evidence` aparte | `scripts/map_workflows.py:70` construye su matriz como `{filename: phase}`; dos entradas más llamadas `SPRINT_LOG.md` habrían **sobrescrito en silencio** la columna del Orchestrator. Y la existencia del fichero es la aserción equivocada: el log existe desde Phase 3, antes de que ningún gate corra |
+| K1 mata también el `if not role: return 0` de la ruta hook | Solo la ruta CLI es estricta; el hook avisa y sigue | Un payload de `SubagentStop` trae tipos de agente arbitrarios, incluidos los propios del runtime. Bloquearlos pararía subagentes que no tienen nada que ver. La intención de K1 se cumple igual: **en Cursor solo existe la ruta CLI** |
 
 **El defecto es más pequeño y más grave de lo que parecía: la normalización ya
 existe, y la ruta que Cursor usa no la llama.** `role_from_agent_type()`
