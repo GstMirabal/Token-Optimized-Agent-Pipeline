@@ -796,9 +796,9 @@ porque el check de ruta contra jurisdicción queda fuera de 034 por diseño.
 | I1 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify | medium | `doc_orchestrator` | ⏳ |
 | I2 | `workflows/pipeline_workflow.md` | modify | high | `orchestrator` | ⏳ |
 | I3 | `agents/agent_orchestrator.md` | modify | high | `agent_orchestrator` | ⏳ |
-| I4 | `scripts/check_task_scope.py` | modify | high | `implementer_agent` | ⏳ |
-| I5 | `tests/test_check_task_scope.py` | modify | medium | `implementer_agent` | ⏳ |
-| I6 | `docs/hotfixes/H-005-pipeline.md` | create | medium | `doc_orchestrator` | ⏳ |
+| I4 | `scripts/check_task_scope.py` | modify | high | `implementer_agent` | ✅ `3dc95db` (capacidad; transcripción pendiente de I7) |
+| I5 | `tests/test_check_task_scope.py` | modify | medium | `implementer_agent` | ✅ `3dc95db` (con I4/K3/K5) |
+| I6 | `docs/hotfixes/H-005-pipeline.md` | create | medium | `doc_orchestrator` | ✅ `18b78ab` |
 | I7 | `docs/standards/templates/AGENT_ASSIGNMENT_TEMPLATE.md` | create | medium | `doc_orchestrator` | ⏳ |
 
 I1: renombrar la columna a `Assignee (proposed)` **solo en esta plantilla** y
@@ -861,14 +861,26 @@ de verdad: `F-20260825-027`, que obligó a poner la advertencia «never copy
 son rulesets aplicados por la sesión padre, que tiene `Write` propio, así que el
 `tools:` del perfil no *bloquea* nada. El check no verifica un permiso efectivo:
 verifica que **el registro nombre a un perfil que podría haberlo hecho**. Sin
-eso, la columna es prosa decorativa — que es exactamente lo que fue en 030 y 031
+eso, la columna es prosa decorativa — que es exactamente lo que fue de 028 a 032
 — y el día que `delegation_mode` pase a `subagent` las mismas filas fallarían de
 verdad.
 
-I6: hotfix `RA-03` por los registros de 030 y 031 que afirman ejecuciones
-imposibles. Siguiente ID libre: existen `H-002`, `H-003`, `H-004`. **No**
-reescribe los logs cerrados; documenta el defecto y apunta a I4 como remedio
-estructural.
+I6: hotfix `RA-03` por los registros que afirman ejecuciones imposibles.
+Siguiente ID libre: existen `H-002`, `H-003`, `H-004`. **No** reescribe los logs
+cerrados; documenta el defecto y apunta a I4 como remedio estructural.
+
+**Corrección de alcance, medida al ejecutar I4.** El plan decía «030 y 031».
+Con el check ya escrito, el recuento real sobre los sprints que llevan columnas
+`Model`/`Effort` es de **32 filas en cinco sprints consecutivos, 028 a 032**, y
+**033 limpio** — el sprint en que `ADR-0009` creó `implementer_agent`. Dos de
+ellas son usurpación de rol en su propia cara: `qa_agent` y `tester_agent`
+asignados a `modify` en 031, cuando `ADR-0008` le da a un gate un veredicto que
+emitir y ningún fichero que escribir. Y `principal_agent` aparece con cuatro
+mutaciones entre 028 y 030. El mismo patrón existe antes —026 tiene 44 filas y
+027 tiene 20— pero ambos son anteriores a las columnas `Model`/`Effort` y el
+check los salta por diseño; 021 a 025 llaman `lead` al asignatario, un
+vocabulario anterior al árbol de perfiles, y no son comparables. Cifras en
+`docs/hotfixes/H-005-pipeline.md §1`.
 
 I7 cierra la inversión que destapó la auditoría de esta sesión: al hacer Phase
 4.1 la autoridad, el artefacto que manda resultó ser el único de los tres sin
@@ -886,9 +898,9 @@ la ejecución del gate no sea verificable.
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | K1 | `scripts/check_role_artifact.py` | modify | high | `implementer_agent` | ✅ `9e8c0d3` |
 | K2 | `config/artifact_registry.json` | modify | high | `rule_validator` | ✅ `ca203ce` |
-| K3 | `scripts/check_task_scope.py` | modify | medium | `implementer_agent` | ⏳ |
+| K3 | `scripts/check_task_scope.py` | modify | medium | `implementer_agent` | ✅ `3dc95db` (con I4) |
 | K4 | `tests/test_check_role_artifact.py` | modify | medium | `implementer_agent` | ✅ `9e8c0d3` (con K1) |
-| K5 | `tests/test_check_task_scope.py` | modify | medium | `implementer_agent` | ⏳ (irá con K3) |
+| K5 | `tests/test_check_task_scope.py` | modify | medium | `implementer_agent` | ✅ `3dc95db` (con I4/K3) |
 | K6 | `workflows/pipeline_workflow.md` | modify | high | `orchestrator` | ⏳ |
 
 **Corrección de granularidad, descubierta al ejecutar.** Separar el arreglo de
@@ -1096,7 +1108,7 @@ Leer `$?` directamente (nunca a través de un pipe).
 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | Columna `Assignee (proposed)` + autoridad de Phase 4.1 |
 | `workflows/pipeline_workflow.md` | Phase 4.1 puede sobrescribir la propuesta |
 | `agents/agent_orchestrator.md` | `staffing_injection` deja de decir «unassigned» |
-| `docs/hotfixes/H-005-pipeline.md` | Registros de 030/031 con asignatario sin `Write` |
+| `docs/hotfixes/H-005-pipeline.md` | 32 filas de 028 a 032 con asignatario sin `Write` |
 | `scripts/verify_references.py` | Check `(f)`: `model:` del perfil vs celda del tier |
 | `docs/standards/templates/AGENT_ASSIGNMENT_TEMPLATE.md` | Forma de `agent_assignment.md`, citada desde Phase 4.1 |
 | `AGENTS.md` | §0: retirar la cláusula que declara inexistente `docs/active_state.json` en el núcleo |
