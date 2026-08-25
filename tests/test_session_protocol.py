@@ -1109,6 +1109,78 @@ def test_sessions_are_counted_across_a_suspended_sprint(anchor):
     assert json.loads(anchor.read_text())["session_count"] == 3
 
 
+# --- require-released: deployment preflight (close → deploy, never suspend) ---
+
+def test_require_released_refuses_suspended(repo, capsys):
+    """A suspended session must never chain into /agents:deployment."""
+    (repo / "docs").mkdir()
+    ss.claim("session-a", takeover=False, tool="terminal")
+    ss.release()
+    ss.claim("session-b", takeover=False, tool="terminal")
+    ss.suspend()
+    assert ss.require_released() == 2
+    assert "SUSPENDED" in capsys.readouterr().out
+
+
+def test_require_released_passes_after_release_on_sealed_tip(repo, capsys):
+    """Close seals HEAD; deploy merges that tip — tip must equal last_close_commit."""
+    (repo / "docs").mkdir()
+    ss.claim("session-a", takeover=False, tool="terminal")
+    assert ss.release() == 0
+    assert ss.require_released() == 0
+    assert "Deploy preflight passed" in capsys.readouterr().out
+
+
+def test_require_released_refuses_unsealed_tip(repo, capsys):
+    """IN_PROGRESS commits after the last seal are not deployable as HEAD."""
+    (repo / "docs").mkdir()
+    ss.claim("session-a", takeover=False, tool="terminal")
+    ss.release()
+    sealed = json.loads((repo / "docs" / "active_state.json").read_text())[
+        "last_close_commit"
+    ]
+    (repo / "extra.txt").write_text("after close\n")
+    subprocess.run(["git", "add", "-A"], cwd=repo, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-qm", "after close"],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+    )
+    ss.claim("session-b", takeover=False, tool="terminal")
+    assert ss.require_released() == 2
+    out = capsys.readouterr().out
+    assert sealed[:7] in out
+    assert "not the sealed close" in out
+
+
+def test_require_released_accepts_explicit_sealed_branch(repo, capsys):
+    """Later claim may move HEAD; --branch still deploys the sealed tip."""
+    (repo / "docs").mkdir()
+    ss.claim("session-a", takeover=False, tool="terminal")
+    ss.release()
+    sealed = json.loads((repo / "docs" / "active_state.json").read_text())[
+        "last_close_commit"
+    ]
+    subprocess.run(
+        ["git", "branch", "ai-sprint/029", sealed],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+    )
+    (repo / "extra.txt").write_text("next sprint\n")
+    subprocess.run(["git", "add", "-A"], cwd=repo, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-qm", "next"],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+    )
+    ss.claim("session-b", takeover=False, tool="terminal")
+    assert ss.require_released("ai-sprint/029") == 0
+    assert "Deploy preflight passed" in capsys.readouterr().out
+
+
 # --- P8.1: UID generation and tool recording for portability --------
 #
 # When `--session-id` is omitted (as in Cursor, which exposes no session UID

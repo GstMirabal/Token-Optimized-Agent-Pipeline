@@ -1,0 +1,8 @@
+{
+  "nodes": 6146,
+  "edges": 7119,
+  "communities": 615,
+  "source": "graphify-out/graph.json",
+  "sprint": 29,
+  "note": "AST update only; deep semantic rebuild skipped (no LLM API key)"
+}

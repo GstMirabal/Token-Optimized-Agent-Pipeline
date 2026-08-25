@@ -64,6 +64,10 @@ The Token-Optimized Agent Pipeline is an AI agent governance framework designed 
 
 ### At a Glance
 
+<!-- COUNTED_START -->
+| **Infrastructure** | 28 Python scripts in [`scripts/`](scripts/) · 6 JSON registries in [`config/`](config/) |
+<!-- COUNTED_END -->
+
 | | |
 | :--- | :--- |
 | **Governance** | Keyed ruleset in [`agents.md`](agents.md) + 11 lazy-loaded domain rule contexts in [`rules/`](rules/) |
@@ -75,7 +79,7 @@ The Token-Optimized Agent Pipeline is an AI agent governance framework designed 
 
 ### Built With
 
-![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white) ![Shell Script](https://img.shields.io/badge/Shell_Script-121011?style=flat&logo=gnu-bash&logoColor=white) ![Markdown](https://img.shields.io/badge/Markdown-000000?style=flat&logo=markdown&logoColor=white) ![Git](https://img.shields.io/badge/Git-F05032?style=flat&logo=git&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?style=flat&logo=githubactions&logoColor=white) ![Claude Code](https://img.shields.io/badge/Claude%20Code-D97757?style=flat&logo=anthropic&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white) ![Shell Script](https://img.shields.io/badge/Shell_Script-121011?style=flat&logo=gnu-bash&logoColor=white) ![Markdown](https://img.shields.io/badge/Markdown-000000?style=flat&logo=markdown&logoColor=white) ![Git](https://img.shields.io/badge/Git-F05032?style=flat&logo=git&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?style=flat&logo=githubactions&logoColor=white) ![Claude Code](https://img.shields.io/badge/Claude%20Code-D97757?style=flat&logo=anthropic&logoColor=white) ![Cursor](https://img.shields.io/badge/Cursor-000000?style=flat&logo=cursor&logoColor=white)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

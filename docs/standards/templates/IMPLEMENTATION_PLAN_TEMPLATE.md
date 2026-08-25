@@ -99,6 +99,24 @@ The exact commands, and what each must return. Read exit codes with `$?` directl
 
 ---
 
+## Documentary impact (T5)
+
+**Applies from Sprint 029 onward** (`rules/documentation_standard.md` §6). Not
+retroactive to plans already sealed.
+
+Every artifact this sprint creates or changes, and what changes about it. A
+sprint that claims "docs updated" without this table has no documentary gate.
+
+| Artefacto | Qué cambia |
+| :--- | :--- |
+| {{PATH}} | {{CHANGE}} |
+
+**Measured figures.** Every number in Context / Design / Verification carries
+the command that reproduces it. A figure without its command is memory, not
+evidence (`021-030-program-queue.md` J6 / T5).
+
+---
+
 ## Out of scope
 
 Named exclusions with their destination. A finding with no destination is a finding

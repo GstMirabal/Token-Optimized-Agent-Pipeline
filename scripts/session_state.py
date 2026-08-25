@@ -15,7 +15,8 @@ Claiming the lock and recording the session are the same act, so they are one
 command rather than two steps that both rewrite the same file.
 
 invoked_by: start_workflow.md#state_claim (claim), close_workflow.md#state_sync
-(release), rules/token_economy.md#3.1 (suspend, at the hard threshold).
+(release), rules/token_economy.md#3.1 (suspend, at the hard threshold),
+deployment_workflow.md#sprint_seal_gate (require-released).
 
 Usage:
     python3 scripts/session_state.py claim [--session-id <uid>] [--takeover]
@@ -25,10 +26,12 @@ Usage:
         # --delegation-mode defaults: cursor→sequential, others→native.
     python3 scripts/session_state.py release   # seals the SPRINT
     python3 scripts/session_state.py suspend   # ends the SESSION only
+    python3 scripts/session_state.py require-released [--branch <ref>]
+        # deployment preflight: refuse SUSPENDED; tip must equal last_close_commit
 
 Exit codes:
-    0 — lock claimed or released
-    2 — a different session holds the lock (RA-11: only 2 blocks a tool call)
+    0 — lock claimed or released, or deploy preflight passed
+    2 — a different session holds the lock, or deploy refused (RA-11: only 2 blocks)
 """
 
 import argparse
@@ -237,6 +240,72 @@ def release() -> int:
     return 0
 
 
+def rev_parse(ref: str) -> str | None:
+    """Resolve a git ref to a full SHA, or None if missing."""
+    result = subprocess.run(
+        ["git", "rev-parse", "--verify", ref],
+        capture_output=True,
+        text=True,
+    )
+    return result.stdout.strip() if result.returncode == 0 else None
+
+
+def require_released(branch: str | None = None) -> int:
+    """Refuse `/agents:deployment` unless the tip is exactly what close sealed.
+
+    A session that ends in ``SUSPENDED`` leaves the sprint open — deploying
+    that work would publish an unsealed sprint. ``IN_PROGRESS`` on a tip that
+    is not ``last_close_commit`` is the same defect. After ``release``, the
+    sealed SHA equals the sprint-branch tip; deployment merges that tip.
+    Passing ``--branch ai-sprint/[ID]`` allows deploying a sealed branch while
+    a later session has already ``claim``ed another tip.
+
+    Args:
+        branch: Git ref whose tip must equal ``last_close_commit``. Defaults
+            to ``HEAD``.
+
+    Returns:
+        int: 0 when deployable; 2 when refused (RA-11).
+    """
+    state = load_state()
+    status = state.get("status")
+    if status == SUSPENDED:
+        print(
+            "Refusing deploy: status is SUSPENDED — the sprint is still open. "
+            "Resume with `session_state.py claim`, or finish and `/agents:close`. "
+            "Never invoke `/agents:deployment` after a suspend."
+        )
+        return 2
+
+    seal = state.get("last_close_commit")
+    if not seal:
+        print(
+            "Refusing deploy: no `last_close_commit` — no sprint has been sealed "
+            "with `release`. Run `/agents:close` first."
+        )
+        return 2
+
+    ref = branch or "HEAD"
+    tip = rev_parse(ref)
+    if tip is None:
+        print(f"Refusing deploy: cannot resolve ref `{ref}`.")
+        return 2
+    if tip != seal:
+        print(
+            f"Refusing deploy: `{ref}` tip {tip[:7]} is not the sealed close "
+            f"{seal[:7]}. Close seals HEAD; deployment merges that tip. "
+            "If a newer session already claimed another branch, pass "
+            "`--branch ai-sprint/[ID]` for the sealed sprint."
+        )
+        return 2
+
+    print(
+        f"✅ Deploy preflight passed — `{ref}` tip matches sealed close "
+        f"{seal[:7]} (status={status})."
+    )
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -262,12 +331,23 @@ def main() -> int:
     )
     sub.add_parser("release", help="Seal the SPRINT at close.")
     sub.add_parser("suspend", help="End the SESSION with the sprint still open.")
+    require_parser = sub.add_parser(
+        "require-released",
+        help="Deployment preflight: tip must equal last_close_commit; refuse SUSPENDED.",
+    )
+    require_parser.add_argument(
+        "--branch",
+        default=None,
+        help="Ref to check (default: HEAD). Use ai-sprint/[ID] when HEAD moved on.",
+    )
 
     args = parser.parse_args()
     if args.command == "claim":
         return claim(args.session_id, args.takeover, args.tool, args.delegation_mode)
     if args.command == "suspend":
         return suspend()
+    if args.command == "require-released":
+        return require_released(args.branch)
     return release()
 
 

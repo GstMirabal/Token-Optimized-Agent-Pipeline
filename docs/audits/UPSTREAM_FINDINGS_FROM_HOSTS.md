@@ -13,7 +13,7 @@ business logic. Where a measurement is quoted it is a count, not an identity.
 
 | Section | What it holds | Reproduction status |
 | :--- | :--- | :--- |
-| *Reported by a host* | The original seven | Reproduced against `v4.4.0` when this file was written, and **re-measured again** when each was closed |
+| *Reported by a host* | The original seven, plus **`F-093-G1`** (opened 2026-08-25) | Original seven: reproduced against `v4.4.0` when this file was written, and **re-measured again** when each was closed. **`F-093-G1`**: reproduced against `84201d2` (`v4.11.0` + post-release seal), **not** against `v4.4.0` |
 | *Added by Sprint 023* | Three items the nucleus found in itself | Measured against the tree at the time each was written. **Not** `v4.4.0` |
 | *Added by Sprint 026* | Three items the nucleus found in itself: one at the Agent Assignment phase, one at the Phase 4 tier audit, one during Hito 1 execution, none while repairing another entry | Measured against the tree at `b5bfb6a`, the commit `docs/sprints/026-core-pipeline/task_scope.md` names as Sprint 026's base |
 | *Inherited from host sprint records* | Leads from a host's sprint history | **Not** re-measured when written. Treat each as a lead, reproduce it first, and delete it if it no longer holds |
@@ -44,6 +44,13 @@ inferred from where the section sits.
 | :--- | :--- |
 | **Closed** | **`F-023-S4`** — dotenv files matched by name; `UNQUOTED_ASSIGNMENT` selected for every file type. Re-measured: `tests/test_on_commit.py` F-023-S4 cases, 152 passed on `hotfix/H-002` |
 | **Still open** | **`F-021-A2`**, **`F-026-A1`**, **`F-026-A2`**, **`F-026-A3`** — A1/A3 closed later in Sprint 027 (see status table above) |
+
+**Status at 2026-08-25 (`84201d2`, intake of `F-093-G1`).**
+
+| | |
+| :--- | :--- |
+| **Opened, still open** | **`F-093-G1`** — Double-Gate has no severity class. Reproduced against `84201d2` (commands in that entry). Not patched |
+| **Still open (unchanged)** | **`F-021-A2`**, **`F-026-A2`** |
 
 **The corrections reproduction produced are recorded where a reader needs them**,
 not collected in a list. `F-086-S3` carries three: it was **narrower** than
@@ -472,6 +479,88 @@ definition rather than a rewrite at each call site.
 >
 > Recorded because the entry's own framing — *"a mandatory close step crashes"* —
 > invites exactly the repair that would have shipped the worse defect.
+
+### - [ ] `F-093-G1` — the Double-Gate has no severity class, so a round cap cannot fire
+
+**Provenance.** Reported by a host under `agents.md §4 feedback_upstream`. Genericized
+per `RA-15`: no host project name, no absolute paths, no host business logic.
+**Not** one of the original seven: those were verified against `v4.4.0`. This
+entry was reproduced against `84201d2` (`v4.11.0` plus the post-release seal
+commit) on 2026-08-25, **before** any patch. The three-verdict split has **not**
+landed — if a later sprint ships it, close this entry against that commit and
+do not re-open it.
+
+**Evidence.** `rules/qa_and_testing.md` §4, `agents/qa_agent.md` (`rejection_trigger`),
+`agents/tester_agent.md`, `workflows/pipeline_workflow.md` Phase 7, `workflows/remediation_workflow.md` Phase 0.
+
+The Double-Gate has two outcomes: proceed, or reject. Rejection of the same
+logic block three times in a row invokes remediation (`>3 consecutive times`).
+There is no third verdict, and no rule that says which finding is a merge-blocker
+and which is recorded and shipped.
+
+A host convention of "two rounds per gate" existed only in that host's sprint
+artifacts. It is not in this nucleus. Raising or lowering a round number does not
+close the gap: a cap that limits *new* work cannot fire if every documentary
+nit is classified as the sprint's charter.
+
+**How it surfaces.** A host sprint whose mechanism was complete at its second
+commit spent eight gate rounds against that two-round convention — six structural,
+two functional. The remaining seven rounds were about what documents *claimed*
+about the mechanism. Each remediation added surface the next round found.
+Several round-2 blockers were inaccurate comments in a Makefile: correct to fix,
+and not reasons to hold a merge.
+
+The same shape already appeared inside this nucleus: Sprint 023 unit `C8` was ten
+checkbox ticks in Markdown, classified low-risk, and cost 5 gate rounds and 4
+rejections that were all false claims. Sprint 023 `C6` stated the durable split
+—*correct the documents that instruct; annotate the records that testify*— and
+routed it to `extract_workflow` / `agents.md` §7 rather than applying it. It is
+not a rule the gates can apply today.
+
+**Cost.** Every host pays it on every sprint whose gates are allowed to reject
+on documentary claims. Round count, not defect class, becomes the runtime. The
+remediation workflow does not help: it triggers on the *same logic block* rejected
+three times, not on seven distinct documentary findings across eight rounds.
+
+**What not to do.**
+
+- Do not encode "max N rounds" as the fix. The reporting host already had N=2
+  and it did not fire.
+- Do not raise the three-strikes remediation threshold. That path nukes the
+  workspace; it is the wrong instrument for a stale comment.
+- Do not treat this as host policy. A host cannot classify what `qa_agent` and
+  `tester_agent` will reject; those profiles live here.
+- Do not fold it into Sprint 029 (`documentation-truth`) or 030
+  (`token-economy-enforcement`). That is the same category error as carrying
+  `F-023-S4` as a rider on a themed sprint. Destination: `docs/roadmaps/core/pipeline/021-030-program-queue.md` carried section `F-093-G1` → first sprint of the next program (`031` `gate-verdict-classes`).
+
+**Proposed fix.** Give the Double-Gate a third, named verdict — `RECORD` (or
+`CARRY`) — and a rule the gates apply before they reject:
+
+| Class | Verdict | When |
+| :--- | :--- | :--- |
+| Unmet charter | REJECT (blocks merge) | The sprint does not do what its plan/ADR says; a gate claims coverage a probe refutes; functional suite red; secret; missing `task_scope.md` |
+| Instructing document is wrong | REJECT until the instructing document is corrected | The file that *tells an agent what to do* (`agents.md`, `rules/`, `workflows/`, a skill `SKILL.md`) states a false procedure |
+| Testifying record is wrong | RECORD and ship | Sprint logs, comments, Makefile remarks, claims about a mechanism that already works. Annotate the record; do not open another round |
+
+Done-criterion: `rules/qa_and_testing.md` §4 names the three verdicts; both gate
+profiles emit one of them; a host sprint whose only remaining findings are
+testifying-record inaccuracies can close after round 1 without a remediation
+loop. The Sprint 023 `C6` sentence becomes the rule, not a log line.
+
+**Reproduced 2026-08-25 against `84201d2` (commands, not memory).**
+
+| Check | Result |
+| :--- | :--- |
+| `grep -nE 'APPROVED\|REJECTED\|RECORD\|CARRY' rules/qa_and_testing.md` | **empty** — §4 names a Structural Halt and a Functional Lock, then the Remediation Loop; it never names a verdict set |
+| `grep -n rejection_trigger agents/qa_agent.md agents/tester_agent.md` | `qa_agent.md:20` *"forcefully rejects"*; `tester_agent.md:21` *"forcefully rejects"* — binary bounce, no third class |
+| `grep -n consecutive workflows/pipeline_workflow.md workflows/remediation_workflow.md` | Phase 7: third consecutive rejection of the same logic block → remediation; Phase 0: `>3 consecutive times` — same-block trigger, not a severity class |
+| `grep -n 'instruct; annotate' agents.md rules/qa_and_testing.md` | **empty** in both |
+| `grep -n 'documents that instruct' docs/sprints/023-core-pipeline/task_scope.md` | **two hits**, lines 714 and 817 — the C6 sentence still has no home in `agents.md` §7 (RA-01…RA-16 only) or in `rules/qa_and_testing.md` |
+
+**Closed** — *not closed.* Do not tick this box against a sprint that only
+mentions the sentence. Tick it when §4 names the three verdicts and both gate
+profiles emit one of them.
 
 ---
 ## Added by Sprint 023 — measured against the tree, not against `v4.4.0`

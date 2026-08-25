@@ -113,3 +113,18 @@ All `WARN`-level, run every close:
 | `README_TEMPLATE.md` | Tutorial | Out of scope for this rule — a host's own branding/identity question, not a governance concern. |
 | `SYSTEM_OVERVIEW_TEMPLATE.md` | — (Documentation Entry Point anchor) | Carries the same metadata block (§4.1) plus C4 Level 1-2 diagrams. |
 | `WALKTHROUGH_TEMPLATE.md` | — (historical narrative, outside Diátaxis) | Links the ADR behind a decision instead of re-explaining it. |
+| `IMPLEMENTATION_PLAN_TEMPLATE.md` | — (pipeline planning) | Mandatory **Documentary impact (T5)** section from Sprint 029 (§6). |
+
+## 6. Documentary impact and measured figures (T5)
+
+**In force from Sprint 029 onward.** Plans sealed before 029 are not rewritten
+to add this section (`021-030-program-queue.md` J4).
+
+| Obligation | Where it lives | Done-criterion |
+| :--- | :--- | :--- |
+| Declare every doc/config/script this sprint creates or changes | `IMPLEMENTATION_PLAN.md` → **Documentary impact (T5)** | Table rows name paths; empty table only when the sprint truly touches none |
+| Every measured figure carries the command that reproduces it | Same plan's Context / Design / Verification | A reader can re-run the command and get the figure; adjectives without commands are rejected at Phase 1 |
+
+The cheap `file:line` range check in `scripts/verify_references.py` (living
+`docs/guides`, `docs/decisions`, `docs/audits`) is complementary and **does not
+replace** T5: it catches citations out of range, not wrong-but-in-range claims.
