@@ -13,31 +13,54 @@
 
 ---
 
+## Failure analysis — Model/Effort block of 2026-08-25 (corrected before Phase 5)
+
+| What went wrong | Evidence | Correct owner / mechanism |
+| :--- | :--- | :--- |
+| **`make cursor-tiers` not run before this file landed** | First `task_scope.md` (`fb0598a`) wrote *"Carried from Sprint 027/028 … `make cursor-tiers` was not re-run"* | **`rule_validator`** MUST run `make cursor-tiers` in the same session immediately before writing or revising `Model`/`Effort` when `session_tool: cursor` (`agents/rule_validator.md` `tier_transcription`; Sprint 028 precedent) |
+| **Looked like Grok was a session default** | Many rows name `grok-4.6` because most units are **author** tier, not because one model runs the chat | **`token_economy_agent`** proposes from the live catalogue; human still picks `modelId` in the UI per unit |
+
+---
+
 ## Ownership map (who does what)
 
 | Concern | Decides | Writes the artifact | Source of truth |
 | :--- | :--- | :--- | :--- |
 | Profile per unit | `agent_orchestrator` | `agent_assignment.md` | Phase 4.1 |
 | File lock / risk / status | `rule_validator` | this file (Work tables) | Phase 4.3 |
-| Tier escalation + Cursor model/effort | `token_economy_agent` | transcribed here by `rule_validator` | `tier_escalation` + Sprint 027 accepted Cursor column |
+| Tier escalation + Cursor model/effort | `token_economy_agent` | transcribed here by `rule_validator` | `tier_escalation` + **`make cursor-tiers` run this session** |
 | Accept Cursor model into `config/model_tiers.json` | **Human** | `config/model_tiers.json` (separate unit if approved) | Sprint 027 Design §D7 — script proposes only |
 
 ---
 
 ## Measured Cursor state (this session, 2026-08-25)
 
-Carried from Sprint 027/028 (human-accepted). `make cursor-tiers` was not
-re-run this extraction: the accepted column is unchanged and `F-026-A2` requires
-the declaration, not a new catalogue.
+```text
+make cursor-tiers   # → python3 scripts/audit_cursor_models.py ; echo exit=$?
+exit=0
+Catalogue source: …/Cursor/User/globalStorage/state.vscdb
+Models after hard filters: 35
+Applied model (author cold-start candidate): grok-4.6
+Proposed author (≤1, cold start): grok-4.6
+Proposed mechanical (no depth lever): composer-2.5, gemini-3.1-pro, gemini-3-flash,
+  gemini-3.5-flash, gpt-5-mini
+Proposed gate: (none) — Design §D7, not proven history
+Proposals only — config/model_tiers.json was not modified
+```
 
-Config already human-accepted Sprint 027: `cursor.mechanical=composer-2.5`,
+Config human-accepted Sprint 027 (unchanged by this run): `cursor.mechanical=composer-2.5`,
 `cursor.author=grok-4.6` (effort `high`). `cursor.gate.model` stays **`null`**.
+
+## Cursor tier map — **ACCEPTED** (Sprint 027, confirmed by catalogue above)
 
 | Intent (phase) | Claude Code (reference only) | Cursor (accepted) | Effort / depth |
 | :--- | :--- | :--- | :--- |
 | `mechanical` | `haiku` / `low` | **`composer-2.5`** | **N/A** |
 | `author` | `sonnet` / `medium` | **`grok-4.6`** | **`high`** |
 | `gate` | `opus` / `high` | **`null` in config** | Operational: log applied model from disk at gate time |
+
+Select the `modelId` in the Cursor UI before each unit; re-read applied config
+from `state.vscdb` into `SPRINT_LOG.md` when gating (026–027 pattern).
 
 ---
 
