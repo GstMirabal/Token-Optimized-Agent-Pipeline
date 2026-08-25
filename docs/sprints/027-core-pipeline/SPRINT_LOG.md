@@ -1,7 +1,7 @@
 # Sprint Log — 027 (`autonomy-posture`)
 
 **Branch**: `ai-sprint/027` from `main` at `980f149`
-**Status**: Phase 3 complete — plan committed; Approval Gate (Phase 5) pending.
+**Status**: Phase 4 complete — assignment artifacts committed; Approval Gate (Phase 5) pending.
 
 ---
 
@@ -55,8 +55,8 @@ Measured at `main` `980f149`, before any Work unit of Sprint `027`:
 | 1 Planning | ✅ plan authored |
 | 2 Environment | ✅ baseline green |
 | 3 Roadmap | ✅ this file + branch |
-| 4.1–4.3 Assignment / skills / task_scope | ⏳ after Phase 5 |
-| 5 Approval Gate | ⏳ awaiting Human OK on committed plan |
+| 4.1–4.3 Assignment / skills / task_scope | ✅ `agent_assignment.md`, `skill_assignment.md`, `task_scope.md` |
+| 5 Approval Gate | ⏳ awaiting Human OK on committed plan `d874d7a` |
 | 6 Execution | ⏳ |
 | 7 Quality Gate | ⏳ |
 | 8 Closeout | ⏳ |
