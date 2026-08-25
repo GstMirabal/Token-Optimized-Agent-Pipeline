@@ -25,7 +25,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _root import agents_root  # noqa: E402
+from _root import agents_root
 
 ACTIVE_STATE = Path("docs/active_state.json")
 
