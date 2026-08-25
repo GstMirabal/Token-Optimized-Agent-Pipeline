@@ -137,6 +137,16 @@
       "nucleus_path": ".agent_state/mirror.json",
       "required": false,
       "note": "The backup, never the authority: when it disagrees with the anchor the anchor wins. It is authoritative only when the anchor is missing or corrupt, which is why its absence blocks nothing."
+    },
+    {
+      "filename": "AGENTS_SLASH_COMMANDS_GUIDE.md",
+      "phase": "Sprint 029 (documentation-truth) — living how-to; refresh when commands/ changes",
+      "role": "Doc Orchestrator",
+      "scope": "repository",
+      "host_path": "docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md",
+      "nucleus_path": "docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md",
+      "required": false,
+      "note": "How-to for /agents:* under Claude Code and Cursor. required=false: living guide, not a per-sprint gate artifact; repository-scoped required is declarative until a consumer filters on it. Named in audit_workflow.md link_audit so map_workflows.py keeps a matrix column."
     }
   ]
 }
