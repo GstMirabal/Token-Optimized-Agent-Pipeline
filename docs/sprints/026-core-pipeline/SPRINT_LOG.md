@@ -136,4 +136,24 @@ Residual (accepted, deferred): `A4` RA-16 hooks-scan widening and `P9.2` tests r
 
 ## Migration Gate — observations `M1`–`M7`
 
-*Section filled immediately after the suspend → install → claim sequence runs in this session.*
+Executed 2026-08-25 under Cursor. Sequence: `suspend` → `install.py --target cursor` → `claim --tool cursor`. **`release` was not used.** Install left `git status --porcelain` empty (`.cursor/` already gitignored); no empty bridge commit.
+
+| # | Result | Evidence |
+| :--- | :--- | :--- |
+| M1 | **PASS** | Status after `suspend`: `SUSPENDED`. `claim --tool cursor` printed resume (`session #13`), not collision. Status after claim: `IN_PROGRESS`. |
+| M2 | **PASS** | `session_id=20260825T043831Z-94095` (form `<ISO compact>-<PID>`), `session_tool=cursor`. |
+| M3 | **PASS** | `delegation_mode=sequential`. Phase 2 treats this as configuration, not `delegation_conflict` incident (this session continued without halting). |
+| M4 | **PASS** | `.cursor/commands/` = 13; `.cursor/rules/` = 12; `.cursor/mcp.json` present. |
+| M5 | **PASS** | Asked: *Under `agents.md §2 jurisdictional_lock`, how many physical files may a single instantiated subagent task edit structurally?* Answer: **1**. Matches `agents.md §2` (*Limit structural editing to `1` single physical file…*). Constitution loaded via `.cursor/rules/00-constitution.mdc` / workspace always-on rules. |
+| M6 | **PASS** | `.git/hooks/pre-push` installed by `install.py --target cursor`. Non-FF stdin to the hook exits `1` with `Rejected non-fast-forward… Force-push and history rewrite are blocked.`; FF control exits `0`. Note: `origin` had no `ai-sprint/026` (first push would be ZERO_SHA and allowed); rejection measured on the hook path `git push --force` uses when rewriting an existing tip — same `on_push.py` gate. |
+| M7 | **PASS** | `resume_pointer.at=37d7adb0c8d6093d8effc95369aa7aa4b378b740` equals `HEAD`. `session_probe.py` reports no anchor-vs-branch mismatch (advisory graph staleness only). |
+
+**Migration Gate: PASSED.** Hito 2 may proceed under Cursor with `delegation_mode: sequential`.
+
+### M5 verbatim answer (gate observation)
+
+> **1**
+
+---
+
+*Certified under conventional commit standard for Sprint 026 gate records.*
