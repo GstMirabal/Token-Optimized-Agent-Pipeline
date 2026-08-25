@@ -1,6 +1,18 @@
 """Generate the Cursor bridge from framework sources.
 
 Imported by scripts/install.py when ``--target`` is ``cursor`` or ``both``.
+
+Rule ``.mdc`` frontmatter contract (measured once in Sprint 026 ``P4.0``;
+absorbed here by ``A3.1`` so the sprint directory carries no tool-probe
+receipt). Only these keys are emitted:
+
+* ``description`` — string (agent-selected rules)
+* ``globs`` — comma-separated string, not a YAML list
+* ``alwaysApply`` — lowercase boolean
+
+Nucleus entry point: ``00-constitution.mdc`` with ``alwaysApply: true``
+importing ``agents.md``. Do not add a root ``AGENTS.md`` beside
+``agents.md`` on case-insensitive filesystems (``P4.0b``).
 """
 from __future__ import annotations
 
@@ -13,6 +25,8 @@ AGENTS_DIR = SCRIPT_DIR.parent
 RULE_TRIGGERS_PATH = AGENTS_DIR / "config" / "rule_triggers.json"
 MCP_TEMPLATE = AGENTS_DIR / "claude" / "mcp.json"
 CONSTITUTION_RULE = "00-constitution.mdc"
+# Keys emitted in rule frontmatter; keep in sync with the module docstring.
+MDC_RULE_FRONTMATTER_KEYS = ("description", "globs", "alwaysApply")
 
 
 def _load_rule_triggers() -> dict[str, dict]:
@@ -58,12 +72,17 @@ def _write_rules(cursor_dir: Path) -> None:
         body = src.read_text(encoding="utf-8")
         description = trigger["trigger_prose"].replace('"', "'")
         globs = _globs_for_mdc(trigger["globs"])
+        fields = {
+            "description": description,
+            "globs": globs,
+            "alwaysApply": "false",
+        }
+        if tuple(fields) != MDC_RULE_FRONTMATTER_KEYS:
+            raise RuntimeError("rule frontmatter keys drifted from MDC_RULE_FRONTMATTER_KEYS")
         frontmatter = (
             "---\n"
-            f"description: {description}\n"
-            f"globs: {globs}\n"
-            "alwaysApply: false\n"
-            "---\n"
+            + "".join(f"{key}: {value}\n" for key, value in fields.items())
+            + "---\n"
         )
         (rules_dir / f"{src.stem}.mdc").write_text(frontmatter + body, encoding="utf-8")
 
