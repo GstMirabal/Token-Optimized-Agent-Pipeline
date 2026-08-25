@@ -54,7 +54,6 @@
     },
     {
       "id": "F-20260825-027",
-      "file": "memory/F-20260825-027-cursor-tiers.md",
       "summary": "Under session_tool cursor, Model/Effort in task_scope must come from make cursor-tiers (token_economy_agent proposes, rule_validator transcribes) — never Claude haiku/sonnet/opus aliases, and never as columns on agent_assignment.md (agent_orchestrator assigns profiles only)."
     }
   ]
