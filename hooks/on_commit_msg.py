@@ -11,7 +11,7 @@ hole rather than leaving it declared, and it is the same lesson PR #30 recorded
 for the secret scanner: a guard that only sees the agent's commits misses most
 of the commits in a repository with a human in it.
 
-invoked_by: .git/hooks/commit-msg, installed by scripts/install_claude.py.
+invoked_by: .git/hooks/commit-msg, installed by scripts/install.py.
 
 Usage:
     python3 hooks/on_commit_msg.py <path-to-commit-message-file>
