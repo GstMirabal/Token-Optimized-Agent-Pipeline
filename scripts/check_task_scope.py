@@ -14,9 +14,14 @@ Usage:
     python3 scripts/check_task_scope.py --sprint-dir docs/sprints/030-core-pipeline
     python3 scripts/check_task_scope.py --current-sprint
 
+Also refuses a row whose assignee cannot perform the operation it is given: a
+profile with no ``Write``/``Edit`` tool cannot ``create``/``modify``/``delete`` a
+file. Sprints 030 and 031 recorded such rows as executed successfully.
+
 Exit codes:
-    0 — pass, skip (historical / no file / no anchor)
-    2 — shape or undeclared mechanical-high row (RA-11)
+    0 — pass, or skip (historical columns / non-canonical dir / no anchor)
+    2 — shape, undeclared mechanical-high row, incapable assignee, or a
+        canonical sprint directory holding no task_scope.md at all (RA-11)
 """
 
 from __future__ import annotations
@@ -34,6 +39,20 @@ MODEL_FROM_SPRINT = 28
 MECHANICAL_PROFILES = frozenset({"devops_agent", "git_sync_agent", "topology_mapper"})
 MECHANICAL_MODELS = frozenset({"haiku", "composer-2.5", "composer-2"})
 WORK_KEYS = ("File", "Operation", "Risk", "Assignee")
+WRITE_TOOLS = frozenset({"Write", "Edit"})
+# Matched as substrings: real tables write "modify/create", "create + delete"
+# and "modify (hito 2 gate)", so equality missed most of them. Deliberately
+# excludes "emit verdict" — a gate emits, the orchestrator transcribes, and
+# ADR-0008 gives the emitting role no file to write.
+MUTATING_OPERATIONS = (
+    "create",
+    "modify",
+    "delete",
+    "move",
+    "regenerate",
+    "append",
+    "transcribe",
+)
 
 
 def sprint_id_from_dir(sprint_dir: Path) -> int | None:
@@ -115,15 +134,66 @@ def _col(header: list[str], row: list[str], name: str) -> str:
     return row[position] if position < len(row) else ""
 
 
-def collect_findings(text: str, sprint_id: int | None) -> list[str]:
-    """Shape and undeclared mechanical-high rows. Empty means pass or skip."""
+def profile_tools(profile: str, root: Path) -> frozenset[str] | None:
+    """Tools declared in a profile's frontmatter, or None when it has no file.
+
+    Args:
+        profile (str): Snake_case profile name as written in the Assignee cell.
+        root (Path): Framework root holding ``agents/``.
+
+    Returns:
+        frozenset[str] | None: Declared tool names, or None if no such profile.
+    """
+    candidates = [root / "agents" / f"{profile}.md"]
+    candidates.extend(sorted(root.glob(f"profiles/*/agents/{profile}.md")))
+    for path in candidates:
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8")
+        match = re.search(r"^tools:\s*(.+)$", text, re.MULTILINE)
+        if match is None:
+            return frozenset()
+        return frozenset(part.strip() for part in match.group(1).split(",") if part.strip())
+    return None
+
+
+def _capability_findings(
+    header: list[str], rows: list[list[str]], root: Path
+) -> list[str]:
+    """Rows whose assignee cannot perform the operation the row assigns it."""
+    findings: list[str] = []
+    for row in rows:
+        operation = _col(header, row, "Operation").strip().lower()
+        assignee = _col(header, row, "Assignee")
+        profile = assignee.split()[0].strip("`,") if assignee else ""
+        mutates = any(verb in operation for verb in MUTATING_OPERATIONS)
+        if not mutates or not profile:
+            continue
+        unit = _col(header, row, "#") or "?"
+        tools = profile_tools(profile, root)
+        if tools is None:
+            findings.append(f"Unit {unit}: assignee {profile!r} has no profile file.")
+        elif not tools & WRITE_TOOLS:
+            findings.append(
+                f"Unit {unit}: {profile} is assigned a {operation!r} but declares "
+                f"no Write/Edit tool (declares: {', '.join(sorted(tools)) or 'none'})."
+            )
+    return findings
+
+
+def collect_findings(
+    text: str, sprint_id: int | None, root: Path | None = None
+) -> list[str]:
+    """Shape, mechanical-high and capability findings. Empty means pass."""
     tables = work_tables(text)
     if not tables:
         return []
     if not requires_model_columns(sprint_id, text):
         return []
+    resolved_root = root if root is not None else agents_root()
     findings: list[str] = []
     for header, rows in tables:
+        findings.extend(_capability_findings(header, rows, resolved_root))
         if "Model" not in header or "Effort" not in header:
             findings.append(
                 "Work table is missing Model/Effort columns "
@@ -158,10 +228,18 @@ def _mechanical_high_findings(header: list[str], rows: list[list[str]]) -> list[
 def check(sprint_dir: Path) -> int:
     """Audit one sprint directory. Returns the process exit code."""
     path = sprint_dir / "task_scope.md"
-    if not path.is_file():
-        print(f"[OK] check_task_scope: no task_scope.md under {sprint_dir} (skip)")
-        return 0
     sprint_id = sprint_id_from_dir(sprint_dir)
+    if not path.is_file():
+        if sprint_id is None:
+            print(f"[OK] check_task_scope: {sprint_dir} is not a sprint directory (skip)")
+            return 0
+        print(
+            f"❌ check_task_scope: no task_scope.md under {sprint_dir}. Phase 4.3 did "
+            "not run, and jurisdictional_lock and no_interference are both applied by "
+            "reading that file — they are disabled while appearing enforced.",
+            file=sys.stderr,
+        )
+        return 2
     findings = collect_findings(path.read_text(encoding="utf-8"), sprint_id)
     if not findings:
         print(f"[OK] check_task_scope: {path}")
