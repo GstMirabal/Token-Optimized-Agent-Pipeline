@@ -242,7 +242,7 @@ Detener y revertir la rama si:
 | :--- | :--- |
 | **Approved by** | Gustavo |
 | **Date** | 2026-08-25 |
-| **Plan commit at approval** | *(filled at Phase 3 commit)* |
+| **Plan commit at approval** | `e52e2b6` |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 *Phase 5 es una autorización humana única y atendida. NO debe envolverse en `/loop` desatendido.*
