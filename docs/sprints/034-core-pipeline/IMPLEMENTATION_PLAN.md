@@ -2,7 +2,7 @@
 
 **Canonical path**: `docs/sprints/034-core-pipeline/IMPLEMENTATION_PLAN.md`
 **Branch**: `ai-sprint/034` (existe; Lock 1 del plan está comiteado) · **Base**: `main` en `76ae9b3` (`v4.16.0`)
-**Status**: `EXECUTING` — Phase 5 autorizada por Gustavo 2026-08-26 («ok, comenzamos»). DAG: `A → B → P → I → K → J → N`.
+**Status**: `CLOSED` — SESSION LOCKED 2026-08-26. DAG `A → B → P → I → K → J → N` entregado. Same-turn `/agents:deployment` (no «awaiting»).
 
 > Redactado en Phase 1 (Planning) por `principal_agent`. Español permitido aquí
 > (`agents.md §1 user_chat`). El resto de artefactos del pipeline sigue en inglés.
@@ -35,8 +35,8 @@ Cifras vigentes (reproducir en Evidence): `start_workflow.md` ≈ 18 794 B;
 ## Open decisions (reanudar aquí)
 
 Las decisiones de diseño de esta tabla están **cerradas** (O1–O3, O5, O6). O4
-pertenece a **038**. Phase 5 **autorizada** 2026-08-26. Lo que queda es ejecutar
-las filas ⏳ de 034.
+pertenece a **038**. Phase 5 **autorizada** 2026-08-26. Work 034 **completo**;
+este close sella el sprint y encadena deploy.
 
 | # | Decisión | Opciones sobre la mesa | Estado / bloqueado hasta |
 | :--- | :--- | :--- | :--- |

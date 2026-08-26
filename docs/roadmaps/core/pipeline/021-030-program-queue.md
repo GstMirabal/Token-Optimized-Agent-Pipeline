@@ -10,7 +10,7 @@ version: 1.0.0
 
 - **Strategy Lock:** `OPEN`
 - **Delivered:** `024` and `025` (`v4.5.0`), `021` (`v4.6.0`), `022` (`v4.7.0`), `023` (`v4.8.0`), `026` (`v4.9.0`, PR #50), `027` (`v4.10.0`, PR #55), `028` (`v4.11.0`, PR #57), `029` (`documentation-truth`, `v4.12.0`, PR #59), `030` (`token-economy-enforcement`, `v4.13.0`, PR #61), `031` (`gate-verdict-classes`, `v4.14.0`, PR #63), `032` (`author-tier-trial`, `v4.15.0`, PR #64), `033` (`implementer-role`, `v4.16.0`, PR #65)
-- **Next / in flight:** post-033 queue open; **`F-021-A2` closed**. `033` **deployed** `v4.16.0` (PR #65, 2026-08-25). `032` **deployed** `v4.15.0` (PR #64). `031` **deployed** `v4.14.0` (PR #63). H-004 **deployed** `v4.13.1` (PR #62).
+- **Next / in flight:** **`034` (`core-pipeline`)** closing 2026-08-26 on `ai-sprint/034` (same-turn deploy). Program **034–038**: C/E/H/F → **035**; M/L → **036**; G → **037**; family-trial → **038**. Hosts stay on `v4.16.0` until the **034** tag; first re-enable is a manual pin of that tag; from **035** `/start` auto-pins. **`F-021-A2` closed**. `033` **deployed** `v4.16.0` (PR #65, 2026-08-25). `032` **deployed** `v4.15.0` (PR #64). `031` **deployed** `v4.14.0` (PR #63). H-004 **deployed** `v4.13.1` (PR #62).
 - **Origin:** drafted in an IDE planning mode across one long session, then migrated
   into this repository. That migration is the point: the same session opened with a
   host having lost an approved plan to ephemeral storage, and this document was
