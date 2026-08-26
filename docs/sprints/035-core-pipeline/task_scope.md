@@ -86,14 +86,14 @@ mechanical+high without keep/escalation note (`F-026-A2`).
 | C2 | `workflows/start_workflow.md` | modify | high | `orchestrator` | `grok-4.5` | `high` | ✅ `78822a6` |
 | C3 | `commands/start.md` | modify | low | `orchestrator` | `grok-4.5` | `high` | ✅ `23ed9a7` |
 | C4 | `tests/test_session_start.py` | create | medium | `implementer_agent` | `composer-2.5` | `N/A` | ✅ `b0a465e` |
-| C5 | `Makefile` | modify | medium | `implementer_agent` | `grok-4.5` | `high` | ⏳ |
+| C5 | `Makefile` | modify | medium | `implementer_agent` | `grok-4.5` | `high` | ✅ `bcfe2b1` |
 
 ## Work — Track H
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | H1 | `docs/decisions/ADR-0011-gate-cell-by-structural-ceiling.md` | create | high | `doc_orchestrator` | `grok-4.5` | `high` | ✅ `289981b` |
-| H2 | `config/model_tiers.json` | modify | high | `rule_validator` | `grok-4.5` | `high` | ⏳ |
+| H2 | `config/model_tiers.json` | modify | high | `rule_validator` | `grok-4.5` | `high` | ✅ `6db7a40` |
 | H3 | `scripts/verify_references.py` | modify | high | `implementer_agent` | `grok-4.5` | `high` | ⏳ |
 | H4 | `tests/test_verify_references.py` | modify | medium | `implementer_agent` | `composer-2.5` | `N/A` | ⏳ |
 
@@ -101,7 +101,7 @@ mechanical+high without keep/escalation note (`F-026-A2`).
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| F3 | `agents/token_economy_agent.md` | modify | medium | `agent_orchestrator` | `grok-4.5` | `high` | ⏳ |
+| F3 | `agents/token_economy_agent.md` | modify | medium | `agent_orchestrator` | `grok-4.5` | `high` | ✅ `c040635` |
 
 ---
 
