@@ -46,11 +46,26 @@
 
 ## Phase 5 — Approval Gate
 
-*(pending — Human OK required)*
+- Human OK 2026-08-26 («ok»). Lock 1 path:
+  `docs/sprints/037-core-pipeline/IMPLEMENTATION_PLAN.md` at `e5e3b58`.
+  `audit_plan.py` exit 0 re-confirmed before the gate.
 
 ## Phase 6 — Execution
 
-*(pending)*
+All **7** Work units landed on `ai-sprint/037` (G + S). Status SHAs on
+`task_scope.md`. DAG honored: G1+G2 before G3; S1+S2 and S3+S4 independent.
+**S1 deviation (measured):** `find … -exec … {} +` still fails under the agent
+sandbox with `sysconf(_SC_ARG_MAX)` — same class as `xargs`. Delivered
+`scripts/py_compile_tree.py` (`5774dcf`) and wired Makefile verify to it
+(`82ee3ba`). Abort criterion 2 satisfied by the Python walk, not `-exec`.
+
+| Unit | Commit |
+| :--- | :--- |
+| G1+G2 | `b360904` |
+| S1 helper `py_compile_tree.py` | `5774dcf` |
+| S1+S2 | `82ee3ba` |
+| S3+S4 | `668196a` |
+| G3 | `925a62d` |
 
 ## Phase 7 — Quality Gate
 

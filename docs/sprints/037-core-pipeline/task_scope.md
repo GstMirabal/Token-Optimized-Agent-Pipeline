@@ -70,18 +70,18 @@ mechanical+high without keep/escalation note (`F-026-A2`).
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| G1 | `scripts/model_ledger.py` | create | high | `implementer_agent` | `grok-4.5` | `high` | ⏳ |
-| G2 | `tests/test_model_ledger.py` | create | medium | `implementer_agent` | `composer-2.5` | `N/A` | ⏳ |
-| G3 | `workflows/close_workflow.md` | modify | medium | `orchestrator` | `grok-4.5` | `high` | ⏳ |
+| G1 | `scripts/model_ledger.py` | create | high | `implementer_agent` | `grok-4.5` | `high` | ✅ `b360904` |
+| G2 | `tests/test_model_ledger.py` | create | medium | `implementer_agent` | `composer-2.5` | `N/A` | ✅ `b360904` |
+| G3 | `workflows/close_workflow.md` | modify | medium | `orchestrator` | `grok-4.5` | `high` | ✅ `925a62d` |
 
 ## Work — Track S
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| S1 | `Makefile` | modify | high | `implementer_agent` | `grok-4.5` | `high` | ⏳ |
-| S2 | `tests/test_verify_py_compile.py` | create | medium | `implementer_agent` | `composer-2.5` | `N/A` | ⏳ |
-| S3 | `scripts/install.py` | modify | high | `implementer_agent` | `grok-4.5` | `high` | ⏳ |
-| S4 | `tests/test_installer.sh` | modify | medium | `implementer_agent` | `composer-2.5` | `N/A` | ⏳ |
+| S1 | `Makefile` | modify | high | `implementer_agent` | `grok-4.5` | `high` | ✅ `82ee3ba` |
+| S2 | `tests/test_verify_py_compile.py` | create | medium | `implementer_agent` | `composer-2.5` | `N/A` | ✅ `82ee3ba` |
+| S3 | `scripts/install.py` | modify | high | `implementer_agent` | `grok-4.5` | `high` | ✅ `668196a` |
+| S4 | `tests/test_installer.sh` | modify | medium | `implementer_agent` | `composer-2.5` | `N/A` | ✅ `668196a` |
 
 ---
 
@@ -91,8 +91,9 @@ mechanical+high without keep/escalation note (`F-026-A2`).
 | :--- | :--- | :--- |
 | `scripts/model_ledger.py` | G1 then G2 tests | G1+G2 may share one commit (plan) |
 | `workflows/close_workflow.md` | G3 after G1+G2 | Names `make model-ledger` (`RA-16`) |
-| `Makefile` | S1 only this sprint | Third touch after C5/035 and L3/036; fold stub cleanup |
-| `tests/test_verify_py_compile.py` | S2 with S1 | Same commit as S1 |
+| `scripts/py_compile_tree.py` | S1 prerequisite | `find -exec` still hits `SC_ARG_MAX` in agent sandbox; script is the compile path |
+| `Makefile` | S1 only this sprint | Third touch after C5/035 and L3/036; wires `py_compile_tree` + live `model-ledger` |
+| `tests/test_verify_py_compile.py` | S2 with S1 | Same commit as S1 Makefile wire |
 | `scripts/install.py` | S3 then S4 | S3+S4 may share one commit (plan) |
 
 `no_interference`: no other IN_PROGRESS subtask lists these paths.

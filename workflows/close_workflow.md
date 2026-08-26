@@ -35,4 +35,4 @@ Master closure protocol enforcing the Zero-Tolerance Memory Purge rule, Absolute
 | **6. Session Lock** | `session_lock` | Output the official seal: **`SESSION LOCKED`**. The sprint is sealed; continue with `deployment_workflow.md` in the same turn (`deployment_handoff` above). |
 
 ---
-*Optimized for Pipeline Topographic Purity & Symmetric Documentation (v6.4.0) — `graph_rebuild` after `atomic_commit`; `deployment_handoff` continues `/agents:deployment` in the same turn (no default "awaiting").*
+*Optimized for Pipeline Topographic Purity & Symmetric Documentation (v6.4.1) — `model_ledger_regen` at Phase 1; `graph_rebuild` after `atomic_commit`; `deployment_handoff` continues `/agents:deployment` in the same turn (no default "awaiting").*
