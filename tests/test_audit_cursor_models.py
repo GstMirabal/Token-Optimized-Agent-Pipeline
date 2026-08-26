@@ -128,14 +128,14 @@ def test_resolve_profile_missing_tier_exits_2(
     assert "no tier:" in err
 
 
-def test_propose_tiers_gate_empty_without_proven_families() -> None:
-    """Regression: Design §D7 — gate stays empty until proven history exists."""
+def test_propose_tiers_gate_structural_ceiling_without_proven_families() -> None:
+    """Regression: Design §D13 — gate fills via structural ceiling with empty proven history."""
     models = [
         {
-            "name": "composer-2.5",
+            "name": "grok-4.5",
             "supportsAgent": True,
             "degradationStatus": 0,
-            "parameterDefinitions": [],
+            "parameterDefinitions": [{"id": "effort"}],
         },
         {
             "name": "claude-opus-4-6",
@@ -143,13 +143,24 @@ def test_propose_tiers_gate_empty_without_proven_families() -> None:
             "degradationStatus": 0,
             "parameterDefinitions": [{"id": "effort"}],
         },
+        {
+            "name": "composer-2.5",
+            "supportsAgent": True,
+            "degradationStatus": 0,
+            "parameterDefinitions": [],
+        },
     ]
     proposals = acm.propose_tiers(
         models,
         applied_model_id="composer-2.5",
         proven_families=set(),
+        map_author_model="grok-4.5",
+        map_author_family="xai",
+        preferred_gate_family="anthropic",
     )
-    assert proposals["gate"] == []
+    assert proposals["gate"]
+    assert all(row["family"] != "xai" for row in proposals["gate"])
+    assert any(row["name"] == "claude-opus-4-6" for row in proposals["gate"])
 
 
 def test_main_resolve_mechanical_via_cli(
