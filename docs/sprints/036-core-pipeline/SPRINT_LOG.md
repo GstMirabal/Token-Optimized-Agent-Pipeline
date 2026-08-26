@@ -31,7 +31,8 @@
 ## Phase 3 — Roadmap extraction
 
 - Branch `ai-sprint/036` created from `main` @ `ba80a55` (`RA-12`).
-- Plan at canonical path; committed before Phase 5 (`triple_lock` lock 1).
+- Plan at canonical path; committed `7ebf251` before Phase 5
+  (`triple_lock` lock 1 path ready).
 
 ## Phase 4 — Assignment
 
