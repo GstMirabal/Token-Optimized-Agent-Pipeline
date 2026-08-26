@@ -83,9 +83,9 @@ mechanical+high without keep/escalation note (`F-026-A2`).
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | C1 | `scripts/session_start.py` | create | high | `implementer_agent` | `grok-4.5` | `high` | ✅ `c208d7d` |
-| C2 | `workflows/start_workflow.md` | modify | high | `orchestrator` | `grok-4.5` | `high` | ⏳ |
-| C3 | `commands/start.md` | modify | low | `orchestrator` | `grok-4.5` | `high` | ⏳ |
-| C4 | `tests/test_session_start.py` | create | medium | `implementer_agent` | `composer-2.5` | `N/A` | ⏳ |
+| C2 | `workflows/start_workflow.md` | modify | high | `orchestrator` | `grok-4.5` | `high` | ✅ `78822a6` |
+| C3 | `commands/start.md` | modify | low | `orchestrator` | `grok-4.5` | `high` | ✅ `23ed9a7` |
+| C4 | `tests/test_session_start.py` | create | medium | `implementer_agent` | `composer-2.5` | `N/A` | ✅ `b0a465e` |
 | C5 | `Makefile` | modify | medium | `implementer_agent` | `grok-4.5` | `high` | ⏳ |
 
 ## Work — Track H
