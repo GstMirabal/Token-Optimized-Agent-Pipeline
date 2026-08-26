@@ -73,8 +73,8 @@ mechanical+high without keep/escalation note (`F-026-A2`).
 | E0 | `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` | modify | medium | `doc_orchestrator` | `grok-4.5` | `high` | ✅ `f636fdd` |
 | E1 | `docs/decisions/ADR-0010-cursor-task-applies-tier-map.md` | create | high | `doc_orchestrator` | `grok-4.5` | `high` | ✅ `45ef87e` |
 | E2 | `scripts/audit_cursor_models.py` | modify | high | `implementer_agent` | `grok-4.5` | `high` | ✅ `a181a11` |
-| E3 | `workflows/pipeline_workflow.md` | modify | high | `orchestrator` | `grok-4.5` | `high` | ⏳ |
-| E4 | `tests/test_audit_cursor_models.py` | create | medium | `implementer_agent` | `composer-2.5` | `N/A` | ⏳ |
+| E3 | `workflows/pipeline_workflow.md` | modify | high | `orchestrator` | `grok-4.5` | `high` | ✅ `0ee4901` |
+| E4 | `tests/test_audit_cursor_models.py` | create | medium | `implementer_agent` | `composer-2.5` | `N/A` | ✅ `baf42d0` |
 | E5 | `scripts/audit_cursor_models.py` | modify | high | `implementer_agent` | `grok-4.5` | `high` | ⏳ |
 | E6 | `scripts/audit_cursor_models.py` | modify | high | `implementer_agent` | `grok-4.5` | `high` | ⏳ |
 
