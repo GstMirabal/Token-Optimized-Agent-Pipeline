@@ -72,23 +72,23 @@ mechanical+high without keep/escalation note (`F-026-A2`).
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| L1 | `scripts/audit_cursor_era.py` | create | high | `implementer_agent` | `grok-4.5` | `high` | ⏳ |
-| L2 | `tests/test_audit_cursor_era.py` | create | medium | `implementer_agent` | `composer-2.5` | `N/A` | ⏳ |
-| L3 | `Makefile` | modify | medium | `implementer_agent` | `grok-4.5` | `high` | ⏳ |
+| L1 | `scripts/audit_cursor_era.py` | create | high | `implementer_agent` | `grok-4.5` | `high` | ✅ `9f505f1` |
+| L2 | `tests/test_audit_cursor_era.py` | create | medium | `implementer_agent` | `composer-2.5` | `N/A` | ✅ `9f505f1` |
+| L3 | `Makefile` | modify | medium | `implementer_agent` | `grok-4.5` | `high` | ✅ `2879d58` |
 
 ## Work — Track M
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| M1 | `scripts/check_forge_ladder.py` | create | high | `implementer_agent` | `grok-4.5` | `high` | ⏳ |
-| M2 | `tests/test_check_forge_ladder.py` | create | medium | `implementer_agent` | `composer-2.5` | `N/A` | ⏳ |
-| M3 | `agents/skill_architect.md` | modify | high | `agent_orchestrator` | `grok-4.5` | `high` | ⏳ |
-| M4 | `docs/standards/templates/SKILL_ASSIGNMENT_TEMPLATE.md` | create | medium | `doc_orchestrator` | `grok-4.5` | `high` | ⏳ |
-| M5 | `workflows/pipeline_workflow.md` | modify | high | `orchestrator` | `grok-4.5` | `high` | ⏳ |
-| M6 | `tests/test_agent_profile_census.py` | create | medium | `implementer_agent` | `composer-2.5` | `N/A` | ⏳ |
-| M7 | `agents/qa_agent.md` | modify | high | `agent_orchestrator` | `grok-4.5` | `high` | ⏳ |
-| M8 | `agents/tester_agent.md` | modify | high | `agent_orchestrator` | `grok-4.5` | `high` | ⏳ |
-| M9 | `agents/principal_agent.md` | modify | high | `agent_orchestrator` | `grok-4.5` | `high` | ⏳ |
+| M1 | `scripts/check_forge_ladder.py` | create | high | `implementer_agent` | `grok-4.5` | `high` | ✅ `dafdf94` |
+| M2 | `tests/test_check_forge_ladder.py` | create | medium | `implementer_agent` | `composer-2.5` | `N/A` | ✅ `dafdf94` |
+| M3 | `agents/skill_architect.md` | modify | high | `agent_orchestrator` | `grok-4.5` | `high` | ✅ `73f9135` |
+| M4 | `docs/standards/templates/SKILL_ASSIGNMENT_TEMPLATE.md` | create | medium | `doc_orchestrator` | `grok-4.5` | `high` | ✅ `f2ac5e3` |
+| M5 | `workflows/pipeline_workflow.md` | modify | high | `orchestrator` | `grok-4.5` | `high` | ✅ `749e5aa` |
+| M6 | `tests/test_agent_profile_census.py` | create | medium | `implementer_agent` | `composer-2.5` | `N/A` | ✅ `87fe381` |
+| M7 | `agents/qa_agent.md` | modify | high | `agent_orchestrator` | `grok-4.5` | `high` | ✅ `18f9d49` |
+| M8 | `agents/tester_agent.md` | modify | high | `agent_orchestrator` | `grok-4.5` | `high` | ✅ `71bfb90` |
+| M9 | `agents/principal_agent.md` | modify | high | `agent_orchestrator` | `grok-4.5` | `high` | ✅ `2937615` |
 
 ---
 

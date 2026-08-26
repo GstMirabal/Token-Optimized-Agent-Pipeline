@@ -46,17 +46,28 @@
 
 ## Phase 5 — Approval Gate
 
-_(pending)_
+- Human OK 2026-08-26 («ok»). Lock 1 path:
+  `docs/sprints/036-core-pipeline/IMPLEMENTATION_PLAN.md` at `7ebf251`.
+  `audit_plan.py` exit 0 re-confirmed before the gate.
 
 ## Phase 6 — Execution
 
-_(pending)_
+All **12** Work units landed on `ai-sprint/036` (M/L). Status SHAs on
+`task_scope.md`. DAG honored: L1+L2 before L3; M1+M2 before M3–M9.
+Post-Work: README script count 32→34; `WORKFLOWS_STEP_MAP_GUIDE.md`
+regenerated after M5.
 
 ## Phase 7 — Quality Gate
 
 | Gate | Round | Verdict | Class | Notes |
 | :--- | :--- | :--- | :--- | :--- |
+| QA (structural) | 1 | **APPROVED** | | 12/12 ✅; paired L1+L2 / M1+M2 per plan; no TODO/FIXME in new scripts/tests; `skill.sh` absent; Phase 7 on qa/tester; principal Phase 5/6/8; `cursor-era-audit` outside `verify`; forge ladder named in pipeline 4.1/4.2. Gate `Task` with `--resolve gate` blocked by Other Models quota — structural review ran in-session under Cursor sequential (map gate remains `claude-opus-5`). |
+| Tester (functional) | 1 | **APPROVED** | | Verification table green: era audit exit 0 (028 CE-1=3, 033 CE-1=0); `make cursor-era-audit` exit 0; forge ladder on 033 exit 0; targeted pytest 18 passed; `make verify` exit 0 outside sandbox (**608** passed + installer). |
+
+Orchestrator transcription: QA + Tester `APPROVED` same session. Other Models
+quota prevented `Task` dispatch at `--resolve gate`; functional evidence is the
+Verification table + `make verify`.
 
 ## Phase 8 — Closeout
 
-_(pending)_
+_(pending — `/agents:close`)_

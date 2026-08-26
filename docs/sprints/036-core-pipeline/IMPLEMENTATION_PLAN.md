@@ -2,7 +2,7 @@
 
 **Canonical path**: `docs/sprints/036-core-pipeline/IMPLEMENTATION_PLAN.md`
 **Branch**: `ai-sprint/036` · **Base**: `main` at `ba80a55`
-**Status**: `DRAFT` (Phase 3 extracted; awaiting Phase 5)
+**Status**: `APPROVED` / `EXECUTED` (Phase 7 green; awaiting close)
 
 > Authored at Phase 1 (Planning) by `principal_agent`. Spanish permitted here
 > (`agents.md §1 user_chat`). Hereda Design **D18** / **D19** del plan sellado
@@ -238,9 +238,9 @@ Orden de commits: `L1+L2 → L3` ∥ `M1+M2 → M3 → M4 → M5 → M6 → M7 �
 
 | Field | Value |
 | :--- | :--- |
-| **Approved by** | _(pending Phase 5)_ |
-| **Date** | |
-| **Plan commit at approval** | |
+| **Approved by** | Gustavo (chat: «ok») |
+| **Date** | 2026-08-26 |
+| **Plan commit at approval** | `7ebf251` |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an
