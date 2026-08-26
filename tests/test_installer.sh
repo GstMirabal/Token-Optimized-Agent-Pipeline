@@ -117,8 +117,13 @@ rm -f "$HOST_CURSOR/.agents/.bridge_claude.lock" "$HOST_CURSOR/.agents/.bridge_c
 [ -d "$HOST_CURSOR/.cursor/commands" ] || fail "cursor host: .cursor/commands missing"
 [ "$(ls -1 "$HOST_CURSOR/.cursor/commands" | wc -l | tr -d ' ')" = "13" ] \
   || fail "cursor host: expected 13 commands"
-[ "$(ls -1 "$HOST_CURSOR/.cursor/rules" | wc -l | tr -d ' ')" = "12" ] \
-  || fail "cursor host: expected 12 rules"
+[ "$(ls -1 "$HOST_CURSOR/.cursor/rules" | wc -l | tr -d ' ')" = "13" ] \
+  || fail "cursor host: expected 13 rules"
+[ -d "$HOST_CURSOR/.cursor/agents" ] || fail "cursor host: .cursor/agents missing"
+[ "$(ls -1 "$HOST_CURSOR/.cursor/agents" | wc -l | tr -d ' ')" = "14" ] \
+  || fail "cursor host: expected 14 Cursor subagents"
+[ -f "$HOST_CURSOR/.cursor/agents/implementer-agent.md" ] \
+  || fail "cursor host: implementer-agent.md missing"
 [ -f "$HOST_CURSOR/.cursor/mcp.json" ] || fail "cursor host: mcp.json missing"
 [ -x "$HOST_CURSOR/.git/hooks/pre-push" ] || fail "cursor host: pre-push missing"
 grep -q "on_push.py" "$HOST_CURSOR/.git/hooks/pre-push" \
@@ -126,7 +131,7 @@ grep -q "on_push.py" "$HOST_CURSOR/.git/hooks/pre-push" \
 [ -f "$HOST_CURSOR/.agents/.bridge_cursor.lock" ] || fail "cursor host: cursor lock missing"
 [ ! -f "$HOST_CURSOR/.agents/.bridge_claude.lock" ] \
   || fail "cursor host: must not write claude lock"
-for entry in "/.cursor/commands/" "/.cursor/rules/" "/.cursor/mcp.json"; do
+for entry in "/.cursor/commands/" "/.cursor/rules/" "/.cursor/agents/" "/.cursor/mcp.json"; do
   grep -qxF "$entry" "$HOST_CURSOR/.gitignore" \
     || fail "cursor host: .gitignore missing $entry"
 done

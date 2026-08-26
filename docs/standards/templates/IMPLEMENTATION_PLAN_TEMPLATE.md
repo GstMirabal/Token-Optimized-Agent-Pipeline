@@ -39,7 +39,13 @@ this document is the only thing that survives the session.
 One row per unit. One unit is one atomic commit (`RA-08`) touching **one physical
 file** as its structural subject (`agents.md §2 jurisdictional_lock`).
 
-| # | File | Operation | Risk | Assignee | Status |
+The Work column `Assignee (proposed)` is a staffing proposal from Phase 1. Phase
+4.1 (`agent_orchestrator`) is the authority that records the assignee; it may
+overwrite this proposal. A Work row is not closed until `agent_assignment.md`
+records it. Do not rename columns on existing `task_scope.md` files to match
+this heading.
+
+| # | File | Operation | Risk | Assignee (proposed) | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | {{ID}} | `{{PATH}}` | create/modify/delete | low/medium/high | `{{ROLE}}` | ⏳ |
 

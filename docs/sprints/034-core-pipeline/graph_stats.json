@@ -1,0 +1,8 @@
+{
+  "nodes": 7149,
+  "edges": 8450,
+  "communities": 696,
+  "source": "graphify-out/graph.json",
+  "sprint": 34,
+  "note": "AST update after atomic_commit (built_at_commit = seal tip); deep semantic rebuild skipped (no LLM API key)"
+}

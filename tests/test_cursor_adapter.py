@@ -33,3 +33,40 @@ def test_write_rules_emits_only_contract_keys(tmp_path: Path) -> None:
         if line.strip() and ":" in line
     )
     assert keys == cursor_adapter.MDC_RULE_FRONTMATTER_KEYS
+
+
+def _frontmatter_keys(text: str) -> tuple[str, ...]:
+    front = text.split("---", 2)[1]
+    return tuple(
+        line.split(":", 1)[0].strip()
+        for line in front.strip().splitlines()
+        if line.strip() and ":" in line
+    )
+
+
+def test_chat_title_rule_is_always_apply(tmp_path: Path) -> None:
+    bridge = tmp_path / "bridge"
+    cursor_adapter._write_chat_title_rule(bridge)
+    path = bridge / "rules" / cursor_adapter.CHAT_TITLE_RULE
+    text = path.read_text(encoding="utf-8")
+    assert "alwaysApply: true" in text
+    assert "rename_chat" in text
+    assert "Chat initialization" in text
+
+
+def test_write_agents_emits_cursor_contract(tmp_path: Path) -> None:
+    bridge = tmp_path / "bridge"
+    cursor_adapter._write_agents(bridge)
+    dest = bridge / "agents"
+    sources = list((cursor_adapter.AGENTS_DIR / "agents").glob("*.md"))
+    written = list(dest.glob("*.md"))
+    assert len(written) == len(sources)
+    qa = (dest / "qa-agent.md").read_text(encoding="utf-8")
+    assert _frontmatter_keys(qa) == cursor_adapter.CURSOR_AGENT_FRONTMATTER_KEYS
+    assert "tools:" not in qa.split("---", 2)[1]
+    assert "tier:" not in qa.split("---", 2)[1]
+    assert "readonly: true" in qa
+    assert "model: inherit" in qa
+    implementer = (dest / "implementer-agent.md").read_text(encoding="utf-8")
+    assert "readonly: false" in implementer
+    assert (dest / "implementer-agent.md").is_file()

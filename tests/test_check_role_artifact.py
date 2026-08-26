@@ -42,7 +42,11 @@ def check_mod(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
                         "scope": "repository",
                         "required": True,
                     },
-                ]
+                ],
+                "gate_evidence": {
+                    "file": "SPRINT_LOG.md",
+                    "roles": {"QA Agent": "QA", "Tester Agent": "Tester"},
+                },
             }
         ),
         encoding="utf-8",
@@ -78,6 +82,56 @@ def test_repository_scope_ignored(check_mod, tmp_path: Path) -> None:
 def test_role_from_agent_type_maps_frontmatter_names(check_mod) -> None:
     assert check_mod.role_from_agent_type("orchestrator") == "Orchestrator"
     assert check_mod.role_from_agent_type("agent-orchestrator") == "Agent Orchestrator"
+
+
+# --- Sprint 034 D17: absence used to be reported as success. ---
+
+
+def test_profile_name_is_accepted_like_the_display_name(check_mod, tmp_path: Path) -> None:
+    """The bug: the framework writes `rule_validator`, the registry writes
+    `Rule Validator`, and the literal comparison matched nothing — which the
+    script called success. Both spellings must now reach the same verdict."""
+    sprint = tmp_path / "sprint"
+    sprint.mkdir()
+    assert check_mod.main(["--role", "rule_validator", "--sprint-dir", str(sprint)]) == 2
+    assert check_mod.main(["--role", "Rule Validator", "--sprint-dir", str(sprint)]) == 2
+
+
+def test_unknown_role_is_refused_not_approved(check_mod, tmp_path: Path) -> None:
+    sprint = tmp_path / "sprint"
+    sprint.mkdir()
+    assert check_mod.main(["--role", "no_such_role", "--sprint-dir", str(sprint)]) == 2
+
+
+def test_no_title_case_fabrication(check_mod) -> None:
+    """`qa-agent` used to become `Qa Agent`, which matched no entry."""
+    assert check_mod.role_from_agent_type("qa-agent") == "QA Agent"
+    assert check_mod.role_from_agent_type("not-a-profile") is None
+
+
+def test_known_profile_absent_from_registry_says_so(check_mod, tmp_path: Path) -> None:
+    sprint = tmp_path / "sprint"
+    sprint.mkdir()
+    assert check_mod.main(["--role", "implementer_agent", "--sprint-dir", str(sprint)]) == 0
+
+
+def test_gate_role_needs_a_gate_row_not_just_the_file(check_mod, tmp_path: Path) -> None:
+    """A gate owns no file: SPRINT_LOG.md exists from Phase 3, before any gate
+    runs. Only a row naming the gate shows it ran."""
+    sprint = tmp_path / "sprint"
+    sprint.mkdir()
+    log = sprint / "SPRINT_LOG.md"
+    log.write_text("# log\n", encoding="utf-8")
+    assert check_mod.main(["--role", "qa_agent", "--sprint-dir", str(sprint)]) == 2
+
+    log.write_text(
+        "| Gate | Round | Verdict | Class | Notes |\n"
+        "| :--- | :--- | :--- | :--- | :--- |\n"
+        "| QA (structural) | 1 | **APPROVED** | | ruff exit 0 |\n",
+        encoding="utf-8",
+    )
+    assert check_mod.main(["--role", "qa_agent", "--sprint-dir", str(sprint)]) == 0
+    assert check_mod.main(["--role", "tester_agent", "--sprint-dir", str(sprint)]) == 2
 
 
 def test_from_hook_missing_sprint_skips(check_mod, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:

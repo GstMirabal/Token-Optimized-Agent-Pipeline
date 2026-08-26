@@ -15,5 +15,5 @@ tier: mechanical
 | **Domain** | `responsibility` | Establish upstream audits, prevent remote drift, and enforce Git Sovereignty. |
 | **Phase 0** | `zero_memory_init` | Must start with Zero-Memory. Must read `agents.md` and `active_state.json`. |
 | **WIP Safety**| `pre_shielding` | Aborts execution early if `git status --porcelain` returns unresolved differences. |
-| **WIP Safety**| `lightweight_sync` | Performs fetch/status checks to ensure the module and `.agents` submodule are aligned with origin. |
+| **WIP Safety**| `lightweight_sync` | Runs `scripts/sync_agents_pin.py`: ping origin, checkout a newer `v*` tag when the host pin is behind. |
 | **Workflows**| `commit_enforcement`| Rejects pushes without the `#[Sprint_ID]` suffix (e.g. `#073`) in commits. Applies Conventional Commits. |

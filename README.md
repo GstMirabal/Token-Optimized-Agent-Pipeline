@@ -65,7 +65,7 @@ The Token-Optimized Agent Pipeline is an AI agent governance framework designed 
 ### At a Glance
 
 <!-- COUNTED_START -->
-| **Infrastructure** | 30 Python scripts in [`scripts/`](scripts/) · 6 JSON registries in [`config/`](config/) |
+| **Infrastructure** | 31 Python scripts in [`scripts/`](scripts/) · 6 JSON registries in [`config/`](config/) |
 <!-- COUNTED_END -->
 
 | | |
@@ -121,9 +121,12 @@ The Token-Optimized Agent Pipeline is an AI agent governance framework designed 
    ```
    Every tag is published as a [GitHub Release](https://github.com/GstMirabal/Token-Optimized-Agent-Pipeline/releases) with its notes, so you can read exactly what a version changes before pinning to it.
 
-   To upgrade later: check the [CHANGELOG](CHANGELOG.md), check out the new tag, and re-run the installer to pick up new agents/commands/skills:
+   To upgrade later: `/agents:start` pings origin and checks out the newest
+   published `vX.Y.Z` tag automatically (`scripts/sync_agents_pin.py`). Commit
+   the dirty gitlink when you next commit. Do **not** `git submodule update
+   --remote --merge` unless you deliberately track `main` (untagged). Re-run
+   the installer only if `bridge_check` / `on_init` did not already re-link:
    ```bash
-   git submodule update --remote --merge   # only if you deliberately track main
    .agents/scripts/install.py --target both
    ```
 

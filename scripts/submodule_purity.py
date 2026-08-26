@@ -100,7 +100,8 @@ def report(untracked: list[str], modified: list[str]) -> None:
             print(f"   • {path}", file=sys.stderr)
         print("     → A framework change belongs in the nucleus repository. Work it "
               "in a separate clone and open a pull request (`agents.md §4 "
-              "feedback_upstream`); it reaches this host as a deliberate pin bump.",
+              "feedback_upstream`); it reaches this host as an automatic pin "
+              "bump on `/agents:start`.",
               file=sys.stderr)
 
     if untracked:

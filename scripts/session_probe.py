@@ -78,26 +78,60 @@ def is_nucleus() -> bool:
 
 # --- probes -----------------------------------------------------------
 
+_BUILT_AT_RE = re.compile(r'"built_at_commit"\s*:\s*"([0-9a-fA-F]{7,40})"')
+
+
+def graph_built_commit(path: Path) -> str | None:
+    """SHA graphify recorded when it wrote `graph.json`, or None if absent.
+
+    The field is read from the first 64 KiB so a 100k-line graph is not parsed
+    just to learn it was never stamped. Missing field must not look like behind.
+    """
+    try:
+        with path.open(encoding="utf-8") as handle:
+            chunk = handle.read(65536)
+    except OSError:
+        return None
+    match = _BUILT_AT_RE.search(chunk)
+    if match is None:
+        return None
+    return match.group(1)
+
+
+def last_source_commit() -> str | None:
+    args = ["git", "log", "-1", "--format=%H", "--"]
+    args += [f"*{suffix[1:]}" for suffix in SOURCE_SUFFIXES]
+    result = subprocess.run(args, capture_output=True, text=True, check=False)
+    sha = result.stdout.strip()
+    if result.returncode != 0 or not sha:
+        return None
+    return sha
+
+
+def is_git_ancestor(commit: str, descendant: str) -> bool:
+    result = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", commit, descendant],
+        capture_output=True, text=True, check=False,
+    )
+    return result.returncode == 0
+
+
 def probe_graph() -> str | None:
     """Is the knowledge graph older than the newest source commit?"""
     if not GRAPH.exists():
         return "No knowledge graph at graphify-out/. Propose: `graphify update .`"
-
-    args = ["git", "log", "-1", "--format=%ct", "--"]
-    args += [f"*{suffix[1:]}" for suffix in SOURCE_SUFFIXES]
-    result = subprocess.run(args, capture_output=True, text=True)
-    if result.returncode != 0 or not result.stdout.strip():
+    built = graph_built_commit(GRAPH)
+    if built is None:
         return None
-
-    last_source_commit = int(result.stdout.strip())
-    if GRAPH.stat().st_mtime < last_source_commit:
-        behind = subprocess.run(
-            ["git", "log", "--oneline", "--since", str(int(GRAPH.stat().st_mtime))],
-            capture_output=True, text=True,
-        ).stdout.count("\n")
-        return (f"Knowledge graph is older than the latest source commit "
-                f"({behind} commit(s) behind). Propose: `graphify update .`")
-    return None
+    source = last_source_commit()
+    if source is None:
+        return None
+    if is_git_ancestor(source, built):
+        return None
+    return (
+        f"Knowledge graph was built at {built[:7]}, which does not include "
+        "the latest source commit. Propose: `graphify update .`"
+    )
 
 
 def probe_docs(state: dict) -> str | None:

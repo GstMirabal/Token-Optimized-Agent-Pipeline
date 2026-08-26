@@ -13,7 +13,7 @@ protocols that should mirror each other shows up there first.
 | Workflow | IMPLEMENTATION_PLAN.md | SPRINT_LOG.md | agent_assignment.md | skill_assignment.md | task_scope.md | graph_stats.json | PHASE_REGISTER.md | active_state.json | CHANGELOG.md | memory_index.json | graph.json | mirror.json | AGENTS_SLASH_COMMANDS_GUIDE.md |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | `audit_workflow` | — | — | — | — | — | — | — | — | — | — | — | — | verify |
-| `close_workflow` | write | write | write | write | write | write | write | write | write | verify/write | — | — | — |
+| `close_workflow` | write | write | write | write | write | write | write | write | write | verify/write | write | — | — |
 | `deployment_workflow` | — | — | — | — | — | — | — | — | write | — | — | — | — |
 | `extract_workflow` | — | — | — | — | — | — | — | — | — | ?/verify/write | — | — | — |
 | `pipeline_workflow` | write | write | write | write | verify/write | — | write | — | write | — | — | — | — |
@@ -65,7 +65,6 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 0. Ruleset Invocation | `read_ruleset` | verify |
 | 1. Topographic Audit | `noise_purge` | write |
 | 1. Topographic Audit | `rules_optimization` | ? |
-| 1. Topographic Audit | `graph_rebuild` | write |
 | 1. Topographic Audit | `docs_freshness_gate` | write |
 | 2. Sprint Closeout | `history_sync` | write |
 | 2. Sprint Closeout | `readme_counts` | write |
@@ -77,6 +76,7 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 3.5 Platform Recheck | `platform_recheck` | verify |
 | 4. State Sync | `state_sync` | write |
 | 5. Git Sovereignty | `atomic_commit` | write |
+| 5. Git Sovereignty | `graph_rebuild` | write |
 | 5. Git Sovereignty | `submodule_purity` | write |
 | 5.5 Branch Sovereignty | `branch_audit` | write |
 | 5.5 Branch Sovereignty | `local_prune` | write |

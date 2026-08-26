@@ -104,4 +104,5 @@ memory/
 # Cursor bridge output (regenerable via scripts/install.py --target cursor)
 .cursor/commands/
 .cursor/rules/
+.cursor/agents/
 .cursor/mcp.json

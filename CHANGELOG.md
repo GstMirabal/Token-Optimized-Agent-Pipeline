@@ -4,6 +4,15 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Added
+- **Sprint 034 (`core-pipeline`)** — Close chains `/agents:deployment` in the same turn (`close_workflow.md` v6.4.0, `commands/close.md`); `session_probe.py` uses `built_at_commit` + `git merge-base --is-ancestor` instead of mtime; `/start` `lightweight_sync` runs `scripts/sync_agents_pin.py` (tags `vX.Y.Z` only, never `main`); Phase 4.3 missing `task_scope.md` is exit 2; `check_gate_log.py` / `check_role_artifact.py` require named QA/Tester rows; Implementation Plan template `Assignee (proposed)`; `docs/standards/templates/AGENT_ASSIGNMENT_TEMPLATE.md`; nucleus `agents.md` session entry (`docs/0_SYSTEM_OVERVIEW.md` stays host-only; nucleus keeps `docs/active_state.json`); Cursor `.cursor/agents/` worktree (gitignored). Program **034–038**; hosts stay on `v4.16.0` until this tag; first re-enable is a manual pin; from 035 `/start` auto-pins. Family-trial is **038**, not 035. #034
+
+### Changed
+- **`close_workflow.md`** — `graph_rebuild` runs after `atomic_commit`; `deployment_handoff` continues `/agents:deployment` in the same turn (no default "awaiting").
+- **`start_workflow.md`** — pin-sync on `/start` after origin is reachable.
+- **`agents.md` §0** — nucleus sessions read `agents.md` plus generated `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md`.
+- **`pipeline_workflow.md` Phase 7** — Orchestrator transcribes QA Agent and Tester Agent rows; Phase 4.3 absence is a hard stop.
+
 ## [4.16.0] - 2026-08-25
 
 ### Added

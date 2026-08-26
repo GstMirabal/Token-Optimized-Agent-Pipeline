@@ -114,6 +114,7 @@ GITIGNORE_ENTRIES = [
     "/.claude/settings.local.json",
     "/.cursor/commands/",
     "/.cursor/rules/",
+    "/.cursor/agents/",
     "/.cursor/mcp.json",
     "/graphify-out/",
 ]

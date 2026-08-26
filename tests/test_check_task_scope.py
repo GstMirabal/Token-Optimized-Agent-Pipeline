@@ -61,13 +61,15 @@ MISSING_COLUMNS = """# Task Scope
 | X | `a.py` | modify | high | `devops_agent` | ⏳ |
 """
 
+# `run`, not `modify`: devops_agent declares no Write/Edit tool, so a mutating
+# operation would now trip the capability check and stop testing escalation.
 MECHANICAL_HIGH = f"""# Task Scope
 
 **Mode.** Cursor.
 
 | {SHAPE} |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| X | `a.py` | modify | high | `devops_agent` | `composer-2.5` | N/A | ⏳ |
+| X | `a.py` | run | high | `devops_agent` | `composer-2.5` | N/A | ⏳ |
 """
 
 ESCALATED = f"""# Task Scope
@@ -76,7 +78,34 @@ ESCALATED = f"""# Task Scope
 
 | {SHAPE} |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| X | `a.py` | modify | high | `devops_agent` — escalated | `grok-4.6` | `high` | ⏳ |
+| X | `a.py` | run | high | `devops_agent` — escalated | `grok-4.6` | `high` | ⏳ |
+"""
+
+INCAPABLE = f"""# Task Scope
+
+**Mode.** Cursor.
+
+| {SHAPE} |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| X | `a.py` | modify | low | `devops_agent` | `composer-2.5` | N/A | ⏳ |
+"""
+
+CAPABLE = f"""# Task Scope
+
+**Mode.** Cursor.
+
+| {SHAPE} |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| X | `a.py` | modify | low | `implementer_agent` | `grok-4.5` | `high` | ⏳ |
+"""
+
+NO_SUCH_PROFILE = f"""# Task Scope
+
+**Mode.** Cursor.
+
+| {SHAPE} |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| X | `a.py` | modify | low | `invented_agent` | `grok-4.5` | `high` | ⏳ |
 """
 
 
@@ -103,6 +132,46 @@ def test_mechanical_high_without_keep_or_escalation_fails(tmp_path: Path) -> Non
 def test_escalated_mechanical_high_passes(tmp_path: Path) -> None:
     sprint = _scope(tmp_path, ESCALATED)
     result = _run("--sprint-dir", str(sprint))
+    assert result.returncode == 0, result.stderr
+
+
+# --- Sprint 034 I4/K3: assignments that cannot execute, and absence. ---
+
+
+def test_assignee_without_write_tool_fails(tmp_path: Path) -> None:
+    """Sprints 028-032 recorded 32 rows like this one as executed successfully."""
+    sprint = _scope(tmp_path, INCAPABLE)
+    result = _run("--sprint-dir", str(sprint))
+    assert result.returncode == 2
+    assert "Write/Edit" in result.stderr
+
+
+def test_assignee_with_write_tool_passes(tmp_path: Path) -> None:
+    sprint = _scope(tmp_path, CAPABLE)
+    result = _run("--sprint-dir", str(sprint))
+    assert result.returncode == 0, result.stderr
+
+
+def test_assignee_with_no_profile_file_fails(tmp_path: Path) -> None:
+    sprint = _scope(tmp_path, NO_SUCH_PROFILE)
+    result = _run("--sprint-dir", str(sprint))
+    assert result.returncode == 2
+    assert "no profile file" in result.stderr
+
+
+def test_absent_task_scope_fails_in_a_sprint_directory(tmp_path: Path) -> None:
+    """Absence used to exit 0, which disabled jurisdictional_lock silently."""
+    sprint = tmp_path / "docs" / "sprints" / "030-core-pipeline"
+    sprint.mkdir(parents=True)
+    result = _run("--sprint-dir", str(sprint))
+    assert result.returncode == 2
+    assert "Phase 4.3" in result.stderr
+
+
+def test_absent_task_scope_skips_outside_a_sprint_directory(tmp_path: Path) -> None:
+    plain = tmp_path / "not-a-sprint"
+    plain.mkdir()
+    result = _run("--sprint-dir", str(plain))
     assert result.returncode == 0, result.stderr
 
 

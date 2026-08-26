@@ -4,7 +4,8 @@
   "_consumers": [
     "scripts/docs_freshness_check.py — check_phase_artifacts: warns per sprint-scoped entry with required=true that the sprint directory does not hold",
     "scripts/map_workflows.py — derives the artifact x workflow matrix columns from every entry",
-    "workflows/close_workflow.md Phase 2.6 — refuses the close when a sprint-scoped required entry is absent"
+    "workflows/close_workflow.md Phase 2.6 — refuses the close when a sprint-scoped required entry is absent",
+    "scripts/check_role_artifact.py — resolves --role against the role names declared here, and enforces gate_evidence"
   ],
   "_fields": {
     "filename": "Basename as it appears on disk. map_workflows.py matches it literally against workflow prose, which is why workflows must name their deliverable by filename rather than describe it.",
@@ -14,6 +15,17 @@
     "host_path": "Path in a host project, relative to the host root.",
     "nucleus_path": "Path in the .agents nucleus, relative to the nucleus root. null where the artifact does not exist in nucleus mode.",
     "required": "true when a gate refuses or warns on absence. ENFORCED TODAY ONLY FOR scope=sprint: the two gates above filter on scope==sprint && required. On scope=repository the field is declarative — it records that a protocol depends on the artifact, and no consumer filters on it yet. Stated rather than implied, because a field that looks enforced and is not is the defect class this sprint exists to remove."
+  },
+  "gate_evidence": {
+    "_purpose": "The two Double-Gate roles were the only pipeline roles owing no artifact, so a gate that never ran and a gate that reviewed thoroughly were indistinguishable to every automated check (Sprint 034 D17). Their evidence is not a file of their own — it is a row inside SPRINT_LOG.md.",
+    "_why_not_an_artifacts_entry": "map_workflows.py:70 builds its matrix as {entry.filename: entry.phase}, so a second and third entry named SPRINT_LOG.md would silently overwrite the Orchestrator one and lose a matrix column. File existence would also be the wrong assertion: SPRINT_LOG.md already exists by Phase 3, long before any gate runs.",
+    "file": "SPRINT_LOG.md",
+    "parser": "scripts/check_gate_log.py gate_tables — tables whose header includes Verdict",
+    "roles": {
+      "QA Agent": "QA",
+      "Tester Agent": "Tester"
+    },
+    "_roles_field": "Registry role display name -> the token the Gate cell must start with. Sprint 033 wrote 'QA (structural)' and 'Tester (functional)', so the match is a prefix, not equality."
   },
   "_paths_are_identical_by_measurement": "Every entry declares the same host_path and nucleus_path except memory_index.json. That is a measurement, not redundancy: agents.md §5 mandatory_topology unified the sprint path at Sprint 024, and the two fields keep the asymmetry expressible for the hosts where it returns.",
   "_limit": "This registry declares artifacts that are already produced. It invents none. PHASE_REGISTER.md, agent_assignment.md and skill_assignment.md were produced by sprints 021, 022, 024 and 025 with zero consumers reading them; this file is their first.",
