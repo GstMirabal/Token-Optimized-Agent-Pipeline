@@ -13,8 +13,9 @@
 
 **Backfill.** This file was written 2026-08-26 after Phase 6 had already
 committed tracks A, B, P, I (partial), K (partial), and N. `jurisdictional_lock`
-could not be enforced on those writes. Remaining lock: **J1** only. K6 landed
-`2a2dbc9`. Out-of-sprint rows (C/E/H/F, M/L, G, 038) are absent on purpose.
+could not be enforced on those writes. **No remaining 034 Work locks.** K6
+`2a2dbc9`, J1 `c61dd89`. Out-of-sprint rows (C/E/H/F, M/L, G, 038) are absent
+on purpose.
 
 ---
 
@@ -127,10 +128,9 @@ K1+K4 share commit `9e8c0d3`.
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| J1 | `AGENTS.md` | modify | high | `rule_validator` | `grok-4.5` | `high` | ⏳ |
+| J1 | `AGENTS.md` | modify | high | `rule_validator` | `grok-4.5` | `high` | ✅ `c61dd89` |
 
-**J1 is locked to `rule_validator` until it lands.** No other unit may edit
-`AGENTS.md` while this row is ⏳.
+**J1 landed** `c61dd89` (`agents.md` on disk; same inode as `AGENTS.md`).
 
 ## Track N — Cursor agent emission
 
