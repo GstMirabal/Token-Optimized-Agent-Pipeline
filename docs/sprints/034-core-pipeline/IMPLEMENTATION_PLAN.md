@@ -1578,10 +1578,10 @@ exige la primera tabla. La segunda es inventario de 035–037.
 | `python3 scripts/model_ledger.py; echo $?` | 037 | `0`; `docs/audits/MODEL_LEDGER.md` con fila para 032 y 033 |
 | `make verify` bajo sandbox del agente Cursor (sin `required_permissions: all`) | 037 | `0` tras S1 — hoy muere en `xargs: sysconf(_SC_ARG_MAX) failed` |
 | `bash scripts/install.sh --target cursor && test -f .bridge_cursor.lock; echo $?` en núcleo | 037 | `0` tras S3 — hoy el lock no se escribe |
-| `rg -n 'skill\.sh' agents/skill_architect.md; echo $?` | 036 | `1` (sin coincidencias) |
+| `python3 scripts/audit_cursor_era.py; echo $?` | 036 | `0`; `docs/audits/CURSOR_ERA_EXECUTION_AUDIT.md` con 8 filas (026–033); fila 028 CE-1 > 0; fila 033 CE-1 = 0 |
 | `make cursor-era-audit; echo $?` | 036 | `0`; el target no aparece como receta de `verify` |
 | `python3 scripts/check_forge_ladder.py --sprint-dir docs/sprints/033-core-pipeline; echo $?` | 036 | `0` en núcleo (033 A1 tiene destino y fichero); un fixture host sin `.claude/agents/<nuevo>.md` sale `2` |
-| `rg -n 'skill.sh' agents/skill_architect.md; echo $?` | 036 | `1` (sin coincidencias) |
+| `rg -n 'skill\.sh' agents/skill_architect.md; echo $?` | 036 | `1` (sin coincidencias) |
 | `python3 -m pytest tests/test_session_start.py tests/test_audit_cursor_models.py tests/test_model_ledger.py tests/test_verify_references.py tests/test_audit_cursor_era.py tests/test_check_forge_ladder.py tests/test_agent_profile_census.py -q; echo $?` | 035–037 | `0` |
 | `rg -n 'Phase 4' agents/qa_agent.md agents/tester_agent.md` | 036 | sin `double_gate_review` / `rejection_trigger` en Phase 4 |
 | `rg -n 'approval_gate' agents/principal_agent.md` | 036 | la fila nombra Phase 5 |
