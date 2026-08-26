@@ -1,7 +1,7 @@
 # Sprint Log — 035 (`core-pipeline`)
 
 **Branch**: `ai-sprint/035` from `main` at `c93e851` (`v4.17.0`)
-**Status**: Phase 3–4 complete — awaiting Phase 5 Approval Gate
+**Status**: Phase 6 EXECUTING — Phase 5 approved 2026-08-26
 **Session**: `20260826T054105Z-79476` · tool `cursor` · `delegation_mode: sequential`
 
 ---
@@ -39,7 +39,9 @@
 
 ## Phase 5 — Approval Gate
 
-- Pending explicit Human OK after plan commit.
+- Human OK 2026-08-26 («phase 5 ok»). Lock 1 path:
+  `docs/sprints/035-core-pipeline/IMPLEMENTATION_PLAN.md` at `7bcd12b`.
+  `audit_plan.py` exit 0 re-confirmed before the gate.
 
 ## Phase 6 — Execution
 

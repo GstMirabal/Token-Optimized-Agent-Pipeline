@@ -2,7 +2,7 @@
 
 **Canonical path**: `docs/sprints/035-core-pipeline/IMPLEMENTATION_PLAN.md`
 **Branch**: `ai-sprint/035` · **Base**: `main` at `c93e851`
-**Status**: `DRAFT` — Phase 3–4 complete; awaiting Phase 5 Human OK
+**Status**: `EXECUTING`
 
 > Authored at Phase 1 (Planning) by `principal_agent`. Spanish permitted here
 > (`agents.md §1 user_chat`). Hereda Design D3/D5/D10/D12/D13/D15/D16 del plan
@@ -237,9 +237,9 @@ restricción dura **H2 y C5 después de E6**.
 
 | Field | Value |
 | :--- | :--- |
-| **Approved by** | _(pendiente Phase 5)_ |
-| **Date** | |
-| **Plan commit at approval** | _(commit en `ai-sprint/035` antes del OK)_ |
+| **Approved by** | Gustavo (chat: «phase 5 ok») |
+| **Date** | 2026-08-26 |
+| **Plan commit at approval** | `7bcd12b` |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an
