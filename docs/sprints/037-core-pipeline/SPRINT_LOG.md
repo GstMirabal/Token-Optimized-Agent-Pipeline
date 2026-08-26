@@ -1,7 +1,7 @@
 # Sprint Log — 037 (`core-pipeline`)
 
 **Branch**: `ai-sprint/037` from `main` at `6a87cf0` (`v4.19.0`)
-**Status**: Phase 3 complete — plan committed; awaiting Phase 4 / Approval Gate
+**Status**: Phase 4 complete — awaiting Phase 5 Approval Gate
 **Session**: `20260826T081613Z-91336` · tool `cursor` · `delegation_mode: sequential`
 
 ---
@@ -35,11 +35,18 @@
 
 ## Phase 4 — Assignment
 
-*(pending)*
+- `agent_assignment.md`, `skill_assignment.md`, `task_scope.md` written this
+  session. No Destination forge (all N/A). No skill forged; P2/P3 not escalated
+  (framework scripts / Makefile / installer — same pattern as 036).
+- `make cursor-tiers` exit `0` (2026-08-26): applied discrepancy `grok-4.6`;
+  map in force `cursor.author` = `grok-4.5` / `high`; mechanical
+  `composer-2.5`; gate `claude-opus-5` / `max` (035 H2). Work rows use the map.
+- Mechanical-eligible: G2, S2, S4. `check_task_scope.py` exit `0`.
+- `check_forge_ladder.py` exit `0`. Plan assignees stand (no staffing overwrites).
 
 ## Phase 5 — Approval Gate
 
-*(pending)*
+*(pending — Human OK required)*
 
 ## Phase 6 — Execution
 
