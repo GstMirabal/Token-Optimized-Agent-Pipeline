@@ -76,13 +76,13 @@ mechanical+high without keep/escalation note (`F-026-A2`).
 | E3 | `workflows/pipeline_workflow.md` | modify | high | `orchestrator` | `grok-4.5` | `high` | ✅ `0ee4901` |
 | E4 | `tests/test_audit_cursor_models.py` | create | medium | `implementer_agent` | `composer-2.5` | `N/A` | ✅ `baf42d0` |
 | E5 | `scripts/audit_cursor_models.py` | modify | high | `implementer_agent` | `grok-4.5` | `high` | ✅ `e1d562e` |
-| E6 | `scripts/audit_cursor_models.py` | modify | high | `implementer_agent` | `grok-4.5` | `high` | ⏳ |
+| E6 | `scripts/audit_cursor_models.py` | modify | high | `implementer_agent` | `grok-4.5` | `high` | ✅ `ae14116` |
 
 ## Work — Track C
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| C1 | `scripts/session_start.py` | create | high | `implementer_agent` | `grok-4.5` | `high` | ⏳ |
+| C1 | `scripts/session_start.py` | create | high | `implementer_agent` | `grok-4.5` | `high` | ✅ `c208d7d` |
 | C2 | `workflows/start_workflow.md` | modify | high | `orchestrator` | `grok-4.5` | `high` | ⏳ |
 | C3 | `commands/start.md` | modify | low | `orchestrator` | `grok-4.5` | `high` | ⏳ |
 | C4 | `tests/test_session_start.py` | create | medium | `implementer_agent` | `composer-2.5` | `N/A` | ⏳ |
@@ -92,7 +92,7 @@ mechanical+high without keep/escalation note (`F-026-A2`).
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| H1 | `docs/decisions/ADR-0011-gate-cell-by-structural-ceiling.md` | create | high | `doc_orchestrator` | `grok-4.5` | `high` | ⏳ |
+| H1 | `docs/decisions/ADR-0011-gate-cell-by-structural-ceiling.md` | create | high | `doc_orchestrator` | `grok-4.5` | `high` | ✅ `289981b` |
 | H2 | `config/model_tiers.json` | modify | high | `rule_validator` | `grok-4.5` | `high` | ⏳ |
 | H3 | `scripts/verify_references.py` | modify | high | `implementer_agent` | `grok-4.5` | `high` | ⏳ |
 | H4 | `tests/test_verify_references.py` | modify | medium | `implementer_agent` | `composer-2.5` | `N/A` | ⏳ |
