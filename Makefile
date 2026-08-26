@@ -23,7 +23,7 @@ PY_EXCLUDES := -not -path "*/.git/*" -not -path "*/node_modules/*" -not -path "*
 VENV_PY := $(AGENTS_DIR)/venv_skillopt/bin/python3
 PY := $(if $(wildcard $(VENV_PY)),$(VENV_PY),python3)
 
-.PHONY: graphify-update graphify-rebuild verify docs-freshness-check session-start model-ledger cursor-tiers role-artifacts
+.PHONY: graphify-update graphify-rebuild verify docs-freshness-check session-start model-ledger cursor-tiers cursor-era-audit role-artifacts
 
 
 # Incremental AST sync after code changes (close_workflow Phase 1, no LLM cost).
@@ -111,6 +111,11 @@ model-ledger:
 # empty until proven history exists. --check (Sprint 035) fails if the gate is empty.
 cursor-tiers:
 	cd $(AGENTS_DIR) && python3 scripts/audit_cursor_models.py --check
+
+# Cursor-era execution census 026–033 (Sprint 036). Derived audit only — never
+# a dependency of `verify` (historical CE-1 would red the nucleus).
+cursor-era-audit:
+	cd $(AGENTS_DIR) && python3 scripts/audit_cursor_era.py
 
 # Sprint 027: verify a role left its required sprint-scoped artifacts (portable
 # SubagentStop counterpart). SPRINT_DIR must be the canonical sprint path.
