@@ -4,13 +4,15 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.21.0] - 2026-08-26
+
 ### Added
 
-- **Sprint 038 (`core-pipeline` / family-trial)** — Track T + R: `cursor.author` **promoted** to `glm-5.2` / `zhipu` / `high` (was `grok-4.5` / `xai`; D12 vs ledger 036+037; Phase 8 Human OK). Payload: `session_start` Still-open counts only the highest `**Status at Sprint NNN**` table. Guide records 038 trial + D16 ownership; `GATE_REPLAY.md` offline gate pass on 032+033 (ADR-0008 vocab; 1× `RECORD` `testifying` on 032 squash). Program **034–038** promote sealed pending close/deploy. #038
+- **Sprint 038 (`core-pipeline` / family-trial)** — Track T + R: `cursor.author` **promoted** to `glm-5.2` / `zhipu` / `high` (was `grok-4.5` / `xai`; D12 vs ledger 036+037; Phase 8 Human OK). Payload: `session_start` Still-open counts only the highest `**Status at Sprint NNN**` table. Guide records 038 trial + D16 ownership; `GATE_REPLAY.md` offline gate pass on 032+033 (ADR-0008 vocab; 1× `RECORD` `testifying` on 032 squash). Program **034–038** complete. Merged as PR #70. #038
 
 ### Changed
 
-- **Program queue** — marked Sprint **037** delivered/deployed as `v4.20.0` (PR #69) in `docs/roadmaps/core/pipeline/021-030-program-queue.md` (commit `d969fec`, post-seal on `main`; reconstructed by `/agents:reconcile` 2026-08-26). **038** promote sealed on `ai-sprint/038` (awaiting close/deploy).
+- **Program queue** — marked Sprint **037** delivered/deployed as `v4.20.0` (PR #69) in `docs/roadmaps/core/pipeline/021-030-program-queue.md` (commit `d969fec`, post-seal on `main`; reconstructed by `/agents:reconcile` 2026-08-26). **038** deployed as `v4.21.0` (PR #70).
 - **`config/model_tiers.json`** — `tiers.author.cursor` = `glm-5.2` / `zhipu` / `high` (promoted).
 
 ## [4.20.0] - 2026-08-26
