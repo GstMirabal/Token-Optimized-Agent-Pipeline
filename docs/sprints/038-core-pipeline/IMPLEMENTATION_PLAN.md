@@ -2,7 +2,7 @@
 
 **Canonical path**: `docs/sprints/038-core-pipeline/IMPLEMENTATION_PLAN.md`
 **Branch**: `ai-sprint/038` · **Base**: `main` at `171531a` (`v4.20.0` + reconcile `#037`)
-**Status**: `DRAFT`
+**Status**: `APPROVED`
 
 > Authored at Phase 1 (Planning) by `principal_agent`. Under `session_tool: cursor`,
 > `SwitchMode` to plan is PROHIBITED (`RA-18`). Committed before Phase 5
@@ -222,9 +222,9 @@ Stop and revert the offending unit (do not ship a partial trial as "promoted") i
 
 | Field | Value |
 | :--- | :--- |
-| **Approved by** | {{HUMAN}} |
-| **Date** | {{ISO_DATE}} |
-| **Plan commit at approval** | `{{COMMIT_SHA}}` |
+| **Approved by** | Gustavo |
+| **Date** | 2026-08-26 |
+| **Plan commit at approval** | `05b4d7b` |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an

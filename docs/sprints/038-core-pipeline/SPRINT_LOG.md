@@ -1,7 +1,7 @@
 # Sprint Log — 038 (`core-pipeline` / family-trial)
 
 **Branch**: `ai-sprint/038` from `main` at `171531a` (`v4.20.0` + reconcile)
-**Status**: IN_PROGRESS — Phase 3–4 complete; awaiting Phase 5 Human OK
+**Status**: IN_PROGRESS — Phase 7 Double-Gate complete; awaiting Phase 8 Human OK (promote/revert C1)
 **Session**: `20260826T100341Z-67664` · tool `cursor` · `delegation_mode: sequential`
 
 ---
@@ -32,7 +32,7 @@
 ## Phase 3 — Roadmap extraction
 
 - Branch `ai-sprint/038` created from `main` @ `171531a` (`RA-12`).
-- Plan at canonical path; committed before Phase 5 (`triple_lock` lock 1).
+- Plan at canonical path; committed `05b4d7b` before Phase 5 (`triple_lock` lock 1).
 
 ## Phase 4 — Assignment
 
@@ -48,10 +48,32 @@
 
 ## Phase 5 — Approval Gate
 
-- Pending explicit Human OK.
+- Human OK 2026-08-26 («ok»). Lock 1 path:
+  `docs/sprints/038-core-pipeline/IMPLEMENTATION_PLAN.md` at `05b4d7b`.
+  `audit_plan.py` exit 0 re-confirmed before the gate.
+- Authorship attestation (Q4): Phase 6 under Cursor **`glm-5.2`**.
 
-## Authorship attestation (Q4)
+## Phase 6 — Execution
 
-- Human attests that Phase 6 authorship for this sprint runs on Cursor model
-  **`glm-5.2`** (family trial). Global `applicationOpenModelAppliedConfig` may
-  still show `grok-4.6` / `grok-4.5` without aborting the trial (032 option B).
+All **6** Work units landed on `ai-sprint/038`. DAG honored: C1 before T/D;
+T1 before M1 (`RA-13`); R1 independent.
+
+| Unit | Commit |
+| :--- | :--- |
+| C1 | `0d69f0c` |
+| T1 | `ade6fb0` (+ companion assertions in `238ff4a` with M1) |
+| M1 | `238ff4a` |
+| D1 | `00f9687` |
+| D2 | `c815135` |
+| R1 | `2a0165f` |
+
+Verification pre-gate: `session_start` Still-open **0**; `pytest tests/test_session_start.py` 5 passed; `make verify` **615** passed + installer; `--check` OK (author `glm-5.2` / gate `claude-opus-5`).
+
+## Phase 7 — Quality Gate
+
+| Gate | Round | Verdict | Class | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| QA (structural) | 1 | **APPROVED** | | 6/6 ✅ in `task_scope`; no TODO/FIXME in T1/M1 paths; author `glm-5.2`/`zhipu` ≠ gate `claude-opus-5`/`anthropic` (D15); `GATE_REPLAY.md` ADR-0008 vocab, no family ranking; `audit_plan`/`check_task_scope` OK. Fresh-context `Task` at map gate (`claude-opus-5`) failed: Other Models usage limit ([QA gate Sprint 038](f94f79f9-b553-4b06-8bf7-44069555497b)); structural review in-session under Cursor sequential (same posture as 037). |
+| Tester (functional) | 1 | **APPROVED** | | Verification green: author cell `glm-5.2`/`zhipu`/`high`; `--check` 0; Still-open **0**; `pytest tests/test_session_start.py` 5 passed; `GATE_REPLAY.md` present; `make model-ledger` 0; `make verify` **615** passed + installer. Tester `Task` same Other Models limit ([Tester gate Sprint 038](7e9dec5c-0027-4c5b-9267-86f7ae020b7c)); functional evidence collected in-session. |
+
+Orchestrator transcription: QA + Tester `APPROVED` same session. `RECORD` not used as a gate verdict (limit noted in Notes). Trial vs baseline 036+037: both prior sprints Gate round 1 `APPROVED`/`APPROVED` — no `REJECTED` `charter` on 038 work (D12 hard constraint 1).

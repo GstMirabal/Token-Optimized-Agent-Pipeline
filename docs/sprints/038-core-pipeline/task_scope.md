@@ -75,17 +75,17 @@ remains accountable owner (`tier_ownership`) without `Write`/`Edit`.
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| C1 | `config/model_tiers.json` | modify | medium | `implementer_agent` | `glm-5.2` | `high` | ⏳ |
-| T1 | `tests/test_session_start.py` | modify | medium | `implementer_agent` | `composer-2.5` | `N/A` | ⏳ |
-| M1 | `scripts/session_start.py` | modify | high | `implementer_agent` | `glm-5.2` | `high` | ⏳ |
-| D1 | `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` | modify | low | `doc_orchestrator` | `glm-5.2` | `high` | ⏳ |
-| D2 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `doc_orchestrator` | `glm-5.2` | `high` | ⏳ |
+| C1 | `config/model_tiers.json` | modify | medium | `implementer_agent` | `glm-5.2` | `high` | ✅ `0d69f0c` |
+| T1 | `tests/test_session_start.py` | modify | medium | `implementer_agent` | `composer-2.5` | `N/A` | ✅ `ade6fb0` |
+| M1 | `scripts/session_start.py` | modify | high | `implementer_agent` | `glm-5.2` | `high` | ✅ `238ff4a` |
+| D1 | `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` | modify | low | `doc_orchestrator` | `glm-5.2` | `high` | ✅ `00f9687` |
+| D2 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `doc_orchestrator` | `glm-5.2` | `high` | ✅ `c815135` |
 
 ## Work — Track R
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| R1 | `docs/sprints/038-core-pipeline/GATE_REPLAY.md` | create | medium | `orchestrator` | `claude-opus-5` | `max` | ⏳ |
+| R1 | `docs/sprints/038-core-pipeline/GATE_REPLAY.md` | create | medium | `orchestrator` | `claude-opus-5` | `max` | ✅ `2a0165f` |
 
 ---
 
