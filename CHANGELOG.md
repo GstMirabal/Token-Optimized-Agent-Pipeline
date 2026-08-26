@@ -4,6 +4,8 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.19.0] - 2026-08-26
+
 ### Added
 
 - **Sprint 036 (`core-pipeline`)** — Tracks M/L (12): `scripts/audit_cursor_era.py` + `make cursor-era-audit` (derived `CURSOR_ERA_EXECUTION_AUDIT.md`, exit always 0, not in `verify`); `scripts/check_forge_ladder.py` host-submodule forge gate (P3 simulated); `SKILL_ASSIGNMENT_TEMPLATE.md`; pipeline Phases 4.1/4.2 name the forge check; `skill_architect` P1–P4 ladder (no `skill.sh`); qa/tester instructing → Phase 7; `principal_agent` Phases 5/6/8; `tests/test_agent_profile_census.py` (14 profiles). Program next: G+S → **037**; family-trial → **038**. Rider **S** (sandbox-safe `py_compile`, nucleus `.bridge_cursor.lock`) queued on 037. #036
