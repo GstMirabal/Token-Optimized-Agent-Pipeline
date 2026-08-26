@@ -13,6 +13,12 @@ receipt). Only these keys are emitted:
 Nucleus entry point: ``00-constitution.mdc`` with ``alwaysApply: true``
 importing ``agents.md``. Do not add a root ``AGENTS.md`` beside
 ``agents.md`` on case-insensitive filesystems (``P4.0b``).
+
+Subagent files under ``.cursor/agents/`` follow the Cursor contract
+(https://cursor.com/docs/subagents): ``name``, ``description``, ``model``,
+``readonly``, ``is_background``. ``model`` is always ``inherit`` — Task
+applies ``config/model_tiers.json`` (ADR-0010). Claude-only keys
+(``tools``, ``tier``) are not copied.
 """
 from __future__ import annotations
 
@@ -25,8 +31,16 @@ AGENTS_DIR = SCRIPT_DIR.parent
 RULE_TRIGGERS_PATH = AGENTS_DIR / "config" / "rule_triggers.json"
 MCP_TEMPLATE = AGENTS_DIR / "claude" / "mcp.json"
 CONSTITUTION_RULE = "00-constitution.mdc"
+CHAT_TITLE_RULE = "01-chat-title.mdc"
 # Keys emitted in rule frontmatter; keep in sync with the module docstring.
 MDC_RULE_FRONTMATTER_KEYS = ("description", "globs", "alwaysApply")
+CURSOR_AGENT_FRONTMATTER_KEYS = (
+    "name",
+    "description",
+    "model",
+    "readonly",
+    "is_background",
+)
 
 
 def _load_rule_triggers() -> dict[str, dict]:
@@ -100,6 +114,84 @@ def _write_constitution(cursor_dir: Path, *, nucleus: bool) -> None:
     (rules_dir / CONSTITUTION_RULE).write_text(text, encoding="utf-8")
 
 
+def _write_chat_title_rule(cursor_dir: Path) -> None:
+    """Emit the standing chat-tab rule. Regenerated on every Cursor install."""
+    rules_dir = cursor_dir / "rules"
+    rules_dir.mkdir(parents=True, exist_ok=True)
+    text = (
+        "---\n"
+        "description: Rename the chat tab to the git branches that acted in this conversation\n"
+        "alwaysApply: true\n"
+        "---\n\n"
+        "# Chat title = sprint branches\n\n"
+        "Standing request for this repository: the chat tab MUST name the git "
+        "branches that acted in the conversation. Treat that as an explicit "
+        "`rename_chat` request at session start and after every checkout that "
+        "changes `HEAD`.\n\n"
+        "| When | Title |\n"
+        "| :--- | :--- |\n"
+        "| One sprint branch | that name (`ai-sprint/034`) |\n"
+        "| Several sprint branches in this chat | join with ` · ` in first-seen order |\n"
+        "| Generic titles (`Chat`, `Chat initialization`, New chat) | replace immediately |\n\n"
+        "Do not put `main` in the title unless this conversation committed to "
+        "`main`. Confirm the current name with `git branch --show-current`.\n"
+    )
+    (rules_dir / CHAT_TITLE_RULE).write_text(text, encoding="utf-8")
+
+
+def _split_frontmatter(text: str) -> tuple[dict[str, str], str]:
+    """Return YAML-ish keys from the first frontmatter block, plus the body."""
+    if not text.startswith("---"):
+        return {}, text
+    parts = text.split("---", 2)
+    if len(parts) < 3:
+        return {}, text
+    fields: dict[str, str] = {}
+    for line in parts[1].splitlines():
+        if ":" not in line:
+            continue
+        key, value = line.split(":", 1)
+        fields[key.strip()] = value.strip()
+    return fields, parts[2].lstrip("\n")
+
+
+def _tools_allow_write(tools: str) -> bool:
+    tokens = {item.strip() for item in tools.split(",") if item.strip()}
+    return bool(tokens & {"Write", "Edit"})
+
+
+def _cursor_agent_document(src_text: str) -> str:
+    """Render one nucleus profile as a Cursor subagent file."""
+    fields, body = _split_frontmatter(src_text)
+    name = fields.get("name", "")
+    description = fields.get("description", "")
+    if not name or not description or not body.strip():
+        raise ValueError(
+            "Cursor subagents require name, description, and a non-empty prompt body"
+        )
+    readonly = "false" if _tools_allow_write(fields.get("tools", "")) else "true"
+    emitted = {
+        "name": name,
+        "description": description,
+        "model": "inherit",
+        "readonly": readonly,
+        "is_background": "false",
+    }
+    if tuple(emitted) != CURSOR_AGENT_FRONTMATTER_KEYS:
+        raise RuntimeError("agent frontmatter keys drifted from CURSOR_AGENT_FRONTMATTER_KEYS")
+    front = "---\n" + "".join(f"{key}: {value}\n" for key, value in emitted.items()) + "---\n"
+    return f"{front}\n{body}"
+
+
+def _write_agents(cursor_dir: Path) -> None:
+    dest = cursor_dir / "agents"
+    dest.mkdir(parents=True, exist_ok=True)
+    for src in sorted((AGENTS_DIR / "agents").glob("*.md")):
+        rendered = _cursor_agent_document(src.read_text(encoding="utf-8"))
+        name = _split_frontmatter(rendered)[0]["name"]
+        (dest / f"{name}.md").write_text(rendered, encoding="utf-8")
+
+
 def _rewrite_mcp_value(value: str, *, nucleus: bool) -> str:
     if not nucleus:
         return value
@@ -143,5 +235,7 @@ def install_cursor_bridge(host_dir: Path, *, nucleus: bool) -> None:
     _write_commands(cursor_dir, nucleus=nucleus)
     _write_rules(cursor_dir)
     _write_constitution(cursor_dir, nucleus=nucleus)
+    _write_chat_title_rule(cursor_dir)
+    _write_agents(cursor_dir)
     _write_mcp(cursor_dir, nucleus=nucleus)
     print(f"✅ Cursor bridge written under {cursor_dir}")
