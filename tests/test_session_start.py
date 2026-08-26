@@ -119,6 +119,30 @@ def test_upstream_still_open_uses_highest_sprint_status_only(
     assert "rows (non-empty): 0" in section
 
 
+def test_upstream_still_open_counts_latest_nonempty_status(
+    session_start, tmp_path: Path
+) -> None:
+    """When the highest Status sprint still lists opens, count that row only."""
+    body = "\n".join(
+        [
+            "**Status at Sprint 027 (2026-08-25).**",
+            "",
+            "| | |",
+            "| :--- | :--- |",
+            "| **Still open** | **`F-021-A2`**, **`F-026-A2`** |",
+            "",
+            "**Status at Sprint 030 (2026-08-25).**",
+            "",
+            "| | |",
+            "| :--- | :--- |",
+            "| **Still open** | **`F-021-A2`** |",
+        ]
+    )
+    root = _write_minimal_root(tmp_path / "repo", upstream_body=body)
+    section = "\n".join(session_start.section_upstream(root))
+    assert "rows (non-empty): 1" in section
+
+
 def test_cli_against_real_repo_stays_under_line_cap() -> None:
     """Integration: real checkout still exits 0 and never dumps UPSTREAM path body."""
     proc = subprocess.run(
