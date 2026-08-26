@@ -4,6 +4,8 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.20.0] - 2026-08-26
+
 ### Added
 
 - **Sprint 037 (`core-pipeline`)** — Track **G** + rider **S**: `scripts/model_ledger.py` + `make model-ledger` → derived `docs/audits/MODEL_LEDGER.md` (gate/task_scope join; omit `<031` / no gate table); `close_workflow.md` `model_ledger_regen` (v6.4.1); `scripts/py_compile_tree.py` wired into `make verify` (agent sandbox denies `SC_ARG_MAX` for both `xargs` and `find -exec`); nucleus `--target cursor`/`both` writes `.bridge_cursor.lock`; installer asserts lock. Program next: family-trial → **038**. #037
