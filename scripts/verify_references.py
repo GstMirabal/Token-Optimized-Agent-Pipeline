@@ -16,6 +16,10 @@ Checks (run from the .agents root; CI fails the PR on any violation):
   (f) Living docs (guides, decisions, audits) that cite ``path:line`` point at a
       file whose line count is at least that line — Sprint 029 J6. Does **not**
       scan docs/sprints/ or docs/roadmaps/ (historical records).
+  (g) Every ``agents/*.md`` with frontmatter ``tier:`` has ``model:`` equal to
+      ``config/model_tiers.json`` → ``tiers[tier]["claude_code"]["model"]``
+      (Claude Code side only, D15). Plan 035 called this ``(f)``; letter ``(f)``
+      is already ``check_file_line_citations`` (Sprint 029), so this is ``(g)``.
 
 invoked_by: Makefile `verify` target (and therefore .github/workflows/ci.yml).
 """
@@ -32,6 +36,7 @@ from _root import agents_root
 CONCORDANCE = Path("rules/LEGACY_RULE_CONCORDANCE.md")
 TEMPLATES_DIR = Path("docs/standards/templates")
 EXCEPTIONS_FILE = Path("config/invocation_exceptions.json")
+MODEL_TIERS_FILE = Path("config/model_tiers.json")
 
 # Living documentary corpus for check (f). Historical sprint/roadmap prose is
 # excluded by construction — abort criterion 3 of Sprint 029.
@@ -40,6 +45,10 @@ FILE_LINE_CORPUS = (
     Path("docs/decisions"),
     Path("docs/audits"),
 )
+
+# Leading YAML frontmatter for check (g). Only ``model:`` / ``tier:`` are read.
+FRONTMATTER_RE = re.compile(r"\A---\r?\n(.*?)\r?\n---\r?\n", re.DOTALL)
+AGENT_TIER_MODEL_RE = re.compile(r"^(model|tier):\s*(\S+)\s*$", re.MULTILINE)
 
 # ``path/to/file.ext:123`` inside backticks or as a bare token. Requires a
 # known text/code suffix so bare ``12:34`` clocks and URL ports do not match.
@@ -306,6 +315,67 @@ def check_file_line_citations() -> list[str]:
     return sorted(set(errors))
 
 
+def parse_agent_frontmatter_fields(text: str) -> dict[str, str]:
+    """Return ``model`` / ``tier`` from the leading ``---`` YAML fence, if any."""
+    match = FRONTMATTER_RE.match(text)
+    if match is None:
+        return {}
+    return dict(AGENT_TIER_MODEL_RE.findall(match.group(1)))
+
+
+def check_agents_model_tier_map() -> list[str]:
+    """(g) ``agents/*.md`` frontmatter ``model:`` must match the Claude tier map.
+
+    Plan 035 named this check ``(f)``; letter ``(f)`` is already
+    ``check_file_line_citations`` (Sprint 029). Implemented as ``(g)``.
+    Claude Code side only (D15) — Cursor cells are not checked.
+    """
+    if not MODEL_TIERS_FILE.is_file():
+        return [f"(g) {MODEL_TIERS_FILE} is missing."]
+    tiers = json.loads(MODEL_TIERS_FILE.read_text(encoding="utf-8")).get("tiers", {})
+    errors: list[str] = []
+    agents_dir = Path("agents")
+    if not agents_dir.is_dir():
+        return errors
+    for path in sorted(agents_dir.glob("*.md")):
+        fields = parse_agent_frontmatter_fields(
+            path.read_text(encoding="utf-8", errors="ignore")
+        )
+        tier = fields.get("tier")
+        model = fields.get("model")
+        if tier is None and model is None:
+            continue
+        if tier is not None and model is None:
+            errors.append(
+                f"(g) {path}: has tier `{tier}` but no model: "
+                f"(required when tier is present)."
+            )
+            continue
+        if tier is None:
+            # model without tier — skip (both required only when tier is set).
+            continue
+        spec = tiers.get(tier)
+        if spec is None:
+            errors.append(
+                f"(g) {path}: unknown tier `{tier}` "
+                f"(not in {MODEL_TIERS_FILE})."
+            )
+            continue
+        expected = spec.get("claude_code", {}).get("model")
+        if expected is None:
+            errors.append(
+                f"(g) {path}: tier `{tier}` has no claude_code.model in "
+                f"{MODEL_TIERS_FILE}."
+            )
+            continue
+        if model != expected:
+            errors.append(
+                f"(g) {path}: frontmatter model `{model}` != map `{expected}` "
+                f"for tier `{tier}`."
+            )
+    return errors
+
+
 def main() -> int:
     # Framework-scoped: every path below is this repository's. See
     # `scripts/_root.py` — the cwd is set once so the messages stay relative and
@@ -320,6 +390,7 @@ def main() -> int:
         + check_invocation_coverage(corpus)
         + check_rule_triggers_sync()
         + check_file_line_citations()
+        + check_agents_model_tier_map()
     )
     if errors:
         for e in errors:
@@ -328,7 +399,8 @@ def main() -> int:
     print(
         "✅ Reference integrity OK — rules reachable, templates exist, "
         "citations resolve, every mechanism has an invoker, "
-        "living file:line citations in range."
+        "living file:line citations in range, "
+        "profile model↔tier map."
     )
     return 0
 
