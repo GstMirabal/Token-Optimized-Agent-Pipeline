@@ -71,8 +71,11 @@ sandbox with `sysconf(_SC_ARG_MAX)` — same class as `xargs`. Delivered
 
 | Gate | Round | Verdict | Class | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| *(pending)* | | | | |
+| QA (structural) | 1 | **APPROVED** | | 7/7 ✅; G1+G2 / S1+S2 / S3+S4 paired; no TODO/FIXME in new scripts/tests; `py_compile_tree` replaces xargs/`find -exec` (sandbox ARG_MAX); nucleus cursor writes `.bridge_cursor.lock`; G3 names `make model-ledger`; ledger has 032/033 rows. Gate `Task` at `--resolve gate` not required — structural review in-session under Cursor sequential (map gate remains `claude-opus-5`). |
+| Tester (functional) | 1 | **APPROVED** | | Verification table green: `make model-ledger` exit 0; `rg` no `xargs python3 -m py_compile`; targeted pytest 5 passed; `bash tests/test_installer.sh` exit 0 (nucleus cursor lock present); `make verify` exit 0 (**613** passed + installer). |
+
+Orchestrator transcription: QA + Tester `APPROVED` same session.
 
 ## Phase 8 — Closeout
 
-*(pending)*
+*(pending — `/agents:close`)*
