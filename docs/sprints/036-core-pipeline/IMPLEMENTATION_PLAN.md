@@ -2,7 +2,7 @@
 
 **Canonical path**: `docs/sprints/036-core-pipeline/IMPLEMENTATION_PLAN.md`
 **Branch**: `ai-sprint/036` · **Base**: `main` at `ba80a55`
-**Status**: `APPROVED` / `EXECUTED` (Phase 7 green; awaiting close)
+**Status**: `CLOSED`
 
 > Authored at Phase 1 (Planning) by `principal_agent`. Spanish permitted here
 > (`agents.md §1 user_chat`). Hereda Design **D18** / **D19** del plan sellado

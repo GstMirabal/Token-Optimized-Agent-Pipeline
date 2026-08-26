@@ -1,7 +1,8 @@
 # Sprint Log — 036 (`core-pipeline`)
 
 **Branch**: `ai-sprint/036` from `main` at `ba80a55` (`v4.18.0`)
-**Status**: Phase 3 complete — plan extracted; awaiting Phases 4–5
+**Status**: **SESSION LOCKED** — Sprint 036 sealed 2026-08-26; continuing
+`/agents:deployment` in the same turn.
 **Session**: `20260826T064621Z-26638` · tool `cursor` · `delegation_mode: sequential`
 
 ---
@@ -74,4 +75,9 @@ Recorded in `021-030-program-queue.md` and 034 Track S / 036 Out of scope.
 
 ## Phase 8 — Closeout
 
-_(pending — `/agents:close`)_
+- `PHASE_REGISTER.md` and `graph_stats.json` written this close.
+- Master Ledger `[Unreleased]` Sprint 036 entry; program-queue **Next** = 037 (G+S).
+- O5 triage of era census: historical CE-1/CE-2/CE-3 → `already-in-034`; 033 CE-1 = `fixed`; CE-4/CE-5 → `deferred`; no mid-sprint `new` units (rider S already on 037).
+- Heuristic pulse: see `PHASE_REGISTER.md` (human OK required before wipe/release).
+- Repo docs present; this sprint did not change reporting or vendoring.
+- `deployment_handoff` continues `/agents:deployment` in this turn.
