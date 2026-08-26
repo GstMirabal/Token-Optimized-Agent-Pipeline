@@ -60,7 +60,10 @@ author **family**, not generation and not effort. Do **not** set `cursor.author`
 to `claude-opus-5` while `cursor.gate` is anthropic (`D15` family diversity).
 Gate-replay (D16) executes in the same sprint; record findings in
 `docs/sprints/038-core-pipeline/GATE_REPLAY.md` — a clean replay does not prove
-superiority and must not rank families.
+superiority and must not rank families. **Outcome (Phase 8 Human OK
+2026-08-26):** **promoted** — map `cursor.author` remains `glm-5.2` /
+`zhipu` / `high` (D12 vs ledger baseline 036+037; Gate1/Gate2 round 1
+`APPROVED`; no `REJECTED` `charter`).
 
 **Abort (chat vs global medidor).** `make cursor-tiers` reads only
 `applicationOpenModelAppliedConfig`. A per-chat override to the trial slug may

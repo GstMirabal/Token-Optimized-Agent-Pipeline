@@ -1,7 +1,7 @@
 # Sprint Log — 038 (`core-pipeline` / family-trial)
 
 **Branch**: `ai-sprint/038` from `main` at `171531a` (`v4.20.0` + reconcile)
-**Status**: IN_PROGRESS — Phase 7 Double-Gate complete; awaiting Phase 8 Human OK (promote/revert C1)
+**Status**: IN_PROGRESS — Phase 8 Human OK **promote** `glm-5.2`; closeout artifacts on branch; awaiting `/agents:close`
 **Session**: `20260826T100341Z-67664` · tool `cursor` · `delegation_mode: sequential`
 
 ---
@@ -77,3 +77,17 @@ Verification pre-gate: `session_start` Still-open **0**; `pytest tests/test_sess
 | Tester (functional) | 1 | **APPROVED** | | Verification green: author cell `glm-5.2`/`zhipu`/`high`; `--check` 0; Still-open **0**; `pytest tests/test_session_start.py` 5 passed; `GATE_REPLAY.md` present; `make model-ledger` 0; `make verify` **615** passed + installer. Tester `Task` same Other Models limit ([Tester gate Sprint 038](7e9dec5c-0027-4c5b-9267-86f7ae020b7c)); functional evidence collected in-session. |
 
 Orchestrator transcription: QA + Tester `APPROVED` same session. `RECORD` not used as a gate verdict (limit noted in Notes). Trial vs baseline 036+037: both prior sprints Gate round 1 `APPROVED`/`APPROVED` — no `REJECTED` `charter` on 038 work (D12 hard constraint 1).
+
+## Phase 8 — Closeout (promote sealed; formal close pending)
+
+- Human OK 2026-08-26 («promover»): **promote** `cursor.author` =
+  `glm-5.2` / `zhipu` / `high` (leave C1; do not restore `grok-4.5`).
+- D12 evidence: ledger row 38 Gate1/Gate2 round 1 `APPROVED`; baseline 036+037
+  same shape; zero `REJECTED` `charter`; no round inflation vs incumbents.
+- `config/model_tiers.json` comment sealed as **promoted** (cell already
+  `glm-5.2` from C1 `0d69f0c`).
+- `CHANGELOG.md` `[Unreleased]` Sprint 038; program-queue Status updated;
+  `MODEL_TIER_TRIAL_GUIDE.md` records promote outcome; `PHASE_REGISTER.md` +
+  `graph_stats.json` (7842 / 9532 / 737 after `graphify-update`).
+- Formal `SESSION LOCKED` + push + `/agents:deployment` → `/agents:close`
+  (Human OK on close / heuristic pulse still required).

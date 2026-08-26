@@ -23,7 +23,7 @@ other authorship so T/D units run under the trial author map.
 | Profile per unit | `agent_orchestrator` | `agent_assignment.md` | Phase 4.1 |
 | File lock / risk / status | `rule_validator` | this file (Work tables) | Phase 4.3 |
 | Tier escalation + Cursor model/effort | `token_economy_agent` | transcribed here by `rule_validator` | `tier_escalation` + **`make cursor-tiers` run this session** |
-| Accept Cursor model into `config/model_tiers.json` | **Human** at Phase 8 (promote or revert C1) | C1 writes trial cell; close seals | D6 / D12; Q1 Human OK |
+| Accept Cursor model into `config/model_tiers.json` | **Human** at Phase 8 | C1 wrote trial cell; Phase 8 **promoted** (`glm-5.2`) | D6 / D12; Human OK «promover» 2026-08-26 |
 
 ---
 

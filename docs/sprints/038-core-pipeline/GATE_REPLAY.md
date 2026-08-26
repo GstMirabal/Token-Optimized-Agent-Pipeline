@@ -67,5 +67,5 @@ diff.
 
 **Not claimed:** that `claude-opus-5` (or any family) is better than another.
 Replay here exercised the **live** `cursor.gate` cell as the offline reviewer
-on frozen diffs only. Gate map unchanged. Author trial remains `glm-5.2`
-(`config/model_tiers.json` C1) pending Phase 8 Human OK.
+on frozen diffs only. Gate map unchanged. Author trial **promoted** at Phase 8
+Human OK 2026-08-26: `cursor.author` = `glm-5.2` / `zhipu` / `high`.
