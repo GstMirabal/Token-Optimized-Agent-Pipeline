@@ -21,7 +21,8 @@
     "cursor.gate remains \"model\": null because promotion to gate requires measured",
     "cost per accepted unit under Cursor beyond a single sprint milestone.",
     "Sprint 032 (2026-08-25): cursor.author promoted to grok-4.5 / high after",
-    "author-tier trial (gate rounds matched 031; Human OK at close)."
+    "author-tier trial (gate rounds matched 031; Human OK at close).",
+    "Sprint 035 H2 structural ceiling 2026-08-26; ADR-0011; supersedes null-until-proven-history clause of ADR-0003 for the cursor.gate cell only."
   ],
   "tiers": {
     "gate": {
@@ -30,8 +31,9 @@
         "effort": "high"
       },
       "cursor": {
-        "model": null,
-        "family": null
+        "model": "claude-opus-5",
+        "family": "anthropic",
+        "effort": "max"
       },
       "profiles": [
         "qa_agent",
