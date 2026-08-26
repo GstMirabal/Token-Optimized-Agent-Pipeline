@@ -1180,7 +1180,7 @@ la ejecución del gate no sea verificable.
 | K3 | `scripts/check_task_scope.py` | modify | medium | `implementer_agent` | ✅ `3dc95db` (con I4) |
 | K4 | `tests/test_check_role_artifact.py` | modify | medium | `implementer_agent` | ✅ `9e8c0d3` (con K1) |
 | K5 | `tests/test_check_task_scope.py` | modify | medium | `implementer_agent` | ✅ `3dc95db` (con I4/K3) |
-| K6 | `workflows/pipeline_workflow.md` | modify | high | `orchestrator` | ⏳ |
+| K6 | `workflows/pipeline_workflow.md` | modify | high | `orchestrator` | ✅ `2a2dbc9` |
 
 **Corrección de granularidad, descubierta al ejecutar.** Separar el arreglo de
 su test en dos unidades es **imposible**: `hooks/on_commit.py` rechaza todo
@@ -1242,7 +1242,7 @@ K6: Phase 7 declara qué deja cada gate y con qué comando se comprueba. Va
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| J1 | `AGENTS.md` | modify | high | `rule_validator` | ⏳ |
+| J1 | `AGENTS.md` | modify | high | `rule_validator` | ✅ `c61dd89` |
 
 `AGENTS.md:17` dice literalmente que «in nucleus mode `docs/active_state.json`
 does not exist (by design, see `§5`)». Es falso, y lo desmienten tres fuentes
@@ -1714,7 +1714,6 @@ ya parcheados en este archivo.
    desempate de familia de D13 = misma que `gate.claude_code`, luego mayor
    ventana de contexto. No quedan huecos de decisión abiertos en el diseño.
 5. Phase 5 **autorizada** 2026-08-26. Phases 3–4 se **backfillearon el mismo
-   día** (`SPRINT_LOG.md`, `agent_assignment.md`, `skill_assignment.md`,
-   `task_scope.md`) porque Phase 6 había arrancado sin ellos. Quedan **K6** y
-   **J1** (⏳ en `task_scope.md`). No ejecutar filas `⏭`.
+   día**. Work 034 **completo** (K6 `2a2dbc9`, J1 `c61dd89`). Siguiente: Phase 7
+   Double-Gate. No ejecutar filas `⏭`.
 6. Tras A–N: close+deploy de 034. Primer pin de hosts a ese tag.
