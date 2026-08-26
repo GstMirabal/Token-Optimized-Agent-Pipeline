@@ -17,7 +17,7 @@ and an already-established (retrofit) repository.
   - **Claude Code:** symlinks `.agents/commands/*.md` into `.claude/commands/agents/`,
     exposing the `/agents:*` namespace so host-defined commands never collide with
     framework ones.
-  - **Cursor:** materializes `.cursor/commands/` (and rules/MCP) from the same sources.
+  - **Cursor:** materializes `.cursor/commands/`, `.cursor/rules/*.mdc`, `.cursor/agents/*.md` (https://cursor.com/docs/subagents), and MCP from the same sources.
 - A restarted harness session after installation — commands are discovered at
   session start, not live.
 
