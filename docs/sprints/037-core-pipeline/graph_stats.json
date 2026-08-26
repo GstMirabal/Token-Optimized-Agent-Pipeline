@@ -1,0 +1,9 @@
+{
+  "nodes": 7591,
+  "edges": 9184,
+  "communities": 724,
+  "source": "graphify-out/graph.json",
+  "sprint": 37,
+  "built_at_commit": "968c06ff8163b96610fc68597ac514d57e34492b",
+  "note": "Pre-close snapshot; graph_rebuild after atomic_commit may refresh built_at_commit"
+}

@@ -1,7 +1,8 @@
 # Sprint Log — 037 (`core-pipeline`)
 
 **Branch**: `ai-sprint/037` from `main` at `6a87cf0` (`v4.19.0`)
-**Status**: Phase 4 complete — awaiting Phase 5 Approval Gate
+**Status**: **SESSION LOCKED** — Sprint 037 sealed 2026-08-26; continuing
+`/agents:deployment` in the same turn.
 **Session**: `20260826T081613Z-91336` · tool `cursor` · `delegation_mode: sequential`
 
 ---
@@ -78,4 +79,9 @@ Orchestrator transcription: QA + Tester `APPROVED` same session.
 
 ## Phase 8 — Closeout
 
-*(pending — `/agents:close`)*
+- `PHASE_REGISTER.md` and `graph_stats.json` written this close.
+- Master Ledger `[Unreleased]` Sprint 037 entry; program-queue **Next** = 038.
+- `model_ledger_regen` exit 0; `docs-freshness-check` WARN-only after
+  `last_audit_sprint` → 37 (cleared prior BLOCK).
+- Heuristic pulse: all `discard` / already shipped (see `PHASE_REGISTER.md`).
+- Same-turn `/agents:deployment` after `release` + push.

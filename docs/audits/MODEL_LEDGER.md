@@ -11,7 +11,7 @@ Regenerate: `make model-ledger`.
 | 34 | mapped | grok-4.5 | high | 27 | 1 | 1 | APPROVED |
 | 35 | mixed | composer-2.5, grok-4.5 | high | 17 | 1 | 1 | RECORD:testifying, APPROVED |
 | 36 | mixed | composer-2.5, grok-4.5 | high | 12 | 1 | 1 | APPROVED |
-| 37 | mixed | composer-2.5, grok-4.5 | high | 7 | 0 | 0 |  |
+| 37 | mixed | composer-2.5, grok-4.5 | high | 7 | 1 | 1 | APPROVED |
 
 ## Omitted
 
