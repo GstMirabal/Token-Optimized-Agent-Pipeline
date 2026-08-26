@@ -10,10 +10,14 @@ Hard filters (mechanical, no judgment):
   * for the ``gate`` tier only: a depth lever in ``parameterDefinitions``
     (``effort``, ``thinking``, or ``reasoning``)
 
-``family`` is derived from the model ``name`` prefix. Promotion to ``gate``
-also requires proven meter history and a family distinct from ``author``'s —
-Design §D7 measures that no Cursor sprint has that history yet, so **this
-script never proposes a ``gate`` model**.
+``family`` is derived from the model ``name`` prefix. The **author** proposal
+is the current ``config/model_tiers.json`` → ``tiers.author.cursor`` map cell
+(mirrored from the filtered catalogue when present, else a synthetic row from
+the map). The Cursor ``applicationOpenModelAppliedConfig`` model is reported
+separately as agreement or discrepancy — it is never treated as the proposal.
+Promotion to ``gate`` also requires proven meter history and a family distinct
+from ``author``'s — Design §D7 measures that no Cursor sprint has that history
+yet, so **this script never proposes a ``gate`` model**.
 
 ``--resolve`` reads ``config/model_tiers.json`` (and optionally
 ``agents/<profile>.md`` frontmatter) without opening the Cursor DB.
@@ -154,6 +158,26 @@ def load_proven_families() -> set[str]:
     return set()
 
 
+def read_map_author_cursor(
+    tiers_path: Path = MODEL_TIERS_PATH,
+) -> tuple[str | None, str | None]:
+    """Return ``(model, family)`` from ``tiers.author.cursor`` in the tier map.
+
+    Args:
+        tiers_path: Path to ``config/model_tiers.json``.
+
+    Returns:
+        Model id and family strings, or ``(None, None)`` when the cell is empty.
+    """
+    payload = load_model_tiers(tiers_path)
+    cursor = ((payload.get("tiers") or {}).get("author") or {}).get("cursor") or {}
+    model = cursor.get("model")
+    family = cursor.get("family")
+    model_str = str(model) if model else None
+    family_str = str(family) if family else None
+    return (model_str, family_str)
+
+
 def hard_filter(models: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Keep agent-capable, non-degraded catalogue rows."""
     kept: list[dict[str, Any]] = []
@@ -171,8 +195,18 @@ def propose_tiers(
     *,
     applied_model_id: str | None,
     proven_families: set[str],
+    map_author_model: str | None = None,
+    map_author_family: str | None = None,
 ) -> dict[str, list[dict[str, str]]]:
-    """Build proposal lists. ``gate`` is always empty without proven history."""
+    """Build proposal lists. Author is the map cell; ``gate`` empty without history.
+
+    ``applied_model_id`` is accepted for callers that still pass it (report /
+    discrepancy lives in ``run_report``); it does not become the author proposal.
+    """
+    del applied_model_id  # discrepancy is reported by run_report, not here
+    if map_author_model is None:
+        map_author_model, map_author_family = read_map_author_cursor()
+
     eligible = hard_filter(models)
     rows: list[dict[str, str]] = []
     for model in eligible:
@@ -188,11 +222,20 @@ def propose_tiers(
         )
 
     author: list[dict[str, str]] = []
-    if applied_model_id:
+    if map_author_model:
         for row in rows:
-            if row["name"] == applied_model_id:
+            if row["name"] == map_author_model:
                 author = [row]
                 break
+        if not author:
+            family = map_author_family or derive_family(map_author_model)
+            author = [
+                {
+                    "name": map_author_model,
+                    "family": family,
+                    "depth": "unknown",
+                }
+            ]
 
     mechanical = [row for row in rows if row["depth"] == "no"][:5]
 
@@ -236,18 +279,33 @@ def run_report(db_path: Path) -> dict[str, list[dict[str, str]]]:
         return {"catalogue": [], "author": [], "mechanical": [], "gate": []}
 
     applied = read_applied_model_id(db_path)
+    map_author_model, map_author_family = read_map_author_cursor()
     proposals = propose_tiers(
         models,
         applied_model_id=applied,
         proven_families=load_proven_families(),
+        map_author_model=map_author_model,
+        map_author_family=map_author_family,
     )
     print(f"Catalogue source: {db_path}")
     print(f"Models after hard filters (excl. default): {len(proposals['catalogue'])}")
+    proposed_author = proposals["author"][0]["name"] if proposals["author"] else None
+    if map_author_model:
+        print(f"Map author cell: {map_author_model}")
     if applied:
-        print(f"Applied model (author cold-start candidate): {applied}")
+        if proposed_author and applied == proposed_author:
+            print(f"Applied model: {applied} (agrees with map author)")
+        else:
+            map_label = proposed_author or "(no map author)"
+            print(
+                f"Applied model (discrepancy): {applied} "
+                f"— differs from map author {map_label}"
+            )
+    elif proposed_author:
+        print(f"No applied model recorded (map author proposal: {proposed_author})")
     print()
     print_table("Catalogue (family derived)", proposals["catalogue"])
-    print_table("Proposed author (at most one; cold start)", proposals["author"])
+    print_table("Proposed author (map cell; at most one)", proposals["author"])
     print_table("Proposed mechanical (no depth lever)", proposals["mechanical"])
     print_table(
         "Proposed gate (requires proven history — Design §D7: none)",
