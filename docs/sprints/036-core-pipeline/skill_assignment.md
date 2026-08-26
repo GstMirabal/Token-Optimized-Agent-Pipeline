@@ -53,5 +53,7 @@ No new skill forged (Priority 4).
 
 ## 5. Gaps
 
-None for 036. Track G (`model_ledger.py`) is 037. Triage of census `new`
-rows (O5) is at close, not a skill forge.
+None for 036. Track G (`model_ledger.py`) is 037. Rider **S** (sandbox
+`xargs` / nucleus `.bridge_cursor.lock`) queued on 037 in
+`021-030-program-queue.md`. Triage of census `new` rows (O5) is at close, not
+a skill forge.

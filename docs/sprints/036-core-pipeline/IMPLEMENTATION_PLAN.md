@@ -205,6 +205,7 @@ Orden de commits: `L1+L2 → L3` ∥ `M1+M2 → M3 → M4 → M5 → M6 → M7 �
 | Exclusion | Destino |
 | :--- | :--- |
 | Track G (`model_ledger.py`) | **037** |
+| Rider **S** — sandbox-safe `py_compile` + nucleus `.bridge_cursor.lock` | **037** (queued in `021-030-program-queue.md`; measured 2026-08-26 on `ai-sprint/036`) |
 | Family-trial / promoción Opus·GLM a `cursor.author` | **038** |
 | Relabel Phase 2→4.1/4.2/4.3 en orchestrator cluster | Reorden O5 o sprint posterior (034 Out of scope) |
 | Meter censo en `make verify` | Prohibido (rojo histórico 028–032; abort I4) |

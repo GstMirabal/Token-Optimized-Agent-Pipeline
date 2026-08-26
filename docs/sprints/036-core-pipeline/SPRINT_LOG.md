@@ -68,6 +68,10 @@ Orchestrator transcription: QA + Tester `APPROVED` same session. Other Models
 quota prevented `Task` dispatch at `--resolve gate`; functional evidence is the
 Verification table + `make verify`.
 
+**Queued for 037 (not executed here):** rider **S** — sandbox-safe `py_compile`
+(no `xargs`/`ARG_MAX`) + nucleus `write_bridge_locks` for `.bridge_cursor.lock`.
+Recorded in `021-030-program-queue.md` and 034 Track S / 036 Out of scope.
+
 ## Phase 8 — Closeout
 
 _(pending — `/agents:close`)_
