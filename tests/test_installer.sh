@@ -86,12 +86,12 @@ rm -f "$NUCLEUS/.bridge_claude.lock" "$NUCLEUS/.bridge_cursor.lock" "$NUCLEUS/CL
 [ -e "$NUCLEUS/.claude/agents/principal_agent.md" ] || fail "nucleus: agents not linked"
 grep -qx "@agents.md" "$NUCLEUS/CLAUDE.md" || fail "nucleus: constitution import missing"
 [ ! -e "$NUCLEUS/.claude/skills" ] || fail "nucleus: skills must NOT be linked (minimal bridge)"
-# start_workflow.md `bridge_check` keys the nucleus trigger on symlink-per-source
-# rather than on a lock, BECAUSE the nucleus path writes none. Nothing pinned that
-# fact until Sprint 023 C6, so a future edit could have written one and left the
-# workflow silently wrong with the whole suite green.
-[ ! -e "$NUCLEUS/.bridge_claude.lock" ] || fail "nucleus: must write no bridge lock (start_workflow bridge_check depends on this)"
-[ ! -e "$NUCLEUS/.bridge_cursor.lock" ] || fail "nucleus: must write no cursor bridge lock"
+# Default nucleus install is Claude-only: start_workflow.md `bridge_check` for
+# Claude still keys on symlink-per-source rather than a lock. Cursor/both paths
+# write `.bridge_cursor.lock` (Sprint 037 S3). Nothing pinned the Claude-no-lock
+# fact until Sprint 023 C6.
+[ ! -e "$NUCLEUS/.bridge_claude.lock" ] || fail "nucleus: Claude default must write no bridge lock"
+[ ! -e "$NUCLEUS/.bridge_cursor.lock" ] || fail "nucleus: Claude default must write no cursor bridge lock"
 ( cd "$NUCLEUS" && python3 scripts/install.py --profile example-project > /dev/null 2>&1 ) \
   && fail "nucleus: profile install must be refused" || true
 ( cd "$NUCLEUS" && python3 scripts/install.py --profile-path /tmp/x > /dev/null 2>&1 ) \
@@ -103,6 +103,8 @@ grep -q "hooks/on_push.py" "$NUCLEUS/.git/hooks/pre-push" \
   || fail "nucleus cursor: pre-push hook must use repo-relative path"
 [ -x "$NUCLEUS/.git/hooks/pre-commit" ] || fail "nucleus cursor: pre-commit hook missing"
 [ -x "$NUCLEUS/.git/hooks/commit-msg" ] || fail "nucleus cursor: commit-msg hook missing"
+[ -f "$NUCLEUS/.bridge_cursor.lock" ] || fail "nucleus cursor: .bridge_cursor.lock missing"
+[ ! -e "$NUCLEUS/.bridge_claude.lock" ] || fail "nucleus cursor: must not write Claude lock"
 echo "✅ nucleus self-bridge test PASSED"
 
 # ── P4.1: --target cursor and --target both on a host with a real .git ───────

@@ -45,7 +45,7 @@ graphify-rebuild:
 # this target by the same rule.
 verify:
 	cd $(AGENTS_DIR) && python3 skills/slash-commander/scripts/verify_commands.py
-	cd $(AGENTS_DIR) && find . -name "*.py" $(PY_EXCLUDES) | xargs python3 -m py_compile
+	cd $(AGENTS_DIR) && python3 scripts/py_compile_tree.py
 	cd $(AGENTS_DIR) && python3 -c "import json, glob; \
 	  [json.load(open(f)) for f in glob.glob('**/*.json', recursive=True) \
 	   if not any(p in f for p in ('node_modules', '.git/', 'venv_skillopt'))]; print('JSON OK')"
@@ -98,13 +98,9 @@ docs-freshness-check:
 session-start:
 	cd $(AGENTS_DIR) && python3 scripts/session_start.py
 
-# Model ledger report (Sprint 037). Stub until scripts/model_ledger.py exists.
+# Model ledger report (Sprint 037). Regenerates docs/audits/MODEL_LEDGER.md.
 model-ledger:
-	cd $(AGENTS_DIR) && if [ -f scripts/model_ledger.py ]; then \
-	  python3 scripts/model_ledger.py; \
-	else \
-	  echo "model-ledger: deferred to Sprint 037"; \
-	fi
+	cd $(AGENTS_DIR) && python3 scripts/model_ledger.py
 
 # Propose Cursor model↔tier assignments from the on-disk catalogue (Sprint 026).
 # Proposes only — never writes config/model_tiers.json. Design §D7: gate stays

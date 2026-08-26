@@ -499,10 +499,12 @@ def main() -> int:
         if args.target == "cursor":
             install_cursor_bridge(AGENTS_DIR, nucleus=True)
             install_nucleus_git_hooks()
+            write_bridge_locks(args.target)
             return 0
         install_nucleus_bridge()
         install_cursor_bridge(AGENTS_DIR, nucleus=True)
         install_nucleus_git_hooks()
+        write_bridge_locks(args.target)
         return 0
 
     profile_dir = resolve_profile_dir(args.profile, args.profile_path)
