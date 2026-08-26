@@ -36,7 +36,13 @@
 
 ## Phase 4 — Assignment
 
-_(pending)_
+- `agent_assignment.md`, `skill_assignment.md`, `task_scope.md` written this
+  session. No Destination forge (all N/A). No skill forged; P2/P3 not escalated.
+- `make cursor-tiers` exit `0` (2026-08-26): applied discrepancy `grok-4.6`;
+  map in force `cursor.author` = `grok-4.5` / `high`; mechanical
+  `composer-2.5`; gate `claude-opus-5` / `max` (035 H2). Work rows use the map.
+- Mechanical-eligible: L2, M2, M6. `check_task_scope.py` exit `0`.
+- Plan assignees stand (no staffing overwrites).
 
 ## Phase 5 — Approval Gate
 
