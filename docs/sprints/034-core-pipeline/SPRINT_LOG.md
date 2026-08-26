@@ -59,6 +59,9 @@ family-trial → 038 (not this log).
 
 ## Phase 7 — Quality Gate
 
-Not run. No Gate/Verdict table until `qa_agent` and `tester_agent` emit
-(after remaining Work units K6 and J1). `orchestrator` transcribes; this log
-does not invent a verdict.
+| Gate | Round | Verdict | Class | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| QA (structural) | 1 | **APPROVED** | | `check_task_scope --sprint-dir docs/sprints/034-core-pipeline` exit 0. `audit_plan` exit 0. `map_workflows --check` exit 0. `check_readme_counts` 11/14/34/12/13/31/6 exit 0. `verify_references` OK. `check_model_tiers` 14/14. No `TODO`/`FIXME` in 034 Python. Role-artifact for Orchestrator / Agent Orchestrator / Skill Architect / Rule Validator present. `ruff` is not in `make verify` (034 deferred); unused-`noqa` noise on pre-existing `session_probe` imports is not a bounce. |
+| Tester (functional) | 1 | **APPROVED** | | `venv_skillopt/bin/python3 -m pytest tests/ -q` **578 passed**. `bash tests/test_installer.sh` PASSED (sandbox blocked rsync; re-run with full FS). `check_absolute_paths` exit 0. |
+
+Orchestrator transcription: both gates `APPROVED` same session (Cursor sequential; commands above). `RECORD` was not used. `docs/active_state.json` still has `current_sprint.id` = 33, so `make verify`'s `--current-sprint` inspects 033 until close `state_sync`; 034 was checked with `--sprint-dir`.
