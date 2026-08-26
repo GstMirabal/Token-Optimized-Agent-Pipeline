@@ -4,6 +4,10 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Changed
+
+- **Program queue** — marked Sprint **037** delivered/deployed as `v4.20.0` (PR #69) in `docs/roadmaps/core/pipeline/021-030-program-queue.md` (commit `d969fec`, post-seal on `main`; reconstructed by `/agents:reconcile` 2026-08-26). Next: **038** family-trial.
+
 ## [4.20.0] - 2026-08-26
 
 ### Added
