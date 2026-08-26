@@ -75,7 +75,7 @@ mechanical+high without keep/escalation note (`F-026-A2`).
 | E2 | `scripts/audit_cursor_models.py` | modify | high | `implementer_agent` | `grok-4.5` | `high` | ✅ `a181a11` |
 | E3 | `workflows/pipeline_workflow.md` | modify | high | `orchestrator` | `grok-4.5` | `high` | ✅ `0ee4901` |
 | E4 | `tests/test_audit_cursor_models.py` | create | medium | `implementer_agent` | `composer-2.5` | `N/A` | ✅ `baf42d0` |
-| E5 | `scripts/audit_cursor_models.py` | modify | high | `implementer_agent` | `grok-4.5` | `high` | ⏳ |
+| E5 | `scripts/audit_cursor_models.py` | modify | high | `implementer_agent` | `grok-4.5` | `high` | ✅ `e1d562e` |
 | E6 | `scripts/audit_cursor_models.py` | modify | high | `implementer_agent` | `grok-4.5` | `high` | ⏳ |
 
 ## Work — Track C
