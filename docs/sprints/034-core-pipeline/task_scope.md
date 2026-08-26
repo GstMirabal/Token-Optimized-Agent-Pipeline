@@ -13,8 +13,8 @@
 
 **Backfill.** This file was written 2026-08-26 after Phase 6 had already
 committed tracks A, B, P, I (partial), K (partial), and N. `jurisdictional_lock`
-could not be enforced on those writes. Remaining locks apply to **K6** and **J1**
-only. Out-of-sprint rows (C/E/H/F, M/L, G, 038) are absent on purpose.
+could not be enforced on those writes. Remaining lock: **J1** only. K6 landed
+`2a2dbc9`. Out-of-sprint rows (C/E/H/F, M/L, G, 038) are absent on purpose.
 
 ---
 
@@ -119,9 +119,9 @@ I4+I5+K3+K5 share commit `3dc95db`. I2 precedes K6 on the same file.
 | K3 | `scripts/check_task_scope.py` | modify | medium | `implementer_agent` | `grok-4.5` | `high` | ✅ `3dc95db` |
 | K4 | `tests/test_check_role_artifact.py` | modify | medium | `implementer_agent` | `grok-4.5` | `high` | ✅ `9e8c0d3` |
 | K5 | `tests/test_check_task_scope.py` | modify | medium | `implementer_agent` | `grok-4.5` | `high` | ✅ `3dc95db` |
-| K6 | `workflows/pipeline_workflow.md` | modify | high | `orchestrator` | `grok-4.5` | `high` | ⏳ |
+| K6 | `workflows/pipeline_workflow.md` | modify | high | `orchestrator` | `grok-4.5` | `high` | ✅ `2a2dbc9` |
 
-K1+K4 share commit `9e8c0d3`. **K6 is locked to `orchestrator` until it lands.**
+K1+K4 share commit `9e8c0d3`.
 
 ## Track J — constitution anchor
 
