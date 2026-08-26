@@ -1,7 +1,7 @@
 # Sprint Log — 038 (`core-pipeline` / family-trial)
 
 **Branch**: `ai-sprint/038` from `main` at `171531a` (`v4.20.0` + reconcile)
-**Status**: IN_PROGRESS — Phase 8 Human OK **promote** `glm-5.2`; closeout artifacts on branch; awaiting `/agents:close`
+**Status**: **SESSION LOCKED** — Sprint 038 closed 2026-08-26; `cursor.author` promoted to `glm-5.2`; continuing `/agents:deployment`
 **Session**: `20260826T100341Z-67664` · tool `cursor` · `delegation_mode: sequential`
 
 ---
@@ -89,5 +89,10 @@ Orchestrator transcription: QA + Tester `APPROVED` same session. `RECORD` not us
 - `CHANGELOG.md` `[Unreleased]` Sprint 038; program-queue Status updated;
   `MODEL_TIER_TRIAL_GUIDE.md` records promote outcome; `PHASE_REGISTER.md` +
   `graph_stats.json` (7842 / 9532 / 737 after `graphify-update`).
-- Formal `SESSION LOCKED` + push + `/agents:deployment` → `/agents:close`
-  (Human OK on close / heuristic pulse still required).
+- Formal `SESSION LOCKED` + push + `/agents:deployment` after Human OK on
+  close («ok» 2026-08-26) covering heuristic pulse (all `discard`).
+- Heuristic pulse (extract): `MESSAGE_GATE_VIOLATION` on early T1-alone
+  `fix(start)` commit type — already remediated by staging with M1
+  (`238ff4a`); Other Models gate-Task limit — in-session Double-Gate (037
+  posture); applied medidor ≠ map — Q4 attestation. All `routing_class:
+  discard`. No `memory_index.json` append. `memory/` wiped.

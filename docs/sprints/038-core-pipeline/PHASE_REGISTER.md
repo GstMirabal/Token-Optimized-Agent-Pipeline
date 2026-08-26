@@ -13,7 +13,7 @@ What `close_workflow.md` Phase 2.6 `double_gate_evidence` reads: **did this phas
 | 5 · Approval Gate | Human authorisation | ✅ 2026-08-26 over plan at `05b4d7b` («ok») |
 | 6 · Execution | DAG `C1 → (T1 → M1)` ∥ `D1` ∥ `D2` ∥ `R1` | ✅ 6/6 SHAs on `task_scope.md` |
 | 7 · Quality Gate | Gate table in `SPRINT_LOG.md` | ✅ both `APPROVED` (round 1; in-session after Other Models limit) |
-| 8 · Closeout | `CHANGELOG.md` `[Unreleased]`, roadmap, this register | ✅ promote sealed this session; formal `/agents:close` + deploy pending |
+| 8 · Closeout | `CHANGELOG.md` `[Unreleased]`, roadmap, this register | ✅ this close; same-turn `/agents:deployment` |
 
 ## Gate rounds
 
@@ -45,4 +45,4 @@ Nucleus mode: no per-module Walkthroughs and no host `0_SYSTEM_OVERVIEW.md` /
 | Applied medidor `grok-4.6` ≠ map after promote | `discard` — 038 Q4 attestation path; map is source of truth for tiers |
 | No new host-class KI | — |
 
-Human OK on `/agents:close` must cover this pulse.
+Human OK on `/agents:close` 2026-08-26 («ok») covers this pulse (all discard).
