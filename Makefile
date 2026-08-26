@@ -23,7 +23,7 @@ PY_EXCLUDES := -not -path "*/.git/*" -not -path "*/node_modules/*" -not -path "*
 VENV_PY := $(AGENTS_DIR)/venv_skillopt/bin/python3
 PY := $(if $(wildcard $(VENV_PY)),$(VENV_PY),python3)
 
-.PHONY: graphify-update graphify-rebuild verify docs-freshness-check cursor-tiers role-artifacts
+.PHONY: graphify-update graphify-rebuild verify docs-freshness-check session-start model-ledger cursor-tiers role-artifacts
 
 
 # Incremental AST sync after code changes (close_workflow Phase 1, no LLM cost).
@@ -94,11 +94,23 @@ SPRINT_ID ?= $(shell python3 -c "import json;print(json.load(open('docs/active_s
 docs-freshness-check:
 	python3 $(AGENTS_DIR)/scripts/docs_freshness_check.py . $(SPRINT_ID)
 
+# Session briefing for the active sprint (Sprint 035).
+session-start:
+	cd $(AGENTS_DIR) && python3 scripts/session_start.py
+
+# Model ledger report (Sprint 037). Stub until scripts/model_ledger.py exists.
+model-ledger:
+	cd $(AGENTS_DIR) && if [ -f scripts/model_ledger.py ]; then \
+	  python3 scripts/model_ledger.py; \
+	else \
+	  echo "model-ledger: deferred to Sprint 037"; \
+	fi
+
 # Propose Cursor model↔tier assignments from the on-disk catalogue (Sprint 026).
 # Proposes only — never writes config/model_tiers.json. Design §D7: gate stays
-# empty until proven history exists.
+# empty until proven history exists. --check (Sprint 035) fails if the gate is empty.
 cursor-tiers:
-	cd $(AGENTS_DIR) && python3 scripts/audit_cursor_models.py
+	cd $(AGENTS_DIR) && python3 scripts/audit_cursor_models.py --check
 
 # Sprint 027: verify a role left its required sprint-scoped artifacts (portable
 # SubagentStop counterpart). SPRINT_DIR must be the canonical sprint path.

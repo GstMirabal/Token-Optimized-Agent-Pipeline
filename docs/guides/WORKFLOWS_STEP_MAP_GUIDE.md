@@ -23,7 +23,7 @@ protocols that should mirror each other shows up there first.
 | `reverse_documentation_workflow` | — | — | — | — | — | — | — | — | — | — | — | — | — |
 | `skill_forge_workflow` | — | — | — | — | — | — | — | — | — | — | — | — | — |
 | `standardization_workflow` | — | — | — | — | — | — | — | verify | write | write | — | — | — |
-| `start_workflow` | write | — | — | — | write | — | — | read/write | write | — | write | read | — |
+| `start_workflow` | write | — | — | — | verify/write | — | — | read | write | — | write | read | — |
 
 **Columns**, from `config/artifact_registry.json` — the artifact and the phase
 that leaves it. A phase is defined by the artifact it leaves, which is what makes
@@ -234,21 +234,21 @@ the matrix portable across tools rather than tied to one runner's agent names.
 
 | Phase | Step | Effect |
 | :--- | :--- | :--- |
-| 0. Zero-Memory Initialization | `read_anchor` | read |
-| 0. Zero-Memory Initialization | `read_ruleset` | read |
-| 0. Zero-Memory Initialization | `pip_setup` | write |
-| 0. Zero-Memory Initialization | `read_graph` | write |
-| 0.4 Drift Check | `drift_check` | write |
-| 0.5 State Claim | `state_claim` | write |
-| 0.6 Readiness Probe | `readiness_probe` | write |
-| 0.7 Platform Probe | `platform_probe` | write |
-| 1. Collision Guard | `session_lock_check` | write |
-| 1. Collision Guard | `lightweight_sync` | write |
-| 1.5 Bridge Provision | `bridge_check` | write |
-| 1.5 Bridge Provision | `first_run_scaffold` | read |
-| 1.6 Autonomy posture (Cursor) | `cursor_memory_drift` | write |
-| 2. Pipeline Handoff | `pipeline_invocation` | write |
-| 2. Pipeline Handoff | `delegation_conflict` | write |
+| 0. Zero-Memory | `read_anchor` | read |
+| 0. Zero-Memory | `read_ruleset` | read |
+| 0. Zero-Memory | `pip_setup` | write |
+| 0. Zero-Memory | `read_graph` | write |
+| 0.4 Drift | `drift_check` | ? |
+| 0.5 Claim | `state_claim` | write |
+| 0.6 Probe | `readiness_probe` | verify |
+| 0.7 Probe | `platform_probe` | verify |
+| 1. Guard | `session_lock_check` | verify |
+| 1. Sync | `lightweight_sync` | write |
+| 1.5 Bridge | `bridge_check` | write |
+| 1.5 Bridge | `first_run_scaffold` | read |
+| 1.6 Cursor | `cursor_memory_drift` | write |
+| 2. Handoff | `pipeline_invocation` | write |
+| 2. Handoff | `delegation_conflict` | write |
 
 ---
 *A `?` means the heuristic could not classify that step's verb. It is left

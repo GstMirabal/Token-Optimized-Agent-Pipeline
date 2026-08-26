@@ -4,6 +4,15 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Added
+- **Sprint 035 (`core-pipeline`)** — Tracks C/E/H/F (17): `/start` briefing (`scripts/session_start.py`, compressed `start_workflow.md` &lt; 8 KB); `audit_cursor_models.py --resolve` + structural gate proposals + inverted `--check`; ADR-0010 (Task applies tier map) and ADR-0011 (gate cell by structural ceiling); `cursor.gate` = `claude-opus-5` / `anthropic` / `max`; `verify_references` check **(g)** profile `model:` ↔ Claude map; Makefile `session-start`, `model-ledger` stub, `cursor-tiers --check`; `token_economy_agent` Phase 4.3 proposal ownership + 14 profiles. Program next: M/L → **036**; G → **037**; family-trial → **038**. #035
+
+### Changed
+- **`workflows/pipeline_workflow.md`** — Phase 6/7 under Cursor bind `Task` + `--resolve` (ADR-0010); v3.8.1.
+- **`workflows/start_workflow.md`** — operational briefing via `session_start.py` (P3 pin-sync preserved).
+- **`config/model_tiers.json`** — `tiers.gate.cursor` filled (ADR-0011); no longer null.
+- **`README.md`** — scripts count 32.
+
 ## [4.17.0] - 2026-08-26
 
 ### Added
