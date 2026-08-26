@@ -95,7 +95,7 @@ mechanical+high without keep/escalation note (`F-026-A2`).
 | H1 | `docs/decisions/ADR-0011-gate-cell-by-structural-ceiling.md` | create | high | `doc_orchestrator` | `grok-4.5` | `high` | ✅ `289981b` |
 | H2 | `config/model_tiers.json` | modify | high | `rule_validator` | `grok-4.5` | `high` | ✅ `6db7a40` |
 | H3 | `scripts/verify_references.py` | modify | high | `implementer_agent` | `grok-4.5` | `high` | ✅ `7fedfac` |
-| H4 | `tests/test_verify_references.py` | modify | medium | `implementer_agent` | `composer-2.5` | `N/A` | ⏳ |
+| H4 | `tests/test_verify_references.py` | modify | medium | `implementer_agent` | `composer-2.5` | `N/A` | ✅ `98f721f` |
 
 ## Work — Track F
 
