@@ -55,7 +55,7 @@ scripts/check_manifest_parity.py, scripts/check_model_tiers.py,
 scripts/check_readme_counts.py, scripts/detect_new_models.py,
 scripts/docs_freshness_check.py, scripts/map_workflows.py,
 scripts/scan_workflow_determinism.py, scripts/submodule_purity.py,
-scripts/verify_references.py.
+scripts/verify_references.py, scripts/sync_agents_pin.py.
 
 Usage:
     from _root import agents_root
