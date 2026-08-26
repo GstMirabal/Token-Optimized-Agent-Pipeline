@@ -1,8 +1,8 @@
 {
-  "nodes": 6809,
-  "edges": 7944,
-  "communities": 669,
+  "nodes": 7149,
+  "edges": 8450,
+  "communities": 696,
   "source": "graphify-out/graph.json",
   "sprint": 34,
-  "note": "AST update after atomic_commit; deep semantic rebuild skipped when no LLM API key. Counts at close Phase 1 match sprint 033 until graphify-update runs."
+  "note": "AST update after atomic_commit (built_at_commit = seal tip); deep semantic rebuild skipped (no LLM API key)"
 }

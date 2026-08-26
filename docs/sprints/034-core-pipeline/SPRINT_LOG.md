@@ -68,7 +68,7 @@ Orchestrator transcription: both gates `APPROVED` same session (Cursor sequentia
 
 ## Phase 8 — Closeout
 
-- `PHASE_REGISTER.md` and `graph_stats.json` written this close (6809 nodes / 7944 edges / 669 communities at Phase 1 snapshot; `graph_rebuild` after `atomic_commit`).
+- `PHASE_REGISTER.md` and `graph_stats.json` written this close (7149 nodes / 8450 edges / 696 communities after `graphify-update`; deep rebuild skipped — no LLM API key).
 - Master Ledger `[Unreleased]` Sprint 034 entry; program-queue **Next / in flight** = 034 closing, program 034–038.
 - Heuristic pulse: no `memory/` directory; no new host-class KI. Human `ok` 2026-08-26 covers Phase 2.5.
 - Repo docs (`CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `NOTICE.md`) present; this sprint did not change reporting or vendoring.
