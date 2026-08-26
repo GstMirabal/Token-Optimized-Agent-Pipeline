@@ -857,8 +857,8 @@ Los assignees son rulesets bajo `delegation_mode: sequential`.
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| A1 | `commands/close.md` | modify | medium | `orchestrator` | ⏳ |
-| A2 | `workflows/close_workflow.md` | modify | high | `orchestrator` | ⏳ |
+| A1 | `commands/close.md` | modify | medium | `orchestrator` | ✅ `c15b4f5` |
+| A2 | `workflows/close_workflow.md` | modify | high | `orchestrator` | ✅ `611da90` |
 
 A1: tras seal + `release`, exigir `@workflows/deployment_workflow.md` en el
 mismo turno.
@@ -869,8 +869,8 @@ A2: quitar el default «wait for deploy now»; mover `graph_rebuild` tras
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| B1 | `scripts/session_probe.py` | modify | high | `implementer_agent` | ⏳ |
-| B2 | `tests/test_session_probe.py` | create | medium | `implementer_agent` | ⏳ |
+| B1 | `scripts/session_probe.py` | modify | high | `implementer_agent` | ✅ `c2fc750` |
+| B2 | `tests/test_session_probe.py` | create | medium | `implementer_agent` | ✅ `c2fc750` |
 
 B1: `built_at_commit` + ancestría. B2: mtime viejo + campo de commit actual →
 sin false behind.
@@ -888,9 +888,9 @@ P3 toca `start_workflow.md` **antes** de C2 (035). C2 no reabre la celda
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| P1 | `scripts/sync_agents_pin.py` | create | high | `implementer_agent` | worktree (sin commit) |
-| P2 | `tests/test_sync_agents_pin.py` | create | medium | `implementer_agent` | worktree (commit con P1) |
-| P3 | `workflows/start_workflow.md` | modify | high | `orchestrator` | worktree (sin commit) |
+| P1 | `scripts/sync_agents_pin.py` | create | high | `implementer_agent` | ✅ `25b48af` |
+| P2 | `tests/test_sync_agents_pin.py` | create | medium | `implementer_agent` | ✅ `25b48af` (con P1) |
+| P3 | `workflows/start_workflow.md` | modify | high | `orchestrator` | ✅ `06a532a` |
 
 Criterio de hecho: `python3 scripts/sync_agents_pin.py; echo $?` en núcleo es
 `0` y imprime `nucleus: skip`. En host, un tag `v*` más nuevo que
@@ -1070,13 +1070,13 @@ porque el check de ruta contra jurisdicción queda fuera de 034 por diseño.
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| I1 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify | medium | `doc_orchestrator` | ⏳ |
-| I2 | `workflows/pipeline_workflow.md` | modify | high | `orchestrator` | ⏳ |
-| I3 | `agents/agent_orchestrator.md` | modify | high | `agent_orchestrator` | ⏳ |
+| I1 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify | medium | `doc_orchestrator` | ✅ `306eba1` |
+| I2 | `workflows/pipeline_workflow.md` | modify | high | `orchestrator` | ✅ `53c596d` |
+| I3 | `agents/agent_orchestrator.md` | modify | high | `agent_orchestrator` | ✅ `d3f284d` |
 | I4 | `scripts/check_task_scope.py` | modify | high | `implementer_agent` | ✅ `3dc95db` (capacidad; transcripción pendiente de I7) |
 | I5 | `tests/test_check_task_scope.py` | modify | medium | `implementer_agent` | ✅ `3dc95db` (con I4/K3/K5) |
 | I6 | `docs/hotfixes/H-005-pipeline.md` | create | medium | `doc_orchestrator` | ✅ `18b78ab` |
-| I7 | `docs/standards/templates/AGENT_ASSIGNMENT_TEMPLATE.md` | create | medium | `doc_orchestrator` | ⏳ |
+| I7 | `docs/standards/templates/AGENT_ASSIGNMENT_TEMPLATE.md` | create | medium | `doc_orchestrator` | ✅ `3182b00` |
 
 I1: renombrar la columna a `Assignee (proposed)` **solo en esta plantilla** y
 añadir una línea que nombre Phase 4.1 como autoridad. Criterio de hecho: la
@@ -1418,12 +1418,12 @@ M (el censo fija los 14) y no bloquea G. Independiente de L.
 
 | # | File | Operation | Risk | Assignee | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| N1 | `scripts/cursor_adapter.py` | modify | high | `implementer_agent` | worktree (sin commit) |
-| N2 | `tests/test_cursor_adapter.py` | modify | medium | `implementer_agent` | worktree (commit con N1) |
-| N3 | `.gitignore` | modify | low | `implementer_agent` | worktree (sin commit) |
-| N4 | `scripts/install.py` | modify | medium | `implementer_agent` | worktree (sin commit) |
-| N5 | `tests/test_installer.sh` | modify | medium | `implementer_agent` | worktree (commit con N4) |
-| N6 | `docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md` | modify | low | `doc_orchestrator` | worktree (sin commit) |
+| N1 | `scripts/cursor_adapter.py` | modify | high | `implementer_agent` | ✅ `676b72a` |
+| N2 | `tests/test_cursor_adapter.py` | modify | medium | `implementer_agent` | ✅ `676b72a` (con N1) |
+| N3 | `.gitignore` | modify | low | `implementer_agent` | ✅ `89861df` |
+| N4 | `scripts/install.py` | modify | medium | `implementer_agent` | ✅ `7fb98cf` |
+| N5 | `tests/test_installer.sh` | modify | medium | `implementer_agent` | ✅ `7fb98cf` (con N4) |
+| N6 | `docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md` | modify | low | `doc_orchestrator` | ✅ `8978a56` |
 
 N1 escribe `.cursor/rules/01-chat-title.mdc` (`alwaysApply: true`: el tab se
 llama como las ramas sprint de la conversación) y `.cursor/agents/{name}.md`
@@ -1695,7 +1695,7 @@ ya parcheados en este archivo.
 
 | Field | Value |
 | :--- | :--- |
-| **Approved by** | Gustavo (chat, «ok, comenzamos») |
+| **Approved by** | Gustavo (chat, «ok, comenzamos»; confirmado «phase 5 ok» 2026-08-26) |
 | **Date** | 2026-08-26 |
 | **Plan commit at approval** | `ffd33e0` |
 | **Remaining locks** | Active Sprint · QA + Tester · Human OK al close |
@@ -1713,6 +1713,8 @@ ya parcheados en este archivo.
    humano el 2026-08-25**: ventana de línea base de D12 = **2 sprints**, y
    desempate de familia de D13 = misma que `gate.claude_code`, luego mayor
    ventana de contexto. No quedan huecos de decisión abiertos en el diseño.
-5. Phase 5 **autorizada** 2026-08-26. Ejecutar `A → B → P → I → K → J → N`.
-   I4/I5/I6/K1–K5 ya ✅. P y N en worktree al autorizar. No ejecutar filas `⏭`.
+5. Phase 5 **autorizada** 2026-08-26. Phases 3–4 se **backfillearon el mismo
+   día** (`SPRINT_LOG.md`, `agent_assignment.md`, `skill_assignment.md`,
+   `task_scope.md`) porque Phase 6 había arrancado sin ellos. Quedan **K6** y
+   **J1** (⏳ en `task_scope.md`). No ejecutar filas `⏭`.
 6. Tras A–N: close+deploy de 034. Primer pin de hosts a ese tag.
