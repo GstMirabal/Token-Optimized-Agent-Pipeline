@@ -72,7 +72,13 @@ def test_upstream_section_reports_size_not_full_dump(
     marker = "UNIQUE_UPSTREAM_PAYLOAD_SHOULD_NOT_APPEAR"
     huge = "\n".join(
         [f"# dump line {i} {marker}" for i in range(500)]
-        + ["| **Still open** | F-999 |"]
+        + [
+            "**Status at Sprint 033 (test).**",
+            "",
+            "| | |",
+            "| :--- | :--- |",
+            "| **Still open** | F-999 |",
+        ]
     )
     root = _write_minimal_root(tmp_path / "repo", upstream_body=huge)
     briefing = session_start.apply_line_cap(session_start.build_briefing(root))
@@ -83,6 +89,58 @@ def test_upstream_section_reports_size_not_full_dump(
     assert "rows (non-empty):" in text
     assert marker not in text
     assert text.count("| **Still open** |") <= 1
+
+
+def test_upstream_still_open_uses_highest_sprint_status_only(
+    session_start, tmp_path: Path
+) -> None:
+    """Sprint 038 M1: historical Status snapshots must not inflate the count.
+
+    Fixture: Sprint 027 Still open non-empty + Sprint 033 *(none…)* → expect 0.
+    Fails against the pre-M1 counter that summed every Still-open row.
+    """
+    body = "\n".join(
+        [
+            "**Status at Sprint 027 (2026-08-25).**",
+            "",
+            "| | |",
+            "| :--- | :--- |",
+            "| **Still open** | **`F-021-A2`**, **`F-026-A2`** |",
+            "",
+            "**Status at Sprint 033 (2026-08-25, `ai-sprint/033`).**",
+            "",
+            "| | |",
+            "| :--- | :--- |",
+            "| **Still open** | *(none in this file's open set)* |",
+        ]
+    )
+    root = _write_minimal_root(tmp_path / "repo", upstream_body=body)
+    section = "\n".join(session_start.section_upstream(root))
+    assert "rows (non-empty): 0" in section
+
+
+def test_upstream_still_open_counts_latest_nonempty_status(
+    session_start, tmp_path: Path
+) -> None:
+    """When the highest Status sprint still lists opens, count that row only."""
+    body = "\n".join(
+        [
+            "**Status at Sprint 027 (2026-08-25).**",
+            "",
+            "| | |",
+            "| :--- | :--- |",
+            "| **Still open** | **`F-021-A2`**, **`F-026-A2`** |",
+            "",
+            "**Status at Sprint 030 (2026-08-25).**",
+            "",
+            "| | |",
+            "| :--- | :--- |",
+            "| **Still open** | **`F-021-A2`** |",
+        ]
+    )
+    root = _write_minimal_root(tmp_path / "repo", upstream_body=body)
+    section = "\n".join(session_start.section_upstream(root))
+    assert "rows (non-empty): 1" in section
 
 
 def test_cli_against_real_repo_stays_under_line_cap() -> None:

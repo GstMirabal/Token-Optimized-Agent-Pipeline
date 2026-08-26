@@ -22,7 +22,11 @@
     "cost per accepted unit under Cursor beyond a single sprint milestone.",
     "Sprint 032 (2026-08-25): cursor.author promoted to grok-4.5 / high after",
     "author-tier trial (gate rounds matched 031; Human OK at close).",
-    "Sprint 035 H2 structural ceiling 2026-08-26; ADR-0011; supersedes null-until-proven-history clause of ADR-0003 for the cursor.gate cell only."
+    "Sprint 035 H2 structural ceiling 2026-08-26; ADR-0011; supersedes null-until-proven-history clause of ADR-0003 for the cursor.gate cell only.",
+    "Sprint 038 (2026-08-26): cursor.author promoted to glm-5.2 / zhipu / high",
+    "after family trial (incumbent was grok-4.5 / xai; Gate1/Gate2 round 1",
+    "APPROVED vs baseline 036+037; D12 + Human OK at Phase 8). Gate remains",
+    "claude-opus-5 / anthropic (D15)."
   ],
   "tiers": {
     "gate": {
@@ -48,8 +52,8 @@
         "effort": "medium"
       },
       "cursor": {
-        "model": "grok-4.5",
-        "family": "xai",
+        "model": "glm-5.2",
+        "family": "zhipu",
         "effort": "high"
       },
       "profiles": [

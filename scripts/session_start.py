@@ -16,6 +16,7 @@ Exit codes:
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -107,8 +108,30 @@ def section_upstream(root: Path) -> list[str]:
         lines.append(f"unreadable: {exc}")
         return lines
     file_lines = text.count("\n") + (0 if text.endswith("\n") or not text else 1)
+    open_rows = _still_open_rows_from_latest_status(text)
+    lines.append(f"file lines: {file_lines} — do not load full UPSTREAM at start")
+    lines.append(f"| **Still open** | rows (non-empty): {open_rows}")
+    return lines
+
+
+_STATUS_SPRINT = re.compile(r"^\*\*Status at Sprint (\d+)\b", re.MULTILINE)
+
+
+def _still_open_rows_from_latest_status(text: str) -> int:
+    """Count Still-open rows in the Status table with the highest sprint id.
+
+    Historical Status snapshots keep closed findings visible; summing them
+    inflates the /start briefing (Sprint 038 M1). No Status table → 0.
+    """
+    matches = list(_STATUS_SPRINT.finditer(text))
+    if not matches:
+        return 0
+    best_i = max(range(len(matches)), key=lambda i: int(matches[i].group(1)))
+    start = matches[best_i].end()
+    end = matches[best_i + 1].start() if best_i + 1 < len(matches) else len(text)
+    span = text[start:end]
     open_rows = 0
-    for raw in text.splitlines():
+    for raw in span.splitlines():
         if "| **Still open" not in raw:
             continue
         cells = [c.strip() for c in raw.split("|")]
@@ -116,9 +139,7 @@ def section_upstream(root: Path) -> list[str]:
         if not value or "*(none" in value.lower():
             continue
         open_rows += 1
-    lines.append(f"file lines: {file_lines} — do not load full UPSTREAM at start")
-    lines.append(f"| **Still open** | rows (non-empty): {open_rows}")
-    return lines
+    return open_rows
 
 
 def section_chat_vs_map(root: Path) -> list[str]:

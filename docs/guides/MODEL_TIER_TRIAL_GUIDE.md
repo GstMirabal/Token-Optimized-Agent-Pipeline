@@ -54,12 +54,23 @@ Candidate: Cursor **`grok-4.5`** / effort **`high`** (prior map: `grok-4.6` /
 attributing gate rounds to either change. Sprint 030 shipped this guide; 031
 retargets it.
 
+**Second trial — family (Sprint 038):** Cursor **`glm-5.2`** / family **`zhipu`**
+/ effort **`high`** (incumbent map: `grok-4.5` / `xai` / `high`). One variable:
+author **family**, not generation and not effort. Do **not** set `cursor.author`
+to `claude-opus-5` while `cursor.gate` is anthropic (`D15` family diversity).
+Gate-replay (D16) executes in the same sprint; record findings in
+`docs/sprints/038-core-pipeline/GATE_REPLAY.md` — a clean replay does not prove
+superiority and must not rank families. **Outcome (Phase 8 Human OK
+2026-08-26):** **promoted** — map `cursor.author` remains `glm-5.2` /
+`zhipu` / `high` (D12 vs ledger baseline 036+037; Gate1/Gate2 round 1
+`APPROVED`; no `REJECTED` `charter`).
+
 **Abort (chat vs global medidor).** `make cursor-tiers` reads only
-`applicationOpenModelAppliedConfig`. A per-chat override to Cursor Grok 4.5 may
-leave that key on `grok-4.6`. Sprint 032 option B: record human attestation in
-`SPRINT_LOG.md` and proceed; do not treat a stale global key alone as abort.
-Abort if the human withdraws the attestation or gate quality collapses
-(restore prior `author` map).
+`applicationOpenModelAppliedConfig`. A per-chat override to the trial slug may
+leave that key on another model. Sprint 032 option B (also 038 Q4): record human
+attestation in `SPRINT_LOG.md` and proceed; do not treat a stale global key alone
+as abort. Abort if the human withdraws the attestation or gate quality collapses
+(restore prior `author` map — for 038 that is `grok-4.5` / `xai` / `high`).
 
 ## 4. Ledger as promotion evidence
 
@@ -76,8 +87,9 @@ model family is better than another from ledger rows alone.
 
 ## 5. Gate-replay protocol (D16)
 
-Document the protocol only. **Do not run gate-replay inside sprints 034–037.**
-Sprint **038** owns execution after the first ledger row exists (037).
+Protocol authored in Sprint 035 (E0). **Execution** is Sprint **038**
+(`docs/sprints/038-core-pipeline/GATE_REPLAY.md`) after the first ledger row
+exists (037). Do not re-run gate-replay inside sprints 034–037.
 
 | Aspect | Rule |
 | :--- | :--- |
@@ -85,7 +97,7 @@ Sprint **038** owns execution after the first ledger row exists (037).
 | **Preferred corpus** | Sprints **032** and **033** (both APPROVED on Double-Gate round 1) |
 | **Selection** | Pick a closed sprint whose `SPRINT_LOG.md` has a Double-Gate table; the diff is that sprint's merge range versus its base branch |
 | **Recording** | Log every finding with ADR-0008 vocabulary: verdict `APPROVED` \| `REJECTED` \| `RECORD`, plus class `charter` \| `instructing` \| `testifying` |
-| **Ownership** | Protocol text lives here (E0 / Sprint 035); execution waits for Sprint 038 |
+| **Ownership** | Protocol text lives here (E0 / Sprint 035); **execution** is Sprint 038 (`GATE_REPLAY.md`) |
 
 ### 5.1 Classification of replay outcomes (informative only)
 
@@ -121,6 +133,8 @@ lists the trial sprint row used for the promotion decision.
 | `make cursor-tiers` still shows prior author while chat is on candidate | Per-chat override not written to global applied config | Attest in `SPRINT_LOG` (032 option B) or set the agent **default** so the medidor matches |
 | Promote from announcement / no ledger row | Skipping evidence base | After 037: regenerate ledger; refuse promotion without a trial row + Human OK |
 | Gate-replay started in 034–037 | Wrong sprint ownership | Stop; wait for Sprint 038 after first ledger row |
+| Gate-replay used to rank families | Violates D7 / D13 | Record findings only; never promote gate from replay alone |
+| Author trial sets Opus while gate is anthropic | Violates D15 | Use a non-anthropic author slug (038: `glm-5.2`) |
 
 ---
 *See also: `docs/decisions/ADR-0003-gates-never-drop-tier.md` ·
