@@ -2,7 +2,7 @@
 
 **Canonical path**: `docs/sprints/035-core-pipeline/IMPLEMENTATION_PLAN.md`
 **Branch**: `ai-sprint/035` · **Base**: `main` at `c93e851`
-**Status**: `EXECUTING`
+**Status**: `CLOSED`
 
 > Authored at Phase 1 (Planning) by `principal_agent`. Spanish permitted here
 > (`agents.md §1 user_chat`). Hereda Design D3/D5/D10/D12/D13/D15/D16 del plan

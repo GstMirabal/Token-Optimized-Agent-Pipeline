@@ -1,7 +1,8 @@
 # Sprint Log — 035 (`core-pipeline`)
 
 **Branch**: `ai-sprint/035` from `main` at `c93e851` (`v4.17.0`)
-**Status**: Phase 7 gates complete — awaiting Phase 8 / `/agents:close`
+**Status**: **SESSION LOCKED** — Sprint 035 sealed 2026-08-26; continuing
+`/agents:deployment` in the same turn.
 **Session**: `20260826T054105Z-79476` · tool `cursor` · `delegation_mode: sequential`
 
 ---
@@ -62,4 +63,8 @@ Orchestrator transcription: QA `RECORD`/`testifying` + Tester `APPROVED` same se
 
 ## Phase 8 — Closeout
 
-- Not started — invoke `/agents:close` when Human OK.
+- `PHASE_REGISTER.md` and `graph_stats.json` written this close.
+- Master Ledger `[Unreleased]` Sprint 035 entry; program-queue **Next** = 036 (M/L).
+- Heuristic pulse: telemetry MESSAGE_GATE_VIOLATION → `discard` (already code_craft §6); no new host-class KI. Human `si` 2026-08-26 covers Phase 2.5.
+- Repo docs present; this sprint did not change reporting or vendoring.
+- `deployment_handoff` continues `/agents:deployment` in this turn.
