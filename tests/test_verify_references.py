@@ -1,8 +1,9 @@
-"""Tests for Sprint 029 J6 file:line range check in verify_references.py."""
+"""Tests for verify_references.py checks (f) file:line and (g) model↔tier."""
 
 from __future__ import annotations
 
 import importlib
+import json
 import sys
 from pathlib import Path
 
@@ -73,3 +74,54 @@ def test_sprint_records_are_not_scanned(
     monkeypatch.setattr(verify_mod, "agents_root", lambda: root)
     monkeypatch.chdir(root)
     assert verify_mod.check_file_line_citations() == []
+
+
+def _write_tier_map(root: Path, *, claude_model: str) -> None:
+    (root / "config").mkdir(parents=True, exist_ok=True)
+    (root / "config" / "model_tiers.json").write_text(
+        json.dumps(
+            {
+                "tiers": {
+                    "gate": {
+                        "claude_code": {"model": claude_model},
+                    }
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
+def _write_agent_profile(root: Path, *, model: str, tier: str) -> None:
+    (root / "agents").mkdir(parents=True, exist_ok=True)
+    (root / "agents" / "qa_agent.md").write_text(
+        f"---\nname: qa-agent\nmodel: {model}\ntier: {tier}\n---\n# stub\n",
+        encoding="utf-8",
+    )
+
+
+def test_agents_model_mismatch_vs_tier_map_cites_g(
+    verify_mod, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """(g): frontmatter model must equal model_tiers[tier].claude_code.model."""
+    root = tmp_path
+    _write_tier_map(root, claude_model="opus")
+    _write_agent_profile(root, model="sonnet", tier="gate")
+    monkeypatch.chdir(root)
+    errors = verify_mod.check_agents_model_tier_map()
+    assert errors, "expected model≠map mismatch to be rejected"
+    assert any("(g)" in e for e in errors)
+    assert any("sonnet" in e and "opus" in e for e in errors)
+
+
+def test_agents_model_matching_tier_map_passes(
+    verify_mod, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """(g): agreeing model/tier produces no (g) error."""
+    root = tmp_path
+    _write_tier_map(root, claude_model="opus")
+    _write_agent_profile(root, model="opus", tier="gate")
+    monkeypatch.chdir(root)
+    errors = verify_mod.check_agents_model_tier_map()
+    assert errors == []
+    assert not any("(g)" in e for e in errors)
