@@ -86,7 +86,7 @@ host. **Reanudar hosts = primer tag posterior a 033.**
 | 1 | **034** (este plan) | A B I K J N P (**27**: 8 ya ✅, 6 N worktree, 3 P worktree, 10 ⏳) | **A** publica. **P** hace que el siguiente `/start` pinche solo. **N** despacha los 14 perfiles. **I/K** cierran gates de ausencia. **B** deja de mentir el grafo. **J** corrige la constitución | **Sí: primer re-enable** (pin manual a 034). Desde 035, `/start` auto-pincha |
 | 2 | **035** | C E H F (**17**) | Cada sesión host: `/start` barato + Task aplica el mapa + celda `gate` | Sí, segundo pin |
 | 3 | **036** | M L (**12**) | Forja host-submódulo + censo 026–033 | Sí |
-| 4 | **037** | G (**2**) | Ledger de gate rounds; insumo de O4 | Sí |
+| 4 | **037** | G (**2**) + S (**3**) | Ledger de gate rounds; rider sandbox `xargs`/`bridge_cursor.lock`; insumo de O4 | Sí |
 | 5 | **038** | family-trial (plan propio) | O3/O4: no mezclar instrumento y author. Tras 037 | Sí |
 
 DAG **dentro de 034:** `A → B → P → I → K → J → N` (A primero: sin deploy el resto no llega a hosts). P va en este tag para que 035+ se pinchen solos. N emite los 14 perfiles *tal cual están*; M7–M9 en 036 corrige instructing de gate. Dependencias **entre** sprints: C5 y H2 en 035 tras E6; L3 en 036 tras C5 de 035; M5 en 036 tras E3 de 035.
@@ -1021,6 +1021,24 @@ G2 cubre: sprint sin `SPRINT_LOG.md` (omitido), sprint anterior a 031
 (vocabulario histórico, omitido), y sprint con Gate 1 en dos rondas (la segunda
 ronda cuenta).
 
+### Track S — Cursor agent sandbox false reds (**037** rider)
+
+Queued 2026-08-26 from Sprint 036 session measurement (not O5 census). Full
+spec + reproduce commands: `docs/roadmaps/core/pipeline/021-030-program-queue.md`
+§ *Queued for 037 — rider S*. Extract into `036`/`037` Implementation Plan at
+Phase 1 of **037**; do not execute inside 036 close.
+
+| # | File | Operation | Risk | Assignee | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| S1 | `Makefile` | modify | high | `implementer_agent` | ⏭ 037 |
+| S2 | `tests/test_verify_py_compile.py` | create | medium | `implementer_agent` | ⏭ 037 (commit con S1) |
+| S3 | `scripts/install.py` (+ nucleus lock assert in `tests/test_installer.sh` if needed) | modify | high | `implementer_agent` | ⏭ 037 |
+
+S1 replaces `find … \| xargs python3 -m py_compile` with a path that does not
+call `sysconf(SC_ARG_MAX)` (agent sandbox denies it → false `make verify` red).
+S3 makes nucleus `--target cursor`/`both` call `write_bridge_locks` so
+`.bridge_cursor.lock` exists after `/start` `bridge_check`.
+
 ### Track H — fijar el tier `gate` por techo estructural (`D13`) (**035**)
 
 | # | File | Operation | Risk | Assignee | Status |
@@ -1480,8 +1498,8 @@ Phase 5 nunca bajo `/loop`. Phases 6–8 solo si el humano arma antes
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `sequential` | `docs/active_state.json` `delegation_mode` |
-| Work units | **27** este sprint (8 ✅, 6 N worktree, 3 P worktree, 10 ⏳) · **58** el programa | 034 ejecuta A B I K J N P. ⏭: C E H F = 035 (17); M L = 036 (12); G = 037 (2). 038 = family-trial, plan propio |
-| Orden entre tracks | **034:** `A → B → P → I → K → J → N`. **Programa:** 034 → 035 (C E H F) → 036 (M L) → 037 (G) → 038 (trial) | **Sin condicionales.** P3 y C2 (035) son toques sucesivos de `start_workflow.md`. C5 (035) es el primer toque del `Makefile` y va después de E6. H2 (035) va después de E6. L3 (036) es el segundo toque del `Makefile` y va después de C5. M5 (036) es un toque de `pipeline_workflow.md` tras E3 (035); I2 y K6 (034) ya habrán tocado ese archivo. K3 tras I4; K6 tras I2. G (037) mide veredictos de gate (`D17`). N (034) no espera a M |
+| Work units | **27** este sprint (8 ✅, 6 N worktree, 3 P worktree, 10 ⏳) · **61** el programa | 034 ejecuta A B I K J N P. ⏭: C E H F = 035 (17); M L = 036 (12); G+S = 037 (2+3); 038 = family-trial, plan propio |
+| Orden entre tracks | **034:** `A → B → P → I → K → J → N`. **Programa:** 034 → 035 (C E H F) → 036 (M L) → 037 (G + S) → 038 (trial) | **Sin condicionales.** P3 y C2 (035) son toques sucesivos de `start_workflow.md`. C5 (035) es el primer toque del `Makefile` y va después de E6. H2 (035) va después de E6. L3 (036) es el segundo toque del `Makefile` y va después de C5. **S1 (037) es el tercer toque del `Makefile`** (después de L3). M5 (036) es un toque de `pipeline_workflow.md` tras E3 (035); I2 y K6 (034) ya habrán tocado ese archivo. K3 tras I4; K6 tras I2. G (037) mide veredictos de gate (`D17`). S (037) quita falsos rojos del sandbox del agente Cursor. N (034) no espera a M |
 | Unidades elegibles a `mechanical` | 5 en 034 (`B2`, `I5` ✅, `N2`, `N5`, `P2`); 7 en 035–037 (`C4`, `E4`, `G2`, `H4`, `L2`, `M2`, `M6`) | tests, hoy sobre el modelo de sesión |
 | Subagents dispatched | 4 lanzados / 2 veredictos | 2× Other Models (Claude+Gemini) cupo → 0 trabajo. 2× Composer: Tester y QA `REJECTED`/`charter` |
 | Prior session ratio | n/a (Cursor / sin transcript) | `python3 scripts/session_cost.py --from-anchor --json` |
@@ -1558,10 +1576,12 @@ exige la primera tabla. La segunda es inventario de 035–037.
 | `wc -c workflows/start_workflow.md` | 035 | **&lt; 8 000** |
 | `rg -n '13 profiles' agents/token_economy_agent.md; echo $?` | 035 | `1` (F3: el mapa tiene 14) |
 | `python3 scripts/model_ledger.py; echo $?` | 037 | `0`; `docs/audits/MODEL_LEDGER.md` con fila para 032 y 033 |
+| `make verify` bajo sandbox del agente Cursor (sin `required_permissions: all`) | 037 | `0` tras S1 — hoy muere en `xargs: sysconf(_SC_ARG_MAX) failed` |
+| `bash scripts/install.sh --target cursor && test -f .bridge_cursor.lock; echo $?` en núcleo | 037 | `0` tras S3 — hoy el lock no se escribe |
 | `python3 scripts/audit_cursor_era.py; echo $?` | 036 | `0`; `docs/audits/CURSOR_ERA_EXECUTION_AUDIT.md` con 8 filas (026–033); fila 028 CE-1 > 0; fila 033 CE-1 = 0 |
 | `make cursor-era-audit; echo $?` | 036 | `0`; el target no aparece como receta de `verify` |
 | `python3 scripts/check_forge_ladder.py --sprint-dir docs/sprints/033-core-pipeline; echo $?` | 036 | `0` en núcleo (033 A1 tiene destino y fichero); un fixture host sin `.claude/agents/<nuevo>.md` sale `2` |
-| `rg -n 'skill.sh' agents/skill_architect.md; echo $?` | 036 | `1` (sin coincidencias) |
+| `rg -n 'skill\.sh' agents/skill_architect.md; echo $?` | 036 | `1` (sin coincidencias) |
 | `python3 -m pytest tests/test_session_start.py tests/test_audit_cursor_models.py tests/test_model_ledger.py tests/test_verify_references.py tests/test_audit_cursor_era.py tests/test_check_forge_ladder.py tests/test_agent_profile_census.py -q; echo $?` | 035–037 | `0` |
 | `rg -n 'Phase 4' agents/qa_agent.md agents/tester_agent.md` | 036 | sin `double_gate_review` / `rejection_trigger` en Phase 4 |
 | `rg -n 'approval_gate' agents/principal_agent.md` | 036 | la fila nombra Phase 5 |

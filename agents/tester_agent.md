@@ -17,5 +17,5 @@ tier: gate
 | **Domain** | `verdict_routing` | Emits the Phase 7 Gate-2 verdict as `APPROVED` \| `REJECTED` \| `RECORD` plus class (`charter` / `instructing` / `testifying`); `orchestrator` transcribes Verdict and Class into `SPRINT_LOG.md` (`config/artifact_registry.json`). |
 | **Domain** | `testing_environment`| Must overwrite native URLs to instantiate in RAM (`sqlite:///:memory:`). Reject external DB connections. |
 | **Phase 0** | `zero_memory_init` | Must start with Zero-Memory. Must read `agents.md` and `active_state.json`. |
-| **Phase 4** | `double_gate_review`| Second line of defense. ALWAYS executes after the QA Agent validates structure. |
-| **Phase 4** | `rejection_trigger` | Functional suite red is `REJECTED` + `charter` and bounces. `RECORD` + `testifying` annotates and does not bounce. `APPROVED` when the suite is green and there are no other findings. |
+| **Phase 7** | `double_gate_review`| Second line of defense. ALWAYS executes after the QA Agent validates structure. |
+| **Phase 7** | `rejection_trigger` | Functional suite red is `REJECTED` + `charter` and bounces. `RECORD` + `testifying` annotates and does not bounce. `APPROVED` when the suite is green and there are no other findings. |

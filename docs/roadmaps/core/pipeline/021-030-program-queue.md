@@ -9,8 +9,8 @@ version: 1.0.0
 ## Status
 
 - **Strategy Lock:** `OPEN`
-- **Delivered:** `024` and `025` (`v4.5.0`), `021` (`v4.6.0`), `022` (`v4.7.0`), `023` (`v4.8.0`), `026` (`v4.9.0`, PR #50), `027` (`v4.10.0`, PR #55), `028` (`v4.11.0`, PR #57), `029` (`documentation-truth`, `v4.12.0`, PR #59), `030` (`token-economy-enforcement`, `v4.13.0`, PR #61), `031` (`gate-verdict-classes`, `v4.14.0`, PR #63), `032` (`author-tier-trial`, `v4.15.0`, PR #64), `033` (`implementer-role`, `v4.16.0`, PR #65), `034` (`core-pipeline`, `v4.17.0`, PR #66), **`035` (`core-pipeline` C/E/H/F — this close)**
-- **Next / in flight:** **`036`** (M/L). Then G → **037**; family-trial → **038**. Hosts pin via `/start` auto-pin to newest `v*`. **`035` deployed** `v4.18.0` (PR #67, 2026-08-26). `034` **deployed** `v4.17.0` (PR #66, 2026-08-26). `033` **deployed** `v4.16.0` (PR #65, 2026-08-25). `032` **deployed** `v4.15.0` (PR #64). `031` **deployed** `v4.14.0` (PR #63). H-004 **deployed** `v4.13.1` (PR #62).
+- **Delivered:** `024` and `025` (`v4.5.0`), `021` (`v4.6.0`), `022` (`v4.7.0`), `023` (`v4.8.0`), `026` (`v4.9.0`, PR #50), `027` (`v4.10.0`, PR #55), `028` (`v4.11.0`, PR #57), `029` (`documentation-truth`, `v4.12.0`, PR #59), `030` (`token-economy-enforcement`, `v4.13.0`, PR #61), `031` (`gate-verdict-classes`, `v4.14.0`, PR #63), `032` (`author-tier-trial`, `v4.15.0`, PR #64), `033` (`implementer-role`, `v4.16.0`, PR #65), `034` (`core-pipeline`, `v4.17.0`, PR #66), `035` (`core-pipeline` C/E/H/F, `v4.18.0`, PR #67), **`036` (`core-pipeline` M/L — this close)**
+- **Next / in flight:** **`037`** = Track **G** (ledger) + rider **S** (Cursor-agent sandbox false reds). Then family-trial → **038**. **`036`** sealed on `ai-sprint/036` — deploy next. Hosts pin via `/start` auto-pin to newest `v*`. **`035` deployed** `v4.18.0` (PR #67, 2026-08-26). `034` **deployed** `v4.17.0` (PR #66, 2026-08-26). `033` **deployed** `v4.16.0` (PR #65, 2026-08-25). `032` **deployed** `v4.15.0` (PR #64). `031` **deployed** `v4.14.0` (PR #63). H-004 **deployed** `v4.13.1` (PR #62).
 - **Origin:** drafted in an IDE planning mode across one long session, then migrated
   into this repository. That migration is the point: the same session opened with a
   host having lost an approved plan to ephemeral storage, and this document was
@@ -51,6 +51,23 @@ the program's own opening command.
 | ✅ | **028** | `self-improvement-unblock` | Deployed `v4.11.0` (PR #57 + seal #58, 2026-08-25). Host-side agent destinations, `--profile-path`, `routing_class` |
 | ✅ | **029** | `documentation-truth` | **Deployed** `v4.12.0` (PR #59, 2026-08-25). README counted set + slash-commands guide + ADR-0003…0007 + T5 + file:line check (f) + deploy-seal gate. `F-093-G1` carried → `031` |
 | ✅ | **030** | `token-economy-enforcement` | **Deployed** `v4.13.0` (PR #61, 2026-08-25). Auditor body + consumption trigger + `check_task_scope.py` (`F-026-A2`); trial guide; first author-tier trial destaged 031 → **032** |
+
+### Queued for **037** — rider **S** (Cursor agent sandbox false reds)
+
+Opened 2026-08-26 during Sprint 036 Phase 7 / `/start` on `ai-sprint/036`.
+Not census O5 rows — session measurement of the Cursor **agent sandbox**
+(distinct from CE-5 pytest/`git init`). Do **not** fold into 036 mid-close;
+Phase 1 of **037** extracts these beside Track G.
+
+| # | Defect (measured) | Reproduce | Fix unit (proposed) |
+| :--- | :--- | :--- | :--- |
+| **S1** | `make verify` dies at `find … \| xargs python3 -m py_compile` with `xargs: sysconf(_SC_ARG_MAX) failed` under the agent sandbox | In Cursor agent sandbox: `find . -name '*.py' -not -path '*/venv_skillopt/*' \| head -3 \| xargs python3 -m py_compile; echo $?` → `1`. Same command with unrestricted shell → `0` (`getconf ARG_MAX` → `1048576`) | `Makefile`: compile without `xargs` (e.g. `find … -exec python3 -m py_compile {} +` or a tiny `scripts/py_compile_tree.py` loop). **Must** still be invoked only by `make verify` (`RA-16`) |
+| **S2** | Pytest covering S1 | Fixture or subprocess that asserts the verify compile step does not call `xargs` / does not require `os.sysconf('SC_ARG_MAX')` | `tests/` paired with S1 |
+| **S3** | Nucleus `scripts/install.py --target cursor` never writes `.bridge_cursor.lock` (early `return 0` skips `write_bridge_locks`); `/start` `bridge_check` cannot seal the lock. Sandbox also makes `.cursor` non-writable (`os.access` False → `PermissionError` on `rmtree`) — document that install needs unrestricted FS; the **code** gap is the missing lock write | `bash scripts/install.sh --target cursor` then `test -f .bridge_cursor.lock; echo $?` on nucleus → `1` today | `scripts/install.py`: nucleus `cursor` / `both` paths call `write_bridge_locks` before return. Optional: `tests/test_installer.sh` nucleus assertion for the lock file |
+
+**Out of S:** changing Cursor product sandbox policy; wrapping every Bash call in `required_permissions: ["all"]` by default; moving `py_compile` into a network-touching step.
+
+---
 
 ### Carried out of `023` — routed to a hotfix, scheduled after `026`
 
