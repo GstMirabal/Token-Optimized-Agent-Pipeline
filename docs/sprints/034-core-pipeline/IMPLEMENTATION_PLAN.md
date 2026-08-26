@@ -1697,7 +1697,7 @@ ya parcheados en este archivo.
 | :--- | :--- |
 | **Approved by** | Gustavo (chat, «ok, comenzamos») |
 | **Date** | 2026-08-26 |
-| **Plan commit at approval** | *(SHA de este archivo en el commit de aprobación, rellenado al commitear)* |
+| **Plan commit at approval** | `ffd33e0` |
 | **Remaining locks** | Active Sprint · QA + Tester · Human OK al close |
 
 *Phase 5 es una única autorización humana atendida. Nunca envolver en `/loop`.*
