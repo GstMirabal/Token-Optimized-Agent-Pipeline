@@ -64,35 +64,35 @@ Proposals only — config/model_tiers.json was not modified.
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| I1 | `scripts/cursor_adapter.py` | modify | high | `implementer_agent` | `glm-5.2` | `high` | ⏳ |
-| I2 | `tests/test_cursor_adapter.py` | modify | medium | `implementer_agent` | `composer-2.5` | `N/A` | ⏳ |
+| I1 | `scripts/cursor_adapter.py` | modify | high | `implementer_agent` | `glm-5.2` | `high` | ✅ `309ccbd` |
+| I2 | `tests/test_cursor_adapter.py` | modify | medium | `implementer_agent` | `composer-2.5` | `N/A` | ✅ `5a93c99` |
 
 ## Work — Track S
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| S1 | `scripts/session_start.py` | modify | high | `implementer_agent` | `glm-5.2` | `high` | ⏳ |
-| S2 | `tests/test_session_start.py` | modify | medium | `implementer_agent` | `composer-2.5` | `N/A` | ⏳ |
+| S1 | `scripts/session_start.py` | modify | high | `implementer_agent` | `glm-5.2` | `high` | ✅ `4f29a8b` |
+| S2 | `tests/test_session_start.py` | modify | medium | `implementer_agent` | `composer-2.5` | `N/A` | ✅ `7c3f52a` |
 
 ## Work — Track W / D
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| W1 | `workflows/start_workflow.md` | modify | medium | `implementer_agent` | `glm-5.2` | `high` | ⏳ |
-| D1 | `workflows/deployment_workflow.md` | modify | medium | `implementer_agent` | `glm-5.2` | `high` | ⏳ |
+| W1 | `workflows/start_workflow.md` | modify | medium | `implementer_agent` | `glm-5.2` | `high` | ✅ `9c3a080` |
+| D1 | `workflows/deployment_workflow.md` | modify | medium | `implementer_agent` | `glm-5.2` | `high` | ✅ `c233d9e` |
 
 ## Work — Track R
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| R1 | `scripts/session_state.py` | modify | medium | `implementer_agent` | `glm-5.2` | `high` | ⏳ |
-| R2 | `tests/test_session_protocol.py` | modify | low | `implementer_agent` | `composer-2.5` | `N/A` | ⏳ |
+| R1 | `scripts/session_state.py` | modify | medium | `implementer_agent` | `glm-5.2` | `high` | ✅ `7b670ef` |
+| R2 | `tests/test_session_protocol.py` | modify | low | `implementer_agent` | `composer-2.5` | `N/A` | ✅ `3ba1d1d` |
 
 ## Work — Track P
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| P1 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `doc_orchestrator` | `composer-2.5` | `N/A` | ⏳ |
+| P1 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `doc_orchestrator` | `composer-2.5` | `N/A` | ✅ `f127e6d` |
 
 ---
 

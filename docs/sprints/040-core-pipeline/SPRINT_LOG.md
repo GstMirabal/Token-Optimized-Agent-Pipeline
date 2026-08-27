@@ -1,7 +1,7 @@
 # Sprint Log — 040 (`core-pipeline` / cursor-bridge-incremental)
 
 **Branch**: `ai-sprint/040` from `main` at `8268fc1` (`v4.22.0`)
-**Status**: Phase 3–4 complete — awaiting Phase 5 Approval Gate
+**Status**: Phase 6 complete — awaiting Phase 7 Double-Gate
 **Session**: `20260827T140724Z-10725` · tool `cursor` · `delegation_mode: sequential`
 
 ---
@@ -45,13 +45,28 @@
 
 ## Phase 5 — Approval Gate
 
-- Lock 1 object: `docs/sprints/040-core-pipeline/IMPLEMENTATION_PLAN.md` at `bba34a9`.
-- `audit_plan.py` exit `0` re-confirmed.
-- _(pending explicit Human OK)_
+- Human OK 2026-08-27 («ok»). Lock 1:
+  `docs/sprints/040-core-pipeline/IMPLEMENTATION_PLAN.md` at `bba34a9`.
+  `audit_plan.py` exit 0 re-confirmed.
 
 ## Phase 6 — Execution
 
-_(pending)_
+All **10** Work units landed on `ai-sprint/040`. DAG honored.
+
+| Unit | Commit |
+| :--- | :--- |
+| I1 | `309ccbd` |
+| I2 | `5a93c99` |
+| S1 | `4f29a8b` |
+| S2 | `7c3f52a` |
+| W1 | `9c3a080` |
+| D1 | `c233d9e` |
+| R1 | `7b670ef` |
+| R2 | `3ba1d1d` |
+| P1 | `f127e6d` |
+
+Mechanical `Task` at map model hit usage limit; I2/S2/R2/P1 executed in-session
+under Cursor sequential (039 posture).
 
 ## Phase 7 — Quality Gate
 

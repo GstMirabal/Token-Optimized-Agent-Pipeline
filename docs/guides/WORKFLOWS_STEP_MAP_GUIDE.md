@@ -100,6 +100,7 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 4. Closure | `github_release` | write |
 | 4. Closure | `local_prune` | write |
 | 4. Closure | `baseline_refresh` | write |
+| 4. Closure | `bridge_lock_refresh` | write |
 
 ### `extract_workflow.md`
 
