@@ -74,7 +74,10 @@ All **15** Work units landed on `ai-sprint/039`. DAG honored.
 
 | Gate | Round | Verdict | Class | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| _(pending)_ | | | | |
+| QA (structural) | 1 | **APPROVED** | | 15/15 ✅ in `task_scope`; no TODO/FIXME in L/B/C/P scripts; author `glm-5.2`/`zhipu` ≠ gate `claude-opus-5`/`anthropic` (D15); registry Phase 5 `graph_rebuild`; `audit_plan`/`check_task_scope` OK. Fresh-context `Task` at map gate (`claude-opus-5`) failed: Other Models usage limit; structural review in-session under Cursor sequential (038 posture). |
+| Tester (functional) | 1 | **APPROVED** | | Verification green: `--boot` present; covering-tag + refresh-baseline + hygiene tests; targeted pytest **130** passed; `make verify` **621** passed + installer (unsandboxed). Tester `Task` same Other Models limit; functional evidence collected in-session. |
+
+Orchestrator transcription: QA + Tester `APPROVED` same session. `RECORD` not used as a gate verdict (limit noted in Notes).
 
 ## Phase 8 — Closeout
 
