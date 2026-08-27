@@ -34,18 +34,20 @@
 ## Phase 3 — Roadmap extraction
 
 - Branch `ai-sprint/040` created from `main` @ `8268fc1` (`RA-12`).
-- Plan committed before Phase 5 (`triple_lock` lock 1).
+- Plan + Phase 4 artifacts committed `bba34a9` before Phase 5 (`triple_lock` lock 1).
 
 ## Phase 4 — Assignment
 
 - `agent_assignment.md`, `skill_assignment.md`, `task_scope.md` written.
 - `make cursor-tiers` exit `0`: author `glm-5.2` / `high`; mechanical
   `composer-2.5`; gate `claude-opus-5` / `max`.
-- Forge / task_scope checks: see Phase 4 commit notes.
+- `check_forge_ladder.py` / `check_task_scope.py` / `audit_plan.py` exit `0`.
 
 ## Phase 5 — Approval Gate
 
-- _(pending Human OK)_
+- Lock 1 object: `docs/sprints/040-core-pipeline/IMPLEMENTATION_PLAN.md` at `bba34a9`.
+- `audit_plan.py` exit `0` re-confirmed.
+- _(pending explicit Human OK)_
 
 ## Phase 6 — Execution
 
