@@ -167,14 +167,42 @@ def enumerate_commits(commits: list[str], stream) -> None:
         print(f"   … and {len(commits) - 20} more", file=stream)
 
 
+def covering_tags(every: list[str], tags: list[str]) -> list[str]:
+    """Sealing tags that contain at least one commit from the drift range.
+
+    ``sealing_tags()`` returns the full ledger-backed catalogue; listing
+    ``tags[:3]`` after a long release history names ancient ``v3.x`` tags that
+    do not cover the range (Sprint 039). Prefer tags that actually ancestor
+    a commit in ``every``.
+
+    Args:
+        every: ``git log --oneline`` lines for ``baseline..HEAD``.
+        tags: Candidate sealing tags from ``sealing_tags()``.
+
+    Returns:
+        list[str]: Covering tags in catalogue order; empty if none match.
+    """
+    shas = [line.split()[0] for line in every if line.strip()]
+    covering: list[str] = []
+    for tag in tags:
+        for sha in shas:
+            # merge-base --is-ancestor exits 0 when sha is ancestor of tag.
+            if git("merge-base", "--is-ancestor", sha, tag) is not None:
+                covering.append(tag)
+                break
+    return covering
+
+
 def report_sealed(every: list[str], tags: list[str]) -> int:
     """Verdict S: the range is covered by a released section. Propose, never block."""
+    named = covering_tags(every, tags) or tags[:3]
     print(f"✅ {len(every)} commit(s) after the last sealed close, all covered by "
-          f"a released ledger section ({', '.join(tags[:3])}).")
+          f"a released ledger section ({', '.join(named[:5])}).")
     enumerate_commits(every, sys.stdout)
     print("\n   Reachability proves the RANGE is covered, not that each commit has "
           "its own entry — PRs #26-#30 were ancestors of a tag and still unrecorded.")
-    print("   The recorded baseline is stale; the next close refreshes it. "
+    print("   The recorded baseline is stale; refresh at deploy "
+          "(`session_state.py refresh-baseline`), not at close. "
           "Nothing to reconcile.")
     return 0
 

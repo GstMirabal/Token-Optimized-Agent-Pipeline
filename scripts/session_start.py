@@ -1,20 +1,26 @@
-"""Print a compact /start session briefing (≤80 lines).
+"""Print a compact /start session briefing (≤80 lines), optionally boot.
 
 Orchestrates existing local tools into a short English briefing for
 `/agents:start`. No network. Does not read `.env`. Does not dump
 `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md`.
 
-invoked_by: workflows/start_workflow.md, make session-start
+With ``--boot``: run drift → claim → probe → sync → bridge, then print the
+briefing. Drift exit ``2`` propagates and skips claim (Sprint 039 B1).
+
+invoked_by: workflows/start_workflow.md, make session-start, commands/start.md
 
 Usage:
     python3 scripts/session_start.py
+    python3 scripts/session_start.py --boot --tool cursor
 
 Exit codes:
-    0 — briefing printed (always; drift/findings are reported, not fatal)
+    0 — briefing printed (no --boot), or boot completed
+    2 — drift requires reconcile, claim refused, or bridge install failed (RA-11)
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import re
 import subprocess
@@ -192,8 +198,129 @@ def apply_line_cap(lines: list[str], cap: int = LINE_CAP) -> list[str]:
     return kept
 
 
-def main() -> int:
+def _run_script(root: Path, relative: str, *args: str) -> int:
+    script = root / relative
+    if not script.is_file():
+        print(f"boot: missing {relative}", file=sys.stderr)
+        return 2
+    proc = subprocess.run(
+        [sys.executable, str(script), *args],
+        cwd=str(root),
+        check=False,
+    )
+    return int(proc.returncode)
+
+
+def _bridge_target(tool: str) -> str | None:
+    if tool == "cursor":
+        return "cursor"
+    if tool == "claude-code":
+        return "claude"
+    return None
+
+
+def _lock_path(root: Path, target: str) -> Path:
+    return root / f".bridge_{target}.lock"
+
+
+def _lock_stale(root: Path, target: str) -> bool:
+    lock = _lock_path(root, target)
+    if not lock.is_file():
+        return True
+    recorded = lock.read_text(encoding="utf-8").strip()
+    proc = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=str(root),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if proc.returncode != 0:
+        return True
+    return recorded != proc.stdout.strip()
+
+
+def _commands_body_stale(root: Path, target: str) -> bool:
+    if target != "cursor":
+        return False
+    sys.path.insert(0, str(root / "scripts"))
+    from cursor_adapter import commands_stale  # noqa: E402
+
+    return bool(commands_stale(root, nucleus=True))
+
+
+def _run_bridge_install(root: Path, target: str) -> int:
+    installer = root / "scripts" / "install.sh"
+    if not installer.is_file():
+        print("boot: scripts/install.sh missing", file=sys.stderr)
+        return 2
+    proc = subprocess.run(
+        ["bash", str(installer), "--target", target],
+        cwd=str(root),
+        check=False,
+    )
+    return int(proc.returncode)
+
+
+def run_boot(root: Path, tool: str) -> int:
+    """Execute binding steps; return 2 on hard stop, else 0 after briefing."""
+    drift_rc = _run_script(root, "scripts/detect_drift.py")
+    if drift_rc == 2:
+        print(
+            "boot: drift exit 2 — run /agents:reconcile before claim.",
+            file=sys.stderr,
+        )
+        return 2
+
+    claim_rc = _run_script(
+        root, "scripts/session_state.py", "claim", "--tool", tool
+    )
+    if claim_rc == 2:
+        print("boot: claim refused (exit 2).", file=sys.stderr)
+        return 2
+
+    _run_script(root, "scripts/session_probe.py")  # advisory; ignore exit 1
+
+    sync_rc = _run_script(root, "scripts/sync_agents_pin.py")
+    if sync_rc == 2:
+        print("boot: pin sync exit 2 — stop until clean.", file=sys.stderr)
+        return 2
+
+    target = _bridge_target(tool)
+    if target is not None:
+        need = _lock_stale(root, target) or _commands_body_stale(root, target)
+        if need:
+            install_rc = _run_bridge_install(root, target)
+            if install_rc != 0:
+                print(
+                    f"boot: bridge install --target {target} failed "
+                    f"(exit {install_rc}).",
+                    file=sys.stderr,
+                )
+                return 2
+
+    briefing = apply_line_cap(build_briefing(root))
+    sys.stdout.write("\n".join(briefing) + "\n")
+    return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    parser.add_argument(
+        "--boot",
+        action="store_true",
+        help="Run drift→claim→probe→sync→bridge before the briefing.",
+    )
+    parser.add_argument(
+        "--tool",
+        choices=["claude-code", "cursor", "terminal"],
+        default="cursor",
+        help="Harness for claim/bridge when --boot (default: cursor).",
+    )
+    args = parser.parse_args(argv)
     root = repo_root()
+    if args.boot:
+        return run_boot(root, args.tool)
     briefing = apply_line_cap(build_briefing(root))
     sys.stdout.write("\n".join(briefing) + "\n")
     return 0

@@ -986,6 +986,95 @@ def test_baseline_on_the_branch_is_not_substituted(repo):
     assert dd.resolve_baseline(base) == (base, None)
 
 
+# --- Sprint 039: refresh-baseline, covering tags, anchor hygiene --------
+
+def test_refresh_baseline_writes_last_close_commit_without_changing_status(repo):
+    """Post-deploy refresh records the integration tip; session status stays put."""
+    (repo / "docs").mkdir(exist_ok=True)
+    head = subprocess.run(
+        ["git", "rev-parse", "HEAD"], capture_output=True, text=True
+    ).stdout.strip()
+    (repo / "docs" / "active_state.json").write_text(
+        json.dumps({"status": "IN_PROGRESS", "session_id": "s1"})
+    )
+    assert ss.refresh_baseline(head) == 0
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert state["last_close_commit"] == head
+    assert state["status"] == "IN_PROGRESS"
+
+
+def test_refresh_baseline_after_orphan_leaves_drift_without_merge_base_warning(
+    repo, capsys
+):
+    """Refresh to HEAD clears the orphaned-baseline substitution on a clean tip."""
+    fork = _head()
+    subprocess.run(["git", "checkout", "-qb", "sprint"], check=True)
+    orphan = _commit(repo, "on the branch\n", "branch work")
+    subprocess.run(["git", "checkout", "-q", "main"], check=True)
+    squashed = _commit(repo, "squashed\n", "squashed onto main")
+    subprocess.run(["git", "tag", "v1.1.0"], check=True)
+    _ledger(repo, ["1.1.0"])
+    (repo / "docs").mkdir(exist_ok=True)
+    (repo / "docs" / "active_state.json").write_text(
+        json.dumps({"last_close_commit": orphan})
+    )
+    assert dd.main() == 0
+    assert "merge-base" in capsys.readouterr().err
+
+    assert ss.refresh_baseline(squashed) == 0
+    assert dd.main() == 0
+    captured = capsys.readouterr()
+    assert "merge-base" not in captured.err
+    assert captured.out or captured.err == ""
+
+
+def test_covering_tags_includes_tag_that_ancestors_range_commits(repo):
+    """covering_tags must not defer to tags[:3] when only a newer tag covers."""
+    base = _head()
+    subprocess.run(["git", "tag", "v1.0.0"], check=True)
+    subprocess.run(["git", "tag", "v2.0.0"], check=True)
+    subprocess.run(["git", "tag", "v3.0.0"], check=True)
+    _commit(repo, "released work\n", "released work")
+    subprocess.run(["git", "tag", "v4.0.0"], check=True)
+    _ledger(repo, ["1.0.0", "2.0.0", "3.0.0", "4.0.0"])
+    every = dd.commits_since(base)
+    covering = dd.covering_tags(every, dd.sealing_tags())
+    assert "v4.0.0" in covering
+
+
+def test_sealed_report_names_covering_tag_not_only_ancient_tags(repo, capsys):
+    """Verdict S must list the tag that actually covers the drift range."""
+    base = _head()
+    subprocess.run(["git", "tag", "v1.0.0"], check=True)
+    subprocess.run(["git", "tag", "v2.0.0"], check=True)
+    subprocess.run(["git", "tag", "v3.0.0"], check=True)
+    _commit(repo, "released work\n", "released work")
+    subprocess.run(["git", "tag", "v4.0.0"], check=True)
+    _ledger(repo, ["1.0.0", "2.0.0", "3.0.0", "4.0.0"])
+    _baseline(repo, base)
+
+    assert dd.main() == 0
+    assert "v4.0.0" in capsys.readouterr().out
+
+
+def test_probe_anchor_hygiene_flags_closed_sprint_while_in_progress():
+    finding = spr.probe_anchor_hygiene({
+        "status": "IN_PROGRESS",
+        "current_sprint": {"id": 39, "status": "CLOSED"},
+    })
+    assert finding is not None
+    assert "CLOSED" in finding
+
+
+def test_probe_anchor_hygiene_silent_when_open_on_matching_branch(repo):
+    _checkout(repo, "ai-sprint/039")
+    assert spr.probe_anchor_hygiene({
+        "status": "IN_PROGRESS",
+        "current_sprint": {"id": 39, "status": "OPEN"},
+        "resume_pointer": {"branch": "ai-sprint/039"},
+    }) is None
+
+
 # --- cost instrumentation: the unit is the context cycle ----------------
 
 def _turn(cache_read: int, model: str = "claude-opus-5", out: int = 100) -> str:

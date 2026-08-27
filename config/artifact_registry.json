@@ -132,7 +132,7 @@
     },
     {
       "filename": "graph.json",
-      "phase": "close_workflow.md Phase 1 (graph_rebuild)",
+      "phase": "close_workflow.md Phase 5 (graph_rebuild)",
       "role": "DevOps Agent",
       "scope": "repository",
       "host_path": "graphify-out/graph.json",

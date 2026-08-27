@@ -58,7 +58,7 @@ def test_main_exits_zero_and_respects_line_cap(
 ) -> None:
     root = _write_minimal_root(tmp_path / "repo")
     monkeypatch.setattr(session_start, "repo_root", lambda: root)
-    assert session_start.main() == 0
+    assert session_start.main([]) == 0
     out = capsys.readouterr().out
     lines = out.splitlines()
     assert len(lines) <= session_start.LINE_CAP
@@ -158,3 +158,41 @@ def test_cli_against_real_repo_stays_under_line_cap() -> None:
     assert "UPSTREAM_FINDINGS_FROM_HOSTS.md" in proc.stdout or "file lines:" in proc.stdout
     # Full dump would be hundreds of lines; cap already enforces this.
     assert "Framework-class findings under" not in proc.stdout
+
+
+def test_boot_returns_2_on_drift_and_skips_claim(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    root = _write_minimal_root(tmp_path / "repo")
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    claim_called: list[tuple[str, tuple[str, ...]]] = []
+
+    def mock_run_script(root_path: Path, relative: str, *args: str) -> int:
+        if relative == "scripts/detect_drift.py":
+            return 2
+        if relative == "scripts/session_state.py" and args[:1] == ("claim",):
+            claim_called.append((relative, args))
+        return 0
+
+    monkeypatch.setattr(session_start, "_run_script", mock_run_script)
+    assert session_start.main(["--boot", "--tool", "cursor"]) == 2
+    assert not claim_called
+
+
+def test_boot_claims_when_drift_is_clean(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    root = _write_minimal_root(tmp_path / "repo")
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    calls: list[tuple[str, tuple[str, ...]]] = []
+
+    def mock_run_script(root_path: Path, relative: str, *args: str) -> int:
+        calls.append((relative, args))
+        return 0
+
+    monkeypatch.setattr(session_start, "_run_script", mock_run_script)
+    monkeypatch.setattr(session_start, "_lock_stale", lambda *a, **k: False)
+    monkeypatch.setattr(session_start, "_commands_body_stale", lambda *a, **k: False)
+
+    assert session_start.main(["--boot", "--tool", "cursor"]) == 0
+    assert ("scripts/session_state.py", ("claim", "--tool", "cursor")) in calls

@@ -14,7 +14,7 @@ protocols that should mirror each other shows up there first.
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | `audit_workflow` | — | — | — | — | — | — | — | — | — | — | — | — | verify |
 | `close_workflow` | write | write | write | write | write | write | write | write | write | verify/write | write | — | — |
-| `deployment_workflow` | — | — | — | — | — | — | — | — | write | — | — | — | — |
+| `deployment_workflow` | — | — | — | — | — | — | — | write | write | — | — | — | — |
 | `extract_workflow` | — | — | — | — | — | — | — | — | — | ?/verify/write | — | — | — |
 | `pipeline_workflow` | write | write | write | write | verify/write | — | write | — | write | — | — | — | — |
 | `reconciliation_workflow` | — | — | — | — | — | — | — | write | write | — | — | write | — |
@@ -39,7 +39,7 @@ the matrix portable across tools rather than tied to one runner's agent names.
 - `active_state.json` — start_workflow.md Phase 0.5 (State Claim) and close_workflow.md Phase 4 (State Sync)
 - `CHANGELOG.md` — Phase 8 (Sprint Closeout)
 - `memory_index.json` — extract_workflow.md Phase 3 (Semantic Indexing)
-- `graph.json` — close_workflow.md Phase 1 (graph_rebuild)
+- `graph.json` — close_workflow.md Phase 5 (graph_rebuild)
 - `mirror.json` — hooks/state_mirror.py (Stop hook, and close_workflow.md Phase 4)
 - `AGENTS_SLASH_COMMANDS_GUIDE.md` — Sprint 029 (documentation-truth) — living how-to; refresh when commands/ changes
 
@@ -99,6 +99,7 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 4. Closure | `release_tagging` | write |
 | 4. Closure | `github_release` | write |
 | 4. Closure | `local_prune` | write |
+| 4. Closure | `baseline_refresh` | write |
 
 ### `extract_workflow.md`
 
@@ -239,7 +240,7 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 0. Zero-Memory | `read_ruleset` | read |
 | 0. Zero-Memory | `pip_setup` | write |
 | 0. Zero-Memory | `read_graph` | write |
-| 0.4 Drift | `drift_check` | ? |
+| 0.4 Drift | `drift_check` | write |
 | 0.5 Claim | `state_claim` | write |
 | 0.6 Probe | `readiness_probe` | verify |
 | 0.7 Probe | `platform_probe` | verify |

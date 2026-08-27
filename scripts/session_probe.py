@@ -199,6 +199,52 @@ def probe_anchor_sprint(state: dict) -> str | None:
             f"to {int(suffix)} in `docs/active_state.json` and refresh the mirror.")
 
 
+def probe_anchor_hygiene(state: dict) -> str | None:
+    """Flag IN_PROGRESS sessions whose sprint looks already closed or resumed wrong.
+
+    After deploy, a new claim on ``main`` often leaves ``current_sprint.status``
+    at ``CLOSED`` and ``resume_pointer.branch`` at the prior ``ai-sprint/[ID]``
+    while HEAD is not that branch — silent until Sprint 039 P1.
+
+    Args:
+        state (dict): Parsed ``docs/active_state.json``.
+
+    Returns:
+        str | None: Finding text, or None when hygiene looks fine.
+    """
+    if state.get("status") != "IN_PROGRESS":
+        return None
+    parts: list[str] = []
+    sprint = state.get("current_sprint")
+    if isinstance(sprint, dict) and sprint.get("status") == "CLOSED":
+        parts.append(
+            "`current_sprint.status` is CLOSED while the session is IN_PROGRESS"
+        )
+    pointer = state.get("resume_pointer")
+    if isinstance(pointer, dict):
+        resume_branch = pointer.get("branch")
+        if isinstance(resume_branch, str) and resume_branch.startswith("ai-sprint/"):
+            result = subprocess.run(
+                ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+                capture_output=True,
+                text=True,
+            )
+            head = result.stdout.strip() if result.returncode == 0 else ""
+            if head and head != resume_branch:
+                parts.append(
+                    f"`resume_pointer.branch` is `{resume_branch}` but HEAD is "
+                    f"`{head}`"
+                )
+    if not parts:
+        return None
+    detail = "; ".join(parts)
+    return (
+        f"Anchor hygiene: {detail}.\n   Propose: open the new sprint's "
+        "`current_sprint` fields (or clear a stale resume_pointer) before Planning; "
+        "do not auto-clear — evidence of resume must stay human-owned."
+    )
+
+
 # Three answers, because two cannot express doubt — the same shape `C9` gave
 # branch integration. A security report is the last place where "I could not
 # find out" may be rendered as "it is off".
@@ -634,6 +680,7 @@ def main() -> int:
     state = load_state()
     findings = [f for f in (probe_graph(),
                             probe_anchor_sprint(state),
+                            probe_anchor_hygiene(state),
                             probe_docs(state),
                             probe_platform(state, args.force_platform),
                             probe_cost(state)) if f]
