@@ -2,7 +2,7 @@
 
 **Canonical path**: `docs/sprints/039-core-pipeline/IMPLEMENTATION_PLAN.md`
 **Branch**: `ai-sprint/039` · **Base**: `main` at `147868f` (`v4.21.0`)
-**Status**: `DRAFT` (Phase 1 Human OK 2026-08-27 — pending Phase 5)
+**Status**: `EXECUTING` (Phase 5 Human OK 2026-08-27)
 
 > Authored at Phase 1 (Planning) by `principal_agent`. Under `session_tool: cursor`,
 > `SwitchMode` to plan is PROHIBITED (`RA-18`). Committed before Phase 5
@@ -286,9 +286,9 @@ sigue pasando, y que drift 2 en boot no deja `status: IN_PROGRESS` nuevo.
 
 | Field | Value |
 | :--- | :--- |
-| **Approved by** | _(pending Human OK)_ |
-| **Date** | |
-| **Plan commit at approval** | _(Phase 3 commit SHA)_ |
+| **Approved by** | Gustavo |
+| **Date** | 2026-08-27 |
+| **Plan commit at approval** | `06b45dc` |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an

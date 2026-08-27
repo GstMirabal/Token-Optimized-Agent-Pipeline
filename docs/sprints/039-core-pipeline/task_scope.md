@@ -63,46 +63,46 @@ Proposals only — config/model_tiers.json was not modified.
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| L1 | `scripts/session_state.py` | modify | high | `implementer_agent` | `glm-5.2` | `high` | ⏳ |
-| L2 | `workflows/deployment_workflow.md` | modify | medium | `implementer_agent` | `glm-5.2` | `high` | ⏳ |
-| L3 | `scripts/detect_drift.py` | modify | medium | `implementer_agent` | `glm-5.2` | `high` | ⏳ |
-| L4 | `tests/test_session_protocol.py` | modify | medium | `implementer_agent` | `composer-2.5` | `N/A` | ⏳ |
+| L1 | `scripts/session_state.py` | modify | high | `implementer_agent` | `glm-5.2` | `high` | ✅ `67142c6` |
+| L2 | `workflows/deployment_workflow.md` | modify | medium | `implementer_agent` | `glm-5.2` | `high` | ✅ `46bd454` |
+| L3 | `scripts/detect_drift.py` | modify | medium | `implementer_agent` | `glm-5.2` | `high` | ✅ `2421b9d` |
+| L4 | `tests/test_session_protocol.py` | modify | medium | `implementer_agent` | `composer-2.5` | `N/A` | ✅ `6a4f6b7` |
 
 ## Work — Track B
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| B1 | `scripts/session_start.py` | modify | high | `implementer_agent` | `glm-5.2` | `high` | ⏳ |
-| B2 | `tests/test_session_start.py` | modify | medium | `implementer_agent` | `composer-2.5` | `N/A` | ⏳ |
-| B3 | `commands/start.md` | modify | low | `implementer_agent` | `composer-2.5` | `N/A` | ⏳ |
-| B4 | `workflows/start_workflow.md` | modify | medium | `implementer_agent` | `glm-5.2` | `high` | ⏳ |
+| B1 | `scripts/session_start.py` | modify | high | `implementer_agent` | `glm-5.2` | `high` | ✅ `53510da` |
+| B2 | `tests/test_session_start.py` | modify | medium | `implementer_agent` | `composer-2.5` | `N/A` | ✅ `00d5a91` |
+| B3 | `commands/start.md` | modify | low | `implementer_agent` | `composer-2.5` | `N/A` | ✅ `78856eb` |
+| B4 | `workflows/start_workflow.md` | modify | medium | `implementer_agent` | `glm-5.2` | `high` | ✅ `2e07d36` |
 
 ## Work — Track C
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| C1 | `scripts/cursor_adapter.py` | modify | medium | `implementer_agent` | `glm-5.2` | `high` | ⏳ |
-| C2 | `tests/test_cursor_adapter.py` | create | medium | `implementer_agent` | `composer-2.5` | `N/A` | ⏳ |
+| C1 | `scripts/cursor_adapter.py` | modify | medium | `implementer_agent` | `glm-5.2` | `high` | ✅ `4b6bc68` |
+| C2 | `tests/test_cursor_adapter.py` | create | medium | `implementer_agent` | `composer-2.5` | `N/A` | ✅ `b20e329` |
 
 ## Work — Track R
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| R1 | `config/artifact_registry.json` | modify | low | `implementer_agent` | `composer-2.5` | `N/A` | ⏳ |
-| R2 | `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` | modify | low | `implementer_agent` | `composer-2.5` | `N/A` | ⏳ |
+| R1 | `config/artifact_registry.json` | modify | low | `implementer_agent` | `composer-2.5` | `N/A` | ✅ `154403a` |
+| R2 | `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` | modify | low | `implementer_agent` | `composer-2.5` | `N/A` | ✅ `d81f2fe` |
 
 ## Work — Track P
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| P1 | `scripts/session_probe.py` | modify | medium | `implementer_agent` | `glm-5.2` | `high` | ⏳ |
+| P1 | `scripts/session_probe.py` | modify | medium | `implementer_agent` | `glm-5.2` | `high` | ✅ `c7e4146` |
 
 ## Work — Track D
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| D1 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `doc_orchestrator` | `glm-5.2` | `high` | ⏳ |
-| D2 | `docs/decisions/ADR-0002-drift-verdict-exit-codes.md` | modify | low | `doc_orchestrator` | `glm-5.2` | `high` | ⏳ |
+| D1 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `doc_orchestrator` | `glm-5.2` | `high` | ✅ `4a044c6` |
+| D2 | `docs/decisions/ADR-0002-drift-verdict-exit-codes.md` | modify | low | `doc_orchestrator` | `glm-5.2` | `high` | ✅ `743dc92` |
 
 ---
 
