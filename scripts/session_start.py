@@ -14,8 +14,10 @@ Usage:
     python3 scripts/session_start.py --boot --tool cursor
 
 Exit codes:
-    0 — briefing printed (no --boot), or boot completed
-    2 — drift requires reconcile, claim refused, or bridge install failed (RA-11)
+    0 — briefing printed (no --boot), or boot completed (including bridge
+        PermissionError advisory — Sprint 040)
+    2 — drift requires reconcile, claim refused, or non-permission bridge
+        install failure (RA-11)
 """
 
 from __future__ import annotations
@@ -249,17 +251,54 @@ def _commands_body_stale(root: Path, target: str) -> bool:
     return bool(commands_stale(root, nucleus=True))
 
 
-def _run_bridge_install(root: Path, target: str) -> int:
+def _refresh_bridge_lock(root: Path, target: str) -> int:
+    """Write ``.bridge_<target>.lock`` to ``HEAD`` without reinstalling the mirror."""
+    proc = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=str(root),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if proc.returncode != 0 or not proc.stdout.strip():
+        print(
+            "boot: cannot refresh bridge lock (git rev-parse failed).",
+            file=sys.stderr,
+        )
+        return 2
+    commit = proc.stdout.strip()
+    lock = _lock_path(root, target)
+    lock.write_text(commit + "\n", encoding="utf-8")
+    print(f"boot: bridge lock refreshed to {commit[:12]} (content fresh).")
+    return 0
+
+
+def _run_bridge_install(root: Path, target: str) -> tuple[int, str]:
     installer = root / "scripts" / "install.sh"
     if not installer.is_file():
-        print("boot: scripts/install.sh missing", file=sys.stderr)
-        return 2
+        msg = "boot: scripts/install.sh missing"
+        print(msg, file=sys.stderr)
+        return 2, msg
     proc = subprocess.run(
         ["bash", str(installer), "--target", target],
         cwd=str(root),
+        capture_output=True,
+        text=True,
         check=False,
     )
-    return int(proc.returncode)
+    combined = (proc.stdout or "") + (proc.stderr or "")
+    if proc.stdout:
+        sys.stdout.write(proc.stdout)
+    if proc.stderr:
+        sys.stderr.write(proc.stderr)
+    return int(proc.returncode), combined
+
+
+def _bridge_permission_denied(output: str) -> bool:
+    lowered = output.lower()
+    if "bridge: permission denied on .cursor" in lowered:
+        return True
+    return "permissionerror" in lowered and ".cursor" in lowered
 
 
 def run_boot(root: Path, tool: str) -> int:
@@ -286,20 +325,40 @@ def run_boot(root: Path, tool: str) -> int:
         print("boot: pin sync exit 2 — stop until clean.", file=sys.stderr)
         return 2
 
+    bridge_notes: list[str] = []
     target = _bridge_target(tool)
     if target is not None:
-        need = _lock_stale(root, target) or _commands_body_stale(root, target)
-        if need:
-            install_rc = _run_bridge_install(root, target)
+        lock_stale = _lock_stale(root, target)
+        body_stale = _commands_body_stale(root, target)
+        if body_stale:
+            install_rc, install_out = _run_bridge_install(root, target)
             if install_rc != 0:
-                print(
-                    f"boot: bridge install --target {target} failed "
-                    f"(exit {install_rc}).",
-                    file=sys.stderr,
-                )
+                if _bridge_permission_denied(install_out):
+                    note = (
+                        "⚠️  Bridge: PermissionError on `.cursor/` "
+                        "(run `bash scripts/install.sh --target "
+                        f"{target}` outside the agent sandbox)."
+                    )
+                    print(note, file=sys.stderr)
+                    bridge_notes.append(note)
+                else:
+                    print(
+                        f"boot: bridge install --target {target} failed "
+                        f"(exit {install_rc}).",
+                        file=sys.stderr,
+                    )
+                    return 2
+        elif lock_stale:
+            lock_rc = _refresh_bridge_lock(root, target)
+            if lock_rc != 0:
                 return 2
 
     briefing = apply_line_cap(build_briefing(root))
+    if bridge_notes:
+        # Keep under LINE_CAP: insert after the title line when present.
+        insert_at = 1 if briefing and briefing[0].startswith("#") else 0
+        merged = briefing[:insert_at] + bridge_notes + briefing[insert_at:]
+        briefing = apply_line_cap(merged)
     sys.stdout.write("\n".join(briefing) + "\n")
     return 0
 
