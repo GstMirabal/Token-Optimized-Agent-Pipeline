@@ -196,3 +196,64 @@ def test_boot_claims_when_drift_is_clean(
 
     assert session_start.main(["--boot", "--tool", "cursor"]) == 0
     assert ("scripts/session_state.py", ("claim", "--tool", "cursor")) in calls
+
+
+def test_boot_lock_only_when_commands_fresh(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    root = _write_minimal_root(tmp_path / "repo")
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    monkeypatch.setattr(session_start, "_run_script", lambda *a, **k: 0)
+    monkeypatch.setattr(session_start, "_lock_stale", lambda *a, **k: True)
+    monkeypatch.setattr(session_start, "_commands_body_stale", lambda *a, **k: False)
+    install_calls: list[str] = []
+
+    def mock_install(root_path: Path, target: str) -> tuple[int, str]:
+        install_calls.append(target)
+        return 1, "should not run"
+
+    refresh_calls: list[str] = []
+
+    def mock_refresh(root_path: Path, target: str) -> int:
+        refresh_calls.append(target)
+        return 0
+
+    monkeypatch.setattr(session_start, "_run_bridge_install", mock_install)
+    monkeypatch.setattr(session_start, "_refresh_bridge_lock", mock_refresh)
+    assert session_start.main(["--boot", "--tool", "cursor"]) == 0
+    assert not install_calls
+    assert refresh_calls == ["cursor"]
+
+
+def test_boot_permission_error_is_advisory(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys
+) -> None:
+    root = _write_minimal_root(tmp_path / "repo")
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    monkeypatch.setattr(session_start, "_run_script", lambda *a, **k: 0)
+    monkeypatch.setattr(session_start, "_lock_stale", lambda *a, **k: True)
+    monkeypatch.setattr(session_start, "_commands_body_stale", lambda *a, **k: True)
+
+    def mock_install(root_path: Path, target: str) -> tuple[int, str]:
+        return 1, "PermissionError: bridge: permission denied on .cursor (x)"
+
+    monkeypatch.setattr(session_start, "_run_bridge_install", mock_install)
+    assert session_start.main(["--boot", "--tool", "cursor"]) == 0
+    out = capsys.readouterr().out
+    assert "PermissionError on `.cursor/`" in out or "agent sandbox" in out
+
+
+def test_boot_generic_install_failure_still_exits_2(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    root = _write_minimal_root(tmp_path / "repo")
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    monkeypatch.setattr(session_start, "_run_script", lambda *a, **k: 0)
+    monkeypatch.setattr(session_start, "_lock_stale", lambda *a, **k: False)
+    monkeypatch.setattr(session_start, "_commands_body_stale", lambda *a, **k: True)
+
+    def mock_install(root_path: Path, target: str) -> tuple[int, str]:
+        return 1, "some other install failure"
+
+    monkeypatch.setattr(session_start, "_run_bridge_install", mock_install)
+    assert session_start.main(["--boot", "--tool", "cursor"]) == 2
