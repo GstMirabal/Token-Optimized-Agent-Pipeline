@@ -70,8 +70,13 @@ under Cursor sequential (039 posture).
 
 ## Phase 7 — Quality Gate
 
-_(pending)_
+| Gate | Round | Verdict | Class | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| QA (structural) | 1 | **APPROVED** | | 10/10 ✅ in `task_scope`; no happy-path `rmtree` in `cursor_adapter`; S1 lock-only + PermissionError advisory; no TODO/FIXME in I/S/R scripts; author `glm-5.2`/`zhipu` ≠ gate `claude-opus-5`/`anthropic`; `check_task_scope` OK. Fresh-context `Task` at map gate failed: Other Models usage limit; structural review in-session under Cursor sequential (039 posture). |
+| Tester (functional) | 1 | **APPROVED** | | Targeted pytest 16 passed; `make verify` **628** passed + installer (unsandboxed). Tester `Task` same Other Models limit; functional evidence collected in-session. |
+
+Orchestrator transcription: QA + Tester `APPROVED` same session.
 
 ## Phase 8 — Closeout
 
-_(pending)_
+_(pending Human OK on close)_
