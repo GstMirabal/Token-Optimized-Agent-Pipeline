@@ -1,0 +1,9 @@
+{
+  "nodes": 7842,
+  "edges": 9532,
+  "communities": 737,
+  "source": "graphify-out/graph.json",
+  "sprint": 39,
+  "built_at_commit": "c5a381e7536205d7ea55e0e91f0b622e83da6284",
+  "note": "Carried shape pending graphify-update at close; refresh after atomic_commit"
+}
