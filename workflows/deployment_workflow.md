@@ -1,6 +1,6 @@
 ---
 description: "Deployment and Production Release Protocol (Keyword: deploy)"
-version: 3.3.0
+version: 3.4.0
 invoked_by: human:/agents:deployment | close_workflow.md#deployment_handoff
 ---
 
@@ -24,6 +24,7 @@ The terminal sequence for graduating verified pipeline code from the localized s
 | **4. Closure** | `github_release` | After `release_tagging` has pushed tag `vX.Y.Z`, run `python3 .agents/scripts/publish_github_release.py vX.Y.Z` and observe exit `0` as a **separate invocation** (RA-13 — never chain tag-and-release). The script creates the GitHub Release from `CHANGELOG.md`'s `## [X.Y.Z]` section, failing if that section is missing (never `--notes-from-tag`), and passes `--verify-tag` so `gh` cannot mint a tag from `main`. `--latest` is set only when that section is the newest sealed version. A tag with no ledger section is not a release. To fill tags that predate this step: `python3 .agents/scripts/publish_github_release.py --missing`. |
 | **4. Closure** | `local_prune` | After the seal and Release land, run `python3 .agents/scripts/branch_sovereignty.py prune` as a **separate invocation**. `close_workflow.md` 5.5 already ran prune **before** `gh pr merge --squash`, so it could not delete the branch just published (`HEAD`, still unmerged). This is the post-merge call: it deletes proven-integrated local heads **and** their `origin` heads when still present. GitHub `delete_branch_on_merge` is independent and may be `false`. |
 | **4. Closure** | `baseline_refresh` | After squash-merge is on `main` (checkout `main` at the integrated tip) and the release tag exists: run `python3 .agents/scripts/session_state.py refresh-baseline` (nucleus: `python3 scripts/session_state.py refresh-baseline`). **Done-criterion**: exit `0` and `docs/active_state.json` `last_close_commit` equals `git rev-parse HEAD`. This is the refresh ADR-0002 named — close `release` seals the sprint-branch tip for `require-released`; squash orphans that SHA from `main`. Without this step every post-deploy `/start` re-opens the orphan-baseline warning (Sprint 039). Separate invocation from `local_prune` (`RA-13`). |
+| **4. Closure** | `bridge_lock_refresh` | **After** `baseline_refresh` (separate invocation, `RA-13`). If `session_tool`/operators use Cursor: when `commands_stale` is false, write `.bridge_cursor.lock` to `HEAD` only (`python3 -c` calling the same lock write as `--boot` lock-only, or re-run `python3 scripts/session_start.py` path is not required — prefer `bash scripts/install.sh --target cursor` only when digests are stale). Nucleus: `test -f .bridge_cursor.lock` after. **Done-criterion**: lock text equals `git rev-parse HEAD`, or install incremental completed exit `0`. Avoids the first post-deploy `/start` discovering a stale lock solely because the tip moved (Sprint 040). |
 
 ---
-*Optimized for Pipeline Production Integrity — PR-based merge with CI gate (v3.3.0); Hotfix H-003 wires `github_release` and post-merge `local_prune`; Sprint 029 adds `sprint_seal_gate`; Sprint 039 adds `baseline_refresh` after squash.*
+*Optimized for Pipeline Production Integrity — PR-based merge with CI gate (v3.4.0); Hotfix H-003 wires `github_release` and post-merge `local_prune`; Sprint 029 adds `sprint_seal_gate`; Sprint 039 adds `baseline_refresh`; Sprint 040 adds `bridge_lock_refresh` after baseline.*
