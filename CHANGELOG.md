@@ -4,15 +4,17 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.22.0] - 2026-08-27
+
 ### Added
 
-- **Sprint 039 (`core-pipeline` / start-close-lifecycle)** — `/agents:start` runs `session_start.py --boot` (drift→claim→probe→sync→bridge; propagates drift exit `2`); `session_state.py refresh-baseline` after deploy squash (`deployment_workflow` `baseline_refresh`) so `last_close_commit` tracks the integrated tip (ADR-0002); Cursor `commands_stale` digest check; `detect_drift` names covering sealing tags; `session_probe` anchor hygiene; `artifact_registry` `graph_rebuild` = Phase 5. #039
+- **Sprint 039 (`core-pipeline` / start-close-lifecycle)** — `/agents:start` runs `session_start.py --boot` (drift→claim→probe→sync→bridge; propagates drift exit `2`); `session_state.py refresh-baseline` after deploy squash (`deployment_workflow` `baseline_refresh`) so `last_close_commit` tracks the integrated tip (ADR-0002); Cursor `commands_stale` digest check; `detect_drift` names covering sealing tags; `session_probe` anchor hygiene; `artifact_registry` `graph_rebuild` = Phase 5. Merged as PR #71. #039
 
 ### Changed
 
 - **`workflows/start_workflow.md`** — v6.5.0; operator path = `--boot`.
 - **`workflows/deployment_workflow.md`** — v3.3.0; `baseline_refresh` cell.
-- **Program queue** — Next = **039** in flight.
+- **Program queue** — Next = **039** (sealed as this release).
 
 ## [4.21.0] - 2026-08-26
 
