@@ -2,7 +2,7 @@
 
 **Canonical path**: `docs/sprints/040-core-pipeline/IMPLEMENTATION_PLAN.md`
 **Branch**: `ai-sprint/040` · **Base**: `main` at `8268fc1` (`v4.22.0`)
-**Status**: `APPROVED` (Phase 1 Human OK 2026-08-27 — «ok»; Q1–Q4 defaults)
+**Status**: `CLOSED` (Phase 8 Human OK 2026-08-27 — «ok»)
 
 > Authored at Phase 1 (Planning) by `principal_agent`. Under `session_tool: cursor`,
 > `SwitchMode` to plan is PROHIBITED (`RA-18`). Committed before Phase 5
@@ -253,9 +253,9 @@ boot con error genérico de install (no PermissionError) sigue exit `2`.
 
 | Field | Value |
 | :--- | :--- |
-| **Approved by** | _(pending Human OK)_ |
-| **Date** | _(pending)_ |
-| **Plan commit at approval** | _(Phase 3 commit SHA)_ |
+| **Approved by** | Gustavo |
+| **Date** | 2026-08-27 |
+| **Plan commit at approval** | `bba34a9` |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an

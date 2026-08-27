@@ -1,7 +1,7 @@
 # Sprint Log — 040 (`core-pipeline` / cursor-bridge-incremental)
 
 **Branch**: `ai-sprint/040` from `main` at `8268fc1` (`v4.22.0`)
-**Status**: Phase 6 complete — awaiting Phase 7 Double-Gate
+**Status**: **SESSION LOCKED** — Sprint 040 closed 2026-08-27; continuing `/agents:deployment`
 **Session**: `20260827T140724Z-10725` · tool `cursor` · `delegation_mode: sequential`
 
 ---
@@ -79,4 +79,7 @@ Orchestrator transcription: QA + Tester `APPROVED` same session.
 
 ## Phase 8 — Closeout
 
-_(pending Human OK on close)_
+- Human OK 2026-08-27 («ok») on close; heuristic pulse all `discard`.
+- `CHANGELOG.md` `[Unreleased]` Sprint 040; program-queue Next = 040;
+  `PHASE_REGISTER.md` + `graph_stats.json`; `make model-ledger` regenerated.
+- Formal `SESSION LOCKED` + push + `/agents:deployment` same turn.

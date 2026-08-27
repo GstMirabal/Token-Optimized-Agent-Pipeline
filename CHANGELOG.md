@@ -4,6 +4,16 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Added
+
+- **Sprint 040 (`core-pipeline` / cursor-bridge-incremental)** — Cursor bridge install is incremental (upsert + prune orphans; no happy-path `rmtree` of `.cursor/`); `/start --boot` refreshes `.bridge_cursor.lock` only when command digests are fresh; install `PermissionError` on `.cursor` is advisory (boot exit `0`); `deployment_workflow` `bridge_lock_refresh` after `baseline_refresh`; `session_state release` clears `resume_pointer`. #040
+
+### Changed
+
+- **`workflows/start_workflow.md`** — v6.6.0; bridge triage lock-only / incremental / soft-fail.
+- **`workflows/deployment_workflow.md`** — v3.4.0; `bridge_lock_refresh` cell.
+- **Program queue** — Next = **040** (`cursor-bridge-incremental`).
+
 ## [4.22.0] - 2026-08-27
 
 ### Added
