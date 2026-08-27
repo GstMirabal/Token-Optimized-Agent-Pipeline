@@ -225,13 +225,19 @@ def claim(session_id: str | None, takeover: bool, tool: str, delegation_mode: st
 
 
 def release() -> int:
-    """Release the lock and record the commit the close sealed at."""
+    """Release the lock and record the commit the close sealed at.
+
+    Clears ``resume_pointer`` so the next ``/start`` on ``main`` does not
+    advisory-flag a closed sprint's branch (Sprint 040 R1). Mid-sprint
+    ``claim`` still must not auto-clear resume (Sprint 039 D-P1).
+    """
     state = load_state()
     state.update({
         "status": CLOSED,
         "end_time": now(),
         "last_updated": now(),
     })
+    state["resume_pointer"] = {}
     sha = head_sha()
     if sha:
         # Sprint-branch tip for require-released. Squash-merge orphans this SHA

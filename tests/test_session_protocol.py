@@ -160,6 +160,17 @@ def test_release_marks_closed(anchor):
     assert state["end_time"]
 
 
+def test_release_clears_resume_pointer(anchor):
+    """Sprint 040 R1 — sealed close must not leave a stale resume branch."""
+    ss.claim("session-a", takeover=False, tool="terminal")
+    state = json.loads(anchor.read_text())
+    state["resume_pointer"] = {"branch": "ai-sprint/039", "at": "deadbeef"}
+    anchor.write_text(json.dumps(state))
+    assert ss.release() == 0
+    after = json.loads(anchor.read_text())
+    assert after.get("resume_pointer") == {}
+
+
 # --- branch sovereignty ------------------------------------------------
 
 @pytest.fixture
