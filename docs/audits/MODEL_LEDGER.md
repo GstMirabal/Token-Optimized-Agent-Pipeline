@@ -13,6 +13,7 @@ Regenerate: `make model-ledger`.
 | 36 | mixed | composer-2.5, grok-4.5 | high | 12 | 1 | 1 | APPROVED |
 | 37 | mixed | composer-2.5, grok-4.5 | high | 7 | 1 | 1 | APPROVED |
 | 38 | mixed | claude-opus-5, composer-2.5, glm-5.2 | high, max | 6 | 1 | 1 | APPROVED |
+| 39 | mixed | composer-2.5, glm-5.2 | high | 15 | 1 | 1 | APPROVED |
 
 ## Omitted
 

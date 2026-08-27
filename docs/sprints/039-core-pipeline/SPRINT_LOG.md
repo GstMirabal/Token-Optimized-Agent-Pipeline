@@ -1,7 +1,7 @@
 # Sprint Log — 039 (`core-pipeline` / start-close-lifecycle)
 
 **Branch**: `ai-sprint/039` from `main` at `147868f` (`v4.21.0`)
-**Status**: Phase 8 artifacts written — awaiting Human OK on close (`/agents:close`)
+**Status**: **SESSION LOCKED** — Sprint 039 closed 2026-08-27; continuing `/agents:deployment`
 **Session**: `20260826T165545Z-2268` · tool `cursor` · `delegation_mode: sequential`
 
 ---
@@ -81,4 +81,7 @@ Orchestrator transcription: QA + Tester `APPROVED` same session. `RECORD` not us
 
 ## Phase 8 — Closeout
 
-_(pending)_
+- Human OK 2026-08-27 («ok») on close; heuristic pulse all `discard`.
+- `CHANGELOG.md` `[Unreleased]` Sprint 039; program-queue Next = 039;
+  `PHASE_REGISTER.md` + `graph_stats.json`; `make model-ledger` regenerated.
+- Formal `SESSION LOCKED` + push + `/agents:deployment` same turn.
