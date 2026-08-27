@@ -16,7 +16,8 @@ command rather than two steps that both rewrite the same file.
 
 invoked_by: start_workflow.md#state_claim (claim), close_workflow.md#state_sync
 (release), rules/token_economy.md#3.1 (suspend, at the hard threshold),
-deployment_workflow.md#sprint_seal_gate (require-released).
+deployment_workflow.md#sprint_seal_gate (require-released),
+deployment_workflow.md#baseline_refresh (refresh-baseline).
 
 Usage:
     python3 scripts/session_state.py claim [--session-id <uid>] [--takeover]
@@ -24,13 +25,15 @@ Usage:
         # --session-id is generated (see generate_session_id()) when the
         # harness exposes none, e.g. Cursor.
         # --delegation-mode defaults: cursor→sequential, others→native.
-    python3 scripts/session_state.py release   # seals the SPRINT
+    python3 scripts/session_state.py release   # seals the SPRINT (sprint-branch tip)
     python3 scripts/session_state.py suspend   # ends the SESSION only
     python3 scripts/session_state.py require-released [--branch <ref>]
         # deployment preflight: refuse SUSPENDED; tip must equal last_close_commit
+    python3 scripts/session_state.py refresh-baseline [--sha HEX]
+        # post-deploy: set last_close_commit to the integrated tip (default HEAD)
 
 Exit codes:
-    0 — lock claimed or released, or deploy preflight passed
+    0 — lock claimed or released, or deploy preflight passed, or baseline refreshed
     2 — a different session holds the lock, or deploy refused (RA-11: only 2 blocks)
 """
 
@@ -231,12 +234,48 @@ def release() -> int:
     })
     sha = head_sha()
     if sha:
-        # Anything committed after this SHA happened outside the protocol.
-        # Without it, drift is undetectable — which is how five merged pull
-        # requests reached main with no ledger entry (Phase 018).
+        # Sprint-branch tip for require-released. Squash-merge orphans this SHA
+        # from main; deployment_workflow baseline_refresh rewrites it to the
+        # integrated tip (Sprint 039). Without any baseline, drift is
+        # undetectable — which is how five merged PRs reached main with no
+        # ledger entry (Phase 018).
         state["last_close_commit"] = sha
     save_state(state)
     print(f"✅ Session lock released{f' at {sha[:7]}' if sha else ''}.")
+    return 0
+
+
+def refresh_baseline(sha: str | None = None) -> int:
+    """Rewrite ``last_close_commit`` to the post-deploy integration tip.
+
+    ``release`` seals the sprint-branch tip so ``require-released`` can gate
+    deploy. After squash-merge onto ``main``, that SHA is no longer an ancestor
+    of HEAD — ADR-0002 substitutes merge-base and warns forever. This command
+    is the refresh ADR-0002 named: call it from ``deployment_workflow`` after
+    the squash tip is checked out, with default SHA = ``HEAD``.
+
+    Does **not** change ``status`` (deploy may run while a later session has
+    already claimed).
+
+    Args:
+        sha: Full or abbreviated commit to record. Defaults to ``HEAD``.
+
+    Returns:
+        int: 0 on success; 2 when the SHA cannot be resolved (RA-11).
+    """
+    target = sha or head_sha()
+    if not target:
+        print("Refusing refresh-baseline: cannot resolve HEAD.")
+        return 2
+    resolved = rev_parse(target)
+    if resolved is None:
+        print(f"Refusing refresh-baseline: cannot resolve `{target}`.")
+        return 2
+    state = load_state()
+    state["last_close_commit"] = resolved
+    state["last_updated"] = now()
+    save_state(state)
+    print(f"✅ Baseline refreshed to {resolved[:7]} (integration tip).")
     return 0
 
 
@@ -340,6 +379,15 @@ def main() -> int:
         default=None,
         help="Ref to check (default: HEAD). Use ai-sprint/[ID] when HEAD moved on.",
     )
+    refresh_parser = sub.add_parser(
+        "refresh-baseline",
+        help="Post-deploy: set last_close_commit to the integrated tip.",
+    )
+    refresh_parser.add_argument(
+        "--sha",
+        default=None,
+        help="Commit to record (default: HEAD). Use after squash on main.",
+    )
 
     args = parser.parse_args()
     if args.command == "claim":
@@ -348,6 +396,8 @@ def main() -> int:
         return suspend()
     if args.command == "require-released":
         return require_released(args.branch)
+    if args.command == "refresh-baseline":
+        return refresh_baseline(args.sha)
     return release()
 
 
