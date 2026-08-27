@@ -78,6 +78,14 @@ narrower comparison instead of listing an entire branch history.
 tags agreeing — a repository that tags without sealing gets `R` and no protection. The tag↔section
 mapping becomes a maintained coupling.
 
+**Refresh is at deploy, not close (Sprint 039).** ADR-0002 already said verdict `S` should propose
+refreshing the baseline; `close` `release` still seals the **sprint-branch tip** so
+`require-released` can gate merge. After squash onto `main`, that tip is orphaned. 
+`deployment_workflow.md` `baseline_refresh` runs `session_state.py refresh-baseline` on the
+integrated tip so the next `/start` does not re-open the orphan warning by construction.
+`detect_drift.report_sealed` names covering sealing tags (not `tags[:3]` of the full catalogue)
+and points operators at deploy refresh, not close.
+
 **Accepted and declared, not hidden.** Reachability proves the *range* is covered by a published
 section, never that each commit carries its own bullet — PRs `#26`-`#30` were ancestors of a tag
 and still unrecorded. The tool states this in its `S` output so the verdict is not read as "every
