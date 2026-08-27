@@ -24,7 +24,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import shutil
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -116,9 +115,11 @@ def commands_stale(host_dir: Path, *, nucleus: bool) -> bool:
     return expected != actual
 
 
-def _write_commands(cursor_dir: Path, *, nucleus: bool) -> None:
+def _write_commands(cursor_dir: Path, *, nucleus: bool) -> set[str]:
+    """Upsert command mirrors; return the set of expected filenames."""
     commands_dir = cursor_dir / "commands"
     commands_dir.mkdir(parents=True, exist_ok=True)
+    expected: set[str] = set()
     for src in sorted((AGENTS_DIR / "commands").glob("*.md")):
         text = src.read_text(encoding="utf-8")
         if text.startswith("---"):
@@ -128,12 +129,34 @@ def _write_commands(cursor_dir: Path, *, nucleus: bool) -> None:
                 body = _rewrite_command_body(parts[2].lstrip("\n"), nucleus=nucleus)
                 text = f"---{front}---\n{body}"
         (commands_dir / src.name).write_text(text, encoding="utf-8")
+        expected.add(src.name)
+    return expected
 
 
-def _write_rules(cursor_dir: Path) -> None:
+def _prune_dir(directory: Path, *, expected_names: set[str], suffix: str) -> None:
+    """Delete files under ``directory`` whose names are not in ``expected_names``.
+
+    Only unlinks regular files with ``suffix``. Does not remove ``directory``
+    itself — Cursor's agent sandbox denies ``rmtree`` on ``.cursor/`` while
+    still allowing per-file write/unlink (Sprint 040).
+    """
+    if not directory.is_dir():
+        return
+    for path in sorted(directory.iterdir()):
+        if not path.is_file():
+            continue
+        if path.suffix != suffix:
+            continue
+        if path.name not in expected_names:
+            path.unlink()
+
+
+def _write_rules(cursor_dir: Path) -> set[str]:
+    """Upsert rule ``.mdc`` files; return expected filenames (excl. constitution)."""
     rules_dir = cursor_dir / "rules"
     rules_dir.mkdir(parents=True, exist_ok=True)
     triggers = _load_rule_triggers()
+    expected: set[str] = set()
     for src in sorted((AGENTS_DIR / "rules").glob("*.md")):
         key = f"rules/{src.name}"
         trigger = triggers[key]
@@ -152,7 +175,10 @@ def _write_rules(cursor_dir: Path) -> None:
             + "".join(f"{key}: {value}\n" for key, value in fields.items())
             + "---\n"
         )
-        (rules_dir / f"{src.stem}.mdc").write_text(frontmatter + body, encoding="utf-8")
+        name = f"{src.stem}.mdc"
+        (rules_dir / name).write_text(frontmatter + body, encoding="utf-8")
+        expected.add(name)
+    return expected
 
 
 def _write_constitution(cursor_dir: Path, *, nucleus: bool) -> None:
@@ -237,13 +263,18 @@ def _cursor_agent_document(src_text: str) -> str:
     return f"{front}\n{body}"
 
 
-def _write_agents(cursor_dir: Path) -> None:
+def _write_agents(cursor_dir: Path) -> set[str]:
+    """Upsert Cursor agent profiles; return expected filenames."""
     dest = cursor_dir / "agents"
     dest.mkdir(parents=True, exist_ok=True)
+    expected: set[str] = set()
     for src in sorted((AGENTS_DIR / "agents").glob("*.md")):
         rendered = _cursor_agent_document(src.read_text(encoding="utf-8"))
         name = _split_frontmatter(rendered)[0]["name"]
-        (dest / f"{name}.md").write_text(rendered, encoding="utf-8")
+        filename = f"{name}.md"
+        (dest / filename).write_text(rendered, encoding="utf-8")
+        expected.add(filename)
+    return expected
 
 
 def _rewrite_mcp_value(value: str, *, nucleus: bool) -> str:
@@ -279,17 +310,33 @@ def _write_mcp(cursor_dir: Path, *, nucleus: bool) -> None:
 def install_cursor_bridge(host_dir: Path, *, nucleus: bool) -> None:
     """Materialize ``.cursor/`` for ``host_dir`` (nucleus or host checkout).
 
+    Happy path is **incremental**: upsert files and prune orphans. Does **not**
+    ``rmtree`` the ``.cursor/`` directory — Cursor's agent sandbox denies that
+    while still allowing per-file writes (Sprint 040).
+
     Args:
         host_dir: Repository root receiving ``.cursor/``.
         nucleus: When True, rewrite ``@.agents/`` paths for the nucleus layout.
+
+    Raises:
+        PermissionError: Re-raised with a stable prefix
+            ``bridge: permission denied on .cursor`` when a write/unlink fails.
     """
     cursor_dir = host_dir / ".cursor"
-    if cursor_dir.exists():
-        shutil.rmtree(cursor_dir)
-    _write_commands(cursor_dir, nucleus=nucleus)
-    _write_rules(cursor_dir)
-    _write_constitution(cursor_dir, nucleus=nucleus)
-    _write_chat_title_rule(cursor_dir)
-    _write_agents(cursor_dir)
-    _write_mcp(cursor_dir, nucleus=nucleus)
+    try:
+        cursor_dir.mkdir(parents=True, exist_ok=True)
+        command_names = _write_commands(cursor_dir, nucleus=nucleus)
+        rule_names = _write_rules(cursor_dir)
+        _write_constitution(cursor_dir, nucleus=nucleus)
+        _write_chat_title_rule(cursor_dir)
+        rule_names |= {CONSTITUTION_RULE, CHAT_TITLE_RULE}
+        agent_names = _write_agents(cursor_dir)
+        _write_mcp(cursor_dir, nucleus=nucleus)
+        _prune_dir(cursor_dir / "commands", expected_names=command_names, suffix=".md")
+        _prune_dir(cursor_dir / "rules", expected_names=rule_names, suffix=".mdc")
+        _prune_dir(cursor_dir / "agents", expected_names=agent_names, suffix=".md")
+    except PermissionError as exc:
+        raise PermissionError(
+            f"bridge: permission denied on .cursor ({exc})"
+        ) from exc
     print(f"✅ Cursor bridge written under {cursor_dir}")
