@@ -22,6 +22,7 @@ applies ``config/model_tiers.json`` (ADR-0010). Claude-only keys
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
 from pathlib import Path
@@ -60,6 +61,59 @@ def _rewrite_command_body(body: str, *, nucleus: bool) -> str:
     if nucleus:
         return body.replace("@.agents/", "@")
     return body
+
+
+def _commands_digest(commands_root: Path) -> dict[str, str]:
+    """Map relative command paths to sha256 hex digests of file bytes."""
+    digests: dict[str, str] = {}
+    if not commands_root.is_dir():
+        return digests
+    for path in sorted(commands_root.rglob("*.md")):
+        rel = path.relative_to(commands_root).as_posix()
+        digests[rel] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return digests
+
+
+def expected_cursor_command_text(src_text: str, *, nucleus: bool) -> str:
+    """Render the bytes ``_write_commands`` would write for one command file."""
+    text = src_text
+    if text.startswith("---"):
+        parts = text.split("---", 2)
+        if len(parts) >= 3:
+            front = parts[1]
+            body = _rewrite_command_body(parts[2].lstrip("\n"), nucleus=nucleus)
+            text = f"---{front}---\n{body}"
+    return text
+
+
+def commands_stale(host_dir: Path, *, nucleus: bool) -> bool:
+    """True when ``.cursor/commands`` digests disagree with ``commands/``.
+
+    Compares the *rendered* Cursor copy (path rewrite applied) against what is
+    on disk under ``.cursor/commands``. A matching ``.bridge_cursor.lock`` alone
+    is not freshness — copies can drift after the lock was written (Sprint 039).
+
+    Args:
+        host_dir: Repository root that holds ``commands/`` and ``.cursor/``.
+        nucleus: Same flag ``_write_commands`` uses for ``@.agents/`` rewrite.
+
+    Returns:
+        bool: True when any command is missing, extra, or content-mismatched.
+    """
+    src_root = host_dir / "commands"
+    dest_root = host_dir / ".cursor" / "commands"
+    if not src_root.is_dir():
+        return False
+    if not dest_root.is_dir():
+        return True
+    expected: dict[str, str] = {}
+    for src in sorted(src_root.glob("*.md")):
+        rendered = expected_cursor_command_text(
+            src.read_text(encoding="utf-8"), nucleus=nucleus
+        )
+        expected[src.name] = hashlib.sha256(rendered.encode("utf-8")).hexdigest()
+    actual = _commands_digest(dest_root)
+    return expected != actual
 
 
 def _write_commands(cursor_dir: Path, *, nucleus: bool) -> None:
