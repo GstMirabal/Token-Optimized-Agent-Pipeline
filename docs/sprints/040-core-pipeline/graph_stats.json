@@ -4,6 +4,6 @@
   "communities": 750,
   "source": "graphify-out/graph.json",
   "sprint": 40,
-  "built_at_commit": "pending-close-seal",
+  "built_at_commit": "797a9a41008215a82ef24b5eb1055832dea25a1e",
   "note": "Counts from graphify update immediately before close seal; built_at_commit rewritten after atomic_commit"
 }
