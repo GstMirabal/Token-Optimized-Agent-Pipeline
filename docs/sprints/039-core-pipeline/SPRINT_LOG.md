@@ -1,7 +1,7 @@
 # Sprint Log — 039 (`core-pipeline` / start-close-lifecycle)
 
 **Branch**: `ai-sprint/039` from `main` at `147868f` (`v4.21.0`)
-**Status**: Phase 6 complete — awaiting Phase 7 Double-Gate
+**Status**: Phase 8 artifacts written — awaiting Human OK on close (`/agents:close`)
 **Session**: `20260826T165545Z-2268` · tool `cursor` · `delegation_mode: sequential`
 
 ---
