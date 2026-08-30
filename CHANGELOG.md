@@ -25,6 +25,7 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 ### Known open
 
 - **193 `ruff` findings across 66 files, all predating this sprint.** The files this sprint touched went from 8 to 7; none were introduced. `make verify` does not run `ruff`. Recorded as `RECORD`/`testifying` at Phase 7, routed rather than remediated.
+- **`close_workflow.md` Phase 4 seals before Phase 5 commits, so the deploy gate refuses its own close.** `state_sync` runs `session_state.py release` (recording `last_close_commit`) at Phase 4; `atomic_commit` and `graph_rebuild` commit at Phase 5. Any tracked artifact written at Phase 5 — `graph_stats.json` stamped with the sealed tip is the documented case — leaves the branch tip ahead of the seal, and `deployment_workflow.md` Phase 0 `sprint_seal_gate` then refuses with *"tip … is not the sealed close …"*. Measured on this sprint: seal `efc80d3`, tip `f9c7882`. Worked around here by re-running `release` once the tip was final, which is the correct semantics (the seal must name the commit that ships). The ordering itself is unrepaired and is the fix a later sprint should make. #041
 - **No `make verify` check passes a versioned template through the gate that consumes it** — the instrument that would prevent a fourth instance of the class above. Routed to the program queue with U10/U11/U12 as measured evidence.
 
 ## [4.23.0] - 2026-08-27
