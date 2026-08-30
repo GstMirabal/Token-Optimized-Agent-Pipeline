@@ -57,9 +57,33 @@ def _constitution_import(*, nucleus: bool) -> str:
 
 
 def _rewrite_command_body(body: str, *, nucleus: bool) -> str:
+    """Render one command body for Cursor.
+
+    Two substitutions, both of which exist because ``commands/`` is a single
+    source mirrored asymmetrically: Claude reads **symlinks** to these files, so
+    the source text must already be correct for Claude, while Cursor reads
+    **rendered copies**, so anything Cursor-specific is produced here.
+
+    ``--tool claude-code`` becomes ``--tool cursor`` for that reason (Sprint
+    041). Before it, ``commands/start.md`` hardcoded ``--tool cursor`` and both
+    harnesses read that, so a Claude Code session running ``/agents:start``
+    claimed the anchor as Cursor — which silenced ``session_cost.py`` and
+    applied ``RA-18`` and the Cursor dispatch rules to a session that cannot
+    execute them. Runtime harness detection was rejected as the alternative: it
+    fails toward a default silently, which is the failure being repaired.
+
+    Args:
+        body: Command body, frontmatter already stripped.
+        nucleus: True when rendering inside the framework checkout, where
+            ``@.agents/`` paths resolve at the repository root instead.
+
+    Returns:
+        str: The bytes Cursor's copy carries.
+    """
+    text = body.replace("--tool claude-code", "--tool cursor")
     if nucleus:
-        return body.replace("@.agents/", "@")
-    return body
+        return text.replace("@.agents/", "@")
+    return text
 
 
 def _commands_digest(commands_root: Path) -> dict[str, str]:
