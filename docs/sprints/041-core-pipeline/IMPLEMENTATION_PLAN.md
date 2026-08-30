@@ -39,7 +39,7 @@ Reproducido 2026-08-30 sobre un clon limpio en `$SCRATCH/repro` (`d258b43`), sin
 `.claude/` ni `.cursor/` (ambos están en `.gitignore`):
 
 ```
-git clone -q /Users/gstmirabal/Developer/.agents "$SCRATCH/repro"
+git clone -q . "$SCRATCH/repro"     # run from the framework checkout root
 cd "$SCRATCH/repro" && python3 scripts/session_start.py --boot --tool claude-code
 ```
 

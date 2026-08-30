@@ -22,22 +22,22 @@ this column is prohibited (`agents.md §7 RA-16` precedent, Sprint 022 `D1`).
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| U1 | `scripts/bridge_state.py` | create | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U2 | `scripts/session_start.py` | modify | high | `implementer_agent` | opus | high | ⏳ |
-| U3 | `hooks/on_init.py` | modify | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U4 | `scripts/cursor_adapter.py` | modify | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U5 | `commands/start.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U6 | `workflows/start_workflow.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U7 | `workflows/deployment_workflow.md` | modify | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U8 | `tests/test_bridge_state.py` | create | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U9 | `tests/test_session_start.py` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U10 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U11 | `docs/standards/templates/SKILL_ASSIGNMENT_TEMPLATE.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U12 | `workflows/pipeline_workflow.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U13 | `scripts/install.py` | modify | **high** | `implementer_agent` | opus | high | ⏳ |
-| U14 | `tests/test_installer.sh` | modify | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U15 | `tests/test_cursor_adapter.py` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U16 | `README.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| U1 | `scripts/bridge_state.py` | create | medium | `implementer_agent` | sonnet | medium | ✅ eef024e |
+| U2 | `scripts/session_start.py` | modify | high | `implementer_agent` | opus | high | ✅ 9f63eb4 |
+| U3 | `hooks/on_init.py` | modify | medium | `implementer_agent` | sonnet | medium | ✅ 05aa629 |
+| U4 | `scripts/cursor_adapter.py` | modify | medium | `implementer_agent` | sonnet | medium | ✅ 8ba0541 |
+| U5 | `commands/start.md` | modify | low | `doc_orchestrator` | sonnet | medium | ✅ 8ba0541 |
+| U6 | `workflows/start_workflow.md` | modify | low | `doc_orchestrator` | sonnet | medium | ✅ 56b0d4a |
+| U7 | `workflows/deployment_workflow.md` | modify | medium | `doc_orchestrator` | sonnet | medium | ✅ 856875e |
+| U8 | `tests/test_bridge_state.py` | create | low | `implementer_agent` | sonnet | medium | ✅ 9df8b52 |
+| U9 | `tests/test_session_start.py` | modify | low | `implementer_agent` | sonnet | medium | ✅ 0b47618 |
+| U10 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify | low | `doc_orchestrator` | sonnet | medium | ✅ ef1c6c2 |
+| U11 | `docs/standards/templates/SKILL_ASSIGNMENT_TEMPLATE.md` | modify | low | `doc_orchestrator` | sonnet | medium | ✅ 38c5d10 |
+| U12 | `workflows/pipeline_workflow.md` | modify | low | `doc_orchestrator` | sonnet | medium | ✅ 61d2bbf |
+| U13 | `scripts/install.py` | modify | **high** | `implementer_agent` | opus | high | ✅ 65d9c62 |
+| U14 | `tests/test_installer.sh` | modify | medium | `implementer_agent` | sonnet | medium | ✅ 65d9c62 |
+| U15 | `tests/test_cursor_adapter.py` | modify | low | `implementer_agent` | sonnet | medium | ✅ 8ba0541 |
+| U16 | `README.md` | modify | low | `doc_orchestrator` | sonnet | medium | ✅ 8faf106 |
 
 **Sixteen units, sixteen distinct physical files.** No file appears twice, so
 `jurisdictional_lock` (one structural subject per task) and `no_interference`
