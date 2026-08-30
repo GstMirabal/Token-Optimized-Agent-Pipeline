@@ -54,6 +54,7 @@ Shape: `# | Target | Operation | Mode | Assignee | Destination | Ruleset file`
 | U10 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify | ruleset | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | U11 | `docs/standards/templates/SKILL_ASSIGNMENT_TEMPLATE.md` | modify | ruleset | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | U12 | `workflows/pipeline_workflow.md` | modify | ruleset | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| U16 | `README.md` | modify | ruleset | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 
 ### Wave 5 — tests
 

@@ -52,6 +52,7 @@ are the ones the pipeline already mandates, not new ones.
 | U13 `scripts/install.py` | none (stdlib) | N/A | P1 |
 | U14 `tests/test_installer.sh` | `bash` end-to-end harness (already present) | N/A | P1 |
 | U15 `tests/test_cursor_adapter.py` | `pytest` | N/A | P1 |
+| U16 `README.md` | `check_readme_counts.py --write` (deterministic) | N/A | P1 |
 
 ---
 
@@ -78,7 +79,7 @@ are the ones the pipeline already mandates, not new ones.
 ## 5. Gaps
 
 **None that block this sprint.** Nothing is built at P4, and that is a deliberate
-outcome rather than an unfilled rung: all fifteen units are edits to existing
+outcome rather than an unfilled rung: all sixteen units are edits to existing
 framework files using the standard library, and `rules/code_craft.md §7` treats
 a new dependency — or a new skill — as permanent code you do not control.
 
