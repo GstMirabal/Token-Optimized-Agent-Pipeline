@@ -172,4 +172,13 @@ starts. Written in advance so it is not renegotiated once the work is sunk cost.
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an
-unattended `/loop` (`workflows/pipeline_workflow.md`, `rules/loop_governance.md`).*
+unattended `/loop` (`workflows/pipeline_workflow.md`, `rules/loop_governance.md`).
+Any `/loop` this sprint does run — Phases 6-8 only — is governed by
+`scripts/loop_guard.py start`, which fails closed.*
+
+> **Do not delete the sentence above.** `audit_plan.py` Filter 6 rejects any plan
+> that names `/loop` without also naming `loop_guard.py`, and this footer names
+> both. Until Sprint 041 it named only `/loop`, so **every plan written faithfully
+> from this template was rejected by the mandatory Phase 1 gate** — the template
+> failed the check that consumes it, and the only passing plans were the ones that
+> had dropped this footer. Replace `{{…}}` placeholders; leave this pairing intact.
