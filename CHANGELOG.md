@@ -4,6 +4,8 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.24.0] - 2026-08-30
+
 ### Added
 
 - **Sprint 041 (`core-pipeline` / bi-harness-bridge-parity)** — `scripts/bridge_state.py`: one bridge predicate for every target (mirror missing or incomplete **OR** content diverged), consumed by both `session_start.py --boot` and `hooks/on_init.py`. `--boot` reaches the install branch for **every** harness, not Cursor alone; the nucleus `--target claude` install writes its lock and its git hooks; `commands/start.md` carries `--tool claude-code` and `cursor_adapter` renders `--tool cursor` for the Cursor copy. Targets stay independent — a boot repairs the harness that booted it and never touches the other's tree. #041
