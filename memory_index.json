@@ -1,60 +1,73 @@
 {
-  "last_update": "2026-08-25",
-  "sprint_id": "027",
+  "last_update": "2026-08-30",
+  "sprint_id": "041",
   "_schema": "Entries are summary-only Knowledge Items. The 'file' field is omitted once the raw log has been purged (agents.md §4 definitive_amnesia) — the 1-line summary IS the retained knowledge.",
   "items": [
     {
       "id": "F-20260509-96AD",
-      "summary": "Language violations and tool failures in Session 96AD."
+      "summary": "Language violations and tool failures in Session 96AD.",
+      "routing_class": "host"
     },
     {
       "id": "F-20260525-2426",
-      "summary": "Global interpreter execution violation: failed to prefix python script with venv/bin."
+      "summary": "Global interpreter execution violation: failed to prefix python script with venv/bin.",
+      "routing_class": "host"
     },
     {
       "id": "F-20260726-RN01",
-      "summary": "Terminology sweeps must use case-insensitive grep — a case-sensitive pass missed multiple ALL-CAPS runtime print strings (e.g. hooks/on_commit.py's log prefixes, legacy_app_auditor.py's status banners) during Phase 015's rename."
+      "summary": "Terminology sweeps must use case-insensitive grep — a case-sensitive pass missed multiple ALL-CAPS runtime print strings (e.g. hooks/on_commit.py's log prefixes, legacy_app_auditor.py's status banners) during Phase 015's rename.",
+      "routing_class": "host"
     },
     {
       "id": "F-20260726-RN02",
-      "summary": "Renaming a skill directory desyncs generate_manifest.py's category/tags (it preserves curated fields by matching the old manifest entry's name, which no longer matches post-rename) — restore them manually after regeneration, don't assume the regenerated entry is complete."
+      "summary": "Renaming a skill directory desyncs generate_manifest.py's category/tags (it preserves curated fields by matching the old manifest entry's name, which no longer matches post-rename) — restore them manually after regeneration, don't assume the regenerated entry is complete.",
+      "routing_class": "host"
     },
     {
       "id": "F-20260726-RN03",
-      "summary": "git mv fails with \"source directory is empty\" on directories holding only untracked files; verify with git ls-files before choosing git mv vs plain mv during a folder rename."
+      "summary": "git mv fails with \"source directory is empty\" on directories holding only untracked files; verify with git ls-files before choosing git mv vs plain mv during a folder rename.",
+      "routing_class": "host"
     },
     {
       "id": "F-20260726-RN04",
-      "summary": "Editing docs/active_state.json directly (not via a workflow step) leaves .agent_state/mirror.json stale — always re-run hooks/state_mirror.py after any manual edit to the active state."
+      "summary": "Editing docs/active_state.json directly (not via a workflow step) leaves .agent_state/mirror.json stale — always re-run hooks/state_mirror.py after any manual edit to the active state.",
+      "routing_class": "host"
     },
     {
       "id": "F-20260824-UF01",
-      "summary": "Counting membership in a frontmatter list needs word boundaries, not a substring grep: `grep -qE 'Write|Edit'` over a `tools:` line also matches TodoWrite in agents/principal_agent.md, whose role explicitly does not write, returning 9 where the answer is 8."
+      "summary": "Counting membership in a frontmatter list needs word boundaries, not a substring grep: `grep -qE 'Write|Edit'` over a `tools:` line also matches TodoWrite in agents/principal_agent.md, whose role explicitly does not write, returning 9 where the answer is 8.",
+      "routing_class": "host"
     },
     {
       "id": "F-20260824-UF02",
-      "summary": "A low-entropy secret fixture (a repeated character run) or a documented placeholder (AWS's …EXAMPLEKEY) is rejected by hooks/on_commit.py's credibility filter, so testing a secret-gate finding with either yields a false negative that looks exactly like the finding reproducing — use real-shaped random key material."
+      "summary": "A low-entropy secret fixture (a repeated character run) or a documented placeholder (AWS's …EXAMPLEKEY) is rejected by hooks/on_commit.py's credibility filter, so testing a secret-gate finding with either yields a false negative that looks exactly like the finding reproducing — use real-shaped random key material.",
+      "routing_class": "host"
     },
     {
       "id": "F-20260824-UF03",
-      "summary": "An artifact's risk is the cost of its assertions being wrong, not the difficulty of writing it: Sprint 023's C8 was ten checkbox ticks in Markdown, classified low-risk, and cost 5 gate rounds and 4 rejections that were all false claims, while C7 (a git mv) cleared both gates in one round."
+      "summary": "An artifact's risk is the cost of its assertions being wrong, not the difficulty of writing it: Sprint 023's C8 was ten checkbox ticks in Markdown, classified low-risk, and cost 5 gate rounds and 4 rejections that were all false claims, while C7 (a git mv) cleared both gates in one round.",
+      "routing_class": "host"
     },
     {
       "id": "F-20260825-A2",
-      "summary": "PLACEHOLDER_MARKERS includes \"test\", so an ENV API_KEY=\"…test…\" Dockerfile never trips on_commit; for real violation exercises use opaque non-placeholder values."
+      "summary": "PLACEHOLDER_MARKERS includes \"test\", so an ENV API_KEY=\"…test…\" Dockerfile never trips on_commit; for real violation exercises use opaque non-placeholder values.",
+      "routing_class": "host"
     },
     {
       "id": "F-20260825-A3",
-      "summary": "A tool-specific measurement receipt left in the sprint directory (e.g. cursor_mdc_schema.md) fails blind portability partition; absorb the contract into the product generator and remove the receipt before A3."
+      "summary": "A tool-specific measurement receipt left in the sprint directory (e.g. cursor_mdc_schema.md) fails blind portability partition; absorb the contract into the product generator and remove the receipt before A3.",
+      "routing_class": "host"
     },
     {
       "id": "F-20260825-H003",
       "file": "memory/H-003-protocol-loss.md",
-      "summary": "CRITICAL/HIGH work outside a sprint is RA-03: branch hotfix/[H-ID] (never fix/), docs/hotfixes/ before the first commit; agents.md used to name only the doc path so an agent opened fix/github-release-in-deploy for H-003."
+      "summary": "CRITICAL/HIGH work outside a sprint is RA-03: branch hotfix/[H-ID] (never fix/), docs/hotfixes/ before the first commit; agents.md used to name only the doc path so an agent opened fix/github-release-in-deploy for H-003.",
+      "routing_class": "host"
     },
     {
       "id": "F-20260825-027",
-      "summary": "Under session_tool cursor, Model/Effort in task_scope must come from make cursor-tiers (token_economy_agent proposes, rule_validator transcribes) — never Claude haiku/sonnet/opus aliases, and never as columns on agent_assignment.md (agent_orchestrator assigns profiles only)."
+      "summary": "Model/Effort are required on task_scope.md for EVERY harness from Sprint 28 onward (check_task_scope.py MODEL_FROM_SPRINT=28, tested before any tool condition) — the session_tool cursor test below it only reaches older sprints; under cursor the values come from make cursor-tiers (token_economy_agent proposes, rule_validator transcribes), never Claude aliases, and never as columns on agent_assignment.md (agent_orchestrator assigns profiles only).",
+      "routing_class": "host"
     }
   ]
 }
