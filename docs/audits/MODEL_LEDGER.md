@@ -15,6 +15,7 @@ Regenerate: `make model-ledger`.
 | 38 | mixed | claude-opus-5, composer-2.5, glm-5.2 | high, max | 6 | 1 | 1 | APPROVED |
 | 39 | mixed | composer-2.5, glm-5.2 | high | 15 | 1 | 1 | APPROVED |
 | 40 | mixed | composer-2.5, glm-5.2 | high | 9 | 1 | 1 | APPROVED |
+| 41 | mixed | opus, sonnet | high, medium | 16 | 4 | 4 | REJECTED:charter, APPROVED, RECORD:testifying |
 
 ## Omitted
 
