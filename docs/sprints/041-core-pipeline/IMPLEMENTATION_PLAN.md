@@ -202,6 +202,7 @@ The Work column `Assignee (proposed)` is a staffing proposal from Phase 1. Phase
 | U12 | `workflows/pipeline_workflow.md` | modify | low | `doc_orchestrator` | ⏳ |
 | U13 | `scripts/install.py` | modify | **high** | `implementer_agent` | ⏳ |
 | U14 | `tests/test_installer.sh` | modify | medium | `implementer_agent` | ⏳ |
+| U15 | `tests/test_cursor_adapter.py` | modify | low | `implementer_agent` | ⏳ |
 
 **Orden obligatorio**: U1 → (U2, U3, U4) → U5 → (U6, U7) → (U8, U9). U2 y U3 importan
 U1; U5 depende de que U4 sepa reescribir el token. **U10, U11 y U12 son independientes
@@ -319,7 +320,7 @@ disco, deterministas y verificables (`token_economy_agent` Filtro 5).
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 14 | Count of rows in Work tables |
+| Work units | 15 | Count of rows in Work tables |
 | Subagents dispatched | 0 (previsto) | El humano no ha solicitado despacho a subagentes; se ejecuta en sesión |
 | Prior session ratio | **5.3** (ciclo 1, `first_turn` 21 682 → `peak` 115 914) | `python3 scripts/session_cost.py --from-anchor --json` |
 

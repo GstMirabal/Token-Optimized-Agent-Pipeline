@@ -62,6 +62,7 @@ Shape: `# | Target | Operation | Mode | Assignee | Destination | Ruleset file`
 | U8 | `tests/test_bridge_state.py` | create | ruleset | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | U9 | `tests/test_session_start.py` | modify | ruleset | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | U14 | `tests/test_installer.sh` | modify | ruleset | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| U15 | `tests/test_cursor_adapter.py` | modify | ruleset | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 
 ---
 

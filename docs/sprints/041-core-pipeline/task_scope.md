@@ -36,8 +36,9 @@ this column is prohibited (`agents.md §7 RA-16` precedent, Sprint 022 `D1`).
 | U12 | `workflows/pipeline_workflow.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 | U13 | `scripts/install.py` | modify | **high** | `implementer_agent` | opus | high | ⏳ |
 | U14 | `tests/test_installer.sh` | modify | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| U15 | `tests/test_cursor_adapter.py` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
 
-**Fourteen units, fourteen distinct physical files.** No file appears twice, so
+**Fifteen units, fifteen distinct physical files.** No file appears twice, so
 `jurisdictional_lock` (one structural subject per task) and `no_interference`
 (no file claimed by two in-flight subtasks) both hold by construction. Verify
 with `awk -F'|' '/^\| U/ {print $3}' task_scope.md | sort | uniq -d` → empty.
@@ -65,7 +66,7 @@ Findings from auditing the roadmap against `rules/` and `agents.md`.
 
 | Rule | Verdict | Note |
 | :--- | :--- | :--- |
-| `agents.md §2 jurisdictional_lock` | ✅ | One physical file per unit; fourteen distinct paths — **except U13+U14, paired by an explicit gate**: `.git/hooks/commit-msg` refuses a `fix(` commit that stages no test (`rules/code_craft.md §6`), so the installer fix and its assertions land together. A gate demanding the pairing outranks the one-file convention |
+| `agents.md §2 jurisdictional_lock` | ✅ | One physical file per unit; fifteen distinct paths — **except U13+U14 and U4+U5+U15, paired by an explicit gate**: `.git/hooks/commit-msg` refuses a `fix(` commit that stages no test (`rules/code_craft.md §6`), so the installer fix and its assertions land together. A gate demanding the pairing outranks the one-file convention |
 | `agents.md §2 no_interference` | ✅ | No duplicate target across in-flight units |
 | `agents.md §2 pre_shielding` | ✅ | `git status --porcelain` was clean before the branch was cut; the only prior untracked path was this sprint's own directory |
 | `agents.md §3 strict_rule` / `jurisdiction` | ✅ | Nucleus mode (`scripts/_mode.py`): `.git` is a real directory, so the framework **is** the work and these records belong at `docs/sprints/` here. No submodule to contaminate |
@@ -78,7 +79,7 @@ Findings from auditing the roadmap against `rules/` and `agents.md`.
 | `rules/code_craft.md` complexity | ⚠️ **binding on U2** | `run_boot` is already the longest function in `session_start.py`. Adding the target-agnostic branch MUST NOT push it past 50 lines or 3 indentation levels (`agents.md §1`). If it would, the triage moves into a helper in U1's module rather than growing `run_boot` |
 | `rules/qa_and_testing.md` | ⚠️ **binding on U8/U9** | Every check in the plan's `## Tests` marked **Yes** must be shown failing against `d258b43` before its repair lands (*reproduce before repairing*) |
 | `agents.md §1` `ephemeral` markers | ✅ | No `TODO`/`FIXME` may enter any unit; `make verify` rejects them |
-| `agents.md §1` `code_logic` | ✅ | All fourteen files are English. Spanish is confined to `IMPLEMENTATION_PLAN.md`, which `agents.md §1 user_chat` permits |
+| `agents.md §1` `code_logic` | ✅ | All fifteen files are English. Spanish is confined to `IMPLEMENTATION_PLAN.md`, which `agents.md §1 user_chat` permits |
 
 ---
 
