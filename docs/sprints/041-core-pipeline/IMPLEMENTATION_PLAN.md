@@ -323,11 +323,23 @@ disco, deterministas y verificables (`token_economy_agent` Filtro 5).
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
 | Work units | 16 | Count of rows in Work tables |
 | Subagents dispatched | 0 (previsto) | El humano no ha solicitado despacho a subagentes; se ejecuta en sesión |
-| Prior session ratio | **5.3** (ciclo 1, `first_turn` 21 682 → `peak` 115 914) | `python3 scripts/session_cost.py --from-anchor --json` |
+| Ratio al abrir Fase 1 | **5.3** (ciclo 1, `first_turn` 21 682 → `peak` 115 914) | `python3 scripts/session_cost.py --from-anchor --json` |
+| Ratio al sellar (Fase 4) | **15.2** (ciclo 1) · **15.5** (ciclo 2) | `python3 scripts/session_cost.py --session <id> --json` |
 
-**Nota de umbral**: 5.3 cruza el umbral **soft** (5×), que por diseño del Sprint 021
-es puramente observacional. El umbral **hard** (15×) sigue lejos. Esta medición solo
-fue posible tras corregir `session_tool` en el ancla — antes devolvía `None`.
+**Umbral duro alcanzado, y el cierre ocurre donde el Sprint 021 dice.** El bound de
+15× se cruzó en los dos ciclos (15.2 y 15.5); `session_probe.py --force-platform` lo
+reportó en la Fase 3.5 de este cierre. Por diseño eso significa **no empezar trabajo
+nuevo** y cerrar en el siguiente límite de commit — que es exactamente este: 16
+unidades cerradas, ambos gates emitidos, `make verify` en `0`, árbol limpio.
+
+**Señal de calibración, declarada.** El Sprint 021 pide distinguir un cierre forzado
+con trabajo pendiente (*"demasiado estricto"* → subir el umbral) de un cierre forzado
+sobre un sprint completo (*no es señal*). **Este es el segundo caso**: nada quedó
+pendiente en `task_scope.md`. El umbral no necesita corrección por esta observación.
+
+**Nota sobre la medición inicial**: 5.3 solo fue medible tras corregir `session_tool`
+en el ancla — antes `session_cost.py` devolvía `None`. Es decir, el propio defecto que
+este sprint repara habría dejado **todo este registro de coste en blanco**.
 
 ---
 
