@@ -49,6 +49,7 @@ are the ones the pipeline already mandates, not new ones.
 | U10 `IMPLEMENTATION_PLAN_TEMPLATE.md` | `token-saver-auditor` | N/A | P1 — `audit_plan.py` is the gate U10 repairs against |
 | U11 `SKILL_ASSIGNMENT_TEMPLATE.md` | none (`check_forge_ladder.py` is the gate it repairs against) | N/A | P1 |
 | U12 `workflows/pipeline_workflow.md` | none (`check_task_scope.py` is the gate it repairs against) | N/A | P1 |
+| U13 `scripts/install.py` | none (stdlib) | N/A | P1 |
 
 ---
 
@@ -75,7 +76,7 @@ are the ones the pipeline already mandates, not new ones.
 ## 5. Gaps
 
 **None that block this sprint.** Nothing is built at P4, and that is a deliberate
-outcome rather than an unfilled rung: all twelve units are edits to existing
+outcome rather than an unfilled rung: all thirteen units are edits to existing
 framework files using the standard library, and `rules/code_craft.md §7` treats
 a new dependency — or a new skill — as permanent code you do not control.
 

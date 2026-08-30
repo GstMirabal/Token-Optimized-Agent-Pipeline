@@ -34,8 +34,9 @@ this column is prohibited (`agents.md §7 RA-16` precedent, Sprint 022 `D1`).
 | U10 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 | U11 | `docs/standards/templates/SKILL_ASSIGNMENT_TEMPLATE.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 | U12 | `workflows/pipeline_workflow.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| U13 | `scripts/install.py` | modify | **high** | `implementer_agent` | opus | high | ⏳ |
 
-**Twelve units, twelve distinct physical files.** No file appears twice, so
+**Thirteen units, thirteen distinct physical files.** No file appears twice, so
 `jurisdictional_lock` (one structural subject per task) and `no_interference`
 (no file claimed by two in-flight subtasks) both hold by construction. Verify
 with `awk -F'|' '/^\| U/ {print $3}' task_scope.md | sort | uniq -d` → empty.
@@ -48,7 +49,8 @@ selector agent, which would spend the unit of cost tiering exists to reduce.
 
 | Unit | Default | Proposed | Reason |
 | :--- | :--- | :--- | :--- |
-| U2 | `sonnet` / `medium` (`author`) | **`opus` / `high`** | `scripts/session_start.py` is the arrival path of **both** harnesses. A regression here is not caught by a later command failing — it is caught by nobody, which is precisely the defect this sprint repairs. It is also the only `high`-risk unit in the sprint |
+| U2 | `sonnet` / `medium` (`author`) | **`opus` / `high`** | `scripts/session_start.py` is the arrival path of **both** harnesses. A regression here is not caught by a later command failing — it is caught by nobody, which is precisely the defect this sprint repairs |
+| U13 | `sonnet` / `medium` (`author`) | **`opus` / `high`** | `scripts/install.py` installs the git hooks that gate secrets and commit messages. A regression here disables those gates silently, which is the same failure class the sprint exists to close |
 
 Every other unit keeps its role default. Neither assignee is a `mechanical`
 profile, so no `mechanical`-at-`high` escalation note is owed
@@ -62,7 +64,7 @@ Findings from auditing the roadmap against `rules/` and `agents.md`.
 
 | Rule | Verdict | Note |
 | :--- | :--- | :--- |
-| `agents.md §2 jurisdictional_lock` | ✅ | One physical file per unit; eleven distinct paths |
+| `agents.md §2 jurisdictional_lock` | ✅ | One physical file per unit; thirteen distinct paths |
 | `agents.md §2 no_interference` | ✅ | No duplicate target across in-flight units |
 | `agents.md §2 pre_shielding` | ✅ | `git status --porcelain` was clean before the branch was cut; the only prior untracked path was this sprint's own directory |
 | `agents.md §3 strict_rule` / `jurisdiction` | ✅ | Nucleus mode (`scripts/_mode.py`): `.git` is a real directory, so the framework **is** the work and these records belong at `docs/sprints/` here. No submodule to contaminate |
@@ -75,7 +77,7 @@ Findings from auditing the roadmap against `rules/` and `agents.md`.
 | `rules/code_craft.md` complexity | ⚠️ **binding on U2** | `run_boot` is already the longest function in `session_start.py`. Adding the target-agnostic branch MUST NOT push it past 50 lines or 3 indentation levels (`agents.md §1`). If it would, the triage moves into a helper in U1's module rather than growing `run_boot` |
 | `rules/qa_and_testing.md` | ⚠️ **binding on U8/U9** | Every check in the plan's `## Tests` marked **Yes** must be shown failing against `d258b43` before its repair lands (*reproduce before repairing*) |
 | `agents.md §1` `ephemeral` markers | ✅ | No `TODO`/`FIXME` may enter any unit; `make verify` rejects them |
-| `agents.md §1` `code_logic` | ✅ | All eleven files are English. Spanish is confined to `IMPLEMENTATION_PLAN.md`, which `agents.md §1 user_chat` permits |
+| `agents.md §1` `code_logic` | ✅ | All thirteen files are English. Spanish is confined to `IMPLEMENTATION_PLAN.md`, which `agents.md §1 user_chat` permits |
 
 ---
 
@@ -101,6 +103,7 @@ concern goes instead.
 | `.claude/`, `.cursor/` | Generated bridge mirrors, both gitignored. They are **outputs** of the installer, never edited by hand |
 | `docs/active_state.json` | Anchor. Written only by `scripts/session_state.py` and the close workflow (`state_homologation`) |
 | `scripts/check_task_scope.py` | U12 corrects the workflow prose, not the enforcing script. `MODEL_FROM_SPRINT = 28` is the authority and is a regression to protect |
+| `scripts/cursor_adapter.py` install path | U13 repairs the nucleus **claude** branch only. The `cursor` and `both` branches already call both helpers and are regressions to protect |
 | `Makefile` | No unit adds a target. The generalized template-gate check is routed to the roadmap, not built here |
 
 ---
@@ -126,3 +129,31 @@ Following a document's instruction produced a blocked gate — the same shape as
 U10 and U11, in a third artifact. **U12 corrects the prose to match the script**,
 because the script is what runs (`close_workflow.md` Phase 2.6 settles this class
 of disagreement the same way: the enforcing artifact decides).
+
+---
+
+## Scope amendment — U13, opened during Phase 6
+
+U2's end-to-end verification installed the Claude mirror correctly (0 → 13
+symlinks) and then exposed a defect one layer down: **no `.bridge_claude.lock`
+was written and no git hook was installed**, on a boot that exited `0`.
+
+`scripts/install.py:497-498`:
+
+```python
+if args.target == "claude":
+    return install_nucleus_bridge()      # early return
+```
+
+That return skips `install_nucleus_git_hooks()` and `write_bridge_locks()`,
+which the `cursor` branch (499-503) and the `both` branch (504-508) both run.
+This is rider **S3** of `021-030-program-queue.md`, which was recorded against
+`--target cursor` and repaired **only** for `cursor` and `both`.
+
+Without the lock, the next boot finds it stale, reinstalls, and still writes no
+lock — a repair that never converges. Without the hooks, a Claude-only nucleus
+checkout has no secret scanner and no commit-message gate.
+
+`scripts/install.py` was **not** in this scope, so it is added here before being
+edited rather than touched outside jurisdiction. Risk `high`, tier escalated to
+`opus`/`high` for the same reason U2 was.

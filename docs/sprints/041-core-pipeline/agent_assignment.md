@@ -37,6 +37,7 @@ Shape: `# | Target | Operation | Mode | Assignee | Destination | Ruleset file`
 | U2 | `scripts/session_start.py` | modify | ruleset | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | U3 | `hooks/on_init.py` | modify | ruleset | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | U4 | `scripts/cursor_adapter.py` | modify | ruleset | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| U13 | `scripts/install.py` | modify | ruleset | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 
 ### Wave 3 — the command source (depends on U4's rewrite)
 
