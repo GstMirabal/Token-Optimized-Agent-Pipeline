@@ -25,8 +25,11 @@ Tracking of atomic goals achieved during the session.
     - `[x]` `audit_plan.py` gate passed (exit `0`)
 - [x] **Phase 2 — Environment Readiness**: `venv_skillopt/` present (Python 3.13.13, pytest 9.1.1); no Docker/DB in scope; `.env` never read (`RA-09`)
 - [x] **Phase 3 — Roadmap Drafting**: sprint directory instantiated, branch `ai-sprint/042` created from `main` at `e29ac98`, plan committed `adc4162`
-- [ ] **Phase 4 — Assignment**: `agent_assignment.md`, `skill_assignment.md`, `task_scope.md`; three gates at exit `0`
-- [ ] **Phase 5 — Approval Gate**: attended human authorization
+- [x] **Phase 4 — Assignment**: `agent_assignment.md`, `skill_assignment.md`, `task_scope.md`; three gates at exit `0`
+    - `[x]` Tier escalation proposed on U3 only (`opus` / `high`), recorded in `task_scope.md` for the human to see
+    - `[x]` U3 + U4 recorded as one merge: `RA-16` declares an invoker that U4 is what makes true
+- [x] **Phase 5 — Approval Gate**: attended human authorization by GstMirabal, 2026-08-31, plan commit `adc4162`
+    - `[x]` Fresh-context Phase 7 gates authorized as a standing preference, not per sprint
 - [ ] **Phase 6 — Execution**: 7 units as atomic commits on `ai-sprint/042`
 - [ ] **Phase 7 — Quality Gate**: QA Agent then Tester Agent, fresh context
 - [ ] **Phase 8 — Sprint Closeout**
