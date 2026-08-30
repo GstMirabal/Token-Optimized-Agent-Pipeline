@@ -10,7 +10,8 @@ version: 1.0.0
 
 - **Strategy Lock:** `OPEN`
 - **Delivered:** `024` and `025` (`v4.5.0`), `021` (`v4.6.0`), `022` (`v4.7.0`), `023` (`v4.8.0`), `026` (`v4.9.0`, PR #50), `027` (`v4.10.0`, PR #55), `028` (`v4.11.0`, PR #57), `029` (`documentation-truth`, `v4.12.0`, PR #59), `030` (`token-economy-enforcement`, `v4.13.0`, PR #61), `031` (`gate-verdict-classes`, `v4.14.0`, PR #63), `032` (`author-tier-trial`, `v4.15.0`, PR #64), `033` (`implementer-role`, `v4.16.0`, PR #65), `034` (`core-pipeline`, `v4.17.0`, PR #66), `035` (`core-pipeline` C/E/H/F, `v4.18.0`, PR #67), `036` (`core-pipeline` M/L, `v4.19.0`, PR #68), `037` (`core-pipeline` G+S, `v4.20.0`, PR #69), **`038` (`core-pipeline` family-trial, `v4.21.0`, PR #70)**
-- **Next / in flight:** **`041` (`bi-harness-bridge-parity`) sealed, awaiting deployment** — the portable boot repaired the bridge of Cursor only; a Claude boot reported a mirror that did not exist and installed no git hooks. Also opened, and closed, three cases of a versioned artifact failing the gate that consumes it (`IMPLEMENTATION_PLAN_TEMPLATE.md`, `SKILL_ASSIGNMENT_TEMPLATE.md`, `pipeline_workflow.md` Phase 4.3), each found by following the artifact rather than by auditing it. Hosts pin via `/start` auto-pin to newest `v*`. **`040` deployed** `v4.23.0` (PR #72, 2026-08-27) — cursor-bridge-incremental. **`039` deployed** `v4.22.0` (PR #71, 2026-08-27) — start-close-lifecycle. **`038` deployed** `v4.21.0` (PR #70, 2026-08-26) — `cursor.author` **`glm-5.2`** / `zhipu` / `high`. **`037` deployed** `v4.20.0` (PR #69, 2026-08-26). **`036` deployed** `v4.19.0` (PR #68, 2026-08-26). **`035` deployed** `v4.18.0` (PR #67, 2026-08-26). `034` **deployed** `v4.17.0` (PR #66, 2026-08-26). `033` **deployed** `v4.16.0` (PR #65, 2026-08-25). `032` **deployed** `v4.15.0` (PR #64). `031` **deployed** `v4.14.0` (PR #63). H-004 **deployed** `v4.13.1` (PR #62).
+- **Next / in flight:** **`042` (`template-gate-parity`) executing** — the instrument for the template/gate divergence `041` measured three times and deliberately did not build, plus the correction of this document's own `F8` status, which was five sprints stale and cost `042` a planning round. **`041` deployed** `v4.24.0`. Detail on `041` below.
+- **Previously:** **`041` (`bi-harness-bridge-parity`) deployed `v4.24.0` (2026-08-30)** — the portable boot repaired the bridge of Cursor only; a Claude boot reported a mirror that did not exist and installed no git hooks. Also opened, and closed, three cases of a versioned artifact failing the gate that consumes it (`IMPLEMENTATION_PLAN_TEMPLATE.md`, `SKILL_ASSIGNMENT_TEMPLATE.md`, `pipeline_workflow.md` Phase 4.3), each found by following the artifact rather than by auditing it. Hosts pin via `/start` auto-pin to newest `v*`. **`040` deployed** `v4.23.0` (PR #72, 2026-08-27) — cursor-bridge-incremental. **`039` deployed** `v4.22.0` (PR #71, 2026-08-27) — start-close-lifecycle. **`038` deployed** `v4.21.0` (PR #70, 2026-08-26) — `cursor.author` **`glm-5.2`** / `zhipu` / `high`. **`037` deployed** `v4.20.0` (PR #69, 2026-08-26). **`036` deployed** `v4.19.0` (PR #68, 2026-08-26). **`035` deployed** `v4.18.0` (PR #67, 2026-08-26). `034` **deployed** `v4.17.0` (PR #66, 2026-08-26). `033` **deployed** `v4.16.0` (PR #65, 2026-08-25). `032` **deployed** `v4.15.0` (PR #64). `031` **deployed** `v4.14.0` (PR #63). H-004 **deployed** `v4.13.1` (PR #62).
 - **Origin:** drafted in an IDE planning mode across one long session, then migrated
   into this repository. That migration is the point: the same session opened with a
   host having lost an approved plan to ephemeral storage, and this document was
@@ -52,7 +53,7 @@ the program's own opening command.
 | ✅ | **029** | `documentation-truth` | **Deployed** `v4.12.0` (PR #59, 2026-08-25). README counted set + slash-commands guide + ADR-0003…0007 + T5 + file:line check (f) + deploy-seal gate. `F-093-G1` carried → `031` |
 | ✅ | **030** | `token-economy-enforcement` | **Deployed** `v4.13.0` (PR #61, 2026-08-25). Auditor body + consumption trigger + `check_task_scope.py` (`F-026-A2`); trial guide; first author-tier trial destaged 031 → **032** |
 
-### Candidate for the next program — template/gate divergence
+### ▶️ Taken by Sprint 042 (`template-gate-parity`) — template/gate divergence
 
 Opened 2026-08-30 during Sprint 041, which hit **three** instances while executing
 its own Phases 1, 4.2 and 4.3. Each time, following a versioned artifact's own
@@ -71,12 +72,39 @@ Sprint 041 deliberately did **not** build it — it is a different concern from
 bridge parity, and absorbing it would have been the scope creep the framework
 prohibits.
 
+**Taken by Sprint 042** (`template-gate-parity`, approved 2026-08-31):
+`scripts/check_template_gates.py` + `config/template_gates.json`, invoked by
+`Makefile#verify`. Two additions the sprint's own Phase 1 measured and this
+section did not carry: the pairing must be **complete** — a template with neither
+a declared pairing nor a typed exception fails the build, or the instrument covers
+four files for ever — and a template is paired with the gate that consumes it **at
+the phase the template is authored**, since `check_role_artifact.py` exits `2`
+against `SPRINT_LOG_TEMPLATE.md` for the correct reason that Phase 7 has not yet
+run. The inverse divergence — `check_task_scope.py` has a gate and no template —
+stays open here: see *Still open for a later program* below.
+
 **Two traps measured while repairing U11.** `check_forge_ladder.py` decides by
 pattern-matching prose, so (a) documenting the repair *in the offending strings'
 own words* re-broke it, twice, and (b) a literal example trail (`skills.sh` JSON
 with `hit: false`) is itself a trigger. A check built for this must therefore
 compare a **rendered copy** in a scratch directory, never lint the template in
 place, or it will trip on its own explanatory text.
+
+---
+
+### Still open for a later program — routed out of Sprint 042
+
+Named exclusions from `docs/sprints/042-core-pipeline/IMPLEMENTATION_PLAN.md`
+`## Out of scope`. Recorded here rather than in the sprint record, because a
+finding whose only home is a sprint record is the loss pattern this whole document
+exists against — and because the section directly above just demonstrated the cost
+of a status claim nobody re-measured.
+
+| # | Item | Why Sprint 042 could not take it |
+| :--- | :--- | :--- |
+| **T1** | `check_task_scope.py` enforces a shape for `task_scope.md` and **no `TASK_SCOPE_TEMPLATE.md` exists** — the divergence inverted. Sprint 041 U12 repaired the prose of `pipeline_workflow.md` Phase 4.3 against the script; nothing renders that shape for an author to start from | The instrument renders templates through their gates. It cannot render a template that does not exist. Proposal: author `TASK_SCOPE_TEMPLATE.md` from the shape the script enforces, then add it as a fourth pairing — the check then guards it like the rest |
+| **T2** | Workflow **prose** that instructs an author, measured against the gate that judges the result (the `pipeline_workflow.md` Phase 4.3 case) | A workflow is not a renderable template: it produces no artifact a gate consumes, so there is nothing to copy into a scratch directory. Needs a different instrument, not a wider one |
+| **T3** | 193 `ruff` findings across 66 files, repo-wide | Sprint 041 Phase 7 classified them `RECORD` / `testifying` and Sprint 042 held `ruff` clean only on its two new files. Neither sprint made them worse; no sprint has owned them |
 
 ---
 
@@ -97,47 +125,76 @@ Phase 1 of **037** extracts these beside Track G.
 
 ---
 
-### Carried out of `023` — routed to a hotfix, scheduled after `026`
+### ✅ Carried out of `023` — CLOSED 2026-08-25 by hotfix `H-002-secrets`
 
-**`F8` / `F-023-S4` — a literal `.env` holding live credentials passes
+> **Status correction, Sprint 042 (2026-08-31).** Everything from this heading to
+> the end of the section described `F8` as **open**, unowned, and the most severe
+> item the program carried — for five sprints after it was repaired. Sprint 042's
+> own Phase 1 read that prose, proposed `F8` as the sprint's scope on it, and
+> withdrew the proposal only after re-measuring the code. A
+> roadmap's status prose is not evidence; the cost of leaving it stale is a
+> planning round, and it was paid.
+>
+> **Re-measured against the current tree before this correction was written:**
+>
+> ```
+> python3 -c "import sys; sys.path.insert(0,'hooks'); import on_commit as o; from pathlib import Path;
+> print(o.is_forbidden_secret_file(Path('.env')),
+>       o.is_forbidden_secret_file(Path('.env.production')),
+>       o.is_forbidden_secret_file(Path('.env.example')),
+>       o.find_hardcoded_secret('API_KEY=sk-a93jf0waldkfj2093ruz', Path('settings.py')))"
+> # True True False API_KEY
+> ```
+>
+> Dotenv files are matched **by name**, `UNQUOTED_ASSIGNMENT` is selected for every
+> file type, and `.env.example` is correctly not a secret. Record:
+> `docs/hotfixes/H-002-secrets.md`; `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md`
+> ticked it closed on the same basis (re-measurement, never the sprint record that
+> claimed the fix).
+>
+> The material below is **kept, not deleted** — it is the measurement that found the
+> defect and the reasoning that routed it, and both are why the repair was correct.
+> It is history from here down; it states no outstanding work.
+
+**`F8` / `F-023-S4` — a literal `.env` holding live credentials passed
 `hooks/on_commit.py`, defeating `RA-09 SECRET_SOVEREIGNTY`.** Written here rather
-than left in a sprint record because that is precisely how it has been lost
-before: it has now survived **four** sessions as *routed, unowned*, which is the
+than left in a sprint record because that is precisely how it had been lost
+before: it survived **four** sessions as *routed, unowned*, which is the
 pattern `023`'s own `Context` names as the original loss this program exists to
-repair. It is the highest-severity open item this program carries.
+repair. While open it was the highest-severity item this program carried.
 
-**Disposition, decided 2026-08-24: `RA-03 HOTFIX_FLAT`, executed after `026`.**
-Not a sprint unit. `026`–`030` are themed and none of them is a secret gate, so
-slotting it into `tool-portability` would be the same category error as `C3`
-accepting it as a rider — and opening `031` for it contradicts `029`, which
-closes this queue. `RA-03` is the route the framework already has for a defect
-that fits no sprint, and it is `RA-06`'s sanctioned naming exception.
+**Disposition, decided 2026-08-24: `RA-03 HOTFIX_FLAT`, executed after `026`** —
+and **carried out on 2026-08-25**. Not a sprint unit. `026`–`030` are themed and
+none of them is a secret gate, so slotting it into `tool-portability` would have
+been the same category error as `C3` accepting it as a rider — and opening `031`
+for it would have contradicted `029`, which closes this queue. `RA-03` is the
+route the framework already has for a defect that fits no sprint, and it is
+`RA-06`'s sanctioned naming exception.
 
 **Why this was not obvious for four sessions.** It was treated as a sprint unit
 throughout, so every session asked *which sprint* and none asked *whether a
 sprint*. The question that resolved it took one exchange once it was put.
 
-**Destination**: `docs/hotfixes/[H-ID]-secrets.md`, from
+**Destination, as executed**: `docs/hotfixes/H-002-secrets.md`, from
 `docs/standards/templates/HOTFIX_TEMPLATE.md`. The measurement, the two
-mechanisms, the repair hazard and both fixture traps below transfer verbatim —
-this section is the hotfix's source material, not a summary of it.
+mechanisms, the repair hazard and both fixture traps below transferred verbatim —
+this section was the hotfix's source material, not a summary of it.
 
-**Ordering is deliberate and is the human's call, recorded with its cost.**
+**Ordering was deliberate and was the human's call, recorded with its cost.**
 `RA-03` exists for emergency speed, and scheduling a hotfix *behind* a full sprint
-is a departure from that. It is taken knowingly: `026` is already unblocked by
+is a departure from that. It was taken knowingly: `026` was already unblocked by
 `C0.2`, and interleaving a secret-gate repair into a portability sprint is what
-`C3` and this very finding's history argue against. **The cost of the departure**:
-the gate stays open across `026`, so any host committing a literal `.env` in that
-window is unprotected by `hooks/on_commit.py` and protected only by
-`.gitignore`. Whoever opens `026` should read this paragraph before deciding the
-order still holds.
+`C3` and this finding's own history argue against. **The cost of the departure**:
+the gate stayed open across `026`, so any host committing a literal `.env` in that
+window was unprotected by `hooks/on_commit.py` and protected only by
+`.gitignore`. **That window closed on 2026-08-25**; it spanned `026` alone.
 
 | | |
 | :--- | :--- |
 | **Files** | `hooks/on_commit.py`, `tests/` |
 | **Risk** | **High** — a secret gate. Same class as `023`'s `C3`, which took four rounds and a mid-unit remediation halt |
 | **Owner** | `devops_agent` ruleset (`hooks/` is its tree per `agents.md §6`, `F-086-A1`) |
-| **Reproduces** | Measured on the repaired tree at `023` session #7, after `C3` and `C3.2` landed |
+| **Reproduces** | Measured on the repaired tree at `023` session #7, after `C3` and `C3.2` landed. **No longer reproduces** — re-measured 2026-08-31 with the command in the status correction above |
 
 **Two independent mechanisms, and a file need only beat one.** Both were
 re-measured rather than carried from the record:
@@ -916,6 +973,9 @@ pass identically, and additionally pass from any other cwd.
   framework-class finding, and this one had survived **three sessions** as *routed, unowned* — the
   precise pattern this sprint's `Context` identifies as the original loss. Recording it in the
   upstream register is **not** the unit `F8` still needs; that unit remains outstanding.
+  **Superseded 2026-08-25**: that unit was delivered as hotfix `H-002-secrets`. The sentence is
+  kept because it records what was true when `C8` ran; the closing evidence is in the
+  *Carried out of `023`* section above.
 
 ### C9-C10 — two gates that answer when they do not know
 
