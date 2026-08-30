@@ -257,3 +257,143 @@ def test_boot_generic_install_failure_still_exits_2(
 
     monkeypatch.setattr(session_start, "_run_bridge_install", mock_install)
     assert session_start.main(["--boot", "--tool", "cursor"]) == 2
+
+
+# ---------------------------------------------------------------------------
+# Claude Code boot path (Sprint 041). Every case below fails against the tree
+# before this sprint, where _commands_body_stale returned False for every
+# target but cursor, so the claude path could only ever refresh the lock.
+# ---------------------------------------------------------------------------
+
+
+def test_boot_claude_installs_when_the_mirror_is_missing(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """A wiped .claude/ reaches the install branch, not the lock-only branch.
+
+    This is the defect: the boot printed 'content fresh' over a checkout with
+    no mirror, exited 0, and never retried because the lock then matched HEAD.
+    """
+    root = _write_minimal_root(tmp_path / "repo")
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    monkeypatch.setattr(session_start, "_run_script", lambda *a, **k: 0)
+    monkeypatch.setattr(session_start, "_lock_stale", lambda *a, **k: False)
+    install_calls: list[str] = []
+    refresh_calls: list[str] = []
+
+    def mock_install(root_path: Path, target: str) -> tuple[int, str]:
+        install_calls.append(target)
+        return 0, ""
+
+    monkeypatch.setattr(session_start, "_run_bridge_install", mock_install)
+    monkeypatch.setattr(
+        session_start,
+        "_refresh_bridge_lock",
+        lambda root_path, target: refresh_calls.append(target) or 0,
+    )
+
+    assert session_start.main(["--boot", "--tool", "claude-code"]) == 0
+    assert install_calls == ["claude"]
+    assert not refresh_calls
+
+
+def test_boot_claude_is_lock_only_when_the_mirror_is_intact(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Triage (a) stays reachable for Claude: no needless reinstall."""
+    root = _write_minimal_root(tmp_path / "repo")
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    monkeypatch.setattr(session_start, "_run_script", lambda *a, **k: 0)
+    monkeypatch.setattr(session_start, "_lock_stale", lambda *a, **k: True)
+    monkeypatch.setattr(session_start, "_commands_body_stale", lambda *a, **k: False)
+    install_calls: list[str] = []
+    refresh_calls: list[str] = []
+    monkeypatch.setattr(
+        session_start,
+        "_run_bridge_install",
+        lambda root_path, target: (install_calls.append(target), (1, "no"))[1],
+    )
+    monkeypatch.setattr(
+        session_start,
+        "_refresh_bridge_lock",
+        lambda root_path, target: refresh_calls.append(target) or 0,
+    )
+
+    assert session_start.main(["--boot", "--tool", "claude-code"]) == 0
+    assert not install_calls
+    assert refresh_calls == ["claude"]
+
+
+def test_boot_claude_never_touches_the_cursor_bridge(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """The bi-harness guarantee: one boot repairs one target."""
+    root = _write_minimal_root(tmp_path / "repo")
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    monkeypatch.setattr(session_start, "_run_script", lambda *a, **k: 0)
+    monkeypatch.setattr(session_start, "_lock_stale", lambda *a, **k: True)
+    monkeypatch.setattr(session_start, "_commands_body_stale", lambda *a, **k: True)
+    targets: list[str] = []
+    monkeypatch.setattr(
+        session_start,
+        "_run_bridge_install",
+        lambda root_path, target: (targets.append(target), (0, ""))[1],
+    )
+
+    assert session_start.main(["--boot", "--tool", "claude-code"]) == 0
+    assert targets == ["claude"]
+    assert "cursor" not in targets
+
+
+def test_boot_terminal_has_no_bridge_and_still_succeeds(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """A terminal session claims the anchor but owns no mirror."""
+    root = _write_minimal_root(tmp_path / "repo")
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    monkeypatch.setattr(session_start, "_run_script", lambda *a, **k: 0)
+    targets: list[str] = []
+    monkeypatch.setattr(
+        session_start,
+        "_run_bridge_install",
+        lambda root_path, target: (targets.append(target), (0, ""))[1],
+    )
+
+    assert session_start.main(["--boot", "--tool", "terminal"]) == 0
+    assert not targets
+
+
+def test_tool_defaults_to_terminal_not_an_ide(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """A bare --boot must not claim the anchor as an IDE nobody named."""
+    root = _write_minimal_root(tmp_path / "repo")
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    calls: list[tuple[str, tuple[str, ...]]] = []
+    monkeypatch.setattr(
+        session_start,
+        "_run_script",
+        lambda root_path, relative, *args: calls.append((relative, args)) or 0,
+    )
+
+    assert session_start.main(["--boot"]) == 0
+    assert ("scripts/session_state.py", ("claim", "--tool", "terminal")) in calls
+
+
+def test_cursor_tiers_section_is_for_cursor_sessions_only(
+    session_start, tmp_path: Path
+) -> None:
+    """`make cursor-tiers` is a Cursor instrument, not briefing furniture."""
+    root = _write_minimal_root(tmp_path / "repo")
+    claude = "\n".join(session_start.build_briefing(root, "claude-code"))
+    cursor = "\n".join(session_start.build_briefing(root, "cursor"))
+    assert "Chat vs map (Cursor tiers)" not in claude
+    assert "Chat vs map (Cursor tiers)" in cursor
+
+
+def test_briefing_without_a_tool_falls_back_to_the_anchor(
+    session_start, tmp_path: Path
+) -> None:
+    """A briefing-only run reads session_tool rather than guessing."""
+    root = _write_minimal_root(tmp_path / "repo")  # anchor says cursor
+    assert "Chat vs map (Cursor tiers)" in "\n".join(session_start.build_briefing(root))
