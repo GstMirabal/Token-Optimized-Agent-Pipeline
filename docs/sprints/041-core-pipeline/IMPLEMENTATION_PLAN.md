@@ -198,10 +198,12 @@ The Work column `Assignee (proposed)` is a staffing proposal from Phase 1. Phase
 | U8 | `tests/test_bridge_state.py` | create | low | `implementer_agent` | ⏳ |
 | U9 | `tests/test_session_start.py` | modify | low | `implementer_agent` | ⏳ |
 | U10 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify | low | `doc_orchestrator` | ⏳ |
+| U11 | `docs/standards/templates/SKILL_ASSIGNMENT_TEMPLATE.md` | modify | low | `doc_orchestrator` | ⏳ |
+| U12 | `workflows/pipeline_workflow.md` | modify | low | `doc_orchestrator` | ⏳ |
 
 **Orden obligatorio**: U1 → (U2, U3, U4) → U5 → (U6, U7) → (U8, U9). U2 y U3 importan
-U1; U5 depende de que U4 sepa reescribir el token. **U10 es independiente y puede ir
-primero.**
+U1; U5 depende de que U4 sepa reescribir el token. **U10, U11 y U12 son independientes
+y pueden ir primero.**
 
 ### U10 — la plantilla oficial suspende su propio gate obligatorio
 
@@ -227,6 +229,65 @@ trabajo: obliga a que todo plan que nombre `/loop` reconozca el guard que lo gob
 Relajarlo a base de detectar negaciones sería heurística frágil sobre prosa. El pie de
 la plantilla pasa a nombrar `scripts/loop_guard.py start`, lo que además es gobernanza
 **más** completa que la actual, no menos.
+
+### U11 — segunda instancia de la misma clase, hallada en la Fase 4.2
+
+Reproducido copiando las plantillas **sin editar** a un directorio de sprint vacío:
+
+```
+cp docs/standards/templates/SKILL_ASSIGNMENT_TEMPLATE.md  "$T/sprint/skill_assignment.md"
+cp docs/standards/templates/AGENT_ASSIGNMENT_TEMPLATE.md  "$T/sprint/agent_assignment.md"
+python3 scripts/check_forge_ladder.py --sprint-dir "$T/sprint"; echo $?
+# ❌ P3 miss recorded but no skill name / SKILL.md path found   → 2
+```
+
+`pipeline_workflow.md` Fase 4.2 hace ese check obligatorio y declara *"exit `2`
+rejects"*. Dos cadenas de la plantilla lo disparan:
+
+| Cadena de la plantilla | Regex que la captura | Efecto |
+| :--- | :--- | :--- |
+| `| P4 | Three-File forge at Destination |` | `\bP4\b[^\n]{0,60}\bforg` (línea 229) | Registra **forja reclamada** |
+| `Result (hit / miss / skipped)` | `P_MISS_TRAIL_RE` (línea 51-54) | Registra **P3 miss** |
+
+Con ambos activos, `check_skill_assignment` exige un nombre de skill que la plantilla
+no puede tener, y suspende. Es decir: **la plantilla oficial de la Fase 4.2 no puede
+pasar el gate de la Fase 4.2.**
+
+**Fix elegido — corregir la plantilla, no el regex.** Igual que en U10: el detector
+está bien calibrado para su propósito (una reclamación de forja debe llevar rastro), y
+relajarlo abriría el hueco que existe para cerrar. La plantilla reescribe la columna
+`Result` sin la palabra `miss` y la fila `P4` sin la palabra `forge`, y añade una línea
+que declara que la escalera termina en la primera rung alcanzada. Verificado en este
+sprint: con esa redacción, `check_forge_ladder.py` sale `0`.
+
+### U12 — tercera instancia, hallada en la Fase 4.3
+
+`workflows/pipeline_workflow.md` Fase 4.3 declara la forma de `task_scope.md` como
+`# | File | Operation | Risk | Assignee | Model | Effort | Status` **"when
+`session_tool: cursor`"**, y la forma corta en caso contrario. El script que lo
+aplica dice otra cosa:
+
+```
+scripts/check_task_scope.py:38    MODEL_FROM_SPRINT = 28
+scripts/check_task_scope.py:119   if sprint_id is not None and sprint_id >= MODEL_FROM_SPRINT: return True
+```
+
+`Model`/`Effort` son obligatorias **desde el Sprint 28 en todo harness**; la condición
+por herramienta es un disparador secundario para sprints anteriores. Medido en este
+sprint: el `task_scope.md` se escribió en la forma que el workflow prescribe para una
+sesión no-Cursor y el gate lo rechazó, `exit 2`.
+
+**Fix elegido — corregir la prosa, no el script.** `MODEL_FROM_SPRINT = 28` es la
+autoridad y es regresión a proteger. `close_workflow.md` Fase 2.6 ya resuelve esta
+clase de desacuerdo igual: decide el artefacto que se ejecuta.
+
+### Las tres instancias comparten causa
+
+Un artefacto versionado (plantilla o prosa de workflow) y el gate que lo consume
+evolucionaron por separado, y nada compara uno contra el otro. **Las tres se hallaron
+ejecutando las Fases 1, 4.2 y 4.3 de este mismo sprint** — no auditando: seguir la
+instrucción produjo un gate bloqueado, tres veces. El instrumento que impediría una
+cuarta queda **fuera de alcance** y enrutado — ver la tabla `Out of scope`.
 
 ---
 
@@ -256,7 +317,7 @@ disco, deterministas y verificables (`token_economy_agent` Filtro 5).
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 10 | Count of rows in Work tables |
+| Work units | 12 | Count of rows in Work tables |
 | Subagents dispatched | 0 (previsto) | El humano no ha solicitado despacho a subagentes; se ejecuta en sesión |
 | Prior session ratio | **5.3** (ciclo 1, `first_turn` 21 682 → `peak` 115 914) | `python3 scripts/session_cost.py --from-anchor --json` |
 
@@ -285,6 +346,10 @@ fue posible tras corregir `session_tool` en el ancla — antes devolvía `None`.
 | `session_cost.py --from-anchor` mide cuando `session_tool` es `claude-code` | No — regresión a proteger |
 | `audit_plan.py` sobre `IMPLEMENTATION_PLAN_TEMPLATE.md` sale `0` | **Yes** — hoy sale `2` (U10) |
 | `audit_plan.py` sigue rechazando un plan que propone `/loop` sin nombrar `loop_guard.py` | No — regresión a proteger: el Filtro 6 no se relaja |
+| `check_forge_ladder.py` sobre `SKILL_ASSIGNMENT_TEMPLATE.md` copiada sin editar sale `0` | **Yes** — hoy sale `2` (U11) |
+| `check_forge_ladder.py` sigue rechazando una forja reclamada sin rastro P3 | No — regresión a proteger: el detector no se relaja |
+| `pipeline_workflow.md` Fase 4.3 describe la forma con `Model`/`Effort` sin condicionarla a Cursor | **Yes** — hoy la condiciona (U12) |
+| `check_task_scope.py` sigue exigiendo `Model`/`Effort` en todo sprint ≥ 28 | No — regresión a proteger: `MODEL_FROM_SPRINT` no se toca |
 
 ---
 
@@ -306,6 +371,8 @@ Exit codes read with `$?` directly, **never through a pipe**.
 | `grep -n rmtree scripts/install.py` | sin salida |
 | `python3 skills/token-saver-auditor/scripts/audit_plan.py docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md; echo $?` | `0` |
 | `python3 skills/token-saver-auditor/scripts/audit_plan.py docs/sprints/041-core-pipeline/IMPLEMENTATION_PLAN.md; echo $?` | `0` |
+| Plantillas copiadas sin editar a un sprint-dir vacío + `python3 scripts/check_forge_ladder.py --sprint-dir <dir>; echo $?` | `0` |
+| `grep -c 'when `session_tool: cursor`' workflows/pipeline_workflow.md` en la celda de Fase 4.3 | `0` |
 
 ---
 
@@ -320,6 +387,8 @@ Exit codes read with `$?` directly, **never through a pipe**.
 | `CHANGELOG.md` | Entrada del sprint bajo `[Unreleased]` referenciando `#041` |
 | `config/invocation_exceptions.json` | Sin cambio: `bridge_state.py` declara `invoked_by:` en su docstring |
 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | El pie de **Approval** nombra `scripts/loop_guard.py start`, de modo que un plan fiel a la plantilla pasa el gate de Fase 1 (U10) |
+| `docs/standards/templates/SKILL_ASSIGNMENT_TEMPLATE.md` | La columna `Result` y la fila `P4` de la escalera se reescriben para no registrar una forja inexistente; pasa el gate de Fase 4.2 (U11) |
+| `workflows/pipeline_workflow.md` | La celda de Fase 4.3 deja de condicionar `Model`/`Effort` a Cursor y cita `MODEL_FROM_SPRINT = 28` (U12) |
 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | Fila «Next / in flight» pasa a nombrar `041` |
 
 **Measured figures.** Cada cifra de Context / Design / Verification lleva su comando.
@@ -334,6 +403,7 @@ Exit codes read with `$?` directly, **never through a pipe**.
 | Cambiar la semántica de `install.sh --target both` | Funciona; este sprint no la toca. El boot sigue siendo por-target (`D3`) |
 | Revisar la sustancia de `RA-18` (plan mode bajo Cursor) | La regla es correcta; el defecto es que se aplicaba con el ancla mal etiquetada. Si `RA-18` necesita revisión, va por `agents.md §7` con su propia evidencia |
 | Que `docs/active_state.json` esté en `.gitignore` (un clon limpio no tiene ancla) | Observado al reproducir. Es una decisión de aislamiento host/núcleo con razones propias (`RA-15`); se registra en `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` como hallazgo abierto, no se toca aquí |
+| **Un check en `make verify` que pase toda plantilla versionada por el gate que la consume** | Es el instrumento que impediría una cuarta instancia de la clase U10/U11/U12, y es una preocupación distinta de la paridad de bridge. **Destino**: fila propia en `docs/roadmaps/core/pipeline/021-030-program-queue.md` como candidato del siguiente programa, redactada en la Fase 8 de este sprint con U10 y U11 como evidencia medida |
 | Migrar `hooks/on_init.py` a target-paramétrico para Cursor | `SessionStart` es un hook de Claude Code; Cursor no tiene contraparte. U3 solo lo hace consumir U1 |
 
 ---
