@@ -7,6 +7,10 @@ Orchestrates existing local tools into a short English briefing for
 With ``--boot``: run drift → claim → probe → sync → bridge, then print the
 briefing. Drift exit ``2`` propagates and skips claim (Sprint 039 B1).
 
+The bridge step asks ``scripts/bridge_state.py`` whether **this** target's
+mirror is missing or diverged, for every target rather than for Cursor alone
+(Sprint 041). It never inspects or touches the other harness's tree.
+
 invoked_by: workflows/start_workflow.md, make session-start, commands/start.md
 
 Usage:
@@ -28,6 +32,11 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from bridge_state import bridge_stale
+from bridge_state import lock_stale as _bridge_lock_stale
 
 LINE_CAP = 80
 DRIFT_OUTPUT_LINES = 15
@@ -176,8 +185,19 @@ def section_chat_vs_map(root: Path) -> list[str]:
     return lines
 
 
-def build_briefing(root: Path) -> list[str]:
+def build_briefing(root: Path, tool: str | None = None) -> list[str]:
+    """Assemble the briefing, including only the sections this tool needs.
+
+    Args:
+        root: Framework checkout.
+        tool: Harness this session claimed. ``None`` falls back to the
+            anchor's ``session_tool``, which is what a briefing-only run reads.
+
+    Returns:
+        list[str]: Briefing lines, before the line cap is applied.
+    """
     state = load_anchor(root)
+    effective = tool or (state or {}).get("session_tool")
     parts: list[str] = [
         "# /start briefing",
         "",
@@ -186,9 +206,11 @@ def build_briefing(root: Path) -> list[str]:
         *section_drift(root),
         "",
         *section_upstream(root),
-        "",
-        *section_chat_vs_map(root),
     ]
+    # `make cursor-tiers` is a Cursor instrument; proposing it to a session
+    # that does not run Cursor is noise the briefing's line cap pays for.
+    if effective == "cursor":
+        parts.extend(["", *section_chat_vs_map(root)])
     return parts
 
 
@@ -226,29 +248,23 @@ def _lock_path(root: Path, target: str) -> Path:
 
 
 def _lock_stale(root: Path, target: str) -> bool:
-    lock = _lock_path(root, target)
-    if not lock.is_file():
-        return True
-    recorded = lock.read_text(encoding="utf-8").strip()
-    proc = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        cwd=str(root),
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if proc.returncode != 0:
-        return True
-    return recorded != proc.stdout.strip()
+    """True when this target's lock is absent or behind ``HEAD``."""
+    return _bridge_lock_stale(root, target)
 
 
 def _commands_body_stale(root: Path, target: str) -> bool:
-    if target != "cursor":
-        return False
-    sys.path.insert(0, str(root / "scripts"))
-    from cursor_adapter import commands_stale  # noqa: E402
+    """True when this target's bridge needs reinstalling.
 
-    return bool(commands_stale(root, nucleus=True))
+    Mirror missing or incomplete, **or** rendered content diverged — the union
+    `workflows/start_workflow.md` Phase 1.5 has always described. Until Sprint
+    041 this returned ``False`` for every target but ``cursor``, so the Claude
+    path could only ever reach the lock-only branch below and reported a
+    checkout with no ``.claude/`` directory as fresh.
+
+    The name is kept: it is the seam the suite patches, and renaming it would
+    be churn without a behavioural difference.
+    """
+    return bridge_stale(root, target, nucleus=True)
 
 
 def _refresh_bridge_lock(root: Path, target: str) -> int:
@@ -301,6 +317,48 @@ def _bridge_permission_denied(output: str) -> bool:
     return "permissionerror" in lowered and ".cursor" in lowered
 
 
+def _bridge_triage(root: Path, target: str | None) -> tuple[int, list[str]]:
+    """Repair this target's bridge, leaving every other target untouched.
+
+    Three outcomes, unchanged in shape since Sprint 040: (a) lock stale while
+    the mirror is intact → refresh the lock only; (b) mirror missing or content
+    diverged → incremental install; (c) ``PermissionError`` on the mirror
+    directory → advisory, boot still succeeds. What changed in Sprint 041 is
+    that (b) is reachable for every target, not for Cursor alone.
+
+    Args:
+        root: Framework checkout.
+        target: ``claude``, ``cursor``, or None for a harness with no bridge.
+
+    Returns:
+        tuple[int, list[str]]: exit code (``2`` stops the boot) and any
+        advisory notes to fold into the briefing.
+    """
+    if target is None:
+        return 0, []
+    if _commands_body_stale(root, target):
+        install_rc, install_out = _run_bridge_install(root, target)
+        if install_rc == 0:
+            return 0, []
+        if not _bridge_permission_denied(install_out):
+            print(
+                f"boot: bridge install --target {target} failed "
+                f"(exit {install_rc}).",
+                file=sys.stderr,
+            )
+            return 2, []
+        note = (
+            f"⚠️  Bridge: PermissionError on the `{target}` mirror "
+            f"(run `bash scripts/install.sh --target {target}` "
+            "outside the agent sandbox)."
+        )
+        print(note, file=sys.stderr)
+        return 0, [note]
+    if _lock_stale(root, target) and _refresh_bridge_lock(root, target) != 0:
+        return 2, []
+    return 0, []
+
+
 def run_boot(root: Path, tool: str) -> int:
     """Execute binding steps; return 2 on hard stop, else 0 after briefing."""
     drift_rc = _run_script(root, "scripts/detect_drift.py")
@@ -325,35 +383,12 @@ def run_boot(root: Path, tool: str) -> int:
         print("boot: pin sync exit 2 — stop until clean.", file=sys.stderr)
         return 2
 
-    bridge_notes: list[str] = []
     target = _bridge_target(tool)
-    if target is not None:
-        lock_stale = _lock_stale(root, target)
-        body_stale = _commands_body_stale(root, target)
-        if body_stale:
-            install_rc, install_out = _run_bridge_install(root, target)
-            if install_rc != 0:
-                if _bridge_permission_denied(install_out):
-                    note = (
-                        "⚠️  Bridge: PermissionError on `.cursor/` "
-                        "(run `bash scripts/install.sh --target "
-                        f"{target}` outside the agent sandbox)."
-                    )
-                    print(note, file=sys.stderr)
-                    bridge_notes.append(note)
-                else:
-                    print(
-                        f"boot: bridge install --target {target} failed "
-                        f"(exit {install_rc}).",
-                        file=sys.stderr,
-                    )
-                    return 2
-        elif lock_stale:
-            lock_rc = _refresh_bridge_lock(root, target)
-            if lock_rc != 0:
-                return 2
+    bridge_rc, bridge_notes = _bridge_triage(root, target)
+    if bridge_rc != 0:
+        return bridge_rc
 
-    briefing = apply_line_cap(build_briefing(root))
+    briefing = apply_line_cap(build_briefing(root, tool))
     if bridge_notes:
         # Keep under LINE_CAP: insert after the title line when present.
         insert_at = 1 if briefing and briefing[0].startswith("#") else 0
@@ -373,8 +408,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--tool",
         choices=["claude-code", "cursor", "terminal"],
-        default="cursor",
-        help="Harness for claim/bridge when --boot (default: cursor).",
+        default="terminal",
+        help="Harness for claim/bridge when --boot (default: terminal, "
+             "matching session_state.py; naming an IDE here claims the anchor "
+             "as that IDE).",
     )
     args = parser.parse_args(argv)
     root = repo_root()
