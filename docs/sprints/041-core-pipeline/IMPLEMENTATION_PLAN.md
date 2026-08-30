@@ -2,7 +2,7 @@
 
 **Canonical path**: `docs/sprints/041-core-pipeline/IMPLEMENTATION_PLAN.md`
 **Branch**: `ai-sprint/041` · **Base**: `main` at `d258b43`
-**Status**: `DRAFT` → `APPROVED` → `EXECUTING` → `CLOSED`
+**Status**: `DRAFT` → `APPROVED` → **`EXECUTING`** → `CLOSED`
 
 > Authored at Phase 1 (Planning) by `principal_agent`, extracted to this path at
 > Phase 3, and **committed before Phase 5 approves it**: `agents.md §2 triple_lock`
@@ -425,9 +425,9 @@ una semana más; un arranque Cursor roto detiene el trabajo que sí está corrie
 
 | Field | Value |
 | :--- | :--- |
-| **Approved by** | *(pendiente — Fase 5, autorización humana atendida)* |
-| **Date** | *(pendiente)* |
-| **Plan commit at approval** | *(pendiente)* |
+| **Approved by** | GstMirabal (human, attended) |
+| **Date** | 2026-08-30 |
+| **Plan commit at approval** | `3ec3d80` |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an
