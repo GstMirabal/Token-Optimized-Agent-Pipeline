@@ -495,7 +495,18 @@ def main() -> int:
             print("🛑 Profiles cannot be installed into the nucleus.", file=sys.stderr)
             return 1
         if args.target == "claude":
-            return install_nucleus_bridge()
+            # The git hooks and the lock are NOT Cursor-specific, and this
+            # branch used to `return install_nucleus_bridge()` directly —
+            # skipping both, which the cursor and both branches below run.
+            # A Claude-only nucleus checkout therefore had no secret scanner
+            # and no commit-message gate, and its lock was never written, so
+            # every boot found it stale, reinstalled, and still wrote nothing.
+            rc = install_nucleus_bridge()
+            if rc != 0:
+                return rc
+            install_nucleus_git_hooks()
+            write_bridge_locks(args.target)
+            return 0
         if args.target == "cursor":
             install_cursor_bridge(AGENTS_DIR, nucleus=True)
             install_nucleus_git_hooks()

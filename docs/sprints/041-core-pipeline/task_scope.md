@@ -35,8 +35,9 @@ this column is prohibited (`agents.md §7 RA-16` precedent, Sprint 022 `D1`).
 | U11 | `docs/standards/templates/SKILL_ASSIGNMENT_TEMPLATE.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 | U12 | `workflows/pipeline_workflow.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 | U13 | `scripts/install.py` | modify | **high** | `implementer_agent` | opus | high | ⏳ |
+| U14 | `tests/test_installer.sh` | modify | medium | `implementer_agent` | sonnet | medium | ⏳ |
 
-**Thirteen units, thirteen distinct physical files.** No file appears twice, so
+**Fourteen units, fourteen distinct physical files.** No file appears twice, so
 `jurisdictional_lock` (one structural subject per task) and `no_interference`
 (no file claimed by two in-flight subtasks) both hold by construction. Verify
 with `awk -F'|' '/^\| U/ {print $3}' task_scope.md | sort | uniq -d` → empty.
@@ -64,7 +65,7 @@ Findings from auditing the roadmap against `rules/` and `agents.md`.
 
 | Rule | Verdict | Note |
 | :--- | :--- | :--- |
-| `agents.md §2 jurisdictional_lock` | ✅ | One physical file per unit; thirteen distinct paths |
+| `agents.md §2 jurisdictional_lock` | ✅ | One physical file per unit; fourteen distinct paths — **except U13+U14, paired by an explicit gate**: `.git/hooks/commit-msg` refuses a `fix(` commit that stages no test (`rules/code_craft.md §6`), so the installer fix and its assertions land together. A gate demanding the pairing outranks the one-file convention |
 | `agents.md §2 no_interference` | ✅ | No duplicate target across in-flight units |
 | `agents.md §2 pre_shielding` | ✅ | `git status --porcelain` was clean before the branch was cut; the only prior untracked path was this sprint's own directory |
 | `agents.md §3 strict_rule` / `jurisdiction` | ✅ | Nucleus mode (`scripts/_mode.py`): `.git` is a real directory, so the framework **is** the work and these records belong at `docs/sprints/` here. No submodule to contaminate |
@@ -77,7 +78,7 @@ Findings from auditing the roadmap against `rules/` and `agents.md`.
 | `rules/code_craft.md` complexity | ⚠️ **binding on U2** | `run_boot` is already the longest function in `session_start.py`. Adding the target-agnostic branch MUST NOT push it past 50 lines or 3 indentation levels (`agents.md §1`). If it would, the triage moves into a helper in U1's module rather than growing `run_boot` |
 | `rules/qa_and_testing.md` | ⚠️ **binding on U8/U9** | Every check in the plan's `## Tests` marked **Yes** must be shown failing against `d258b43` before its repair lands (*reproduce before repairing*) |
 | `agents.md §1` `ephemeral` markers | ✅ | No `TODO`/`FIXME` may enter any unit; `make verify` rejects them |
-| `agents.md §1` `code_logic` | ✅ | All thirteen files are English. Spanish is confined to `IMPLEMENTATION_PLAN.md`, which `agents.md §1 user_chat` permits |
+| `agents.md §1` `code_logic` | ✅ | All fourteen files are English. Spanish is confined to `IMPLEMENTATION_PLAN.md`, which `agents.md §1 user_chat` permits |
 
 ---
 
@@ -157,3 +158,27 @@ checkout has no secret scanner and no commit-message gate.
 `scripts/install.py` was **not** in this scope, so it is added here before being
 edited rather than touched outside jurisdiction. Risk `high`, tier escalated to
 `opus`/`high` for the same reason U2 was.
+
+### U14 — the test the repair invalidates, and the one it revives
+
+`tests/test_installer.sh` **pinned the defect as intended behaviour**:
+
+```sh
+[ ! -e "$NUCLEUS/.bridge_claude.lock" ] || fail "nucleus: Claude default must write no bridge lock"
+```
+
+with the stated reason *"`start_workflow.md bridge_check` for Claude still keys
+on symlink-per-source rather than a lock"*. **U2 made that premise false** — the
+boot now keys on the lock *and* the mirror. The assertion is inverted and the
+expired premise is recorded beside it, the same correction Sprint 021 applied to
+`rules/loop_governance.md` once the meter existed (`RA-14`).
+
+A second assertion, *"nucleus cursor: must not write Claude lock"*, is **kept and
+strengthened**. It is the target-isolation guarantee this sprint's `D3` rests on.
+It was passing without ever being exercised: the Claude install wrote no lock, so
+the directory was incidentally clean. The lock is now cleared immediately before
+the Cursor run, so a Claude lock found afterwards was written **by** that run.
+
+The new end-to-end block runs in a checkout of its own with a real `git init`,
+never the shared `$NUCLEUS`: asserting the Cursor mirror is absent is only
+meaningful where no Cursor install has ever run.
