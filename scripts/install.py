@@ -467,6 +467,43 @@ def install_host_claude_bridge(profile_dir: Path | None) -> int:
     return 0
 
 
+def install_nucleus(args: argparse.Namespace, install_cursor_bridge) -> int:
+    """Install the nucleus self-bridge for one target.
+
+    Nucleus mode (`agents.md §5 nucleus_neutrality`): the full host bridge is
+    refused, but the minimal self-bridge (commands, agents, constitution
+    import) is installed so the framework's own workflows are invocable while
+    developing it.
+
+    **Every target ends the same way** — git hooks, then the lock. Neither is
+    Cursor-specific: the hooks are the secret scanner, the `#[Sprint_ID]`
+    commit-message gate and the force-push block, and the lock is what tells
+    the next boot the bridge is current. The `claude` branch used to
+    `return install_nucleus_bridge()` before reaching either, so a Claude-only
+    checkout had no gates and a lock that was never written (Sprint 041).
+
+    Args:
+        args: Parsed CLI arguments; `target` and the profile flags are read.
+        install_cursor_bridge: Imported lazily by the caller to keep the
+            adapter off the import path of a Claude-only install.
+
+    Returns:
+        int: 0 on success, 1 when a profile was requested.
+    """
+    if args.profile or args.profile_path:
+        print("🛑 Profiles cannot be installed into the nucleus.", file=sys.stderr)
+        return 1
+    if args.target in ("claude", "both"):
+        rc = install_nucleus_bridge()
+        if rc != 0:
+            return rc
+    if args.target in ("cursor", "both"):
+        install_cursor_bridge(AGENTS_DIR, nucleus=True)
+    install_nucleus_git_hooks()
+    write_bridge_locks(args.target)
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Install the .agents bridge.")
     parser.add_argument(
@@ -487,25 +524,8 @@ def main() -> int:
     args = parser.parse_args()
     from cursor_adapter import install_cursor_bridge  # noqa: E402
 
-    # Nucleus mode (agents.md §5 nucleus_neutrality): the full host bridge is
-    # refused, but the minimal self-bridge (commands/agents/constitution) is
-    # installed so the framework's own workflows are invocable while developing it.
     if (AGENTS_DIR / ".git").is_dir():
-        if args.profile or args.profile_path:
-            print("🛑 Profiles cannot be installed into the nucleus.", file=sys.stderr)
-            return 1
-        if args.target == "claude":
-            return install_nucleus_bridge()
-        if args.target == "cursor":
-            install_cursor_bridge(AGENTS_DIR, nucleus=True)
-            install_nucleus_git_hooks()
-            write_bridge_locks(args.target)
-            return 0
-        install_nucleus_bridge()
-        install_cursor_bridge(AGENTS_DIR, nucleus=True)
-        install_nucleus_git_hooks()
-        write_bridge_locks(args.target)
-        return 0
+        return install_nucleus(args, install_cursor_bridge)
 
     profile_dir = resolve_profile_dir(args.profile, args.profile_path)
 

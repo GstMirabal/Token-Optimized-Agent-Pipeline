@@ -86,17 +86,29 @@ rm -f "$NUCLEUS/.bridge_claude.lock" "$NUCLEUS/.bridge_cursor.lock" "$NUCLEUS/CL
 [ -e "$NUCLEUS/.claude/agents/principal_agent.md" ] || fail "nucleus: agents not linked"
 grep -qx "@agents.md" "$NUCLEUS/CLAUDE.md" || fail "nucleus: constitution import missing"
 [ ! -e "$NUCLEUS/.claude/skills" ] || fail "nucleus: skills must NOT be linked (minimal bridge)"
-# Default nucleus install is Claude-only: start_workflow.md `bridge_check` for
-# Claude still keys on symlink-per-source rather than a lock. Cursor/both paths
-# write `.bridge_cursor.lock` (Sprint 037 S3). Nothing pinned the Claude-no-lock
-# fact until Sprint 023 C6.
-[ ! -e "$NUCLEUS/.bridge_claude.lock" ] || fail "nucleus: Claude default must write no bridge lock"
+# INVERTED in Sprint 041, because the reason this was pinned stopped being true.
+# The original assertion was `[ ! -e .bridge_claude.lock ]`, justified as:
+# "start_workflow.md bridge_check for Claude still keys on symlink-per-source
+# rather than a lock". Sprint 041 made the portable boot key on both - the lock
+# AND the mirror, through scripts/bridge_state.py - so a Claude install that
+# writes no lock now leaves every subsequent boot finding it stale, reinstalling,
+# and still writing nothing. The premise expired; the assertion followed it.
+# Same correction shape as Sprint 021 amending loop_governance.md's "advisory
+# budget" once the meter existed: leaving the old justification standing while
+# the fact changed is the drift RA-14 pursues.
+[ -e "$NUCLEUS/.bridge_claude.lock" ] || fail "nucleus: Claude install must write its bridge lock"
 [ ! -e "$NUCLEUS/.bridge_cursor.lock" ] || fail "nucleus: Claude default must write no cursor bridge lock"
 ( cd "$NUCLEUS" && python3 scripts/install.py --profile example-project > /dev/null 2>&1 ) \
   && fail "nucleus: profile install must be refused" || true
 ( cd "$NUCLEUS" && python3 scripts/install.py --profile-path /tmp/x > /dev/null 2>&1 ) \
   && fail "nucleus: external profile-path must be refused" || true
 mkdir -p "$NUCLEUS/.git/hooks"
+# Clear the lock the default (Claude) install above now leaves behind, so the
+# isolation assertion below measures what it claims: any .bridge_claude.lock
+# present after a --target cursor run was written BY that run. Before Sprint
+# 041 the Claude install wrote no lock, so this directory was incidentally
+# clean and the assertion passed without ever being exercised.
+rm -f "$NUCLEUS/.bridge_claude.lock"
 ( cd "$NUCLEUS" && python3 scripts/install.py --target cursor > /dev/null )
 [ -x "$NUCLEUS/.git/hooks/pre-push" ] || fail "nucleus cursor: pre-push hook missing"
 grep -q "hooks/on_push.py" "$NUCLEUS/.git/hooks/pre-push" \
@@ -200,3 +212,44 @@ test_existing_pre_commit_hook_is_not_overwritten() {
     python3 "$repo/.agents/scripts/install.py" >/dev/null 2>&1
     grep -q "project-owned" "$repo/.git/hooks/pre-commit" || return 1
 }
+
+# ---------------------------------------------------------------------------
+# Nucleus --target claude (Sprint 041, U13). The branch returned
+# install_nucleus_bridge() directly, skipping the git hooks and the bridge
+# lock that the cursor and both branches have always installed. A Claude-only
+# nucleus checkout therefore had no secret scanner and no commit-message gate,
+# and its lock was never written, so every boot found it stale, reinstalled,
+# and still wrote nothing. Asserted here rather than in pytest because the
+# defect is in the installer's own end-to-end path.
+# ---------------------------------------------------------------------------
+
+# A directory of its own, never the $NUCLEUS reused above: this block asserts
+# the Cursor mirror is absent, which is only meaningful on a checkout where no
+# Cursor install has ever run. A real `git init` too, because the lock records
+# HEAD and the hooks are installed into .git/hooks.
+NUC_CLAUDE="$WORK/nucleus_claude_only"
+mkdir -p "$NUC_CLAUDE"
+rsync -a --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
+  --exclude='.claude' --exclude='.cursor' "$AGENTS_SRC/" "$NUC_CLAUDE/"
+rm -f "$NUC_CLAUDE/.bridge_claude.lock" "$NUC_CLAUDE/.bridge_cursor.lock"
+git -C "$NUC_CLAUDE" init -q
+git -C "$NUC_CLAUDE" config user.email "t@t"
+git -C "$NUC_CLAUDE" config user.name "t"
+git -C "$NUC_CLAUDE" add -A > /dev/null 2>&1
+git -C "$NUC_CLAUDE" commit -q -m "seed" --no-verify > /dev/null 2>&1
+
+python3 "$NUC_CLAUDE/scripts/install.py" --target claude > /dev/null
+
+[ -L "$NUC_CLAUDE/.claude/commands/agents/start.md" ] \
+  || fail "nucleus claude: command symlink missing"
+[ -f "$NUC_CLAUDE/.bridge_claude.lock" ] \
+  || fail "nucleus claude: .bridge_claude.lock not written"
+[ "$(cat "$NUC_CLAUDE/.bridge_claude.lock")" = "$(git -C "$NUC_CLAUDE" rev-parse HEAD)" ] \
+  || fail "nucleus claude: lock does not record HEAD"
+[ -x "$NUC_CLAUDE/.git/hooks/pre-commit" ] \
+  || fail "nucleus claude: pre-commit hook not installed"
+[ -x "$NUC_CLAUDE/.git/hooks/commit-msg" ] \
+  || fail "nucleus claude: commit-msg hook not installed"
+[ ! -d "$NUC_CLAUDE/.cursor" ] \
+  || fail "nucleus claude: touched the Cursor mirror it must leave alone"
+echo "✅ nucleus --target claude test PASSED"

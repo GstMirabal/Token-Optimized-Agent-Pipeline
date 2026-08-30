@@ -78,3 +78,35 @@ def test_install_permission_error_uses_stable_prefix(
     with pytest.raises(PermissionError) as excinfo:
         ca.install_cursor_bridge(tmp_path / "repo", nucleus=True)
     assert str(excinfo.value).startswith("bridge: permission denied on .cursor")
+
+
+def test_render_rewrites_the_tool_token_for_cursor() -> None:
+    """The Cursor copy claims the anchor as Cursor; the source is for Claude.
+
+    `commands/` is one source mirrored asymmetrically - Claude symlinks it,
+    Cursor gets a rendered copy - so the harness-specific value is produced
+    here. Before Sprint 041 the source hardcoded `--tool cursor` and both
+    harnesses read it, so a Claude Code session claimed the anchor as Cursor.
+    """
+    src = "---\nd: x\n---\nRun `session_start.py --boot --tool claude-code`.\n"
+    rendered = ca.expected_cursor_command_text(src, nucleus=True)
+    assert "--tool cursor" in rendered
+    assert "--tool claude-code" not in rendered
+
+
+def test_render_leaves_other_tool_values_alone() -> None:
+    """Only the Claude token is rewritten; terminal and cursor pass through."""
+    for value in ("--tool terminal", "--tool cursor"):
+        src = f"---\nd: x\n---\nRun `session_start.py --boot {value}`.\n"
+        assert value in ca.expected_cursor_command_text(src, nucleus=True)
+
+
+def test_shipped_start_command_carries_the_claude_token() -> None:
+    """The source of record must be the Claude form, or the symlink is wrong.
+
+    Claude reads `commands/start.md` through a symlink, so whatever the source
+    says is what a Claude session runs. There is no render step on that side.
+    """
+    src = (SCRIPTS.parent / "commands" / "start.md").read_text(encoding="utf-8")
+    assert "--tool claude-code" in src
+    assert "--tool cursor" in ca.expected_cursor_command_text(src, nucleus=True)

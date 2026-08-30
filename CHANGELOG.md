@@ -4,6 +4,30 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Added
+
+- **Sprint 041 (`core-pipeline` / bi-harness-bridge-parity)** — `scripts/bridge_state.py`: one bridge predicate for every target (mirror missing or incomplete **OR** content diverged), consumed by both `session_start.py --boot` and `hooks/on_init.py`. `--boot` reaches the install branch for **every** harness, not Cursor alone; the nucleus `--target claude` install writes its lock and its git hooks; `commands/start.md` carries `--tool claude-code` and `cursor_adapter` renders `--tool cursor` for the Cursor copy. Targets stay independent — a boot repairs the harness that booted it and never touches the other's tree. #041
+
+### Fixed
+
+- **`--boot --tool claude-code` reported a bridge that did not exist.** On a checkout with no `.claude/` directory it printed `content fresh`, exited `0`, installed no mirror and **no git hooks** — so a Claude-only checkout had no secret scanner and no `#[Sprint_ID]` gate — then never retried, because refreshing the lock made it match `HEAD`. `session_start.py:245` returned `False` for every target but `cursor`; `hooks/on_init.py` already held the right predicate and its own docstring named the portable boot as its counterpart. #041
+- **`scripts/install.py` nucleus `claude` branch** returned before `install_nucleus_git_hooks()` and `write_bridge_locks()` (rider `S3`, repaired for `cursor`/`both` only). Extracted as `install_nucleus()`; `main()` 55 → 38 lines, inside `agents.md §1`'s cap for the first time. #041
+- **`commands/start.md` hardcoded `--tool cursor`** for both harnesses, so a Claude Code session claimed the anchor as Cursor — silencing `session_cost.py` entirely, applying `RA-18` without cause and demanding Cursor `Task` dispatch it cannot perform. `--tool` now defaults to `terminal`, not an IDE. #041
+- **Three shipped artifacts failed the gate that consumes them**, each found by following the artifact: `IMPLEMENTATION_PLAN_TEMPLATE.md` vs `audit_plan.py` Filter 6; `SKILL_ASSIGNMENT_TEMPLATE.md` vs `check_forge_ladder.py`; `pipeline_workflow.md` Phase 4.3 vs `check_task_scope.py` (`MODEL_FROM_SPRINT = 28` applies to every harness, not only Cursor). In all three the **document** was corrected, never the detector. #041
+
+### Changed
+
+- **`workflows/start_workflow.md`** — v6.7.0; `bridge_check` names `bridge_state.bridge_stale` and states per-target independence.
+- **`workflows/deployment_workflow.md`** — `bridge_lock_refresh` covers both targets, refreshing a lock only over an intact mirror.
+- **`tests/test_installer.sh`** — the assertion pinning "Claude default must write no bridge lock" is inverted, its expired premise recorded beside it; the sibling target-isolation assertion is now genuinely exercised.
+- **Test coverage** — 19 cases added (9 `bridge_state`, 7 Claude boot path, 3 render). All ten pre-existing `test_session_start.py` cases were Cursor-shaped, which is why this shipped through Sprint 040 with the gate green.
+
+### Known open
+
+- **193 `ruff` findings across 66 files, all predating this sprint.** The files this sprint touched went from 8 to 7; none were introduced. `make verify` does not run `ruff`. Recorded as `RECORD`/`testifying` at Phase 7, routed rather than remediated.
+- **`close_workflow.md` Phase 4 seals before Phase 5 commits, so the deploy gate refuses its own close.** `state_sync` runs `session_state.py release` (recording `last_close_commit`) at Phase 4; `atomic_commit` and `graph_rebuild` commit at Phase 5. Any tracked artifact written at Phase 5 — `graph_stats.json` stamped with the sealed tip is the documented case — leaves the branch tip ahead of the seal, and `deployment_workflow.md` Phase 0 `sprint_seal_gate` then refuses with *"tip … is not the sealed close …"*. Measured on this sprint: seal `efc80d3`, tip `f9c7882`. Worked around here by re-running `release` once the tip was final, which is the correct semantics (the seal must name the commit that ships). The ordering itself is unrepaired and is the fix a later sprint should make. #041
+- **No `make verify` check passes a versioned template through the gate that consumes it** — the instrument that would prevent a fourth instance of the class above. Routed to the program queue with U10/U11/U12 as measured evidence.
+
 ## [4.23.0] - 2026-08-27
 
 ### Added

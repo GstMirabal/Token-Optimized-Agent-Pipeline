@@ -10,7 +10,7 @@ version: 1.0.0
 
 - **Strategy Lock:** `OPEN`
 - **Delivered:** `024` and `025` (`v4.5.0`), `021` (`v4.6.0`), `022` (`v4.7.0`), `023` (`v4.8.0`), `026` (`v4.9.0`, PR #50), `027` (`v4.10.0`, PR #55), `028` (`v4.11.0`, PR #57), `029` (`documentation-truth`, `v4.12.0`, PR #59), `030` (`token-economy-enforcement`, `v4.13.0`, PR #61), `031` (`gate-verdict-classes`, `v4.14.0`, PR #63), `032` (`author-tier-trial`, `v4.15.0`, PR #64), `033` (`implementer-role`, `v4.16.0`, PR #65), `034` (`core-pipeline`, `v4.17.0`, PR #66), `035` (`core-pipeline` C/E/H/F, `v4.18.0`, PR #67), `036` (`core-pipeline` M/L, `v4.19.0`, PR #68), `037` (`core-pipeline` G+S, `v4.20.0`, PR #69), **`038` (`core-pipeline` family-trial, `v4.21.0`, PR #70)**
-- **Next / in flight:** *(none named — Sprint **040** deployed as `v4.23.0`)*. Hosts pin via `/start` auto-pin to newest `v*`. **`040` deployed** `v4.23.0` (PR #72, 2026-08-27) — cursor-bridge-incremental. **`039` deployed** `v4.22.0` (PR #71, 2026-08-27) — start-close-lifecycle. **`038` deployed** `v4.21.0` (PR #70, 2026-08-26) — `cursor.author` **`glm-5.2`** / `zhipu` / `high`. **`037` deployed** `v4.20.0` (PR #69, 2026-08-26). **`036` deployed** `v4.19.0` (PR #68, 2026-08-26). **`035` deployed** `v4.18.0` (PR #67, 2026-08-26). `034` **deployed** `v4.17.0` (PR #66, 2026-08-26). `033` **deployed** `v4.16.0` (PR #65, 2026-08-25). `032` **deployed** `v4.15.0` (PR #64). `031` **deployed** `v4.14.0` (PR #63). H-004 **deployed** `v4.13.1` (PR #62).
+- **Next / in flight:** **`041` (`bi-harness-bridge-parity`) sealed, awaiting deployment** — the portable boot repaired the bridge of Cursor only; a Claude boot reported a mirror that did not exist and installed no git hooks. Also opened, and closed, three cases of a versioned artifact failing the gate that consumes it (`IMPLEMENTATION_PLAN_TEMPLATE.md`, `SKILL_ASSIGNMENT_TEMPLATE.md`, `pipeline_workflow.md` Phase 4.3), each found by following the artifact rather than by auditing it. Hosts pin via `/start` auto-pin to newest `v*`. **`040` deployed** `v4.23.0` (PR #72, 2026-08-27) — cursor-bridge-incremental. **`039` deployed** `v4.22.0` (PR #71, 2026-08-27) — start-close-lifecycle. **`038` deployed** `v4.21.0` (PR #70, 2026-08-26) — `cursor.author` **`glm-5.2`** / `zhipu` / `high`. **`037` deployed** `v4.20.0` (PR #69, 2026-08-26). **`036` deployed** `v4.19.0` (PR #68, 2026-08-26). **`035` deployed** `v4.18.0` (PR #67, 2026-08-26). `034` **deployed** `v4.17.0` (PR #66, 2026-08-26). `033` **deployed** `v4.16.0` (PR #65, 2026-08-25). `032` **deployed** `v4.15.0` (PR #64). `031` **deployed** `v4.14.0` (PR #63). H-004 **deployed** `v4.13.1` (PR #62).
 - **Origin:** drafted in an IDE planning mode across one long session, then migrated
   into this repository. That migration is the point: the same session opened with a
   host having lost an approved plan to ephemeral storage, and this document was
@@ -51,6 +51,34 @@ the program's own opening command.
 | ✅ | **028** | `self-improvement-unblock` | Deployed `v4.11.0` (PR #57 + seal #58, 2026-08-25). Host-side agent destinations, `--profile-path`, `routing_class` |
 | ✅ | **029** | `documentation-truth` | **Deployed** `v4.12.0` (PR #59, 2026-08-25). README counted set + slash-commands guide + ADR-0003…0007 + T5 + file:line check (f) + deploy-seal gate. `F-093-G1` carried → `031` |
 | ✅ | **030** | `token-economy-enforcement` | **Deployed** `v4.13.0` (PR #61, 2026-08-25). Auditor body + consumption trigger + `check_task_scope.py` (`F-026-A2`); trial guide; first author-tier trial destaged 031 → **032** |
+
+### Candidate for the next program — template/gate divergence
+
+Opened 2026-08-30 during Sprint 041, which hit **three** instances while executing
+its own Phases 1, 4.2 and 4.3. Each time, following a versioned artifact's own
+instruction produced a blocked gate:
+
+| Artifact | Gate it failed | Repaired as |
+| :--- | :--- | :--- |
+| `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | `audit_plan.py` Filter 6 | `041` U10 |
+| `docs/standards/templates/SKILL_ASSIGNMENT_TEMPLATE.md` | `check_forge_ladder.py` | `041` U11 |
+| `workflows/pipeline_workflow.md` Phase 4.3 | `check_task_scope.py` | `041` U12 |
+
+**The proposal is the instrument, not more repairs**: a `make verify` check that
+copies each versioned template into a scratch sprint directory and runs the gate
+that consumes it, failing the build when a template cannot pass its own gate.
+Sprint 041 deliberately did **not** build it — it is a different concern from
+bridge parity, and absorbing it would have been the scope creep the framework
+prohibits.
+
+**Two traps measured while repairing U11.** `check_forge_ladder.py` decides by
+pattern-matching prose, so (a) documenting the repair *in the offending strings'
+own words* re-broke it, twice, and (b) a literal example trail (`skills.sh` JSON
+with `hit: false`) is itself a trigger. A check built for this must therefore
+compare a **rendered copy** in a scratch directory, never lint the template in
+place, or it will trip on its own explanatory text.
+
+---
 
 ### Queued for **037** — rider **S** (Cursor agent sandbox false reds)
 

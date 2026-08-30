@@ -27,16 +27,17 @@ sys.path.insert(0, str(_REPO))
 sys.path.insert(0, str(_REPO / "scripts"))
 
 from _root import agents_root
+from bridge_state import CLAUDE_ANCHORS, mirror_missing
 
 from hooks.telemetry import log_error
 
 # Host-scoped (cwd = host project).
 CONFIG_PATH = Path(".env")
 ENV_TEMPLATE = Path(".env.template")
-BRIDGE_ANCHORS = [
-    Path(".claude/commands/agents/start.md"),
-    Path(".claude/agents/principal_agent.md"),
-]
+# Re-exported, not redefined: `scripts/bridge_state.py` owns the anchor list
+# since Sprint 041, and one definition is the point. Kept under this name
+# because it is the host-relativity guarantee `F-026-A3` pins by it.
+BRIDGE_ANCHORS = list(CLAUDE_ANCHORS)
 
 
 def bridge_lock_path() -> Path:
@@ -80,8 +81,22 @@ def current_submodule_commit() -> str:
 
 
 def bridge_intact() -> bool:
-    """Confirm linked host artifacts survive on disk, independent of the lock."""
-    return all(path.exists() for path in BRIDGE_ANCHORS)
+    """Confirm linked host artifacts survive on disk, independent of the lock.
+
+    Delegates to ``scripts/bridge_state.py`` (Sprint 041), which now owns this
+    predicate for every caller. It was defined here and nowhere else, while
+    this module's own docstring named ``workflows/start_workflow.md`` Phase 1.5
+    ``bridge_check`` as its portable counterpart — a counterpart that did not
+    have it and therefore reported a wiped ``.claude/`` as fresh. Sharing the
+    definition is what stops the two drifting apart again.
+
+    The shared predicate also catches a *partial* mirror, which the two-anchor
+    check could not: a command added to ``commands/`` and never linked leaves
+    both anchors present.
+    """
+    return not mirror_missing(
+        Path.cwd(), "claude", framework_root=agents_root()
+    )
 
 
 def sync_commands() -> bool:
