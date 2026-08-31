@@ -29,8 +29,36 @@ this column is prohibited.
 | U5 | `tests/test_check_template_gates.py` | create | medium | `implementer_agent` | sonnet | medium | ✅ 63a4c6f |
 | U6 | `README.md` | modify | low | `doc_orchestrator` | sonnet | medium | ✅ 4a60e93 |
 | U7 | `docs/decisions/ADR-0012-template-gate-parity.md` | create | low | `doc_orchestrator` | sonnet | medium | ✅ 5181761 |
+| U8 | `docs/decisions/ADR-0013-declaration-containment.md` | create | low | `doc_orchestrator` | sonnet | medium | ✅ d7022c2 |
+| U9 | `docs/decisions/ADR-0012-template-gate-parity.md` | modify | low | `doc_orchestrator` | sonnet | medium | ✅ 81d2adf |
 
-**Seven units, seven distinct physical files.** No file appears twice, so
+### Scope amendment — U8 and U9, opened during Phase 7
+
+Gate 1 round 3 recorded (`RECORD` / `testifying`) that `ADR-0012` §2 point 3
+enumerates **four** constraints and §3 calls them *"the containment"*, while the
+containment is now **seven**. That enumeration is not a cosmetic staleness: the
+round-1 implementation matched the ADR exactly, so the document is what made the
+gap invisible, and a reader treating §2.3 as complete would re-derive the same
+defect.
+
+`rules/documentation_standard.md §3` forbids an in-place edit of an Accepted ADR;
+a changed decision gets a new ADR that supersedes it. The containment set changed,
+so supersession is the mechanism the rule provides:
+
+| # | Target | Why it is a separate unit |
+| :--- | :--- | :--- |
+| U8 | `ADR-0013-declaration-containment.md` | The superseding record: seven constraints, and the finding that an incomplete enumeration in a decision record is itself a defect class |
+| U9 | `ADR-0012` `Status` line only | Setting `Superseded by ADR-0013` is the template's own designed-for-later field (`ADR_TEMPLATE.md` line 2), not a rewrite of the Decision. `jurisdictional_lock` makes it its own commit because it is a second physical file |
+
+**Nine units, eight distinct physical files.** `ADR-0012` is the one path claimed
+twice (U7 creates it, U9 sets one field). They are sequential, never concurrent,
+so `no_interference` holds; `jurisdictional_lock` is satisfied by one structural
+subject per commit. Every other file appears once. Verify with
+`awk -F'|' '/^\| U/ {print $3}' task_scope.md | sort | uniq -d` → one line, and it
+is `ADR-0012`, by the amendment above rather than by accident.
+
+**Seven units, seven distinct physical files** *(as planned at Phase 4; see the
+amendment above)*. No file appears twice, so
 `jurisdictional_lock` (one structural subject per task) and `no_interference`
 (no file claimed by two in-flight subtasks) both hold by construction. Verify
 with `awk -F'|' '/^\| U/ {print $3}' task_scope.md | sort | uniq -d` → empty.

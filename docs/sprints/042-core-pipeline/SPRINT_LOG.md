@@ -30,12 +30,15 @@ Tracking of atomic goals achieved during the session.
     - `[x]` U3 + U4 recorded as one merge: `RA-16` declares an invoker that U4 is what makes true
 - [x] **Phase 5 — Approval Gate**: attended human authorization by GstMirabal, 2026-08-31, plan commit `adc4162`
     - `[x]` Fresh-context Phase 7 gates authorized as a standing preference, not per sprint
-- [x] **Phase 6 — Execution**: **7 units** as atomic commits on `ai-sprint/042` (`f84dd3c` `57f184a` `1c2e88c` `0fb5f03` `63a4c6f` `4a60e93` `5181761`)
+- [x] **Phase 6 — Execution**: **9 units** as atomic commits on `ai-sprint/042` — U1-U7 as planned (`f84dd3c` `57f184a` `1c2e88c` `0fb5f03` `63a4c6f` `4a60e93` `5181761`), U8-U9 opened by the Phase 7 scope amendment (`d7022c2` `81d2adf`), plus two Gate 1 remediation commits (`3cefba8` `c763d41`)
     - `[x]` Abort criterion measured, not assumed: `grep -c "audit_plan\|forge_ladder\|gate_log" scripts/check_template_gates.py` → `0`
-    - `[x]` *Reproduce before repairing*: the U5 module run against a clean clone of `e29ac98` → `1 failed, 15 errors` (the mechanism does not exist there); on this tree → `16 passed`
-    - `[x]` `make verify` → exit `0`; `pytest tests/` → **663 passed** (baseline 647 + 16)
+    - `[x]` *Reproduce before repairing*: the U5 module run against a clean clone of `e29ac98` → `1 failed, 15 errors` (the mechanism does not exist there); on this tree → `25 passed`
+    - `[x]` `make verify` → exit `0`; `pytest tests/` → **672 passed** (baseline 647 + 25)
     - `[x]` Anchor `current_sprint` opened to `42` / `IN_PROGRESS` — untracked local state (`.gitignore:55`), so not a Work unit and not committable; `session_probe.py:196-199` proposes precisely this edit and no script performs it. Before the edit the three `--current-sprint` checks inside `make verify` were auditing Sprint 041's artifacts
 - [ ] **Phase 7 — Quality Gate**: QA Agent then Tester Agent, fresh context
+    - `[x]` Gate 1 (`qa_agent`), three rounds: `REJECTED` → `REJECTED` → `RECORD`. Two `charter` defects in the security boundary, both invisible to a green `make verify` because they concern what the checker **permits**, not what the shipped declaration asks for
+    - `[x]` Scope amendment U8/U9: `ADR-0012` superseded by `ADR-0013` rather than edited in place (`rules/documentation_standard.md §3`)
+    - `[ ]` Gate 2 (`tester_agent`), fresh context
 - [ ] **Phase 8 — Sprint Closeout**
 
 ---
@@ -48,6 +51,9 @@ here before that phase is the correct state, not a missing row.
 
 | Gate | Round | Verdict | Class | Notes |
 | :--- | :--- | :--- | :--- | :--- |
+| QA Agent | 1 | REJECTED | charter | The `D5` containment the plan, `task_scope.md` and `ADR-0012` each declared was not implemented. (a) The script-path check was `str(script).startswith(str(root))` — a name prefix, not containment: `../<root>-evil/pwn.py` passed and was executed, and that is the layout `agents.md §3 topological_order` prescribes for `<host-root>/.agents-profile/` beside the `.agents` submodule, so the bypass **was the documented convention**. (b) The `render` map reached `shutil.copyfile` unvalidated — any readable file copied over any writable one, in one case at exit `0` with `[OK]` printed. Advisories in the same bounce: untyped exception reasons accepted; root resolution deviating from the `scripts/_root.py` contract; `.DS_Store` counted as a template |
+| QA Agent | 2 | REJECTED | charter | Remediation `3cefba8` closed F1, F3, F4, F5 and two of the three path fields. **Residual**: `case["id"]` is joined into `sprint_dir` unvalidated, and `check_render_paths` measures target containment *against that anchor* — so a declaration-chosen anchor satisfied it by construction. Measured: exit `0`, `[OK] pairing complete`, files written outside the `TemporaryDirectory`, no finding. The gate's formulation is worth keeping: *a containment check whose anchor is unvalidated input is not a containment check*. It recommended asserting the anchor over guarding the field, because that closes the class |
+| QA Agent | 3 | RECORD | testifying | Remediation `c763d41` (anchor form, as recommended). The gate attacked it with relative traversal, an absolute id, `..`, and the benign `a/../b` case — every escape refused, no false rejection — and measured `.resolve()` semantics on this platform for the not-yet-existing path, including the `/tmp` → `/private/tmp` symlink that would have caused a permanent false rejection had only one side been resolved. It traced every declaration-derived value to its guard and left two residuals open **deliberately, with reasons**: `command[2:]` is unconstrained (the charter's own threat model is reviewed in-repository content) and `{sprint_dir}` expands after validation (unreachable without a file literally named `{sprint_dir}`). Both are recorded in `ADR-0013` `Consequences`. Documentary staleness raised here is discharged by U8/U9 and by this table |
 
 Emitible set: `APPROVED` \| `REJECTED` \| `RECORD`, each with class `charter` \|
 `instructing` \| `testifying` (`RA-17`, `rules/qa_and_testing.md` §4).
@@ -68,6 +74,6 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: `LOCKED`
-**Next Phase**: Phase 4 — Assignment (`agent_assignment.md`, `skill_assignment.md`, `task_scope.md`)
+**Next Phase**: Phase 7 Gate 2 — Tester Agent in fresh context, then Phase 8 Sprint Closeout (`/agents:close`)
 
 *Certified under conventional commit standard: feat(scope): message #042*
