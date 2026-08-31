@@ -30,7 +30,11 @@ Tracking of atomic goals achieved during the session.
     - `[x]` U3 + U4 recorded as one merge: `RA-16` declares an invoker that U4 is what makes true
 - [x] **Phase 5 — Approval Gate**: attended human authorization by GstMirabal, 2026-08-31, plan commit `adc4162`
     - `[x]` Fresh-context Phase 7 gates authorized as a standing preference, not per sprint
-- [ ] **Phase 6 — Execution**: 7 units as atomic commits on `ai-sprint/042`
+- [x] **Phase 6 — Execution**: **7 units** as atomic commits on `ai-sprint/042` (`f84dd3c` `57f184a` `1c2e88c` `0fb5f03` `63a4c6f` `4a60e93` `5181761`)
+    - `[x]` Abort criterion measured, not assumed: `grep -c "audit_plan\|forge_ladder\|gate_log" scripts/check_template_gates.py` → `0`
+    - `[x]` *Reproduce before repairing*: the U5 module run against a clean clone of `e29ac98` → `1 failed, 15 errors` (the mechanism does not exist there); on this tree → `16 passed`
+    - `[x]` `make verify` → exit `0`; `pytest tests/` → **663 passed** (baseline 647 + 16)
+    - `[x]` Anchor `current_sprint` opened to `42` / `IN_PROGRESS` — untracked local state (`.gitignore:55`), so not a Work unit and not committable; `session_probe.py:196-199` proposes precisely this edit and no script performs it. Before the edit the three `--current-sprint` checks inside `make verify` were auditing Sprint 041's artifacts
 - [ ] **Phase 7 — Quality Gate**: QA Agent then Tester Agent, fresh context
 - [ ] **Phase 8 — Sprint Closeout**
 

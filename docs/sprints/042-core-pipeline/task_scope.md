@@ -22,13 +22,13 @@ this column is prohibited.
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| U1 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U2 | `config/template_gates.json` | create | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U3 | `scripts/check_template_gates.py` | create | **high** | `implementer_agent` | opus | high | ⏳ |
-| U4 | `Makefile` | modify | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U5 | `tests/test_check_template_gates.py` | create | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U6 | `README.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U7 | `docs/decisions/ADR-0012-template-gate-parity.md` | create | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| U1 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `doc_orchestrator` | sonnet | medium | ✅ f84dd3c |
+| U2 | `config/template_gates.json` | create | medium | `implementer_agent` | sonnet | medium | ✅ 57f184a |
+| U3 | `scripts/check_template_gates.py` | create | **high** | `implementer_agent` | opus | high | ✅ 1c2e88c |
+| U4 | `Makefile` | modify | medium | `implementer_agent` | sonnet | medium | ✅ 0fb5f03 |
+| U5 | `tests/test_check_template_gates.py` | create | medium | `implementer_agent` | sonnet | medium | ✅ 63a4c6f |
+| U6 | `README.md` | modify | low | `doc_orchestrator` | sonnet | medium | ✅ 4a60e93 |
+| U7 | `docs/decisions/ADR-0012-template-gate-parity.md` | create | low | `doc_orchestrator` | sonnet | medium | ✅ 5181761 |
 
 **Seven units, seven distinct physical files.** No file appears twice, so
 `jurisdictional_lock` (one structural subject per task) and `no_interference`
