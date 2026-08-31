@@ -16,6 +16,13 @@ The pairing must also be complete — a file in docs/standards/templates/ with
 neither a case nor a typed exception fails the build, so a new template cannot be
 added without deciding what judges it.
 
+The declaration is a data file that gets executed, so every field it contributes
+is constrained here rather than trusted to whoever edits it: the interpreter is
+pinned, the script and every rendered path must resolve inside the directory that
+owns it, the scratch directory name is one relative component, and `{sprint_dir}`
+is the only expandable token. Guarding the argument vector alone is not enough —
+the render map reaches the filesystem too.
+
 This module knows no check by name. Names live in config/template_gates.json; a
 branch here that recognised one would make this a second copy of the checks, and
 the second copy is what drifts.
@@ -35,6 +42,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -48,6 +56,7 @@ CONFIG = Path("config/template_gates.json")
 TEMPLATES = Path("docs/standards/templates")
 INTERPRETER = "python3"
 SPRINT_DIR_TOKEN = "{sprint_dir}"
+VALID_EXCEPTION_REASONS = frozenset({"no-automated-gate", "phase-mismatch"})
 
 
 def load_config(root: Path, config: Path) -> dict:
@@ -70,9 +79,49 @@ def declared_templates(spec: dict) -> set[str]:
     return rendered | {item["template"] for item in spec["exceptions"]}
 
 
+def check_exceptions(spec: dict) -> list[str]:
+    """Reject an exemption that is not typed.
+
+    An untyped exemption excuses a template while saying nothing about why, which
+    is how a stale one survives. The valid set lives here, in code, and the
+    declaration's own mirror of it is compared against this one so the two cannot
+    drift — the drift being the defect class this whole check exists to close.
+    """
+    findings = [
+        f"{item.get('template', '<unnamed>')}: exception reason "
+        f"{item.get('reason')!r} is not one of {sorted(VALID_EXCEPTION_REASONS)}"
+        for item in spec["exceptions"]
+        if item.get("reason") not in VALID_EXCEPTION_REASONS
+    ]
+    declared = set(spec.get("_valid_exception_reasons", []))
+    if declared != set(VALID_EXCEPTION_REASONS):
+        findings.append(
+            f"{CONFIG} `_valid_exception_reasons` {sorted(declared)} disagrees with "
+            f"the set this check enforces, {sorted(VALID_EXCEPTION_REASONS)}"
+        )
+    return findings
+
+
+def check_scratch_name(spec: dict) -> list[str]:
+    """Require the scratch directory to be one relative path component.
+
+    It is joined onto a temporary directory. A name carrying separators or `..`
+    would place the rendered copies outside that directory, where nothing cleans
+    them up and something may already live.
+    """
+    name = spec["scratch_sprint_dir"]
+    if Path(name).parts == (name,) and name not in {".", ".."}:
+        return []
+    return [f"scratch_sprint_dir must be a single relative path component: {name!r}"]
+
+
 def check_completeness(root: Path, spec: dict) -> list[str]:
     """Compare the templates directory against the declaration."""
-    present = {p.name for p in (root / TEMPLATES).iterdir() if p.is_file()}
+    present = {
+        p.name
+        for p in (root / TEMPLATES).iterdir()
+        if p.is_file() and not p.name.startswith(".")
+    }
     declared = declared_templates(spec)
     findings = [
         f"{name}: in {TEMPLATES}/ with no case and no typed exception"
@@ -101,11 +150,31 @@ def check_command(root: Path, command: list[str]) -> str | None:
     if len(command) < 2 or command[0] != INTERPRETER:
         return f"command must start with {INTERPRETER!r}: {command}"
     script = (root / command[1]).resolve()
-    if not str(script).startswith(str(root.resolve())):
+    if not script.is_relative_to(root.resolve()):
         return f"script escapes the framework root: {command[1]}"
     if not script.is_file():
         return f"script does not exist: {command[1]}"
     return None
+
+
+def check_render_paths(root: Path, case: dict, sprint_dir: Path) -> list[str]:
+    """Reject a render map that reads or writes outside its two directories.
+
+    `check_command` guarded the argument vector and nothing else, while the render
+    map from the same file reached `shutil.copyfile` directly — so a declaration
+    could read any readable file and overwrite any writable one. A source must be
+    a template; a target must land inside the scratch sprint directory.
+    """
+    findings = []
+    templates = (root / TEMPLATES).resolve()
+    for template, artifact in case["render"].items():
+        source = (root / TEMPLATES / template).resolve()
+        if not source.is_relative_to(templates) or source == templates:
+            findings.append(f"render source is not a file in {TEMPLATES}/: {template}")
+        target = (sprint_dir / artifact).resolve()
+        if not target.is_relative_to(sprint_dir.resolve()) or target == sprint_dir.resolve():
+            findings.append(f"render target escapes the scratch directory: {artifact}")
+    return findings
 
 
 def render(root: Path, case: dict, sprint_dir: Path) -> None:
@@ -129,6 +198,9 @@ def run_case(root: Path, case: dict, scratch: Path) -> str | None:
     if refusal:
         return f"{case['id']}: {refusal}"
     sprint_dir = scratch / case["id"] / case["scratch_sprint_dir"]
+    unsafe = check_render_paths(root, case, sprint_dir)
+    if unsafe:
+        return f"{case['id']}: {unsafe[0]}"
     render(root, case, sprint_dir)
     command = [part.replace(SPRINT_DIR_TOKEN, str(sprint_dir)) for part in case["command"]]
     result = subprocess.run(command, cwd=root, capture_output=True, text=True, check=False)
@@ -146,10 +218,12 @@ def check(root: Path, config: Path) -> int:
         The process exit code.
     """
     spec = load_config(root, config)
-    findings = check_completeness(root, spec)
+    findings = check_completeness(root, spec) + check_exceptions(spec)
+    unsafe_scratch = check_scratch_name(spec)
+    findings += unsafe_scratch
     with tempfile.TemporaryDirectory() as tmp:
         scratch = Path(tmp)
-        for case in spec["cases"]:
+        for case in spec["cases"] if not unsafe_scratch else []:
             case = {**case, "scratch_sprint_dir": spec["scratch_sprint_dir"]}
             finding = run_case(root, case, scratch)
             if finding:
@@ -167,8 +241,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n", 1)[0])
     parser.add_argument("--config", type=Path, default=CONFIG, help="Pairing declaration")
     args = parser.parse_args()
-    root = agents_root() if (Path.cwd() / "scripts").is_dir() else Path.cwd()
-    return check(root, args.config)
+    os.chdir(agents_root())
+    return check(agents_root(), args.config)
 
 
 if __name__ == "__main__":

@@ -64,6 +64,7 @@ def _root(tmp_path: Path, template_body: str, gate_body: str = REFUSES_MARKER) -
     (templates / "SPEC_TEMPLATE.md").write_text(template_body, encoding="utf-8")
     gate = _fake_gate(root, "fake_gate.py", gate_body)
     spec = {
+        "_valid_exception_reasons": ["no-automated-gate", "phase-mismatch"],
         "scratch_sprint_dir": "999-core-pipeline",
         "cases": [
             {
@@ -193,6 +194,25 @@ def test_script_may_not_escape_the_framework_root(tmp_path: Path, module) -> Non
     assert "escapes" in finding
 
 
+def test_sibling_directory_extending_the_root_name_is_outside_it(tmp_path: Path, module) -> None:
+    """Containment, not a name prefix.
+
+    The first implementation compared strings with `startswith`, so
+    `<root>-anything/` read as inside `<root>/`. That is not hypothetical here:
+    `agents.md §3 topological_order` puts host profiles at `<host-root>/.agents-profile/`
+    beside the `<host-root>/.agents` submodule, so the bypass was the documented
+    convention. Found by Gate 1 of Sprint 042, after the easy `../outside.py` case
+    above had passed.
+    """
+    root = _root(tmp_path, "# Spec\n")
+    sibling = root.parent / f"{root.name}-evil"
+    sibling.mkdir()
+    (sibling / "pwn.py").write_text("", encoding="utf-8")
+    finding = module.check_command(root, ["python3", f"../{sibling.name}/pwn.py"])
+    assert finding is not None
+    assert "escapes" in finding
+
+
 def test_missing_script_is_reported(tmp_path: Path, module) -> None:
     root = _root(tmp_path, "# Spec\n")
     finding = module.check_command(root, ["python3", "scripts/absent.py"])
@@ -226,6 +246,94 @@ def test_only_the_sprint_dir_token_is_expanded(tmp_path: Path, module) -> None:
     spec = _spec(root)
     spec["cases"][0]["command"] = ["python3", echo, "{root}", "{sprint_dir}"]
     _write_spec(root, spec)
+    assert module.check(root, module.CONFIG) == 0
+
+
+# --- The render map is data that reaches the filesystem -------------------
+
+
+def test_render_source_outside_the_templates_directory_is_refused(
+    tmp_path: Path, module, capsys
+) -> None:
+    """A declaration may not read an arbitrary file.
+
+    The first implementation guarded the argument vector only, so this copied a
+    file from anywhere the process could read. Found by Gate 1 of Sprint 042.
+    """
+    root = _root(tmp_path, "# Spec\n")
+    secret = tmp_path / "secret.txt"
+    secret.write_text("credentials", encoding="utf-8")
+    spec = _spec(root)
+    spec["cases"][0]["render"] = {"../../../../secret.txt": "SPEC.md"}
+    spec["exceptions"] = [
+        {"template": "SPEC_TEMPLATE.md", "reason": "no-automated-gate", "note": "unpaired here"}
+    ]
+    _write_spec(root, spec)
+    assert module.check(root, module.CONFIG) == 2
+    assert "render source" in capsys.readouterr().err
+
+
+def test_render_target_may_not_escape_the_scratch_directory(
+    tmp_path: Path, module, capsys
+) -> None:
+    """A declaration may not overwrite an arbitrary file."""
+    victim = tmp_path / "victim.md"
+    victim.write_text("original", encoding="utf-8")
+    root = _root(tmp_path, "# Spec\n")
+    spec = _spec(root)
+    spec["cases"][0]["render"] = {"SPEC_TEMPLATE.md": "../../../../victim.md"}
+    _write_spec(root, spec)
+    assert module.check(root, module.CONFIG) == 2
+    assert "escapes the scratch directory" in capsys.readouterr().err
+    assert victim.read_text(encoding="utf-8") == "original"
+
+
+def test_scratch_directory_name_must_be_one_component(tmp_path: Path, module, capsys) -> None:
+    """A traversing scratch name wrote outside the temporary directory."""
+    root = _root(tmp_path, "# Spec\n")
+    spec = _spec(root)
+    spec["scratch_sprint_dir"] = "../../../../escaped_sprint"
+    _write_spec(root, spec)
+    assert module.check(root, module.CONFIG) == 2
+    assert "single relative path component" in capsys.readouterr().err
+    assert not (tmp_path / "escaped_sprint").exists()
+
+
+# --- Exemptions must be typed ---------------------------------------------
+
+
+def test_untyped_exception_reason_is_refused(tmp_path: Path, module, capsys) -> None:
+    root = _root(tmp_path, "# Spec\n")
+    (root / "docs" / "standards" / "templates" / "ORPHAN_TEMPLATE.md").write_text("x", encoding="utf-8")
+    spec = _spec(root)
+    spec["exceptions"] = [{"template": "ORPHAN_TEMPLATE.md", "reason": "because"}]
+    _write_spec(root, spec)
+    assert module.check(root, module.CONFIG) == 2
+    assert "is not one of" in capsys.readouterr().err
+
+
+def test_declared_reason_set_must_match_the_enforced_one(tmp_path: Path, module, capsys) -> None:
+    """Two sources of truth for the same set is the defect this sprint closes."""
+    root = _root(tmp_path, "# Spec\n")
+    spec = _spec(root)
+    spec["_valid_exception_reasons"] = ["no-automated-gate"]
+    _write_spec(root, spec)
+    assert module.check(root, module.CONFIG) == 2
+    assert "disagrees with" in capsys.readouterr().err
+
+
+def test_real_declaration_mirrors_the_enforced_reason_set(module) -> None:
+    spec = module.load_config(REPO, module.CONFIG)
+    assert set(spec["_valid_exception_reasons"]) == set(module.VALID_EXCEPTION_REASONS)
+
+
+# --- Editor droppings are not templates -----------------------------------
+
+
+def test_dotfiles_are_not_counted_as_templates(tmp_path: Path, module) -> None:
+    """A .DS_Store in the templates directory must not fail the build."""
+    root = _root(tmp_path, "# Spec\n")
+    (root / "docs" / "standards" / "templates" / ".DS_Store").write_text("", encoding="utf-8")
     assert module.check(root, module.CONFIG) == 0
 
 

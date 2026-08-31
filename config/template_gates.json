@@ -14,11 +14,17 @@
     "is born outside it."
   ],
   "_command_contract": [
-    "A command here is executed. The reader (scripts/check_template_gates.py) enforces,",
-    "and does not trust this file for: no shell; argv[0] is exactly `python3`; argv[1]",
-    "resolves to an existing path inside the framework root; `{sprint_dir}` is the only",
-    "expandable token. Widening any of these turns an edit to this file into arbitrary",
-    "execution inside `make verify` and CI."
+    "Every field here reaches the filesystem or a subprocess. The reader",
+    "(scripts/check_template_gates.py) enforces, and does not trust this file for:",
+    "no shell; argv[0] is exactly `python3`; argv[1] resolves to an existing path",
+    "inside the framework root (containment, not a name prefix — a sibling directory",
+    "whose name extends the root's is outside it); every `render` key resolves inside",
+    "docs/standards/templates/ and every `render` value inside the scratch sprint",
+    "directory; `scratch_sprint_dir` is one relative path component; `{sprint_dir}` is",
+    "the only expandable token. Widening any of these turns an edit to this file into",
+    "arbitrary execution, or an arbitrary file copy, inside `make verify` and CI.",
+    "The first version of the reader guarded the argument vector and nothing else,",
+    "and this paragraph claimed otherwise; Gate 1 of Sprint 042 measured both."
   ],
   "_valid_exception_reasons": ["no-automated-gate", "phase-mismatch"],
 
