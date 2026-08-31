@@ -288,6 +288,26 @@ def test_render_target_may_not_escape_the_scratch_directory(
     assert victim.read_text(encoding="utf-8") == "original"
 
 
+def test_case_id_may_not_escape_the_temporary_directory(tmp_path: Path, module, capsys) -> None:
+    """The scratch anchor is verified, not just the fields joined onto it.
+
+    `sprint_dir` is `scratch / case["id"] / scratch_sprint_dir`. Validating only
+    the last component left the middle one free, and target containment is then
+    measured against an anchor the declaration chose — satisfied by construction,
+    so the run exited 0 while writing outside the temporary directory. Found by
+    Gate 1 round 2 of Sprint 042. This asserts the anchor, not the field, so a
+    fourth component joined onto that expression is contained without a new test.
+    """
+    root = _root(tmp_path, "# Spec\n")
+    escape = tmp_path / "outside_scratch"
+    spec = _spec(root)
+    spec["cases"][0]["id"] = f"../../../../../..{escape}"
+    _write_spec(root, spec)
+    assert module.check(root, module.CONFIG) == 2
+    assert "escapes the temporary directory" in capsys.readouterr().err
+    assert not escape.exists()
+
+
 def test_scratch_directory_name_must_be_one_component(tmp_path: Path, module, capsys) -> None:
     """A traversing scratch name wrote outside the temporary directory."""
     root = _root(tmp_path, "# Spec\n")

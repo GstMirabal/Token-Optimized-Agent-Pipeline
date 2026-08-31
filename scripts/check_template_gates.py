@@ -164,6 +164,11 @@ def check_render_paths(root: Path, case: dict, sprint_dir: Path) -> list[str]:
     map from the same file reached `shutil.copyfile` directly — so a declaration
     could read any readable file and overwrite any writable one. A source must be
     a template; a target must land inside the scratch sprint directory.
+
+    The caller MUST establish that `sprint_dir` is itself inside the temporary
+    directory before calling this. Target containment is measured against that
+    anchor, so an anchor the declaration chose would satisfy it vacuously — which
+    it did, silently, until Gate 1 round 2 of Sprint 042 measured it.
     """
     findings = []
     templates = (root / TEMPLATES).resolve()
@@ -198,6 +203,8 @@ def run_case(root: Path, case: dict, scratch: Path) -> str | None:
     if refusal:
         return f"{case['id']}: {refusal}"
     sprint_dir = scratch / case["id"] / case["scratch_sprint_dir"]
+    if not sprint_dir.resolve().is_relative_to(scratch.resolve()):
+        return f"{case['id']}: scratch sprint directory escapes the temporary directory"
     unsafe = check_render_paths(root, case, sprint_dir)
     if unsafe:
         return f"{case['id']}: {unsafe[0]}"
