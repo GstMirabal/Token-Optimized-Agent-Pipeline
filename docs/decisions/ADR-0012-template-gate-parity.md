@@ -1,6 +1,6 @@
 # 📜 ADR-0012: A template is proved against the check that consumes it
 
-**Status**: `Accepted`
+**Status**: `Superseded by ADR-0013` — the containment enumerated in §2 point 3 and called complete in §3 was four constraints; three rounds of Gate 1 measured it to be seven. The decision to render templates through their consuming checks stands and is unchanged. `ADR-0013` carries the containment; this record is kept intact, insufficient list included, because it is the evidence of how a documented control became an undone one.
 **Date**: 2026-08-31
 **Triggers**: 3 (`rules/documentation_standard.md §3.1`) — the check executes an argument vector declared in a data file, so the boundary between data and execution is the decision's core. Trigger #3 escalates to full MADR individually (`§3.2`).
 
