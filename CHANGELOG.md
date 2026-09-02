@@ -4,6 +4,9 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Fixed
+- **Hotfix `H-006`** — `make verify` and CI were red on `main` from 2026-09-01 with nothing committed to cause it. `tests/test_session_protocol.py` pinned the platform-probe fixture to the literal instant `2026-08-25T12:00:00Z` and tested it against a **relative** predicate (`session_probe.py:598`, `PLATFORM_TTL_DAYS = 7`), so the fixture aged out of the window it was written to exercise and the test began asserting the opposite branch from the one it names. Fixtures now derive from the present, and the expired side of the boundary — previously uncovered, which is why the expiry was silent — is pinned by `test_expired_ttl_reprobes`. Both cases are mutation-proven: removing the TTL comparison reds the fresh case, forcing it always-true reds the expired one. Record: `docs/hotfixes/H-006-tests.md`. Measured bound: `datetime.now` compared against stored state occurs exactly once in the codebase, so no sibling fixture is waiting to expire.
+
 ## [4.24.0] - 2026-08-30
 
 ### Added

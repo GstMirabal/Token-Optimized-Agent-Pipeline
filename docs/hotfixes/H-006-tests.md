@@ -88,4 +88,4 @@ the assertions true on any date the suite is executed.
 
 - [x] Is this failure class systemic (a process pattern, not a one-off)? **Yes, and it is already indexed.** `agents.md §1 unambiguous_action` requires magnitudes to carry units and a done-criterion; the deeper pattern here — a fixture that is an absolute instant tested against a relative predicate — is the same class `RA-14 PATCH_PROPAGATION` and the T5 «measured figures» rule address for documents: a figure that reproduces only at one moment must carry what makes it reproducible. No new `RA-XX` is drafted, because the corrective instrument already exists and the codebase has exactly one site where it applies. Recorded here rather than amended: `N/A`
 - [x] Does the root cause reveal a design decision worth recording? No. `PLATFORM_TTL_DAYS = 7` is unchanged and correct; the test was wrong about how to exercise it. ADR: `N/A`
-- [ ] Master Ledger entry added under `[Unreleased]`.
+- [x] Master Ledger entry added under `[Unreleased]`.
