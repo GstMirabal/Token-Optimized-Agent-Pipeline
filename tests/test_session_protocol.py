@@ -6,6 +6,7 @@ healthy tree proves nothing — the lesson PR #28 left behind.
 import json
 import subprocess
 import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -1652,9 +1653,21 @@ def test_missing_gh_does_not_stamp_last_platform_probe(anchor, monkeypatch):
     assert "last_platform_probe" not in json.loads(anchor.read_text())
 
 
+def _stamp(days_ago: float) -> str:
+    """A `last_platform_probe` value the given number of days in the past.
+
+    The TTL is evaluated against the present (`session_probe.py:598`), so a
+    fixture written as an absolute instant is inside the window only until it is
+    not. `"2026-08-25T12:00:00Z"` was pinned here against a 7-day TTL and the
+    suite went red on 2026-09-01 with nothing committed — hotfix `H-006`.
+    """
+    moment = datetime.now(timezone.utc) - timedelta(days=days_ago)
+    return moment.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 def test_fresh_ttl_does_not_rewrite_last_platform_probe(anchor, monkeypatch):
     """Within the 7-day TTL, the stamp is left alone."""
-    prior = "2026-08-25T12:00:00Z"
+    prior = _stamp(1)
     anchor.write_text(json.dumps({
         "session_id": "s1",
         "last_platform_probe": prior,
@@ -1662,3 +1675,18 @@ def test_fresh_ttl_does_not_rewrite_last_platform_probe(anchor, monkeypatch):
     _mock_platform_interrogation(monkeypatch)
     assert spr.probe_platform(json.loads(anchor.read_text()), force=False) is None
     assert json.loads(anchor.read_text())["last_platform_probe"] == prior
+
+
+def test_expired_ttl_reprobes(anchor, monkeypatch):
+    """Past the 7-day TTL, the cache is not honoured and the platform is read.
+
+    The other side of the same boundary. Only the fresh side was covered, so the
+    fixture's expiry silently moved the surviving test onto this branch, where it
+    asserted the opposite of what it names.
+    """
+    anchor.write_text(json.dumps({
+        "session_id": "s1",
+        "last_platform_probe": _stamp(spr.PLATFORM_TTL_DAYS + 1),
+    }) + "\n")
+    _mock_platform_interrogation(monkeypatch)
+    assert spr.probe_platform(json.loads(anchor.read_text()), force=False) is not None
