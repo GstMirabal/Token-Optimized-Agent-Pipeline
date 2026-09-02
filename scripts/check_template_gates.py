@@ -102,6 +102,28 @@ def check_exceptions(spec: dict) -> list[str]:
     return findings
 
 
+def check_gate_exceptions(root: Path, spec: dict) -> list[str]:
+    """Hold a recorded non-pairing to the same standard as an exemption.
+
+    `gate_exceptions` records a check deliberately not paired with a template —
+    a decision, not a grant, so nothing depends on it at runtime. That is exactly
+    why it rots: measured by Gate 2, an entry naming a non-existent check, a
+    non-existent template and an invented reason passed in silence, one array away
+    from three guards written to prevent that staleness.
+    """
+    findings = []
+    for item in spec.get("gate_exceptions", []):
+        gate = item.get("gate", "")
+        template = item.get("template", "")
+        if item.get("reason") not in VALID_EXCEPTION_REASONS:
+            findings.append(f"{gate or '<unnamed>'}: reason {item.get('reason')!r} is not typed")
+        if not (root / gate).is_file():
+            findings.append(f"gate_exceptions names a check that does not exist: {gate!r}")
+        if not (root / TEMPLATES / template).is_file():
+            findings.append(f"gate_exceptions names a template that does not exist: {template!r}")
+    return findings
+
+
 def check_scratch_name(spec: dict) -> list[str]:
     """Require the scratch directory to be one relative path component.
 
@@ -225,7 +247,11 @@ def check(root: Path, config: Path) -> int:
         The process exit code.
     """
     spec = load_config(root, config)
-    findings = check_completeness(root, spec) + check_exceptions(spec)
+    findings = (
+        check_completeness(root, spec)
+        + check_exceptions(spec)
+        + check_gate_exceptions(root, spec)
+    )
     unsafe_scratch = check_scratch_name(spec)
     findings += unsafe_scratch
     with tempfile.TemporaryDirectory() as tmp:

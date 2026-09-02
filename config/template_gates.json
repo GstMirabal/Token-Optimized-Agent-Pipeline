@@ -27,6 +27,12 @@
     "and this paragraph claimed otherwise; Gate 1 of Sprint 042 measured both."
   ],
   "_valid_exception_reasons": ["no-automated-gate", "phase-mismatch"],
+  "_records_are_checked_too": [
+    "`gate_exceptions` grants nothing and no run depends on it, which is why it rots:",
+    "Gate 2 of Sprint 042 measured an entry naming a non-existent check, a non-existent",
+    "template and an invented reason passing in silence. Its gate, template and reason",
+    "are now resolved on every run, like the entries of `exceptions`."
+  ],
 
   "scratch_sprint_dir": "999-core-pipeline",
 

@@ -32,7 +32,7 @@ Tracking of atomic goals achieved during the session.
     - `[x]` Fresh-context Phase 7 gates authorized as a standing preference, not per sprint
 - [x] **Phase 6 — Execution**: **9 units** as atomic commits on `ai-sprint/042` — U1-U7 as planned (`f84dd3c` `57f184a` `1c2e88c` `0fb5f03` `63a4c6f` `4a60e93` `5181761`), U8-U9 opened by the Phase 7 scope amendment (`d7022c2` `81d2adf`), plus two Gate 1 remediation commits (`3cefba8` `c763d41`)
     - `[x]` Abort criterion measured, not assumed: `grep -c "audit_plan\|forge_ladder\|gate_log" scripts/check_template_gates.py` → `0`
-    - `[x]` *Reproduce before repairing*: the U5 module run against a clean clone of `e29ac98` → `1 failed, 15 errors` (the mechanism does not exist there); on this tree → `25 passed`
+    - `[x]` *Reproduce before repairing*: the U5 module run against a clean clone of `e29ac98` → the mechanism does not exist there. Measured `1 failed, 15 errors` against the 16-test file at `63a4c6f`; re-measured by Gate 2 against the final file, `1 failed, 24 errors`. Both figures are the same claim at two sizes — the first no longer reproduces, and is kept beside the second rather than replaced, because a figure that reproduces only against a commit must say which one
     - `[x]` `make verify` → exit `0`; `pytest tests/` → **672 passed** (baseline 647 + 25)
     - `[x]` Anchor `current_sprint` opened to `42` / `IN_PROGRESS` — untracked local state (`.gitignore:55`), so not a Work unit and not committable; `session_probe.py:196-199` proposes precisely this edit and no script performs it. Before the edit the three `--current-sprint` checks inside `make verify` were auditing Sprint 041's artifacts
 - [ ] **Phase 7 — Quality Gate**: QA Agent then Tester Agent, fresh context

@@ -347,6 +347,71 @@ def test_real_declaration_mirrors_the_enforced_reason_set(module) -> None:
     assert set(spec["_valid_exception_reasons"]) == set(module.VALID_EXCEPTION_REASONS)
 
 
+# --- A recorded non-pairing is held to the same standard ------------------
+
+
+def _with_gate_exception(root: Path, entry: dict) -> None:
+    spec = _spec(root)
+    spec["gate_exceptions"] = [entry]
+    _write_spec(root, spec)
+
+
+def test_gate_exception_naming_an_absent_check_is_refused(
+    tmp_path: Path, module, capsys
+) -> None:
+    """Measured by Gate 2: this whole array passed unread.
+
+    An entry naming a non-existent check, a non-existent template and an invented
+    reason exited 0 with `[OK]` printed, while the sibling `exceptions` array had
+    three guards against exactly that staleness.
+    """
+    root = _root(tmp_path, "# Spec\n")
+    _with_gate_exception(
+        root,
+        {"gate": "scripts/absent.py", "template": "SPEC_TEMPLATE.md", "reason": "phase-mismatch"},
+    )
+    assert module.check(root, module.CONFIG) == 2
+    assert "check that does not exist" in capsys.readouterr().err
+
+
+def test_gate_exception_naming_an_absent_template_is_refused(
+    tmp_path: Path, module, capsys
+) -> None:
+    root = _root(tmp_path, "# Spec\n")
+    _with_gate_exception(
+        root,
+        {"gate": "scripts/fake_gate.py", "template": "GONE_TEMPLATE.md", "reason": "phase-mismatch"},
+    )
+    assert module.check(root, module.CONFIG) == 2
+    assert "template that does not exist" in capsys.readouterr().err
+
+
+def test_gate_exception_reason_must_be_typed(tmp_path: Path, module, capsys) -> None:
+    root = _root(tmp_path, "# Spec\n")
+    _with_gate_exception(
+        root,
+        {"gate": "scripts/fake_gate.py", "template": "SPEC_TEMPLATE.md", "reason": "made-up"},
+    )
+    assert module.check(root, module.CONFIG) == 2
+    assert "is not typed" in capsys.readouterr().err
+
+
+def test_valid_gate_exception_passes(tmp_path: Path, module) -> None:
+    root = _root(tmp_path, "# Spec\n")
+    _with_gate_exception(
+        root,
+        {"gate": "scripts/fake_gate.py", "template": "SPEC_TEMPLATE.md", "reason": "phase-mismatch"},
+    )
+    assert module.check(root, module.CONFIG) == 0
+
+
+def test_shipped_gate_exceptions_resolve(module) -> None:
+    """The real declaration's recorded non-pairing points at things that exist."""
+    spec = module.load_config(REPO, module.CONFIG)
+    assert spec["gate_exceptions"]
+    assert module.check_gate_exceptions(REPO, spec) == []
+
+
 # --- Editor droppings are not templates -----------------------------------
 
 

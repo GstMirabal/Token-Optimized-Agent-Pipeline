@@ -289,7 +289,7 @@ The exact commands, and what each must return. Read exit codes with `$?` directl
 | `python3 scripts/check_template_gates.py; echo $?` | `0`, una línea `[OK]` por caso |
 | `./venv_skillopt/bin/python -m pytest tests/test_check_template_gates.py -q; echo $?` | `0` |
 | `./venv_skillopt/bin/python -m pytest tests/ -q; echo $?` | `0`, ≥ 647 tests (línea base de `041`), cero fallos |
-| `make verify; echo $?` | `0`, 16 checks verdes (15 en `041` + este) |
+| `make verify; echo $?` | `0`, **18** checks verdes (17 en `main` + este). *Corregido en Fase 7 por Gate 2: este plan decía «16 (15 en 041 + este)». El delta `+1` era correcto y la cifra absoluta no — la línea base se contó de un registro y no del árbol.* |
 | `python3 scripts/verify_references.py; echo $?` | `0` — `RA-16` check (d) resuelve el invocador de `check_template_gates.py` |
 | `python3 scripts/check_readme_counts.py; echo $?` | `0` |
 | `ruff check scripts/check_template_gates.py tests/test_check_template_gates.py; echo $?` | `0` — ficheros nuevos, sin deuda heredada |
