@@ -15,6 +15,40 @@ This rule bounds deployment scopes, establishing testing thresholds and failsafe
 ## 3. Code Rollback Safety
 - **Tracking Deviations**: Any structural detour forced by environmental variables must be explicitly marked as `:tech-debt:` inside active implementation plans, immediately rendering the block a high-priority vulnerability for retroactive analysis.
 
+## 3.1 What green cannot see (Sprint 042)
+
+**A green build reports on the input it was given, never on the inputs it would
+accept.** Measured, not argued: Sprint 042 ran `make verify` at exit `0`, a full
+suite passing, `ruff` clean and its own abort criterion satisfied, through **two
+rounds** in which the security boundary it had just built was open — because every
+one of those instruments exercises what the shipped declaration *asks for*, and
+both defects lived in what the checker *permits*.
+
+| Obligation | Done-criterion |
+| :--- | :--- |
+| A unit that validates input is tested with input it must **refuse**, not only input it accepts | One test per constraint, each red when its guard is reverted |
+| The refusal test uses the case that actually occurs, not the easy one | `../outside.py` passed while `../<root>-evil/x.py` — the documented `<host-root>/.agents-profile/` layout — did not. The easy fixture is why the defect survived its own test |
+| Nothing is claimed green on the strength of an exit code alone when the change is a gate | Say which property the exit code demonstrates, and which it cannot |
+
+Corollary for the Double-Gate below: this is why a gate runs in **fresh context**.
+The author's tests encode the author's model of what the input can be, so the
+author cannot test the assumption that produced the gap.
+
+### Fixtures that expire (hotfix `H-006`)
+
+A fixture written as an **absolute instant** and tested against a **relative**
+predicate is true until it is not, and then it silently exercises the opposite
+branch from the one it names. `tests/test_session_protocol.py` pinned
+`"2026-08-25T12:00:00Z"` against a 7-day TTL; the suite and CI went red on
+2026-09-01 with nothing committed.
+
+- Derive time fixtures from the present (`now - N days`), never from a literal.
+- Cover **both** sides of a boundary. Only the fresh side was covered, which is
+  precisely why the expiry was silent — the surviving test drifted onto the other
+  branch with nothing left to contradict it.
+- Prove each side by mutation: forcing the predicate always-false must red one
+  case, always-true the other. A test that passes under both is testing nothing.
+
 ## 4. The Double-Gate Review Protocol
 
 Phase 7 emits exactly one of `APPROVED` | `REJECTED` | `RECORD` per gate
