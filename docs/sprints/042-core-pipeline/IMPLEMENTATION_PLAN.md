@@ -246,9 +246,24 @@ to plans sealed before 030. Enforced by
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 7 | Count of rows in Work tables |
-| Subagents dispatched | 2 previstos — `qa_agent` y `tester_agent` en Fase 7, contexto fresco | `pipeline_workflow.md` Fase 7 nota: *«Fresh-context gate execution is required under both tools»*. Fases 1–6 se ejecutan en la sesión principal; **se confirma en la Fase 5** |
-| Prior session ratio | `4.1` (esta sesión, 52 mensajes, primer turno `21 682` → pico `88 283`) | `python3 scripts/session_cost.py --from-anchor --json` |
+| Work units | **9** (7 planificadas + U8/U9 por la enmienda de Fase 7) | Count of rows in Work tables |
+| Subagents dispatched | **2**, como se presupuestó — `qa_agent` (3 rondas, misma instancia reanudada) y `tester_agent` (1 ronda), ambos en contexto fresco | `pipeline_workflow.md` Fase 7; autorizado por el humano en Fase 5 como preferencia permanente |
+| Prior session ratio | `4.1` medido en Fase 1 (52 mensajes) | `python3 scripts/session_cost.py --from-anchor --json` |
+| **Ratio final — actualizado en Fase 3.5, umbral duro cruzado** | **`15.3×` en el ciclo 4** (`21 682` → `330 930`), 393 mensajes, 5 ciclos: `8.2` / `10.9` / `11.3` / **`15.3`** / `13.8` | `python3 scripts/session_cost.py --session c1ac4874-95ed-4046-8a8c-fcd3f3f4c4c5` |
+
+**Actualización obligatoria por el umbral duro** (`rules/token_economy.md §3.1`), no
+observacional. La sesión cruzó `15×` en el ciclo 4 y esta sección se actualiza antes
+de que el cierre continúe, que es lo que este plan se comprometió a hacer si ocurría.
+
+Qué lo produjo, medido y no supuesto: el sprint planificó 7 unidades y ejecutó **9
+unidades + 3 remediaciones + un hotfix completo en su propia rama**, con **cuatro
+rondas de gate** en lugar de dos. Las dos rondas extra no son desperdicio — el Gate 1
+encontró en ellas los dos defectos de seguridad, y el coste de no haberlas corrido
+habría sido enviar un control de contención que no contenía. El coste evitable está
+en otro sitio: el ciclo 4 concentra la Fase 7, donde releí varias veces ficheros que
+ya había leído en la Fase 1. La compactación reinicia el eje sin reducir el área
+(`§3.1`), y cuatro de los cinco ciclos comparten el mismo primer turno, así que el
+área es real y no un artefacto del contador.
 
 Soft (5×) / hard (15×) thresholds force an update to this section before new
 work continues — they are not observational-only once a measurable Claude
