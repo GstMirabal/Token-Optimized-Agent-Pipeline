@@ -48,6 +48,26 @@ Recognising a pattern requires it to have a name. When you catch yourself in one
 | **Wrong Abstraction** | Copy-pasting twice before understanding it, then extracting the accidental similarity |
 | **Optimistic Path** | The happy path handled, the 500 ignored |
 | **Runaway Refactor** | One fix cascading across files, each change requiring the next |
+| **Borrowed Anchor** | Measuring containment against a value the guarded input supplied. Guarding one field while its sibling in the same expression stays free is the same defect one step earlier |
+
+### The Borrowed Anchor, in full (Sprint 042)
+
+A check that asks *is this path inside that directory* proves nothing when the
+declaration being checked chose the directory. `scripts/check_template_gates.py`
+validated every render target against `sprint_dir`, and `sprint_dir` was
+`scratch / case["id"] / case["scratch_sprint_dir"]` — the last component
+validated, the middle one not. The predicate was then satisfied by construction:
+the run exited `0`, printed `[OK]`, and wrote outside its temporary directory.
+
+**Validate the field and you close the instance; verify the anchor and you close
+the class** — a fourth component joined onto that expression is contained without
+anyone remembering to guard it. State the obligation in the docstring of whatever
+measures against the anchor, at the place a future contributor would reorder.
+
+Two guards were already in place and neither helped, which is why this is named
+rather than left to care: the interpreter was pinned and the script path
+contained. A guarded argument vector says nothing about a second channel to the
+filesystem.
 
 ## 6. Regression test first (enforced)
 

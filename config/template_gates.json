@@ -1,0 +1,143 @@
+{
+  "_purpose": "Which gate consumes which versioned template, so `make verify` can prove a template still passes the check that judges what an author writes from it (scripts/check_template_gates.py).",
+  "_why_this_file_exists": [
+    "Sprint 041 hit three artifacts whose own instructions produced a blocked gate,",
+    "in its own Phases 1, 4.2 and 4.3. The sharpest was IMPLEMENTATION_PLAN_TEMPLATE.md:",
+    "every plan written faithfully from it was rejected by the mandatory Phase 1 gate,",
+    "and the only plans that passed were the ones that had dropped part of the template.",
+    "Those three are repaired. This file is what stops the fourth."
+  ],
+  "_rule": [
+    "Every entry of docs/standards/templates/ MUST appear either in some case's",
+    "`render` map or in `exceptions`. A template in neither fails the build. Without",
+    "that, the instrument covers the files it was born with and the next divergence",
+    "is born outside it."
+  ],
+  "_command_contract": [
+    "Every field here reaches the filesystem or a subprocess. The reader",
+    "(scripts/check_template_gates.py) enforces, and does not trust this file for:",
+    "no shell; argv[0] is exactly `python3`; argv[1] resolves to an existing path",
+    "inside the framework root (containment, not a name prefix — a sibling directory",
+    "whose name extends the root's is outside it); every `render` key resolves inside",
+    "docs/standards/templates/ and every `render` value inside the scratch sprint",
+    "directory; `scratch_sprint_dir` is one relative path component; `{sprint_dir}` is",
+    "the only expandable token. Widening any of these turns an edit to this file into",
+    "arbitrary execution, or an arbitrary file copy, inside `make verify` and CI.",
+    "The first version of the reader guarded the argument vector and nothing else,",
+    "and this paragraph claimed otherwise; Gate 1 of Sprint 042 measured both."
+  ],
+  "_valid_exception_reasons": ["no-automated-gate", "phase-mismatch"],
+  "_records_are_checked_too": [
+    "`gate_exceptions` grants nothing and no run depends on it, which is why it rots:",
+    "Gate 2 of Sprint 042 measured an entry naming a non-existent check, a non-existent",
+    "template and an invented reason passing in silence. Its gate, template and reason",
+    "are now resolved on every run, like the entries of `exceptions`."
+  ],
+
+  "scratch_sprint_dir": "999-core-pipeline",
+
+  "cases": [
+    {
+      "id": "implementation-plan",
+      "authored_at_phase": "1",
+      "render": {
+        "IMPLEMENTATION_PLAN_TEMPLATE.md": "IMPLEMENTATION_PLAN.md"
+      },
+      "command": [
+        "python3",
+        "skills/token-saver-auditor/scripts/audit_plan.py",
+        "{sprint_dir}/IMPLEMENTATION_PLAN.md"
+      ]
+    },
+    {
+      "id": "assignment-pair",
+      "authored_at_phase": "4.1 and 4.2",
+      "note": "One gate reads both files from the same directory, so the case is a set of rendered files and one command — not a template-to-gate pair.",
+      "render": {
+        "AGENT_ASSIGNMENT_TEMPLATE.md": "agent_assignment.md",
+        "SKILL_ASSIGNMENT_TEMPLATE.md": "skill_assignment.md"
+      },
+      "command": [
+        "python3",
+        "scripts/check_forge_ladder.py",
+        "--sprint-dir",
+        "{sprint_dir}"
+      ]
+    },
+    {
+      "id": "sprint-log",
+      "authored_at_phase": "3",
+      "render": {
+        "SPRINT_LOG_TEMPLATE.md": "SPRINT_LOG.md"
+      },
+      "command": [
+        "python3",
+        "scripts/check_gate_log.py",
+        "--sprint-dir",
+        "{sprint_dir}"
+      ]
+    }
+  ],
+
+  "gate_exceptions": [
+    {
+      "gate": "scripts/check_role_artifact.py",
+      "template": "SPRINT_LOG_TEMPLATE.md",
+      "reason": "phase-mismatch",
+      "note": "Measured exit 2 against the bare template ('missing: QA row'), and that is correct behaviour: the template is authored at Phase 3 and the verdict rows are written at Phase 7 by the gates themselves. A template owes only the gate that consumes it at the phase it is authored. Pairing it here would be repaired by adding fabricated verdict rows to the template, which would teach authors to invent verdicts."
+    }
+  ],
+
+  "exceptions": [
+    {
+      "template": "ADR_TEMPLATE.md",
+      "reason": "no-automated-gate",
+      "note": "ADR shape is reviewed by rules/documentation_standard.md, which no script enforces."
+    },
+    {
+      "template": "AUDIT_REPORT_TEMPLATE.md",
+      "reason": "no-automated-gate",
+      "note": "Consumed by audit_workflow.md; its output is read by a human, not a check."
+    },
+    {
+      "template": "BLUEPRINT_TEMPLATE.md",
+      "reason": "no-automated-gate",
+      "note": "agents.md §0 requires a Blueprint per module in a host. The nucleus records an accepted gap for its own tree (docs/active_state.json acknowledged_gaps.docs); nothing scripted judges the result."
+    },
+    {
+      "template": "CHANGELOG_TEMPLATE.md",
+      "reason": "no-automated-gate",
+      "note": "The deploy-seal check reads a real host CHANGELOG.md at release time, not this template."
+    },
+    {
+      "template": "GUIDE_TEMPLATE.md",
+      "reason": "no-automated-gate",
+      "note": "Guides are prose. WORKFLOWS_STEP_MAP_GUIDE.md is generated by scripts/map_workflows.py and never authored from this template."
+    },
+    {
+      "template": "HOTFIX_TEMPLATE.md",
+      "reason": "no-automated-gate",
+      "note": "RA-03 requires the record before the first substantive commit; the commit hook checks the message suffix, not the document's shape."
+    },
+    {
+      "template": "IDENTITY_TEMPLATE.json",
+      "reason": "no-automated-gate",
+      "note": "Scaffolded at onboarding into a host. Not JSON a framework check parses, and not a sprint artifact."
+    },
+    {
+      "template": "README_TEMPLATE.md",
+      "reason": "no-automated-gate",
+      "note": "scripts/check_readme_counts.py judges the counted block of a real README, not this template, which carries no counted block."
+    },
+    {
+      "template": "SYSTEM_OVERVIEW_TEMPLATE.md",
+      "reason": "no-automated-gate",
+      "note": "Host-only by design (agents.md §0 Entry Point); scaffolded by standardization_workflow.md and read by humans."
+    },
+    {
+      "template": "WALKTHROUGH_TEMPLATE.md",
+      "reason": "no-automated-gate",
+      "note": "Walkthroughs are narrative achievement records; RA-05 requires them updated at close, and no script judges their shape."
+    }
+  ]
+}

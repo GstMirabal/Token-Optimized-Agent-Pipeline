@@ -1,0 +1,9 @@
+{
+  "nodes": 8872,
+  "edges": 11112,
+  "communities": 775,
+  "source": "graphify-out/graph.json",
+  "sprint": 42,
+  "built_at_commit": "e1344bcef12ad469e9e392fc93eb1e748d418525",
+  "note": "Counts from `graphify update` (AST) at the sealed tip. `graphify-rebuild` (deep, semantic) could not run on this machine: it requires an LLM API key and none is exported (agents.md RA-09 forbids reading .env into context). Stated rather than silently skipped."
+}

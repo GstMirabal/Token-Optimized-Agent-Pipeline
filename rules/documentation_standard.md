@@ -128,3 +128,28 @@ to add this section (`021-030-program-queue.md` J4).
 The cheap `file:line` range check in `scripts/verify_references.py` (living
 `docs/guides`, `docs/decisions`, `docs/audits`) is complementary and **does not
 replace** T5: it catches citations out of range, not wrong-but-in-range claims.
+
+### T5 extends to status, not only to figures (Sprint 042)
+
+**A status claim in a living document is a measured figure and carries the command
+that re-measures it.** `021-030-program-queue.md` called a finding the program's
+most severe open item for five sprints after a hotfix closed it; Sprint 042's
+Phase 1 read that prose, proposed the closed work as the sprint's scope, and
+withdrew only after re-measuring the code. The cost is a planning round, and it is
+paid by whoever reads the document next.
+
+| Obligation | Done-criterion |
+| :--- | :--- |
+| A finding marked closed is marked closed **where the ordering decision is made** — the roadmap that says what is worked on next — not only in the audit register | `grep` the corpus for the identifier before the correction is called complete (`RA-14`) |
+| The closing entry names the artifact that closed it, the date, and the command that re-measures | A reader verifies instead of trusting |
+| Superseded prose is **annotated in place, never deleted** | The record of what was true when it was written survives beside the correction |
+
+### An enumeration in a decision record becomes the implementation's ceiling
+
+`ADR-0012` listed four constraints and called them *the containment*. The
+implementation matched that list exactly and contained nothing — the document is
+what made the gap invisible, and a reader treating the list as complete would
+re-derive the same defect. **State the property; give the list as evidence of the
+property, never as its definition.** When the list proves insufficient, the
+correction is a superseding ADR (§3) — deleting the insufficient list would delete
+the evidence of how a documented control became an undone one.

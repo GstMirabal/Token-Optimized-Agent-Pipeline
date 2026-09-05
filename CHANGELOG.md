@@ -4,6 +4,13 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Added
+- **Sprint 042 `template-gate-parity`** — `make verify` now fails when a versioned template cannot pass the check that consumes what an author writes from it. `scripts/check_template_gates.py` renders each template declared in `config/template_gates.json` into a scratch sprint directory and runs the declared check against the copy; the pairing must be complete, so a file in `docs/standards/templates/` with neither a case nor a typed exception fails the build. Built because Sprint 041 hit three such divergences inside its own phases — one of them had been rejecting **every** Implementation Plan written faithfully from the official template, so the only plans that passed were the ones that had dropped part of it. Three pairs are declared and one non-pairing is recorded with its reason (`check_role_artifact.py` is not owed by `SPRINT_LOG_TEMPLATE.md`, whose verdict rows Phase 7 writes).
+- `docs/decisions/ADR-0013-declaration-containment.md` — every value a declaration contributes is traced to a guard, and a path guard is anchored to already-verified ground. Supersedes `ADR-0012`, whose four-item enumeration of the containment the implementation matched exactly and which was not containment.
+
+### Changed
+- `docs/roadmaps/core/pipeline/021-030-program-queue.md` — `F8` / `F-023-S4` marked closed by hotfix `H-002-secrets` (2026-08-25), re-measured against `hooks/on_commit.py` rather than read from a record. The section had declared it the program's most severe open item for five sprints after its repair, and Sprint 042's own Phase 1 proposed it as scope on that basis before withdrawing. Sprint 042's exclusions (`T1`-`T3`) are routed there with their reasons.
+
 ### Fixed
 - **Hotfix `H-006`** — `make verify` and CI were red on `main` from 2026-09-01 with nothing committed to cause it. `tests/test_session_protocol.py` pinned the platform-probe fixture to the literal instant `2026-08-25T12:00:00Z` and tested it against a **relative** predicate (`session_probe.py:598`, `PLATFORM_TTL_DAYS = 7`), so the fixture aged out of the window it was written to exercise and the test began asserting the opposite branch from the one it names. Fixtures now derive from the present, and the expired side of the boundary — previously uncovered, which is why the expiry was silent — is pinned by `test_expired_ttl_reprobes`. Both cases are mutation-proven: removing the TTL comparison reds the fresh case, forcing it always-true reds the expired one. Record: `docs/hotfixes/H-006-tests.md`. Measured bound: `datetime.now` compared against stored state occurs exactly once in the codebase, so no sibling fixture is waiting to expire.
 
