@@ -4,6 +4,8 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.25.0] - 2026-09-05
+
 ### Added
 - **Sprint 042 `template-gate-parity`** — `make verify` now fails when a versioned template cannot pass the check that consumes what an author writes from it. `scripts/check_template_gates.py` renders each template declared in `config/template_gates.json` into a scratch sprint directory and runs the declared check against the copy; the pairing must be complete, so a file in `docs/standards/templates/` with neither a case nor a typed exception fails the build. Built because Sprint 041 hit three such divergences inside its own phases — one of them had been rejecting **every** Implementation Plan written faithfully from the official template, so the only plans that passed were the ones that had dropped part of it. Three pairs are declared and one non-pairing is recorded with its reason (`check_role_artifact.py` is not owed by `SPRINT_LOG_TEMPLATE.md`, whose verdict rows Phase 7 writes).
 - `docs/decisions/ADR-0013-declaration-containment.md` — every value a declaration contributes is traced to a guard, and a path guard is anchored to already-verified ground. Supersedes `ADR-0012`, whose four-item enumeration of the containment the implementation matched exactly and which was not containment.
