@@ -4,6 +4,15 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Added
+- **Sprint 043 `submodule-runtime-parity`** — `scripts/check_venv_relocatable.py`: a Python venv is not relocatable, so `venv_skillopt/bin/graphify` and `bin/pip` carry an absolute shebang to the build path and `bad interpreter` under any relocated `.agents` (submodule checkout, copied tree, renamed nucleus), while `bin/python` — a symlink to the system interpreter — keeps working, so the breakage is silent until a console-script runs. `start_workflow.md` `pip_setup` only rebuilt the venv when `installed.lock` was absent, so a stale venv was never revalidated. The new gate runs every session, matches the `pyvenv.cfg` `command` line as a whole substring (whitespace-immune) and follows pip's POSIX `#!/bin/sh` + `'''exec'` wrapper to the real interpreter; exit `2` triggers a `python3 -m venv --clear` rebuild. `invoked_by: workflows/start_workflow.md#pip_setup`. #043
+
+### Changed
+- `workflows/start_workflow.md` — `read_graph` invokes `venv_skillopt/bin/python -m graphify` (never the `bin/graphify` console-script), checks `graphify-out/.graphify_root` against the checkout root and forces `graphify update . --force` on mismatch, and requires a `⚠️ graph unavailable (sandbox/venv)` report to the human when `graphify update` fails rather than a silent fall-back to recursive grep. `pip_setup` runs `check_venv_relocatable.py` regardless of `installed.lock`. #043
+- `rules/graphify.md` — every CLI example switched to `venv_skillopt/bin/python -m graphify <cmd>`; added the invocation-form rule and the non-silent sandbox-failure rule. #043
+- `agents.md` §4 `feedback_upstream` — rewritten as the single canonical statement of the three-tier learning flow. It now spells out how a framework-class lesson reaches the nucleus without violating `§3 strict_rule`: the host session only *detects and drafts* (`routing_class: nucleus`, surfaced to the human in `extract_workflow`); the PR is authored from a **separate clone**, never a write into the `.agents` tree. `§3 jurisdiction` and `workflows/extract_workflow.md` point to it and carry a compressed restatement to re-grep on every §4 patch (`RA-14`). #043
+- `docs/guides/SELF_IMPROVEMENT_GUIDE.md` — new "How the framework learns from a host" section (detect-and-draft vs land-the-PR as two separate acts); metadata block refreshed to Sprint 043. #043
+
 ## [4.25.0] - 2026-09-05
 
 ### Added

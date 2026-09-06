@@ -1,8 +1,8 @@
 # How to create agents and profiles without breaking strict_rule
 
-**Last Audit Sprint**: 028
-**Last Audit Date**: 2026-08-25
-**Last Audit Commit SHA**: 9da899c
+**Last Audit Sprint**: 043
+**Last Audit Date**: 2026-09-06
+**Last Audit Commit SHA**: d3227f4
 
 ---
 
@@ -10,6 +10,24 @@
 
 Enable a host to improve itself — new agents, family profiles, preserved memory —
 without writing into the `.agents` submodule (`agents.md §3 strict_rule`).
+
+## How the framework learns from a host
+
+`agents.md §4 feedback_upstream` is the canonical statement; this is the
+operator's summary of its framework-class branch.
+
+A host session **never** writes into `.agents` — not even to file a framework
+improvement. The learning still reaches the nucleus, in two separate acts:
+
+| Act | Where | Who | When |
+| :--- | :--- | :--- | :--- |
+| **Detect and draft** | the host repo (memory, sprint record) | the host session | `extract_workflow` — assign `routing_class: nucleus`, write the finding down, surface it to the human |
+| **Land the PR** | a **separate clone** of the `.agents` repository | a human, or a nucleus-mode session in that clone | after the host sprint closes |
+
+The submodule tree stays untouched throughout (`scripts/submodule_purity.py`
+refuses a close that contaminates it). A framework-class lesson that is only
+indexed in the host's `memory_index.json` and never drafted upstream is a
+governance violation, not a kept secret.
 
 ## Prerequisites
 
