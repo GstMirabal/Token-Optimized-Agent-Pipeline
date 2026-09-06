@@ -18,18 +18,25 @@ Check: `python3 scripts/check_task_scope.py --sprint-dir docs/sprints/044-core-p
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| U1 | `scripts/session_start.py` | modify | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U2 | `tests/test_session_start.py` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U3 | `scripts/session_start.py` | modify | high | `implementer_agent` | opus | high | ⏳ (tier_escalation) |
-| U4 | `tests/test_session_protocol.py` | modify | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U5 | `scripts/ci_gate.py` | modify | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U6 | `tests/test_ci_gate.py` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U7 | `scripts/detect_drift.py` | modify | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U8 | `tests/test_detect_drift.py` | create | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U9 | `Makefile` | modify | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U10 | `scripts/check_venv_relocatable.py` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U11 | `tests/test_check_venv_relocatable.py` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U12 | `docs/decisions/ADR-0014-ci-gate-record-on-uninspectable-protection.md` | create | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| U1 | `scripts/session_start.py` | modify | medium | `implementer_agent` | sonnet | medium | ✅ a0cf769 |
+| U2 | `tests/test_session_start.py` | modify | low | `implementer_agent` | sonnet | medium | ✅ a0cf769 |
+| U3 | `scripts/session_start.py` | modify | high | `implementer_agent` | opus | high | ✅ a2fcdbb (tier_escalation) |
+| U4 | `tests/test_session_start.py` | modify | medium | `implementer_agent` | sonnet | medium | ✅ a2fcdbb |
+| U5 | `scripts/ci_gate.py` | modify | medium | `implementer_agent` | sonnet | medium | ✅ 53786db |
+| U6 | `tests/test_ci_gate.py` | modify | low | `implementer_agent` | sonnet | medium | ✅ 53786db |
+| U7 | `scripts/detect_drift.py` | modify | medium | `implementer_agent` | sonnet | medium | ✅ 502b5a9 |
+| U8 | `tests/test_detect_drift.py` | create | low | `implementer_agent` | sonnet | medium | ✅ 502b5a9 |
+| U9 | `Makefile` | modify | medium | `implementer_agent` | sonnet | medium | ✅ aa69f08 |
+| U10 | `scripts/check_venv_relocatable.py` | modify | low | `implementer_agent` | sonnet | medium | ✅ 44e0e65 |
+| U11 | `tests/test_check_venv_relocatable.py` | modify | low | `implementer_agent` | sonnet | medium | ✅ 44e0e65 |
+| U12 | `docs/decisions/ADR-0014-ci-gate-record-on-uninspectable-protection.md` | create | low | `doc_orchestrator` | sonnet | medium | ✅ 8de8eb7 |
+
+**Plan deviation (recorded for `RA-14`):** U4's target moved from
+`tests/test_session_protocol.py` to `tests/test_session_start.py` — the tests U3
+forces (the `_run_script` cwd-kwarg mock updates) and the new F-BOOT-2 boot-path
+cases both belong beside the existing Claude-boot suite, and the `fix(` hook
+(`rules/code_craft.md §6`) requires the proving test in U3's own commit. U3 and
+U4 committed together (`a2fcdbb`).
 
 ---
 
