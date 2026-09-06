@@ -109,6 +109,23 @@ of a status claim nobody re-measured.
 
 ---
 
+### ▶️ Taken by Sprint 043 (`submodule-runtime-parity`) — graphify/venv break under a relocated `.agents`
+
+Not drawn from this queue: four field defects the operator hit while running the
+framework as a submodule inside a host.
+
+| # | Defect | Fix |
+| :--- | :--- | :--- |
+| C-1/C-5 | A Python venv is not relocatable — `venv_skillopt/bin/graphify` and `bin/pip` carry an absolute shebang to the build path, so they `bad interpreter` under any relocated `.agents`. `pip_setup` only rebuilds when `installed.lock` is absent, so a stale venv is never revalidated | `scripts/check_venv_relocatable.py` (new) — whitespace-immune build-path + pip `/bin/sh`-wrapper detection; `start_workflow.md` `pip_setup` runs it every session, `--clear` rebuild on exit `2` |
+| C-2 | `start_workflow.md` `read_graph` invoked the `graphify` console-script; `reverse_documentation_workflow.md` and `claude/mcp.json` already used `python -m graphify` | All graphify invocations in `workflows/` and `rules/` use `venv_skillopt/bin/python -m graphify` |
+| C-3 | `graphify-out/.graphify_root` holds an absolute path baked at build time | `read_graph` compares it to the checkout root and forces `graphify update . --force` on mismatch |
+| C-4 | `read_graph` degraded to recursive grep with no signal when the sandbox denied `graphify update` | `read_graph` and `rules/graphify.md` require a `⚠️ graph unavailable (sandbox/venv)` report to the human — no silent fallback. Full sandbox recovery (auto-retry unsandboxed) is **not** taken: Claude Code owns the sandbox. Related to rider **S** below |
+| C-6 | `strict_rule` (no host write to `.agents`) read as contradicting `feedback_upstream` (framework must learn from hosts) | `agents.md §4` rewritten as the single canonical statement: host session *detects and drafts*; the PR is authored from a **separate clone**. `§3 jurisdiction` and `extract_workflow.md` point to it; `SELF_IMPROVEMENT_GUIDE.md` gained a "how the framework learns from a host" section |
+
+**Surfaced for `/agents:extract`**: `check_venv_relocatable.py:75` accepts `str(venv)` (the arg as given) as well as `str(venv.resolve())`, which is loose under a relative `--venv` — unreachable from the shipped invoker, recorded as a decision. Gate-2 round 1 `REJECTED` the first `check_venv_relocatable.py` for a whitespace-path false positive whose prescribed remedy looped; fixed at origin in round 2.
+
+---
+
 ### Queued for **037** — rider **S** (Cursor agent sandbox false reds)
 
 Opened 2026-08-26 during Sprint 036 Phase 7 / `/start` on `ai-sprint/036`.
