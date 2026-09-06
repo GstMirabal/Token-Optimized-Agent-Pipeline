@@ -1,0 +1,9 @@
+{
+  "nodes": 9008,
+  "edges": 11319,
+  "communities": 785,
+  "source": "graphify-out/graph.json",
+  "sprint": 43,
+  "built_at_commit": "7016e24165fdb49bd44cb419157276407586aa8b",
+  "note": "Counts from `graphify update --force` (AST) at the pre-seal tip. `graphify-rebuild` (deep, semantic) could not run: it requires an LLM API key and none is exported (RA-09 forbids reading .env). The Makefile `graphify-rebuild` target also invokes the `graphify` console-script + `--mode deep` unconditionally \u2014 recorded as a follow-up in SPRINT_LOG.md."
+}
