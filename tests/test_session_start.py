@@ -345,6 +345,58 @@ def test_boot_claude_never_touches_the_cursor_bridge(
     assert "cursor" not in targets
 
 
+def test_bridge_permission_denied_recognizes_claude_mirror(session_start) -> None:
+    """F-BOOT-1: a raw PermissionError naming .claude is a permission denial.
+
+    Fails against the pre-Sprint-044 tree, where the predicate took no target
+    and matched `.cursor` alone: a denied `claude`-target install then fell
+    through to the hard-stop branch.
+    """
+    denied = (
+        "PermissionError: [Errno 13] Permission denied: "
+        "'/host/.claude/settings.json'"
+    )
+    assert session_start._bridge_permission_denied(denied, "claude") is True
+    # The rendered line shape is recognised too.
+    rendered = "bridge: permission denied on .claude (Errno 13)"
+    assert session_start._bridge_permission_denied(rendered, "claude") is True
+    # Marker isolation: a .cursor denial is not this target's, and an unknown
+    # target never reports a denial.
+    cursor_denied = "PermissionError: ... '/host/.cursor/mcp.json'"
+    assert session_start._bridge_permission_denied(cursor_denied, "claude") is False
+    assert session_start._bridge_permission_denied(denied, "terminal") is False
+    # A non-permission failure is still not a denial.
+    assert session_start._bridge_permission_denied("some other failure", "claude") is False
+
+
+def test_boot_claude_permission_error_is_advisory(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys
+) -> None:
+    """F-BOOT-1: a sandbox-denied `.claude` install is advisory, exit 0.
+
+    Against the pre-Sprint-044 tree this exits 2 (`_bridge_permission_denied`
+    returned False for the `.claude` string), so the host session was never
+    claimed.
+    """
+    root = _write_minimal_root(tmp_path / "repo")
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    monkeypatch.setattr(session_start, "_run_script", lambda *a, **k: 0)
+    monkeypatch.setattr(session_start, "_lock_stale", lambda *a, **k: True)
+    monkeypatch.setattr(session_start, "_commands_body_stale", lambda *a, **k: True)
+
+    def mock_install(root_path: Path, target: str) -> tuple[int, str]:
+        return 1, (
+            "PermissionError: [Errno 13] Permission denied: "
+            "'/host/.claude/settings.json'"
+        )
+
+    monkeypatch.setattr(session_start, "_run_bridge_install", mock_install)
+    assert session_start.main(["--boot", "--tool", "claude-code"]) == 0
+    combined = capsys.readouterr()
+    out = combined.out + combined.err
+    assert "claude" in out and ("agent sandbox" in out or "PermissionError" in out)
+
+
 def test_boot_terminal_has_no_bridge_and_still_succeeds(
     session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

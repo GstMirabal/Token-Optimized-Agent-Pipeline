@@ -19,7 +19,8 @@ Usage:
 
 Exit codes:
     0 — briefing printed (no --boot), or boot completed (including bridge
-        PermissionError advisory — Sprint 040)
+        PermissionError advisory — Sprint 040 for `.cursor`, Sprint 044 for
+        the `.claude` mirror too)
     2 — drift requires reconcile, claim refused, or non-permission bridge
         install failure (RA-11)
 """
@@ -310,11 +311,36 @@ def _run_bridge_install(root: Path, target: str) -> tuple[int, str]:
     return int(proc.returncode), combined
 
 
-def _bridge_permission_denied(output: str) -> bool:
+_MIRROR_MARKER = {"cursor": ".cursor", "claude": ".claude"}
+
+
+def _bridge_permission_denied(output: str, target: str) -> bool:
+    """True when ``target``'s bridge install failed only for lack of write access.
+
+    Recognises both shapes the install path can produce: the rendered
+    ``bridge: permission denied on .<mirror>`` line that ``cursor_adapter.py``
+    raises, and a raw ``PermissionError`` traceback naming the mirror directory
+    — which is what ``install.py`` yields when it cannot write
+    ``<host>/.claude/settings.json`` under an agent sandbox. Until Sprint 044
+    this matched ``.cursor`` alone, so a denied ``claude``-target install fell
+    through to the hard-stop branch (``F-BOOT-1``); Sprint 041 had generalised
+    ``_commands_body_stale`` to every target but left this predicate behind.
+
+    Args:
+        output: Combined stdout+stderr captured from the install attempt.
+        target: ``claude`` or ``cursor`` — selects the mirror marker to match.
+
+    Returns:
+        bool: True when the failure is a permission denial on this target's
+        mirror, False for any other failure (or an unknown target).
+    """
+    marker = _MIRROR_MARKER.get(target)
+    if marker is None:
+        return False
     lowered = output.lower()
-    if "bridge: permission denied on .cursor" in lowered:
+    if f"bridge: permission denied on {marker}" in lowered:
         return True
-    return "permissionerror" in lowered and ".cursor" in lowered
+    return "permissionerror" in lowered and marker in lowered
 
 
 def _bridge_triage(root: Path, target: str | None) -> tuple[int, list[str]]:
@@ -340,7 +366,7 @@ def _bridge_triage(root: Path, target: str | None) -> tuple[int, list[str]]:
         install_rc, install_out = _run_bridge_install(root, target)
         if install_rc == 0:
             return 0, []
-        if not _bridge_permission_denied(install_out):
+        if not _bridge_permission_denied(install_out, target):
             print(
                 f"boot: bridge install --target {target} failed "
                 f"(exit {install_rc}).",
