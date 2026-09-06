@@ -18,12 +18,12 @@
 
 ## 🏁 Sprint Progression
 
-- [ ] **A1** — `workflows/start_workflow.md`: `read_graph` → `python -m graphify`, chequeo `.graphify_root`, reporte no-silencioso de sandbox; `pip_setup` invoca el gate de relocatabilidad
-- [ ] **A2** — `rules/graphify.md`: ejemplos CLI a `python -m graphify` + nota modo submódulo
-- [ ] **D1** — `scripts/check_venv_relocatable.py` (nuevo): gate determinista ruta-de-build vs `agents_root()`
-- [ ] **D2** — `tests/test_venv_relocatable.py` (nuevo): cobertura del gate
-- [ ] **C1** — `agents.md`: §4 `feedback_upstream` como bloque canónico único; §3 referencia (`RA-14`)
-- [ ] **C2** — `docs/guides/SELF_IMPROVEMENT_GUIDE.md`: párrafo «cómo aprende el framework de un host»
+- [x] **A1** — `workflows/start_workflow.md`: `read_graph` → `python -m graphify`, chequeo `.graphify_root`, reporte no-silencioso de sandbox; `pip_setup` invoca el gate de relocatabilidad
+- [x] **A2** — `rules/graphify.md`: ejemplos CLI a `python -m graphify` + nota modo submódulo
+- [x] **D1** — `scripts/check_venv_relocatable.py` (nuevo): gate determinista ruta-de-build vs `agents_root()`
+- [x] **D2** — `tests/test_check_venv_relocatable.py` (nuevo): cobertura del gate
+- [x] **C1** — `agents.md`: §4 `feedback_upstream` como bloque canónico único; §3 referencia (`RA-14`)
+- [x] **C2** — `docs/guides/SELF_IMPROVEMENT_GUIDE.md`: párrafo «cómo aprende el framework de un host»
 
 ---
 
@@ -31,7 +31,7 @@
 
 | Friction Point | Resolution / Workaround | KI ID |
 | :--- | :--- | :--- |
-| _pendiente extract_ | | |
+| Plan nombró el test `tests/test_venv_relocatable.py` | Renombrado a `tests/test_check_venv_relocatable.py` en todos los artefactos del sprint para seguir la convención `test_check_*.py` de los tests hermanos | _extract_ |
 
 ---
 
@@ -46,6 +46,6 @@
 ## ⚓ Documentation Entry Point Seal
 
 **Strategic Lock**: LOCKED
-**Next Phase**: 4.1 Agent Assignment
+**Next Phase**: 7 Quality Gate
 
 *Certified under conventional commit standard: `fix(pipeline): message #043`*

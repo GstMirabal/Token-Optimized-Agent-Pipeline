@@ -172,7 +172,7 @@ file** as its structural subject (`agents.md §2 jurisdictional_lock`).
 | A1 | `workflows/start_workflow.md` | modify | medium | `orchestrator` | ⏳ |
 | A2 | `rules/graphify.md` | modify | low | `rule_validator` | ⏳ |
 | D1 | `scripts/check_venv_relocatable.py` | create | medium | `implementer_agent` | ⏳ |
-| D2 | `tests/test_venv_relocatable.py` | create | low | `implementer_agent` | ⏳ |
+| D2 | `tests/test_check_venv_relocatable.py` | create | low | `implementer_agent` | ⏳ |
 | C1 | `agents.md` | modify | medium | `rule_validator` | ⏳ |
 | C2 | `docs/guides/SELF_IMPROVEMENT_GUIDE.md` | modify | low | `doc_orchestrator` | ⏳ |
 
@@ -253,7 +253,7 @@ work continues.
 | `python3 scripts/check_venv_relocatable.py; echo $?` | `0` sobre el venv correctamente ubicado |
 | `venv_skillopt/bin/python -m graphify --version; echo $?` | `0` |
 | `grep -rn "bin/graphify " workflows/ rules/; echo $?` | `1` (sin coincidencias) |
-| `venv_skillopt/bin/python -m pytest tests/test_venv_relocatable.py -q; echo $?` | `0` |
+| `venv_skillopt/bin/python -m pytest tests/test_check_venv_relocatable.py -q; echo $?` | `0` |
 | `python3 scripts/verify_references.py; echo $?` | `0` (check (d) resuelve el nuevo `invoked_by`) |
 | `make verify` | pass (pytest + installer + step map fresco) |
 | `python3 skills/token-saver-auditor/scripts/audit_plan.py docs/sprints/043-core-pipeline/IMPLEMENTATION_PLAN.md; echo $?` | `0` |
@@ -270,7 +270,7 @@ work continues.
 | `agents.md` | §4 `feedback_upstream` consolidado en un bloque canónico del flujo de tres niveles; §3 `jurisdiction`/`strict_rule` lo referencian |
 | `docs/guides/SELF_IMPROVEMENT_GUIDE.md` | párrafo explícito «cómo aprende el framework de un host» apuntando a `agents.md §4` |
 | `scripts/check_venv_relocatable.py` | **nuevo** — gate determinista de relocatabilidad del venv |
-| `tests/test_venv_relocatable.py` | **nuevo** — cobertura del gate |
+| `tests/test_check_venv_relocatable.py` | **nuevo** — cobertura del gate |
 | `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` | regenerado en Phase 8 (`make verify`); esperado no-op (claves de paso sin cambio) |
 | `CHANGELOG.md` (`.agents`) | entrada `[Unreleased]` en Sprint Closeout |
 | `docs/sprints/043-core-pipeline/PHASE_REGISTER.md` | **nuevo** en Sprint Closeout |

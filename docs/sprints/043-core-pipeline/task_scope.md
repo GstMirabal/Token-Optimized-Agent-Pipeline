@@ -16,12 +16,12 @@ Check: `python3 scripts/check_task_scope.py --sprint-dir docs/sprints/043-core-p
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| A1 | `workflows/start_workflow.md` | modify | medium | `orchestrator` | sonnet | medium | ⏳ |
-| A2 | `rules/graphify.md` | modify | low | `rule_validator` | sonnet | medium | ⏳ |
-| D1 | `scripts/check_venv_relocatable.py` | create | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| D2 | `tests/test_venv_relocatable.py` | create | low | `implementer_agent` | sonnet | medium | ⏳ |
-| C1 | `agents.md` | modify | medium | `rule_validator` | sonnet | medium | ⏳ |
-| C2 | `docs/guides/SELF_IMPROVEMENT_GUIDE.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A1 | `workflows/start_workflow.md` | modify | medium | `orchestrator` | sonnet | medium | ✅ 8abffe2 |
+| A2 | `rules/graphify.md` | modify | low | `rule_validator` | sonnet | medium | ✅ caa8bfc |
+| D1 | `scripts/check_venv_relocatable.py` | create | medium | `implementer_agent` | sonnet | medium | ✅ 1f89eb4 |
+| D2 | `tests/test_check_venv_relocatable.py` | create | low | `implementer_agent` | sonnet | medium | ✅ 410eba3 |
+| C1 | `agents.md` | modify | medium | `rule_validator` | sonnet | medium | ✅ d3227f4 |
+| C2 | `docs/guides/SELF_IMPROVEMENT_GUIDE.md` | modify | low | `doc_orchestrator` | sonnet | medium | ✅ 06e376c |
 
 ---
 

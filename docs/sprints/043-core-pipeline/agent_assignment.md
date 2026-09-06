@@ -28,7 +28,7 @@ every row.
 | A1 | `workflows/start_workflow.md` | modify | native | `orchestrator` | N/A | `agents/orchestrator.md` |
 | A2 | `rules/graphify.md` | modify | native | `rule_validator` | N/A | `agents/rule_validator.md` |
 | D1 | `scripts/check_venv_relocatable.py` | create | native | `implementer_agent` | N/A | `agents/implementer_agent.md` |
-| D2 | `tests/test_venv_relocatable.py` | create | native | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| D2 | `tests/test_check_venv_relocatable.py` | create | native | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | C1 | `agents.md` | modify | native | `rule_validator` | N/A | `agents/rule_validator.md` |
 | C2 | `docs/guides/SELF_IMPROVEMENT_GUIDE.md` | modify | native | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 
