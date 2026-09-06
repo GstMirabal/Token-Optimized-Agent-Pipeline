@@ -41,6 +41,7 @@ here before that phase is the correct state, not a missing row.
 
 | Gate | Round | Verdict | Class | Notes |
 | :--- | :--- | :--- | :--- | :--- |
+| QA Agent (structural) | 1 | REJECTED | charter | `verify_references` / `check_task_scope` / `check_forge_ladder` / `check_template_gates` / `make verify` all exit `0`; zero new ruff findings vs `main`. Two charter findings: **C-1** `resolve_inputs` grew to 53 lines (`agents.md §1` limit 50) — the file's first breach. **C-2** `RA-14`: the approved plan said "403/404" in three places while implementation, tests and `ADR-0014` were 403-only. Remediated `daa40ed` (extract `_record_not_inspectable`, `resolve_inputs` → 47) and `2baa07c` (plan/task_scope/ADR reconciled to HTTP 403; `task_scope.md` deviation row #2 added). Testifying notes carried to closeout. Not a third consecutive REJECTED — no `remediation_workflow.md`. |
 
 Emitible set: `APPROVED` \| `REJECTED` \| `RECORD`, each with class `charter` \|
 `instructing` \| `testifying` (`RA-17`, `rules/qa_and_testing.md` §4).
