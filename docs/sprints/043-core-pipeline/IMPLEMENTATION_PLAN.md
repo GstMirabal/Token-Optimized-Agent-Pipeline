@@ -307,9 +307,9 @@ proceden por separado.
 
 | Field | Value |
 | :--- | :--- |
-| **Approved by** | _pending_ |
-| **Date** | _pending_ |
-| **Plan commit at approval** | _pending_ |
+| **Approved by** | GstMirabal (gst.mirabal@gmail.com) — attended Phase 5, `/agents:pipeline` |
+| **Date** | 2026-09-06 |
+| **Plan commit at approval** | `82e9644` (filed) · gate re-run at `bf3ef04` |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an
