@@ -52,6 +52,15 @@ only the message separates them. The first is an answer — classic protection
 requires nothing here. The second is not: the branch does not exist, and
 treating it as "requires nothing" would pass a gate against a typo.
 
+**When both sources refuse with HTTP 403** — every private repository on the
+GitHub free plan, where `.../protection` and `.../rules/branches` answer
+`Upgrade to GitHub Pro` — the required set is not inspectable and no token or
+retry changes that. The gate emits a `RECORD` (testifying, `RA-17`) and exits
+`0` rather than blocking the merge path of every such host outright, naming the
+manual substitute: `gh pr checks <N>` observed as a separate step before the
+merge (`RA-13` preserved by that separate observation). Decision: `ADR-0014`
+(`F-BOOT-3`).
+
 invoked_by: deployment_workflow.md#pr_flow.
 
 The branch whose requirements apply is read from the pull request itself, never
@@ -64,7 +73,9 @@ Usage:
     python3 scripts/ci_gate.py 47 --base release/2.0
 
 Exit codes:
-    0 — every required check reported and passed; the merge may be issued
+    0 — every required check reported and passed (the merge may be issued), or
+        branch protection is not inspectable on this repository's plan and a
+        RECORD is emitted with the manual substitute named (ADR-0014)
     2 — a required check failed, is still pending, none is declared, or the
         state could not be determined. The merge must not be issued in any of
         those cases (RA-11)
@@ -133,6 +144,14 @@ UNORDERABLE = {"", "0001-01-01T00:00:00Z"}
 # Sentinels distinguishing "the API answered" from "the API did not".
 NOT_FOUND = "not-found"
 FORBIDDEN = "forbidden"
+
+# Both protection sources refused with HTTP 403 — the state of every private
+# repository on the GitHub free plan, where `.../protection` and `.../rulesets`
+# answer `Upgrade to GitHub Pro`. Distinct from "unreadable" because there is
+# nothing to retry and no token that would help: the gate cannot inspect the
+# required set here and says so as a RECORD, rather than blocking every such
+# host's merge path outright (`F-BOOT-3`, ADR-0014).
+PROTECTION_NOT_INSPECTABLE = "protection-not-inspectable-on-plan"
 
 # Both are HTTP 404; only this message means "protected by nothing", which is an
 # answer. Any other 404 from that endpoint is not.
@@ -291,6 +310,8 @@ def required_checks(slug: str, base: str) -> tuple[set[str] | None, str]:
     rulesets, ruleset_error = required_from_rulesets(slug, base)
 
     if protection is None and rulesets is None:
+        if protection_error == FORBIDDEN and ruleset_error == FORBIDDEN:
+            return None, PROTECTION_NOT_INSPECTABLE
         return None, f"branch protection: {protection_error}; rulesets: {ruleset_error}"
 
     known = (protection or set()) | (rulesets or set())
@@ -559,6 +580,15 @@ def resolve_inputs(args: argparse.Namespace) -> set[str] | int:
             return 2
 
     required, error = required_checks(slug, base)
+    if error == PROTECTION_NOT_INSPECTABLE:
+        print(f"📋 RECORD (testifying) — `{base}` branch protection and rulesets "
+              f"are not readable on this repository's plan (HTTP 403 on both "
+              f"endpoints). This gate cannot verify the required set here and "
+              f"does not block on it (RA-17).\n"
+              f"   Manual substitute, observed as a SEPARATE step before the "
+              f"merge is issued (RA-13): run `gh pr checks {args.pr}` and confirm "
+              f"every check is green.")
+        return 0
     if required is None:
         print(f"❌ What `{base}` requires could not be determined, so nothing "
               f"here proves the checks passed — {error}\n"

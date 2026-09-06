@@ -266,6 +266,43 @@ def test_one_unreadable_source_still_verifies_what_the_other_declares(monkeypatc
     assert "may be incomplete" in capsys.readouterr().err
 
 
+def test_both_sources_forbidden_is_flagged_not_inspectable(monkeypatch):
+    """F-BOOT-3: a private repo on the free plan 403s on BOTH endpoints.
+
+    That is not the same state as one 403 and one transient failure
+    (`test_neither_source_readable_...` keeps exit 2): nothing here is
+    retryable, so `required_checks` returns the dedicated sentinel.
+    """
+    monkeypatch.setattr(ci_gate, "gh_json", fake_gh({
+        "protection": (None, ci_gate.FORBIDDEN),
+        "rules/branches": (None, ci_gate.FORBIDDEN),
+    }))
+    names, error = ci_gate.required_checks(SLUG, "main")
+    assert names is None
+    assert error == ci_gate.PROTECTION_NOT_INSPECTABLE
+
+
+def test_main_records_and_exits_0_when_protection_is_not_inspectable(
+    monkeypatch, capsys
+):
+    """F-BOOT-3: the RA-13 gate stays operable on a free-plan private repo.
+
+    Against the pre-Sprint-044 tree this exits 2 (`resolve_inputs` mapped every
+    unreadable required set to a hard failure), making the gate impossible to
+    pass for every such host.
+    """
+    code, out, err = drive(monkeypatch, capsys, {
+        **HEALTHY,
+        "protection": (None, ci_gate.FORBIDDEN),
+        "rules/branches": (None, ci_gate.FORBIDDEN),
+    })
+    assert code == 0
+    assert "RECORD" in out
+    assert "gh pr checks 45" in out
+    assert "RA-13" in out
+    assert err == ""
+
+
 # --- Reducing one rollup entry --------------------------------------------
 
 @pytest.mark.parametrize("conclusion", ["SUCCESS", "NEUTRAL", "SKIPPED"])
