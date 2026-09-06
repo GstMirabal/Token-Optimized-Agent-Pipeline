@@ -5,7 +5,10 @@ Orchestrates existing local tools into a short English briefing for
 `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md`.
 
 With ``--boot``: run drift → claim → probe → sync → bridge, then print the
-briefing. Drift exit ``2`` propagates and skips claim (Sprint 039 B1).
+briefing. Drift exit ``2`` propagates and skips claim (Sprint 039 B1). In
+submodule mode the anchor-writing sub-scripts (claim, probe) run with cwd at the
+host root, not the ``.agents`` checkout, so the host anchor is the one claimed
+(``F-BOOT-2``, Sprint 044).
 
 The bridge step asks ``scripts/bridge_state.py`` whether **this** target's
 mirror is missing or diverged, for every target rather than for Cursor alone
@@ -36,6 +39,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from _mode import is_nucleus
 from bridge_state import bridge_stale
 from bridge_state import lock_stale as _bridge_lock_stale
 
@@ -223,17 +227,40 @@ def apply_line_cap(lines: list[str], cap: int = LINE_CAP) -> list[str]:
     return kept
 
 
-def _run_script(root: Path, relative: str, *args: str) -> int:
+def _run_script(
+    root: Path, relative: str, *args: str, cwd: Path | None = None
+) -> int:
     script = root / relative
     if not script.is_file():
         print(f"boot: missing {relative}", file=sys.stderr)
         return 2
     proc = subprocess.run(
         [sys.executable, str(script), *args],
-        cwd=str(root),
+        cwd=str(cwd if cwd is not None else root),
         check=False,
     )
     return int(proc.returncode)
+
+
+def _anchor_cwd(root: Path) -> Path:
+    """Directory the anchor-writing sub-scripts must resolve their paths against.
+
+    ``session_state.py`` and ``session_probe.py`` are host-scoped: they read and
+    write ``docs/active_state.json`` relative to the process cwd. In nucleus mode
+    the framework *is* the work, so ``root`` (the ``.agents`` checkout) is
+    correct. In submodule mode the work is the superproject and its anchor lives
+    at ``<host>/docs/active_state.json`` — one level above ``root`` — so running
+    them at ``root`` claimed the gitignored nucleus anchor and left the host
+    session unclaimed (``F-BOOT-2``). ``detect_drift.py`` and
+    ``sync_agents_pin.py`` are deliberately left at ``root``.
+
+    Args:
+        root: The ``.agents`` checkout (``repo_root()``).
+
+    Returns:
+        Path: ``root`` in nucleus mode, ``root.parent`` in submodule mode.
+    """
+    return root if is_nucleus() else root.parent
 
 
 def _bridge_target(tool: str) -> str | None:
@@ -395,14 +422,16 @@ def run_boot(root: Path, tool: str) -> int:
         )
         return 2
 
+    anchor_cwd = _anchor_cwd(root)
     claim_rc = _run_script(
-        root, "scripts/session_state.py", "claim", "--tool", tool
+        root, "scripts/session_state.py", "claim", "--tool", tool, cwd=anchor_cwd
     )
     if claim_rc == 2:
         print("boot: claim refused (exit 2).", file=sys.stderr)
         return 2
 
-    _run_script(root, "scripts/session_probe.py")  # advisory; ignore exit 1
+    # advisory; ignore exit 1
+    _run_script(root, "scripts/session_probe.py", cwd=anchor_cwd)
 
     sync_rc = _run_script(root, "scripts/sync_agents_pin.py")
     if sync_rc == 2:

@@ -167,7 +167,9 @@ def test_boot_returns_2_on_drift_and_skips_claim(
     monkeypatch.setattr(session_start, "repo_root", lambda: root)
     claim_called: list[tuple[str, tuple[str, ...]]] = []
 
-    def mock_run_script(root_path: Path, relative: str, *args: str) -> int:
+    def mock_run_script(
+        root_path: Path, relative: str, *args: str, **kwargs: object
+    ) -> int:
         if relative == "scripts/detect_drift.py":
             return 2
         if relative == "scripts/session_state.py" and args[:1] == ("claim",):
@@ -186,7 +188,9 @@ def test_boot_claims_when_drift_is_clean(
     monkeypatch.setattr(session_start, "repo_root", lambda: root)
     calls: list[tuple[str, tuple[str, ...]]] = []
 
-    def mock_run_script(root_path: Path, relative: str, *args: str) -> int:
+    def mock_run_script(
+        root_path: Path, relative: str, *args: str, **kwargs: object
+    ) -> int:
         calls.append((relative, args))
         return 0
 
@@ -397,6 +401,70 @@ def test_boot_claude_permission_error_is_advisory(
     assert "claude" in out and ("agent sandbox" in out or "PermissionError" in out)
 
 
+def test_anchor_cwd_is_the_host_root_in_submodule_mode(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """F-BOOT-2: submodule mode → the anchor lives one level above .agents/."""
+    root = tmp_path / "host" / ".agents"
+    monkeypatch.setattr(session_start, "is_nucleus", lambda: False)
+    assert session_start._anchor_cwd(root) == root.parent
+    monkeypatch.setattr(session_start, "is_nucleus", lambda: True)
+    assert session_start._anchor_cwd(root) == root
+
+
+def test_boot_runs_claim_and_probe_from_the_host_root_in_submodule_mode(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """F-BOOT-2: claim/probe resolve docs/active_state.json against the host.
+
+    Against the pre-Sprint-044 tree every sub-script ran with cwd = the .agents
+    checkout, so `session_state.py claim` wrote the gitignored nucleus anchor and
+    the host session was never claimed. detect_drift / sync_agents_pin stay at
+    the framework checkout.
+    """
+    root = _write_minimal_root(tmp_path / "host" / ".agents")
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    monkeypatch.setattr(session_start, "is_nucleus", lambda: False)
+    monkeypatch.setattr(session_start, "_bridge_triage", lambda *a, **k: (0, []))
+    seen: dict[str, Path | None] = {}
+
+    def mock_run_script(
+        root_path: Path, relative: str, *args: str, cwd: Path | None = None
+    ) -> int:
+        seen[relative] = cwd
+        return 0
+
+    monkeypatch.setattr(session_start, "_run_script", mock_run_script)
+    assert session_start.main(["--boot", "--tool", "claude-code"]) == 0
+    assert seen["scripts/session_state.py"] == root.parent
+    assert seen["scripts/session_probe.py"] == root.parent
+    assert seen["scripts/detect_drift.py"] is None  # default cwd = root
+    assert seen["scripts/sync_agents_pin.py"] is None
+
+
+def test_boot_keeps_claim_at_root_in_nucleus_mode(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """F-BOOT-2 regression guard: nucleus mode is unchanged (this session's path)."""
+    root = _write_minimal_root(tmp_path / "repo")
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    monkeypatch.setattr(session_start, "is_nucleus", lambda: True)
+    monkeypatch.setattr(session_start, "_bridge_triage", lambda *a, **k: (0, []))
+    seen: dict[str, Path | None] = {}
+
+    def mock_run_script(
+        root_path: Path, relative: str, *args: str, cwd: Path | None = None
+    ) -> int:
+        seen[relative] = cwd
+        return 0
+
+    monkeypatch.setattr(session_start, "_run_script", mock_run_script)
+    assert session_start.main(["--boot", "--tool", "claude-code"]) == 0
+    # nucleus: _anchor_cwd returns root itself, passed explicitly.
+    assert seen["scripts/session_state.py"] == root
+    assert seen["scripts/session_probe.py"] == root
+
+
 def test_boot_terminal_has_no_bridge_and_still_succeeds(
     session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -425,7 +493,10 @@ def test_tool_defaults_to_terminal_not_an_ide(
     monkeypatch.setattr(
         session_start,
         "_run_script",
-        lambda root_path, relative, *args: calls.append((relative, args)) or 0,
+        lambda root_path, relative, *args, **kwargs: calls.append(
+            (relative, args)
+        )
+        or 0,
     )
 
     assert session_start.main(["--boot"]) == 0
