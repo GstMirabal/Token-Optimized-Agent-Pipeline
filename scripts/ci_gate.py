@@ -555,6 +555,26 @@ def poll(pr: str, required: set[str], deadline: float) -> dict[str, list[str]] |
         time.sleep(POLL_SECONDS)
 
 
+def _record_not_inspectable(base: str, pr: str) -> int:
+    """Emit the RECORD for a plan on which branch protection cannot be read.
+
+    Args:
+        base: the branch a merge would target.
+        pr: the pull request number, for the manual-substitute command.
+
+    Returns:
+        int: always `0` — this is a RECORD, not a block (`RA-17`, `ADR-0014`).
+    """
+    print(f"📋 RECORD (testifying) — `{base}` branch protection and rulesets "
+          f"are not readable on this repository's plan (HTTP 403 on both "
+          f"endpoints). This gate cannot verify the required set here and "
+          f"does not block on it (RA-17).\n"
+          f"   Manual substitute, observed as a SEPARATE step before the "
+          f"merge is issued (RA-13): run `gh pr checks {pr}` and confirm "
+          f"every check is green.")
+    return 0
+
+
 def resolve_inputs(args: argparse.Namespace) -> set[str] | int:
     """Read the repository, the branch the pull request targets, and its checks.
 
@@ -563,8 +583,9 @@ def resolve_inputs(args: argparse.Namespace) -> set[str] | int:
 
     Returns:
         set: the required check names, or an exit code when any of the three
-            lookups did not answer. Every failure path here returns `2`: an
-            input this gate could not read is not an input it may pass.
+            lookups did not answer. Every failure path here returns `2` except
+            the RECORD path (exit `0`, `ADR-0014`): an input this gate could not
+            read is not an input it may pass.
     """
     slug, error = repo_slug()
     if error:
@@ -581,14 +602,7 @@ def resolve_inputs(args: argparse.Namespace) -> set[str] | int:
 
     required, error = required_checks(slug, base)
     if error == PROTECTION_NOT_INSPECTABLE:
-        print(f"📋 RECORD (testifying) — `{base}` branch protection and rulesets "
-              f"are not readable on this repository's plan (HTTP 403 on both "
-              f"endpoints). This gate cannot verify the required set here and "
-              f"does not block on it (RA-17).\n"
-              f"   Manual substitute, observed as a SEPARATE step before the "
-              f"merge is issued (RA-13): run `gh pr checks {args.pr}` and confirm "
-              f"every check is green.")
-        return 0
+        return _record_not_inspectable(base, args.pr)
     if required is None:
         print(f"❌ What `{base}` requires could not be determined, so nothing "
               f"here proves the checks passed — {error}\n"
