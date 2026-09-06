@@ -72,7 +72,12 @@ def _command_line_problem(pyvenv_cfg: Path, venv: Path) -> str | None:
         key, sep, _ = line.partition("=")
         if not sep or key.strip() != "command":
             continue
-        if str(expected) in line or str(venv) in line:
+        # Match the resolved absolute form only. The shipped invoker passes an
+        # already-resolved path (`agents_root() / "venv_skillopt"`), so this is
+        # unchanged for it; a bare `str(venv)` disjunct additionally accepted a
+        # relative `--venv` argument by its literal spelling, which is not a
+        # location reference (`C6`, Sprint 044).
+        if str(expected) in line:
             return None
         return (
             f"pyvenv.cfg command line does not reference {expected} "

@@ -81,6 +81,26 @@ def test_clear_flag_in_command_line_is_parsed(tmp_path: Path) -> None:
     assert cvr.check(venv) == []
 
 
+def test_a_relative_venv_arg_is_not_matched_by_its_literal_spelling(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """C6: `command = ... -m venv relvenv` names a relative path, not a location.
+
+    Against the pre-Sprint-044 tree the bare `str(venv) in line` disjunct
+    accepted `relvenv` by its spelling and returned None; now only the resolved
+    absolute form counts, so the mismatch is reported.
+    """
+    monkeypatch.chdir(tmp_path)
+    venv = tmp_path / "venv_skillopt"
+    (venv / "bin").mkdir(parents=True)
+    (venv / "pyvenv.cfg").write_text(
+        f"command = {_SYSTEM_PY} -m venv relvenv\n", encoding="utf-8"
+    )
+    problem = cvr._command_line_problem(venv / "pyvenv.cfg", Path("relvenv"))
+    assert problem is not None
+    assert "does not reference" in problem
+
+
 def test_cli_exit_0_on_consistent(tmp_path: Path) -> None:
     venv = _make_venv(tmp_path, tmp_path / "venv_skillopt")
     result = subprocess.run(
