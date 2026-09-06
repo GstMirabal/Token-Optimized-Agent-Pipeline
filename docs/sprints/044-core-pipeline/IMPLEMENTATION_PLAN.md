@@ -216,10 +216,13 @@ A single non-`U3` unit that hits the wall is reverted and re-scoped to Sprint
 
 | Field | Value |
 | :--- | :--- |
-| **Approved by** | _pending Phase 5_ |
-| **Date** | _pending_ |
-| **Plan commit at approval** | _pending_ |
+| **Approved by** | GstMirabal |
+| **Date** | 2026-09-06 |
+| **Plan commit at approval** | `9ae69aa` |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
+
+**Status**: `APPROVED` (2026-09-06). Fresh-context Phase 7 gates authorized as a
+standing preference, not per sprint.
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an
 unattended `/loop` (`workflows/pipeline_workflow.md`, `rules/loop_governance.md`).
