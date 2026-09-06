@@ -4,6 +4,8 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.26.0] - 2026-09-06
+
 ### Added
 - **Sprint 043 `submodule-runtime-parity`** — `scripts/check_venv_relocatable.py`: a Python venv is not relocatable, so `venv_skillopt/bin/graphify` and `bin/pip` carry an absolute shebang to the build path and `bad interpreter` under any relocated `.agents` (submodule checkout, copied tree, renamed nucleus), while `bin/python` — a symlink to the system interpreter — keeps working, so the breakage is silent until a console-script runs. `start_workflow.md` `pip_setup` only rebuilt the venv when `installed.lock` was absent, so a stale venv was never revalidated. The new gate runs every session, matches the `pyvenv.cfg` `command` line as a whole substring (whitespace-immune) and follows pip's POSIX `#!/bin/sh` + `'''exec'` wrapper to the real interpreter; exit `2` triggers a `python3 -m venv --clear` rebuild. `invoked_by: workflows/start_workflow.md#pip_setup`. #043
 
