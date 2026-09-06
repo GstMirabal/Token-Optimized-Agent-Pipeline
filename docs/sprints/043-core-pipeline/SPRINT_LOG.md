@@ -33,6 +33,7 @@
 | :--- | :--- | :--- |
 | Plan nombró el test `tests/test_venv_relocatable.py` | Renombrado a `tests/test_check_venv_relocatable.py` en todos los artefactos del sprint para seguir la convención `test_check_*.py` de los tests hermanos | _extract_ |
 | D1 `_recorded_build_path` partía rutas con espacios; `_shebang_interpreter` no seguía el wrapper POSIX `#!/bin/sh` de pip | Gate-2 ronda 1 REJECTED/charter. Fix `96e3303`: match por subcadena completa de la línea `command` + resolución del wrapper `'''exec'`. Casos de regresión con ruta-con-espacio añadidos | _extract_ |
+| `Makefile` `graphify-rebuild` usa `$(GRAPHIFY) . --mode deep` — console-script + modo deep que exige `GEMINI_API_KEY` → falla en el closeout | Rebuild AST hecho manualmente con `venv_skillopt/bin/python -m graphify update . --force` (9008 nodos). Mismo defecto de clase C-2, fuera del grep de alcance (`workflows/ rules/`). Candidato roadmap + `/agents:extract` | _extract_ |
 | `check_venv_relocatable.py:75` acepta `str(venv)` (arg tal cual) además de `str(venv.resolve())` — laxo con `--venv` relativo | No alcanzable desde el invocador real (`start_workflow.md:25` usa el default absoluto); `_console_script_problem` cubre el hueco. Registrado como decisión, candidato a endurecer | _extract_ |
 
 ---
