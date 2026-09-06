@@ -1,7 +1,7 @@
 """Fail when venv_skillopt was built for a path other than this checkout's.
 
 A Python virtualenv is not relocatable: every console-script under
-``venv_skillopt/bin/`` carries an absolute shebang to
+``venv_skillopt/bin/`` carries an absolute reference to
 ``<build-path>/venv_skillopt/bin/python3.x``, and ``pyvenv.cfg`` records the
 build path on its ``command =`` line. When ``.agents`` is embedded as a
 submodule at a path different from where the venv was created — a copied tree, a
@@ -14,6 +14,12 @@ so the breakage stays silent until a console-script is called.
 ``installed.lock`` is absent, so a stale venv with the lock present is never
 revalidated. This check closes that gap: it runs every session and exits ``2``
 when the recorded build path does not match this checkout.
+
+Both detectors are whitespace-immune: a checkout path containing a space (for
+example ``.../My Projects/host/.agents``) must not be misread as a relocated
+venv. The ``pyvenv.cfg`` ``command`` line is matched as a whole substring, never
+tokenised, and pip's POSIX ``/bin/sh`` console-script wrapper is followed to the
+interpreter it execs rather than stopping at ``/bin/sh``.
 
 invoked_by: workflows/start_workflow.md#pip_setup
 
@@ -29,6 +35,7 @@ Exit codes:
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
@@ -36,58 +43,129 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _root import agents_root
 
 _PROBE_SCRIPTS = ("bin/pip", "bin/pip3")
+_POSIX_WRAPPER_SHELLS = ("sh", "bash")
+_EXEC_LINE = re.compile(r"'exec'\s+(['\"])(.*?)\1")
 
 
-def _recorded_build_path(pyvenv_cfg: Path) -> Path | None:
-    """Venv destination path from the ``command =`` line of ``pyvenv.cfg``.
+def _command_line_problem(pyvenv_cfg: Path, venv: Path) -> str | None:
+    """Problem when ``pyvenv.cfg``'s ``command`` line targets another path.
 
-    The destination is always the final argument of ``python -m venv [opts] DEST``,
-    so the last whitespace-separated token is taken rather than the one after
-    ``venv`` (which would be a flag such as ``--clear``).
+    The venv destination is compared as a whole substring — never tokenised —
+    so a build path containing whitespace is matched intact.
 
     Args:
         pyvenv_cfg: Path to the venv's ``pyvenv.cfg``.
+        venv: Path to the ``venv_skillopt`` directory.
 
     Returns:
-        The path passed to ``-m venv`` at build time, or ``None`` when the line
-        is absent or malformed.
+        A one-line description, or ``None`` when the line already references this
+        location or is absent. A normal but old venv legitimately has no
+        ``command`` line (recorded only since Python 3.11), so failing closed on
+        its absence would false-positive — a missing line returns ``None``.
     """
     try:
         lines = pyvenv_cfg.read_text(encoding="utf-8").splitlines()
     except OSError:
         return None
+    expected = venv.resolve()
     for line in lines:
-        key, _, value = line.partition("=")
-        if key.strip() != "command":
+        key, sep, _ = line.partition("=")
+        if not sep or key.strip() != "command":
             continue
-        parts = value.split()
-        if "venv" in parts and len(parts) > parts.index("venv") + 1:
-            return Path(parts[-1])
+        if str(expected) in line or str(venv) in line:
+            return None
+        return (
+            f"pyvenv.cfg command line does not reference {expected} "
+            "(venv built for another path)"
+        )
     return None
 
 
-def _shebang_interpreter(script: Path) -> Path | None:
-    """Interpreter path from a console-script's ``#!`` first line.
+def _script_text(venv: Path) -> str | None:
+    """Body of the first readable console-script among ``bin/pip``, ``bin/pip3``.
 
     Args:
-        script: Path to a generated console-script (e.g. ``bin/pip``).
+        venv: Path to the ``venv_skillopt`` directory.
 
     Returns:
-        The interpreter path, or ``None`` when the file is missing or its first
-        line is not a shebang.
+        The full text of the first probe script that reads, or ``None`` when
+        none is present or readable.
     """
-    try:
-        text = script.read_text(encoding="utf-8", errors="replace")
-    except OSError:
-        return None
-    first = text.splitlines()[0] if text else ""
+    for name in _PROBE_SCRIPTS:
+        try:
+            return (venv / name).read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+    return None
+
+
+def _interpreter_ref(text: str) -> str | None:
+    """Interpreter path a console-script hands control to.
+
+    Handles the direct ``#!<interpreter>`` form and pip's POSIX space-safe
+    wrapper (``#!/bin/sh`` followed on line 2 by
+    ``'''exec' '<interpreter>' "$0" "$@"``, single- or double-quoted).
+
+    Args:
+        text: Full text of the console-script.
+
+    Returns:
+        The interpreter path as written (not resolved), or ``None`` when no
+        shebang is present or the wrapper's exec line cannot be parsed.
+    """
+    lines = text.splitlines()
+    first = lines[0] if lines else ""
     if not first.startswith("#!"):
         return None
-    return Path(first[2:].strip())
+    shebang = first[2:].strip()
+    token = shebang.split()[0] if shebang else ""
+    if Path(token).name not in _POSIX_WRAPPER_SHELLS:
+        return shebang
+    exec_line = lines[1] if len(lines) > 1 else ""
+    match = _EXEC_LINE.search(exec_line)
+    return match.group(2) if match else None
+
+
+def _console_script_problem(venv: Path) -> str | None:
+    """Problem when pip's console-script interpreter points outside this venv.
+
+    A relocated venv leaves ``bin/pip`` (or its POSIX wrapper) referencing an
+    interpreter that no longer exists or lives under a different tree. The
+    reference is compared literally: ``.resolve()`` is not called on it, because
+    that would follow ``bin/python3.x`` to the system interpreter and break the
+    check on a correctly-located venv.
+
+    Args:
+        venv: Path to the ``venv_skillopt`` directory.
+
+    Returns:
+        A one-line description, or ``None`` when the venv is consistent or no
+        parseable console-script is present.
+    """
+    text = _script_text(venv)
+    if text is None:
+        return None
+    ref = _interpreter_ref(text)
+    if ref is None:
+        return None
+    expected = venv.resolve()
+    ref_path = Path(ref)
+    if ref_path.exists() and expected in ref_path.parents:
+        return None
+    return (
+        f"console-script interpreter {ref} is not under {expected} "
+        "(venv built for another path)"
+    )
 
 
 def check(venv: Path) -> list[str]:
     """Mismatches between the venv's recorded build path and its location.
+
+    Two independent, whitespace-immune detectors run: the ``pyvenv.cfg``
+    ``command`` line (whole-substring match) and pip's console-script
+    interpreter (direct shebang or POSIX ``/bin/sh`` wrapper). A venv with
+    neither a ``command`` line nor a readable ``bin/pip*`` yields no problem
+    (fails open on an exotic venv rather than false-positive on a valid one).
 
     Args:
         venv: Path to the ``venv_skillopt`` directory to inspect.
@@ -98,23 +176,13 @@ def check(venv: Path) -> list[str]:
     """
     if not venv.is_dir():
         return []
-    expected = venv.resolve()
     problems: list[str] = []
-
-    recorded = _recorded_build_path(venv / "pyvenv.cfg")
-    if recorded is not None and recorded.resolve() != expected:
-        problems.append(
-            f"pyvenv.cfg build path {recorded} != current location {expected}"
-        )
-
-    for name in _PROBE_SCRIPTS:
-        interpreter = _shebang_interpreter(venv / name)
-        if interpreter is None:
-            continue
-        if interpreter.parent.parent.resolve() != expected:
-            problems.append(f"{name} shebang {interpreter} is outside {expected}")
-        break
-
+    command_problem = _command_line_problem(venv / "pyvenv.cfg", venv)
+    if command_problem is not None:
+        problems.append(command_problem)
+    script_problem = _console_script_problem(venv)
+    if script_problem is not None:
+        problems.append(script_problem)
     return problems
 
 
