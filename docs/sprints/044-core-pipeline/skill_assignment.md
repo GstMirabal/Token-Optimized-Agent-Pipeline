@@ -35,7 +35,7 @@ This sprint builds no skill. The ladder terminates at the first rung.
 | U2 | Edit — pytest cases (`unittest.mock` stubs) | N/A | Ladder → P1 |
 | U3 | Edit — `_run_script` cwd resolution via `scripts/_root.py` / `scripts/_mode.py` | N/A | Ladder → P1 |
 | U4 | Edit — pytest submodule-mode boot fixture | N/A | Ladder → P1 |
-| U5 | Edit — `ci_gate.py` 403/404 classification | N/A | Ladder → P1 |
+| U5 | Edit — `ci_gate.py` HTTP-403 classification | N/A | Ladder → P1 |
 | U6 | Edit — pytest GitHub-client stubs (existing pattern in `test_ci_gate.py`) | N/A | Ladder → P1 |
 | U7 | Edit — `detect_drift.py` range filter (`git log`/`git show` already used) | N/A | Ladder → P1 |
 | U8 | Create — pytest fixture repo (existing pattern: `git init` in `tmp_path`) | N/A | Ladder → P1 |
