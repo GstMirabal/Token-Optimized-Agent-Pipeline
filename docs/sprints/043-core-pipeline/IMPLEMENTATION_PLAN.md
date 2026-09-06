@@ -23,7 +23,7 @@ submódulo** dentro de un host. Investigación en el checkout núcleo
 ### C-1 · graphify no arranca — shebang absoluto del console-script
 
 `head -1 venv_skillopt/bin/graphify` →
-`#!/Users/gstmirabal/Developer/.agents/venv_skillopt/bin/python3.13`.
+`#!<ABS>/.agents/venv_skillopt/bin/python3.13`.
 `head -1 venv_skillopt/bin/pip` → misma línea. Un venv de Python **no es
 relocatable**: todos los console-scripts (`graphify`, `pip`, `ruff`, …) son
 ficheros con shebang **absoluto** a `<build-path>/venv_skillopt/bin/python3.13`.
@@ -50,7 +50,7 @@ de modo que `venv_skillopt/bin/python -m graphify` **sí** funciona reubicado.
 
 ### C-3 · `.graphify_root` con ruta absoluta baked-in
 
-`cat graphify-out/.graphify_root` → `/Users/gstmirabal/Developer/.agents`.
+`cat graphify-out/.graphify_root` → `<ABS>/.agents`.
 En otro checkout esa raíz no coincide; graphify puede rechazar el grafo o
 reindexar sin avisar.
 
@@ -70,7 +70,7 @@ a grep recursivo sin declararlo.
 ### C-5 · `venv_skillopt` no carga en submódulo
 
 Misma raíz que C-1. `venv_skillopt/pyvenv.cfg`:
-`command = … -m venv /Users/gstmirabal/Developer/.agents/venv_skillopt`.
+`command = … -m venv <ABS>/.agents/venv_skillopt`.
 `workflows/start_workflow.md:23` (`pip_setup`) sólo reconstruye el venv
 **si `.agents/installed.lock` falta**. Un checkout con lock presente y venv
 construido para otra ruta (copia, rename del núcleo, host reusado) **nunca se
