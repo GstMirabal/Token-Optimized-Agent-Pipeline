@@ -89,4 +89,4 @@ script would be worse than reusing the established one.
   silently. Revisit if that response shape changes.
 
 ---
-*Immutable once Accepted — a changed decision gets a new ADR that supersedes this one, never an in-place edit (`rules/documentation_standard.md §3`). Cross-references `ADR-0002` (drift verdict exit codes: a verdict follows the action required, not the severity observed) and `RA-13` / `RA-17`.*
+*Immutable once Accepted — a changed decision gets a new ADR that supersedes this one, never an in-place edit (`rules/documentation_standard.md §3`). File lives at `docs/decisions/ADR-0014-ci-gate-record-on-uninspectable-protection.md`. Cross-references `ADR-0002` (drift verdict exit codes: a verdict follows the action required, not the severity observed) and `RA-13` / `RA-17`.*

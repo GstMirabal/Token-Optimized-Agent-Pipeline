@@ -32,7 +32,11 @@ What is true when the sprint is done:
 - A submodule-mode `--boot` writes the session claim to `<host-root>/docs/active_state.json`
   and does not create `.agents/docs/active_state.json` (`F-BOOT-2`).
 - `ci_gate.py` against a repository whose protection and rulesets endpoints both
-  return HTTP 403/404 exits `0` with a `RECORD`-class line, not `2` (`F-BOOT-3`).
+  return HTTP 403 exits `0` with a `RECORD`-class line, not `2` (`F-BOOT-3`).
+  *(Corrected from "403/404" at Phase 7 Gate 1, QA finding C-2: the both-sources
+  branch is only reachable via `FORBIDDEN`; a `NOT_FOUND` on either endpoint is
+  already handled as "nothing required". See the `task_scope.md` deviation row
+  and `ADR-0014`.)*
 - On a repository whose only commits since `last_close_commit` touch just
   `docs/active_state.json`, `detect_drift.py` exits `0` (`F-BOOT-4`).
 - `make -f .agents/Makefile graphify-rebuild` with `GEMINI_API_KEY` unset
@@ -53,7 +57,7 @@ What is true when the sprint is done:
 | `F-BOOT-1` scope of the predicate | Widen `_bridge_permission_denied` to take the `target` and match `permissionerror` together with that target's own mirror marker (`.cursor` for `cursor`, `.claude` for `claude`) or the rendered `permission denied on <mirror>` line | A blanket `"permissionerror" in lowered` with no marker | A markerless match would swallow an unrelated `PermissionError` from a different failure and report a bridge advisory for it. Sprint 041 generalised `_commands_body_stale` to every target and left this predicate Cursor-only; this closes the same gap in the same shape. |
 | `F-BOOT-2` where anchor-writing sub-scripts run | In `_run_script`, run `session_state.py` and `session_probe.py` with `cwd = agents_root().parent` when `is_nucleus()` is `False`; unchanged (`cwd = root`) in nucleus mode | Capturing `Path.cwd()` at process entry | `agents_root().parent` is deterministic and does not depend on where the operator invoked the command from. `session_state.py:51` resolves `Path("docs/active_state.json")` against cwd (it is host-scoped, like `detect_drift.py`), so forcing `cwd = agents_root()` made it claim the nucleus anchor inside a host. |
 | `F-BOOT-2` `detect_drift.py` / `sync_agents_pin.py` cwd | Left at the framework checkout for this sprint | Moving them too | The reported finding scopes the cwd fix to the claim/probe pair. Whether `detect_drift.py` should also run from the host root in submodule mode is a separate question — recorded in **Out of scope**. |
-| `F-BOOT-3` verdict for an unreadable protection API | Classify HTTP 403/404 on **both** the protection and rulesets endpoints as `protection-not-inspectable-on-plan` and emit a `RECORD`-class result (exit `0`) that names the manual substitute: an observed `gh pr checks <N>` all-green step run as a separate invocation before merge (`RA-13` preserved) | Passing silently; keeping exit `2` | Exit `2` makes the `RA-13` CI gate inoperable for every private repo on the GitHub free plan. A silent pass removes the gate. `RECORD` (`RA-17`) is the existing vocabulary for "observed, not a pass, not a block". The half-readable case (`_from_one_source`) is untouched — this only covers **both** sources returning 403/404. |
+| `F-BOOT-3` verdict for an unreadable protection API | Classify an HTTP 403 (`FORBIDDEN`) on **both** the protection and rulesets endpoints as `protection-not-inspectable-on-plan` and emit a `RECORD`-class result (exit `0`) that names the manual substitute: an observed `gh pr checks <N>` all-green step run as a separate invocation before merge (`RA-13` preserved) | Passing silently; keeping exit `2` | Exit `2` makes the `RA-13` CI gate inoperable for every private repo on the GitHub free plan. A silent pass removes the gate. `RECORD` (`RA-17`) is the existing vocabulary for "observed, not a pass, not a block". The half-readable case (`_from_one_source`) is untouched — this only covers **both** sources returning HTTP 403. A `NOT_FOUND` never reaches this branch: `required_from_protection` / `required_from_rulesets` map it to "nothing required" upstream. |
 | `F-BOOT-3` documentation of the new verdict path | New ADR under `docs/decisions/` recording that `ci_gate.py` (a script, not a Phase 7 gate) emits a `RECORD` result and why | Inlining the rationale in the docstring only | `rules/documentation_standard.md §3.1` triggers an ADR when a script adopts a governance vocabulary (`RA-17` classes) outside its original locus. |
 | `F-BOOT-4` how routine state commits leave the drift range | In `detect_drift.py`, exclude a commit from the range when its diff touches only `docs/active_state.json` **and** its subject matches `^docs\(state\)` | Advancing `last_close_commit` to the trailing state commit | Advancing the baseline is a write to the anchor from a read-only check. A diff-and-subject filter keeps `detect_drift.py` non-mutating and matches the `ADR-0002` principle that the verdict follows the action required. Both conditions are required so a substantive commit mis-subjected `docs(state)` is still counted. |
 | `C5` how `graphify-rebuild` avoids the API-key failure | Change the recipe to `$(AGENTS_DIR)/venv_skillopt/bin/python -m graphify update . --force` | Passing `--mode deep` conditionally on `GEMINI_API_KEY` | `close_workflow.md` Phase 5 `graph_rebuild` and this sprint's own closeout run offline. `-m graphify update . --force` is the invocation Sprint 043 already used by hand for the same reason (`SPRINT_LOG.md:36`). Deep semantic rebuild stays available as `graphify-update`'s manual escalation, documented in the recipe comment. |
@@ -153,7 +157,7 @@ the exclusion.
 | :--- | :--- |
 | `.agents/venv_skillopt/bin/python -m pytest tests/ -q` | `≥ 688 + <new cases> passed`, `0 failed` |
 | `python3 scripts/session_start.py --boot --tool claude-code` (nucleus, this repo) | exit `0`, briefing prints, nucleus anchor still claimed — `F-BOOT-2` did not regress nucleus mode |
-| `ruff check .` | exit `0` |
+| `venv_skillopt/bin/ruff check` on each changed `.py` | no **new** finding vs the `main` version of that file (repo-wide `ruff check .` carries ~193 pre-existing findings — a known migration exclusion since Sprint 043; `make verify` does not run ruff) |
 | `.agents/venv_skillopt/bin/python -m graphify update . --force` (post-`C5`, `GEMINI_API_KEY` unset) | exit `0` |
 | `make -f .agents/Makefile graphify-rebuild` (`GEMINI_API_KEY` unset) | exit `0` |
 | `make verify` | exit `0` |
@@ -168,7 +172,7 @@ Read exit codes with `$?` directly; never through a pipe.
 | Artefacto | Qué cambia |
 | :--- | :--- |
 | `scripts/session_start.py` (module docstring + `_bridge_triage` docstring) | State that outcome (c) — PermissionError advisory, exit `0` — is reachable for the `claude` mirror, not Cursor alone; note that claim/probe sub-scripts run from the host root in submodule mode |
-| `scripts/ci_gate.py` (module docstring) | Add the both-sources-403/404 → `RECORD` path and the manual `gh pr checks` substitute it names |
+| `scripts/ci_gate.py` (module docstring) | Add the both-sources-403 → `RECORD` path and the manual `gh pr checks` substitute it names |
 | `scripts/detect_drift.py` (module docstring) | Add the `docs(state)`-only exclusion to the "A non-empty range is not drift by itself" paragraph |
 | `docs/decisions/ADR-0014-ci-gate-record-on-uninspectable-protection.md` | New — records the `RECORD`-class verdict for an uninspectable protection API, its `RA-13` / `RA-17` basis, and `Consequences` |
 | `docs/decisions/ADR-0002-drift-verdict-exit-codes.md` | Addendum paragraph: routine `docs(state)` commits are outside the drift range by construction |

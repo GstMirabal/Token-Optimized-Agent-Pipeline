@@ -31,12 +31,24 @@ Check: `python3 scripts/check_task_scope.py --sprint-dir docs/sprints/044-core-p
 | U11 | `tests/test_check_venv_relocatable.py` | modify | low | `implementer_agent` | sonnet | medium | ✅ 44e0e65 |
 | U12 | `docs/decisions/ADR-0014-ci-gate-record-on-uninspectable-protection.md` | create | low | `doc_orchestrator` | sonnet | medium | ✅ 8de8eb7 |
 
-**Plan deviation (recorded for `RA-14`):** U4's target moved from
-`tests/test_session_protocol.py` to `tests/test_session_start.py` — the tests U3
-forces (the `_run_script` cwd-kwarg mock updates) and the new F-BOOT-2 boot-path
-cases both belong beside the existing Claude-boot suite, and the `fix(` hook
-(`rules/code_craft.md §6`) requires the proving test in U3's own commit. U3 and
-U4 committed together (`a2fcdbb`).
+**Plan deviations (recorded for `RA-14`):**
+
+1. U4's target moved from `tests/test_session_protocol.py` to
+   `tests/test_session_start.py` — the tests U3 forces (the `_run_script`
+   cwd-kwarg mock updates) and the new F-BOOT-2 boot-path cases both belong
+   beside the existing Claude-boot suite, and the `fix(` hook
+   (`rules/code_craft.md §6`) requires the proving test in U3's own commit. U3
+   and U4 committed together (`a2fcdbb`).
+
+2. **F-BOOT-3 fires on HTTP 403 only, not "403/404"** (Phase 7 Gate 1, QA C-2).
+   The plan bullet, Design row and Documentary-impact row said "403/404"; the
+   Tests table (`:137`) said "403". The both-sources-unreadable branch in
+   `required_checks` is only reachable with `FORBIDDEN` on both — a `NOT_FOUND`
+   is mapped to "nothing required" by `required_from_protection` /
+   `required_from_rulesets` before it can arrive there. Implementation, tests,
+   `ADR-0014` and `SPRINT_LOG.md` were all 403-only; the plan prose was the sole
+   drift and is corrected in place with a Phase-7 note. `ADR-0014` records a
+   `404` revisit trigger should GitHub change the free-plan response shape.
 
 ---
 
