@@ -4,6 +4,8 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.27.0] - 2026-09-07
+
 ### Fixed
 - **Sprint 044 `session-start-drift-cigate-host-parity`** — six `nucleus`-class defects on the `/agents:start` → drift → CI-gate path, four reported from a Claude Code host session during `/agents:start` → `/agents:reconcile` (host-identifying strings genericised, `RA-15`), two backfilled from the Sprint 043 close.
   - **F-BOOT-1** — `scripts/session_start.py` `_bridge_permission_denied` recognised only the `.cursor` mirror, so a `--boot --tool claude-code` whose bridge install was denied write access to `<host>/.claude/settings.json` (agent sandbox) exited `2` instead of printing the `PermissionError` advisory and exiting `0`. The predicate now takes the target and matches `permissionerror` together with that target's own mirror marker (`.claude` for `claude`, `.cursor` for `cursor`). Sprint 041 had generalised `_commands_body_stale` to every target and left this one behind. #044
