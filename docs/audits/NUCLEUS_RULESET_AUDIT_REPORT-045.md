@@ -14,8 +14,8 @@ Classification of every normative unit in the always-loaded constitution (`agent
 | Metric | Score | Status |
 | :--- | :--- | :--- |
 | Norms classified | 38 (9 sections + 18 amendments + 11 rule files) | ✅ |
-| `VIGENTE` | 27 | ✅ |
-| `MEJORAR` | 9 | ⚠️ |
+| `VIGENTE` | 22 register rows | ✅ |
+| `MEJORAR` | 14 register rows (consolidate to 9 distinct cross-cutting findings — ranked below) | ⚠️ |
 | `OBSOLETA` | 2 | ⚠️ |
 | Corpus integrity (`scripts/verify_references.py`) | GREEN | ✅ |
 
@@ -113,7 +113,7 @@ Ranked: always-loaded constitution defects outrank on-trigger `rules/` defects; 
 | 1 | **RA-04: FULL_DEPLOYMENT** | Always-loaded; actively **contradicts** the `§6 orchestrator` charter, so a reader can be misled, not merely under-informed. 0 citations, 0 implementing workflow. | Retire to a tombstone row (no renumber of RA-05..RA-18). |
 | 2 | **RA-10: SUPPLY_CHAIN_SHIELD** | Always-loaded; harmless but redundant — a strict subset of `§8` two rows below it. | Degrade to a one-line pointer to `§8`. |
 
-### MEJORAR — top 5 (of 9)
+### MEJORAR — top 5 (of 9 distinct findings; 14 register rows)
 
 | Rank | Norm | Core defect | Fix |
 | :--- | :--- | :--- | :--- |
@@ -123,7 +123,9 @@ Ranked: always-loaded constitution defects outrank on-trigger `rules/` defects; 
 | 4 | **§2 (ast_skeleton / graph_sovereignty / graph_sync)** (CC-6, CC-7) | Always-loaded; three deictic/bare or wrong paths (`omni_minimizer.py`, `graph.json`, bare `graphify update`), one pointing at a file that does not exist — a `§1 unambiguous_action` breach in the constitution. | Path all three; use the `-m graphify` module form. |
 | 5 | **§0 Certification ≡ RA-05, §3 secret_sovereignty ≡ RA-09, RA-02 circular** (CC-2, CC-3, CC-8) | Always-loaded self-duplication: three rules each stated twice, one pair (`RA-02`) circular so neither copy is complete. | Pick the canonical statement in each pair; degrade the other to a pointer. |
 
-Remaining MEJORAR (rank 6-9): **RA-16 print-order** (CC-11, cosmetic), **rules/frontend_modular_standard.md** legacy `Rule 041` nomenclature (on-trigger, `frontend/` only), **rules/token_economy.md** bare `omni_minimizer.py` (on-trigger), **rules/project_topology.md** `./venv/` example mismatch (on-trigger, host-facing).
+Remaining MEJORAR (findings 6-9): **RA-16 print-order** (CC-11, cosmetic), **rules/frontend_modular_standard.md** legacy `Rule 041` nomenclature (on-trigger, `frontend/` only), **rules/token_economy.md** bare `omni_minimizer.py` (on-trigger), **rules/project_topology.md** `./venv/` example mismatch (on-trigger, host-facing).
+
+*Register-row vs distinct-finding count: the 14 register rows verdicted `MEJORAR` collapse to these 9 cross-cutting findings — the self-duplication finding (CC-2/CC-3/CC-8) marks both halves of each pair (§0 + RA-05, §3 + RA-09, RA-02 + its rule row), and the §2 path finding (CC-6/CC-7) marks three rows. `NUCLEUS_AUDIT_SYNTHESIS-045.md` §3 carries the same reconciliation.*
 
 ---
 

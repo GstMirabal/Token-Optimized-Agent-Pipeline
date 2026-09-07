@@ -12,14 +12,14 @@
 
 ## 🚦 Executive Summary
 
-Wave 2 merges the three Wave-1 unit reports into one impact-ranked register, cross-checks it against the open upstream-findings ledger, and buckets every actionable item into a recommended execution sprint. Units 1–3 classified 129 normative units and mechanisms; 2 are `OBSOLETA` (both in the always-loaded constitution) and 23 are `MEJORAR`. The synthesis register carries **29 actionable rows** (`S045-01`..`S045-29`) plus **1 RECORD row** (`S045-30`, no action). All 29 route `nucleus` — this is the nucleus auditing its own corpus. Zero rows duplicate an open upstream finding, because **0 upstream findings are currently open** (`docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md`, latest status table — Sprint 033, `ai-sprint/033`: "Still open: *(none in this file's open set)*").
+Wave 2 merges the three Wave-1 unit reports into one impact-ranked register, cross-checks it against the open upstream-findings ledger, and buckets every actionable item into a recommended execution sprint. Units 1–3 classified 129 normative units and mechanisms; 2 are `OBSOLETA` (both in the always-loaded constitution) and 28 register rows are `MEJORAR` (23 distinct cross-cutting findings — the register splits a finding that spans two norms into one row per norm; see the Reconciliation notes). The synthesis register carries **29 actionable rows** (`S045-01`..`S045-29`) plus **1 RECORD row** (`S045-30`, no action). All 29 route `nucleus` — this is the nucleus auditing its own corpus. Zero rows duplicate an open upstream finding, because **0 upstream findings are currently open** (`docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md`, latest status table — Sprint 033, `ai-sprint/033`: "Still open: *(none in this file's open set)*").
 
 | Metric | Value | Status |
 | :--- | :--- | :--- |
 | Units consolidated | 3 (ruleset, workflows, mechanisms) | ✅ |
 | Norms / mechanisms audited (all units) | 129 | ✅ |
 | `OBSOLETA` (all units) | 2 | ⚠️ |
-| `MEJORAR` (all units) | 23 | ⚠️ |
+| `MEJORAR` (all units) | 28 register rows (23 distinct findings) | ⚠️ |
 | Synthesis register — actionable rows | 29 (`S045-01`..`S045-29`) | ⚠️ |
 | Synthesis register — RECORD rows (no action) | 1 (`S045-30`) | ℹ️ |
 | Rows routed `nucleus` | 29 / 29 actionable | ✅ |
@@ -81,17 +81,17 @@ Source: `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` (1354 lines — not dumped
 
 ## 📊 3. Consolidated Verdict Counts
 
-Figures as stated in each unit's Executive Summary.
+Figures as stated in each unit's Executive Summary (Unit 1 as classification-register rows).
 
 | Unit | Norms / mechanisms audited | VIGENTE | MEJORAR | OBSOLETA |
 | :--- | :--- | :--- | :--- | :--- |
-| Unit 1 — ruleset (`agents.md` §0–§8 + `RA-01`..`RA-18` + 11 `rules/*.md`) | 38 | 27 | 9 | 2 |
+| Unit 1 — ruleset (`agents.md` §0–§8 + `RA-01`..`RA-18` + 11 `rules/*.md`) | 38 | 22 | 14 (9 distinct findings) | 2 |
 | Unit 2 — workflows (`workflows/*.md`) | 12 | 6 | 6 | 0 |
 | Unit 3 — mechanisms (39 scripts + 6 hooks + 34 skills) | 79 | 75 | 8 | 0 |
-| **Total** | **129** | **108** | **23** | **2** |
+| **Total** | **129** | **103** | **28 rows (23 distinct findings)** | **2** |
 
 **Reconciliation notes (source-internal slack, not a synthesis error):**
-- Unit 1's Executive Summary tallies `MEJORAR = 9`; its Classification Register enumerates ~14 granular `MEJORAR` sub-findings (6 `agents.md` sections + 5 amendments + 3 rule files), several of which are two halves of one cross-cutting finding (e.g. `§0 Certification` ≡ `RA-05`). This synthesis lists the granular items as distinct register rows because each carries a distinct fix.
+- Unit 1's Classification Register has **14 rows** verdicted `MEJORAR`; these collapse to **9 distinct cross-cutting findings**, because the self-duplication finding marks both halves of each pair (`§0 Certification` + `RA-05`; `§3 secret_sovereignty` + `RA-09`; `RA-02` + its rule row) and the `§2` bare-path finding marks three rows. Unit 1's Executive Summary and this synthesis both now state the split (14 rows / 9 findings) explicitly — an earlier draft of both headlines said `9` without the row count, corrected under `RA-14` after Phase 7 Gate 2 (T2).
 - Unit 3's Executive Summary counts `MEJORAR = 6 (4 scripts, 2 hooks) + 2 skill annotations = 8`; its `VIGENTE` figure ("41 scripts/hooks + 34 skills") carries a small arithmetic overlap (`merge_json.py` / `cursor_adapter.py` counted once as VIGENTE-by-import and once flagged `MEJORAR` for the missing token). Treated as 8 `MEJORAR` above.
 - Consequently the `Total` row sums the per-unit summary figures; it is indicative, not a headcount of the 29 synthesis register rows.
 
