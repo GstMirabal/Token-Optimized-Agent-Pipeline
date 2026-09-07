@@ -167,7 +167,9 @@ def test_boot_returns_2_on_drift_and_skips_claim(
     monkeypatch.setattr(session_start, "repo_root", lambda: root)
     claim_called: list[tuple[str, tuple[str, ...]]] = []
 
-    def mock_run_script(root_path: Path, relative: str, *args: str) -> int:
+    def mock_run_script(
+        root_path: Path, relative: str, *args: str, **kwargs: object
+    ) -> int:
         if relative == "scripts/detect_drift.py":
             return 2
         if relative == "scripts/session_state.py" and args[:1] == ("claim",):
@@ -186,7 +188,9 @@ def test_boot_claims_when_drift_is_clean(
     monkeypatch.setattr(session_start, "repo_root", lambda: root)
     calls: list[tuple[str, tuple[str, ...]]] = []
 
-    def mock_run_script(root_path: Path, relative: str, *args: str) -> int:
+    def mock_run_script(
+        root_path: Path, relative: str, *args: str, **kwargs: object
+    ) -> int:
         calls.append((relative, args))
         return 0
 
@@ -345,6 +349,122 @@ def test_boot_claude_never_touches_the_cursor_bridge(
     assert "cursor" not in targets
 
 
+def test_bridge_permission_denied_recognizes_claude_mirror(session_start) -> None:
+    """F-BOOT-1: a raw PermissionError naming .claude is a permission denial.
+
+    Fails against the pre-Sprint-044 tree, where the predicate took no target
+    and matched `.cursor` alone: a denied `claude`-target install then fell
+    through to the hard-stop branch.
+    """
+    denied = (
+        "PermissionError: [Errno 13] Permission denied: "
+        "'/host/.claude/settings.json'"
+    )
+    assert session_start._bridge_permission_denied(denied, "claude") is True
+    # The rendered line shape is recognised too.
+    rendered = "bridge: permission denied on .claude (Errno 13)"
+    assert session_start._bridge_permission_denied(rendered, "claude") is True
+    # Marker isolation: a .cursor denial is not this target's, and an unknown
+    # target never reports a denial.
+    cursor_denied = "PermissionError: ... '/host/.cursor/mcp.json'"
+    assert session_start._bridge_permission_denied(cursor_denied, "claude") is False
+    assert session_start._bridge_permission_denied(denied, "terminal") is False
+    # A non-permission failure is still not a denial.
+    assert session_start._bridge_permission_denied("some other failure", "claude") is False
+
+
+def test_boot_claude_permission_error_is_advisory(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys
+) -> None:
+    """F-BOOT-1: a sandbox-denied `.claude` install is advisory, exit 0.
+
+    Against the pre-Sprint-044 tree this exits 2 (`_bridge_permission_denied`
+    returned False for the `.claude` string), so the host session was never
+    claimed.
+    """
+    root = _write_minimal_root(tmp_path / "repo")
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    monkeypatch.setattr(session_start, "_run_script", lambda *a, **k: 0)
+    monkeypatch.setattr(session_start, "_lock_stale", lambda *a, **k: True)
+    monkeypatch.setattr(session_start, "_commands_body_stale", lambda *a, **k: True)
+
+    def mock_install(root_path: Path, target: str) -> tuple[int, str]:
+        return 1, (
+            "PermissionError: [Errno 13] Permission denied: "
+            "'/host/.claude/settings.json'"
+        )
+
+    monkeypatch.setattr(session_start, "_run_bridge_install", mock_install)
+    assert session_start.main(["--boot", "--tool", "claude-code"]) == 0
+    combined = capsys.readouterr()
+    out = combined.out + combined.err
+    assert "claude" in out and ("agent sandbox" in out or "PermissionError" in out)
+
+
+def test_anchor_cwd_is_the_host_root_in_submodule_mode(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """F-BOOT-2: submodule mode → the anchor lives one level above .agents/."""
+    root = tmp_path / "host" / ".agents"
+    monkeypatch.setattr(session_start, "is_nucleus", lambda: False)
+    assert session_start._anchor_cwd(root) == root.parent
+    monkeypatch.setattr(session_start, "is_nucleus", lambda: True)
+    assert session_start._anchor_cwd(root) == root
+
+
+def test_boot_runs_claim_and_probe_from_the_host_root_in_submodule_mode(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """F-BOOT-2: claim/probe resolve docs/active_state.json against the host.
+
+    Against the pre-Sprint-044 tree every sub-script ran with cwd = the .agents
+    checkout, so `session_state.py claim` wrote the gitignored nucleus anchor and
+    the host session was never claimed. detect_drift / sync_agents_pin stay at
+    the framework checkout.
+    """
+    root = _write_minimal_root(tmp_path / "host" / ".agents")
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    monkeypatch.setattr(session_start, "is_nucleus", lambda: False)
+    monkeypatch.setattr(session_start, "_bridge_triage", lambda *a, **k: (0, []))
+    seen: dict[str, Path | None] = {}
+
+    def mock_run_script(
+        root_path: Path, relative: str, *args: str, cwd: Path | None = None
+    ) -> int:
+        seen[relative] = cwd
+        return 0
+
+    monkeypatch.setattr(session_start, "_run_script", mock_run_script)
+    assert session_start.main(["--boot", "--tool", "claude-code"]) == 0
+    assert seen["scripts/session_state.py"] == root.parent
+    assert seen["scripts/session_probe.py"] == root.parent
+    assert seen["scripts/detect_drift.py"] is None  # default cwd = root
+    assert seen["scripts/sync_agents_pin.py"] is None
+
+
+def test_boot_keeps_claim_at_root_in_nucleus_mode(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """F-BOOT-2 regression guard: nucleus mode is unchanged (this session's path)."""
+    root = _write_minimal_root(tmp_path / "repo")
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    monkeypatch.setattr(session_start, "is_nucleus", lambda: True)
+    monkeypatch.setattr(session_start, "_bridge_triage", lambda *a, **k: (0, []))
+    seen: dict[str, Path | None] = {}
+
+    def mock_run_script(
+        root_path: Path, relative: str, *args: str, cwd: Path | None = None
+    ) -> int:
+        seen[relative] = cwd
+        return 0
+
+    monkeypatch.setattr(session_start, "_run_script", mock_run_script)
+    assert session_start.main(["--boot", "--tool", "claude-code"]) == 0
+    # nucleus: _anchor_cwd returns root itself, passed explicitly.
+    assert seen["scripts/session_state.py"] == root
+    assert seen["scripts/session_probe.py"] == root
+
+
 def test_boot_terminal_has_no_bridge_and_still_succeeds(
     session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -373,7 +493,10 @@ def test_tool_defaults_to_terminal_not_an_ide(
     monkeypatch.setattr(
         session_start,
         "_run_script",
-        lambda root_path, relative, *args: calls.append((relative, args)) or 0,
+        lambda root_path, relative, *args, **kwargs: calls.append(
+            (relative, args)
+        )
+        or 0,
     )
 
     assert session_start.main(["--boot"]) == 0

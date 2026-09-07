@@ -126,6 +126,56 @@ framework as a submodule inside a host.
 
 ---
 
+### ▶️ Taken by Sprint 044 (`session-start-drift-cigate-host-parity`) — the `/agents:start` → drift → CI-gate path breaks in submodule mode
+
+Not drawn from this queue: four field defects reported from a Claude Code host
+session during `/agents:start` → `/agents:reconcile`, plus the two items the
+Sprint 043 close surfaced for `/agents:extract` (`check_venv_relocatable.py:75`,
+`make graphify-rebuild` offline).
+
+| # | Defect | Fix |
+| :--- | :--- | :--- |
+| F-BOOT-1 | `session_start.py` `_bridge_permission_denied` recognised only the `.cursor` mirror, so a sandbox-denied `.claude/settings.json` write exited `2` instead of the advisory exit `0` | Predicate takes the target and matches `permissionerror` + that target's mirror marker (`.claude` / `.cursor`) |
+| F-BOOT-2 | `--boot` ran `session_state.py claim` / `session_probe.py` with `cwd` = the `.agents` checkout, claiming the gitignored **nucleus** anchor while the host session was never claimed — invisible to `submodule_purity` because the stray anchor is gitignored | The two anchor-writing sub-scripts run with `cwd` = `agents_root().parent` in submodule mode; nucleus mode unchanged |
+| F-BOOT-3 | `ci_gate.py` mapped an unreadable protection API to exit `2`, so the `RA-13` gate was impossible to pass on every free-plan private repo (both endpoints HTTP 403) | Both sources `FORBIDDEN` → `RECORD` (testifying, `RA-17`) at exit `0`, naming the `gh pr checks <N>` manual substitute (`RA-13` preserved). `ADR-0014` |
+| F-BOOT-4 | `detect_drift.py` counted the routine `docs(state)` anchor commit every close/deploy appends, forcing a no-op `/agents:reconcile` on every session between close and the next tag | A commit whose diff is only `docs/active_state.json` **and** whose subject matches `^docs\(state\)` is dropped from the range |
+| C5 | `make graphify-rebuild` used `--mode deep` (needs `GEMINI_API_KEY`), failing at every offline closeout | Recipe is `venv_skillopt/bin/python -m graphify update . --force`; deep rebuild is a documented manual escalation |
+| C6 | `check_venv_relocatable.py:75` accepted a `--venv` arg by its literal spelling as well as its resolved form | Dropped the `str(venv) in line` disjunct — behaviour-neutral for the shipped (already-resolved) invoker |
+
+### Queued for **045** — the submodule-mode anchor *read* (Gate-2 testifying finding)
+
+F-BOOT-2 fixed the anchor *write* (claim/probe host-scoped in submodule mode).
+The *read* is still framework-anchored: `session_start.py:56` `load_anchor`
+resolves `root / "docs" / "active_state.json"` with `root = repo_root()`
+unconditionally, so `/agents:start` in a host prints "docs/active_state.json:
+absent or unreadable" over a live host anchor, and `detect_drift.py` (also host-
+scoped, deferred by F-BOOT-2) checks the framework's git history rather than the
+host's. One unit: make both host-scoped in submodule mode. Adjacent, pre-
+existing, same register: `scripts/_mode.is_nucleus()` returns `False` inside a
+linked git worktree of the nucleus (a worktree's `.git` is a file), misrouting a
+framework developer who works in a worktree.
+
+**Also for 045, from the Sprint 044 extract (`nucleus`-class):**
+
+- `scripts/submodule_purity.py` (and `close_workflow.md` Phase 5) trust
+  `git -C .agents status --porcelain`, which **does not list ignored files** —
+  so a stray gitignored `.agents/docs/active_state.json` written by a buggy
+  submodule-mode session is invisible to the one check built to catch host
+  contamination (Gate 2 measured this at `2bbfa60`). Add a `--ignored` scan of
+  the anchor paths (`docs/active_state.json`, `.agent_state/`) to
+  `submodule_purity.py`. Same blindness `agents.md §5 mandatory_topology`
+  already documents for `docs/sprints/`.
+- **`RA-14` amendment proposal for `rule_validator`**: extend the mandatory
+  patch-propagation grep from "the same artifact" to "the sprint's artifact
+  set", and bind it to the **remediation step**, not only the reviewer's
+  spot-check. Precedent: Sprint 044 reconciled "403/404" → "403" across the
+  plan, `task_scope.md` and `ADR-0014` but left a fourth spelling in
+  `skill_assignment.md:38` until Gate 1 round 2 caught it. `agents.md` edits go
+  through a planned sprint unit (`strict_rule` — no tactical injection), so this
+  is queued, not applied here.
+
+---
+
 ### Queued for **037** — rider **S** (Cursor agent sandbox false reds)
 
 Opened 2026-08-26 during Sprint 036 Phase 7 / `/start` on `ai-sprint/036`.

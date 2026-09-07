@@ -28,6 +28,15 @@ tags** — tags whose version owns a `## [X.Y.Z]` section — and the exit code
 follows the action required, not the severity observed. See
 `docs/decisions/ADR-0002-drift-verdict-exit-codes.md`.
 
+A routine `docs(state)` anchor write — a commit whose subject starts
+`docs(state)` and whose only changed path is `docs/active_state.json` — is
+dropped from the range before it is judged (`F-BOOT-4`). `close_workflow.md`
+Phase 4 and `deployment_workflow.md` each append one after `last_close_commit`,
+and with `[Unreleased]` empty they otherwise read as verdict `U`/`A` and force a
+no-op `/agents:reconcile` on every session until the next deployment tags over
+them. Both conditions are required: a commit that also touches another file is
+still counted whatever its subject says.
+
 **Reachability is not per-commit coverage.** That a commit is an ancestor of a
 sealing tag proves the range is covered by a published section, never that the
 commit has its own ledger entry: PRs #26-#30 ended up ancestors of a tag and
@@ -134,6 +143,46 @@ def commits_since(baseline: str, *exclude: str) -> list[str]:
     return [line for line in log.splitlines() if line]
 
 
+_STATE_SUBJECT = re.compile(r"^docs\(state\)")
+
+
+def _routine_state_shas(commits: list[str]) -> set[str]:
+    """SHAs in ``commits`` that are a routine ``docs(state)`` anchor write.
+
+    ``close_workflow.md`` Phase 4 and ``deployment_workflow.md`` both append a
+    commit touching only ``docs/active_state.json`` after ``last_close_commit``.
+    With ``[Unreleased]`` empty these read as drift (verdict ``U``/``A``) and
+    force a no-op ``/agents:reconcile`` on every session between that close and
+    the next deployment's tag (``F-BOOT-4``). They are outside the drift range
+    by construction, not by severity — the same principle as
+    ``ADR-0002-drift-verdict-exit-codes``.
+
+    Both conditions are required: a substantive commit mis-subjected
+    ``docs(state)`` still changes other files and is still counted.
+
+    Args:
+        commits: ``git log --oneline`` lines for the range under judgement.
+
+    Returns:
+        set[str]: the leading short SHA of each line that is a routine state
+        commit.
+    """
+    routine: set[str] = set()
+    for line in commits:
+        parts = line.split()
+        if not parts:
+            continue
+        sha = parts[0]
+        subject = git("log", "-1", "--format=%s", sha) or ""
+        if not _STATE_SUBJECT.match(subject):
+            continue
+        files = git("diff-tree", "--no-commit-id", "--name-only", "-r", sha) or ""
+        changed = [f for f in files.splitlines() if f.strip()]
+        if changed == ["docs/active_state.json"]:
+            routine.add(sha)
+    return routine
+
+
 def classify(baseline: str) -> tuple[str, list[str], list[str], list[str]]:
     """Decide the verdict for the range `baseline..HEAD`.
 
@@ -144,6 +193,9 @@ def classify(baseline: str) -> tuple[str, list[str], list[str], list[str]]:
         tuple: (verdict, every commit in range, unsealed commits, sealing tags).
     """
     every = commits_since(baseline)
+    routine = _routine_state_shas(every)
+    if routine:
+        every = [c for c in every if c.split()[0] not in routine]
     if not every:
         return "CLEAN", [], [], []
 
@@ -151,7 +203,11 @@ def classify(baseline: str) -> tuple[str, list[str], list[str], list[str]]:
     if not tags:
         return "R", every, every, []
 
-    unsealed = commits_since(baseline, *(f"^{tag}" for tag in tags))
+    unsealed = [
+        c
+        for c in commits_since(baseline, *(f"^{tag}" for tag in tags))
+        if c.split()[0] not in routine
+    ]
     if not unsealed:
         return "S", every, [], tags
     if not unreleased_is_empty():

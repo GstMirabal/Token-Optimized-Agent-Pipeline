@@ -1,0 +1,9 @@
+{
+  "nodes": 9242,
+  "edges": 11646,
+  "communities": 804,
+  "source": "graphify-out/graph.json",
+  "sprint": 44,
+  "built_at_commit": "1dd1a1113181230a224b54c92e7d7711fea710b8",
+  "note": "Counts from `graphify update . --force` (AST, no LLM) at the pre-seal tip. `graphify-rebuild` now runs offline (Sprint 044 C5) and produced these; the deep semantic pass still needs an LLM API key and none is exported (RA-09). Delta vs Sprint 043 (9008/11319/785) is the six changed scripts plus the new test file and ADR-0014."
+}

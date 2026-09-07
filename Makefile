@@ -30,9 +30,14 @@ PY := $(if $(wildcard $(VENV_PY)),$(VENV_PY),python3)
 graphify-update:
 	$(GRAPHIFY) update .
 
-# Full semantic rebuild — required when documentation changed (close_workflow Phase 1).
+# Full AST rebuild — required when documentation changed (close_workflow Phase 1,
+# pipeline_workflow Phase 8). Runs offline: `close_workflow` Phase 5 and every
+# sprint closeout run with no network and no credentials, and `--mode deep`
+# (semantic, needs GEMINI_API_KEY) failed there every time (C5, Sprint 044).
+# Deep semantic rebuild stays available as a manual escalation:
+#   $(AGENTS_DIR)/venv_skillopt/bin/graphify . --mode deep   # needs GEMINI_API_KEY
 graphify-rebuild:
-	$(GRAPHIFY) . --mode deep
+	$(AGENTS_DIR)/venv_skillopt/bin/python -m graphify update . --force
 
 # Framework self-check. THIS is the full set: `.github/workflows/ci.yml` invokes
 # this target rather than listing its own steps, so a green local run and a green
