@@ -10,7 +10,7 @@ version: 1.0.0
 
 - **Strategy Lock:** `OPEN`
 - **Delivered:** `024` and `025` (`v4.5.0`), `021` (`v4.6.0`), `022` (`v4.7.0`), `023` (`v4.8.0`), `026` (`v4.9.0`, PR #50), `027` (`v4.10.0`, PR #55), `028` (`v4.11.0`, PR #57), `029` (`documentation-truth`, `v4.12.0`, PR #59), `030` (`token-economy-enforcement`, `v4.13.0`, PR #61), `031` (`gate-verdict-classes`, `v4.14.0`, PR #63), `032` (`author-tier-trial`, `v4.15.0`, PR #64), `033` (`implementer-role`, `v4.16.0`, PR #65), `034` (`core-pipeline`, `v4.17.0`, PR #66), `035` (`core-pipeline` C/E/H/F, `v4.18.0`, PR #67), `036` (`core-pipeline` M/L, `v4.19.0`, PR #68), `037` (`core-pipeline` G+S, `v4.20.0`, PR #69), **`038` (`core-pipeline` family-trial, `v4.21.0`, PR #70)**
-- **Next / in flight:** **`042` (`template-gate-parity`) executing** — the instrument for the template/gate divergence `041` measured three times and deliberately did not build, plus the correction of this document's own `F8` status, which was five sprints stale and cost `042` a planning round. **`041` deployed** `v4.24.0`. Detail on `041` below.
+- **Next / in flight:** **`045` (`nucleus-ruleset-mechanism-audit`) closed** — full obsolescence audit of the framework corpus; 4 reports in `docs/audits/`, 29 `nucleus` amendment rows bucketed 046/047/defer, nothing applied (analysis-only). Section below. **`044` deployed** `v4.27.0`, **`043` deployed** `v4.26.0`, **`042` deployed** `v4.25.0`, **`041` deployed** `v4.24.0`.
 - **Previously:** **`041` (`bi-harness-bridge-parity`) deployed `v4.24.0` (2026-08-30)** — the portable boot repaired the bridge of Cursor only; a Claude boot reported a mirror that did not exist and installed no git hooks. Also opened, and closed, three cases of a versioned artifact failing the gate that consumes it (`IMPLEMENTATION_PLAN_TEMPLATE.md`, `SKILL_ASSIGNMENT_TEMPLATE.md`, `pipeline_workflow.md` Phase 4.3), each found by following the artifact rather than by auditing it. Hosts pin via `/start` auto-pin to newest `v*`. **`040` deployed** `v4.23.0` (PR #72, 2026-08-27) — cursor-bridge-incremental. **`039` deployed** `v4.22.0` (PR #71, 2026-08-27) — start-close-lifecycle. **`038` deployed** `v4.21.0` (PR #70, 2026-08-26) — `cursor.author` **`glm-5.2`** / `zhipu` / `high`. **`037` deployed** `v4.20.0` (PR #69, 2026-08-26). **`036` deployed** `v4.19.0` (PR #68, 2026-08-26). **`035` deployed** `v4.18.0` (PR #67, 2026-08-26). `034` **deployed** `v4.17.0` (PR #66, 2026-08-26). `033` **deployed** `v4.16.0` (PR #65, 2026-08-25). `032` **deployed** `v4.15.0` (PR #64). `031` **deployed** `v4.14.0` (PR #63). H-004 **deployed** `v4.13.1` (PR #62).
 - **Origin:** drafted in an IDE planning mode across one long session, then migrated
   into this repository. That migration is the point: the same session opened with a
@@ -142,7 +142,37 @@ Sprint 043 close surfaced for `/agents:extract` (`check_venv_relocatable.py:75`,
 | C5 | `make graphify-rebuild` used `--mode deep` (needs `GEMINI_API_KEY`), failing at every offline closeout | Recipe is `venv_skillopt/bin/python -m graphify update . --force`; deep rebuild is a documented manual escalation |
 | C6 | `check_venv_relocatable.py:75` accepted a `--venv` arg by its literal spelling as well as its resolved form | Dropped the `str(venv) in line` disjunct — behaviour-neutral for the shipped (already-resolved) invoker |
 
-### Queued for **045** — the submodule-mode anchor *read* (Gate-2 testifying finding)
+### ▶️ Taken by Sprint 045 (`nucleus-ruleset-mechanism-audit`) — full audit of the framework corpus
+
+Not drawn from this queue: the human rescoped Sprint 045 to a systematic
+obsolescence audit of the whole nucleus (`agents.md`, `rules/`, `workflows/`,
+`scripts/`/`hooks/`/`skills/`). Analysis-only — it classifies and drafts
+amendments, applies none. Four reports under `docs/audits/`
+(`NUCLEUS_{RULESET,WORKFLOW,MECHANISM}_AUDIT_REPORT-045.md` +
+`NUCLEUS_AUDIT_SYNTHESIS-045.md`).
+
+| Scope | Audited | VIGENTE | MEJORAR | OBSOLETA |
+| :--- | :--- | :--- | :--- | :--- |
+| `agents.md` §0–§8 + `RA-01`..`RA-18` + 11 `rules/*.md` | 38 | 22 | 14 rows / 9 findings | 2 |
+| 12 `workflows/*.md` | 12 | 6 | 6 | 0 |
+| 39 scripts + 6 hooks + 34 skills | 79 | 75 | 8 | 0 |
+
+`OBSOLETA` (both always-loaded): `RA-04 FULL_DEPLOYMENT` (0 external citations,
+contradicts §6 `orchestrator` + `RA-12` — tombstone, never renumber) and
+`RA-10 SUPPLY_CHAIN_SHIELD` (strict subset of §8 — pointer). The synthesis carries
+29 actionable `S045-*` rows, all `routing_class: nucleus`, bucketed **046** (18
+mechanical) / **047** (10 needing design) / **defer** (1). 0 upstream findings
+open. Phase 7: QA + Tester both `RECORD`/`testifying`, no bounce.
+
+**Execution of the approved amendments is a later sprint** — 045 delivered the
+evidence and the drafted fixes, not the edits (`strict_rule`: `agents.md` changes
+go through a planned sprint unit).
+
+### Queued for **046** — the submodule-mode anchor *read* (Gate-2 testifying finding)
+
+*(Was queued for 045; deferred because the human rescoped Sprint 045 to the
+nucleus audit above. Now competes with the `S045-*` remediation batch for the
+046 slot — a Planning-phase call.)*
 
 F-BOOT-2 fixed the anchor *write* (claim/probe host-scoped in submodule mode).
 The *read* is still framework-anchored: `session_start.py:56` `load_anchor`
@@ -155,7 +185,7 @@ existing, same register: `scripts/_mode.is_nucleus()` returns `False` inside a
 linked git worktree of the nucleus (a worktree's `.git` is a file), misrouting a
 framework developer who works in a worktree.
 
-**Also for 045, from the Sprint 044 extract (`nucleus`-class):**
+**Also for 046 (was 045), from the Sprint 044 extract (`nucleus`-class):**
 
 - `scripts/submodule_purity.py` (and `close_workflow.md` Phase 5) trust
   `git -C .agents status --porcelain`, which **does not list ignored files** —

@@ -4,6 +4,15 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Added
+- **Sprint 045 `nucleus-ruleset-mechanism-audit`** — a full audit of the framework corpus, analysis-only: it classifies and drafts amendments, it applies none (`git diff --stat e0189a3..HEAD` on `agents.md` / `rules/` / `workflows/` / `scripts/` / `hooks/` is empty). Four reports under `docs/audits/`:
+  - `NUCLEUS_RULESET_AUDIT_REPORT-045.md` — `agents.md` §0–§8 + `RA-01`..`RA-18` + the 11 `rules/*.md` files: 38 norms, **22 VIGENTE / 14 MEJORAR register rows (9 distinct cross-cutting findings) / 2 OBSOLETA**. `OBSOLETA`: `RA-04 FULL_DEPLOYMENT` (zero external citations in 44 sprints, contradicts the §6 `orchestrator` charter and `RA-12` — retire to a tombstone, never renumber) and `RA-10 SUPPLY_CHAIN_SHIELD` (strict subset of §8 — degrade to a pointer).
+  - `NUCLEUS_WORKFLOW_AUDIT_REPORT-045.md` — the 12 `workflows/*.md`: **6 VIGENTE / 6 MEJORAR / 0 OBSOLETA**; 7 dead references (`remediation_workflow.md` `invoked_by` anchor `#functional_lock` does not exist; `audit_workflow.md` `precision_audit` cites an unusable `train_runner.py` and a decommissioned topology path); 5 step-ambiguity clusters (`repository_hardening_workflow.md` — 8/8 steps prose, never run against this repo).
+  - `NUCLEUS_MECHANISM_AUDIT_REPORT-045.md` — 39 scripts + 6 hooks + 34 skills: **75 VIGENTE / 8 MEJORAR / 0 OBSOLETA**; no orphan mechanism, no blocking-hook `exit(1)` defect, no stale `config/invocation_exceptions.json` entry (11 entries, all paths exist); `RA-17` gate vocabulary in `check_gate_log.py` matches `rules/qa_and_testing.md §4` exactly.
+  - `NUCLEUS_AUDIT_SYNTHESIS-045.md` — consolidated impact-ranked register: 29 actionable rows (`S045-01`..`S045-29`) + 1 `RECORD` row, all `routing_class: nucleus`, bucketed **Sprint 046** (18 — mechanical reference/naming/docstring fixes + the two `OBSOLETA` downgrades), **Sprint 047** (10 — need design: `§1` linter/complexity enforcement gap, `RA-01` rewrite, workflow step-id renumbering under `RA-14`), **defer** (1 — `last_harden_run` field, human policy call). 0 upstream findings open; no duplicates.
+  - `KI-045-1` (for `/agents:extract`): `SPRINT_LOG_TEMPLATE.md` ships no Quality Gate table, yet `RA-17` / `check_gate_log.py` / `close_workflow.md` Phase 2.6 gate on it — each sprint hand-rolls it and invents a placeholder, which turned `make verify` red mid-close this sprint (Gate 2 T1). `routing_class: nucleus`, Sprint 046 bucket.
+  - Phase 7 Double-Gate: QA `RECORD`/`testifying` (4 items R1–R4, fixed in-phase), Tester `RECORD`/`testifying` (2 items T1–T2, fixed in-phase). No bounce, no remediation.
+
 ## [4.27.0] - 2026-09-07
 
 ### Fixed
