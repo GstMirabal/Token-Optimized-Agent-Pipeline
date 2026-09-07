@@ -155,6 +155,25 @@ existing, same register: `scripts/_mode.is_nucleus()` returns `False` inside a
 linked git worktree of the nucleus (a worktree's `.git` is a file), misrouting a
 framework developer who works in a worktree.
 
+**Also for 045, from the Sprint 044 extract (`nucleus`-class):**
+
+- `scripts/submodule_purity.py` (and `close_workflow.md` Phase 5) trust
+  `git -C .agents status --porcelain`, which **does not list ignored files** —
+  so a stray gitignored `.agents/docs/active_state.json` written by a buggy
+  submodule-mode session is invisible to the one check built to catch host
+  contamination (Gate 2 measured this at `2bbfa60`). Add a `--ignored` scan of
+  the anchor paths (`docs/active_state.json`, `.agent_state/`) to
+  `submodule_purity.py`. Same blindness `agents.md §5 mandatory_topology`
+  already documents for `docs/sprints/`.
+- **`RA-14` amendment proposal for `rule_validator`**: extend the mandatory
+  patch-propagation grep from "the same artifact" to "the sprint's artifact
+  set", and bind it to the **remediation step**, not only the reviewer's
+  spot-check. Precedent: Sprint 044 reconciled "403/404" → "403" across the
+  plan, `task_scope.md` and `ADR-0014` but left a fourth spelling in
+  `skill_assignment.md:38` until Gate 1 round 2 caught it. `agents.md` edits go
+  through a planned sprint unit (`strict_rule` — no tactical injection), so this
+  is queued, not applied here.
+
 ---
 
 ### Queued for **037** — rider **S** (Cursor agent sandbox false reds)

@@ -1,6 +1,6 @@
 {
-  "last_update": "2026-09-06",
-  "sprint_id": "043",
+  "last_update": "2026-09-07",
+  "sprint_id": "044",
   "_schema": "Entries are summary-only Knowledge Items. The 'file' field is omitted once the raw log has been purged (agents.md §4 definitive_amnesia) — the 1-line summary IS the retained knowledge.",
   "items": [
     {
@@ -82,6 +82,16 @@
     {
       "id": "F-20260906-043B",
       "summary": "Parsing venv metadata must handle whitespace in paths (no naive split of the recorded build-path or pyvenv command line) and must resolve pip's POSIX '#!/bin/sh' exec-wrapper shebang rather than assume '#!/usr/bin/python'; a green suite without a spaced-path fixture misses both (Sprint 043 Gate-2 charter REJECTED, fix 96e3303).",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20260907-044A",
+      "summary": "A fix( commit must carry its proving test in the SAME commit (hooks/on_commit.py audit_regression_test, rules/code_craft.md §6); this reconciles with jurisdictional_lock because the sanctioned exception is the code file plus its one test together (Sprint 043 96e3303 precedent), and a genuinely untestable fix must be committed as refactor(/build(/chore( instead.",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20260907-044B",
+      "summary": "ruff check . carries ~193 pre-existing findings repo-wide (no on-disk ruff config) and make verify runs no ruff step, so a code sprint's QA gate measures ruff on the changed files only — new and changed lines must be clean while pre-existing debt is the accepted Sprint 043 migration exclusion.",
       "routing_class": "host"
     }
   ]
