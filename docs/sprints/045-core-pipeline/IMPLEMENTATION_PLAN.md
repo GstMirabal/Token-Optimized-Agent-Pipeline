@@ -180,7 +180,8 @@ conjunto de veredictos `OBSOLETA`/`MEJORAR`, no una rotura de código.
 | `test -f docs/audits/NUCLEUS_MECHANISM_AUDIT_REPORT-045.md; echo $?` | `0` |
 | `test -f docs/audits/NUCLEUS_AUDIT_SYNTHESIS-045.md; echo $?` | `0` |
 | `count=$(grep -oE 'RA-[0-9]{2}' agents.md \| sort -u \| wc -l); rep=$(grep -oE 'RA-[0-9]{2}' docs/audits/NUCLEUS_RULESET_AUDIT_REPORT-045.md \| sort -u \| wc -l); [ "$count" -le "$rep" ]; echo $?` | `0` (todas las enmiendas clasificadas) |
-| `grep -cE '^\| *(VIGENTE\|OBSOLETA\|MEJORAR)' docs/audits/NUCLEUS_AUDIT_SYNTHESIS-045.md` | `≥ 41` (18 RA + §0–§8 + 11 rules + 12 workflows + mecanismos) |
+| `grep -cE '^\| S045-' docs/audits/NUCLEUS_AUDIT_SYNTHESIS-045.md` | `≥ 29` (filas accionables del registro consolidado) |
+| `grep -cE 'VIGENTE\|OBSOLETA\|MEJORAR' docs/audits/NUCLEUS_RULESET_AUDIT_REPORT-045.md` | `≥ 38` (una clasificación por norma del ruleset: §0–§8 + 18 RA + 11 rules) |
 | `make verify; echo $?` | `0` (ningún mecanismo modificado) |
 | `python3 scripts/verify_references.py; echo $?` | `0` |
 | `python3 skills/token-saver-auditor/scripts/audit_plan.py docs/sprints/045-core-pipeline/IMPLEMENTATION_PLAN.md; echo $?` | `0` |
