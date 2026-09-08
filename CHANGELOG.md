@@ -4,6 +4,8 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.29.0] - 2026-09-08
+
 ### Changed
 - **Sprint 046 `nucleus-audit-mechanical-remediation`** — applied the 18-row mechanical bucket of the Sprint 045 nucleus audit (`NUCLEUS_AUDIT_SYNTHESIS-045.md §4`: `S045-01, 03, 04, 05, 07, 08, 10, 11, 12, 13, 15, 16, 21, 23, 24, 25, 26, 28`) plus extract item `KI-045-1`, one atomic commit per physical file. Drafted amendment text only, no redesign. `agents.md §7` amendment IDs `RA-01`..`RA-18` were **not** renumbered.
   - `agents.md` — `RA-04 FULL_DEPLOYMENT` retired to a tombstone row (0 external citations in 45 sprints; contradicted the §6 `orchestrator` charter and `RA-12`); `RA-10 SUPPLY_CHAIN_SHIELD` degraded to a pointer to §8 (strict subset); `§3 federation` / `§5 discovery_manifest` now name `install.py` the sanctioned bridge (`install.sh` is the forwarding shim); `§3 enforcement` names `skills/topology-monitor/scripts/legacy_app_auditor.py` the Three-File-Standard auditor (`mass-standardizer` scoped to manifest generation); `§2` citations pathed (`skills/omni-context-minimizer/scripts/omni_minimizer.py`, `graphify-out/graph.json`, `venv_skillopt/bin/python -m graphify update .`); `§0 Certification` and `§3 secret_sovereignty` degraded to pointers to `RA-05` / `RA-09`; `RA-15` / `RA-16` print order restored to monotonic. #046
