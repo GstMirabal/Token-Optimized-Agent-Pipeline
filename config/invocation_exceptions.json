@@ -25,6 +25,16 @@
       "note": "Vendored from affaan-m/ECC (MIT). Same status as django-patterns-3rd."
     },
     {
+      "path": "skills/django-expert-3rd",
+      "reason": "vendored-reference",
+      "note": "Vendored Django reference pack (rules/django_backend_standard.md). Consulted when working on a Django host; not a step in any framework workflow. Ships an accepted vendored-upstream nested skills/ sub-layer (rules/django_backend_standard.md)."
+    },
+    {
+      "path": "skills/autoskills-3rd",
+      "reason": "vendored-reference",
+      "note": "Local Arsenal Bridge (rules/skills_and_integrations.md §1 Priority 2). Reference material the skill_architect consults; not a scripted workflow step."
+    },
+    {
       "path": "skills/skills-samples-3rd",
       "reason": "vendored-reference",
       "note": "Sample skills kept as authoring examples for skill_forge_workflow.md. Wiring them into a workflow step would execute examples as if they were tools."

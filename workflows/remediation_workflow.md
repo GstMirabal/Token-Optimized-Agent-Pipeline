@@ -1,7 +1,7 @@
 ---
 description: "Emergency Rollback and Remediation Protocol (Keyword: remediation)"
 version: 2.0.0
-invoked_by: human:/agents:remediation, rules/qa_and_testing.md#functional_lock
+invoked_by: human:/agents:remediation, rules/qa_and_testing.md#4-the-double-gate-review-protocol, workflows/pipeline_workflow.md
 ---
 
 # 🛡️ Workflow: Remediation (Rollback & Recovery)

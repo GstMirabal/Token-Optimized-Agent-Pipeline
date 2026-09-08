@@ -2,6 +2,8 @@
 
 Imported by scripts/install.py when ``--target`` is ``cursor`` or ``both``.
 
+invoked_by: scripts/install.py (import; --target cursor|both).
+
 Rule ``.mdc`` frontmatter contract (measured once in Sprint 026 ``P4.0``;
 absorbed here by ``A3.1`` so the sprint directory carries no tool-probe
 receipt). Only these keys are emitted:

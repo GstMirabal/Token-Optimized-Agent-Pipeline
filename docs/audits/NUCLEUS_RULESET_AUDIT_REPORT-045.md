@@ -11,6 +11,15 @@
 
 Classification of every normative unit in the always-loaded constitution (`agents.md` §0–§8, `RA-01`..`RA-18`) and the 11 on-trigger rule files under `rules/`. This sprint **classifies and drafts** amendments as proposed text inside this report; it applies nothing (`IMPLEMENTATION_PLAN.md` decision D1). No edit to `agents.md` or any `rules/*.md` is made by this unit.
 
+> **Applied in Sprint 046** (`ai-sprint/046`): the mechanical ruleset rows —
+> `S045-01` (`RA-04` tombstone), `S045-03` (`install.py` bridge), `S045-04`
+> (`legacy_app_auditor.py`), `S045-05` (`§2` paths), `S045-07` (`RA-10` pointer),
+> `S045-08` (`§0`/`§3` → pointers), `S045-10` (`RA-15`/`RA-16` order), `S045-11`
+> (`frontend_modular_standard.md` retitle), `S045-12` (`project_topology.md`
+> nucleus interpreter). `agents.md §7` IDs were **not** renumbered. The `047`
+> ruleset rows (`S045-02, 06, 09`) are untouched. Evidence:
+> `docs/sprints/046-core-pipeline/`.
+
 | Metric | Score | Status |
 | :--- | :--- | :--- |
 | Norms classified | 38 (9 sections + 18 amendments + 11 rule files) | ✅ |

@@ -1,9 +1,11 @@
 """Non-destructive JSON merge.
 
 Adds a template's keys into a destination JSON file without overwriting
-anything the host project already defined. Used by install.sh to merge
+anything the host project already defined. Used to merge
 claude/settings.hooks.json -> host .claude/settings.json and claude/mcp.json
 -> host .mcp.json.
+
+invoked_by: scripts/install.py (import; non-destructive settings/mcp merge).
 """
 import json
 import sys

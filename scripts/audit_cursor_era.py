@@ -4,6 +4,10 @@ Walks ``docs/sprints/{026..033}-core-pipeline/``, skips missing directories, and
 writes ``docs/audits/CURSOR_ERA_EXECUTION_AUDIT.md``. Always exits ``0`` — this
 is a census, not a gate. Uses existing parsers only (no new table parsers).
 
+Scope frozen to sprints 026-033 (Cursor era). Not stale — a bounded historical
+census, re-runnable but not expected to change; the standing ``make
+cursor-era-audit`` target keeps it live.
+
 invoked_by: Makefile target `cursor-era-audit`.
 
 Usage:

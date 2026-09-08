@@ -1,0 +1,9 @@
+{
+  "nodes": 9591,
+  "edges": 12145,
+  "communities": 819,
+  "source": "graphify-out/graph.json",
+  "sprint": 46,
+  "built_at_commit": "c5647e2c70beb3dde10cc28d69ae5f9c4f2a7006",
+  "note": "Counts from `make graphify-rebuild` (`graphify update . --force`, AST, no LLM) at the pre-seal tip. Delta vs Sprint 045 (9415/11919/810) is the Sprint 046 directory artifacts (IMPLEMENTATION_PLAN / SPRINT_LOG / agent_assignment / skill_assignment / task_scope / PHASE_REGISTER), `tests/test_state_mirror.py` (U29), and the text edits across `agents.md`, `rules/`, `workflows/`, `docs/standards/templates/`, `config/invocation_exceptions.json`, `docs/audits/NUCLEUS_*-045.md`, CHANGELOG and the program-queue roadmap. Mechanical audit-remediation sprint: one new source file (the test)."
+}

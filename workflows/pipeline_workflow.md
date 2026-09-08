@@ -31,10 +31,10 @@ Master operational protocol ensuring rigid task delegation, automated Double-Gat
 
 ## 📐 Standards & Rules
 - **Zero-Memory Initialization**: All subagents start with zero memory; read `active_state.json` first. The governance ruleset is auto-imported via the host `CLAUDE.md` — verify presence, re-read only after compaction (`anti_amnesia`).
-- **Graph Sovereignty**: Query `graph.json` via MCP or CLI before any recursive grep codebase research.
+- **Graph Sovereignty**: Query `graphify-out/graph.json` via MCP or CLI before any recursive grep codebase research.
 - **Topographic Purity**: Prohibited to leave empty folders. Purge noise before closing.
 - **Unique Naming**: All artifacts must follow the `[MODULE]_[TYPE].md` standard (Option B).
-- **Context Limit**: Mandatory use of `omni_minimizer.py` for files >200 lines.
+- **Context Limit**: Mandatory use of `skills/omni-context-minimizer/scripts/omni_minimizer.py` for files >200 lines.
 - **Branch Discipline (RA-12)**: All work happens on `ai-sprint/[ID]`, created in Phase 3 and pushed in `close_workflow.md` Phase 5. Only `deployment_workflow.md` merges to `main`.
 - **`/loop` usage**: Claude Code's `/loop` skill MAY wrap Phases 6-8 (Execution → Quality Gate → Sprint Closeout) to advance a multi-sprint pipeline without manual re-invocation. It MUST NOT wrap Phase 5 (Approval Gate) — human authorization stays a single, attended invocation. **Arm the stop set before the first iteration** (`python3 .agents/scripts/loop_guard.py start --max-iterations N --success "<condition>"`) and run `loop_guard.py check` as the **first action of every iteration**; it fails closed on a missing or stale `loop` block. Full rule: `rules/loop_governance.md`.
 

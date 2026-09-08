@@ -1,6 +1,18 @@
-# 🛡️ Rule 041: Frontend Modular Standard
+# Rule Context: Frontend Modular Standard
 
-## 1. Directory Anatomy (Rule 41.1)
+Governs the structure of every module under `frontend/src/modules/`: directory
+anatomy, cross-module import boundaries, and UI consistency. Loaded when touching
+`frontend/src/modules/`. Not loaded for other stacks; `rules/code_craft.md`
+remains the language-level rule for JS/TS regardless. Legacy citations `Rule 41`
+/ `Rule 041` / `Rule 41.x` resolve here via `rules/LEGACY_RULE_CONCORDANCE.md`.
+
+**Last Audit Sprint**: 046
+**Last Audit Date**: 2026-09-08
+**Last Audit Commit SHA**: 30d3835
+
+---
+
+## 1. Directory Anatomy
 Every module inside `frontend/src/modules/` must adhere to the following minimum structure to guarantee interoperability and isolation:
 - `pages/`: Contains route-level views exclusively (suffix: `View.tsx`).
 - `components/`: Atomic or molecular components specific to the module's domain.
@@ -9,14 +21,10 @@ Every module inside `frontend/src/modules/` must adhere to the following minimum
 - `store/`: (Optional) Module-specific global state definitions (Zustand/Redux).
 - `index.ts`: The module's **Public API**. Only what is exported here is accessible from outside the module.
 
-## 2. Cross-Module Communication (Rule 41.2)
+## 2. Cross-Module Communication
 - **Zero-Leaking**: Importing files directly from another module's subfolders is strictly **PROHIBITED** (e.g. `import { UserCard } from "@/modules/users/components/UserCard"` is ILLEGAL).
 - **Public Access**: Cross-module imports must go through the module's root entry point (e.g. `import { UserCard } from "@/modules/users"`).
 
-## 3. UI Consistency (Rule 41.3)
+## 3. UI Consistency
 - **Sovereign Aesthetic**: All module components must inherit the design tokens defined in `SovereignLayout` and use `framer-motion` for view-state transitions.
 - **Loading States**: Every `View.tsx` must implement a loading state (Skeleton or premium Loader) while API promises resolve.
-
----
-*Effective since: 2026-05-07*
-*Status: ACTIVE*

@@ -11,6 +11,17 @@
 
 > This unit **classifies and drafts** only (`IMPLEMENTATION_PLAN.md` decision D1). No script, hook, skill, `agents.md` or `rules/*.md` is modified. Every proposed amendment below is drafted text, not an applied change.
 
+> **Applied in Sprint 046** (`ai-sprint/046`): the mechanism-layer rows —
+> `S045-21` / F-7 (`hooks/state_mirror.py` bare `except … pass` → stderr line),
+> `S045-23` / F-6 (`scripts/check_gate_log.py:17` docstring `RA-11` → `RA-17`),
+> `S045-24` / F-4 (`hooks/on_commit.py` exit-code docstring → exit-2 semantics),
+> `S045-25` / F-1 (`scripts/merge_json.py` + `scripts/cursor_adapter.py`
+> `invoked_by:` tokens), `S045-26` / F-2 (`config/invocation_exceptions.json`
+> two `vendored-reference` entries), `S045-28` / F-8 (`scripts/audit_cursor_era.py`
+> scope-frozen docstring line). `S045-22` / meta-finding 1
+> (`verify_references.py` check (d) `#anchor` resolution) is routed to `047`.
+> `S045-30` / F-5 is `RECORD` only. Evidence: `docs/sprints/046-core-pipeline/`.
+
 ---
 
 ## Executive Summary

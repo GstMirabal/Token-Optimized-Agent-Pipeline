@@ -8,6 +8,14 @@
 **Scope**: consolidation of Units 1–3 — `NUCLEUS_RULESET_AUDIT_REPORT-045.md`, `NUCLEUS_WORKFLOW_AUDIT_REPORT-045.md`, `NUCLEUS_MECHANISM_AUDIT_REPORT-045.md`
 **Nature**: classification + drafted amendments only. This report **applies nothing** (`IMPLEMENTATION_PLAN.md` decision D1). No `agents.md`, `rules/*.md`, `workflows/*.md`, script or hook was edited. Every "Proposed amendment" cell below is drafted text, not an applied change.
 
+> **Applied in Sprint 046** (`ai-sprint/046`, `nucleus-audit-mechanical-remediation`):
+> the 18-row `046` bucket — `S045-01, 03, 04, 05, 07, 08, 10, 11, 12, 13, 15, 16,
+> 21, 23, 24, 25, 26, 28` — plus `KI-045-1`, one atomic commit per file. Those
+> rows are **done**; do not re-apply them. The `047` bucket
+> (`S045-02, 06, 09, 14, 17, 18, 19, 20, 22, 27`), `S045-29` (deferred) and
+> `S045-30` (`RECORD`) are untouched and still pending. Evidence:
+> `docs/sprints/046-core-pipeline/`.
+
 ---
 
 ## 🚦 Executive Summary

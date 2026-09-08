@@ -8,7 +8,7 @@ Before touching any source file, descend this ladder and stop at the first rung 
 | Rung | Tool | When | Approx. cost |
 | :--- | :--- | :--- | :--- |
 | **1. Graph query** | `graphify query "<question>"` / MCP `query_graph` | Architecture, relationships, "where is X used" | Scoped subgraph, smallest |
-| **2. AST skeleton** | `omni_minimizer.py <file>` | Structure of one large file (classes, signatures) | ~10% of the file |
+| **2. AST skeleton** | `skills/omni-context-minimizer/scripts/omni_minimizer.py <file>` | Structure of one large file (classes, signatures) | ~10% of the file |
 | **3. Targeted partial read** | `Read` with offset/limit, or `ripgrep` on the symbol | Inspecting one known function/range | Only the affected lines |
 | **4. Full read** | `Read` entire file | Files **<200 lines only** | Full file |
 

@@ -10,7 +10,7 @@ version: 1.0.0
 
 - **Strategy Lock:** `OPEN`
 - **Delivered:** `024` and `025` (`v4.5.0`), `021` (`v4.6.0`), `022` (`v4.7.0`), `023` (`v4.8.0`), `026` (`v4.9.0`, PR #50), `027` (`v4.10.0`, PR #55), `028` (`v4.11.0`, PR #57), `029` (`documentation-truth`, `v4.12.0`, PR #59), `030` (`token-economy-enforcement`, `v4.13.0`, PR #61), `031` (`gate-verdict-classes`, `v4.14.0`, PR #63), `032` (`author-tier-trial`, `v4.15.0`, PR #64), `033` (`implementer-role`, `v4.16.0`, PR #65), `034` (`core-pipeline`, `v4.17.0`, PR #66), `035` (`core-pipeline` C/E/H/F, `v4.18.0`, PR #67), `036` (`core-pipeline` M/L, `v4.19.0`, PR #68), `037` (`core-pipeline` G+S, `v4.20.0`, PR #69), **`038` (`core-pipeline` family-trial, `v4.21.0`, PR #70)**
-- **Next / in flight:** **`045` (`nucleus-ruleset-mechanism-audit`) deployed `v4.28.0` (PR #78)** — full obsolescence audit of the framework corpus; 4 reports in `docs/audits/`, 29 `nucleus` amendment rows bucketed 046/047/defer, nothing applied (analysis-only). Section below. **046** picks up the mechanical `S045-*` batch + the two `KI-045-*` extract items. **`044` deployed** `v4.27.0`, **`043` deployed** `v4.26.0`, **`042` deployed** `v4.25.0`, **`041` deployed** `v4.24.0`.
+- **Next / in flight:** **`046` (`nucleus-audit-mechanical-remediation`) sealed on `ai-sprint/046`, pending deploy** — applied the 18-row mechanical `S045-*` bucket + `KI-045-1` (Quality Gate table stub in `SPRINT_LOG_TEMPLATE.md`), one atomic commit per file, drafted text only, `agents.md §7` IDs `RA-01`..`RA-18` not renumbered (`RA-04`/`RA-10` → tombstone/pointer in place). Phase 7: QA Gate 1 `REJECTED`/`instructing` r1 (F-046-QA1 — a faithfully transcribed but defective drafted amendment `A4`) → `APPROVED` r2; Tester Gate 2 `RECORD`/`testifying` (T-046-1 closed by `U29` `tests/test_state_mirror.py`; T-046-2 pre-existing). Section below. **`045` (`nucleus-ruleset-mechanism-audit`) deployed `v4.28.0` (PR #78)** — full obsolescence audit; 29 `nucleus` rows bucketed 046/047/defer, analysis-only. **047** picks up the design-pass bucket (`S045-02, 06, 09, 14, 17, 18, 19, 20, 22, 27`) + `KI-045-2` + `KI-046-3` + the submodule-mode anchor *read* / `submodule_purity --ignored` items still queued below. **`044` deployed** `v4.27.0`, **`043` deployed** `v4.26.0`, **`042` deployed** `v4.25.0`, **`041` deployed** `v4.24.0`.
 - **Previously:** **`041` (`bi-harness-bridge-parity`) deployed `v4.24.0` (2026-08-30)** — the portable boot repaired the bridge of Cursor only; a Claude boot reported a mirror that did not exist and installed no git hooks. Also opened, and closed, three cases of a versioned artifact failing the gate that consumes it (`IMPLEMENTATION_PLAN_TEMPLATE.md`, `SKILL_ASSIGNMENT_TEMPLATE.md`, `pipeline_workflow.md` Phase 4.3), each found by following the artifact rather than by auditing it. Hosts pin via `/start` auto-pin to newest `v*`. **`040` deployed** `v4.23.0` (PR #72, 2026-08-27) — cursor-bridge-incremental. **`039` deployed** `v4.22.0` (PR #71, 2026-08-27) — start-close-lifecycle. **`038` deployed** `v4.21.0` (PR #70, 2026-08-26) — `cursor.author` **`glm-5.2`** / `zhipu` / `high`. **`037` deployed** `v4.20.0` (PR #69, 2026-08-26). **`036` deployed** `v4.19.0` (PR #68, 2026-08-26). **`035` deployed** `v4.18.0` (PR #67, 2026-08-26). `034` **deployed** `v4.17.0` (PR #66, 2026-08-26). `033` **deployed** `v4.16.0` (PR #65, 2026-08-25). `032` **deployed** `v4.15.0` (PR #64). `031` **deployed** `v4.14.0` (PR #63). H-004 **deployed** `v4.13.1` (PR #62).
 - **Origin:** drafted in an IDE planning mode across one long session, then migrated
   into this repository. That migration is the point: the same session opened with a
@@ -188,11 +188,36 @@ go through a planned sprint unit).
   `agents.md` / `AUDIT_REPORT_TEMPLATE.md` edits go through a planned sprint unit
   (`strict_rule`), so this is queued for 047, not applied here.
 
-### Queued for **046** — the submodule-mode anchor *read* (Gate-2 testifying finding)
+### ▶️ Taken by Sprint 046 (`nucleus-audit-mechanical-remediation`) — the mechanical `S045-*` bucket
 
-*(Was queued for 045; deferred because the human rescoped Sprint 045 to the
-nucleus audit above. Now competes with the `S045-*` remediation batch for the
-046 slot — a Planning-phase call.)*
+Scoped by the human at Planning to **A + B**: the 18 mechanical `S045-*` rows
+(`S045-01, 03, 04, 05, 07, 08, 10, 11, 12, 13, 15, 16, 21, 23, 24, 25, 26, 28`)
++ `KI-045-1`. One atomic commit per physical file, drafted amendment text only,
+no redesign. `agents.md §7` IDs `RA-01`..`RA-18` **not** renumbered — `RA-04`
+(tombstone) and `RA-10` (pointer to §8) are rows in place.
+
+| Group | What landed |
+| :--- | :--- |
+| `agents.md` ×7 | `RA-04` tombstone, `RA-10` pointer, `install.py` bridge, `legacy_app_auditor.py` auditor, `§2` pathed citations, `§0`/`§3` → pointers, `RA-15`/`RA-16` order restored |
+| `rules/` ×3 + `RA-14` propagation ×2 | `token_economy.md` + `pipeline_workflow.md` pathed; `LEGACY_RULE_CONCORDANCE.md` `Rule 66` single authority; `frontend_modular_standard.md` → `Rule Context:` + `§4.1` metadata block; `project_topology.md` nucleus-interpreter line + host-only marks |
+| `workflows/` ×3 | `remediation_workflow.md` dead `#functional_lock` anchor repointed; `standardization_workflow.md` Phase 6 gains `0_SYSTEM_ARCHITECTURE.md`; `skill_forge_workflow.md` full `train_runner.py` path + `--profile-path` route |
+| mechanisms | `state_mirror.py` bare `except` → stderr; `on_commit.py` / `check_gate_log.py` exit-code docstrings; `merge_json.py` / `cursor_adapter.py` `invoked_by:` tokens; `audit_cursor_era.py` scope note; `config/invocation_exceptions.json` +2 `vendored-reference` |
+| `KI-045-1` | `SPRINT_LOG_TEMPLATE.md` Quality Gate stub (header + commented guide, 0 data rows) |
+
+Phase 7: QA Gate 1 `REJECTED`/`instructing` round 1 — **F-046-QA1**: `U15` was a
+faithful transcription of drafted amendment `A4`, but `A4` asserted
+`0_SYSTEM_ARCHITECTURE.md` is "materialized from their templates" and no such
+template exists; fixed round 2 (`SYSTEM_OVERVIEW_TEMPLATE.md` named as the sole
+anchor template, no new template created) → `APPROVED`. Tester Gate 2
+`RECORD`/`testifying`: **T-046-1** — the one behavioural change (`state_mirror.py`)
+had no suite coverage; closed post-gate by `U29` (`tests/test_state_mirror.py`,
+704 passed). **T-046-2** — pre-existing `ruff`-not-in-`make verify` gap
+(= `S045-02` / T3). No remediation escalation.
+
+### Queued for **047** — the submodule-mode anchor *read* (Gate-2 testifying finding)
+
+*(Was queued for 045, then 046; not taken by 046 — the human scoped 046 to the
+`S045-*` mechanical batch. Now routed to 047 alongside the design-pass bucket.)*
 
 F-BOOT-2 fixed the anchor *write* (claim/probe host-scoped in submodule mode).
 The *read* is still framework-anchored: `session_start.py:56` `load_anchor`
@@ -205,7 +230,7 @@ existing, same register: `scripts/_mode.is_nucleus()` returns `False` inside a
 linked git worktree of the nucleus (a worktree's `.git` is a file), misrouting a
 framework developer who works in a worktree.
 
-**Also for 046 (was 045), from the Sprint 044 extract (`nucleus`-class):**
+**Also for 047 (was 045/046), from the Sprint 044 extract (`nucleus`-class):**
 
 - `scripts/submodule_purity.py` (and `close_workflow.md` Phase 5) trust
   `git -C .agents status --porcelain`, which **does not list ignored files** —

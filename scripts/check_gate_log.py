@@ -14,7 +14,7 @@ Usage:
 
 Exit codes:
     0 — pass, skip (historical / no file / no rows)
-    2 — vocabulary or class mismatch (RA-11)
+    2 — vocabulary or class mismatch (RA-17; exit-code-2 blocking per RA-11 semantics)
 """
 
 from __future__ import annotations
