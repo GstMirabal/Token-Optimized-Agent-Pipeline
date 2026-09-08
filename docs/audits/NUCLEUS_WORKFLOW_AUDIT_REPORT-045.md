@@ -21,6 +21,15 @@
 
 No workflow is wholly superseded; every one has a live, distinct purpose and at least one resolving invoker. The six `MEJORAR` verdicts are driven by dead sub-references, non-canonical artifact names, and steps whose verbs do not state an operation (`agents.md §1 unambiguous_action`).
 
+> **Applied in Sprint 046** (`ai-sprint/046`): the mechanical workflow rows —
+> `S045-13` (`remediation_workflow.md` `invoked_by:` off the dead
+> `#functional_lock` anchor), `S045-15` (`standardization_workflow.md` Phase 6
+> end-state gains `0_SYSTEM_ARCHITECTURE.md`), `S045-16` (`skill_forge_workflow.md`
+> full `train_runner.py` path + `--profile-path` route). The `047` workflow rows
+> (`S045-14, 17, 18, 19, 20, 27` — `audit_workflow` `precision_audit`,
+> `train_runner.py` canonicalisation, step-id passes, script enhancements) are
+> untouched. Evidence: `docs/sprints/046-core-pipeline/`.
+
 | Metric | Score | Status |
 | :--- | :--- | :--- |
 | Frontmatter `invoked_by:` present (RA-16) | 12/12 | 🟢 |
