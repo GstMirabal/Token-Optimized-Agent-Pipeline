@@ -2,7 +2,7 @@
 
 **Canonical path**: `docs/sprints/046-core-pipeline/IMPLEMENTATION_PLAN.md`
 **Branch**: `ai-sprint/046` · **Base**: `main` at `8265c09c8a12c8a2d79fdc290670fa899f4cb6de`
-**Status**: `DRAFT` → `APPROVED` → `EXECUTING` → `CLOSED`
+**Status**: `DRAFT` → `APPROVED` → **`EXECUTING`** → `CLOSED`
 
 > Authored at Phase 1 (Planning) by `principal_agent`, extracted to this path at
 > Phase 3, and **committed before Phase 5 approves it**: `agents.md §2 triple_lock`
@@ -364,10 +364,10 @@ not an abort.
 
 | Field | Value |
 | :--- | :--- |
-| **Approved by** | _(pending Phase 5)_ |
-| **Date** | _(pending)_ |
-| **Plan commit at approval** | _(pending — filled at Phase 5 after the plan is committed on `ai-sprint/046`)_ |
-| **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
+| **Approved by** | GstMirabal (human, chat authorization "ok") |
+| **Date** | 2026-09-08 |
+| **Plan commit at approval** | `d4859b3` (plan committed on `ai-sprint/046` at Phase 3; this Status/Approval edit is a follow-up commit) |
+| **Remaining locks** | Active Sprint (open) · QA + Tester verdicts (Phase 7) · Human OK at close (Phase 8) |
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an
 unattended `/loop` (`workflows/pipeline_workflow.md`, `rules/loop_governance.md`).
