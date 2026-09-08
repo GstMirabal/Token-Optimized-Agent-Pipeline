@@ -11,7 +11,11 @@ Usage:
 
 Exit codes:
     0 — commit allowed
-    1 — commit rejected (any non-zero exit blocks ``git commit``)
+    2 — rejected: blocks the git commit AND the Claude Code ``PreToolUse`` Bash
+        call. ``RA-11`` requires ``2``, not ``1`` — the model only sees stderr on
+        exit ``2``. This hook is dual-wired (native ``pre-commit`` +
+        ``claude/settings.hooks.json`` PreToolUse); ``block()`` always
+        ``sys.exit(2)``.
 """
 
 import subprocess
