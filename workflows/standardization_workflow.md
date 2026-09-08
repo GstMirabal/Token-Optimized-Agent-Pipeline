@@ -47,7 +47,7 @@ Invoked by `start_workflow first_run_scaffold` when prior agent-generated docume
 
 ## Phase 6: Onboarding Scenario Matrix (`start_workflow first_run_scaffold` routing)
 
-Loaded only on a host's FIRST pipeline session (token economy: one-time routing does not belong in the every-session start protocol). All scenarios end with: `docs/` tree instantiated, `docs/0_SYSTEM_OVERVIEW.md` materialized from its template, initial `docs/active_state.json`, and the **Master Ledger** (`CHANGELOG.md`) present at the host root (created from `CHANGELOG_TEMPLATE.md` only if absent — an existing changelog is adopted as-is, never reformatted).
+Loaded only on a host's FIRST pipeline session (token economy: one-time routing does not belong in the every-session start protocol). All scenarios end with: `docs/` tree instantiated, `docs/0_SYSTEM_OVERVIEW.md` **and** `docs/0_SYSTEM_ARCHITECTURE.md` materialized from their templates (the sibling Documentation Entry Point anchor `close_workflow.md` `history_sync` and `rules/documentation_standard.md §2` both assume this workflow scaffolds), initial `docs/active_state.json`, and the **Master Ledger** (`CHANGELOG.md`) present at the host root (created from `CHANGELOG_TEMPLATE.md` only if absent — an existing changelog is adopted as-is, never reformatted).
 
 | Scenario | Detection signals | Route |
 | :--- | :--- | :--- |
