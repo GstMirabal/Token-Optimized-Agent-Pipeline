@@ -4,6 +4,8 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.28.0] - 2026-09-08
+
 ### Added
 - **Sprint 045 `nucleus-ruleset-mechanism-audit`** — a full audit of the framework corpus, analysis-only: it classifies and drafts amendments, it applies none (`git diff --stat e0189a3..HEAD` on `agents.md` / `rules/` / `workflows/` / `scripts/` / `hooks/` is empty). Four reports under `docs/audits/`:
   - `NUCLEUS_RULESET_AUDIT_REPORT-045.md` — `agents.md` §0–§8 + `RA-01`..`RA-18` + the 11 `rules/*.md` files: 38 norms, **22 VIGENTE / 14 MEJORAR register rows (9 distinct cross-cutting findings) / 2 OBSOLETA**. `OBSOLETA`: `RA-04 FULL_DEPLOYMENT` (zero external citations in 44 sprints, contradicts the §6 `orchestrator` charter and `RA-12` — retire to a tombstone, never renumber) and `RA-10 SUPPLY_CHAIN_SHIELD` (strict subset of §8 — degrade to a pointer).
