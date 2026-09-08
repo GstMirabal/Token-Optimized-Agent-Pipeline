@@ -61,12 +61,12 @@ Domain rules live in `rules/` and are loaded **on demand** at these triggers —
 | :--- | :--- | :--- |
 | **Security** | `triple_lock` | Approved Implementation Plan + Active Sprint + QA/Tester Approval + Human OK. **Lock 1 has a path and an ordering**: the plan is at `IMPLEMENTATION_PLAN.md` inside the canonical sprint directory (`§0`, `§5 mandatory_topology`) and is committed **before** Phase 5 runs. A lock cannot close over an artifact that does not exist, and an approval whose object vanished cannot be audited afterwards — which is the failure this rule was written against. |
 | **Context** | `token_saver` | Files >200 lines MUST NOT be fully dumped. Targeted partial reads (offset/limit on the affected function) are the sanctioned mechanism. Decision ladder in `rules/token_economy.md`. |
-| **Context** | `ast_skeleton` | For structural discovery on large files, invoke `omni_minimizer.py` to extract the skeleton before any partial read. |
+| **Context** | `ast_skeleton` | For structural discovery on large files, invoke `skills/omni-context-minimizer/scripts/omni_minimizer.py` (skill: `omni-context-minimizer`) to extract the skeleton before any partial read. |
 | **Context** | `anti_amnesia` | Re-read `agents.md` and `active_state.json` once per session (at start) and after any context compaction — not after every execution step. |
-| **Context** | `graph_sovereignty`| Query `graph.json` via MCP or CLI before any full codebase research or recursive grep operations. |
+| **Context** | `graph_sovereignty`| Query `graphify-out/graph.json` via MCP or CLI before any full codebase research or recursive grep operations. |
 | **WIP Safety** | `pre_shielding` | Abort if `git status --porcelain` returns unresolved differences. |
 | **WIP Safety** | `destructive_flags` | Reject massive modifications/deletions unless the human grants explicit approval (via chat or Claude Code's permission prompt). |
-| **WIP Safety** | `graph_sync` | Mandate running `graphify update` post-changes during quality check or commit phase. |
+| **WIP Safety** | `graph_sync` | Mandate running `venv_skillopt/bin/python -m graphify update .` post-changes during quality check or commit phase (never the bare `graphify` console-script — it fails `bad interpreter` under a relocated `.agents`; `rules/graphify.md`). |
 | **Isolation** | `jurisdictional_lock` | Limit structural editing to `1` single physical file per instantiated subagent task. |
 | **Isolation** | `no_interference` | Abort if `task_scope.md` shows the target file listed by another subtask in progress. |
 
