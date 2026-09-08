@@ -197,7 +197,7 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 0. Isolation | `forge_destination` | write |
 | 1. Scaffolding | `blueprint` | write |
 | 2. Benchmarking | `sterile_dev` | ? |
-| 2. Benchmarking | `skillopt_run` | ? |
+| 2. Benchmarking | `skillopt_run` | write |
 | 2. Benchmarking | `smoke_test` | ? |
 | 3. Registration | `manifest_update` | write |
 | 4. Approval Gate | `authorization` | ? |
