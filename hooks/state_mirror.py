@@ -10,6 +10,7 @@ invoked_by: claude/settings.hooks.json Stop hook, close_workflow.md#state_sync.
 """
 import json
 import shutil
+import sys
 from pathlib import Path
 
 ACTIVE_STATE = Path("docs/active_state.json")
@@ -25,7 +26,12 @@ def mirror_active_state():
                 json.load(f)
             shutil.copy2(ACTIVE_STATE, MIRROR_STATE)
         except json.JSONDecodeError:
-            pass # Keep it silent to not interrupt workflows unnecessarily unless debugging
+            # Non-fatal: the Stop hook must not interrupt the session. One stderr
+            # line satisfies agents.md §1 exception_handling without happy-path noise.
+            print(
+                "[state_mirror] active_state.json is not valid JSON; mirror skipped",
+                file=sys.stderr,
+            )
     else:
         pass
 
