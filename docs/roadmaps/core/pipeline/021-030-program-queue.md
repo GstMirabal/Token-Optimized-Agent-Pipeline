@@ -168,6 +168,26 @@ open. Phase 7: QA + Tester both `RECORD`/`testifying`, no bounce.
 evidence and the drafted fixes, not the edits (`strict_rule`: `agents.md` changes
 go through a planned sprint unit).
 
+**From the Sprint 045 extract (`nucleus`-class), for the 046/047 batch:**
+
+- `KI-045-1` — `SPRINT_LOG_TEMPLATE.md` ships **no Quality Gate table**, yet
+  `RA-17`, `scripts/check_gate_log.py` and this workflow's Phase 2.6 all gate on
+  that table's shape and vocabulary, and `make verify` runs the checker. Each
+  sprint hand-rolls the table and invents a placeholder; Sprint 045's
+  `_(pending)_` reddened `make verify` mid-close (Gate 2 T1). Add the
+  `Gate | Round | Verdict | Class | Notes` stub plus a comment naming the
+  allowed verdict vocabulary. One-file edit — 046 mechanical bucket.
+- `KI-045-2` — **`RA-14` amendment proposal for `rule_validator`**: the
+  patch-propagation rule covers a document *revised across sessions*; extend it
+  so a deliverable's **headline metrics** (verdict counts, cross-reference
+  targets) must be a `grep`-reproducible figure derived from the body register,
+  not carried from the author's summary prose. Precedent: Sprint 045 Gate 1 R1
+  cited a skill (`react-quality-auditor`) that exists nowhere, and Gate 2 T2
+  found the ruleset report's headline `27/9` against a register of `22/14` —
+  both author-prose drift the body contradicted, both caught only at the gate.
+  `agents.md` / `AUDIT_REPORT_TEMPLATE.md` edits go through a planned sprint unit
+  (`strict_rule`), so this is queued for 047, not applied here.
+
 ### Queued for **046** — the submodule-mode anchor *read* (Gate-2 testifying finding)
 
 *(Was queued for 045; deferred because the human rescoped Sprint 045 to the
