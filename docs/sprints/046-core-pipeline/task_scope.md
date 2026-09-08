@@ -47,12 +47,15 @@ Check: `python3 scripts/check_task_scope.py --sprint-dir docs/sprints/046-core-p
 | U26 | `docs/audits/NUCLEUS_RULESET_AUDIT_REPORT-045.md` | modify | low | `rule_validator` | sonnet | medium | ✅ 351f5b2 |
 | U27 | `docs/audits/NUCLEUS_WORKFLOW_AUDIT_REPORT-045.md` | modify | low | `rule_validator` | sonnet | medium | ✅ 6dc9a8b |
 | U28 | `docs/audits/NUCLEUS_MECHANISM_AUDIT_REPORT-045.md` | modify | low | `rule_validator` | sonnet | medium | ✅ f867f1d |
+| U29 | `tests/test_state_mirror.py` | create | low | `implementer_agent` | sonnet | medium | ✅ 7bb3cdf |
 
 Wave 1 = `U01`–`U07` (**strictly serial** — one shared target `agents.md`,
 `no_interference`). Wave 2 = `U08`–`U16` (disjoint targets; starts after Wave 1
 because `U08`/`U09`/`U10`/`U11` propagate `U04`/`U06`/`U07` under `RA-14`).
 Wave 3 = `U17`–`U23` (disjoint; parallel-safe). Wave 4 = `U24`–`U28` (after
-Waves 1–3; `U25`–`U28` disjoint among themselves).
+Waves 1–3; `U25`–`U28` disjoint among themselves). `U29` (`tests/test_state_mirror.py`)
+was added at Phase 7 to close Gate 2 finding `T-046-1` — the sprint's one
+behavioural change (`hooks/state_mirror.py`, `U17`) had no suite coverage.
 
 ---
 
