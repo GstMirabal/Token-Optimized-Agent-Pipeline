@@ -41,13 +41,11 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 *Hand-rolled section (`SPRINT_LOG_TEMPLATE.md` ships no Quality Gate table — this
 sprint's `U24` / `KI-045-1` adds the stub). Verdict vocabulary: `APPROVED` |
 `REJECTED` | `RECORD`; class `charter` | `instructing` | `testifying`
-(`rules/qa_and_testing.md §4`, `RA-17`). Rows transcribed by `orchestrator` from
-the gate agents' emissions (`config/artifact_registry.json`).*
-
-| Gate | Round | Verdict | Class | Notes |
-| :--- | :--- | :--- | :--- | :--- |
-| QA Agent (Gate 1) | 1 | _pending_ | _pending_ | _pending Phase 7_ |
-| Tester Agent (Gate 2) | 1 | _pending_ | _pending_ | _pending Phase 7_ |
+(`rules/qa_and_testing.md §4`, `RA-17`). The `Gate | Round | Verdict | Class |
+Notes` table is transcribed here by `orchestrator` from the gate agents' emissions
+at **Phase 7** — it is intentionally absent until then, because
+`scripts/check_gate_log.py` (run by `make verify`) rejects any placeholder verdict
+token, which is the exact `KI-045-1` friction this sprint fixes.*
 
 ---
 
