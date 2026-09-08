@@ -15,7 +15,7 @@ Before the tabular refactor of the governance ruleset (commit `36ab935`), govern
 | **Rule 41 / 041 / 41.x** | `rules/frontend_modular_standard.md` | Frontend modular standard (self-defined). |
 | **Rule 52** | `agents.md §5 state_anchor` | State redundancy / mirror protocol (`.agent_state/mirror.json`). |
 | **Rule 60** | `agents.md §3 three_file_standard` | Three-File Skill Standard for skills. |
-| **Rule 66** | `agents.md §3 secret_sovereignty` + `RA-09` | Never read `.env` into context; secret shielding. |
+| **Rule 66** | `agents.md §7 RA-09: SECRET_SOVEREIGNTY` | Never read `.env` into context; secret shielding. (`§3 secret_sovereignty` is a pointer to `RA-09` since Sprint 046 — single authority.) |
 | **Rule 70** | `rules/skills_and_integrations.md §1` | Skill discovery escalation ladder. |
 | **Rule 71** | `agents.md §3 topological_order` + `rules/skills_and_integrations.md §3` | Flat skills topology + `-3rd` external suffix. |
 | **Rule 74 / 75** | `agents.md §4` (Memory Management) | KI distillation and zero-tolerance purge. |
