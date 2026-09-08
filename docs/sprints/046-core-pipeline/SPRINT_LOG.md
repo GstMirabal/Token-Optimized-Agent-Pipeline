@@ -17,13 +17,15 @@
 ## 🏁 Sprint Progression
 Tracking of atomic goals achieved during the session.
 
-- [ ] **Objective 1 — Group A (`agents.md`, serialised)**: `U01` `RA-04` tombstone · `U02` `install.sh`→`install.py` · `U03` `mass-standardizer`→`legacy_app_auditor.py` · `U04` `§2` bare paths · `U05` `RA-10` pointer · `U06` `§0`/`§3` duplication→pointers · `U07` `RA-15`/`RA-16` order swap. No amendment ID renumbered.
-- [ ] **Objective 2 — Group B (`RA-14` propagation)**: `U08` `rules/token_economy.md` · `U09` `workflows/pipeline_workflow.md` · `U10` `rules/LEGACY_RULE_CONCORDANCE.md` · `U11` `docs/standards/templates/README_TEMPLATE.md`.
-- [ ] **Objective 3 — Group C (`rules/`)**: `U12` `frontend_modular_standard.md` RA-06 retitle · `U13` `project_topology.md` nucleus interpreter line.
-- [ ] **Objective 4 — Group D (`workflows/`)**: `U14` dead `#functional_lock` anchor · `U15` `0_SYSTEM_ARCHITECTURE.md` end-state · `U16` `skill_forge_workflow.md` paths + `--profile-path`.
-- [ ] **Objective 5 — Group E (`scripts/`+`hooks/`)**: `U17` `state_mirror.py` bare `except` · `U18` `check_gate_log.py` docstring · `U19` `on_commit.py` docstring · `U20` `merge_json.py` `invoked_by:` · `U21` `cursor_adapter.py` `invoked_by:` · `U22` `audit_cursor_era.py` scope note.
-- [ ] **Objective 6 — Group F (`config/`+templates)**: `U23` two `vendored-reference` exceptions · `U24` `SPRINT_LOG_TEMPLATE.md` Quality Gate stub (`KI-045-1`).
-- [ ] **Objective 7 — Group G (evidence closeout)**: `U25`–`U28` mark the 18 rows applied in `NUCLEUS_AUDIT_SYNTHESIS-045.md` + the three Wave-1 unit reports.
+- [x] **Objective 1 — Group A (`agents.md`, serialised)**: `U01` `RA-04` tombstone · `U02` `install.sh`→`install.py` · `U03` `mass-standardizer`→`legacy_app_auditor.py` · `U04` `§2` bare paths · `U05` `RA-10` pointer · `U06` `§0`/`§3` duplication→pointers · `U07` `RA-15`/`RA-16` order swap. No amendment ID renumbered (`grep -cE '^\| \*\*Amendment\*\* \| \`RA-(0[1-9]\|1[0-8]):' agents.md` → 18).
+- [x] **Objective 2 — Group B (`RA-14` propagation)**: `U08` `rules/token_economy.md` · `U09` `workflows/pipeline_workflow.md` · `U10` `rules/LEGACY_RULE_CONCORDANCE.md` · `U11` `docs/standards/templates/README_TEMPLATE.md`.
+- [x] **Objective 3 — Group C (`rules/`)**: `U12` `frontend_modular_standard.md` RA-06 retitle · `U13` `project_topology.md` nucleus interpreter line.
+- [x] **Objective 4 — Group D (`workflows/`)**: `U14` dead `#functional_lock` anchor · `U15` `0_SYSTEM_ARCHITECTURE.md` end-state · `U16` `skill_forge_workflow.md` paths + `--profile-path`.
+- [x] **Objective 5 — Group E (`scripts/`+`hooks/`)**: `U17` `state_mirror.py` bare `except` · `U18` `check_gate_log.py` docstring · `U19` `on_commit.py` docstring · `U20` `merge_json.py` `invoked_by:` · `U21` `cursor_adapter.py` `invoked_by:` · `U22` `audit_cursor_era.py` scope note.
+- [x] **Objective 6 — Group F (`config/`+templates)**: `U23` two `vendored-reference` exceptions · `U24` `SPRINT_LOG_TEMPLATE.md` Quality Gate stub (`KI-045-1`).
+- [x] **Objective 7 — Group G (evidence closeout)**: `U25`–`U28` mark the 18 rows applied in `NUCLEUS_AUDIT_SYNTHESIS-045.md` + the three Wave-1 unit reports.
+
+All 28 units landed as atomic one-file commits `727fb24`..`f867f1d` on `ai-sprint/046`. `make verify` exit 0 at each wave checkpoint and at HEAD. `U17` committed as `refactor(` not `fix(` — standards-compliance change, no external behaviour delta (devops pre-commit gate required a test for `fix(`).
 
 ---
 

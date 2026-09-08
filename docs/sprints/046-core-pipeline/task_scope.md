@@ -19,34 +19,34 @@ Check: `python3 scripts/check_task_scope.py --sprint-dir docs/sprints/046-core-p
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| U01 | `agents.md` | modify | medium | `rule_validator` | sonnet | medium | ⏳ |
-| U02 | `agents.md` | modify | low | `rule_validator` | sonnet | medium | ⏳ |
-| U03 | `agents.md` | modify | low | `rule_validator` | sonnet | medium | ⏳ |
-| U04 | `agents.md` | modify | low | `rule_validator` | sonnet | medium | ⏳ |
-| U05 | `agents.md` | modify | medium | `rule_validator` | sonnet | medium | ⏳ |
-| U06 | `agents.md` | modify | low | `rule_validator` | sonnet | medium | ⏳ |
-| U07 | `agents.md` | modify | medium | `rule_validator` | sonnet | medium | ⏳ |
-| U08 | `rules/token_economy.md` | modify | low | `rule_validator` | sonnet | medium | ⏳ |
-| U09 | `workflows/pipeline_workflow.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U10 | `rules/LEGACY_RULE_CONCORDANCE.md` | modify | low | `rule_validator` | sonnet | medium | ⏳ |
-| U11 | `docs/standards/templates/README_TEMPLATE.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U12 | `rules/frontend_modular_standard.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U13 | `rules/project_topology.md` | modify | low | `rule_validator` | sonnet | medium | ⏳ |
-| U14 | `workflows/remediation_workflow.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U15 | `workflows/standardization_workflow.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U16 | `workflows/skill_forge_workflow.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U17 | `hooks/state_mirror.py` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U18 | `scripts/check_gate_log.py` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U19 | `hooks/on_commit.py` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U20 | `scripts/merge_json.py` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U21 | `scripts/cursor_adapter.py` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U22 | `scripts/audit_cursor_era.py` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U23 | `config/invocation_exceptions.json` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U24 | `docs/standards/templates/SPRINT_LOG_TEMPLATE.md` | modify | medium | `rule_validator` | sonnet | medium | ⏳ |
-| U25 | `docs/audits/NUCLEUS_AUDIT_SYNTHESIS-045.md` | modify | low | `rule_validator` | sonnet | medium | ⏳ |
-| U26 | `docs/audits/NUCLEUS_RULESET_AUDIT_REPORT-045.md` | modify | low | `rule_validator` | sonnet | medium | ⏳ |
-| U27 | `docs/audits/NUCLEUS_WORKFLOW_AUDIT_REPORT-045.md` | modify | low | `rule_validator` | sonnet | medium | ⏳ |
-| U28 | `docs/audits/NUCLEUS_MECHANISM_AUDIT_REPORT-045.md` | modify | low | `rule_validator` | sonnet | medium | ⏳ |
+| U01 | `agents.md` | modify | medium | `rule_validator` | sonnet | medium | ✅ 727fb24 |
+| U02 | `agents.md` | modify | low | `rule_validator` | sonnet | medium | ✅ 4ddddaa |
+| U03 | `agents.md` | modify | low | `rule_validator` | sonnet | medium | ✅ 28d6a11 |
+| U04 | `agents.md` | modify | low | `rule_validator` | sonnet | medium | ✅ ef233ff |
+| U05 | `agents.md` | modify | medium | `rule_validator` | sonnet | medium | ✅ 4d97196 |
+| U06 | `agents.md` | modify | low | `rule_validator` | sonnet | medium | ✅ 509624a |
+| U07 | `agents.md` | modify | medium | `rule_validator` | sonnet | medium | ✅ 22c6010 |
+| U08 | `rules/token_economy.md` | modify | low | `rule_validator` | sonnet | medium | ✅ d4ebef6 |
+| U09 | `workflows/pipeline_workflow.md` | modify | low | `doc_orchestrator` | sonnet | medium | ✅ 538c53d |
+| U10 | `rules/LEGACY_RULE_CONCORDANCE.md` | modify | low | `rule_validator` | sonnet | medium | ✅ 617300c |
+| U11 | `docs/standards/templates/README_TEMPLATE.md` | modify | low | `doc_orchestrator` | sonnet | medium | ✅ 30d3835 |
+| U12 | `rules/frontend_modular_standard.md` | modify | low | `doc_orchestrator` | sonnet | medium | ✅ 263614e |
+| U13 | `rules/project_topology.md` | modify | low | `rule_validator` | sonnet | medium | ✅ 6cc2eef |
+| U14 | `workflows/remediation_workflow.md` | modify | low | `doc_orchestrator` | sonnet | medium | ✅ 6e8c00e |
+| U15 | `workflows/standardization_workflow.md` | modify | low | `doc_orchestrator` | sonnet | medium | ✅ d790f8d |
+| U16 | `workflows/skill_forge_workflow.md` | modify | low | `doc_orchestrator` | sonnet | medium | ✅ 56fc793 |
+| U17 | `hooks/state_mirror.py` | modify | low | `implementer_agent` | sonnet | medium | ✅ 56f86cb |
+| U18 | `scripts/check_gate_log.py` | modify | low | `implementer_agent` | sonnet | medium | ✅ 0e30517 |
+| U19 | `hooks/on_commit.py` | modify | low | `implementer_agent` | sonnet | medium | ✅ b74fba3 |
+| U20 | `scripts/merge_json.py` | modify | low | `implementer_agent` | sonnet | medium | ✅ 2b422c4 |
+| U21 | `scripts/cursor_adapter.py` | modify | low | `implementer_agent` | sonnet | medium | ✅ efc8406 |
+| U22 | `scripts/audit_cursor_era.py` | modify | low | `implementer_agent` | sonnet | medium | ✅ 08b07ce |
+| U23 | `config/invocation_exceptions.json` | modify | low | `implementer_agent` | sonnet | medium | ✅ 1054b10 |
+| U24 | `docs/standards/templates/SPRINT_LOG_TEMPLATE.md` | modify | medium | `rule_validator` | sonnet | medium | ✅ 807c5cf |
+| U25 | `docs/audits/NUCLEUS_AUDIT_SYNTHESIS-045.md` | modify | low | `rule_validator` | sonnet | medium | ✅ 37d070d |
+| U26 | `docs/audits/NUCLEUS_RULESET_AUDIT_REPORT-045.md` | modify | low | `rule_validator` | sonnet | medium | ✅ 351f5b2 |
+| U27 | `docs/audits/NUCLEUS_WORKFLOW_AUDIT_REPORT-045.md` | modify | low | `rule_validator` | sonnet | medium | ✅ 6dc9a8b |
+| U28 | `docs/audits/NUCLEUS_MECHANISM_AUDIT_REPORT-045.md` | modify | low | `rule_validator` | sonnet | medium | ✅ f867f1d |
 
 Wave 1 = `U01`–`U07` (**strictly serial** — one shared target `agents.md`,
 `no_interference`). Wave 2 = `U08`–`U16` (disjoint targets; starts after Wave 1
