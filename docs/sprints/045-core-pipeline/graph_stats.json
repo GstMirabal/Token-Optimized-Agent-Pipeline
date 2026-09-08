@@ -1,0 +1,9 @@
+{
+  "nodes": 9415,
+  "edges": 11919,
+  "communities": 810,
+  "source": "graphify-out/graph.json",
+  "sprint": 45,
+  "built_at_commit": "b9103c1388acbd9cf0c988c2b6a7ea06e0e07476",
+  "note": "Counts from `make graphify-rebuild` (`graphify update . --force`, AST, no LLM) at the pre-seal tip. Delta vs Sprint 044 (9242/11646/804) is the four new `docs/audits/NUCLEUS_*-045.md` reports plus the sprint-directory artifacts and the CHANGELOG / roadmap edits — this sprint added no source files (analysis-only, `IMPLEMENTATION_PLAN.md` D1)."
+}
