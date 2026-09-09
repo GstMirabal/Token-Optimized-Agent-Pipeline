@@ -2,7 +2,7 @@
 
 **Canonical path**: `docs/sprints/047-core-pipeline/IMPLEMENTATION_PLAN.md`
 **Branch**: `ai-sprint/047` · **Base**: `main` at `3dd8537`
-**Status**: `DRAFT` → `APPROVED` → `EXECUTING` → `CLOSED`
+**Status**: ~~`DRAFT`~~ → `APPROVED` → `EXECUTING` → `CLOSED`
 
 > Authored at Phase 1 (Planning) by `principal_agent`, extracted to this path at
 > Phase 3, and **committed before Phase 5 approves it**: `agents.md §2 triple_lock`
@@ -356,10 +356,10 @@ git-version matrix instead.
 
 | Field | Value |
 | :--- | :--- |
-| **Approved by** | _(pending — Phase 5)_ |
-| **Date** | _(pending)_ |
-| **Plan commit at approval** | _(pending — commit hash of this file on `ai-sprint/047`)_ |
-| **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
+| **Approved by** | GstMirabal (`gst.mirabal@gmail.com`) — Phase 5, attended, not in a `/loop` |
+| **Date** | 2026-09-09 |
+| **Plan commit at approval** | `a995d6f` (`docs/sprints/047-core-pipeline/IMPLEMENTATION_PLAN.md` on `ai-sprint/047`) |
+| **Remaining locks** | Active Sprint ✅ (id 47, `IN_PROGRESS`) · QA + Tester verdicts (pending Phase 7) · Human OK at close (pending Phase 8) |
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an
 unattended `/loop` (`workflows/pipeline_workflow.md`, `rules/loop_governance.md`).
