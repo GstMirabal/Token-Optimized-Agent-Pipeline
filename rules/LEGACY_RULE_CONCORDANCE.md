@@ -23,5 +23,6 @@ Before the tabular refactor of the governance ruleset (commit `36ab935`), govern
 | **Rule 79** | `agents.md §4 definitive_amnesia` | Log purge after ratification. |
 | **Rule 83** | `agents.md §5 state_anchor` | `docs/active_state.json` as authoritative anchor. |
 | **Rule 113** | `agents.md §3 federation` + `skills/slash-commander/` | Workflows accessible as slash commands. |
+| **Clause J-02 / RA-02** | `rules/django_backend_standard.md §2 Signal Registration` | Django `signals.py` lazy-signal paradigm: local imports in the receiver, dotted-string senders. `agents.md §7 RA-02` is a pointer to `django_backend_standard.md §2` since Sprint 047 — single authority there. |
 
 > New documents MUST cite keyed rules (`agents.md §N key` or `rules/<file>.md §N`) — numbered citations are legacy-only and frozen to this table.
