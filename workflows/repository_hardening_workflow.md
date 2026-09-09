@@ -11,6 +11,12 @@ does not lock you out of your own work. Runs **first** in any multi-repository
 programme — it reduces risk without touching code — except for the last phase,
 which runs **last** for a reason given below.
 
+**Mode**: This protocol applies in nucleus mode too. It governs the `.agents`
+repository itself, not only host projects. Precedent (`RA-16`): `/agents:harden`
+shipped in PR #29 and was never run against this repository, so five platform
+controls sat disabled for weeks. Run it here exactly as it is run against any
+host.
+
 > [!IMPORTANT]
 > Order matters twice. Branch protection blocks history rewriting, so it goes
 > after any planned rewrite. And a required status check that never runs makes
@@ -19,16 +25,21 @@ which runs **last** for a reason given below.
 
 ## Execution Flow
 
-| Phase | Action | When |
-| :--- | :--- | :--- |
-| **1** | Secret scanning, push protection, private vulnerability reporting | First. No code changes, immediate risk reduction |
-| **2** | Dependabot alerts and security updates | First |
-| **3** | Code scanning (CodeQL) | First |
-| **4** | Triage every alert produced | Before any history decision |
-| **5** | Community health files | Any time |
-| **6** | Repository metadata: description, topics, homepage | Any time |
-| **7** | History rewrite, if any | Before phase 8 |
-| **8** | Branch protection | **Last** |
+One row per phase. **Operation** is the imperative action to take. **Verify** is
+the read-back that proves it, lifted from the phase prose below. Phases 2, 3, 6
+and 7 have no `gh` verify call in their prose, so the standard read-back for that
+setting is given instead. `$R` is `owner/repo` as set at the top of Phase 1.
+
+| Phase | Step id | Operation | Verify |
+| :--- | :--- | :--- | :--- |
+| **1** | `secret_scanning` | Enable secret scanning, secret-scanning push protection and private vulnerability reporting, then confirm each setting reads back as `enabled` | `gh api "repos/$R" --jq '.security_and_analysis'` |
+| **2** | `dependabot` | Enable Dependabot alerts and Dependabot security updates, then confirm the alert stream is live | `gh api "repos/$R" --jq '.security_and_analysis.dependabot_security_updates'` |
+| **3** | `code_scanning` | Enable CodeQL code scanning and confirm the analysis state is reported as configured | `gh api "repos/$R/code-scanning/default-setup" --jq '.state'` |
+| **4** | `alert_triage` | Triage every open alert into false positive, expired credential or live credential; verify fixes against a clean install, never the manifest file | `python3 -m venv /tmp/verify && /tmp/verify/bin/pip install -q -r requirements.txt; /tmp/verify/bin/pip list --format=freeze \| grep -iE '^(django\|cryptography\|pillow)='` |
+| **5** | `community_health` | Create repository-specific `SECURITY.md`, `CONTRIBUTING.md` and issue templates only where the account-level `.github` defaults would be wrong | `gh api graphql -f query='{ repository(owner:"OWNER", name:"REPO") { issueTemplates { name filename } } }'` |
+| **6** | `repo_metadata` | Update the repository description, topics and homepage URL | `gh api "repos/$R" --jq '{description, homepage, topics}'` |
+| **7** | `history_rewrite` | Rewrite or squash history only after confirming explicit per-operation human authorization, stating what will be lost before each irreversible action | `git log --oneline origin/main..HEAD` |
+| **8** | `branch_protection` | Update branch protection on `main` from the status-check names observed on a real check-run listing, requiring exactly those checks with `enforce_admins:false` and `required_pull_request_reviews:null` | `gh api "repos/$R/commits/main/check-runs" --jq '.check_runs[] \| select(.conclusion=="success") \| .name'` |
 
 ## Phase 1 — What is free, and what is not
 
