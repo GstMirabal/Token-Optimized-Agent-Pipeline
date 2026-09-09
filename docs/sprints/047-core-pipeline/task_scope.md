@@ -29,16 +29,16 @@ hand-edited, and is not a second structural subject.
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| U1 | `agents.md` | modify | high | `rule_validator` | sonnet | medium | ⏳ |
-| U2 | `rules/django_backend_standard.md` | modify | medium | `rule_validator` | sonnet | medium | ⏳ |
-| U3 | `rules/LEGACY_RULE_CONCORDANCE.md` | modify | low | `rule_validator` | sonnet | medium | ⏳ |
-| U4 | `workflows/audit_workflow.md` | modify | medium | `rule_validator` | sonnet | medium | ⏳ |
-| U5 | `rules/skills_and_integrations.md` | modify | medium | `rule_validator` | sonnet | medium | ⏳ |
-| U6 | `workflows/close_workflow.md` | modify | medium | `rule_validator` | sonnet | medium | ⏳ |
-| U7 | `workflows/skill_forge_workflow.md` | modify | low | `rule_validator` | sonnet | medium | ⏳ |
-| U8 | `workflows/reverse_documentation_workflow.md` | modify | low | `rule_validator` | sonnet | medium | ⏳ |
-| U9 | `workflows/repository_hardening_workflow.md` | modify | medium | `rule_validator` | sonnet | medium | ⏳ |
-| U10 | `workflows/standardization_workflow.md` | modify | medium | `rule_validator` | sonnet | medium | ⏳ |
+| U1 | `agents.md` | modify | high | `rule_validator` | sonnet | medium | ✅ 8ccf8cb |
+| U2 | `rules/django_backend_standard.md` | modify | medium | `rule_validator` | sonnet | medium | ✅ 06c076a |
+| U3 | `rules/LEGACY_RULE_CONCORDANCE.md` | modify | low | `rule_validator` | sonnet | medium | ✅ 8ffcbd0 |
+| U4 | `workflows/audit_workflow.md` | modify | medium | `rule_validator` | sonnet | medium | ✅ feee5a4 |
+| U5 | `rules/skills_and_integrations.md` | modify | medium | `rule_validator` | sonnet | medium | ✅ 2524940 |
+| U6 | `workflows/close_workflow.md` | modify | medium | `rule_validator` | sonnet | medium | ✅ 87211f1 |
+| U7 | `workflows/skill_forge_workflow.md` | modify | low | `rule_validator` | sonnet | medium | ✅ 963b309 |
+| U8 | `workflows/reverse_documentation_workflow.md` | modify | low | `rule_validator` | sonnet | medium | ✅ 77e64a7 |
+| U9 | `workflows/repository_hardening_workflow.md` | modify | medium | `rule_validator` | sonnet | medium | ✅ 90c0268 |
+| U10 | `workflows/standardization_workflow.md` | modify | medium | `rule_validator` | sonnet | medium | ✅ 35e625b |
 | U11 | `scripts/verify_references.py` | modify | high | `implementer_agent` | sonnet | medium | ⏳ |
 | U12 | `scripts/map_workflows.py` | modify | high | `implementer_agent` | sonnet | medium | ⏳ |
 | U13 | `scripts/check_gate_log.py` | modify | medium | `implementer_agent` | sonnet | medium | ⏳ |
@@ -52,6 +52,14 @@ hand-edited, and is not a second structural subject.
 | U21 | `tests/test_mode.py` | modify/create | medium | `implementer_agent` | sonnet | medium | ⏳ |
 | U22 | `tests/test_session_start.py` | modify/create | medium | `implementer_agent` | sonnet | medium | ⏳ |
 | U23 | `tests/test_submodule_purity.py` | modify/create | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| U24 | `config/invocation_exceptions.json` | modify | low | `rule_validator` | sonnet | medium | ✅ e0b7753 |
+
+> **U24 — discovered during U1 execution.** U1's `agents.md §1` rewrite dropped
+> the `python-doctor` / `react-doctor` names; the RA-14 sprint-artifact-set
+> clause U1 itself added then requires the two stale `note` fields in
+> `config/invocation_exceptions.json` (`:55`, `:60`) to be reconciled in the same
+> sprint. One-file JSON note edit; keys and schema unchanged (`verify_references.py`
+> check (d) reads only `path` / `reason`). Same wave/tier as U1–U10.
 
 **Waves (inside the one sprint; `IMPLEMENTATION_PLAN.md` "Commit groups"):**
 Wave 1 = U1–U10 governance prose, gate `make verify`; dispatched one atomic
