@@ -12,10 +12,10 @@ Governance protocol to enforce structural sovereignty, unique naming, and symmet
 
 | Phase | Step | Action / Constraint |
 | :--- | :--- | :--- |
-| **0. Trigger** | `condition_check` | Triggered if naming drift, empty folders, or asymmetric roadmaps are detected. |
+| **0. Trigger** | `condition_check` | The agent handling `/agents:standardization` (or `start_workflow.md#first_run_scaffold`) runs three detections from the repository root: (a) `skills/topology-monitor/scripts/legacy_app_auditor.py` for topology and naming-standard conflicts (exit code `1` = conflicts found); (b) `find . -type d -empty -not -path './.git/*'` for empty directories — the same scan the `noise_purge` step executes in Phase 3; (c) `git ls-files 'docs/**/*.md'` and the sprint-folder list checked against `[MODULE]_[TYPE].md` / `[ID]-[Stack]-[Layer]`, plus a Backend-vs-Frontend roadmap pairing check, for naming drift and asymmetric roadmaps. Done-criterion: all three run and their combined finding list is recorded; the workflow enters Phase 1 only if that list is non-empty, otherwise it halts with `no standardization drift detected`. |
 | **1. Naming Standard** | **Option B** | Force rename all docs to `[MODULE]_[TYPE].md`. Force rename sprint folders to `[ID]-[Stack]-[Layer]`. |
 | **2. Symmetric Audit** | `roadmap_sync` | Ensure every Backend Roadmap has a corresponding Frontend Roadmap and vice-versa. |
-| **3. Topological Purity** | `noise_purge` | Recursively delete all empty directories in `/docs/` and `/backend/` (RA-07). |
+| **3. Topological Purity** | `noise_purge` | Recursively delete all empty directories in `/docs/` and `/backend/` (RA-07). `/backend/` is **host-only — no nucleus referent** (same marking as `rules/project_topology.md §2`): a nucleus session applies this step to `/docs/` only. |
 | **4. Historical Capture**| `walkthrough_gen` | Generate or update `[MODULE]_WALKTHROUGH.md` for all operational modules. |
 
 ## Phase 5: Legacy Absorption Protocol (Onboarding Scenario B)
@@ -33,6 +33,8 @@ Invoked by `start_workflow first_run_scaffold` when prior agent-generated docume
 | **5.7 Integrity** | `conservation_audit` | Verify: (a) every census file is accounted for (destination + snapshot + authorized-purge lists must sum to the census count); (b) `link_audit` — no host `.md` references a migrated path; (c) seal the report with the result and store it as `docs/ONBOARDING_AUDIT.md` — the onboarding becomes its own auditable artifact. |
 
 ### Legacy Routing Table (5.4 manifest baseline)
+
+<!-- map_workflows:skip-table -->
 
 | Legacy artifact | Pipeline destination | Action |
 | :--- | :--- | :--- |
