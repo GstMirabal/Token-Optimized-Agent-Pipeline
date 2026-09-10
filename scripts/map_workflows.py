@@ -8,9 +8,13 @@ of lying quietly.
 Three table shapes exist in `workflows/` (`Phase | Step | Action`,
 `Phase | Action | Gate`, `Phase | Item | When`), and the ad-hoc extractor used
 while planning this phase silently produced nothing for two of them. That is
-why the parser is shape-tolerant and why anything it cannot classify is emitted
-as `?` rather than guessed: a script that feigns certainty about prose is the
-PR #28 defect wearing different clothes.
+why the parser is shape-tolerant. A step whose verb the heuristic recognises is
+labelled `read`, `write` or `verify`; one it cannot is labelled `ambiguous`
+(a real step id) or `prose` (a `**Bold sentence.**` with no verb-plus-object)
+rather than guessed — a script that feigns certainty about prose is the PR #28
+defect wearing different clothes. A table immediately preceded by a line reading
+`<!-- map_workflows:skip-table -->` is a reference table, not a step list, and
+is excluded from the map entirely.
 
 The matrix columns come from `config/artifact_registry.json` (Sprint 023
 `C0.2`). They were a fixed table of six state artifacts and zero documentary
@@ -37,7 +41,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _root import agents_root  # noqa: E402
+from _root import agents_root
 
 WORKFLOWS = Path("workflows")
 OUTPUT = Path("docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md")
@@ -81,6 +85,11 @@ CHECK_VERBS = ("verify", "check", "audit", "validate", "ensure", "confirm",
 
 ROW = re.compile(r"^\|\s*(\*\*)?([^|]+?)(\*\*)?\s*\|\s*(.+?)\s*\|\s*(.+?)\s*\|\s*$")
 
+# A line equal to this (after stripping) immediately before a table removes that
+# whole table from step parsing — for reference tables such as
+# `standardization_workflow.md`'s Legacy Routing Table (`S045-27`).
+SKIP_MARKER = "<!-- map_workflows:skip-table -->"
+
 
 def classify(action: str) -> str:
     """read / write / verify, from the action's own verb.
@@ -95,18 +104,135 @@ def classify(action: str) -> str:
     return "?"
 
 
-def parse(path: Path) -> list[tuple[str, str, str]]:
-    """(phase, step, action) triples from whichever table shape a workflow uses."""
-    rows = []
-    for line in path.read_text(encoding="utf-8").splitlines():
+def _is_prose(step_cell: str) -> bool:
+    """Whether a step cell reads as a bold sentence rather than a step id.
+
+    A real step cell is a lone code span (`` `state_claim` ``) or a short bold
+    label (`**Option B**`). Prose is a `**Bold sentence.**`, optionally preceded
+    by an HTML anchor and trailed by further sentence text.
+
+    Args:
+        step_cell (str): The raw second column of a table row.
+
+    Returns:
+        bool: True when the cell is prose, False when it is a step identifier.
+    """
+    text = re.sub(r"<[^>]+>", "", step_cell).strip()
+    if re.fullmatch(r"`[^`]+`", text) or re.fullmatch(r"\*\*[^*.]+\*\*", text):
+        return False
+    return "**" in text
+
+
+def _effect(step_cell: str, action: str) -> str:
+    """The Section 2 effect label for one step row.
+
+    Args:
+        step_cell (str): The raw second column, used to tell prose from a step id.
+        action (str): The effect/gate column handed to `classify`.
+
+    Returns:
+        str: `read` / `write` / `verify` when the verb is recognised; otherwise
+        `prose` for a bold sentence or `ambiguous` for an unrecognised verb.
+    """
+    verdict = classify(action)
+    if verdict != "?":
+        return verdict
+    return "prose" if _is_prose(step_cell) else "ambiguous"
+
+
+def _is_separator_row(line: str) -> bool:
+    """True for a Markdown header underline such as `| :--- | :--- |`."""
+    stripped = line.strip()
+    return bool(stripped) and set(stripped) <= set("|:- ")
+
+
+def _take_table_block(lines: list[str], start: int) -> tuple[list[str], int]:
+    """Collect the run of consecutive table rows beginning at `start`.
+
+    Args:
+        lines (list[str]): The file's lines.
+        start (int): Index of the first table-row line.
+
+    Returns:
+        tuple[list[str], int]: The block's lines and the index just past it.
+    """
+    index = start
+    while index < len(lines) and ROW.match(lines[index]):
+        index += 1
+    return lines[start:index], index
+
+
+def _group_tables(lines: list[str]) -> list[tuple[str, list[str]]]:
+    """Split file lines into contiguous table blocks with their preceding line.
+
+    Args:
+        lines (list[str]): The workflow file's lines, terminators removed.
+
+    Returns:
+        list[tuple[str, list[str]]]: One `(preceding, block)` pair per maximal
+        run of table rows. `preceding` is the last non-blank line before the
+        block, stripped, so a caller can honour `SKIP_MARKER`.
+    """
+    tables: list[tuple[str, list[str]]] = []
+    preceding = ""
+    index = 0
+    while index < len(lines):
+        if ROW.match(lines[index]):
+            block, index = _take_table_block(lines, index)
+            tables.append((preceding, block))
+            continue
+        stripped = lines[index].strip()
+        if stripped:
+            preceding = stripped
+        index += 1
+    return tables
+
+
+def _rows_from_block(block: list[str]) -> list[tuple[str, str, str, str]]:
+    """(phase, step, action, effect) tuples for one table block.
+
+    The header row and its `:---` separator are dropped when present; a row
+    whose phase cell is a dash run or the literal `phase` is skipped as a second
+    safety net against non-step rows.
+
+    Args:
+        block (list[str]): Consecutive table-row lines from one table.
+
+    Returns:
+        list[tuple[str, str, str, str]]: One tuple per real step row.
+    """
+    body = block[2:] if len(block) >= 2 and _is_separator_row(block[1]) else block
+    rows: list[tuple[str, str, str, str]] = []
+    for line in body:
         match = ROW.match(line)
         if not match:
             continue
         phase, second, third = match.group(2).strip(), match.group(4).strip(), match.group(5).strip()
         if set(phase) <= set(": -") or phase.lower() == "phase":
-            continue  # separator or header
+            continue
         step = second.strip("`* ")
-        rows.append((phase.strip("* "), step, third))
+        rows.append((phase.strip("* "), step, third, _effect(second, third)))
+    return rows
+
+
+def parse(path: Path) -> list[tuple[str, str, str, str]]:
+    """(phase, step, action, effect) rows from a workflow's step tables.
+
+    A table immediately preceded by a line equal to `SKIP_MARKER` is a reference
+    table, not a step list, and contributes no rows.
+
+    Args:
+        path (Path): A workflow file under `workflows/`.
+
+    Returns:
+        list[tuple[str, str, str, str]]: Every real step row, in file order.
+    """
+    lines = path.read_text(encoding="utf-8").splitlines()
+    rows: list[tuple[str, str, str, str]] = []
+    for preceding, block in _group_tables(lines):
+        if preceding == SKIP_MARKER:
+            continue
+        rows.extend(_rows_from_block(block))
     return rows
 
 
@@ -133,7 +259,7 @@ def build() -> str:
     for path, rows in parsed.items():
         cells = []
         for artifact in ARTIFACTS:
-            kinds = {classify(action) for _, _, action in rows if artifact in action}
+            kinds = {classify(action) for _, _, action, _ in rows if artifact in action}
             cells.append("/".join(sorted(kinds)) if kinds else "—")
         lines.append(f"| `{path.stem}` | " + " | ".join(cells) + " |")
 
@@ -149,15 +275,21 @@ def build() -> str:
     lines += ["", "## 2. Steps, by protocol", ""]
     for path, rows in parsed.items():
         lines += [f"### `{path.name}`", "", "| Phase | Step | Effect |", "| :--- | :--- | :--- |"]
-        for phase, step, action in rows:
-            lines.append(f"| {phase} | `{step}` | {classify(action)} |")
+        for phase, step, _, effect in rows:
+            lines.append(f"| {phase} | `{step}` | {effect} |")
         lines.append("")
 
     lines += [
         "---",
-        "*A `?` means the heuristic could not classify that step's verb. It is left",
-        "visible rather than guessed — an unclassified step is information, a wrongly",
-        "classified one is a lie the next reader inherits.*",
+        "*The **Effect** column is `read`, `write` or `verify` when the step's verb",
+        "is recognised. Two labels mark what the heuristic will not guess at, kept",
+        "visible because an unclassified step is information while a wrongly",
+        "classified one is a lie the next reader inherits:*",
+        "",
+        "- *`ambiguous` — a real step id whose verb the heuristic does not recognise.*",
+        "- *`prose` — the step cell is a `**Bold sentence.**` rather than a verb plus object; it needs a step id and a done-criterion (`agents.md §1 unambiguous_action`).*",
+        "",
+        "*A table immediately preceded by a `<!-- map_workflows:skip-table -->` line is a reference table, not a step list, and is excluded from this map entirely.*",
         "",
     ]
     return "\n".join(lines)

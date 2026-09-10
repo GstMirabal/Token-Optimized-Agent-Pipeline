@@ -22,7 +22,7 @@ protocols that should mirror each other shows up there first.
 | `repository_hardening_workflow` | — | — | — | — | — | — | — | — | — | — | — | — | — |
 | `reverse_documentation_workflow` | — | — | — | — | — | — | — | — | — | — | — | — | — |
 | `skill_forge_workflow` | — | — | — | — | — | — | — | — | — | — | — | — | — |
-| `standardization_workflow` | — | — | — | — | — | — | — | verify | write | write | — | — | — |
+| `standardization_workflow` | — | — | — | — | — | — | — | — | — | — | — | — | — |
 | `start_workflow` | write | — | — | — | verify/write | — | — | read | write | — | write | read | — |
 
 **Columns**, from `config/artifact_registry.json` — the artifact and the phase
@@ -50,11 +50,11 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | Phase | Step | Effect |
 | :--- | :--- | :--- |
 | 0. Zero-Memory Initialization | `init_check` | read |
-| 1. Topo Sweep | `rule_introspection` | ? |
+| 1. Topo Sweep | `rule_introspection` | ambiguous |
 | 1. Topo Sweep | `skill_standard_check` | verify |
 | 1. Topo Sweep | `federation_audit` | write |
-| 2. Doc Purity | `nomenclature` | ? |
-| 2. Doc Purity | `precision_audit` | ? |
+| 2. Doc Purity | `nomenclature` | write |
+| 2. Doc Purity | `precision_audit` | write |
 | 2. Doc Purity | `link_audit` | verify |
 | 3. Verdict | `report` | write |
 
@@ -64,7 +64,7 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | :--- | :--- | :--- |
 | 0. Ruleset Invocation | `read_ruleset` | verify |
 | 1. Topographic Audit | `noise_purge` | write |
-| 1. Topographic Audit | `rules_optimization` | ? |
+| 1. Topographic Audit | `rules_optimization` | verify |
 | 1. Topographic Audit | `docs_freshness_gate` | write |
 | 1. Topographic Audit | `model_ledger_regen` | verify |
 | 2. Sprint Closeout | `history_sync` | write |
@@ -82,18 +82,18 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 5.5 Branch Sovereignty | `branch_audit` | write |
 | 5.5 Branch Sovereignty | `local_prune` | write |
 | 6. Session Lock | `deployment_handoff` | write |
-| 6. Session Lock | `session_lock` | ? |
+| 6. Session Lock | `session_lock` | ambiguous |
 
 ### `deployment_workflow.md`
 
 | Phase | Step | Effect |
 | :--- | :--- | :--- |
 | 0. Sprint Seal Gate | `sprint_seal_gate` | write |
-| 0. Git State Gate | `git_state_gate` | ? |
+| 0. Git State Gate | `git_state_gate` | ambiguous |
 | 1. Branch Merge | `test_audit` | verify |
 | 1. Branch Merge | `pr_flow` | write |
 | 1. Branch Merge | `deploy_unlock` | write |
-| 2. Environment | `production_bridge` | ? |
+| 2. Environment | `production_bridge` | ambiguous |
 | 3. Remote Sync | `ci_cd_handover` | verify |
 | 4. Closure | `ledger_seal` | write |
 | 4. Closure | `release_tagging` | write |
@@ -108,9 +108,9 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | :--- | :--- | :--- |
 | 0. Zero-Memory Initialization | `read_ruleset` | read |
 | 1. Strategic Extraction | `signal_scan` | verify |
-| 1. Strategic Extraction | `amnesia_test` | ? |
+| 1. Strategic Extraction | `amnesia_test` | ambiguous |
 | 2. Rule Integration Check | `rule_vs_ki` | write |
-| 2. Rule Integration Check | `upstream_feedback` | ? |
+| 2. Rule Integration Check | `upstream_feedback` | ambiguous |
 | 3. Semantic Indexing | `routing_gate` | verify |
 | 3. Semantic Indexing | `index_update` | write |
 | 3. Semantic Indexing | `last_update` | write |
@@ -151,87 +151,73 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | :--- | :--- | :--- |
 | 0. Trigger | `auto_invocation` | write |
 | 1. Deadlock Term | `reversibility` | verify |
-| 1. Deadlock Term | `state_nuke` | ? |
-| 2. Extraction | `error_mining` | ? |
-| 2. Extraction | `negative_ki` | ? |
+| 1. Deadlock Term | `state_nuke` | ambiguous |
+| 2. Extraction | `error_mining` | ambiguous |
+| 2. Extraction | `negative_ki` | ambiguous |
 | 3. Rollback | `roadmap_tag` | write |
-| 3. Rollback | `session_lock` | ? |
+| 3. Rollback | `session_lock` | ambiguous |
 
 ### `repository_hardening_workflow.md`
 
 | Phase | Step | Effect |
 | :--- | :--- | :--- |
-| 1 | `Secret scanning, push protection, private vulnerability reporting` | ? |
-| 2 | `Dependabot alerts and security updates` | ? |
-| 3 | `Code scanning (CodeQL)` | ? |
-| 4 | `Triage every alert produced` | ? |
-| 5 | `Community health files` | ? |
-| 6 | `Repository metadata: description, topics, homepage` | ? |
-| 7 | `History rewrite, if any` | ? |
-| 8 | `Branch protection` | ? |
+| 1 | `secret_scanning` | verify |
+| 2 | `dependabot` | write |
+| 3 | `code_scanning` | verify |
+| 4 | `alert_triage` | verify |
+| 5 | `community_health` | write |
+| 6 | `repo_metadata` | write |
+| 7 | `history_rewrite` | verify |
+| 8 | `branch_protection` | write |
 
 ### `reverse_documentation_workflow.md`
 
 | Phase | Step | Effect |
 | :--- | :--- | :--- |
 | 1 | `Graph first.** `graphify update <path> --force`.` | write |
-| 2 | `Measure coverage.** Every source file present in the graph.` | ? |
-| 3 | `Read the existing documentation.** Every file under `docs/`, in full.` | ? |
-| 4 | `Contrast each claim against the graph and the tree.` | verify |
-| 4.5 | `C4 layer.** Levels 1-2 always; Level 3 only for the containers the eligibility formula selects (`rules/documentation_standard.md §2.1`).` | ? |
-| 5 | `Correct what is false**, in place, saying what it said before. **Stamp the metadata block** (`§4.1`) on every document touched.` | ? |
-| 6 | `Write the missing contracts**, one per exposed interface, using the `contract-writer` skill.` | ? |
-| 6.5 | `Blueprints.** One `[MODULE]_BLUEPRINT.md` per module, from `BLUEPRINT_TEMPLATE.md`, with the metadata block stamped.` | ? |
-| 6.7 | `ADR recovery.** Identify decisions that meet a trigger in `§3.1` and record one ADR each, with the metadata block stamped. **Rationale that is not evidenced in the code or its history is recorded as `unrecoverable at this audit` — never inferred.` | ? |
-| 7 | `Diátaxis classification.** Reference, Explanation, How-to, Tutorial.` | ? |
-| 8 | `Prose gate.** `vale docs/`.` | ? |
-| 9 | `Coverage closure.** Re-run phase 4 against the finished set.` | ? |
-| 9.5 | `Findings handoff.** Write everything surfaced that this protocol does not fix to `docs/audits/REVDOC_FINDINGS-[slug].md`, from `AUDIT_REPORT_TEMPLATE.md`.` | ? |
-| 10 | `Freshness gate.** `docs_freshness_check.py . <sprint>` | ? |
+| 2 (measure_coverage) | `Measure coverage.** Every source file present in the graph.` | prose |
+| 3 (read_existing) | `Read the existing documentation.** Every file under `docs/`, in full.` | prose |
+| 4 (contrast) | `Contrast each claim against the graph and the tree.` | verify |
+| 4.5 (c4_layer) | `C4 layer.** Levels 1-2 always; Level 3 only for the containers the eligibility formula selects (`rules/documentation_standard.md §2.1`).` | prose |
+| 5 (correct_false) | `Correct what is false**, in place, saying what it said before. **Stamp the metadata block** (`§4.1`) on every document touched.` | prose |
+| 6 (write_contracts) | `Write the missing contracts**, one per exposed interface, using the `contract-writer` skill.` | prose |
+| 6.5 (blueprints) | `Blueprints.** One `[MODULE]_BLUEPRINT.md` per module, from `BLUEPRINT_TEMPLATE.md`, with the metadata block stamped.` | prose |
+| 6.7 (adr_recovery) | `ADR recovery.** Identify decisions that meet a trigger in `§3.1` and record one ADR each, with the metadata block stamped. **Rationale that is not evidenced in the code or its history is recorded as `unrecoverable at this audit` — never inferred.` | prose |
+| 7 (diataxis) | `Diátaxis classification.** Reference, Explanation, How-to, Tutorial.` | prose |
+| 8 (prose_gate) | `Prose gate.** `vale docs/`.` | prose |
+| 9 (coverage_closure) | `Coverage closure.** Re-run phase 4 against the finished set.` | prose |
+| 9.5 (findings_handoff) | `<a id="findings-handoff"></a>**Findings handoff.** Write everything surfaced that this protocol does not fix to `docs/audits/REVDOC_FINDINGS-[slug].md`, from `AUDIT_REPORT_TEMPLATE.md`.` | prose |
+| 10 (freshness_gate) | `Freshness gate.** `docs_freshness_check.py . <sprint>` | prose |
 
 ### `skill_forge_workflow.md`
 
 | Phase | Step | Effect |
 | :--- | :--- | :--- |
-| 0. Isolation | `role_lock` | ? |
+| 0. Isolation | `role_lock` | ambiguous |
 | 0. Isolation | `forge_destination` | write |
 | 1. Scaffolding | `blueprint` | write |
-| 2. Benchmarking | `sterile_dev` | ? |
-| 2. Benchmarking | `skillopt_run` | write |
-| 2. Benchmarking | `smoke_test` | ? |
+| 2. Benchmarking | `sterile_dev` | ambiguous |
+| 2. Benchmarking | `skillopt_run` | verify |
+| 2. Benchmarking | `smoke_test` | ambiguous |
 | 3. Registration | `manifest_update` | write |
-| 4. Approval Gate | `authorization` | ? |
+| 4. Approval Gate | `authorization` | ambiguous |
 
 ### `standardization_workflow.md`
 
 | Phase | Step | Effect |
 | :--- | :--- | :--- |
-| 0. Trigger | `condition_check` | ? |
+| 0. Trigger | `condition_check` | write |
 | 1. Naming Standard | `Option B` | write |
 | 2. Symmetric Audit | `roadmap_sync` | verify |
 | 3. Topological Purity | `noise_purge` | write |
 | 4. Historical Capture | `walkthrough_gen` | write |
-| Step | `Gate` | ? |
 | 5.1 Census | `inventory` | write |
 | 5.2 Secret Scan | `shield_gate` | verify |
 | 5.3 Snapshot | `reversibility_gate` | write |
 | 5.4 Report | `reconciliation_report` | verify |
-| 5.5 Approval Gate | `human_ok` | ? |
-| 5.6 Migration | `absorb` | ? |
+| 5.5 Approval Gate | `human_ok` | ambiguous |
+| 5.6 Migration | `absorb` | ambiguous |
 | 5.7 Integrity | `conservation_audit` | write |
-| Legacy artifact | `Pipeline destination` | ? |
-| `task/task.md`, `docs/active_task.md`, `.agent_state/session_metadata.json` | `docs/active_state.json` | ? |
-| `task/sprints/`, `task/roadmaps/`, root `implementation_plan*` | `docs/sprints/[ID]-[Stack]-[Layer]/` | verify |
-| `knowledge/ki_*.md`, `memory/<domain>/ki_*.md` | `Three-way triage` | write |
-| `ki_index.json`, per-domain `memory_index.json` | `Flat summary-only `memory_index.json` | ? |
-| Numbered roadmaps (`NNN-title.md`) | `Untouched if closed history; Option B rename (`[MODULE]_ROADMAP.md`) only for ACTIVE ones` | ? |
-| `violation_log.md`, `PROCEDURAL_DEVIATION_*.md` | `memory/telemetry/` → distillation → purge` | ? |
-| Other frameworks' files (`.windsurfrules`, `copilot-instructions.md`, …) | `Proposed for archive in the snapshot` | write |
-| Pre-arc42-lite `*_BLUEPRINT.md` (missing Runtime View/Crosscutting Concepts/Glossary, or with rationale inlined instead of an ADR link) | `Inventoried in the reconciliation report as a migration candidate` | ? |
-| Scenario | `Detection signals` | ? |
-| A. Greenfield | `Short/empty git history, no `docs/`, no substantial source code.` | verify |
-| B. Prior agent interactions | `Pre-existing `CLAUDE.md`/`.claude/`, legacy `.agents` artifacts (`task/`, `implementation_plan*.md`, `knowledge/`, `docs/active_task.md`, `.agent_state/`), or other frameworks' files (`.cursor/rules`, `.windsurfrules`, `copilot-instructions.md`).` | write |
-| C. Mature project, no agents | `Substantial codebase, zero agentic traces.` | write |
 
 ### `start_workflow.md`
 
@@ -254,6 +240,12 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 2. Handoff | `delegation_conflict` | write |
 
 ---
-*A `?` means the heuristic could not classify that step's verb. It is left
-visible rather than guessed — an unclassified step is information, a wrongly
-classified one is a lie the next reader inherits.*
+*The **Effect** column is `read`, `write` or `verify` when the step's verb
+is recognised. Two labels mark what the heuristic will not guess at, kept
+visible because an unclassified step is information while a wrongly
+classified one is a lie the next reader inherits:*
+
+- *`ambiguous` — a real step id whose verb the heuristic does not recognise.*
+- *`prose` — the step cell is a `**Bold sentence.**` rather than a verb plus object; it needs a step id and a done-criterion (`agents.md §1 unambiguous_action`).*
+
+*A table immediately preceded by a `<!-- map_workflows:skip-table -->` line is a reference table, not a step list, and is excluded from this map entirely.*
