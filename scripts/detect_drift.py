@@ -5,6 +5,16 @@ anchor and the Master Ledger it compares all belong to the host, so this script
 MUST NOT adopt `scripts/_root.py` — anchored to the framework it would report
 drift in the wrong repository (Sprint 023 `C0.3`).
 
+There is no root computation in this module at all: `ACTIVE_STATE` and
+`CHANGELOG` are cwd-relative and `git()` runs with no `cwd=`, so it inherits the
+process working directory. The scope is therefore whatever the caller's cwd is —
+the invoker is responsible for setting it to the framework root in nucleus mode
+and to the host root in submodule mode, the same `F-BOOT-2` scoping that
+`session_start.py` `_anchor_cwd` applies to the anchor-writing sub-scripts. The
+roadmap line "checks the framework's git history rather than the host's"
+(`021-030-program-queue.md`) describes a caller passing the wrong cwd, not this
+module: adopting `agents_root()` here is the defect, not the fix.
+
 The case: commits were made without `start`, without `close`, or without
 either. The recorded state and the repository then disagree, and every workflow
 that follows reasons from a false premise.
