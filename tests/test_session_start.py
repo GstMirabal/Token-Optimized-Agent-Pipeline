@@ -415,12 +415,14 @@ def test_anchor_cwd_is_the_host_root_in_submodule_mode(
 def test_boot_runs_claim_and_probe_from_the_host_root_in_submodule_mode(
     session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    """F-BOOT-2: claim/probe resolve docs/active_state.json against the host.
+    """F-BOOT-2 / D8: claim, probe and drift resolve their paths against the host.
 
     Against the pre-Sprint-044 tree every sub-script ran with cwd = the .agents
     checkout, so `session_state.py claim` wrote the gitignored nucleus anchor and
-    the host session was never claimed. detect_drift / sync_agents_pin stay at
-    the framework checkout.
+    the host session was never claimed. Sprint 047 (D8) extends the same scoping
+    to detect_drift.py, so it measures drift against the host's git history. Only
+    sync_agents_pin stays at the framework checkout — it pins the .agents
+    submodule.
     """
     root = _write_minimal_root(tmp_path / "host" / ".agents")
     monkeypatch.setattr(session_start, "repo_root", lambda: root)
@@ -438,8 +440,9 @@ def test_boot_runs_claim_and_probe_from_the_host_root_in_submodule_mode(
     assert session_start.main(["--boot", "--tool", "claude-code"]) == 0
     assert seen["scripts/session_state.py"] == root.parent
     assert seen["scripts/session_probe.py"] == root.parent
-    assert seen["scripts/detect_drift.py"] is None  # default cwd = root
-    assert seen["scripts/sync_agents_pin.py"] is None
+    assert seen["scripts/detect_drift.py"] == root.parent  # D8: host-scoped
+    assert seen["scripts/detect_drift.py"] == seen["scripts/session_state.py"]
+    assert seen["scripts/sync_agents_pin.py"] is None  # framework-scoped (pins .agents)
 
 
 def test_boot_keeps_claim_at_root_in_nucleus_mode(
@@ -463,6 +466,8 @@ def test_boot_keeps_claim_at_root_in_nucleus_mode(
     # nucleus: _anchor_cwd returns root itself, passed explicitly.
     assert seen["scripts/session_state.py"] == root
     assert seen["scripts/session_probe.py"] == root
+    # D8: drift stays framework-scoped when is_nucleus() is True.
+    assert seen["scripts/detect_drift.py"] == root
 
 
 def test_boot_terminal_has_no_bridge_and_still_succeeds(
@@ -576,3 +581,39 @@ def test_briefing_reads_the_host_anchor_in_submodule_mode(
 
     assert "HOST-ANCHOR-SENTINEL" in briefing
     assert "test-sess-035" not in briefing
+
+
+def test_section_drift_spawns_detect_drift_from_the_anchor_cwd(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """D8: the briefing-only drift probe runs detect_drift.py at the anchor cwd.
+
+    ``section_drift`` spawns ``scripts/detect_drift.py`` with cwd at
+    ``_anchor_cwd(root)`` — the host root one level above ``.agents`` in
+    submodule mode, the framework checkout in nucleus mode. The submodule case
+    fails against HEAD, where ``section_drift`` passed ``cwd=str(root)`` and so
+    measured drift against the framework's git history.
+    """
+    root = tmp_path / "host" / ".agents"
+    (root / "scripts").mkdir(parents=True)
+    (root / "scripts" / "detect_drift.py").write_text("", encoding="utf-8")
+    seen: dict[str, str | None] = {}
+
+    def mock_run(
+        *args: object, cwd: str | None = None, **kwargs: object
+    ) -> subprocess.CompletedProcess[str]:
+        seen["cwd"] = cwd
+        return subprocess.CompletedProcess(
+            args=[], returncode=0, stdout="", stderr=""
+        )
+
+    monkeypatch.setattr(session_start.subprocess, "run", mock_run)
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+
+    monkeypatch.setattr(session_start, "is_nucleus", lambda: False)
+    session_start.section_drift(root)
+    assert seen["cwd"] == str(root.parent)
+
+    monkeypatch.setattr(session_start, "is_nucleus", lambda: True)
+    session_start.section_drift(root)
+    assert seen["cwd"] == str(root)
