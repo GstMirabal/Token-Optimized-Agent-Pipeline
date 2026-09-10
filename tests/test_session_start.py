@@ -515,8 +515,64 @@ def test_cursor_tiers_section_is_for_cursor_sessions_only(
 
 
 def test_briefing_without_a_tool_falls_back_to_the_anchor(
-    session_start, tmp_path: Path
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     """A briefing-only run reads session_tool rather than guessing."""
     root = _write_minimal_root(tmp_path / "repo")  # anchor says cursor
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    monkeypatch.setattr(session_start, "is_nucleus", lambda: True)
     assert "Chat vs map (Cursor tiers)" in "\n".join(session_start.build_briefing(root))
+
+
+def test_anchor_root_is_repo_root_in_nucleus_mode(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """D8: nucleus mode anchors the briefing read on the framework checkout."""
+    root = tmp_path / "repo"
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    monkeypatch.setattr(session_start, "is_nucleus", lambda: True)
+    assert session_start.anchor_root() == root
+
+
+def test_anchor_root_is_the_host_root_in_submodule_mode(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """D8: submodule mode anchors one level above the .agents checkout."""
+    root = tmp_path / "host" / ".agents"
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    monkeypatch.setattr(session_start, "is_nucleus", lambda: False)
+    assert session_start.anchor_root() == root.parent
+
+
+def test_briefing_reads_the_host_anchor_in_submodule_mode(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """D8: a host briefing reports ``<host>/docs/active_state.json``, not the copy.
+
+    Fails against HEAD: there ``build_briefing`` calls ``load_anchor(root)`` with
+    no ``anchor_root()`` seam, so it reports the framework-side anchor at
+    ``root/docs/active_state.json`` — ``HOST-ANCHOR-SENTINEL`` never appears and
+    ``test-sess-035`` does.
+    """
+    agents_root = _write_minimal_root(tmp_path / "host" / ".agents")
+    host_docs = agents_root.parent / "docs"
+    host_docs.mkdir(parents=True)
+    (host_docs / "active_state.json").write_text(
+        json.dumps(
+            {
+                "status": "IN_PROGRESS",
+                "session_id": "HOST-ANCHOR-SENTINEL",
+                "current_sprint": {"id": 47, "layer": "core", "app": "pipeline"},
+                "session_tool": "claude-code",
+                "delegation_mode": "native",
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(session_start, "repo_root", lambda: agents_root)
+    monkeypatch.setattr(session_start, "is_nucleus", lambda: False)
+
+    briefing = "\n".join(session_start.build_briefing(agents_root))
+
+    assert "HOST-ANCHOR-SENTINEL" in briefing
+    assert "test-sess-035" not in briefing

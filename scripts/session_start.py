@@ -8,7 +8,9 @@ With ``--boot``: run drift → claim → probe → sync → bridge, then print t
 briefing. Drift exit ``2`` propagates and skips claim (Sprint 039 B1). In
 submodule mode the anchor-writing sub-scripts (claim, probe) run with cwd at the
 host root, not the ``.agents`` checkout, so the host anchor is the one claimed
-(``F-BOOT-2``, Sprint 044).
+(``F-BOOT-2``, Sprint 044). The briefing's own read of ``docs/active_state.json``
+is scoped the same way, through ``anchor_root()`` (``D8``, Sprint 047), so a
+briefing run inside a host reports the host anchor rather than the framework one.
 
 The bridge step asks ``scripts/bridge_state.py`` whether **this** target's
 mirror is missing or diverged, for every target rather than for Cursor alone
@@ -51,6 +53,28 @@ TRUNCATION_MARK = "… truncated (session_start line cap)"
 def repo_root() -> Path:
     """Repository root as the parent of ``scripts/`` (nucleus-friendly)."""
     return Path(__file__).resolve().parent.parent
+
+
+def anchor_root() -> Path:
+    """Base directory the session anchor (``docs/active_state.json``) is read from.
+
+    The briefing must read the same anchor the boot sequence writes. Boot's
+    anchor-writing sub-scripts are host-scoped (``_anchor_cwd``): in submodule
+    mode the live anchor is the superproject's at
+    ``<host>/docs/active_state.json`` — one level above the ``.agents`` checkout —
+    while the nucleus copy at that path is gitignored. In nucleus mode the
+    framework *is* the work and its own anchor at ``repo_root()`` is correct.
+    This mirrors the ``F-BOOT-2`` write scoping (Sprint 044) onto the read path,
+    for the same reason ``scripts/detect_drift.py`` anchors on the cwd rather
+    than ``scripts/_root.py``: the subject is the project being worked, not the
+    framework.
+
+    Returns:
+        Path: ``repo_root()`` in nucleus mode, its parent (the host root) in
+        submodule mode.
+    """
+    base = repo_root()
+    return base if is_nucleus() else base.parent
 
 
 def load_anchor(root: Path) -> dict[str, object] | None:
@@ -194,14 +218,18 @@ def build_briefing(root: Path, tool: str | None = None) -> list[str]:
     """Assemble the briefing, including only the sections this tool needs.
 
     Args:
-        root: Framework checkout.
+        root: Framework checkout — used for the drift, upstream-findings and
+            model-tier sections, all of which read framework-owned paths. The
+            anchor section reads ``docs/active_state.json`` from
+            ``anchor_root()`` instead, so a host briefing reports the host
+            anchor.
         tool: Harness this session claimed. ``None`` falls back to the
             anchor's ``session_tool``, which is what a briefing-only run reads.
 
     Returns:
         list[str]: Briefing lines, before the line cap is applied.
     """
-    state = load_anchor(root)
+    state = load_anchor(anchor_root())
     effective = tool or (state or {}).get("session_tool")
     parts: list[str] = [
         "# /start briefing",
