@@ -35,7 +35,7 @@ own guidance the outcome is described, never pasted as a literal trail.
 
 | Unit | Skill / tool | Destination | P1–P4 trail |
 | :--- | :--- | :--- | :--- |
-| U1 (`agents.md`, 176 lines) | `Read` with `offset`/`limit` on `§1`, `RA-01`, `RA-02`, `RA-14`; `grep -nE '^\| ' agents.md` to locate rows; `Edit`. Verify: `make verify`, `scripts/verify_references.py`, `grep -c 'python-doctor\|react-doctor' agents.md` == `0`, `grep -n 'RA-04\|RA-10' agents.md` (no renumber) | N/A | P1 HIT; P3 checked, no applicable skill |
+| U1 (`agents.md`, 176 lines) | `Read` with `offset`/`limit` on `§1`, `RA-01`, `RA-02`, `RA-14`; `grep -nE '^\| ' agents.md` to locate rows; `Edit`. Verify: `make verify`, `scripts/verify_references.py`, `grep -n 'python-doctor\|react-doctor' agents.md` (both survivors are negative-existence statements, not the tool named as live instruction — Gate 1 F-047-QA1), `grep -n 'RA-04\|RA-10' agents.md` (no renumber) | N/A | P1 HIT; P3 checked, no applicable skill |
 | U2 (`rules/django_backend_standard.md`, 62) | `Read`/`Edit`. Verify: `scripts/verify_references.py`, `make verify` | N/A | P1 HIT |
 | U3 (`rules/LEGACY_RULE_CONCORDANCE.md`, 27) | `Read`/`Edit`. Verify: `scripts/verify_references.py` (unmapped `Clause`/`Rule NN` → fail), `make verify` | N/A | P1 HIT |
 | U4 (`workflows/audit_workflow.md`, 25) | `Read`/`Edit`. Verify: `scripts/verify_references.py`, `scripts/scan_workflow_determinism.py`, `scripts/check_template_gates.py`, `make verify` | N/A | P1 HIT |
@@ -57,10 +57,17 @@ own guidance the outcome is described, never pasted as a literal trail.
 | U20 (`tests/test_check_gate_log.py`) | `Read`/`Edit`/`Write`; `tmp_path` fixtures. Verify: `venv_skillopt/bin/python -m pytest tests/test_check_gate_log.py -q`, `ruff check tests/` | N/A | P1 HIT; `django-tdd-3rd` rejected (§4) |
 | U21 (`tests/test_mode.py`) | `Read`/`Edit`/`Write`; `monkeypatch` + `tmp_path` for a simulated worktree/submodule `.git` file. Verify: `venv_skillopt/bin/python -m pytest tests/test_mode.py -q`, `ruff check tests/` | N/A | P1 HIT; `django-tdd-3rd` rejected (§4) |
 | U22 (`tests/test_session_start.py`) | `Read`/`Edit`/`Write`; `monkeypatch` + `tmp_path` for a simulated submodule layout. Verify: `venv_skillopt/bin/python -m pytest tests/test_session_start.py -q`, `ruff check tests/` | N/A | P1 HIT; `django-tdd-3rd` rejected (§4) |
-| U23 (`tests/test_submodule_purity.py`) | `Read`/`Edit`/`Write`; `tmp_path` for a gitignored stray anchor. Verify: `venv_skillopt/bin/python -m pytest tests/test_submodule_purity.py -q`, `ruff check tests/` | N/A | P1 HIT; `django-tdd-3rd` rejected (§4) |
+| U23 (`tests/test_submodule_purity.py`) | `Read`/`Edit`/`Write`; `tmp_path` for a gitignored stray anchor, real throwaway `git init` repo. Verify: `venv_skillopt/bin/python -m pytest tests/test_submodule_purity.py -q`, `ruff check tests/` | N/A | P1 HIT; `django-tdd-3rd` rejected (§4) |
+| U24 (`config/invocation_exceptions.json`) — discovered during U1 | `Read`/`Edit`. Verify: `python3 -c "import json;json.load(open(...))"`, `scripts/verify_references.py` | N/A | P1 HIT |
+| U25 (`workflows/pipeline_workflow.md`) — discovered during U11 | `Read`/`Edit` (add `<a id="loop_guard">`). Verify: `scripts/verify_references.py` (`#loop_guard` resolves) | N/A | P1 HIT |
+| U26 (`rules/token_economy.md`) — discovered during U11 | `Read`/`Edit` (add `<a id="session_bound">`). Verify: `scripts/verify_references.py` (`#session_bound` resolves) | N/A | P1 HIT |
+| U27 (`workflows/standardization_workflow.md`, 2nd unit) — discovered during U12 | `Read`/`Edit` (2nd skip-marker before the Scenario Matrix). Verify: `scripts/map_workflows.py --check` | N/A | P1 HIT |
+| U28 (`scripts/session_start.py`, 2nd unit) — discovered during U15 | `Read`/`Edit` (`_anchor_cwd` routed through `section_drift`/`run_boot`). Verify: `ruff check scripts/session_start.py`, `venv_skillopt/bin/python -m pytest tests/test_session_start.py -q` | N/A | P1 HIT |
+| U29 (`tests/test_session_start.py`, 2nd unit) — paired with U28 | `Read`/`Edit`; `monkeypatch` + `tmp_path`. Verify: `venv_skillopt/bin/python -m pytest tests/test_session_start.py -q`, `ruff check tests/` | N/A | P1 HIT; `django-tdd-3rd` rejected (§4) |
 
-Full-suite regression after Wave 3: `venv_skillopt/bin/python -m pytest tests/ -q`
-(expected exit `0`, `IMPLEMENTATION_PLAN.md` Verification table).
+Full-suite regression, run after every unit and finally after all 29 land:
+`venv_skillopt/bin/python -m pytest tests/ -q` (exit `0`, 747 passed —
+`IMPLEMENTATION_PLAN.md` Verification table).
 
 `Destination` is `N/A` on every row: no skill is built, so there is no forge
 destination to validate. Writing under `.agents/skills/` from any session is
@@ -84,13 +91,13 @@ prohibited (`agents.md §3 strict_rule`); it is not attempted here.
 | :--- | :--- |
 | `omni-context-minimizer` for U1 (`agents.md`) | `agents.md` is 176 lines — below the >200-line `ast_skeleton` threshold (`agents.md §2`). Targeted `grep -nE '^\| '` plus `offset`/`limit` `Read` on the four affected `§` blocks suffice; the skeleton tool is still used for U11/U14/U15, which are over 200 lines. |
 | `django-tdd-3rd` (pytest authoring, U18–U23) | Django/`pytest-django` specific — `factory_boy`, migrations, DRF client, coverage gates. The nucleus suites are plain stdlib `pytest` with `tmp_path`/`monkeypatch` against framework `scripts/`. No Django in the nucleus. |
-| `sprint-architect` | The Work Breakdown (U1–U23) was produced at Phase 1 and is fixed in `IMPLEMENTATION_PLAN.md`. Phase 4.2 does not re-derive it. |
+| `sprint-architect` | The Work Breakdown (U1–U23) was produced at Phase 1 and is fixed in `IMPLEMENTATION_PLAN.md`. Phase 4.2 does not re-derive it. (U24–U29 were discovered during Execution, each a direct consequence of a plan unit's own finding — not a re-derivation of the breakdown.) |
 | `skill-creator` / `skill-forge_workflow` | No new skill is built: every unit maps to `Read`/`Edit` (or `Write` for a test file) plus an existing deterministic gate. `rules/skills_and_integrations.md §1` — build only when the ladder finds no existing capability. |
-| A new "anchor-resolver" / "audit-row applicator" skill | Over-engineering. U11 extends an existing check (d) in `scripts/verify_references.py`; the other 22 units are one-file prose, stdlib-script, or `pytest` edits. A forged tool for a one-time set of internal edits is disproportionate (`rules/skills_and_integrations.md §1`). |
-| `autoskills-3rd` (P2 rung) | Not reached — P1 resolved every unit. |
+| A new "anchor-resolver" / "audit-row applicator" skill | Over-engineering. U11 extends an existing check (d) in `scripts/verify_references.py`; the other units are one-file prose, stdlib-script, or `pytest` edits. A forged tool for a one-time set of internal edits is disproportionate (`rules/skills_and_integrations.md §1`). |
+| `autoskills-3rd` (P2 rung) | Not reached — P1 resolved every unit, including U24–U29. |
 
 ## 5. Gaps
 
-None. Every unit U1–U23 resolves to `Read`/`Edit`/`Write` plus an existing
+None. Every unit U1–U29 resolves to `Read`/`Edit`/`Write` plus an existing
 verification tool (`ruff`, `pytest`, `py_compile`, `make verify`, and the
 `scripts/*.py` gates). No capability is missing; no skill is built.

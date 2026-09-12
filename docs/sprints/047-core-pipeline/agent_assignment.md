@@ -15,10 +15,12 @@ column names which profile's ruleset governs each write.
 | Which ruleset governs each unit | Model / effort (`task_scope.md`, Phase 4.3) |
 | Agent-forge destination on units that create agents | `tier_escalation` proposals |
 
-**No unit in this sprint creates a new agent profile.** Every U1–U23 assignee is
+**No unit in this sprint creates a new agent profile.** Every U1–U29 assignee is
 an existing core or auxiliary role (`rule_validator`, `implementer_agent`), so no
 `Destination` value is required — `Destination` is `N/A` on every row and
-`check_forge_ladder.py` has no forge row to validate.
+`check_forge_ladder.py` has no forge row to validate. (U24–U29 are 6 units
+discovered mid-execution beyond the plan's original U1–U23; see `task_scope.md`
+for the finding that produced each.)
 
 ---
 
@@ -83,13 +85,28 @@ Targets are disjoint physical files.
 | U22 | `tests/test_session_start.py` | modify/create | ruleset | `implementer-agent` | N/A | `agents/implementer_agent.md` |
 | U23 | `tests/test_submodule_purity.py` | modify/create | ruleset | `implementer-agent` | N/A | `agents/implementer_agent.md` |
 
+### Wave 4 — discovered mid-execution (U24–U29)
+
+Each a direct, same-sprint consequence of a unit above (finding recorded in
+`task_scope.md` discovery notes), not new scope. Same staffing rule: `rule-
+validator` for governance prose, `implementer-agent` for scripts/tests.
+
+| # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| U24 | `config/invocation_exceptions.json` | modify | ruleset | `rule-validator` | N/A | `agents/rule_validator.md` |
+| U25 | `workflows/pipeline_workflow.md` | modify | ruleset | `rule-validator` | N/A | `agents/rule_validator.md` |
+| U26 | `rules/token_economy.md` | modify | ruleset | `rule-validator` | N/A | `agents/rule_validator.md` |
+| U27 | `workflows/standardization_workflow.md` | modify | ruleset | `rule-validator` | N/A | `agents/rule_validator.md` |
+| U28 | `scripts/session_start.py` | modify | ruleset | `implementer-agent` | N/A | `agents/implementer_agent.md` |
+| U29 | `tests/test_session_start.py` | modify | ruleset | `implementer-agent` | N/A | `agents/implementer_agent.md` |
+
 ## Assignee breakdown
 
 | Assignee | Units | Count |
 | :--- | :--- | :--- |
-| `rule-validator` | U1–U10 | 10 |
-| `implementer-agent` | U11–U23 | 13 |
-| **Total** | U1–U23 | **23** |
+| `rule-validator` | U1–U10, U24–U27 | 14 |
+| `implementer-agent` | U11–U23, U28–U29 | 15 |
+| **Total** | U1–U29 | **29** |
 
 ## Disagreements with the plan
 
