@@ -39,20 +39,25 @@ hand-edited, and is not a second structural subject.
 | U8 | `workflows/reverse_documentation_workflow.md` | modify | low | `rule_validator` | sonnet | medium | ✅ 77e64a7 |
 | U9 | `workflows/repository_hardening_workflow.md` | modify | medium | `rule_validator` | sonnet | medium | ✅ 90c0268 |
 | U10 | `workflows/standardization_workflow.md` | modify | medium | `rule_validator` | sonnet | medium | ✅ 35e625b |
-| U11 | `scripts/verify_references.py` | modify | high | `implementer_agent` | sonnet | medium | ⏳ |
-| U12 | `scripts/map_workflows.py` | modify | high | `implementer_agent` | sonnet | medium | ⏳ |
-| U13 | `scripts/check_gate_log.py` | modify | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U14 | `scripts/session_start.py` | modify | high | `implementer_agent` | sonnet | medium | ⏳ |
-| U15 | `scripts/detect_drift.py` | modify | high | `implementer_agent` | sonnet | medium | ⏳ |
-| U16 | `scripts/_mode.py` | modify | high | `implementer_agent` | sonnet | medium | ⏳ |
-| U17 | `scripts/submodule_purity.py` | modify | high | `implementer_agent` | sonnet | medium | ⏳ |
-| U18 | `tests/test_verify_references.py` | modify/create | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U19 | `tests/test_map_workflows.py` | modify/create | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U20 | `tests/test_check_gate_log.py` | modify/create | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U21 | `tests/test_mode.py` | modify/create | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U22 | `tests/test_session_start.py` | modify/create | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U23 | `tests/test_submodule_purity.py` | modify/create | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| U11 | `scripts/verify_references.py` | modify | high | `implementer_agent` | sonnet | medium | ✅ 6125c5f |
+| U12 | `scripts/map_workflows.py` | modify | high | `implementer_agent` | sonnet | medium | ✅ fcdbf28 |
+| U13 | `scripts/check_gate_log.py` | modify | medium | `implementer_agent` | sonnet | medium | ✅ 3441ac2 |
+| U14 | `scripts/session_start.py` | modify | high | `implementer_agent` | sonnet | medium | ✅ 3e9a892 |
+| U15 | `scripts/detect_drift.py` | modify | high | `implementer_agent` | sonnet | medium | ✅ d930e4a |
+| U16 | `scripts/_mode.py` | modify | high | `implementer_agent` | sonnet | medium | ✅ 61e877c |
+| U17 | `scripts/submodule_purity.py` | modify | high | `implementer_agent` | sonnet | medium | ✅ 55014c8 |
+| U18 | `tests/test_verify_references.py` | modify/create | medium | `implementer_agent` | sonnet | medium | ✅ 6125c5f |
+| U19 | `tests/test_map_workflows.py` | modify/create | medium | `implementer_agent` | sonnet | medium | ✅ fcdbf28 |
+| U20 | `tests/test_check_gate_log.py` | modify/create | medium | `implementer_agent` | sonnet | medium | ✅ 3441ac2 |
+| U21 | `tests/test_mode.py` | modify/create | medium | `implementer_agent` | sonnet | medium | ✅ 61e877c |
+| U22 | `tests/test_session_start.py` | modify/create | medium | `implementer_agent` | sonnet | medium | ✅ 3e9a892 |
+| U23 | `tests/test_submodule_purity.py` | modify/create | medium | `implementer_agent` | sonnet | medium | ✅ 55014c8 |
 | U24 | `config/invocation_exceptions.json` | modify | low | `rule_validator` | sonnet | medium | ✅ e0b7753 |
+| U25 | `workflows/pipeline_workflow.md` | modify | low | `rule_validator` | sonnet | medium | ✅ f3d11cd |
+| U26 | `rules/token_economy.md` | modify | low | `rule_validator` | sonnet | medium | ✅ eafc6c3 |
+| U27 | `workflows/standardization_workflow.md` | modify | low | `rule_validator` | sonnet | medium | ✅ 5157086 |
+| U28 | `scripts/session_start.py` | modify | high | `implementer_agent` | sonnet | medium | ✅ 17db62c |
+| U29 | `tests/test_session_start.py` | modify | medium | `implementer_agent` | sonnet | medium | ✅ 17db62c |
 
 > **U24 — discovered during U1 execution.** U1's `agents.md §1` rewrite dropped
 > the `python-doctor` / `react-doctor` names; the RA-14 sprint-artifact-set
@@ -60,6 +65,28 @@ hand-edited, and is not a second structural subject.
 > `config/invocation_exceptions.json` (`:55`, `:60`) to be reconciled in the same
 > sprint. One-file JSON note edit; keys and schema unchanged (`verify_references.py`
 > check (d) reads only `path` / `reason`). Same wave/tier as U1–U10.
+
+> **U25/U26 — discovered during U11 execution.** U11 taught `verify_references.py`
+> check (d) to resolve `#anchor` fragments in `invoked_by:` and immediately caught
+> two pre-existing broken anchors (`S045-13`'s exact defect class): `loop_guard.py`
+> → `pipeline_workflow.md#loop_guard` and `session_cost.py` →
+> `rules/token_economy.md#session_bound`. Fixed by adding the missing `<a id=…>`
+> anchors rather than by touching the two scripts (different files; jurisdictional_lock).
+>
+> **U27 — discovered during U12 execution.** `standardization_workflow.md` carries
+> a *second* non-step reference table (the Scenario Matrix) that U10's single
+> skip-marker did not cover; U12's regenerated guide still misparsed its 3 rows.
+> A second `<!-- map_workflows:skip-table -->` line closes the S045-27 finding
+> completely.
+>
+> **U28/U29 — discovered during U15 execution.** The roadmap's D8 claim that
+> `detect_drift.py` "checks the framework's git history rather than the host's"
+> was traced to the actual call sites: `detect_drift.py` itself is correctly
+> cwd-scoped (U15, docstring-only), but `session_start.py`'s `section_drift()`
+> and `run_boot()` invoked it with `cwd = repo_root()` (the `.agents` checkout)
+> unconditionally. The plan's Work table put this fix at U15's file; execution
+> found it belongs in `session_start.py` instead — a second, later unit on a file
+> U14 already closed (no `no_interference` conflict; U14 was committed).
 
 **Waves (inside the one sprint; `IMPLEMENTATION_PLAN.md` "Commit groups"):**
 Wave 1 = U1–U10 governance prose, gate `make verify`; dispatched one atomic
