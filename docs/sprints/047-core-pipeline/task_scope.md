@@ -96,10 +96,14 @@ bug).
 **Waves (inside the one sprint; `IMPLEMENTATION_PLAN.md` "Commit groups"):**
 Wave 1 = U1–U10 governance prose, gate `make verify`; dispatched one atomic
 commit each (`RA-08`). Wave 2 = U11–U17 framework-root `scripts/` behaviour.
-Wave 3 = U18–U23 pytest suites. Groups are sequential. Every unit is a distinct
-physical file, so units inside a wave carry no `no_interference` overlap and may
-be dispatched in parallel within the wave (Wave 1 excepted where an `RA-14`
-propagation order applies — see below).
+Wave 3 = U18–U23 pytest suites — landed paired with each Wave-2 fix commit, not
+as a trailing group (`rules/code_craft.md §6`; see `jurisdictional_lock` below).
+**Wave 4 = U24–U29**, discovered mid-execution (one finding each, recorded at
+the Group tables in `SPRINT_LOG.md`); dispatched inline as its wave's finding
+surfaced, not as a fourth sequential block. Groups are sequential relative to
+each other; two units never target the same file while both are active (see
+`jurisdictional_lock`'s two declared exception classes and two legitimate
+sequential re-targets below).
 
 ---
 
@@ -137,10 +141,9 @@ exception classes**, both stated here rather than left to inference:
    commit hook's test-with-fix requirement; recorded here, not by rewriting the
    locked plan.
 
-Twenty-nine distinct **files** are named across 29 units, but two files are each
-the target of **two sequential, non-overlapping** units:
-- `agents.md` — U1 only.
-- `workflows/close_workflow.md` — U6 only.
+**26 distinct files** are named across the 29 units (three files are each the
+target of two sequential, non-overlapping units — 29 units minus 3 re-targets =
+26 files):
 - `workflows/standardization_workflow.md` — U10, then **U27** (a second,
   later, independent unit: U10's own subtask was closed and committed
   (`35e625b`) before U27 opened; not a simultaneous claim).
