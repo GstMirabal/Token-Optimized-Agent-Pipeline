@@ -10,7 +10,7 @@ version: 1.0.0
 
 - **Strategy Lock:** `OPEN`
 - **Delivered:** `024` and `025` (`v4.5.0`), `021` (`v4.6.0`), `022` (`v4.7.0`), `023` (`v4.8.0`), `026` (`v4.9.0`, PR #50), `027` (`v4.10.0`, PR #55), `028` (`v4.11.0`, PR #57), `029` (`documentation-truth`, `v4.12.0`, PR #59), `030` (`token-economy-enforcement`, `v4.13.0`, PR #61), `031` (`gate-verdict-classes`, `v4.14.0`, PR #63), `032` (`author-tier-trial`, `v4.15.0`, PR #64), `033` (`implementer-role`, `v4.16.0`, PR #65), `034` (`core-pipeline`, `v4.17.0`, PR #66), `035` (`core-pipeline` C/E/H/F, `v4.18.0`, PR #67), `036` (`core-pipeline` M/L, `v4.19.0`, PR #68), `037` (`core-pipeline` G+S, `v4.20.0`, PR #69), **`038` (`core-pipeline` family-trial, `v4.21.0`, PR #70)**
-- **Next / in flight:** **`046` (`nucleus-audit-mechanical-remediation`) deployed `v4.29.0` (PR #79, 2026-09-08)** — applied the 18-row mechanical `S045-*` bucket + `KI-045-1` (Quality Gate table stub in `SPRINT_LOG_TEMPLATE.md`), one atomic commit per file, drafted text only, `agents.md §7` IDs `RA-01`..`RA-18` not renumbered (`RA-04`/`RA-10` → tombstone/pointer in place). Phase 7: QA Gate 1 `REJECTED`/`instructing` r1 (F-046-QA1 — a faithfully transcribed but defective drafted amendment `A4`) → `APPROVED` r2; Tester Gate 2 `RECORD`/`testifying` (T-046-1 closed by `U29` `tests/test_state_mirror.py`; T-046-2 pre-existing). Section below. **`045` (`nucleus-ruleset-mechanism-audit`) deployed `v4.28.0` (PR #78)** — full obsolescence audit; 29 `nucleus` rows bucketed 046/047/defer, analysis-only. **047** picks up the design-pass bucket (`S045-02, 06, 09, 14, 17, 18, 19, 20, 22, 27`) + `KI-045-2` + `KI-046-3` + the submodule-mode anchor *read* / `submodule_purity --ignored` items still queued below. **`044` deployed** `v4.27.0`, **`043` deployed** `v4.26.0`, **`042` deployed** `v4.25.0`, **`041` deployed** `v4.24.0`.
+- **Next / in flight:** **`047` (`nucleus-audit-design-remediation`) closed 2026-09-13 (Sprint Closeout, pending `/agents:deploy`)** — closed the design-pass bucket of the Sprint 045 audit (`S045-02, 06, 09, 14, 17, 18, 19, 20, 22, 27`) + `KI-045-2` + `KI-046-3` + the submodule-mode anchor-*read* findings + `submodule_purity --ignored`. 23 planned + 6 discovered mid-execution = 29 units, `make verify` green, 747 tests pass. Phase 7: QA Gate 1 `REJECTED`/`charter` r1 (sprint-directory records still claimed 23 units after 29 landed — `RA-14`'s own new sprint-artifact-set clause, added by this sprint's `U1`, violated by this sprint) → `RECORD`/`testifying` r2 (records-only fix, `IMPLEMENTATION_PLAN.md` untouched); Tester Gate 2 `RECORD`/`testifying` (one ambient-checkout-shape test coupling recorded, routed to Extract). Section below. **`046` (`nucleus-audit-mechanical-remediation`) deployed `v4.29.0` (PR #79, 2026-09-08)** — applied the 18-row mechanical `S045-*` bucket + `KI-045-1` (Quality Gate table stub in `SPRINT_LOG_TEMPLATE.md`), one atomic commit per file, drafted text only, `agents.md §7` IDs `RA-01`..`RA-18` not renumbered (`RA-04`/`RA-10` → tombstone/pointer in place). Phase 7: QA Gate 1 `REJECTED`/`instructing` r1 (F-046-QA1 — a faithfully transcribed but defective drafted amendment `A4`) → `APPROVED` r2; Tester Gate 2 `RECORD`/`testifying` (T-046-1 closed by `U29` `tests/test_state_mirror.py`; T-046-2 pre-existing). **`045` (`nucleus-ruleset-mechanism-audit`) deployed `v4.28.0` (PR #78)** — full obsolescence audit; 29 `nucleus` rows bucketed 046/047/defer, analysis-only. Both Sprint 045 buckets are now closed. **`044` deployed** `v4.27.0`, **`043` deployed** `v4.26.0`, **`042` deployed** `v4.25.0`, **`041` deployed** `v4.24.0`.
 - **Previously:** **`041` (`bi-harness-bridge-parity`) deployed `v4.24.0` (2026-08-30)** — the portable boot repaired the bridge of Cursor only; a Claude boot reported a mirror that did not exist and installed no git hooks. Also opened, and closed, three cases of a versioned artifact failing the gate that consumes it (`IMPLEMENTATION_PLAN_TEMPLATE.md`, `SKILL_ASSIGNMENT_TEMPLATE.md`, `pipeline_workflow.md` Phase 4.3), each found by following the artifact rather than by auditing it. Hosts pin via `/start` auto-pin to newest `v*`. **`040` deployed** `v4.23.0` (PR #72, 2026-08-27) — cursor-bridge-incremental. **`039` deployed** `v4.22.0` (PR #71, 2026-08-27) — start-close-lifecycle. **`038` deployed** `v4.21.0` (PR #70, 2026-08-26) — `cursor.author` **`glm-5.2`** / `zhipu` / `high`. **`037` deployed** `v4.20.0` (PR #69, 2026-08-26). **`036` deployed** `v4.19.0` (PR #68, 2026-08-26). **`035` deployed** `v4.18.0` (PR #67, 2026-08-26). `034` **deployed** `v4.17.0` (PR #66, 2026-08-26). `033` **deployed** `v4.16.0` (PR #65, 2026-08-25). `032` **deployed** `v4.15.0` (PR #64). `031` **deployed** `v4.14.0` (PR #63). H-004 **deployed** `v4.13.1` (PR #62).
 - **Origin:** drafted in an IDE planning mode across one long session, then migrated
   into this repository. That migration is the point: the same session opened with a
@@ -214,40 +214,42 @@ had no suite coverage; closed post-gate by `U29` (`tests/test_state_mirror.py`,
 704 passed). **T-046-2** — pre-existing `ruff`-not-in-`make verify` gap
 (= `S045-02` / T3). No remediation escalation.
 
-### Queued for **047** — the submodule-mode anchor *read* (Gate-2 testifying finding)
+### ✅ Taken by Sprint 047 (`nucleus-audit-design-remediation`) — the submodule-mode anchor *read* + the Sprint 045 design-pass bucket
 
 *(Was queued for 045, then 046; not taken by 046 — the human scoped 046 to the
-`S045-*` mechanical batch. Now routed to 047 alongside the design-pass bucket.)*
+`S045-*` mechanical batch. Delivered here alongside the design-pass bucket.)*
 
 F-BOOT-2 fixed the anchor *write* (claim/probe host-scoped in submodule mode).
-The *read* is still framework-anchored: `session_start.py:56` `load_anchor`
-resolves `root / "docs" / "active_state.json"` with `root = repo_root()`
-unconditionally, so `/agents:start` in a host prints "docs/active_state.json:
-absent or unreadable" over a live host anchor, and `detect_drift.py` (also host-
-scoped, deferred by F-BOOT-2) checks the framework's git history rather than the
-host's. One unit: make both host-scoped in submodule mode. Adjacent, pre-
-existing, same register: `scripts/_mode.is_nucleus()` returns `False` inside a
-linked git worktree of the nucleus (a worktree's `.git` is a file), misrouting a
-framework developer who works in a worktree.
+The *read* was still framework-anchored: `session_start.py` `load_anchor`
+resolved `root / "docs" / "active_state.json"` with `root = repo_root()`
+unconditionally, so `/agents:start` in a host printed "docs/active_state.json:
+absent or unreadable" over a live host anchor. **Fixed**: a new `anchor_root()`
+helper returns `repo_root()` in nucleus mode, `repo_root().parent` in submodule
+mode; `build_briefing`'s anchor read routes through it (U14). `detect_drift.py`
+itself was found to be **already correctly cwd-scoped** (no root computation at
+all — the roadmap's own framing of this item was imprecise); the actual defect
+was `session_start.py` invoking it with the framework cwd unconditionally in two
+call sites (`section_drift`, `run_boot`), fixed the same way (U28). Adjacent,
+pre-existing, same register: `scripts/_mode.is_nucleus()` returned `False`
+inside a linked git worktree of the nucleus — **fixed** (U16) by distinguishing
+a worktree `gitdir:` (→ the nucleus's own `.git/worktrees/…`) from a submodule
+`gitdir:` (→ a superproject), pure filesystem parsing, no `git` subprocess.
 
-**Also for 047 (was 045/046), from the Sprint 044 extract (`nucleus`-class):**
+**Also delivered, from the Sprint 044 extract (`nucleus`-class):**
 
-- `scripts/submodule_purity.py` (and `close_workflow.md` Phase 5) trust
-  `git -C .agents status --porcelain`, which **does not list ignored files** —
-  so a stray gitignored `.agents/docs/active_state.json` written by a buggy
-  submodule-mode session is invisible to the one check built to catch host
-  contamination (Gate 2 measured this at `2bbfa60`). Add a `--ignored` scan of
-  the anchor paths (`docs/active_state.json`, `.agent_state/`) to
-  `submodule_purity.py`. Same blindness `agents.md §5 mandatory_topology`
-  already documents for `docs/sprints/`.
-- **`RA-14` amendment proposal for `rule_validator`**: extend the mandatory
-  patch-propagation grep from "the same artifact" to "the sprint's artifact
-  set", and bind it to the **remediation step**, not only the reviewer's
-  spot-check. Precedent: Sprint 044 reconciled "403/404" → "403" across the
-  plan, `task_scope.md` and `ADR-0014` but left a fourth spelling in
-  `skill_assignment.md:38` until Gate 1 round 2 caught it. `agents.md` edits go
-  through a planned sprint unit (`strict_rule` — no tactical injection), so this
-  is queued, not applied here.
+- `scripts/submodule_purity.py` gained a `--ignored` flag (U17) scanning the
+  anchor paths (`docs/active_state.json`, `.agent_state/`) that plain
+  `git status --porcelain` cannot see (nucleus mode short-circuits — its own
+  anchor is legitimately gitignored-but-present there). `close_workflow.md`
+  Phase 5 prose now names it (U6).
+- **`RA-14` amendment applied** (U1): the mandatory patch-propagation grep now
+  extends from "the same artifact" to the sprint's **artifact set**, bound to
+  the **remediation step** — consolidated with `KI-045-2`'s headline-metrics
+  clause into one `RA-14` amendment. Precedent that motivated it (Sprint 044's
+  fourth "403/404" spelling caught only at Gate 1 round 2) was echoed by this
+  very sprint: Gate 1 round 1 caught 16 stale "23-unit" references the
+  sprint's own sprint-directory records left behind after 6 units were
+  discovered mid-execution — fixed in round 2 without touching the locked plan.
 
 ---
 
