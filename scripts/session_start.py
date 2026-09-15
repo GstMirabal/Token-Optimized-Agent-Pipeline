@@ -6,9 +6,14 @@ Orchestrates existing local tools into a short English briefing for
 
 With ``--boot``: run drift → claim → probe → sync → bridge, then print the
 briefing. Drift exit ``2`` propagates and skips claim (Sprint 039 B1). In
-submodule mode the anchor-writing sub-scripts (claim, probe) run with cwd at the
-host root, not the ``.agents`` checkout, so the host anchor is the one claimed
-(``F-BOOT-2``, Sprint 044).
+submodule mode the host-scoped sub-scripts (drift, claim, probe) run with cwd at
+the host root, not the ``.agents`` checkout, so drift is measured against the
+host's git history and the host anchor is the one claimed (``F-BOOT-2`` for
+claim/probe, Sprint 044; ``D8`` for ``detect_drift.py``, Sprint 047).
+``sync_agents_pin.py`` stays framework-scoped — it pins the ``.agents``
+submodule. The briefing's own read of ``docs/active_state.json`` is scoped the
+same way, through ``anchor_root()`` (``D8``, Sprint 047), so a briefing run
+inside a host reports the host anchor rather than the framework one.
 
 The bridge step asks ``scripts/bridge_state.py`` whether **this** target's
 mirror is missing or diverged, for every target rather than for Cursor alone
@@ -53,6 +58,28 @@ def repo_root() -> Path:
     return Path(__file__).resolve().parent.parent
 
 
+def anchor_root() -> Path:
+    """Base directory the session anchor (``docs/active_state.json``) is read from.
+
+    The briefing must read the same anchor the boot sequence writes. Boot's
+    anchor-writing sub-scripts are host-scoped (``_anchor_cwd``): in submodule
+    mode the live anchor is the superproject's at
+    ``<host>/docs/active_state.json`` — one level above the ``.agents`` checkout —
+    while the nucleus copy at that path is gitignored. In nucleus mode the
+    framework *is* the work and its own anchor at ``repo_root()`` is correct.
+    This mirrors the ``F-BOOT-2`` write scoping (Sprint 044) onto the read path,
+    for the same reason ``scripts/detect_drift.py`` anchors on the cwd rather
+    than ``scripts/_root.py``: the subject is the project being worked, not the
+    framework.
+
+    Returns:
+        Path: ``repo_root()`` in nucleus mode, its parent (the host root) in
+        submodule mode.
+    """
+    base = repo_root()
+    return base if is_nucleus() else base.parent
+
+
 def load_anchor(root: Path) -> dict[str, object] | None:
     path = root / "docs" / "active_state.json"
     if not path.is_file():
@@ -94,7 +121,7 @@ def section_drift(root: Path) -> list[str]:
     try:
         proc = subprocess.run(
             [sys.executable, str(script)],
-            cwd=str(root),
+            cwd=str(_anchor_cwd(root)),
             capture_output=True,
             text=True,
             check=False,
@@ -194,14 +221,20 @@ def build_briefing(root: Path, tool: str | None = None) -> list[str]:
     """Assemble the briefing, including only the sections this tool needs.
 
     Args:
-        root: Framework checkout.
+        root: Framework checkout — locates the scripts, and the framework-owned
+            paths the upstream-findings and model-tier sections read. The drift
+            section also takes ``root`` to find ``detect_drift.py``, but runs it
+            with cwd at ``_anchor_cwd(root)`` so a host briefing measures the
+            host's git history (``D8``). The anchor section reads
+            ``docs/active_state.json`` from ``anchor_root()`` instead, so a host
+            briefing reports the host anchor.
         tool: Harness this session claimed. ``None`` falls back to the
             anchor's ``session_tool``, which is what a briefing-only run reads.
 
     Returns:
         list[str]: Briefing lines, before the line cap is applied.
     """
-    state = load_anchor(root)
+    state = load_anchor(anchor_root())
     effective = tool or (state or {}).get("session_tool")
     parts: list[str] = [
         "# /start briefing",
@@ -243,16 +276,20 @@ def _run_script(
 
 
 def _anchor_cwd(root: Path) -> Path:
-    """Directory the anchor-writing sub-scripts must resolve their paths against.
+    """Directory the host-scoped boot sub-scripts must resolve their paths against.
 
-    ``session_state.py`` and ``session_probe.py`` are host-scoped: they read and
-    write ``docs/active_state.json`` relative to the process cwd. In nucleus mode
-    the framework *is* the work, so ``root`` (the ``.agents`` checkout) is
-    correct. In submodule mode the work is the superproject and its anchor lives
-    at ``<host>/docs/active_state.json`` — one level above ``root`` — so running
-    them at ``root`` claimed the gitignored nucleus anchor and left the host
-    session unclaimed (``F-BOOT-2``). ``detect_drift.py`` and
-    ``sync_agents_pin.py`` are deliberately left at ``root``.
+    ``session_state.py``, ``session_probe.py`` and ``detect_drift.py`` are
+    host-scoped: they resolve ``docs/active_state.json`` — and, for
+    ``detect_drift.py``, the git history and ``CHANGELOG.md`` it compares —
+    relative to the process cwd. In nucleus mode the framework *is* the work, so
+    ``root`` (the ``.agents`` checkout) is correct. In submodule mode the work is
+    the superproject and its anchor lives at ``<host>/docs/active_state.json`` —
+    one level above ``root`` — so running them at ``root`` claimed the gitignored
+    nucleus anchor and left the host session unclaimed (``F-BOOT-2`` for
+    claim/probe, Sprint 044), and measured drift against the framework's git
+    history instead of the host's (``D8``, Sprint 047). ``sync_agents_pin.py``
+    alone stays at ``root``: it pins the ``.agents`` submodule and is
+    framework-scoped by design.
 
     Args:
         root: The ``.agents`` checkout (``repo_root()``).
@@ -414,7 +451,8 @@ def _bridge_triage(root: Path, target: str | None) -> tuple[int, list[str]]:
 
 def run_boot(root: Path, tool: str) -> int:
     """Execute binding steps; return 2 on hard stop, else 0 after briefing."""
-    drift_rc = _run_script(root, "scripts/detect_drift.py")
+    anchor_cwd = _anchor_cwd(root)
+    drift_rc = _run_script(root, "scripts/detect_drift.py", cwd=anchor_cwd)
     if drift_rc == 2:
         print(
             "boot: drift exit 2 — run /agents:reconcile before claim.",
@@ -422,7 +460,6 @@ def run_boot(root: Path, tool: str) -> int:
         )
         return 2
 
-    anchor_cwd = _anchor_cwd(root)
     claim_rc = _run_script(
         root, "scripts/session_state.py", "claim", "--tool", tool, cwd=anchor_cwd
     )

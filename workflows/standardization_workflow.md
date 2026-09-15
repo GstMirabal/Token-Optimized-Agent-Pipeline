@@ -12,10 +12,10 @@ Governance protocol to enforce structural sovereignty, unique naming, and symmet
 
 | Phase | Step | Action / Constraint |
 | :--- | :--- | :--- |
-| **0. Trigger** | `condition_check` | Triggered if naming drift, empty folders, or asymmetric roadmaps are detected. |
+| **0. Trigger** | `condition_check` | The agent handling `/agents:standardization` (or `start_workflow.md#first_run_scaffold`) runs three detections from the repository root: (a) `skills/topology-monitor/scripts/legacy_app_auditor.py` for topology and naming-standard conflicts (exit code `1` = conflicts found); (b) `find . -type d -empty -not -path './.git/*'` for empty directories — the same scan the `noise_purge` step executes in Phase 3; (c) `git ls-files 'docs/**/*.md'` and the sprint-folder list checked against `[MODULE]_[TYPE].md` / `[ID]-[Stack]-[Layer]`, plus a Backend-vs-Frontend roadmap pairing check, for naming drift and asymmetric roadmaps. Done-criterion: all three run and their combined finding list is recorded; the workflow enters Phase 1 only if that list is non-empty, otherwise it halts with `no standardization drift detected`. |
 | **1. Naming Standard** | **Option B** | Force rename all docs to `[MODULE]_[TYPE].md`. Force rename sprint folders to `[ID]-[Stack]-[Layer]`. |
 | **2. Symmetric Audit** | `roadmap_sync` | Ensure every Backend Roadmap has a corresponding Frontend Roadmap and vice-versa. |
-| **3. Topological Purity** | `noise_purge` | Recursively delete all empty directories in `/docs/` and `/backend/` (RA-07). |
+| **3. Topological Purity** | `noise_purge` | Recursively delete all empty directories in `/docs/` and `/backend/` (RA-07). `/backend/` is **host-only — no nucleus referent** (same marking as `rules/project_topology.md §2`): a nucleus session applies this step to `/docs/` only. |
 | **4. Historical Capture**| `walkthrough_gen` | Generate or update `[MODULE]_WALKTHROUGH.md` for all operational modules. |
 
 ## Phase 5: Legacy Absorption Protocol (Onboarding Scenario B)
@@ -34,6 +34,8 @@ Invoked by `start_workflow first_run_scaffold` when prior agent-generated docume
 
 ### Legacy Routing Table (5.4 manifest baseline)
 
+<!-- map_workflows:skip-table -->
+
 | Legacy artifact | Pipeline destination | Action |
 | :--- | :--- | :--- |
 | `task/task.md`, `docs/active_task.md`, `.agent_state/session_metadata.json` | `docs/active_state.json` | Absorb any live state; archive the file (parallel state is PROHIBITED — `state_homologation`). |
@@ -48,6 +50,8 @@ Invoked by `start_workflow first_run_scaffold` when prior agent-generated docume
 ## Phase 6: Onboarding Scenario Matrix (`start_workflow first_run_scaffold` routing)
 
 Loaded only on a host's FIRST pipeline session (token economy: one-time routing does not belong in the every-session start protocol). All scenarios end with: `docs/` tree instantiated, `docs/0_SYSTEM_OVERVIEW.md` materialized from `docs/standards/templates/SYSTEM_OVERVIEW_TEMPLATE.md` (the sole anchor template — `rules/documentation_standard.md §5`) **and** the sibling Documentation Entry Point anchor `docs/0_SYSTEM_ARCHITECTURE.md` present as the C4 Level-1/2 anchor (`rules/documentation_standard.md §2`; seeded from that template's *Architecture at a glance (C4 Level 1-2)* section — there is no separate architecture template). `close_workflow.md` `history_sync` stamps both anchors on structural sprints. Also: initial `docs/active_state.json`, and the **Master Ledger** (`CHANGELOG.md`) present at the host root (created from `CHANGELOG_TEMPLATE.md` only if absent — an existing changelog is adopted as-is, never reformatted).
+
+<!-- map_workflows:skip-table -->
 
 | Scenario | Detection signals | Route |
 | :--- | :--- | :--- |

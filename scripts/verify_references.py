@@ -11,7 +11,11 @@ Checks (run from the .agents root; CI fails the PR on any violation):
       rules/LEGACY_RULE_CONCORDANCE.md (the numbering system was abolished
       by the tabular refactor; unmapped numbers are phantom references).
   (d) Every workflow, script and executable skill has a declared invoker, or a
-      declared exception (RA-16 INVOCATION_COVERAGE, agents.md §7).
+      declared exception (RA-16 INVOCATION_COVERAGE, agents.md §7). Every
+      ``invoked_by:`` token of the form ``path#fragment`` also resolves its
+      ``#fragment`` — a GitHub heading slug, an ``<a id=>`` / ``<a name=>``
+      anchor, or a workflow step-id token — in the file ``path`` names
+      (Sprint 047 U11, S045-22).
   (e) config/rule_triggers.json mirrors rules/*.md.
   (f) Living docs (guides, decisions, audits) that cite ``path:line`` point at a
       file whose line count is at least that line — Sprint 029 J6. Does **not**
@@ -49,6 +53,11 @@ FILE_LINE_CORPUS = (
 # Leading YAML frontmatter for check (g). Only ``model:`` / ``tier:`` are read.
 FRONTMATTER_RE = re.compile(r"\A---\r?\n(.*?)\r?\n---\r?\n", re.DOTALL)
 AGENT_TIER_MODEL_RE = re.compile(r"^(model|tier):\s*(\S+)\s*$", re.MULTILINE)
+
+# ``path#fragment`` / ``path.md#fragment`` tokens inside an ``invoked_by:`` line.
+# Group 1 (path) is optional: a bare ``#fragment`` inherits the previous token's
+# path (e.g. ``start_workflow.md#readiness_probe and #platform_probe``).
+INVOKED_TOKEN_RE = re.compile(r"([\w./-]+)?#([\w-]+)")
 
 # ``path/to/file.ext:123`` inside backticks or as a bare token. Requires a
 # known text/code suffix so bare ``12:34`` clocks and URL ports do not match.
@@ -247,6 +256,139 @@ def check_invocation_coverage(corpus: str) -> list[str]:
             continue
         errors.append(f"(d) {key} is an executable skill nothing invokes and nothing excuses.")
 
+    errors += check_invoked_by_anchors()
+    return errors
+
+
+def github_heading_slug(heading: str) -> str:
+    """Convert a Markdown heading's text to its GitHub anchor slug.
+
+    Lowercases, drops every character that is not a word character, whitespace
+    or a hyphen, then collapses whitespace runs to single hyphens.
+
+    Args:
+        heading: Heading text with the leading ``#`` markers already stripped.
+
+    Returns:
+        str: The slug, e.g. ``4-the-double-gate-review-protocol``.
+    """
+    slug = re.sub(r"[^\w\s-]", "", heading.strip().lower())
+    return re.sub(r"\s+", "-", slug).strip("-")
+
+
+def _heading_slug_matches(text: str, fragment: str) -> bool:
+    """True when ``fragment`` equals the slug of some ``#`` heading in ``text``."""
+    for line in text.splitlines():
+        heading = re.match(r"^#{1,6}\s+(.*)$", line)
+        if heading and github_heading_slug(heading.group(1)) == fragment:
+            return True
+    return False
+
+
+def fragment_resolves(text: str, fragment: str) -> bool:
+    """True when ``fragment`` names a reachable location inside ``text``.
+
+    Accepts a GitHub heading slug, an explicit ``<a id=>`` / ``<a name=>``
+    anchor, a backtick or parenthesised step-id token (`` `id` `` / ``(id)``)
+    as used in this repository's workflow step tables, or a ``make``-style
+    ``target:`` definition for non-Markdown invokers such as the ``Makefile``.
+
+    Args:
+        text: Full content of the resolved invoker file.
+        fragment: The substring after ``#`` in an ``invoked_by:`` token.
+
+    Returns:
+        bool: True if any recognised anchor form matches ``fragment``.
+    """
+    if _heading_slug_matches(text, fragment):
+        return True
+    if re.search(rf'<a\s+(?:id|name)=["\']{re.escape(fragment)}["\']', text):
+        return True
+    if f"`{fragment}`" in text or f"({fragment})" in text:
+        return True
+    return bool(re.search(rf"^{re.escape(fragment)}\s*:", text, re.MULTILINE))
+
+
+def resolve_invoker_path(raw: str) -> Path | None:
+    """Resolve an ``invoked_by:`` path token to a file under the framework root.
+
+    Tokens are written relative to the root (``rules/qa_and_testing.md``,
+    ``Makefile``) or as a bare workflow/script basename (``close_workflow.md``).
+
+    Args:
+        raw: The path portion of an ``invoked_by:`` token, without ``#fragment``.
+
+    Returns:
+        Path | None: The resolved file, or None when no candidate exists.
+    """
+    candidates = [Path(raw)]
+    if "/" not in raw:
+        candidates += [Path("workflows") / raw, Path("scripts") / raw]
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def _invoked_by_line(text: str) -> str:
+    """Return the ``invoked_by:`` declaration line, or ``""`` when absent.
+
+    Matches the line where ``invoked_by:`` opens the declaration (optionally
+    behind a ``#`` comment marker or a ``\"\"\"`` docstring fence), so that a
+    prose mention such as ``the ``invoked_by:`` token`` is not mistaken for it.
+    """
+    for line in text.splitlines():
+        if re.match(r'\s*(?:"""|#)?\s*invoked_by:', line):
+            return line
+    return ""
+
+
+def _anchor_errors_for(source: Path) -> list[str]:
+    """Check the ``#fragment`` of every ``invoked_by:`` token in one file.
+
+    Args:
+        source: A workflow, script or hook whose ``invoked_by:`` line may carry
+            ``path#fragment`` tokens.
+
+    Returns:
+        list[str]: One error per token whose path or fragment does not resolve.
+    """
+    line = _invoked_by_line(source.read_text(encoding="utf-8"))
+    errors: list[str] = []
+    last_path: str | None = None
+    for match in INVOKED_TOKEN_RE.finditer(line):
+        last_path = match.group(1) or last_path
+        target = resolve_invoker_path(last_path) if last_path else None
+        if target is None:
+            errors.append(
+                f"(d) {source}: invoked_by token `{match.group(0)}` — "
+                f"path `{last_path}` does not resolve to a file."
+            )
+            continue
+        if not fragment_resolves(target.read_text(encoding="utf-8", errors="ignore"), match.group(2)):
+            errors.append(
+                f"(d) {source}: invoked_by token `{match.group(0)}` — `#{match.group(2)}` "
+                f"is not a heading, anchor or step-id in {target}."
+            )
+    return errors
+
+
+def check_invoked_by_anchors() -> list[str]:
+    """(d) Resolve the ``#fragment`` suffix of every ``invoked_by:`` token.
+
+    An unresolvable fragment takes the same failure path as an unresolvable
+    filename (RA-16). A token with no ``#`` is not inspected here.
+
+    Returns:
+        list[str]: One error per unresolvable ``invoked_by:`` path or fragment.
+    """
+    errors: list[str] = []
+    for path in [
+        *sorted(Path("workflows").glob("*.md")),
+        *sorted(Path("scripts").glob("*.py")),
+        *sorted(Path("hooks").glob("*.py")),
+    ]:
+        errors += _anchor_errors_for(path)
     return errors
 
 
@@ -398,7 +540,8 @@ def main() -> int:
         return 2
     print(
         "✅ Reference integrity OK — rules reachable, templates exist, "
-        "citations resolve, every mechanism has an invoker, "
+        "citations resolve, every mechanism has an invoker whose "
+        "invoked_by anchor fragments resolve, "
         "living file:line citations in range, "
         "profile model↔tier map."
     )

@@ -26,6 +26,8 @@ Full-dumping a file >200 lines is PROHIBITED (`agents.md §2 token_saver`). Skip
 - **State over rediscovery**: `docs/active_state.json` and `graphify-out/graph.json` are the memory — re-deriving what they already record is a violation, not diligence.
 - **Workflows are lazy-loaded**: protocols live behind `/agents:*` commands and are only pulled into context when invoked.
 
+<a id="session_bound"></a>
+
 ### 3.1 The session bound — binding, and measured per context cycle
 
 **Unit: the ratio of a turn's `cache_read` against the first turn of the current context cycle**, never of the session. Self-calibrating per project — a large repository starts with more base context, but "10× your first turn" means the same everywhere, and nothing is configured per host.

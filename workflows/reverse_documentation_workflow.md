@@ -33,26 +33,26 @@ of writing its API contract — neither was visible in a blueprint.
 | Phase | Action | Gate |
 | :--- | :--- | :--- |
 | **1** | **Graph first.** `graphify update <path> --force`. | Node count and file coverage recorded. |
-| **2** | **Measure coverage.** Every source file present in the graph. | Uncovered files listed and explained, not ignored. |
-| **3** | **Read the existing documentation.** Every file under `docs/`, in full. | — |
-| **4** | **Contrast each claim against the graph and the tree.** | Every path, symbol and route the documentation declares is confirmed to exist. |
-| **4.5** | **C4 layer.** Levels 1-2 always; Level 3 only for the containers the eligibility formula selects (`rules/documentation_standard.md §2.1`). | Every selected container has a Level 3; every manual override cites its ADR. |
-| **5** | **Correct what is false**, in place, saying what it said before. **Stamp the metadata block** (`§4.1`) on every document touched. | — |
-| **6** | **Write the missing contracts**, one per exposed interface, using the `contract-writer` skill. | Every endpoint and public interface has one. |
-| **6.5** | **Blueprints.** One `[MODULE]_BLUEPRINT.md` per module, from `BLUEPRINT_TEMPLATE.md`, with the metadata block stamped. | `agents.md §0` requires one per module; none may be missing without being named as absent. |
-| **6.7** | **ADR recovery.** Identify decisions that meet a trigger in `§3.1` and record one ADR each, with the metadata block stamped. **Rationale that is not evidenced in the code or its history is recorded as `unrecoverable at this audit` — never inferred.** | Every triggering decision has an ADR; every unrecoverable rationale says so. |
-| **7** | **Diátaxis classification.** Reference, Explanation, How-to, Tutorial. | No document does two jobs. |
-| **8** | **Prose gate.** `vale docs/`. | Zero findings. |
-| **9** | **Coverage closure.** Re-run phase 4 against the finished set. | Zero stale references. |
-| **9.5** | **Findings handoff.** Write everything surfaced that this protocol does not fix to `docs/audits/REVDOC_FINDINGS-[slug].md`, from `AUDIT_REPORT_TEMPLATE.md`. | Every finding has a destination; none live only in the session transcript. |
-| **10** | **Freshness gate.** `docs_freshness_check.py . <sprint>` | Exit 0. |
+| **2 (measure_coverage)** | **Measure coverage.** Every source file present in the graph. | Uncovered files listed and explained, not ignored. |
+| **3 (read_existing)** | **Read the existing documentation.** Every file under `docs/`, in full. | — |
+| **4 (contrast)** | **Contrast each claim against the graph and the tree.** | Every path, symbol and route the documentation declares is confirmed to exist. |
+| **4.5 (c4_layer)** | **C4 layer.** Levels 1-2 always; Level 3 only for the containers the eligibility formula selects (`rules/documentation_standard.md §2.1`). | Every selected container has a Level 3; every manual override cites its ADR. |
+| **5 (correct_false)** | **Correct what is false**, in place, saying what it said before. **Stamp the metadata block** (`§4.1`) on every document touched. | — |
+| **6 (write_contracts)** | **Write the missing contracts**, one per exposed interface, using the `contract-writer` skill. | Every endpoint and public interface has one. |
+| **6.5 (blueprints)** | **Blueprints.** One `[MODULE]_BLUEPRINT.md` per module, from `BLUEPRINT_TEMPLATE.md`, with the metadata block stamped. | `agents.md §0` requires one per module; none may be missing without being named as absent. |
+| **6.7 (adr_recovery)** | **ADR recovery.** Identify decisions that meet a trigger in `§3.1` and record one ADR each, with the metadata block stamped. **Rationale that is not evidenced in the code or its history is recorded as `unrecoverable at this audit` — never inferred.** | Every triggering decision has an ADR; every unrecoverable rationale says so. |
+| **7 (diataxis)** | **Diátaxis classification.** Reference, Explanation, How-to, Tutorial. | No document does two jobs. |
+| **8 (prose_gate)** | **Prose gate.** `vale docs/`. | Zero findings. |
+| **9 (coverage_closure)** | **Coverage closure.** Re-run phase 4 against the finished set. | Zero stale references. |
+| **9.5 (findings_handoff)** | <a id="findings-handoff"></a>**Findings handoff.** Write everything surfaced that this protocol does not fix to `docs/audits/REVDOC_FINDINGS-[slug].md`, from `AUDIT_REPORT_TEMPLATE.md`. | Every finding has a destination; none live only in the session transcript. |
+| **10 (freshness_gate)** | **Freshness gate.** `docs_freshness_check.py . <sprint>` | Exit 0. |
 
 > [!IMPORTANT]
 > **Phases 4.5, 6.5, 6.7 and 9.5 were added in Phase 019, and the numbering is deliberately fractional.** Renumbering 1-10 would break every `Phase N` citation in `agents.md`, the README and this repository's own history — the `RA-14` failure mode, committed while fixing an `RA-14` finding.
 >
 > Until then this protocol produced **none of the three artifacts** `rules/documentation_standard.md` mandates: no C4 at any level, no Blueprints despite `agents.md §0` requiring one per module, and no ADRs despite `§3` defining seven triggers and a format-scaling rule. Worse, **Phase 10 verified metadata that no earlier phase wrote**: `docs_freshness_check.py` parses `Last Audit Sprint`/`Date`/`Commit SHA` (`§4.1`), so the gate ran against documents this very workflow had just created without those fields. Stamping now happens in the phases that touch each document.
 
-## Phase 6.7 — Recovering decisions without inventing them
+## Phase 6.7 (adr_recovery) — Recovering decisions without inventing them
 
 Reverse-documenting a system can recover **that** a decision was made, and often what it cost; it cannot recover why someone chose it, unless the code, the commit history or an existing document says so.
 
@@ -77,7 +77,7 @@ own environment:
 .agents/venv_skillopt/bin/python -m graphify update . --force
 ```
 
-## Phase 4 — What "contrast" means, concretely
+## Phase 4 (contrast) — What "contrast" means, concretely
 
 Not reading the document and nodding. Extracting its claims and checking each
 one:
@@ -98,7 +98,7 @@ That is not hypothetical: a repository that moved `backend/apps/users/` to
 `python backend/manage.py`. The check that would have caught it was scoped to
 `users/` and reported clean.
 
-## Phase 6 — Contracts are where the defects are
+## Phase 6 (write_contracts) — Contracts are where the defects are
 
 A contract states, per interface: inputs with types and constraints, every
 status code, what the caller can and cannot infer, and what the host must
@@ -115,7 +115,7 @@ Record what is **absent** as explicitly as what is present. A blueprint stating
 "no contract exists for this interface at this audit" is doing its job; one
 that omits the interface is not.
 
-## Phase 8 — Run the linter, do not merely configure it
+## Phase 8 (prose_gate) — Run the linter, do not merely configure it
 
 `vale` requires `.vale.ini` and a styles directory. If a repository has the
 configuration and no one has ever run the binary, the gate has never gated

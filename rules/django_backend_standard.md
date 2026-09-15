@@ -52,8 +52,10 @@ Governs Django-specific architecture the language-level rules cannot express: ap
 
 ## 2. Signal Registration
 
-- **`RA-02: LAZY_SIGNAL_PARADIGM` governs every signal definition** (`agents.md §7`): local imports inside the receiver, and lazy sender strings.
-- Stated as a reference and **not restated**, so that the amendment and this rule cannot drift apart (`RA-14`). `agents.md §7` is the single definition; this section exists so that a session loading the Django rule is told the amendment applies without having to already know it does.
+- **This section is the self-contained definition of `RA-02: LAZY_SIGNAL_PARADIGM`.** It previously deferred to `agents.md §7` as "the single definition" while `§7` held only a one-line summary, so a session loading only one file got a stub. `agents.md §7 RA-02` is now a pointer to this section; both files stay on the grep-set for any future patch to this rule (`RA-14`).
+- **Directive 1 — local imports inside the signal receiver.** Import every model a receiver function touches inside that function's body, never at `signals.py` module top level.
+- **Directive 2 — lazy sender references as dotted strings.** Declare the `sender` as `'app.Model'` — a string Django resolves at app-load — not as an imported model symbol.
+- **Rationale.** A top-level `from .models import X` in `signals.py`, together with `models.py` or `apps.py` importing `signals`, forms a `signals.py` → `models.py` → `signals.py` import cycle that fails at Django app-load. Deferring the model import into the receiver body and the sender resolution to a dotted string breaks the cycle.
 - The citation this directive carried was `Clause J-02`, the numbering abolished by the `J-XX` → `RA-XX` sweep in Phase 015. That sweep declared itself repo-wide and named the one host-family file it caught (`docs/roadmaps/core/pipeline/015-terminology-and-nomenclature-hardening.md:52`); it missed this one, which then carried the abolished citation through Phases 016-022 and was found in 023. `rules/LEGACY_RULE_CONCORDANCE.md` maps the old numbers.
 
 ## 3. I/O Contracts

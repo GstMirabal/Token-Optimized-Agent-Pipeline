@@ -20,17 +20,40 @@ Exit codes:
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _root import agents_root  # noqa: E402
-from check_task_scope import current_sprint_dir, sprint_id_from_dir  # noqa: E402
+from _root import agents_root
+from check_task_scope import current_sprint_dir, sprint_id_from_dir
 
 SKIP_BEFORE = 31
 VERDICTS = frozenset({"APPROVED", "REJECTED", "RECORD"})
 REJECTED_CLASSES = frozenset({"charter", "instructing"})
 RECORD_CLASS = "testifying"
+_HTML_COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
+
+
+def _strip_html_comments(text: str) -> str:
+    """Remove every ``<!-- ... -->`` region so no commented line is parsed.
+
+    Well-formed comments are deleted whether they sit on a single line or
+    span several lines. A comment that opens with ``<!--`` and is never
+    closed swallows the rest of the file, mirroring how HTML and Markdown
+    renderers treat an unterminated comment.
+
+    Args:
+        text: The full SPRINT_LOG.md content.
+
+    Returns:
+        The content with every comment region removed.
+    """
+    without_closed = _HTML_COMMENT.sub("", text)
+    unclosed = without_closed.find("<!--")
+    if unclosed != -1:
+        return without_closed[:unclosed]
+    return without_closed
 
 
 def _cells(line: str) -> list[str]:
@@ -50,7 +73,7 @@ def _plain(cell: str) -> str:
 def gate_tables(text: str) -> list[tuple[list[str], list[list[str]]]]:
     """Tables whose header includes Verdict."""
     tables: list[tuple[list[str], list[list[str]]]] = []
-    lines = text.splitlines()
+    lines = _strip_html_comments(text).splitlines()
     index = 0
     while index < len(lines):
         line = lines[index]

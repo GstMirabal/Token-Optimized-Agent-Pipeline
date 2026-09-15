@@ -21,6 +21,7 @@ Regenerate: `make model-ledger`.
 | 44 | mixed | opus, sonnet | high, medium | 12 | 2 | 1 | REJECTED:charter, RECORD:testifying |
 | 45 | mapped | sonnet | medium | 4 | 1 | 1 | RECORD:testifying |
 | 46 | mapped | sonnet | medium | 29 | 2 | 1 | REJECTED:instructing, APPROVED, RECORD:testifying |
+| 47 | mapped | sonnet | medium | 29 | 2 | 1 | REJECTED:charter, RECORD:testifying |
 
 ## Omitted
 
