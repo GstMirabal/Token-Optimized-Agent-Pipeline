@@ -251,6 +251,23 @@ a worktree `gitdir:` (→ the nucleus's own `.git/worktrees/…`) from a submodu
   sprint's own sprint-directory records left behind after 6 units were
   discovered mid-execution — fixed in round 2 without touching the locked plan.
 
+### Still open for a later program — routed out of Sprint 047 (Extract, all `routing_class: nucleus`)
+
+Six findings from Gate 1/Gate 2 and the sprint's own retrospective, none applied
+in 047 (out of its declared scope; each is small enough for a future mechanical
+bucket rather than its own sprint). `KI-047-1` recurs across sprints (Sprint
+046 hit the same friction and side-stepped it by mislabelling a commit
+`refactor(` instead of `fix(`) — per `extract_workflow.md` `rule_vs_ki`, that
+makes it a governance-amendment candidate, not a plain Knowledge Item.
+
+| # | Finding | Proposed destination |
+| :--- | :--- | :--- |
+| `KI-047-1` | A unit whose commit will be `fix(`-typed must stage its regression test in the same commit (`code_craft.md §6`) — Sprint 047's Work table planned Wave 3 (tests) as a trailing group and had to re-pair 7 units mid-execution once the commit hook enforced it; Sprint 046 hit the identical friction and mislabelled a unit `refactor(` to avoid it | Amend `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md`'s `## Work` guidance: a unit whose `Operation` will land as a `fix(` commit is planned as one paired (implementation + test) row from Phase 1, not split across separate Work-table groups |
+| `KI-047-3` | `verify_references.py` check (d)'s new `#anchor` fragment resolution (`S045-22`, Sprint 047) immediately found 2 pre-existing broken `invoked_by:` anchors the moment it shipped, the same defect class as `S045-13`. Only the anchors this sprint's own edits touched were checked; the rest of the corpus was not swept | A one-time full-corpus `invoked_by:#anchor` sweep, now that the checker can catch this class — likely folds into a future `audit_workflow.md` run rather than a dedicated sprint |
+| `KI-047-4` / `F-047-QA5` | `scripts/map_workflows.py` `build()` is 57 lines, over `agents.md §1`'s 50-line-per-function limit (measured via AST); the sprint that added the QA-gate-judgment split for this exact limit also introduced this instance of it | Extract the two trailing `lines += [...]` legend blocks into module-level constants next time `map_workflows.py` is opened |
+| `KI-047-5` / `F-047-QA6` | 1 new `RUF100` (unused `noqa`) in `tests/test_mode.py:30`, copied from the house pattern in `scripts/_mode.py` which carries the same finding; and `workflows/repository_hardening_workflow.md`'s `S045-19` reshape dropped its old `When` column, so Phase 4's "before any history decision" ordering constraint is no longer stated anywhere in that file | Fold into the pre-existing repo-wide `ruff` backlog (`S045-02` / roadmap T3, 193→188 findings, still nobody's to fix as a batch); add a one-line ordering note under the `repository_hardening_workflow.md` table |
+| `KI-047-6` / `F-047-T1` | `tests/test_session_start.py::test_main_exits_zero_and_respects_line_cap` gained a hidden dependency on the ambient checkout shape via `anchor_root()` (Sprint 047 D8): it patches `repo_root` but not `is_nucleus`, so the suite reds if run from a `.git`-less or submodule-pointer checkout — a position `agents.md §3 strict_rule` already forbids for nucleus work, so it is green in every sanctioned context (nucleus clone, CI, separate clone, worktree) | One-line fix: add `monkeypatch.setattr(session_start, "is_nucleus", lambda: True)`, mirroring the guard `U22` already applied to the sibling test it touched |
+
 ---
 
 ### Queued for **037** — rider **S** (Cursor agent sandbox false reds)
