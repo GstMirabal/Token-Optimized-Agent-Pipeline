@@ -41,6 +41,8 @@ setting is given instead. `$R` is `owner/repo` as set at the top of Phase 1.
 | **7** | `history_rewrite` | Rewrite or squash history only after confirming explicit per-operation human authorization, stating what will be lost before each irreversible action | `git log --oneline origin/main..HEAD` |
 | **8** | `branch_protection` | Update branch protection on `main` from the status-check names observed on a real check-run listing, requiring exactly those checks with `enforce_admins:false` and `required_pull_request_reviews:null` | `gh api "repos/$R/commits/main/check-runs" --jq '.check_runs[] \| select(.conclusion=="success") \| .name'` |
 
+Phase 4 (`alert_triage`) precedes any Phase 7 (`history_rewrite`) decision — an alert must be triaged before the evidence it depends on can be rewritten or squashed away.
+
 ## Phase 1 — What is free, and what is not
 
 ```bash
