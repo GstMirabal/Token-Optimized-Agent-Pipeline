@@ -86,7 +86,7 @@
     },
     {
       "id": "F-20260907-044A",
-      "summary": "A fix( commit must carry its proving test in the SAME commit (hooks/on_commit.py audit_regression_test, rules/code_craft.md §6); this reconciles with jurisdictional_lock because the sanctioned exception is the code file plus its one test together (Sprint 043 96e3303 precedent), and a genuinely untestable fix must be committed as refactor(/build(/chore( instead.",
+      "summary": "A fix( commit must carry its proving test in the SAME commit (hooks/on_commit.py audit_regression_test, rules/code_craft.md §6); this is ordinary compliance with jurisdictional_lock (agents.md §2, restated Sprint 048 — the mandatory paired test is not a second claimable subject, not an exception to it), and a genuinely untestable fix must be committed as refactor(/build(/chore( instead.",
       "routing_class": "host"
     },
     {
