@@ -9,10 +9,12 @@ Mode: **claude-code** (nucleus), `delegation_mode: native`, `session_tool: claud
 (`docs/active_state.json`). **Model/Effort columns are required regardless of
 tool**: `scripts/check_task_scope.py:38` `MODEL_FROM_SPRINT = 28` fires for any
 sprint numbered ≥28 under every harness — Sprint 48 qualifies independently of
-`session_tool`. `agents/rule_validator.md:19`'s current "when `session_tool` is
-`cursor` … otherwise" wording is itself the stale statement U7 in this sprint's
-plan corrects (`workflows/pipeline_workflow.md:20` already carries the corrected
-text); it is not read as authority on this point while drafting this table.
+`session_tool`. `agents/rule_validator.md:19`'s "when `session_tool` is
+`cursor` … otherwise" wording *was* the stale statement U7 in this sprint's plan
+corrects — already landed at `f818ff0`, so line 19 now carries the corrected
+`MODEL_FROM_SPRINT = 28` text itself (`workflows/pipeline_workflow.md:20` carried
+the correct version from the start); it was not read as authority on this point
+while drafting this table, back when it was still stale.
 
 Model/Effort source: `config/model_tiers.json` `tiers.author.claude_code`
 (`sonnet` / `medium`) for every row. All four assignees in this sprint
