@@ -310,9 +310,9 @@ Stop and revert if any of these is observed:
 
 | Field | Value |
 | :--- | :--- |
-| **Approved by** | {{HUMAN}} |
-| **Date** | {{ISO_DATE}} |
-| **Plan commit at approval** | {{COMMIT_SHA}} |
+| **Approved by** | GstMirabal (`gst.mirabal@gmail.com`) — Phase 5, attended, not in a `/loop` |
+| **Date** | 2026-09-17 |
+| **Plan commit at approval** | `1bde7d9` |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an
