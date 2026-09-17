@@ -27,7 +27,7 @@ import pytest
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
-import _mode  # noqa: E402
+import _mode
 
 
 def _make_nucleus(root: Path, *, markers: bool = True, worktree: str = "w1") -> Path:
