@@ -13,10 +13,12 @@
 
 ## Context
 
-Sprint 047 closed (`v4.30.0`, `cb0b6bb`) leaving six findings routed to a later
+Sprint 047 closed (`v4.30.0`, `cb0b6bb`) leaving five findings (the routed section
+names six `KI-047-*` numbers, but `KI-047-2` was already absorbed into the `RA-14`
+amendment Sprint 047 itself applied and correctly carries no row) routed to a later
 program in `docs/roadmaps/core/pipeline/021-030-program-queue.md` under
 *"Still open for a later program — routed out of Sprint 047"*. This sprint applies
-them. Two of the six changed shape during Phase 1 re-measurement, and both changes
+them. Two of the five changed shape during Phase 1 re-measurement, and both changes
 are recorded in Design rather than silently absorbed.
 
 **`KI-047-1` is not a template tweak.** Its friction recurred in 046 and 047 because
@@ -148,20 +150,20 @@ under it.
 
 | # | File | Operation | Risk | Assignee (proposed) | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| U1 | `agents.md` | modify — restate `§2 Isolation jurisdictional_lock` as its invariant (exactly one file as structural subject; subject is the unit of isolation, not a count of files in a commit; caps concurrent claim scope, not lifetime touches) | high | `rule_validator` | ⏳ |
-| U2 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify — `## Work` gloss drops "touching", names the structural subject, and requires a `fix(`-typed unit to name its paired test in the same row (`KI-047-1`) | medium | `rule_validator` | ⏳ |
-| U3 | `workflows/pipeline_workflow.md` | modify — Phase 6 Done-criterion reads "one structural subject per commit"; a mandatory companion is not a second subject | medium | `rule_validator` | ⏳ |
-| U4 | `agents/implementer_agent.md` | modify — frontmatter `description` (line 3) and `write_scope` (line 20) both restated to "one structural subject per task" | low | `rule_validator` | ⏳ |
-| U5 | `rules/code_craft.md` | modify — §2 line 21 reads "bounds **which file** a subagent claims as its subject" | low | `rule_validator` | ⏳ |
-| U6 | `memory_index.json` | modify — replace the superseded entry at line 89 encoding the void "sanctioned exception" framing (`redundant_ki_purge`) | low | `governance_learner` | ⏳ |
-| U7 | `agents/rule_validator.md` | modify — line 19 Model/Effort shape aligned to `check_task_scope.py:38` `MODEL_FROM_SPRINT = 28` under every harness (`D6`) | low | `rule_validator` | ⏳ |
-| U8 | `scripts/verify_references.py` (subject) **+ paired test** `tests/test_verify_references.py` | modify — check (d) coverage extends to `skills/*/scripts/*.py` and `tests/*.py` via one shared tree list serving both halves (lines 234-236 and 386-391); test asserts exit `2` on an unresolvable `#anchor` in a newly covered tree (`KI-047-3`) | high | `implementer_agent` | ⏳ |
-| U9 | *contingency* — files named by U8's first run | modify — repair `invoked_by:#anchor` defects surfaced in newly covered trees; one commit per subject. **Abort if more than 10 defects surface** (see Abort criterion 2) | medium | `implementer_agent` | ⏳ |
-| U10 | `scripts/map_workflows.py` | modify — hoist the two trailing legend blocks (lines 266, 282) to module-level constants so `build()` is at or under 50 lines; output must be byte-identical (`KI-047-4`) | medium | `implementer_agent` | ⏳ |
-| U11 | `tests/test_mode.py` | modify — remove the unused `# noqa: E402` at line 30 after measuring with `ruff` (`KI-047-5a`) | low | `implementer_agent` | ⏳ |
-| U12 | `workflows/repository_hardening_workflow.md` | modify — restore Phase 4's "before any history decision" ordering constraint as a one-line note under the table, lost in the `S045-19` reshape (`KI-047-5b`) | low | `rule_validator` | ⏳ |
-| U13 | `tests/test_session_start.py` | modify — add `monkeypatch.setattr(session_start, "is_nucleus", lambda: True)` to `test_main_exits_zero_and_respects_line_cap` (`KI-047-6`) | low | `implementer_agent` | ⏳ |
-| U14 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify — "Six findings" to five with `KI-047-2` recorded as absorbed into `RA-14`; rewrite `KI-047-3`'s stale premise; mark the bucket applied | low | `orchestrator` | ⏳ |
+| U1 | `agents.md` | modify — restate `§2 Isolation jurisdictional_lock` as its invariant (exactly one file as structural subject; subject is the unit of isolation, not a count of files in a commit; caps concurrent claim scope, not lifetime touches) | high | `rule_validator` | ✅ `9be872d` |
+| U2 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify — `## Work` gloss drops "touching", names the structural subject, and requires a `fix(`-typed unit to name its paired test in the same row (`KI-047-1`) | medium | `rule_validator` | ✅ `e4afc40` |
+| U3 | `workflows/pipeline_workflow.md` | modify — Phase 6 Done-criterion reads "one structural subject per commit"; a mandatory companion is not a second subject | medium | `rule_validator` | ✅ `aaefdfd` |
+| U4 | `agents/implementer_agent.md` | modify — frontmatter `description` (line 3) and `write_scope` (line 20) both restated to "one structural subject per task" | low | `rule_validator` | ✅ `ea33343` |
+| U5 | `rules/code_craft.md` | modify — §2 line 21 reads "bounds **which file** a subagent claims as its subject" | low | `rule_validator` | ✅ `81345d8` |
+| U6 | `memory_index.json` | modify — replace the superseded entry at line 89 encoding the void "sanctioned exception" framing (`redundant_ki_purge`) | low | `governance_learner` | ✅ `8037213` |
+| U7 | `agents/rule_validator.md` | modify — line 19 Model/Effort shape aligned to `check_task_scope.py:38` `MODEL_FROM_SPRINT = 28` under every harness (`D6`) | low | `rule_validator` | ✅ `f818ff0` |
+| U8 | `scripts/verify_references.py` (subject) **+ paired test** `tests/test_verify_references.py` | modify — **landed scope, corrected at Gate 1 remediation**: only `check_invoked_by_anchors` (the anchor-resolution half of check (d), line ~390) was extended to `skills/*/scripts/*.py` and `tests/*.py`; `check_invocation_coverage` (the sibling half, lines 234-236) was deliberately left at its original three trees. Extending both surfaced 59 findings, over Abort criterion 2's 10-item threshold; a human mid-execution decision scoped the unit down to the anchor-resolution half alone (0 new findings), leaving the coverage-half question for a dedicated future sweep (`KI-047-3`) | high | `implementer_agent` | ✅ `ffcb874` |
+| U9 | *contingency* — files named by U8's first run | modify — repair `invoked_by:#anchor` defects surfaced in newly covered trees; one commit per subject. **Abort if more than 10 defects surface** (see Abort criterion 2) | medium | `implementer_agent` | n/a — not triggered (0 fallout) |
+| U10 | `scripts/map_workflows.py` | modify — hoist the two trailing legend blocks (lines 266, 282) to module-level constants so `build()` is at or under 50 lines; output must be byte-identical (`KI-047-4`) | medium | `implementer_agent` | ✅ `f1c323b` |
+| U11 | `tests/test_mode.py` | modify — remove the unused `# noqa: E402` at line 30 after measuring with `ruff` (`KI-047-5a`) | low | `implementer_agent` | ✅ `a9ab722` |
+| U12 | `workflows/repository_hardening_workflow.md` | modify — restore Phase 4's "before any history decision" ordering constraint as a one-line note under the table, lost in the `S045-19` reshape (`KI-047-5b`) | low | `rule_validator` | ✅ `73ef5df` |
+| U13 | `tests/test_session_start.py` | modify — add `monkeypatch.setattr(session_start, "is_nucleus", lambda: True)` to `test_main_exits_zero_and_respects_line_cap` (`KI-047-6`) | low | `implementer_agent` | ✅ `b80063c` |
+| U14 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify — "Six findings" to five with `KI-047-2` recorded as absorbed into `RA-14`; rewrite `KI-047-3`'s stale premise; mark the bucket applied | low | `orchestrator` | ✅ `c6b61d1` |
 
 **Ordering**: U1 before U2-U6 (they cite the restated rule). U1 before U8 (`D4`).
 U8 before U9. U10-U14 independent.
@@ -244,7 +246,7 @@ The exact commands, and what each must return. Read exit codes with `$?` directl
 | `python3 -m pytest tests/ -q` | exit `0`, zero failures |
 | `python3 skills/token-saver-auditor/scripts/audit_plan.py docs/sprints/048-core-pipeline/IMPLEMENTATION_PLAN.md` | exit `0` |
 | `python3 scripts/check_task_scope.py --sprint-dir docs/sprints/048-core-pipeline` | exit `0` |
-| `grep -rn "physical file" --include=*.md --include=*.json . \| grep -v docs/sprints/ \| grep -v CHANGELOG.md \| grep -v docs/audits/ \| grep -v docs/roadmaps/ \| grep -v docs/plans/` | only `docs/decisions/ADR-0001-no-parallel-fan-out.md` remains (`D2`) |
+| `grep -rn "physical file" --include=*.md --include=*.json . \| grep -v docs/sprints/ \| grep -v CHANGELOG.md \| grep -v docs/audits/ \| grep -v docs/roadmaps/ \| grep -v docs/plans/` | only `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md:39` (U2's own corrected text, "one physical file **as its structural subject**" — benign, not a stale count claim) remains. `ADR-0001-no-parallel-fan-out.md:37` uses the phrase "one file per subagent", which this grep pattern does not match — the file is deliberately unpatched (`D2`) but is not itself proof of this check passing (`F-048-QA6`, corrected at Gate 1 remediation) |
 | `python3 -c "import ast,pathlib; t=ast.parse(pathlib.Path('scripts/map_workflows.py').read_text()); print(max(n.end_lineno-n.lineno+1 for n in ast.walk(t) if isinstance(n,ast.FunctionDef) and n.name=='build'))"` | `50` or less |
 | `python3 scripts/map_workflows.py; git diff --exit-code docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` | exit `0`, empty diff (U10 output-identical) |
 | `ruff check --select RUF100 tests/test_mode.py` | exit `0` |
