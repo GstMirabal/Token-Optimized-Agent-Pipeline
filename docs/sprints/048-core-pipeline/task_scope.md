@@ -39,20 +39,20 @@ subject; see `jurisdictional_lock` below).
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| U1 | `agents.md` | modify | high | `rule_validator` | sonnet | medium | ⏳ |
-| U2 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify | medium | `rule_validator` | sonnet | medium | ⏳ |
-| U3 | `workflows/pipeline_workflow.md` | modify | medium | `rule_validator` | sonnet | medium | ⏳ |
-| U4 | `agents/implementer_agent.md` | modify | low | `rule_validator` | sonnet | medium | ⏳ |
-| U5 | `rules/code_craft.md` | modify | low | `rule_validator` | sonnet | medium | ⏳ |
-| U6 | `memory_index.json` | modify | low | `governance_learner` | sonnet | medium | ⏳ |
-| U7 | `agents/rule_validator.md` | modify | low | `rule_validator` | sonnet | medium | ⏳ |
-| U8 | `scripts/verify_references.py` (subject) + paired test `tests/test_verify_references.py` | modify | high | `implementer_agent` | sonnet | medium | ⏳ |
-| U9 | *contingency* — file(s) named by U8's first run (unknown at Phase 4.3; bounded, ≤10 defects per Abort criterion 2) | modify (contingency) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U10 | `scripts/map_workflows.py` | modify | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U11 | `tests/test_mode.py` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U12 | `workflows/repository_hardening_workflow.md` | modify | low | `rule_validator` | sonnet | medium | ⏳ |
-| U13 | `tests/test_session_start.py` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U14 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `orchestrator` | sonnet | medium | ⏳ |
+| U1 | `agents.md` | modify | high | `rule_validator` | sonnet | medium | ✅ `9be872d` |
+| U2 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify | medium | `rule_validator` | sonnet | medium | ✅ `e4afc40` |
+| U3 | `workflows/pipeline_workflow.md` | modify | medium | `rule_validator` | sonnet | medium | ✅ `aaefdfd` |
+| U4 | `agents/implementer_agent.md` | modify | low | `rule_validator` | sonnet | medium | ✅ `ea33343` |
+| U5 | `rules/code_craft.md` | modify | low | `rule_validator` | sonnet | medium | ✅ `81345d8` |
+| U6 | `memory_index.json` | modify | low | `governance_learner` | sonnet | medium | ✅ `8037213` |
+| U7 | `agents/rule_validator.md` | modify | low | `rule_validator` | sonnet | medium | ✅ `f818ff0` |
+| U8 | `scripts/verify_references.py` (subject) + paired test `tests/test_verify_references.py` — **landed narrower than planned**: only `check_invoked_by_anchors` (anchor-resolution half of check (d)) was extended to `skills/*/scripts/*.py` and `tests/*.py`. `check_invocation_coverage` (the sibling half) was deliberately left untouched — extending it too produced 59 findings, over Abort criterion 2's threshold of 10, confirmed by a human scoping decision mid-execution. The 59-finding remainder is routed to a new roadmap entry (see U14/roadmap) | modify | high | `implementer_agent` | sonnet | medium | ✅ `ffcb874` |
+| U9 | *contingency* — not triggered. U8's landed (scoped) extension surfaced 0 new anchor-resolution findings, so no contingency repair was needed | n/a | medium | `implementer_agent` | sonnet | medium | n/a — not needed |
+| U10 | `scripts/map_workflows.py` | modify | medium | `implementer_agent` | sonnet | medium | ✅ `f1c323b` |
+| U11 | `tests/test_mode.py` | modify | low | `implementer_agent` | sonnet | medium | ✅ `a9ab722` |
+| U12 | `workflows/repository_hardening_workflow.md` | modify | low | `rule_validator` | sonnet | medium | ✅ `73ef5df` |
+| U13 | `tests/test_session_start.py` | modify | low | `implementer_agent` | sonnet | medium | ✅ `b80063c` |
+| U14 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `orchestrator` | sonnet | medium | ✅ `c6b61d1` (plus a remediation-pass follow-up correcting the U8 description and adding the deferred-sweep entry) |
 
 **Ordering** (`IMPLEMENTATION_PLAN.md` "Ordering", unchanged here): U1 before
 U2–U6 (they cite the restated rule). U1 before U7 (D6 is a distinct `RA-14`
@@ -155,8 +155,10 @@ is listed by an in-progress subtask in any other `task_scope.md`.
 
 ### Missing rules
 
-None. No new `rules/` file is required. This sprint applies six findings routed
-from Sprint 047 (`docs/roadmaps/core/pipeline/021-030-program-queue.md`) against
+None. No new `rules/` file is required. This sprint applies five findings routed
+from Sprint 047 (`docs/roadmaps/core/pipeline/021-030-program-queue.md` — the
+routed section named six `KI-047-*` numbers, but `KI-047-2` was already absorbed
+into the `RA-14` amendment Sprint 047 applied and correctly carries no row) against
 **existing** rules, workflows, agent profiles and scripts, plus U7's independent
 `RA-14` defect in `agents/rule_validator.md`. No rule category is unaddressed by
 the current `rules/` corpus.
