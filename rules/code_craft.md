@@ -18,7 +18,7 @@ Write the minimum that solves the problem in front of you, not the minimum that 
 
 ## 2. Surgical diff
 
-`jurisdictional_lock` bounds how many **files** a subagent touches; nothing bounded how much of one file it rewrites.
+`jurisdictional_lock` bounds **which file** a subagent claims as its subject; nothing bounded how much of that file it rewrites.
 
 - Do not touch what you were not asked to touch. Do not reformat. Match the surrounding style even when you prefer another.
 - **Every changed line must be justifiable by the task.** A line changed because "while I was in there" is reverted — including a formatter pass that buries three meaningful lines inside three hundred mechanical ones.
