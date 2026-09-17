@@ -123,6 +123,13 @@ Lines 234-236 use the same three globs for the sibling half of check (d), so one
 shared helper corrects both halves. Fallout is unknown until the checker runs, hence
 the U9 contingency slot with a bounded abort.
 
+**As-planned above; superseded at execution.** U8 landed narrower: the sibling
+half (`check_invocation_coverage`, lines 234-236) was deliberately left
+untouched and no shared helper was built, after the human's mid-execution
+scoping decision at Abort criterion 2 (59 findings, over the 10-item threshold —
+see the Work table's U8 row and `docs/roadmaps/core/pipeline/021-030-program-queue.md`
+`KI-048-1`).
+
 ### D6 — `agents/rule_validator.md:19` is a distinct `RA-14` defect, admitted on its own merits
 
 It still says Model/Effort apply "when `session_tool` is `cursor`… otherwise" the
