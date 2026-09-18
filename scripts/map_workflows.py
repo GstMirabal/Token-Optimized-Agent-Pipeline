@@ -236,6 +236,35 @@ def parse(path: Path) -> list[tuple[str, str, str, str]]:
     return rows
 
 
+# Static legend text for "## 1. Artifact x Workflow matrix" — hoisted out of
+# `build()` so the function that assembles the guide stays under the
+# per-function line cap (`agents.md §1 max_lines_per_func`) without changing
+# what the legend says.
+COLUMNS_LEGEND = [
+    "",
+    "**Columns**, from `config/artifact_registry.json` — the artifact and the phase",
+    "that leaves it. A phase is defined by the artifact it leaves, which is what makes",
+    "the matrix portable across tools rather than tied to one runner's agent names.",
+    "",
+]
+
+# Static legend text for "## 2. Steps, by protocol" — same rationale as
+# `COLUMNS_LEGEND` above.
+EFFECT_LEGEND = [
+    "---",
+    "*The **Effect** column is `read`, `write` or `verify` when the step's verb",
+    "is recognised. Two labels mark what the heuristic will not guess at, kept",
+    "visible because an unclassified step is information while a wrongly",
+    "classified one is a lie the next reader inherits:*",
+    "",
+    "- *`ambiguous` — a real step id whose verb the heuristic does not recognise.*",
+    "- *`prose` — the step cell is a `**Bold sentence.**` rather than a verb plus object; it needs a step id and a done-criterion (`agents.md §1 unambiguous_action`).*",
+    "",
+    "*A table immediately preceded by a `<!-- map_workflows:skip-table -->` line is a reference table, not a step list, and is excluded from this map entirely.*",
+    "",
+]
+
+
 def build() -> str:
     lines = [
         "# Workflow Step Map",
@@ -263,13 +292,7 @@ def build() -> str:
             cells.append("/".join(sorted(kinds)) if kinds else "—")
         lines.append(f"| `{path.stem}` | " + " | ".join(cells) + " |")
 
-    lines += [
-        "",
-        "**Columns**, from `config/artifact_registry.json` — the artifact and the phase",
-        "that leaves it. A phase is defined by the artifact it leaves, which is what makes",
-        "the matrix portable across tools rather than tied to one runner's agent names.",
-        "",
-    ]
+    lines += COLUMNS_LEGEND
     lines += [f"- `{artifact}` — {phase}" for artifact, phase in ARTIFACTS.items()]
 
     lines += ["", "## 2. Steps, by protocol", ""]
@@ -279,19 +302,7 @@ def build() -> str:
             lines.append(f"| {phase} | `{step}` | {effect} |")
         lines.append("")
 
-    lines += [
-        "---",
-        "*The **Effect** column is `read`, `write` or `verify` when the step's verb",
-        "is recognised. Two labels mark what the heuristic will not guess at, kept",
-        "visible because an unclassified step is information while a wrongly",
-        "classified one is a lie the next reader inherits:*",
-        "",
-        "- *`ambiguous` — a real step id whose verb the heuristic does not recognise.*",
-        "- *`prose` — the step cell is a `**Bold sentence.**` rather than a verb plus object; it needs a step id and a done-criterion (`agents.md §1 unambiguous_action`).*",
-        "",
-        "*A table immediately preceded by a `<!-- map_workflows:skip-table -->` line is a reference table, not a step list, and is excluded from this map entirely.*",
-        "",
-    ]
+    lines += EFFECT_LEGEND
     return "\n".join(lines)
 
 

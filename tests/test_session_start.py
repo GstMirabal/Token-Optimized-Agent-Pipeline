@@ -58,6 +58,7 @@ def test_main_exits_zero_and_respects_line_cap(
 ) -> None:
     root = _write_minimal_root(tmp_path / "repo")
     monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    monkeypatch.setattr(session_start, "is_nucleus", lambda: True)
     assert session_start.main([]) == 0
     out = capsys.readouterr().out
     lines = out.splitlines()

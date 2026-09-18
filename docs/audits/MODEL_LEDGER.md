@@ -22,6 +22,7 @@ Regenerate: `make model-ledger`.
 | 45 | mapped | sonnet | medium | 4 | 1 | 1 | RECORD:testifying |
 | 46 | mapped | sonnet | medium | 29 | 2 | 1 | REJECTED:instructing, APPROVED, RECORD:testifying |
 | 47 | mapped | sonnet | medium | 29 | 2 | 1 | REJECTED:charter, RECORD:testifying |
+| 48 | mapped | sonnet | medium | 14 | 2 | 1 | REJECTED:charter, RECORD:testifying |
 
 ## Omitted
 

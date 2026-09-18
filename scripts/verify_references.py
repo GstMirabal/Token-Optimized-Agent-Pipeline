@@ -387,6 +387,8 @@ def check_invoked_by_anchors() -> list[str]:
         *sorted(Path("workflows").glob("*.md")),
         *sorted(Path("scripts").glob("*.py")),
         *sorted(Path("hooks").glob("*.py")),
+        *sorted(Path("skills").glob("*/scripts/*.py")),
+        *sorted(Path("tests").glob("*.py")),
     ]:
         errors += _anchor_errors_for(path)
     return errors

@@ -1,0 +1,9 @@
+{
+  "nodes": 10056,
+  "edges": 12840,
+  "communities": 862,
+  "source": "graphify-out/graph.json",
+  "sprint": 48,
+  "built_at_commit": "d729e00",
+  "note": "Counts from `make -f Makefile graphify-rebuild` (`graphify update . --force`, AST, no LLM) before the Phase 8 closeout commits (SPRINT_LOG.md, PHASE_REGISTER.md, this file, CHANGELOG entry). Delta vs Sprint 047 (9920/12658/845) is the Sprint 048 directory artifacts written so far (IMPLEMENTATION_PLAN.md, agent_assignment.md, skill_assignment.md, task_scope.md), text edits across agents.md, docs/standards/templates/, workflows/, agents/, rules/, memory_index.json, and one new test function in tests/test_verify_references.py (no new source files). Rule-reconciliation sprint: 0 new source files, 13 landed units."
+}

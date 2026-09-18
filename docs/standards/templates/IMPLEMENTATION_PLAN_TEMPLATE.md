@@ -36,8 +36,15 @@ this document is the only thing that survives the session.
 
 ## Work
 
-One row per unit. One unit is one atomic commit (`RA-08`) touching **one physical
-file** as its structural subject (`agents.md §2 jurisdictional_lock`).
+One row per unit. One unit is one atomic commit (`RA-08`) with **one physical file as
+its structural subject** (`agents.md §2 jurisdictional_lock`) — the file the unit exists
+to change, which is the file this row names.
+
+A unit whose commit will be `fix(`-typed names its paired test **in the same row**:
+`rules/code_craft.md §6` requires that test in the same commit, and a mandatory
+companion file is not a second subject. Plan the pair at Phase 1. Splitting
+implementation and test into separate Work rows is what forced Sprint 047 to re-pair 7
+units mid-execution.
 
 The Work column `Assignee (proposed)` is a staffing proposal from Phase 1. Phase
 4.1 (`agent_orchestrator`) is the authority that records the assignee; it may

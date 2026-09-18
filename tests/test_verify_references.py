@@ -210,3 +210,38 @@ def test_check_invoked_by_anchors_flags_then_clears_missing_fragment(
         '# Other\n\n<a id="missing-anchor"></a>\n\nBody text.\n', encoding="utf-8"
     )
     assert verify_mod.check_invoked_by_anchors() == []
+
+
+def test_check_invoked_by_anchors_covers_skills_scripts_and_tests_trees(
+    verify_mod, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Sprint 048 U8 (KI-047-3): the anchor-resolution tree list now also scans
+    ``skills/*/scripts/*.py`` and ``tests/*.py`` — the coverage half of check
+    (d), ``check_invocation_coverage``, is deliberately left untouched (a
+    separate, larger sweep).
+
+    A fixture script under ``skills/sample-skill/scripts/`` and a fixture test
+    under ``tests/`` each declare an ``invoked_by:`` token whose ``#fragment``
+    does not resolve in the target file; both must be reported.
+    """
+    (tmp_path / "skills" / "sample-skill" / "scripts").mkdir(parents=True)
+    (tmp_path / "skills" / "sample-skill" / "scripts" / "run.py").write_text(
+        '"""\ninvoked_by: other.md#missing-anchor\n"""\n', encoding="utf-8"
+    )
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "tests" / "test_fixture.py").write_text(
+        '"""\ninvoked_by: other.md#missing-anchor\n"""\n', encoding="utf-8"
+    )
+    other = tmp_path / "other.md"
+    other.write_text("# Other\n\nBody text with no anchor.\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    errors = verify_mod.check_invoked_by_anchors()
+    assert len(errors) == 2, f"expected one error per fixture file, got: {errors}"
+    assert any("skills/sample-skill/scripts/run.py" in e for e in errors)
+    assert any("tests/test_fixture.py" in e for e in errors)
+
+    other.write_text(
+        '# Other\n\n<a id="missing-anchor"></a>\n\nBody text.\n', encoding="utf-8"
+    )
+    assert verify_mod.check_invoked_by_anchors() == []
