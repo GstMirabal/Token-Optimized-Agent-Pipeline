@@ -4,6 +4,8 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.31.0] - 2026-09-18
+
 ### Changed
 - **Sprint 048 `jurisdictional-lock-reconciliation-and-047-residue`** — applied the five findings routed out of Sprint 047 (`KI-047-1`, `KI-047-3`, `KI-047-4`, `KI-047-5`, `KI-047-6`; `KI-047-2` was absorbed into the `RA-14` amendment 047 itself applied and correctly has no row) plus one independent `RA-14` defect, across 14 planned units of which 13 landed — U9 was a contingency slot whose condition evaluated to 0. #048
   - **`agents.md §2 jurisdictional_lock` restated at its root, not excepted at its edge.** The rule stated a **proxy metric** ("`1` single physical file per instantiated subagent task") and omitted its **invariant**, so it genuinely contradicted `rules/code_craft.md §6` — machine-enforced by `hooks/on_commit.py audit_regression_test`, which *requires* a `fix(` commit to stage its regression test, i.e. two files. Sprint 046 escaped the contradiction by mislabelling a `fix(` commit `refactor(`; Sprint 047 re-paired 7 units mid-execution. The rule now reads: a task claims **exactly one file as its structural subject**, declared in `task_scope.md`, and no concurrently in-progress task may claim it; the subject is the unit of isolation, **not a count of files in a commit**; a mandatory companion is not an independently claimable subject; it caps concurrent claim scope, never lifetime touches. An exception clause sanctioning the impl+test pair was drafted and **rejected** — when two rules contradict, the imprecise one is corrected so the two are consistent by construction. #048
