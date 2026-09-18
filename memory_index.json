@@ -1,6 +1,6 @@
 {
-  "last_update": "2026-09-08",
-  "sprint_id": "045",
+  "last_update": "2026-09-18",
+  "sprint_id": "048",
   "_schema": "Entries are summary-only Knowledge Items. The 'file' field is omitted once the raw log has been purged (agents.md §4 definitive_amnesia) — the 1-line summary IS the retained knowledge.",
   "items": [
     {
@@ -92,6 +92,26 @@
     {
       "id": "F-20260907-044B",
       "summary": "ruff check . carries ~193 pre-existing findings repo-wide (no on-disk ruff config) and make verify runs no ruff step, so a code sprint's QA gate measures ruff on the changed files only — new and changed lines must be clean while pre-existing debt is the accepted Sprint 043 migration exclusion.",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20260918-048A",
+      "summary": "Two subagents with disjoint structural subjects (jurisdictional_lock/no_interference both satisfied, no file double-claimed) can still race on the shared .git/index when dispatched concurrently and each holds Bash — neither Isolation rule partitions the index itself; mitigate by serialising Bash-holding subagent dispatches one at a time within an execution wave (Sprint 048).",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20260918-048B",
+      "summary": "The graph-rebuild owner is stated in three places that disagree: pipeline_workflow.md Phase 8 and stale Makefile target comments both say Phase 1/8, while close_workflow.md Phase 5 graph_rebuild is the actual authority and the only one carrying its own measurement (rebuilding in Phase 1 left graph.json mtime behind later commits, producing a false session_probe.py 'behind') — the other two need a one-line RA-14 correction (Sprint 048).",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20260918-048C",
+      "summary": "A running session's agents.md context is a session-start snapshot (via the host CLAUDE.md import); a sprint that amends agents.md mid-session cannot assume its own later-dispatched subagents see the amendment unless explicitly told to Read the changed section from disk — anti_amnesia covers session start and post-compaction, not a rule changing mid-session (Sprint 048).",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20260918-048D",
+      "summary": "Even when a dispatch prompt explicitly names the #<Sprint_ID> suffix, commit-authoring subagents forgot it on their first attempt 4 times in Sprint 048 (on_commit_msg MESSAGE_GATE_VIOLATION telemetry, caught and self-corrected every time by the hook, no bad commit landed) — consider supplying the exact trailing tag as a literal string to copy in future dispatch prompts rather than a prose reminder.",
       "routing_class": "host"
     }
   ]
