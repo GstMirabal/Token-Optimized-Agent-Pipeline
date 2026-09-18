@@ -113,6 +113,11 @@
       "id": "F-20260918-048D",
       "summary": "Even when a dispatch prompt explicitly names the #<Sprint_ID> suffix, commit-authoring subagents forgot it on their first attempt 4 times in Sprint 048 (on_commit_msg MESSAGE_GATE_VIOLATION telemetry, caught and self-corrected every time by the hook, no bad commit landed) — consider supplying the exact trailing tag as a literal string to copy in future dispatch prompts rather than a prose reminder.",
       "routing_class": "host"
+    },
+    {
+      "id": "F-20260918-048E",
+      "summary": "Provisioning the skillopt heavy stack (requirements-skillopt.txt) into venv_skillopt installs a real PyPI package literally named 'scripts' with its own __init__.py, which shadows this repo's local scripts/ directory (an implicit namespace package, no __init__.py) for every import scripts.* in that venv — reproduced as 3 collection errors in make verify immediately after provisioning, fixed by uninstalling skillopt/google-generativeai/claude-agent-sdk/python-dotenv; also, skills/skillopt/configs/agents_opt.yaml hardcodes host-mode paths (.agents/agents.md, .agents/skills/skillopt/data/scenarios.json) that double-nest and 404 when run from nucleus mode (cwd already is .agents) — rules_optimization could not complete in nucleus mode for either reason (Sprint 048 close).",
+      "routing_class": "host"
     }
   ]
 }
