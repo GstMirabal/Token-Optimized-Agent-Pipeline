@@ -1,10 +1,10 @@
-# Cursor-era execution audit (026–033)
+# Cursor-era execution audit (027–040)
 
-Derived by `scripts/audit_cursor_era.py`. Do not edit by hand.
+Derived by `scripts/audit_cursor_era.py` from every sprint whose own
+`SPRINT_LOG.md` declares `tool `cursor``. Do not edit by hand.
 
 | Sprint | CE-1 | CE-2 | CE-3 | CE-4 |
 | :--- | ---: | ---: | ---: | ---: |
-| 026 | 52 | 0 | 2 | 0 |
 | 027 | 25 | 0 | 2 | 0 |
 | 028 | 3 | 0 | 2 | 0 |
 | 029 | 8 | 0 | 2 | 0 |
@@ -12,6 +12,13 @@ Derived by `scripts/audit_cursor_era.py`. Do not edit by hand.
 | 031 | 5 | 0 | 0 | 0 |
 | 032 | 3 | 0 | 0 | 0 |
 | 033 | 0 | 0 | 0 | 0 |
+| 034 | 0 | 0 | 0 | 0 |
+| 035 | 0 | 0 | 0 | 1 |
+| 036 | 0 | 0 | 0 | 1 |
+| 037 | 0 | 0 | 0 | 0 |
+| 038 | 0 | 0 | 0 | 0 |
+| 039 | 0 | 0 | 0 | 1 |
+| 040 | 0 | 0 | 0 | 1 |
 
 ## CE-5 — sandbox vs non-sandbox pytest protocol
 
