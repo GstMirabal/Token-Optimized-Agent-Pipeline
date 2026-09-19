@@ -109,10 +109,10 @@ Phase 1 is what Sprint 047 had to do mid-execution for 7 units.
 
 ## Verdict
 
-**APPROVED for Phase 5.** Twelve units, two assignees, both author-tier. One
-shared structural subject (`Makefile`) with its sequencing constraint recorded and
-binding. No rule in `rules/` is contradicted by the plan as written, and the three
-findings above are dispositions, not blockers.
+**APPROVED for Phase 5.** Eleven live units (`U9` withdrawn), two assignees,
+both author-tier. No subject is claimed twice in this table. No rule in
+`rules/` is contradicted by the plan as written, and the three findings above
+are dispositions, not blockers.
 
 Phase 5 remains a single attended human authorization and is not satisfied by this
 verdict.

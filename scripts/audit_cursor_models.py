@@ -365,6 +365,40 @@ def author_cell_discrepancy(applied: str | None, map_author_model: str | None) -
     return bool(applied and map_author_model and applied != map_author_model)
 
 
+def _print_applied_status(
+    applied: str | None,
+    map_author_model: str | None,
+    proposed_author: str | None,
+    discrepancy: bool,
+) -> None:
+    """Print the applied-vs-map-author line: agreement, discrepancy, or neither known."""
+    if applied:
+        if not discrepancy:
+            print(f"Applied model: {applied} (agrees with map author)")
+        else:
+            print(
+                f"Applied model (discrepancy): {applied} "
+                f"— differs from map author {map_author_model}"
+            )
+    elif proposed_author:
+        print(f"No applied model recorded (map author proposal: {proposed_author})")
+
+
+def _print_proposal_tables(proposals: dict[str, list[dict[str, str]]]) -> None:
+    """Print the four proposal tables and the closing disclaimer."""
+    print_table("Catalogue (family derived)", proposals["catalogue"])
+    print_table("Proposed author (map cell; at most one)", proposals["author"])
+    print_table("Proposed mechanical (no depth lever)", proposals["mechanical"])
+    print_table(
+        "Proposed gate (structural ceiling; family ≠ map author)",
+        proposals["gate"],
+    )
+    print(
+        "Proposals only — config/model_tiers.json was not modified. "
+        "Gate cell is filled separately by ADR-0011 / H2."
+    )
+
+
 def run_report(db_path: Path) -> dict[str, list[dict[str, str]] | bool]:
     """Load catalogue, propose tiers, print tables. Returns proposals plus
     ``"author_discrepancy"``: True when the applied model and the map's
@@ -399,28 +433,9 @@ def run_report(db_path: Path) -> dict[str, list[dict[str, str]] | bool]:
     if map_author_model:
         print(f"Map author cell: {map_author_model}")
     discrepancy = author_cell_discrepancy(applied, map_author_model)
-    if applied:
-        if not discrepancy:
-            print(f"Applied model: {applied} (agrees with map author)")
-        else:
-            print(
-                f"Applied model (discrepancy): {applied} "
-                f"— differs from map author {map_author_model}"
-            )
-    elif proposed_author:
-        print(f"No applied model recorded (map author proposal: {proposed_author})")
+    _print_applied_status(applied, map_author_model, proposed_author, discrepancy)
     print()
-    print_table("Catalogue (family derived)", proposals["catalogue"])
-    print_table("Proposed author (map cell; at most one)", proposals["author"])
-    print_table("Proposed mechanical (no depth lever)", proposals["mechanical"])
-    print_table(
-        "Proposed gate (structural ceiling; family ≠ map author)",
-        proposals["gate"],
-    )
-    print(
-        "Proposals only — config/model_tiers.json was not modified. "
-        "Gate cell is filled separately by ADR-0011 / H2."
-    )
+    _print_proposal_tables(proposals)
     proposals["author_discrepancy"] = discrepancy
     return proposals
 
