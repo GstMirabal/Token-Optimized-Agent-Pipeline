@@ -1,0 +1,9 @@
+{
+  "rules": [
+    {
+      "path": "rules/domain_example_standard.md",
+      "globs": ["**/*.py", "**/*.ts"],
+      "trigger_prose": "Illustrative trigger for the example-project profile pack — writing or modifying domain entities in this fictional project."
+    }
+  ]
+}
