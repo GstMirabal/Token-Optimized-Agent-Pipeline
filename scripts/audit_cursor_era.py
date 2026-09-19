@@ -1,12 +1,19 @@
-"""Census CE-1–CE-5 over Cursor-era sprints 026–033 (derived audit).
+"""Census CE-1–CE-5 over Cursor-era sprints (derived audit).
 
-Walks ``docs/sprints/{026..033}-core-pipeline/``, skips missing directories, and
-writes ``docs/audits/CURSOR_ERA_EXECUTION_AUDIT.md``. Always exits ``0`` — this
-is a census, not a gate. Uses existing parsers only (no new table parsers).
+Walks every ``docs/sprints/NNN-core-pipeline/`` whose ``SPRINT_LOG.md``
+declares a ``cursor`` session tool, and writes
+``docs/audits/CURSOR_ERA_EXECUTION_AUDIT.md``. Always exits ``0`` — this is a
+census, not a gate. Uses existing parsers only (no new table parsers).
 
-Scope frozen to sprints 026-033 (Cursor era). Not stale — a bounded historical
-census, re-runnable but not expected to change; the standing ``make
-cursor-era-audit`` target keeps it live.
+**Window is derived, not fixed** (`D5`, Sprint 049, `F-049-3`). Sprint 036
+hardcoded ``ERA_START = 26`` / ``ERA_END = 33`` and Sprint 046 reaffirmed that
+range as an intentional "bounded historical census" without re-measuring it.
+Measured against `main` before this fix: sprints 034-040 also declare
+``tool `cursor`` `` in their own ``SPRINT_LOG.md`` (``grep -oE 'tool
+`[a-z-]+`' docs/sprints/*/SPRINT_LOG.md``) and were silently excluded. This
+module now derives its window from that same evidence, so a future
+Cursor-tool sprint enters the census automatically and no constant needs
+updating by hand.
 
 invoked_by: Makefile target `cursor-era-audit`.
 
@@ -16,6 +23,7 @@ Usage:
 
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 
@@ -29,10 +37,33 @@ from check_role_artifact import (  # noqa: E402
 )
 from check_task_scope import collect_findings, sprint_id_from_dir  # noqa: E402
 
-ERA_START = 26
-ERA_END = 33
+SESSION_TOOL_RE = re.compile(r"tool `([a-z0-9_-]+)`")
 GATE_ROLES = ("QA Agent", "Tester Agent")
 OUT_REL = Path("docs/audits/CURSOR_ERA_EXECUTION_AUDIT.md")
+
+
+def era_sprint_ids(root: Path) -> list[int]:
+    """Sprint numbers whose ``SPRINT_LOG.md`` declares a ``cursor`` session tool.
+
+    Reads the ``**Session**: `<id>` · tool `<tool>` · ...`` line every sprint
+    log carries since Sprint 026. A sprint with no such line (no tool
+    declared, or a non-Cursor tool) is not part of the era.
+    """
+    sprints_dir = root / "docs" / "sprints"
+    if not sprints_dir.is_dir():
+        return []
+    ids: list[int] = []
+    for path in sorted(sprints_dir.glob("*-core-pipeline")):
+        log = path / "SPRINT_LOG.md"
+        if not log.is_file():
+            continue
+        match = SESSION_TOOL_RE.search(log.read_text(encoding="utf-8"))
+        if match is None or match.group(1) != "cursor":
+            continue
+        sprint_id = sprint_id_from_dir(path)
+        if sprint_id is not None:
+            ids.append(sprint_id)
+    return sorted(ids)
 
 
 def required_roles() -> list[str]:
@@ -107,21 +138,21 @@ def sprint_row(sprint_dir: Path) -> dict[str, int | str]:
 
 
 def iter_era_dirs(root: Path) -> list[Path]:
-    """Existing ``NNN-core-pipeline`` dirs in the inclusive 026–033 window."""
-    found: list[Path] = []
-    for number in range(ERA_START, ERA_END + 1):
-        path = root / "docs" / "sprints" / f"{number:03d}-core-pipeline"
-        if path.is_dir():
-            found.append(path)
-    return found
+    """``NNN-core-pipeline`` dirs whose own ``SPRINT_LOG.md`` declares Cursor."""
+    return [
+        root / "docs" / "sprints" / f"{number:03d}-core-pipeline"
+        for number in era_sprint_ids(root)
+    ]
 
 
 def render_markdown(rows: list[dict[str, int | str]]) -> str:
     """Build the derived audit markdown (table + CE-5 protocol block)."""
+    span = f"{rows[0]['sprint']}–{rows[-1]['sprint']}" if rows else "none measured"
     lines = [
-        "# Cursor-era execution audit (026–033)",
+        f"# Cursor-era execution audit ({span})",
         "",
-        "Derived by `scripts/audit_cursor_era.py`. Do not edit by hand.",
+        "Derived by `scripts/audit_cursor_era.py` from every sprint whose own",
+        "`SPRINT_LOG.md` declares `tool `cursor``. Do not edit by hand.",
         "",
         "| Sprint | CE-1 | CE-2 | CE-3 | CE-4 |",
         "| :--- | ---: | ---: | ---: | ---: |",
