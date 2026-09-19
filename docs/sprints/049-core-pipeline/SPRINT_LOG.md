@@ -40,7 +40,7 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | Friction Point | Resolution / Workaround | KI ID |
 | :--- | :--- | :--- |
 | Planning proposed the minimal remediation (declare the gap) for `F-049-6` before measuring whether the deterministic alternative existed. It did: all six `model-invoked` skills ship `scripts/` with a CLI entry, which `rules/token_economy.md` Filter 5 requires to be named and preferred. | Verify whether a deterministic alternative exists **before** classifying a mechanism as agent judgment, not after the human objects. Filter 5 is a precondition of the proposal, not a review step. | `KI-049-1` |
-| A green suite and a green `make verify` were read as evidence of Cursor-side health. Both stayed green across all six defects, two of them HIGH. | Coverage is not health. A harness-conditional path needs a check that runs under that condition, or its absence is invisible to every gate the other harness runs. | `KI-049-2` |
+| A green suite and a green `make verify` were read as evidence of Cursor-side health. Both stayed green across all six defects, two of them HIGH. `tests/test_installer.sh` covers `--target cursor` (line 152) and `--profile-path` (line 195) **separately and never in combination**, which is the exact shape that let `F-049-1` ship. | Coverage of two flags is not coverage of their combination. When a flag selects a code path, the test matrix owes the cross product, not one case per flag — and a harness-conditional path needs a check that runs under that condition, or its absence stays invisible to every gate the other harness runs. | `KI-049-2` |
 
 ---
 
