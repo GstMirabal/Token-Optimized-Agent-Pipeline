@@ -24,13 +24,15 @@ Tracking of atomic goals achieved during the session.
     - `[x]` `python3 skills/token-saver-auditor/scripts/audit_plan.py` → exit `0`
 - [x] **Phase 2 — Environment Readiness**: `venv_skillopt` Python 3.13.13, pytest 9.1.1
 - [x] **Phase 3 — Roadmap Drafting**: branch `ai-sprint/049` cut from base before any commit (`RA-12`); plan extracted to the canonical path and committed
-- [ ] **Phase 4.1 — Agent Assignment**: `agent_assignment.md`
-- [ ] **Phase 4.2 — Skill Assignment**: `skill_assignment.md`
-- [ ] **Phase 4.3 — Rule Audit**: `task_scope.md` (Model/Effort columns required, `MODEL_FROM_SPRINT = 28`)
-- [ ] **Phase 5 — Approval Gate**: **BLOCKED — returned to Phase 1**
+- [x] **Phase 4.1 — Agent Assignment**: `agent_assignment.md` (`deca40b`)
+- [x] **Phase 4.2 — Skill Assignment**: `skill_assignment.md` (`deca40b`)
+- [x] **Phase 4.3 — Rule Audit**: `task_scope.md`, `check_task_scope.py` exit `0` (`deca40b`)
+- [x] **Phase 5 — Approval Gate**: **APPROVED** 2026-09-19, GstMirabal (`gst.mirabal@gmail.com`), plan commit `42b6620`
     - `[x]` Canonical-path and commit preconditions met (`e2ec1ac`); `audit_plan.py` exit `0`
     - `[x]` `token_economy_agent` pre-approval audit dispatched as the plan's `## Mechanisms` section requires
-    - `[ ]` **Verdict: HOLD on `U9`/`U11` as scoped.** Gate not opened — see `F-049-7`
+    - `[x]` Initial verdict HOLD on `U9`/`U11` (`F-049-7`); plan revised (`60b3750`), stray D1 reference swept (`42b6620`) after re-review flagged it
+    - `[x]` `token_economy_agent` re-review: HOLD lifted, RA-16 check (d) confirmed satisfied by exception `reason`, not `note`
+    - `[x]` Single attended human authorization, not wrapped in `/loop`
 - [ ] **Phase 6 — Execution**: 11 live units (`U9` withdrawn, identifier retained per `RA-14`), `U1`→`U2` ordered
 - [ ] **Phase 7 — Quality Gate**: QA Agent then Tester Agent, fresh context
 - [ ] **Phase 8 — Sprint Closeout**: `PHASE_REGISTER.md`, Master Ledger entry
@@ -106,6 +108,6 @@ and a fabricated row would teach authors to invent verdicts
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: LOCKED
-**Next Phase**: Phase 4.1 — Agent Assignment (`agent_assignment.md`)
+**Next Phase**: Phase 6 — Execution (`U1` first: `scripts/cursor_adapter.py`, precedes `U2`)
 
 *Certified under conventional commit standard: feat(scope): message #049*
