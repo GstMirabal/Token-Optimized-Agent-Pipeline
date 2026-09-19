@@ -52,8 +52,8 @@ claimable subject, and so does not appear as its own row.
 | U7 | `scripts/audit_cursor_models.py` | modify | medium | `implementer_agent` | sonnet | medium | ✅ `b38cd1d` |
 | U8 | `tests/test_cursor_phase1.py` | modify | low | `implementer_agent` | sonnet | medium | ✅ `591e047` |
 | ~~U9~~ | ~~`Makefile`~~ | **withdrawn** | — | — | — | — | 🚫 |
-| U10 | `config/invocation_exceptions.json` | modify | medium | `rule_validator` | sonnet | medium | ✅ `<pending>` |
-| U11 | `agents.md` | modify | high | `rule_validator` | sonnet | medium | ⏳ |
+| U10 | `config/invocation_exceptions.json` | modify | medium | `rule_validator` | sonnet | medium | ✅ `8fd2662` |
+| U11 | `agents.md` | modify | high | `rule_validator` | sonnet | medium | ✅ `<pending>` |
 | U12 | `Makefile` | modify | low | `implementer_agent` | sonnet | medium | ✅ `d112407` |
 
 ### `jurisdictional_lock` and `no_interference`
