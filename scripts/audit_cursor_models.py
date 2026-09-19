@@ -33,9 +33,13 @@ Usage:
     python3 scripts/audit_cursor_models.py --resolve mechanical|author|gate|<profile>
 
 Exit codes:
-    0 — report printed; ``--check`` confirms ≥1 ``gate`` proposal;
-        ``--resolve`` printed modelId/effort
-    2 — ``--check``: ``gate`` empty or catalogue unavailable;
+    0 — report printed; ``--check`` confirms ≥1 ``gate`` proposal and the
+        applied model agrees with the map's author cell (or neither is
+        known); ``--resolve`` printed modelId/effort
+    2 — ``--check``: ``gate`` empty, catalogue unavailable, or the applied
+        model **disagrees** with the map's author cell (Sprint 049,
+        ``F-049-4``: this printed as "Applied model (discrepancy): ..." and
+        still exited 0 before — the mismatch was visible, never enforced);
         ``--resolve`` profile missing or has no ``tier:`` field
 """
 
@@ -352,15 +356,32 @@ def print_table(title: str, rows: list[dict[str, str]]) -> None:
     print()
 
 
-def run_report(db_path: Path) -> dict[str, list[dict[str, str]]]:
-    """Load catalogue, propose tiers, print tables. Returns the proposals."""
+def author_cell_discrepancy(applied: str | None, map_author_model: str | None) -> bool:
+    """True when a known applied model disagrees with a known map author cell.
+
+    Neither side known, or the two agree, is not a discrepancy: `--check`
+    (`F-049-4`) has nothing to enforce when there is nothing to compare.
+    """
+    return bool(applied and map_author_model and applied != map_author_model)
+
+
+def run_report(db_path: Path) -> dict[str, list[dict[str, str]] | bool]:
+    """Load catalogue, propose tiers, print tables. Returns proposals plus
+    ``"author_discrepancy"``: True when the applied model and the map's
+    ``author`` cell are both known and differ (`F-049-4`)."""
     models = open_catalogue(db_path)
     if models is None:
         print(
             f"ℹ️  Cursor state DB not found at {db_path} — "
             "skipping catalogue audit (same doctrine as platform_probe without gh)."
         )
-        return {"catalogue": [], "author": [], "mechanical": [], "gate": []}
+        return {
+            "catalogue": [],
+            "author": [],
+            "mechanical": [],
+            "gate": [],
+            "author_discrepancy": False,
+        }
 
     applied = read_applied_model_id(db_path)
     map_author_model, map_author_family = read_map_author_cursor()
@@ -377,14 +398,14 @@ def run_report(db_path: Path) -> dict[str, list[dict[str, str]]]:
     proposed_author = proposals["author"][0]["name"] if proposals["author"] else None
     if map_author_model:
         print(f"Map author cell: {map_author_model}")
+    discrepancy = author_cell_discrepancy(applied, map_author_model)
     if applied:
-        if proposed_author and applied == proposed_author:
+        if not discrepancy:
             print(f"Applied model: {applied} (agrees with map author)")
         else:
-            map_label = proposed_author or "(no map author)"
             print(
                 f"Applied model (discrepancy): {applied} "
-                f"— differs from map author {map_label}"
+                f"— differs from map author {map_author_model}"
             )
     elif proposed_author:
         print(f"No applied model recorded (map author proposal: {proposed_author})")
@@ -400,6 +421,7 @@ def run_report(db_path: Path) -> dict[str, list[dict[str, str]]]:
         "Proposals only — config/model_tiers.json was not modified. "
         "Gate cell is filled separately by ADR-0011 / H2."
     )
+    proposals["author_discrepancy"] = discrepancy
     return proposals
 
 
@@ -523,8 +545,17 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 2
+    if args.check and proposals["author_discrepancy"]:
+        print(
+            "❌ --check failed: applied model differs from the tier map's "
+            "author cell (see 'Applied model (discrepancy)' above). "
+            "Reconcile config/model_tiers.json tiers.author.cursor or the "
+            "live Cursor selection — this is a real drift, not noise.",
+            file=sys.stderr,
+        )
+        return 2
     if args.check:
-        print("✅ --check OK — gate proposals present.")
+        print("✅ --check OK — gate proposals present, author cell matches applied model.")
     return 0
 
 

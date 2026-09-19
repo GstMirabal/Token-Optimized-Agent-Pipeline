@@ -49,7 +49,7 @@ claimable subject, and so does not appear as its own row.
 | U4 | `scripts/bridge_state.py` | modify | high | `implementer_agent` | sonnet | medium | ✅ `258ac26` |
 | U5 | `scripts/audit_cursor_era.py` | modify | medium | `implementer_agent` | sonnet | medium | ✅ `e72eb6f` |
 | U6 | `docs/audits/CURSOR_ERA_EXECUTION_AUDIT.md` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U7 | `scripts/audit_cursor_models.py` | modify | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| U7 | `scripts/audit_cursor_models.py` | modify | medium | `implementer_agent` | sonnet | medium | ✅ `<pending>` |
 | U8 | `tests/test_cursor_phase1.py` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
 | ~~U9~~ | ~~`Makefile`~~ | **withdrawn** | — | — | — | — | 🚫 |
 | U10 | `config/invocation_exceptions.json` | modify | medium | `rule_validator` | sonnet | medium | ⏳ |
