@@ -33,7 +33,14 @@ Tracking of atomic goals achieved during the session.
     - `[x]` Initial verdict HOLD on `U9`/`U11` (`F-049-7`); plan revised (`60b3750`), stray D1 reference swept (`42b6620`) after re-review flagged it
     - `[x]` `token_economy_agent` re-review: HOLD lifted, RA-16 check (d) confirmed satisfied by exception `reason`, not `note`
     - `[x]` Single attended human authorization, not wrapped in `/loop`
-- [ ] **Phase 6 — Execution**: 11 live units (`U9` withdrawn, identifier retained per `RA-14`), `U1`→`U2` ordered
+- [x] **Phase 6 — Execution**: 11/11 live units landed (`U9` withdrawn, identifier retained per `RA-14`)
+    - `[x]` `F-049-1` — U1 `b5df5bd`, U2 `b247a27`, U3 `9daca5d`
+    - `[x]` `F-049-2` — U4 `258ac26`, U12 `d112407`
+    - `[x]` `F-049-3` — U5 `e72eb6f`, U6 `80f1ef7`
+    - `[x]` `F-049-4` — U7 `b38cd1d`
+    - `[x]` `F-049-5` — U8 `591e047`
+    - `[x]` `F-049-7` — U10 `8fd2662`, U11 `dbd5b15`
+    - `[x]` `make verify` exit `0` after every commit
 - [ ] **Phase 7 — Quality Gate**: QA Agent then Tester Agent, fresh context
 - [ ] **Phase 8 — Sprint Closeout**: `PHASE_REGISTER.md`, Master Ledger entry
 

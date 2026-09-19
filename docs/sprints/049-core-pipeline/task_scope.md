@@ -48,12 +48,12 @@ claimable subject, and so does not appear as its own row.
 | U3 | `profiles/example-project/rule_triggers.json` | create | low | `implementer_agent` | sonnet | medium | ✅ `9daca5d` |
 | U4 | `scripts/bridge_state.py` | modify | high | `implementer_agent` | sonnet | medium | ✅ `258ac26` |
 | U5 | `scripts/audit_cursor_era.py` | modify | medium | `implementer_agent` | sonnet | medium | ✅ `e72eb6f` |
-| U6 | `docs/audits/CURSOR_ERA_EXECUTION_AUDIT.md` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
+| U6 | `docs/audits/CURSOR_ERA_EXECUTION_AUDIT.md` | modify | low | `implementer_agent` | sonnet | medium | ✅ `80f1ef7` |
 | U7 | `scripts/audit_cursor_models.py` | modify | medium | `implementer_agent` | sonnet | medium | ✅ `b38cd1d` |
 | U8 | `tests/test_cursor_phase1.py` | modify | low | `implementer_agent` | sonnet | medium | ✅ `591e047` |
 | ~~U9~~ | ~~`Makefile`~~ | **withdrawn** | — | — | — | — | 🚫 |
 | U10 | `config/invocation_exceptions.json` | modify | medium | `rule_validator` | sonnet | medium | ✅ `8fd2662` |
-| U11 | `agents.md` | modify | high | `rule_validator` | sonnet | medium | ✅ `<pending>` |
+| U11 | `agents.md` | modify | high | `rule_validator` | sonnet | medium | ✅ `dbd5b15` |
 | U12 | `Makefile` | modify | low | `implementer_agent` | sonnet | medium | ✅ `d112407` |
 
 ### `jurisdictional_lock` and `no_interference`
