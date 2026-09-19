@@ -52,12 +52,12 @@
     {
       "path": "skills/python-quality-auditor",
       "reason": "model-invoked",
-      "note": "This skill IS the instrument behind agents.md §1's style-score for Python (Warn if score < 95). No `python-doctor` binary exists in the tree — the score is this skill's output, measured by QA-gate judgment. `ruff check .` remains the deterministic linter and is separate from this QA-gate style score."
+      "note": "Named by agents.md §1's linter_command/max_indentation/max_lines_per_func rows. Corrected at Sprint 049 (F-049-7): its script shells to ruff/mypy/bandit/radon and prints a pass/fail line per tool; it computes no numeric score, never checks indentation or function length, and never exits non-zero. `ruff check .` remains the real deterministic linter for Python. The exception is kept, not withdrawn: no deterministic instrument exists yet to replace this model-invoked call (routed to Sprint 050)."
     },
     {
       "path": "skills/js-standardizer",
       "reason": "model-invoked",
-      "note": "This skill IS the instrument behind agents.md §1's style-score for JS/TS (Warn if score < 95), the counterpart to python-quality-auditor. No `react-doctor` binary exists in the tree — the score is this skill's output, measured by QA-gate judgment. `pnpm run lint` remains the deterministic linter and is separate from this QA-gate style score."
+      "note": "Named by agents.md §1's linter_command/max_indentation/max_lines_per_func rows. Corrected at Sprint 049 (F-049-7): its script checks for lint-tool config file presence and a single repo-wide boolean (any .js/.ts file anywhere contains \"@param\" or \"@returns\"), not per-function JSDoc coverage; it computes no numeric score, never checks indentation or function length, and never exits non-zero. `pnpm run lint` remains the real deterministic linter for JS/TS. The exception is kept, not withdrawn: no deterministic instrument exists yet to replace this model-invoked call (routed to Sprint 050)."
     },
     {
       "path": "skills/mcp-registry",
