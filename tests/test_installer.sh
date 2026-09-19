@@ -151,6 +151,27 @@ for entry in "/.cursor/commands/" "/.cursor/rules/" "/.cursor/agents/" "/.cursor
 done
 echo "✅ host --target cursor test PASSED"
 
+# ── F-049-1: --target cursor + --profile must not drop the profile silently ──
+HOST_CURSOR_PROFILE="$WORK/host-cursor-profile"
+mkdir -p "$HOST_CURSOR_PROFILE/.agents"
+rsync -a --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
+  "$AGENTS_SRC/" "$HOST_CURSOR_PROFILE/.agents/"
+echo "gitdir: ../.git/modules/.agents" > "$HOST_CURSOR_PROFILE/.agents/.git"
+rm -f "$HOST_CURSOR_PROFILE/.agents/.bridge_claude.lock" "$HOST_CURSOR_PROFILE/.agents/.bridge_cursor.lock"
+( cd "$HOST_CURSOR_PROFILE" && git init -q && git config user.email t@t && git config user.name t )
+( cd "$HOST_CURSOR_PROFILE" && python3 .agents/scripts/install.py --target cursor --profile example-project > "$WORK/f049-1-out.txt" 2>&1 )
+[ -f "$HOST_CURSOR_PROFILE/.cursor/agents/domain-specialist-example.md" ] \
+  || fail "cursor+profile: domain-specialist-example.md missing (F-049-1 regressed)"
+[ -f "$HOST_CURSOR_PROFILE/.cursor/rules/domain_example_standard.mdc" ] \
+  || fail "cursor+profile: domain_example_standard.mdc missing (F-049-1 regressed)"
+[ "$(ls -1 "$HOST_CURSOR_PROFILE/.cursor/agents" | wc -l | tr -d ' ')" = "15" ] \
+  || fail "cursor+profile: expected 14 core + 1 profile agent = 15"
+grep -q "alwaysApply: false" "$HOST_CURSOR_PROFILE/.cursor/rules/domain_example_standard.mdc" \
+  || fail "cursor+profile: profile rule must not default to alwaysApply: true"
+grep -q "example-api-bridge-3rd" "$WORK/f049-1-out.txt" \
+  || fail "cursor+profile: unmirrored skill example-api-bridge-3rd not named on stdout"
+echo "✅ host --target cursor --profile test PASSED (F-049-1)"
+
 HOST_BOTH="$WORK/host-both"
 mkdir -p "$HOST_BOTH/.agents"
 rsync -a --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
