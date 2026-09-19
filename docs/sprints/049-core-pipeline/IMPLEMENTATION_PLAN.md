@@ -43,37 +43,61 @@ Los seis defectos de abajo conviven con ese verde. Ninguno es detectable por
 | `F-049-4` | BAJA | La deriva entre el mapa de tiers y el modelo aplicado se imprime pero no se gatea | `make cursor-tiers` → `Applied model (discrepancy): grok-4.6 — differs from map author glm-5.2` **y exit `0`** |
 | `F-049-5` | BAJA | `RA-18` no tiene enforcement en runtime; los 4 casos de `test_cursor_phase1.py` son aserciones de presencia de string sobre markdown | `grep -rn "RA-18\|SwitchMode" scripts/ hooks/ tests/` → ninguna ocurrencia ejecutable |
 | `F-049-6` | MEDIA | Seis skills declaradas `model-invoked` **tienen `scripts/` ejecutables con entrada CLI**. Bajo Cursor nada las presenta al modelo: son código muerto, y cuatro filas de `agents.md §1` se quedan sin instrumento | `config/invocation_exceptions.json:53,58` + `skills/python-quality-auditor/scripts/python_quality_auditor.py` y `skills/js-standardizer/scripts/js_standardizer.py`, ambos con `__main__` |
+| `F-049-7` | ALTA | **El instrumento nombrado no implementa la regla.** `config/invocation_exceptions.json` afirma que cada una de esas dos skills *es* el instrumento del style-score de `agents.md §1` (*"the score is this skill's output"*). Ninguna calcula un score, ninguna tiene umbral, ninguna sale distinto de `0`, ninguna mira indentación ni longitud de función | `grep -c -i "score\|95"` → **0** en ambos · `grep -c "sys.exit"` → **0** en ambos · `grep -c -i "indent\|max_lines\|lines_per"` → **0** · `mypy`/`bandit`/`radon` ausentes del entorno, `ruff` solo en `venv_skillopt/bin/` |
 
 **Qué es verdad cuando este sprint termina:** un host que instala con `--target
 cursor` recibe su perfil; un espejo `.cursor/` incompleto se detecta en el arranque;
 el censo cubre la ventana Cursor medida; la deriva de tier falla en vez de avisar;
 existe un test que demuestra que el fallo de `RA-18` se captura; y las cuatro filas
-de `agents.md §1` que dependían de que un modelo se fijara en una skill tienen un
-invocador determinista que corre bajo los dos arneses.
+de `agents.md §1` y las dos notas de `config/invocation_exceptions.json` **describen
+lo que sus instrumentos hacen de verdad**, con el instrumento real nombrado y
+enrutado a Sprint 050.
+
+**Revisión de Fase 1 (post `F-049-7`).** Este plan se aprobó a sí mismo una primera
+vez con `audit_plan.py` en exit `0` y fue devuelto a Fase 1 por la auditoría de
+pre-aprobación de `token_economy_agent`, que retuvo `U9`/`U11`. La versión anterior
+proponía reclasificar el style-score a determinista apoyándose en esos dos scripts;
+la medición demostró que no calculan lo que las filas describen. `U9` queda retirada
+y `U10`/`U11` pasan de *reclasificar* a *decir la verdad*. El gate hizo su trabajo
+antes de que hubiera una firma humana sobre una afirmación falsa.
 
 ---
 
 ## Design
 
-### D1 — `F-049-6` no es un hueco de Cursor: es una infracción del Filtro 5
+### D1 — `F-049-7`: la alternativa nombrada no existe todavía, así que este sprint dice la verdad y enruta el instrumento
 
-`rules/token_economy.md` Filtro 5 (citado en la sección **Mechanisms** de la
-plantilla): *un mecanismo recurrente delegado a juicio de agente cuando existe una
-alternativa determinista se rechaza, y la alternativa debe nombrarse.*
-`python-quality-auditor` y `js-standardizer` **son** la alternativa determinista —
-scripts con entrada CLI dentro de la propia skill — y están declaradas
-`model-invoked`. Bajo Claude Code eso funciona por accidente (el modelo ve la skill);
-bajo Cursor no funciona en absoluto.
+**Corrección de citación.** La versión anterior de esta sección atribuía el "Filtro
+5" a `rules/token_economy.md`. Ese fichero contiene **cero** ocurrencias de la
+palabra (`grep -c -i filter rules/token_economy.md` → `0`). El texto operativo —
+*un mecanismo recurrente delegado a juicio de agente cuando existe una alternativa
+determinista se rechaza, y la alternativa debe nombrarse* — vive en
+`agents/token_economy_agent.md` (`burden_of_proof`),
+`docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md`, `rules/code_craft.md` y
+`skills/token-saver-auditor/README.md`. La regla es real; la fuente estaba mal.
 
-Por eso la remediación no es documental. Se les da un invocador determinista y se
-retira la excepción `RA-16` que ya no les corresponde. Esto es jurisdicción de
-`token_economy_agent` (*owns whether a proposed recurring mechanism should be a
-deterministic script or an agent judgment call, before it lands in an Implementation
-Plan*), que debe firmar antes de la Puerta de Aprobación.
+**Qué cambia eso.** `burden_of_proof` exige nombrar una alternativa determinista
+**concreta que realice el chequeo desplazado**. `python-quality-auditor` y
+`js-standardizer` no lo realizan: no calculan score, no tienen umbral, no salen
+distinto de `0` y no miran indentación ni longitud de función (`F-049-7`). No es un
+caso de juicio que se resiste a la determinización — es un caso de alternativa
+inexistente. Reclasificar apoyándose en ellas habría sustituido una afirmación falsa
+por otra, ahora con un `make` target dándole aspecto de gate.
 
-**Alternativa rechazada:** declarar el hueco en `AUTONOMY_POSTURE_GUIDE.md` y dejar
-las skills como están. Rechazada explícitamente por el humano en Fase 1: deja en pie
-la infracción del Filtro 5 y mantiene los scripts muertos bajo Cursor.
+**Lo que hace este sprint.** No construye el auditor. Corrige las dos notas de
+`config/invocation_exceptions.json` y las cuatro filas de `agents.md §1` para que
+describan lo que los scripts comprueban realmente, conservando en el texto los
+strings literales `python-quality-auditor` y `js-standardizer` — porque
+`scripts/verify_references.py check_invocation_coverage` construye su corpus con
+`agents.md`, `workflows/`, `commands/`, `rules/*.md` y `agents/*.md`, y **el
+`Makefile` no forma parte de ese corpus**. Las excepciones `model-invoked` se
+mantienen: mientras no exista invocador, retirarlas dejaría la regla sin ninguno.
+
+**Alternativas rechazadas.** (a) Declarar el hueco y no tocar nada: deja en pie dos
+afirmaciones falsas en ficheros de gobernanza. (b) Construir el auditor determinista
+dentro de este sprint: materia distinta —el defecto es igual de real bajo Claude
+Code, Cursor solo lo hizo visible— y duplicaría el sprint. Destino nombrado en
+`## Out of scope`.
 
 ### D2 — Paridad de perfil: se espeja lo que Cursor tiene, se nombra lo que no
 
@@ -139,15 +163,22 @@ sprint Cursor. La ventana se deriva de los `SPRINT_LOG.md` que declaran
 | U6 | `docs/audits/CURSOR_ERA_EXECUTION_AUDIT.md` | modify | low | `implementer_agent` | ⏳ |
 | U7 | `scripts/audit_cursor_models.py` (+ par `tests/test_audit_cursor_models.py`) | modify | medium | `implementer_agent` | ⏳ |
 | U8 | `tests/test_cursor_phase1.py` | modify | low | `implementer_agent` | ⏳ |
-| U9 | `Makefile` — target `quality-audit` (`F-049-6`) | modify | medium | `implementer_agent` | ⏳ |
+| ~~U9~~ | ~~`Makefile` — target `quality-audit`~~ | **RETIRADA** | — | — | 🚫 |
 | U10 | `config/invocation_exceptions.json` | modify | medium | `rule_validator` | ⏳ |
 | U11 | `agents.md` — filas `§1` de style-score y complejidad | modify | high | `rule_validator` | ⏳ |
 | U12 | `Makefile` — target `bridge-state` (`F-049-2`) | modify | low | `implementer_agent` | ⏳ |
 
-**Restricción de secuencia (`jurisdictional_lock`).** U9 y U12 comparten sujeto
-estructural (`Makefile`). No pueden estar en curso a la vez: U12 toma el sujeto
-sólo cuando U9 ha aterrizado (precedente Fase 014 `T21`/`T22`). U1 debe aterrizar
-antes que U2: U2 llama a la firma que U1 introduce.
+**`U9` retirada, no renumerada.** Su identificador se conserva vacío a propósito:
+`agent_assignment.md`, `skill_assignment.md` y `task_scope.md` ya citan U10–U12 por
+número, y renumerar propagaría la corrección a tres artefactos más — exactamente el
+modo de fallo que `RA-14` describe. Motivo de la retirada: un `make` target que
+envuelve dos scripts que no calculan nada y no pueden fallar no es un gate, es su
+apariencia (`D1`, `F-049-7`).
+
+**Restricción de secuencia (`jurisdictional_lock`).** Con `U9` retirada, `U12` es la
+única unidad que reclama `Makefile`: la restricción de sujeto compartido desaparece.
+Queda una sola: U1 debe aterrizar antes que U2, porque U2 llama a la firma que U1
+introduce. **Total de unidades vivas: 11.**
 
 **Unidades `fix(` y su test pareado.** U1, U2, U4, U5, U7 serán commits `fix(`:
 `rules/code_craft.md §6` exige el test en el mismo commit y `hooks/on_commit.py
@@ -169,14 +200,15 @@ ejecución.
 
 | Mechanism | Deterministic or agent judgment | Invoker (`RA-16`) |
 | :--- | :--- | :--- |
-| Auditoría de calidad Python/JS (`F-049-6`) | **script** — deja de ser juicio de agente | `Makefile` target `quality-audit` |
 | Integridad del espejo fuera del arranque (`F-049-2`) | **script** | `Makefile` target `bridge-state` |
 | Gate de deriva de tier (`F-049-4`) | **script** | `make cursor-tiers` (`--check`, ya existente) |
 | Censo de era Cursor (`F-049-3`) | **script** | `Makefile` target `cursor-era-audit` (ya existente) |
+| Style-score Python/JS y complejidad (`F-049-7`) | **sigue siendo juicio de agente** — la alternativa determinista no existe todavía | Sin cambio: excepciones `model-invoked` conservadas en `config/invocation_exceptions.json`. `U10`/`U11` corrigen lo que las filas afirman, no el mecanismo |
 
-`token_economy_agent` debe auditar la fila 1 antes de la Puerta de Aprobación: es
-una reclasificación de juicio-de-agente a determinista sobre una fila de `agents.md`,
-exactamente su `pre_approval_audit` / Filtro 5.
+`token_economy_agent` auditó esta sección antes de la Puerta de Aprobación y retuvo
+la versión anterior, que proponía reclasificar la última fila a determinista. Ese
+veredicto está transcrito en `SPRINT_LOG.md` (`F-049-7`) y es la razón de esta
+revisión. Ninguna fila viva propone ya una reclasificación.
 
 ---
 
@@ -185,7 +217,7 @@ exactamente su `pre_approval_audit` / Filtro 5.
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 12 | Conteo de filas de la tabla Work |
+| Work units | 11 | Conteo de filas vivas de la tabla Work (`U9` retirada, identificador conservado) |
 | Subagents dispatched | 1 en Fase 1 (`Explore`, descartado y re-verificado a mano) | Transcripción de sesión |
 | Prior session ratio | 4.5 (ciclo 1) · **5.05 (ciclo 2)** | `python3 scripts/session_cost.py --from-anchor --json` |
 
@@ -207,7 +239,8 @@ es lo que convirtió el sprint de documental a correctivo.
 | El censo incluye los sprints 034–040 | **Yes** — este es el defecto (`F-049-3`) |
 | `make cursor-tiers` sale `2` con el mapa en deriva | **Yes** — hoy sale `0` (`F-049-4`) |
 | Fase 5 rechaza un plan que sólo existe bajo `~/.cursor/plans/` | **Yes** — el chequeo existe, ningún test lo demuestra (`F-049-5`) |
-| `make quality-audit` corre sin que un modelo elija la skill | **Yes** — este es el defecto (`F-049-6`) |
+| Las dos notas de `config/invocation_exceptions.json` describen lo que los scripts comprueban | **Yes** — hoy afirman un score que ningún script calcula (`F-049-7`) |
+| Las cuatro filas de `agents.md §1` conservan los strings de skill que `check_invocation_coverage` necesita | **No** — regresión a proteger: perderlos rompe `verify_references.py` check (d) |
 | `bridge_stale(claude)` sigue detectando espejo vacío | **No** — regresión a proteger |
 | Los 32 tests cursor siguen en verde | **No** — regresión a proteger |
 | `--resolve` de los cinco targets sigue en exit `0` | **No** — regresión a proteger |
@@ -220,7 +253,6 @@ es lo que convirtió el sprint de documental a correctivo.
 | :--- | :--- |
 | `./venv_skillopt/bin/python -m pytest tests/ -q; echo $?` | `0`, con ≥ 32 casos cursor y los nuevos pares |
 | `make verify; echo $?` | `0` |
-| `make quality-audit; echo $?` | `0` — nuevo target, corre sin intervención de modelo |
 | `make bridge-state; echo $?` | `0` sobre el árbol limpio |
 | `make cursor-tiers; echo $?` | `2` mientras `author` esté en deriva (`grok-4.6` vs `glm-5.2`); `0` una vez reconciliado |
 | `make cursor-era-audit; echo $?` | `0`, y `CURSOR_ERA_EXECUTION_AUDIT.md` lista 027–040 |
@@ -235,8 +267,8 @@ Los códigos de salida se leen con `$?` directo, nunca a través de una tubería
 
 | Artefacto | Qué cambia |
 | :--- | :--- |
-| `agents.md` `§1` | Las filas `linter_command` (Python y JS/TS), `max_indentation` y `max_lines_per_func` pasan de *"Verified by: QA-gate judgment, NOT `make verify`"* a nombrar el invocador determinista y su arnés |
-| `config/invocation_exceptions.json` | Se retiran las excepciones `model-invoked` de `python-quality-auditor` y `js-standardizer`; las otras cuatro se re-anotan con el motivo vigente |
+| `agents.md` `§1` | Las filas `linter_command` (Python y JS/TS), `max_indentation` y `max_lines_per_func` dejan de atribuir un style-score a un script que no lo calcula. Describen lo que existe, conservan los strings `python-quality-auditor` y `js-standardizer` que `check_invocation_coverage` necesita, y nombran Sprint 050 como destino del instrumento real |
+| `config/invocation_exceptions.json` | Las dos notas de `python-quality-auditor` y `js-standardizer` dejan de afirmar que producen un style-score y describen lo que los scripts comprueban. Las excepciones `model-invoked` **se conservan**: sin invocador real, retirarlas dejaría la regla sin ninguno |
 | `docs/audits/CURSOR_ERA_EXECUTION_AUDIT.md` | Regenerado sobre la ventana derivada (artefacto derivado — nunca editado a mano) |
 | `docs/guides/AUTONOMY_POSTURE_GUIDE.md` | La tabla de contrapartes Cursor registra que las skills de perfil no tienen destino y que el instalador las nombra |
 | `CHANGELOG.md` `[Unreleased]` | Entrada de Sprint 049 en el Closeout |
@@ -248,7 +280,8 @@ Los códigos de salida se leen con `$?` directo, nunca a través de una tubería
 
 | Exclusion | Why, and where it goes instead |
 | :--- | :--- |
-| Espejar `skills/` del framework o del perfil dentro de `.cursor/` | Cursor no tiene concepto de skills en este puente. `D1` resuelve el caso que importaba (las 6 ejecutables) dándoles invocador determinista; las 11 de sólo conocimiento quedan declaradas en `AUTONOMY_POSTURE_GUIDE.md` |
+| **Construir el auditor de calidad determinista** (score reproducible con umbral, profundidad de indentación, longitud de función, `sys.exit(2)` al fallar, para Python y JS/TS) | **Destino: Sprint 050**, con plan propio. `F-049-7` no es un defecto del puente Cursor: las cuatro filas de `agents.md §1` son igual de inverificables bajo Claude Code, porque un modelo que carga una skill que no calcula nada no verifica nada. Cursor sólo hizo visible la ausencia. Meterlo aquí sería dos sprints bajo un nombre. `U10`/`U11` dejan el hecho escrito en los ficheros de gobernanza para que el 050 tenga premisa verificada |
+| Espejar `skills/` del framework o del perfil dentro de `.cursor/` | Cursor no tiene concepto de skills en este puente. Las 23 ejecutables siguen siendo invocables por ruta; las 11 de sólo conocimiento quedan declaradas en `AUTONOMY_POSTURE_GUIDE.md` |
 | `verify_references.py` check (g) sobre celdas Cursor | Hueco **declarado** (D15) en el docstring, no silencioso. Destino: `docs/roadmaps/core/pipeline/` como entrada propia |
 | Reconciliar `author.cursor.model` (`glm-5.2` vs `grok-4.6` aplicado) | U7 construye el gate; *qué* modelo debe ganar es un ensayo de tier, jurisdicción de `MODEL_TIER_TRIAL_GUIDE.md`. El gate rojo es el resultado esperado del sprint, no un fallo |
 | Interceptar `SwitchMode` en runtime | Es una función del IDE, fuera del alcance del framework. U8 cubre lo que sí es alcanzable: demostrar que la consecuencia se captura en Fase 5 |

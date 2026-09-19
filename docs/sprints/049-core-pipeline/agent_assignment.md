@@ -59,11 +59,11 @@ One table per wave. Shape is mandatory:
 | U7 | `scripts/audit_cursor_models.py` | modify | native | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | U8 | `tests/test_cursor_phase1.py` | modify | native | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 
-### Wave 5 — `F-049-6` deterministic instrument and its governance record
+### Wave 5 — `F-049-6` / `F-049-7` governance record (no instrument is built here)
 
 | # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| U9 | `Makefile` | modify | native | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| ~~U9~~ | ~~`Makefile`~~ | **WITHDRAWN** at the Phase 5 pre-approval audit (`F-049-7`) | — | — | — | — |
 | U10 | `config/invocation_exceptions.json` | modify | native | `rule_validator` | N/A | `agents/rule_validator.md` |
 | U11 | `agents.md` | modify | native | `rule_validator` | N/A | `agents/rule_validator.md` |
 
@@ -74,9 +74,8 @@ One table per wave. Shape is mandatory:
 | Constraint | Reason |
 | :--- | :--- |
 | U1 lands before U2 | U2 calls the signature U1 introduces on `install_cursor_bridge` |
-| U9 lands before U12 | Both claim `Makefile` as structural subject; `jurisdictional_lock` caps concurrent claims, not lifetime touches (Phase 014 `T21`/`T22` precedent) |
 | U5 lands before U6 | U6 is the regenerated output of the generator U5 changes; hand-editing it is prohibited by its own header |
-| U9 lands before U10 and U11 | The exemption may only be withdrawn once the invoker it is replaced by exists — a window where neither holds would leave the rule with no instrument at all |
+| U10 and U11 keep the literal skill-path strings | `U10` no longer withdraws the `model-invoked` exceptions — it corrects their notes. `RA-16` safety rests on `agents.md` retaining the strings `python-quality-auditor` and `js-standardizer`, because `verify_references.py check_invocation_coverage` excludes the `Makefile` from its corpus |
 
 ---
 
@@ -84,6 +83,6 @@ One table per wave. Shape is mandatory:
 
 | Unit | Plan proposal | Recorded assignee | Reason |
 | :--- | :--- | :--- | :--- |
-| U9, U12 | `implementer_agent` | `implementer_agent` (**stands, recorded as a judgment call**) | `agents/implementer_agent.md` names framework-root `scripts/`, `hooks/` and `tests/` — not `Makefile`. `devops_agent` is the other candidate by subject matter but holds no `Write`/`Edit` for framework-root tooling (`ADR-0009`, Sprint 033), so it cannot author the target. `implementer_agent` is the only profile with both the grant and the code-authorship charter. Recorded here because the charter does not name the file type, not because the proposal was overwritten. |
+| U12 | `implementer_agent` | `implementer_agent` (**stands, recorded as a judgment call**) | `agents/implementer_agent.md` names framework-root `scripts/`, `hooks/` and `tests/` — not `Makefile`. `devops_agent` is the other candidate by subject matter but holds no `Write`/`Edit` for framework-root tooling (`ADR-0009`, Sprint 033), so it cannot author the target. `implementer_agent` is the only profile with both the grant and the code-authorship charter. Recorded here because the charter does not name the file type, not because the proposal was overwritten. |
 
 Every other row: the plan's `Assignee (proposed)` stands unchanged.

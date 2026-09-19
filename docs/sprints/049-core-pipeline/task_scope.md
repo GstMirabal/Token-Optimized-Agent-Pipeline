@@ -20,11 +20,14 @@ prose amendment — no new logic class, no new dependency, no mechanical-tier wo
 This role transcribes that flat verdict; no `token_economy_agent` escalation was
 raised on the tier itself (`tier_transcription`). No `Declared escalations`.
 
-`token_economy_agent` **does** owe a separate pre-approval judgment on `U9`/`U10`/
-`U11` — the reclassification of a recurring mechanism from agent judgment to
-deterministic script (`rules/token_economy.md` Filter 5). That is a classification
-sign-off, not a tier escalation, and it is recorded in the plan's `## Mechanisms`
-section rather than here.
+`token_economy_agent` **delivered** its pre-approval judgment on the proposed
+reclassification and returned **HOLD**: the named deterministic alternative does not
+perform the displaced check (`F-049-7`, transcribed in `SPRINT_LOG.md`). `U9` is
+withdrawn as a result and no live unit proposes a reclassification. The governing
+text is `agents/token_economy_agent.md` `burden_of_proof` — **not**
+`rules/token_economy.md`, which contains zero occurrences of the word `Filter`
+(`grep -c -i filter rules/token_economy.md` → `0`). That mis-citation was this
+plan's own and is corrected here and in `IMPLEMENTATION_PLAN.md` `D1`.
 
 Check: `python3 scripts/check_task_scope.py --sprint-dir docs/sprints/049-core-pipeline`
 
@@ -48,18 +51,17 @@ claimable subject, and so does not appear as its own row.
 | U6 | `docs/audits/CURSOR_ERA_EXECUTION_AUDIT.md` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
 | U7 | `scripts/audit_cursor_models.py` | modify | medium | `implementer_agent` | sonnet | medium | ⏳ |
 | U8 | `tests/test_cursor_phase1.py` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U9 | `Makefile` | modify | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| ~~U9~~ | ~~`Makefile`~~ | **withdrawn** | — | — | — | — | 🚫 |
 | U10 | `config/invocation_exceptions.json` | modify | medium | `rule_validator` | sonnet | medium | ⏳ |
 | U11 | `agents.md` | modify | high | `rule_validator` | sonnet | medium | ⏳ |
 | U12 | `Makefile` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
 
 ### `jurisdictional_lock` and `no_interference`
 
-`U9` and `U12` name the same structural subject (`Makefile`). The rule caps
-**concurrent** claims, never lifetime touches on a file: `U12` may claim the
-subject once `U9` has landed (Phase 014 `T21`/`T22` precedent, as restated by
-Sprint 048). **Neither may be in progress while the other is.** No other subject
-is claimed twice in this table.
+With `U9` withdrawn, `U12` is the only unit claiming `Makefile`: the shared-subject
+constraint recorded in the first revision no longer applies. **No subject is claimed
+twice in this table.** The single remaining ordering constraint is `U1` before `U2`,
+which is a call-signature dependency, not a `jurisdictional_lock` matter.
 
 ### Paired tests carried inside a unit
 
@@ -81,17 +83,17 @@ Phase 1 is what Sprint 047 had to do mid-execution for 7 units.
 
 | Rule | Bearing on this sprint | Verdict |
 | :--- | :--- | :--- |
-| `agents.md §2 jurisdictional_lock` | `U9`/`U12` share `Makefile` | **Satisfied** — sequencing recorded above; no concurrent claim |
+| `agents.md §2 jurisdictional_lock` | No subject is claimed twice since `U9` was withdrawn | **Satisfied** — every live unit names a distinct structural subject |
 | `agents.md §2 no_interference` | No other in-progress task claims any subject in this table | **Satisfied** — Sprint 048 is CLOSED and deployed as `v4.31.0` |
 | `agents.md §2 token_saver` / `ast_skeleton` | Three subjects exceed 200 lines (`cursor_adapter.py` 368, `install.py`, `audit_cursor_models.py`) | **Satisfied** — `omni-context-minimizer` assigned to `U1`, `U2`, `U7` in `skill_assignment.md` |
 | `agents.md §3 strict_rule` / `jurisdiction` | Nucleus session: the framework is the work | **Satisfied** — `.git` is a real directory; sprint records belong in `.agents/docs/sprints/` |
 | `agents.md §5 historical_log` | Commit suffix `#049`, Conventional Commits | **Satisfied** — Phase 3 commit `e2ec1ac` already carries it |
 | `RA-08 COMMIT_SQUASH` | Atomic local commits; squash at Closeout | **Satisfied** — 12 atomic units planned |
 | `RA-12 BRANCH_DISCIPLINE` | All work on `ai-sprint/049` | **Satisfied** — branch cut from `c0f5904` before the first commit |
-| `RA-16 INVOCATION_COVERAGE` | `U10` withdraws two exceptions; `U9`/`U12` add two `Makefile` targets | **Satisfied by sequencing** — `U9` lands the invoker before `U10` withdraws the exemption, so no window exists in which the rule has neither |
+| `RA-16 INVOCATION_COVERAGE` | `U10` **corrects** two exception notes and keeps both exceptions; `U12` adds one `Makefile` target | **Satisfied by string retention, not by sequencing** — `verify_references.py check_invocation_coverage` builds its corpus from `agents.md`, `workflows/`, `commands/`, `rules/*.md` and `agents/*.md`; the `Makefile` is **not** in it. The first revision's sequencing claim named the wrong mechanism. `U11` must keep the literal strings `python-quality-auditor` and `js-standardizer` in the rewritten rows |
 | `rules/code_craft.md §6` | Five `fix(` units | **Satisfied** — paired tests tabled above |
 | `rules/code_craft.md §7` | Dependencies | **Satisfied** — plan declares `None`; every unit is stdlib-only |
-| `rules/token_economy.md` Filter 5 | `F-049-6` is itself a Filter 5 violation being repaired | **Satisfied** — `U9` names and builds the deterministic alternative; `token_economy_agent` signs the classification before Phase 5 |
+| `agents/token_economy_agent.md` `burden_of_proof` | Whether a recurring mechanism may be reclassified to deterministic | **Satisfied by withdrawal** — the audit ruled the named alternative does not perform the displaced check, so nothing is reclassified. Building the real instrument is Sprint 050 (`IMPLEMENTATION_PLAN.md` `## Out of scope`) |
 | `agents.md §1 code_logic` | English in code, logs, commits and artifacts | **Satisfied** — `IMPLEMENTATION_PLAN.md` is the only Spanish artifact, which `§1 user_chat` permits |
 | `agents.md §1 unambiguous_action` | Every unit names its operation, its target by name and its done-criterion | **Satisfied** — plan `## Tests` and `## Verification` carry the criteria per unit |
 

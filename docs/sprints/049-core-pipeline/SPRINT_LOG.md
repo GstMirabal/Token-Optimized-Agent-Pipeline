@@ -31,7 +31,7 @@ Tracking of atomic goals achieved during the session.
     - `[x]` Canonical-path and commit preconditions met (`e2ec1ac`); `audit_plan.py` exit `0`
     - `[x]` `token_economy_agent` pre-approval audit dispatched as the plan's `## Mechanisms` section requires
     - `[ ]` **Verdict: HOLD on `U9`/`U11` as scoped.** Gate not opened — see `F-049-7`
-- [ ] **Phase 6 — Execution**: 12 units, `U1`→`U2` ordered, `U9`→`U12` share the `Makefile` subject
+- [ ] **Phase 6 — Execution**: 11 live units (`U9` withdrawn, identifier retained per `RA-14`), `U1`→`U2` ordered
 - [ ] **Phase 7 — Quality Gate**: QA Agent then Tester Agent, fresh context
 - [ ] **Phase 8 — Sprint Closeout**: `PHASE_REGISTER.md`, Master Ledger entry
 
@@ -42,7 +42,7 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 
 | Friction Point | Resolution / Workaround | KI ID |
 | :--- | :--- | :--- |
-| Planning proposed the minimal remediation (declare the gap) for `F-049-6` before measuring whether the deterministic alternative existed. It did: all six `model-invoked` skills ship `scripts/` with a CLI entry, which `rules/token_economy.md` Filter 5 requires to be named and preferred. | Verify whether a deterministic alternative exists **before** classifying a mechanism as agent judgment, not after the human objects. Filter 5 is a precondition of the proposal, not a review step. | `KI-049-1` |
+| Planning saw that all six `model-invoked` skills ship `scripts/` with a CLI entry and concluded the deterministic alternative existed. It does not: the scripts run, but they do not compute the metric the rule names. The first conclusion was drawn from the *presence* of an executable, never from its behaviour. | **A script that exists is not a check that runs.** Before naming something as the deterministic alternative to a judgment call, execute it and confirm it produces the specific metric and the failing exit code the rule depends on. `burden_of_proof` (`agents/token_economy_agent.md`) demands an alternative that performs the displaced check — presence is not performance. | `KI-049-1` |
 | Planning cited `rules/token_economy.md` as the source of "Filter 5". That file contains **zero** occurrences of the word: the rule lives in `agents/token_economy_agent.md`, `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md`, `rules/code_craft.md` and `skills/token-saver-auditor/README.md`. | Cite the file that carries the text, verified by `grep`, not the file whose name matches the topic. A plausible-sounding citation survives review precisely because it sounds right. | `KI-049-3` |
 | A green suite and a green `make verify` were read as evidence of Cursor-side health. Both stayed green across all six defects, two of them HIGH. `tests/test_installer.sh` covers `--target cursor` (line 152) and `--profile-path` (line 195) **separately and never in combination**, which is the exact shape that let `F-049-1` ship. | Coverage of two flags is not coverage of their combination. When a flag selects a code path, the test matrix owes the cross product, not one case per flag — and a harness-conditional path needs a check that runs under that condition, or its absence stays invisible to every gate the other harness runs. | `KI-049-2` |
 
@@ -70,13 +70,21 @@ what they describe. This is **not** a Cursor-bridge defect — the rows are equa
 unverifiable under Claude Code, because a model electing to load a skill that
 computes no score verifies nothing. Cursor only made the absence visible.
 
-`U10` (withdraw the two `model-invoked` exceptions) remains sound **provided**
-`U11`'s rewritten rows keep the literal strings `python-quality-auditor` and
-`js-standardizer`: `scripts/verify_references.py check_invocation_coverage` builds
-its corpus from `agents.md`, `workflows/`, `commands/`, `rules/*.md` and
-`agents/*.md` — **the `Makefile` is not in that corpus**. The `task_scope.md`
-`RA-16` disposition claiming the `U9`→`U10` sequence closes the window is
-therefore wrong on the mechanism, and is corrected when the plan is revised.
+**Disposition, applied to the plan on this branch.** `U9` is withdrawn: a `make`
+target wrapping two scripts that compute nothing and cannot fail is the appearance
+of a gate, not a gate. `U10` no longer withdraws the two `model-invoked` exceptions
+— while no real invoker exists, withdrawing them would leave the rule with none; it
+corrects their notes instead. `U11` rewrites the four `agents.md §1` rows to
+describe what the scripts actually check, and **must keep the literal strings**
+`python-quality-auditor` and `js-standardizer`: `scripts/verify_references.py
+check_invocation_coverage` builds its corpus from `agents.md`, `workflows/`,
+`commands/`, `rules/*.md` and `agents/*.md` — **the `Makefile` is not in that
+corpus**, so the first revision's claim that the `U9`→`U10` sequence closed the
+window named the wrong mechanism entirely.
+
+Building the real deterministic auditor is routed to **Sprint 050**
+(`IMPLEMENTATION_PLAN.md` `## Out of scope`), because the defect is framework-wide
+rather than Cursor-specific and would otherwise double this sprint.
 
 ---
 
