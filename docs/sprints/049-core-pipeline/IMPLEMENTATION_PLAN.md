@@ -272,7 +272,7 @@ Los códigos de salida se leen con `$?` directo, nunca a través de una tubería
 | `docs/audits/CURSOR_ERA_EXECUTION_AUDIT.md` | Regenerado sobre la ventana derivada (artefacto derivado — nunca editado a mano) |
 | `docs/guides/AUTONOMY_POSTURE_GUIDE.md` | La tabla de contrapartes Cursor registra que las skills de perfil no tienen destino y que el instalador las nombra |
 | `CHANGELOG.md` `[Unreleased]` | Entrada de Sprint 049 en el Closeout |
-| `docs/decisions/` | ADR si `rule_validator` juzga que `D1` (reclasificación determinista) es decisión arquitectónica y no enmienda de fila |
+| `docs/decisions/` | ADR si `rule_validator` juzga que `D1` (corrección de lo que las filas afirman, más el enrutado del instrumento real a Sprint 050) es decisión arquitectónica y no enmienda de fila. La versión retirada de `D1` proponía una reclasificación determinista; esta no |
 
 ---
 
