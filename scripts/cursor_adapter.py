@@ -392,6 +392,38 @@ def _cursor_agent_document(src_text: str) -> str:
     return f"{front}\n{body}"
 
 
+def expected_cursor_agent_names(agents_src: Path) -> set[str]:
+    """Filenames ``_write_agents`` would produce for ``agents_src``, without writing.
+
+    The Cursor filename comes from the source frontmatter's ``name:`` field
+    (hyphenated, e.g. ``principal_agent.md`` -> ``principal-agent.md``), not
+    from the source filename — so a caller checking membership cannot diff
+    filenames directly and needs this rendering. Used by
+    ``bridge_state._cursor_mirror_missing`` (`F-049-2`, `D4`) to detect an
+    incomplete mirror without installing one.
+    """
+    names: set[str] = set()
+    if not agents_src.is_dir():
+        return names
+    for src in sorted(agents_src.glob("*.md")):
+        rendered = _cursor_agent_document(src.read_text(encoding="utf-8"))
+        names.add(f"{_split_frontmatter(rendered)[0]['name']}.md")
+    return names
+
+
+def expected_cursor_rule_names(rules_src: Path) -> set[str]:
+    """``.mdc`` filenames ``_write_rules`` would produce for ``rules_src``.
+
+    Rule filenames are stem-based (no frontmatter lookup needed, unlike
+    agents), plus the two standing rules every bridge carries regardless of
+    ``rules_src`` content. Used by `bridge_state._cursor_mirror_missing`
+    (`F-049-2`, `D4`).
+    """
+    names = {f"{src.stem}.mdc" for src in rules_src.glob("*.md")} if rules_src.is_dir() else set()
+    names |= {CONSTITUTION_RULE, CHAT_TITLE_RULE}
+    return names
+
+
 def _write_agents(cursor_dir: Path, *, agents_src: Path | None = None) -> set[str]:
     """Upsert Cursor agent profiles from ``agents_src``; return expected filenames.
 

@@ -94,11 +94,11 @@ def lock_stale(root: Path, target: str) -> bool:
     return recorded != proc.stdout.strip()
 
 
-def _names(directory: Path) -> set[str]:
-    """Markdown file names directly under ``directory`` (empty when absent)."""
+def _names(directory: Path, suffix: str = ".md") -> set[str]:
+    """Filenames with ``suffix`` directly under ``directory`` (empty when absent)."""
     if not directory.is_dir():
         return set()
-    return {path.name for path in directory.glob("*.md")}
+    return {path.name for path in directory.glob(f"*{suffix}")}
 
 
 def _claude_mirror_missing(host_dir: Path, framework_root: Path) -> bool:
@@ -114,10 +114,44 @@ def _claude_mirror_missing(host_dir: Path, framework_root: Path) -> bool:
     return bool(commands_missing or agents_missing)
 
 
-def _cursor_mirror_missing(host_dir: Path) -> bool:
-    """True when the Cursor mirror directories are absent."""
+def _cursor_mirror_missing(host_dir: Path, framework_root: Path) -> bool:
+    """True when the Cursor mirror is absent, incomplete, or missing a member.
+
+    Before `F-049-2` this only asked ``is_dir()`` of two directories: deleting
+    every ``.cursor/rules/*.mdc`` (including ``00-constitution.mdc``, the only
+    ``alwaysApply: true`` rule that imports the governance constitution) and
+    13 of 14 agents left this returning ``False`` — a Cursor session could
+    boot green with zero governance rules loaded. `D4` gives Cursor the same
+    membership test the Claude side already had, extended to ``rules/`` (which
+    Claude's symlink mirror does not carry) and ``mcp.json``.
+
+    Args:
+        host_dir: Directory that holds ``.cursor/``.
+        framework_root: Checkout holding ``commands/``, ``agents/`` and
+            ``rules/`` — the source of truth for what should be mirrored.
+
+    Returns:
+        bool: True when an install is needed.
+    """
     cursor = host_dir / ".cursor"
-    return not (cursor / "commands").is_dir() or not (cursor / "agents").is_dir()
+    if (
+        not (cursor / "commands").is_dir()
+        or not (cursor / "agents").is_dir()
+        or not (cursor / "rules").is_dir()
+        or not (cursor / "mcp.json").is_file()
+    ):
+        return True
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from cursor_adapter import expected_cursor_agent_names, expected_cursor_rule_names
+
+    commands_missing = _names(framework_root / "commands") - _names(cursor / "commands")
+    agents_missing = expected_cursor_agent_names(framework_root / "agents") - _names(
+        cursor / "agents"
+    )
+    rules_missing = expected_cursor_rule_names(framework_root / "rules") - _names(
+        cursor / "rules", ".mdc"
+    )
+    return bool(commands_missing or agents_missing or rules_missing)
 
 
 def mirror_missing(
@@ -141,7 +175,7 @@ def mirror_missing(
     if target == "claude":
         return _claude_mirror_missing(host_dir, root)
     if target == "cursor":
-        return _cursor_mirror_missing(host_dir)
+        return _cursor_mirror_missing(host_dir, root)
     return False
 
 
@@ -194,3 +228,38 @@ def bridge_stale(
     if mirror_missing(host_dir, target, framework_root=framework_root):
         return True
     return content_stale(host_dir, target, nucleus=nucleus)
+
+
+def _repo_root() -> Path:
+    """This checkout's root — the parent of ``scripts/`` (nucleus-friendly)."""
+    return Path(__file__).resolve().parent.parent
+
+
+def main() -> int:
+    """CLI: report bridge staleness for every target, outside session boot.
+
+    `F-049-2`'s second gap: even once `mirror_missing` could detect an
+    incomplete mirror, nothing let an auditor ask "is the bridge intact?"
+    without running a full session boot. Invoked by ``make bridge-state``.
+
+    Returns:
+        int: 2 when any target needs reinstalling, 0 when every target is
+        fresh.
+    """
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from _mode import is_nucleus
+
+    nucleus = is_nucleus()
+    root = _repo_root()
+    host_dir = root if nucleus else root.parent
+    exit_code = 0
+    for target in TARGETS:
+        stale = bridge_stale(host_dir, target, nucleus=nucleus, framework_root=root)
+        print(f"{target}: {'STALE — reinstall needed' if stale else 'fresh'}")
+        if stale:
+            exit_code = 2
+    return exit_code
+
+
+if __name__ == "__main__":
+    sys.exit(main())
