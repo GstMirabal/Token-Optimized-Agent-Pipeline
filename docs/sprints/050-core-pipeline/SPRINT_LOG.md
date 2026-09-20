@@ -66,6 +66,52 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 
 ---
 
+## 📏 `D5` Branch decision — `quality-audit` verify-wiring
+
+`IMPLEMENTATION_PLAN.md` `## Design` D5 makes the `verify`-wiring of `U3`
+depend on a measurement taken after `U2` lands. That measurement is recorded
+here, not renegotiated after the fact.
+
+**Measured** (`python3 scripts/quality_audit.py --report .` from the `.agents`
+root, `DEFAULT_EXCLUDE_DIRS` — `venv_skillopt/`, `node_modules/`, `.git/` —
+applied by the script itself):
+
+| Figure | Value |
+| :--- | :--- |
+| First-party Python functions scanned | 1428 |
+| Compliant | 1337 |
+| Violating | 91 |
+| Violation rate | 91/1428 = 6.37% |
+| Unparsed | 0 |
+
+91/1428 = 6.37% is **> 0 and ≤ 20%**, so **`D5` Branch B applies**: `U3` ships
+the standalone `make quality-audit` target only; `quality-audit` is
+deliberately **not** added to `verify`'s dependency chain — same convention as
+the existing `bridge-state` and `cursor-era-audit` targets, each carrying its
+own stated reason as a `Makefile` comment. Remediation of the 91 violating
+units is **routed to Sprint 051**, per `D5`'s own text ("`U3` ships the
+standalone target only, the violating units are listed in `SPRINT_LOG.md`, and
+their remediation is routed to Sprint 051").
+
+The full 91-unit register is reproducible on demand and not duplicated here in
+full (`agents.md §2 token_saver`):
+
+```
+python3 scripts/quality_audit.py --report . | grep '^FAIL'
+```
+
+At time of measurement the 91 violations span `hooks/`, `scripts/`, `skills/`
+and `tests/`; none is `unparsed`. Representative entries (full list via the
+command above): `hooks/on_commit.py:835 main lines=40 depth=4`,
+`scripts/session_state.py:354 main lines=51 depth=2`,
+`skills/skill-creator/scripts/run_eval.py:35 run_single_query lines=100 depth=10`.
+
+`make quality-audit` therefore exits `2` against the current tree — this is
+the instrument correctly reporting the measured baseline, not a defect in the
+target.
+
+---
+
 ## 🚦 Quality Gate
 
 Transcribed here by `orchestrator` from the gate agents' emissions at **Phase 7**
