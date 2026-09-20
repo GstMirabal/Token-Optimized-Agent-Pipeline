@@ -197,7 +197,7 @@ merges without a declared, verifiable invoker, or a typed exception in
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
 | Work units | 10 | Count of rows in Work tables |
 | Subagents dispatched | 10 planned (1 per unit) + 2 Phase 7 gates in fresh context | `agent_assignment.md` at Phase 4.1 |
-| Prior session ratio | measure at Phase 3 | `python3 scripts/session_cost.py --from-anchor --json` |
+| Prior session ratio | `2.9` (peak 107612 / first-turn 37002 tokens, session `5aead9ab`) | `python3 scripts/session_cost.py --from-anchor --json` |
 
 ---
 
