@@ -61,8 +61,8 @@ from the plan's original proposal (`U1`, `U4`, `U5` — see that file's
 | U4 | `config/invocation_exceptions.json` | modify | low | `rule_validator` | sonnet | medium | ✅ `c702d29` |
 | U5 | `agents.md` | modify | medium | `rule_validator` | sonnet | medium | ✅ `ac7dcca` |
 | U6 | `scripts/session_state.py` (+ paired `tests/test_session_state.py`, same commit) | modify | high | `implementer_agent` | sonnet | medium | ✅ `0ddc0f8` |
-| U7 | `workflows/close_workflow.md` | modify | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U8 | `workflows/deployment_workflow.md` | modify | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
+| U7 | `workflows/close_workflow.md` | modify | medium | `doc_orchestrator` | sonnet | medium | ✅ `6d12c26` |
+| U8 | `workflows/deployment_workflow.md` | modify | medium | `doc_orchestrator` | sonnet | medium | ✅ `8eff243` |
 | U9 | `tests/test_audit_cursor_models.py` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
 | U10 | `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` | modify (generated, never hand-edited) | low | `implementer_agent` | sonnet | medium | ⏳ |
 
