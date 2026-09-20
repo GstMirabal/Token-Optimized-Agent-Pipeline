@@ -57,8 +57,8 @@ from the plan's original proposal (`U1`, `U4`, `U5` — see that file's
 | U1 | `agents.md` | modify | medium | `rule_validator` | sonnet | medium | ✅ `11186bb` |
 | U2 | `scripts/quality_audit.py` (+ paired `tests/test_quality_audit.py`, same commit) | create | high | `implementer_agent` | sonnet | medium | ✅ `80bb5e1` |
 | U3 | `Makefile` | modify | medium | `implementer_agent` | sonnet | medium | ✅ `43e60b3` |
-| U4 | `config/invocation_exceptions.json` | modify | low | `rule_validator` | sonnet | medium | ⏳ |
-| U5 | `agents.md` | modify | medium | `rule_validator` | sonnet | medium | ⏳ |
+| U4 | `config/invocation_exceptions.json` | modify | low | `rule_validator` | sonnet | medium | ✅ `c702d29` |
+| U5 | `agents.md` | modify | medium | `rule_validator` | sonnet | medium | ✅ `ac7dcca` |
 | U6 | `scripts/session_state.py` (+ paired `tests/test_session_state.py`, same commit) | modify | high | `implementer_agent` | sonnet | medium | ⏳ |
 | U7 | `workflows/close_workflow.md` | modify | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
 | U8 | `workflows/deployment_workflow.md` | modify | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
