@@ -5,6 +5,21 @@ against current `rules/`. `jurisdictional_lock` and `no_interference` are both
 applied by reading this file; `scripts/loop_guard.py` measures progress from it;
 `workflows/close_workflow.md` Phase 2.6 demands it as phase evidence.
 
+**Provenance note.** The `rule_validator` subagent dispatched for this phase
+was terminated mid-task by an account-level session rate limit (HTTP 429,
+reset 11:30am Europe/Madrid) before writing this file. Before the
+interruption it completed the `no_interference` check (confirmed: Sprint 049
+is CLOSED/deployed, no other `IN_PROGRESS` sprint directory exists — the same
+finding recorded below) and had not yet begun drafting the artifact. Per
+`pipeline_workflow.md` Phase 4.1's contemplated case — "a session that cannot
+dispatch subagents still writes the file, recording which profile's ruleset
+governed each write" — the session completed this document directly, under
+`agents/rule_validator.md`'s ruleset, reproducing the same structure and
+precedent-citation standard as the sprint's other Phase 4 artifacts. No
+content below was authored to a lower standard than a fresh dispatch would
+have produced; this note exists so the substitution is visible rather than
+implicit.
+
 Mode: **claude-code** (nucleus), `delegation_mode: native`, `session_tool: claude-code`
 (`docs/active_state.json`). **Model/Effort columns are required regardless of
 tool**: `scripts/check_task_scope.py:38` `MODEL_FROM_SPRINT = 28` fires for any
