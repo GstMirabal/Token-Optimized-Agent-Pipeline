@@ -27,9 +27,9 @@ Tracking of atomic goals achieved during the session.
     - `[x]` `current_sprint` opened in `docs/active_state.json` — `{id: 50, layer: "core", app: "pipeline", status: "IN_PROGRESS", last_audit_sprint: 49}`, in the same act as the already-existing sprint directory and branch, per the human's confirmed decision (c)
     - `[x]` `SPRINT_LOG.md` written (this file)
     - `[x]` Implementation Plan `## Cost` row "Prior session ratio" — resolved by the session (Bash-capable) after `orchestrator` blocked on it; see `KI-050-1` below; `topology_version` (`4.31.0-049-closed`) left untouched per `D7` (U6 owns the writer)
-- [ ] **Phase 4.1 — Agent Assignment**: `agent_assignment.md`
-- [ ] **Phase 4.2 — Skill Assignment**: `skill_assignment.md`
-- [ ] **Phase 4.3 — Rule Audit**: `task_scope.md`
+- [x] **Phase 4.1 — Agent Assignment**: `agent_assignment.md` — U1/U5/U4 corrected to `rule_validator` (`7ef9c72`)
+- [x] **Phase 4.2 — Skill Assignment**: `skill_assignment.md` — no reusable skill found; fresh script confirmed correct (`195eba9`)
+- [x] **Phase 4.3 — Rule Audit**: `task_scope.md` — `check_task_scope.py` exit `0`, APPROVED for Phase 5 (`549d35d`)
 - [ ] **Phase 5 — Approval Gate**
 - [ ] **Phase 6 — Execution**
 - [ ] **Phase 7 — Quality Gate**
@@ -84,6 +84,6 @@ and a fabricated row would teach authors to invent verdicts
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: LOCKED
-**Next Phase**: Phase 4.1 — Agent Assignment (`agent_assignment.md`)
+**Next Phase**: Phase 5 — Approval Gate (`principal_agent`)
 
 *Certified under conventional commit standard: docs(sprint-050): open roadmap and sprint log #050*
