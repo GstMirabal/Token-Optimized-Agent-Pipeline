@@ -292,10 +292,27 @@ Two observations stop this sprint, decided before execution:
 
 | Field | Value |
 | :--- | :--- |
-| **Approved by** | {{HUMAN}} |
-| **Date** | {{ISO_DATE}} |
-| **Plan commit at approval** | `{{COMMIT_SHA}}` |
+| **Approved by** | GstMirabal (`gst.mirabal@gmail.com`) |
+| **Date** | 2026-09-20 |
+| **Plan commit at approval** | `532b508` |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
+
+The gate was held twice before this signature landed, and both holds are recorded
+because an approval whose objections left no trace cannot be audited afterwards.
+**Hold 1**: the Approval Gate was refused while `docs/sprints/050-core-pipeline/`
+contained only `IMPLEMENTATION_PLAN.md` — Phases 2, 3, 4.1, 4.2 and 4.3 had not
+produced their artifacts, and `task_scope.md` is the file by which
+`jurisdictional_lock` and `no_interference` are applied. **Hold 2**: `audit_plan.py`
+had last returned `0` against the plan as committed at `5f1b174`, but Phase 3
+subsequently edited the `## Cost` table (`Prior session ratio` → `2.9`) in
+`532b508`; the auditor was re-run against the current file and observed at exit `0`
+before the authorization was requested, rather than inheriting the earlier result —
+the same discipline Sprint 049 recorded (`audit_plan.py` exit `0` at draft, after
+the mid-Phase-5 revision, and again at approval). A related record-integrity gap was
+closed in the same round: `task_scope.md` now carries a provenance note (`943bcad`)
+stating that its dispatched `rule_validator` was terminated by an account rate limit
+after completing only the `no_interference` check, and that the session authored the
+remainder under `agents/rule_validator.md`'s ruleset.
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an
 unattended `/loop` (`workflows/pipeline_workflow.md`, `rules/loop_governance.md`).
