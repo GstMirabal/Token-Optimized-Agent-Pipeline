@@ -56,6 +56,7 @@ from the plan's original proposal (`U1`, `U4`, `U5` — see that file's
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | U1 | `agents.md` | modify | medium | `rule_validator` | sonnet | medium | ✅ `11186bb` |
 | U2 | `scripts/quality_audit.py` (+ paired `tests/test_quality_audit.py`, same commit) | create | high | `implementer_agent` | sonnet | medium | ✅ `80bb5e1` |
+| U2a | `README.md` | modify (generated, never hand-edited — `check_readme_counts.py --write`) | low | `implementer_agent` | sonnet | low | ✅ `8c688cf` |
 | U3 | `Makefile` | modify | medium | `implementer_agent` | sonnet | medium | ✅ `43e60b3` |
 | U4 | `config/invocation_exceptions.json` | modify | low | `rule_validator` | sonnet | medium | ✅ `c702d29` |
 | U5 | `agents.md` | modify | medium | `rule_validator` | sonnet | medium | ✅ `ac7dcca` |
@@ -64,6 +65,16 @@ from the plan's original proposal (`U1`, `U4`, `U5` — see that file's
 | U8 | `workflows/deployment_workflow.md` | modify | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
 | U9 | `tests/test_audit_cursor_models.py` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
 | U10 | `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` | modify (generated, never hand-edited) | low | `implementer_agent` | sonnet | medium | ⏳ |
+
+`U2a` was not in `IMPLEMENTATION_PLAN.md`'s original `## Work` table (approved and
+sealed, `532b508`/`35c3863` — left untouched, per Sprint 047's precedent that
+record remediation does not reopen the plan). It surfaced mid-execution as a
+mechanical consequence of `U2`: creating `scripts/quality_audit.py` bumped the
+`scripts/` file count 39→40, drifting `README.md`'s generated "At a Glance" block
+out of sync with `tests/test_check_readme_counts.py`. Fixed by running
+`python3 scripts/check_readme_counts.py --write` (regenerated output, same class
+as `U10` — never hand-edited) and recorded here so the artifact set stays complete
+before Phase 7 (`RA-14`).
 
 ### `jurisdictional_lock` and `no_interference`
 
