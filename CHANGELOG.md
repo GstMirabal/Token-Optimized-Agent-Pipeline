@@ -4,6 +4,8 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.32.0] - 2026-09-20
+
 ### Fixed
 - **Sprint 049 `cursor-bridge-100`** — audited the Cursor integration bridge end to end at human request ("verify it is 100% effective"); found and fixed six defects, five of them reproduced in an isolated sandbox before being touched, and corrected two false claims in governance files that the audit's own premise (a real deterministic alternative existed) turned out not to hold. 11 planned units landed (`U9` withdrawn mid-sprint, identifier retained per `RA-14`); `make verify` green, 780 tests pass (748 baseline + 32 new), zero regression. #049
   - **`F-049-1` (high)** — `scripts/install.py --target cursor` combined with `--profile`/`--profile-path` silently dropped the entire profile: exit `0`, four success messages, zero profile artifacts anywhere. `install_cursor_bridge()` gained a `profile_dir` parameter; a profile's `agents/` and `rules/` now render into `.cursor/`, and `skills/` (which this bridge has no destination for) is named on stdout instead of dropped without a trace. `profiles/example-project/rule_triggers.json` added as the fixture proving the primary rung of the new metadata cascade.
