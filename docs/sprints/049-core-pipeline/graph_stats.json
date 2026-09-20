@@ -1,0 +1,9 @@
+{
+  "nodes": 10371,
+  "edges": 13368,
+  "communities": 890,
+  "source": "graphify-out/graph.json",
+  "sprint": 49,
+  "built_at_commit": "058a5fc",
+  "note": "Counts from `make -f Makefile graphify-rebuild` (`graphify update . --force`, AST, no LLM) at HEAD before the close-workflow closeout commits (this file, model_ledger_regen). Delta vs Sprint 048 (10056/12840/862) reflects six code files touched (scripts/cursor_adapter.py, install.py, bridge_state.py, audit_cursor_era.py, audit_cursor_models.py, tests/*), one new fixture (profiles/example-project/rule_triggers.json), and the sprint directory's own artifacts (IMPLEMENTATION_PLAN.md, SPRINT_LOG.md, agent_assignment.md, skill_assignment.md, task_scope.md, PHASE_REGISTER.md)."
+}
