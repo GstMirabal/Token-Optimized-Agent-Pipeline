@@ -55,7 +55,7 @@ from the plan's original proposal (`U1`, `U4`, `U5` — see that file's
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | U1 | `agents.md` | modify | medium | `rule_validator` | sonnet | medium | ✅ `11186bb` |
-| U2 | `scripts/quality_audit.py` (+ paired `tests/test_quality_audit.py`, same commit) | create | high | `implementer_agent` | sonnet | medium | ⏳ |
+| U2 | `scripts/quality_audit.py` (+ paired `tests/test_quality_audit.py`, same commit) | create | high | `implementer_agent` | sonnet | medium | ✅ `80bb5e1` |
 | U3 | `Makefile` | modify | medium | `implementer_agent` | sonnet | medium | ⏳ |
 | U4 | `config/invocation_exceptions.json` | modify | low | `rule_validator` | sonnet | medium | ⏳ |
 | U5 | `agents.md` | modify | medium | `rule_validator` | sonnet | medium | ⏳ |
