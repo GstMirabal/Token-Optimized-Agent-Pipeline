@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -110,3 +111,194 @@ def test_shipped_start_command_carries_the_claude_token() -> None:
     src = (SCRIPTS.parent / "commands" / "start.md").read_text(encoding="utf-8")
     assert "--tool claude-code" in src
     assert "--tool cursor" in ca.expected_cursor_command_text(src, nucleus=True)
+
+
+# --- F-049-1: profile parity under Cursor (D2/D3) -----------------------
+
+
+def _make_profile(
+    root: Path, *, rule_triggers: bool = True, rule_frontmatter: bool = False
+) -> Path:
+    """A minimal profile pack: one agent, one rule, one unmirrorable skill."""
+    profile = root / "profile"
+    agents = profile / "agents"
+    agents.mkdir(parents=True)
+    (agents / "domain_specialist_example.md").write_text(
+        "---\nname: domain_specialist_example\ndescription: Example domain agent\n"
+        "tools: Read, Grep\n---\nDomain specialist prompt body.\n",
+        encoding="utf-8",
+    )
+    rules = profile / "rules"
+    rules.mkdir(parents=True)
+    if rule_frontmatter:
+        (rules / "domain_example_standard.md").write_text(
+            "---\ndescription: fallback trigger\nglobs: **/*.py\n---\n"
+            "# Rule: Domain Example Standard\nBody text.\n",
+            encoding="utf-8",
+        )
+    else:
+        (rules / "domain_example_standard.md").write_text(
+            "# Rule: Domain Example Standard\nBody text.\n", encoding="utf-8"
+        )
+    if rule_triggers:
+        (profile / "rule_triggers.json").write_text(
+            json.dumps(
+                {
+                    "rules": [
+                        {
+                            "path": "rules/domain_example_standard.md",
+                            "globs": ["**/*.py"],
+                            "trigger_prose": "Domain example trigger.",
+                        }
+                    ]
+                }
+            ),
+            encoding="utf-8",
+        )
+    skills = profile / "skills" / "example-api-bridge-3rd"
+    skills.mkdir(parents=True)
+    (skills / "SKILL.md").write_text("skill body\n", encoding="utf-8")
+    return profile
+
+
+def test_write_agents_default_source_still_renders_core_agents(
+    tmp_path: Path,
+) -> None:
+    """The no-arg call still renders the nucleus's own agents/, not a profile's."""
+    cursor_dir = tmp_path / "repo" / ".cursor"
+    names = ca._write_agents(cursor_dir)
+    assert "principal-agent.md" in names
+    assert "domain_specialist_example.md" not in names
+
+
+def test_write_agents_reads_from_override_source(tmp_path: Path) -> None:
+    profile = _make_profile(tmp_path)
+    cursor_dir = tmp_path / "repo" / ".cursor"
+    names = ca._write_agents(cursor_dir, agents_src=profile / "agents")
+    assert names == {"domain_specialist_example.md"}
+    assert (cursor_dir / "agents" / "domain_specialist_example.md").is_file()
+
+
+def test_write_profile_rules_primary_uses_own_rule_triggers_json(
+    tmp_path: Path,
+) -> None:
+    profile = _make_profile(tmp_path, rule_triggers=True)
+    cursor_dir = tmp_path / "repo" / ".cursor"
+    names = ca._write_profile_rules(cursor_dir, profile)
+    assert names == {"domain_example_standard.mdc"}
+    rendered = (cursor_dir / "rules" / "domain_example_standard.mdc").read_text(
+        encoding="utf-8"
+    )
+    assert "description: Domain example trigger." in rendered
+    assert "globs: **/*.py" in rendered
+    assert "alwaysApply: false" in rendered
+
+
+def test_write_profile_rules_fallback_uses_rule_frontmatter(
+    tmp_path: Path,
+) -> None:
+    """No rule_triggers.json: description/globs come from the rule file itself."""
+    profile = _make_profile(tmp_path, rule_triggers=False, rule_frontmatter=True)
+    cursor_dir = tmp_path / "repo" / ".cursor"
+    names = ca._write_profile_rules(cursor_dir, profile)
+    assert names == {"domain_example_standard.mdc"}
+    rendered = (cursor_dir / "rules" / "domain_example_standard.mdc").read_text(
+        encoding="utf-8"
+    )
+    assert "description: fallback trigger" in rendered
+    assert "globs: **/*.py" in rendered
+    assert "Body text." in rendered
+
+
+def test_write_profile_rules_raises_named_error_when_neither_source_exists(
+    tmp_path: Path,
+) -> None:
+    """Neither rule_triggers.json nor frontmatter: a named error, never a bare KeyError."""
+    profile = _make_profile(tmp_path, rule_triggers=False, rule_frontmatter=False)
+    cursor_dir = tmp_path / "repo" / ".cursor"
+    with pytest.raises(ca.ProfileRuleTriggerError) as excinfo:
+        ca._write_profile_rules(cursor_dir, profile)
+    assert "domain_example_standard.md" in str(excinfo.value)
+
+
+def test_write_profile_rules_never_defaults_to_always_apply_true(
+    tmp_path: Path,
+) -> None:
+    """token_saver: a missing trigger must not fall back to loading every turn."""
+    profile = _make_profile(tmp_path, rule_triggers=True)
+    cursor_dir = tmp_path / "repo" / ".cursor"
+    ca._write_profile_rules(cursor_dir, profile)
+    rendered = (cursor_dir / "rules" / "domain_example_standard.mdc").read_text(
+        encoding="utf-8"
+    )
+    assert "alwaysApply: true" not in rendered
+
+
+def test_profile_skill_names_returns_sorted_directory_names(tmp_path: Path) -> None:
+    profile = _make_profile(tmp_path)
+    assert ca._profile_skill_names(profile) == ["example-api-bridge-3rd"]
+
+
+def test_profile_skill_names_empty_when_no_skills_dir(tmp_path: Path) -> None:
+    profile = tmp_path / "profile"
+    profile.mkdir()
+    assert ca._profile_skill_names(profile) == []
+
+
+def test_install_cursor_bridge_with_profile_renders_agent_and_rule(
+    tmp_path: Path,
+) -> None:
+    """F-049-1 regression: --target cursor + a profile must not drop it silently."""
+    profile = _make_profile(tmp_path)
+    host = tmp_path / "host"
+    ca.install_cursor_bridge(host, nucleus=False, profile_dir=profile)
+    assert (host / ".cursor" / "agents" / "domain_specialist_example.md").is_file()
+    assert (host / ".cursor" / "rules" / "domain_example_standard.mdc").is_file()
+
+
+def test_install_cursor_bridge_with_profile_prints_unmirrored_skills(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Skills have no Cursor destination: named on stdout, not dropped without a trace."""
+    profile = _make_profile(tmp_path)
+    host = tmp_path / "host"
+    ca.install_cursor_bridge(host, nucleus=False, profile_dir=profile)
+    captured = capsys.readouterr()
+    assert "example-api-bridge-3rd" in captured.out
+    assert "no skills/ destination" in captured.out
+
+
+def test_install_cursor_bridge_without_profile_prints_nothing_about_skills(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """The default call (no profile_dir) is unaffected — no skills message at all."""
+    host = tmp_path / "host"
+    ca.install_cursor_bridge(host, nucleus=True)
+    captured = capsys.readouterr()
+    assert "skills/ destination" not in captured.out
+
+
+def test_install_cursor_bridge_core_agents_survive_a_profile_install(
+    tmp_path: Path,
+) -> None:
+    """Profile agents are additive: the core 14 framework agents are not pruned."""
+    profile = _make_profile(tmp_path)
+    host = tmp_path / "host"
+    ca.install_cursor_bridge(host, nucleus=True, profile_dir=profile)
+    core_agent = host / ".cursor" / "agents" / "principal-agent.md"
+    assert core_agent.is_file()
+    assert (host / ".cursor" / "agents" / "domain_specialist_example.md").is_file()
+
+
+def test_example_project_profile_fixture_matches_the_primary_cascade_rung(
+    tmp_path: Path,
+) -> None:
+    """profiles/example-project/rule_triggers.json (U3) must satisfy the primary D3 rung."""
+    real_profile = SCRIPTS.parent / "profiles" / "example-project"
+    cursor_dir = tmp_path / "repo" / ".cursor"
+    names = ca._write_profile_rules(cursor_dir, real_profile)
+    assert names == {"domain_example_standard.mdc"}
+    rendered = (cursor_dir / "rules" / "domain_example_standard.mdc").read_text(
+        encoding="utf-8"
+    )
+    assert "alwaysApply: false" in rendered

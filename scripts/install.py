@@ -535,7 +535,7 @@ def main() -> int:
             return rc
 
     if args.target in ("cursor", "both"):
-        install_cursor_bridge(HOST_DIR, nucleus=False)
+        install_cursor_bridge(HOST_DIR, nucleus=False, profile_dir=profile_dir)
         ensure_gitignore_entries()
         if args.target == "cursor":
             install_host_git_hooks()

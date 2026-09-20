@@ -26,11 +26,25 @@ def _copy_registry(root: Path) -> None:
     shutil.copytree(REPO / "config", root / "config")
 
 
-def _write_sprint(root: Path, number: int, *, task_scope: str | None = None) -> Path:
+def _write_sprint(
+    root: Path,
+    number: int,
+    *,
+    task_scope: str | None = None,
+    tool: str | None = "cursor",
+) -> Path:
+    """A minimal sprint dir. ``tool`` writes the SPRINT_LOG.md Session line
+    `era_sprint_ids` reads (`D5`); pass ``None`` to omit it entirely."""
     sprint = root / "docs" / "sprints" / f"{number:03d}-core-pipeline"
     sprint.mkdir(parents=True, exist_ok=True)
     if task_scope is not None:
         (sprint / "task_scope.md").write_text(task_scope, encoding="utf-8")
+    if tool is not None:
+        (sprint / "SPRINT_LOG.md").write_text(
+            f"# Sprint Log: #{number}\n\n"
+            f"**Session**: `x` · tool `{tool}` · `delegation_mode: sequential`\n",
+            encoding="utf-8",
+        )
     return sprint
 
 
@@ -58,6 +72,33 @@ def test_missing_sprint_dirs_omitted_and_main_exits_zero(
     assert "| 030 |" in audit_text
     assert "| 027 |" not in audit_text
     assert "| 033 |" not in audit_text
+
+
+# --- F-049-3 / D5: the era window is derived from SPRINT_LOG.md, not fixed ---
+
+
+def test_era_sprint_ids_excludes_a_sprint_with_no_cursor_tool(
+    audit_mod, tmp_path: Path
+) -> None:
+    """The exact defect this sprint fixes: a hardcoded 26-33 both included a
+    sprint with no evidence and excluded 034-040, which had real evidence."""
+    root = tmp_path / "repo"
+    _write_sprint(root, 27, tool="cursor")
+    _write_sprint(root, 28, tool="claude-code")
+    _write_sprint(root, 29, tool=None)  # no Session line at all
+    _write_sprint(root, 41, tool="cursor")
+
+    assert audit_mod.era_sprint_ids(root) == [27, 41]
+
+
+def test_era_sprint_ids_on_the_real_repository_matches_the_measured_window(
+    audit_mod,
+) -> None:
+    """Reproduces the Phase 1 measurement: `grep -oE 'tool `[a-z-]+`'` across
+    every docs/sprints/*/SPRINT_LOG.md gives cursor sprints 027-040, nothing
+    before or after. Fails if the real sprint logs ever drift from that."""
+    ids = audit_mod.era_sprint_ids(REPO)
+    assert ids == list(range(27, 41))
 
 
 def test_sprint_033_ce1_is_zero(audit_mod) -> None:

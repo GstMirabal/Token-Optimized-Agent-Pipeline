@@ -23,7 +23,7 @@ PY_EXCLUDES := -not -path "*/.git/*" -not -path "*/node_modules/*" -not -path "*
 VENV_PY := $(AGENTS_DIR)/venv_skillopt/bin/python3
 PY := $(if $(wildcard $(VENV_PY)),$(VENV_PY),python3)
 
-.PHONY: graphify-update graphify-rebuild verify docs-freshness-check session-start model-ledger cursor-tiers cursor-era-audit role-artifacts
+.PHONY: graphify-update graphify-rebuild verify docs-freshness-check session-start model-ledger cursor-tiers cursor-era-audit bridge-state role-artifacts
 
 
 # Incremental AST sync after code changes (close_workflow Phase 1, no LLM cost).
@@ -118,6 +118,13 @@ cursor-tiers:
 # a dependency of `verify` (historical CE-1 would red the nucleus).
 cursor-era-audit:
 	cd $(AGENTS_DIR) && python3 scripts/audit_cursor_era.py
+
+# Bridge mirror integrity for every target, outside the session-boot path
+# (Sprint 049, F-049-2). Exit 2 if either .claude/ or .cursor/ needs
+# reinstalling. Not a `verify` dependency: a stale bridge on the machine
+# running `make verify` is a local-environment fact, not a code defect.
+bridge-state:
+	cd $(AGENTS_DIR) && python3 scripts/bridge_state.py
 
 # Sprint 027: verify a role left its required sprint-scoped artifacts (portable
 # SubagentStop counterpart). SPRINT_DIR must be the canonical sprint path.

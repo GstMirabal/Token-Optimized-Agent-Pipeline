@@ -1,6 +1,6 @@
 {
-  "last_update": "2026-09-18",
-  "sprint_id": "048",
+  "last_update": "2026-09-20",
+  "sprint_id": "049",
   "_schema": "Entries are summary-only Knowledge Items. The 'file' field is omitted once the raw log has been purged (agents.md §4 definitive_amnesia) — the 1-line summary IS the retained knowledge.",
   "items": [
     {
@@ -117,6 +117,26 @@
     {
       "id": "F-20260918-048E",
       "summary": "Provisioning the skillopt heavy stack (requirements-skillopt.txt) into venv_skillopt installs a real PyPI package literally named 'scripts' with its own __init__.py, which shadows this repo's local scripts/ directory (an implicit namespace package, no __init__.py) for every import scripts.* in that venv — reproduced as 3 collection errors in make verify immediately after provisioning, fixed by uninstalling skillopt/google-generativeai/claude-agent-sdk/python-dotenv; also, skills/skillopt/configs/agents_opt.yaml hardcodes host-mode paths (.agents/agents.md, .agents/skills/skillopt/data/scenarios.json) that double-nest and 404 when run from nucleus mode (cwd already is .agents) — rules_optimization could not complete in nucleus mode for either reason (Sprint 048 close).",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20260920-049A",
+      "summary": "A script that exists is not a check that runs: before naming something the deterministic alternative to a judgment call, execute it and confirm it produces the specific metric/exit code the rule depends on, not just that it's callable.",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20260920-049B",
+      "summary": "A test matrix for a flag-selected code path owes the cross product, not one case per flag: Sprint 049's F-049-1 shipped because --target cursor and --profile were each tested separately and never together.",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20260920-049C",
+      "summary": "Cite the file verified by grep to carry the text, not the file whose name matches the topic — a plausible-sounding citation survives review precisely because it sounds right.",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20260920-049D",
+      "summary": "Correcting one false clause in governance prose can silently invert an adjacent true one in the same edit (Sprint 049 U11 fixed a style-score claim but replaced a correct \"NOT enforced by make verify\" framing with its negation) — re-verify the whole edited sentence, not just the clause you targeted.",
       "routing_class": "host"
     }
   ]

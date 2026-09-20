@@ -286,6 +286,25 @@ One finding, deferred by the plan's own Abort criterion 2 rather than applied.
 
 ---
 
+### Still open for a later program — routed out of Sprint 049 (`cursor-bridge-100`)
+
+One finding sized for its own sprint by the plan's own `## Out of scope`, plus
+three minor observations from the Phase 7 round-2 gates — not individually
+sized for a sprint, left here so they are not silently lost.
+
+| # | Finding | Proposed destination |
+| :--- | :--- | :--- |
+| `KI-049-4` | `config/invocation_exceptions.json` names `skills/python-quality-auditor` and `skills/js-standardizer` as the instrument behind `agents.md §1`'s Python/JS style-score, `max_indentation` and `max_lines_per_func` rows. Measured during Sprint 049 (`F-049-7`): neither script computes a numeric score, checks indentation depth, measures function length, or exits non-zero — `python_quality_auditor.py` shells to `ruff`/`mypy`/`bandit`/`radon` and only prints pass/fail per tool; `js_standardizer.py` checks lint-config presence and one repo-wide boolean (`@param`/`@returns` anywhere in any `.js`/`.ts` file). Sprint 049 corrected the governance text to describe this honestly; it did not build the real instrument | Build a deterministic style-score / indentation / function-length auditor for Python and JS/TS (stdlib `ast` for Python is enough — no new dependency), wired to `make quality-audit` with a real threshold and `sys.exit(2)` on failure. Not a Cursor-bridge defect: the current gap is equally unverifiable under Claude Code, since a model that loads a skill computing no score verifies nothing either way |
+
+Minor, no dedicated sprint — noted at Phase 7 round 2, small enough to pick up
+opportunistically the next time these files are touched:
+
+- `agents.md §1 max_lines_per_func` states "50 lines" without a unit (raw span vs. executable lines); `scripts/cursor_adapter.py:480 install_cursor_bridge` sits ambiguously against it (56 raw / 28 executable) — an `§1 unambiguous_action` gap ("magnitudes without a unit").
+- `tests/test_audit_cursor_models.py`'s three `test_run_report_*` cases (Sprint 049 `U7`) assert only the returned `author_discrepancy` boolean, no `capsys` — behavior-preservation across the Gate-1 remediation refactor was proven by an independent side-by-side execution at Gate 2 round 2, not by these tests. One `capsys` assertion per case would close the gap.
+- `scripts/audit_cursor_era.py`'s derived Cursor-era window (`D5`) correctly excludes sprint 026 — it predates the `tool `x`` Session-line convention introduced in Sprint 041 — despite 026's own `SPRINT_LOG.md` documenting real Cursor/Composer gate activity. Accepted as a design-boundary tradeoff of evidence-based derivation (Tester Gate 2 round 1), not a defect.
+
+---
+
 ### Queued for **037** — rider **S** (Cursor agent sandbox false reds)
 
 Opened 2026-08-26 during Sprint 036 Phase 7 / `/start` on `ai-sprint/036`.

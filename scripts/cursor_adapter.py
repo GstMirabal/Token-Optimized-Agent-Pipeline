@@ -207,6 +207,109 @@ def _write_rules(cursor_dir: Path) -> set[str]:
     return expected
 
 
+class ProfileRuleTriggerError(RuntimeError):
+    """A profile rule has neither its own trigger entry nor usable frontmatter.
+
+    Raised by `_write_profile_rules` (D3) instead of two silent failure modes:
+    a bare `KeyError` from indexing a missing trigger, or defaulting the rule
+    to `alwaysApply: true`, which would load a domain rule on every turn
+    regardless of what is being edited — exactly what `agents.md §2
+    token_saver` prohibits.
+    """
+
+
+def _load_profile_rule_triggers(profile_dir: Path) -> dict[str, dict]:
+    """A profile's own ``rule_triggers.json``, same schema as the nucleus's.
+
+    Returns an empty map when the file is absent — the primary rung of the
+    `D3` cascade simply does not apply, and the caller falls back to
+    frontmatter.
+    """
+    path = profile_dir / "rule_triggers.json"
+    if not path.is_file():
+        return {}
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return {entry["path"]: entry for entry in data["rules"]}
+
+
+def _profile_rule_fallback(text: str) -> tuple[str, str] | None:
+    """``description``/``globs`` read from a profile rule's own frontmatter.
+
+    Returns ``None`` when either field is missing, so the caller can raise
+    `ProfileRuleTriggerError` naming the file instead of writing a malformed
+    `.mdc`.
+    """
+    fields, _ = _split_frontmatter(text)
+    description = fields.get("description")
+    globs = fields.get("globs")
+    if not description or not globs:
+        return None
+    return description, globs
+
+
+def _write_profile_rules(cursor_dir: Path, profile_dir: Path) -> set[str]:
+    """Upsert a profile's rule ``.mdc`` files; return expected filenames.
+
+    `D3` cascade, in order: (1) the profile's own ``rule_triggers.json``
+    entry, body taken verbatim from the rule `.md` (mirrors how the nucleus's
+    own `rules/*.md` carry no frontmatter of their own); (2) the rule file's
+    own ``description``/``globs`` frontmatter, body is what follows it; (3)
+    neither exists — raise `ProfileRuleTriggerError` naming the file, never a
+    bare `KeyError` and never a silent `alwaysApply: true` default.
+    """
+    rules_src = profile_dir / "rules"
+    if not rules_src.is_dir():
+        return set()
+    rules_dir = cursor_dir / "rules"
+    rules_dir.mkdir(parents=True, exist_ok=True)
+    triggers = _load_profile_rule_triggers(profile_dir)
+    expected: set[str] = set()
+    for src in sorted(rules_src.glob("*.md")):
+        key = f"rules/{src.name}"
+        text = src.read_text(encoding="utf-8")
+        if key in triggers:
+            trigger = triggers[key]
+            description = trigger["trigger_prose"].replace('"', "'")
+            globs = _globs_for_mdc(trigger["globs"])
+            body = text
+        else:
+            fallback = _profile_rule_fallback(text)
+            if fallback is None:
+                raise ProfileRuleTriggerError(
+                    f"{src}: no entry for {key!r} in "
+                    f"{profile_dir / 'rule_triggers.json'}, and no "
+                    "description/globs frontmatter of its own"
+                )
+            description, globs = fallback
+            _, body = _split_frontmatter(text)
+        fields = {
+            "description": description,
+            "globs": globs,
+            "alwaysApply": "false",
+        }
+        frontmatter = (
+            "---\n"
+            + "".join(f"{key}: {value}\n" for key, value in fields.items())
+            + "---\n"
+        )
+        name = f"{src.stem}.mdc"
+        (rules_dir / name).write_text(frontmatter + body, encoding="utf-8")
+        expected.add(name)
+    return expected
+
+
+def _profile_skill_names(profile_dir: Path) -> list[str]:
+    """Skill directory names under a profile's ``skills/``.
+
+    Cursor's bridge has no skills destination (`D2`): `install_cursor_bridge`
+    names every entry this returns instead of dropping it without a trace.
+    """
+    skills_dir = profile_dir / "skills"
+    if not skills_dir.is_dir():
+        return []
+    return sorted(path.name for path in skills_dir.iterdir() if path.is_dir())
+
+
 def _write_constitution(cursor_dir: Path, *, nucleus: bool) -> None:
     rules_dir = cursor_dir / "rules"
     rules_dir.mkdir(parents=True, exist_ok=True)
@@ -289,12 +392,53 @@ def _cursor_agent_document(src_text: str) -> str:
     return f"{front}\n{body}"
 
 
-def _write_agents(cursor_dir: Path) -> set[str]:
-    """Upsert Cursor agent profiles; return expected filenames."""
+def expected_cursor_agent_names(agents_src: Path) -> set[str]:
+    """Filenames ``_write_agents`` would produce for ``agents_src``, without writing.
+
+    The Cursor filename comes from the source frontmatter's ``name:`` field
+    (hyphenated, e.g. ``principal_agent.md`` -> ``principal-agent.md``), not
+    from the source filename — so a caller checking membership cannot diff
+    filenames directly and needs this rendering. Used by
+    ``bridge_state._cursor_mirror_missing`` (`F-049-2`, `D4`) to detect an
+    incomplete mirror without installing one.
+    """
+    names: set[str] = set()
+    if not agents_src.is_dir():
+        return names
+    for src in sorted(agents_src.glob("*.md")):
+        rendered = _cursor_agent_document(src.read_text(encoding="utf-8"))
+        names.add(f"{_split_frontmatter(rendered)[0]['name']}.md")
+    return names
+
+
+def expected_cursor_rule_names(rules_src: Path) -> set[str]:
+    """``.mdc`` filenames ``_write_rules`` would produce for ``rules_src``.
+
+    Rule filenames are stem-based (no frontmatter lookup needed, unlike
+    agents), plus the two standing rules every bridge carries regardless of
+    ``rules_src`` content. Used by `bridge_state._cursor_mirror_missing`
+    (`F-049-2`, `D4`).
+    """
+    names = {f"{src.stem}.mdc" for src in rules_src.glob("*.md")} if rules_src.is_dir() else set()
+    names |= {CONSTITUTION_RULE, CHAT_TITLE_RULE}
+    return names
+
+
+def _write_agents(cursor_dir: Path, *, agents_src: Path | None = None) -> set[str]:
+    """Upsert Cursor agent profiles from ``agents_src``; return expected filenames.
+
+    Args:
+        cursor_dir: The ``.cursor/`` directory receiving the rendered files.
+        agents_src: Source directory of ``*.md`` agent profiles. Defaults to
+            the nucleus's own ``agents/`` — the eight core pipeline roles every
+            bridge needs. A profile pack's ``agents/`` is rendered through a
+            second call with this override (`D2`).
+    """
     dest = cursor_dir / "agents"
     dest.mkdir(parents=True, exist_ok=True)
+    src_root = agents_src if agents_src is not None else AGENTS_DIR / "agents"
     expected: set[str] = set()
-    for src in sorted((AGENTS_DIR / "agents").glob("*.md")):
+    for src in sorted(src_root.glob("*.md")):
         rendered = _cursor_agent_document(src.read_text(encoding="utf-8"))
         name = _split_frontmatter(rendered)[0]["name"]
         filename = f"{name}.md"
@@ -333,7 +477,9 @@ def _write_mcp(cursor_dir: Path, *, nucleus: bool) -> None:
     (cursor_dir / "mcp.json").write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
 
-def install_cursor_bridge(host_dir: Path, *, nucleus: bool) -> None:
+def install_cursor_bridge(
+    host_dir: Path, *, nucleus: bool, profile_dir: Path | None = None
+) -> None:
     """Materialize ``.cursor/`` for ``host_dir`` (nucleus or host checkout).
 
     Happy path is **incremental**: upsert files and prune orphans. Does **not**
@@ -343,10 +489,21 @@ def install_cursor_bridge(host_dir: Path, *, nucleus: bool) -> None:
     Args:
         host_dir: Repository root receiving ``.cursor/``.
         nucleus: When True, rewrite ``@.agents/`` paths for the nucleus layout.
+        profile_dir: Project-family profile pack to render alongside the core
+            bridge (`D2`, `F-049-1`). Before this parameter existed, a host
+            running ``--target cursor`` with ``--profile``/``--profile-path``
+            silently dropped the profile: exit ``0``, no error, zero profile
+            artifacts anywhere. ``agents/`` and ``rules/`` are rendered into
+            ``.cursor/`` (the latter via the `D3` trigger cascade);
+            ``skills/`` has no Cursor destination in this bridge and is named
+            on stdout, never dropped without a trace.
 
     Raises:
         PermissionError: Re-raised with a stable prefix
             ``bridge: permission denied on .cursor`` when a write/unlink fails.
+        ProfileRuleTriggerError: A profile rule has neither a
+            ``rule_triggers.json`` entry nor its own ``description``/``globs``
+            frontmatter (`D3`).
     """
     cursor_dir = host_dir / ".cursor"
     try:
@@ -357,6 +514,9 @@ def install_cursor_bridge(host_dir: Path, *, nucleus: bool) -> None:
         _write_chat_title_rule(cursor_dir)
         rule_names |= {CONSTITUTION_RULE, CHAT_TITLE_RULE}
         agent_names = _write_agents(cursor_dir)
+        if profile_dir is not None:
+            agent_names |= _write_agents(cursor_dir, agents_src=profile_dir / "agents")
+            rule_names |= _write_profile_rules(cursor_dir, profile_dir)
         _write_mcp(cursor_dir, nucleus=nucleus)
         _prune_dir(cursor_dir / "commands", expected_names=command_names, suffix=".md")
         _prune_dir(cursor_dir / "rules", expected_names=rule_names, suffix=".mdc")
@@ -366,3 +526,10 @@ def install_cursor_bridge(host_dir: Path, *, nucleus: bool) -> None:
             f"bridge: permission denied on .cursor ({exc})"
         ) from exc
     print(f"✅ Cursor bridge written under {cursor_dir}")
+    if profile_dir is not None:
+        skipped = _profile_skill_names(profile_dir)
+        if skipped:
+            print(
+                "⚠️  Cursor bridge has no skills/ destination — not mirrored: "
+                + ", ".join(skipped)
+            )

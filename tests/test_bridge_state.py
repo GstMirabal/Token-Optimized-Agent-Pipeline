@@ -7,6 +7,7 @@ did not exist and the portable boot asked only whether the lock matched HEAD.
 from __future__ import annotations
 
 import importlib
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -30,7 +31,10 @@ def _sources(root: Path) -> None:
     (root / "commands").mkdir(parents=True, exist_ok=True)
     (root / "commands" / "start.md").write_text("---\nx: 1\n---\nbody\n", encoding="utf-8")
     (root / "agents").mkdir(parents=True, exist_ok=True)
-    (root / "agents" / "principal_agent.md").write_text("profile\n", encoding="utf-8")
+    (root / "agents" / "principal_agent.md").write_text(
+        "---\nname: principal-agent\ndescription: Lead agent.\n---\nProfile body.\n",
+        encoding="utf-8",
+    )
 
 
 def _claude_mirror(root: Path) -> None:
@@ -44,9 +48,24 @@ def _claude_mirror(root: Path) -> None:
 
 
 def _cursor_mirror(root: Path) -> None:
-    """Scaffold the Cursor mirror directories."""
-    (root / ".cursor" / "commands").mkdir(parents=True, exist_ok=True)
-    (root / ".cursor" / "agents").mkdir(parents=True, exist_ok=True)
+    """Scaffold a complete Cursor mirror mapping every source file (`D4`).
+
+    ``rules/`` and ``mcp.json`` are part of this mirror's membership test even
+    though `_sources` carries no ``rules/`` source dir — `expected_cursor_rule_names`
+    treats an absent source as "only the two standing rules", so this fixture
+    carries exactly those two.
+    """
+    commands = root / ".cursor" / "commands"
+    commands.mkdir(parents=True, exist_ok=True)
+    (commands / "start.md").write_text("rendered\n", encoding="utf-8")
+    agents = root / ".cursor" / "agents"
+    agents.mkdir(parents=True, exist_ok=True)
+    (agents / "principal-agent.md").write_text("rendered\n", encoding="utf-8")
+    rules = root / ".cursor" / "rules"
+    rules.mkdir(parents=True, exist_ok=True)
+    (rules / "00-constitution.mdc").write_text("constitution\n", encoding="utf-8")
+    (rules / "01-chat-title.mdc").write_text("chat title\n", encoding="utf-8")
+    (root / ".cursor" / "mcp.json").write_text("{}\n", encoding="utf-8")
 
 
 def test_claude_mirror_absent_is_stale(bridge_state, tmp_path: Path) -> None:
@@ -153,3 +172,66 @@ def test_host_mode_separates_mirror_root_from_framework_root(
 
     _claude_mirror(host)
     assert bridge_state.mirror_missing(host, "claude", framework_root=framework) is False
+
+
+# --- F-049-2: bridge_stale(cursor) must see an incomplete mirror ----------
+
+
+def test_cursor_mirror_missing_rules_dir_is_stale(bridge_state, tmp_path: Path) -> None:
+    """Before D4 this returned False — is_dir() checked only commands/ and agents/."""
+    _sources(tmp_path)
+    _cursor_mirror(tmp_path)
+    shutil.rmtree(tmp_path / ".cursor" / "rules")
+    assert bridge_state.mirror_missing(tmp_path, "cursor") is True
+
+
+def test_cursor_mirror_missing_constitution_is_stale(bridge_state, tmp_path: Path) -> None:
+    """The one alwaysApply: true rule that imports agents.md, gone, must be caught.
+
+    This is the exact defect measured in Sprint 049 Phase 1: deleting every
+    .cursor/rules/*.mdc left a Cursor session able to boot with zero
+    governance rules loaded, undetected.
+    """
+    _sources(tmp_path)
+    _cursor_mirror(tmp_path)
+    (tmp_path / ".cursor" / "rules" / "00-constitution.mdc").unlink()
+    assert bridge_state.mirror_missing(tmp_path, "cursor") is True
+
+
+def test_cursor_mirror_missing_most_agents_is_stale(bridge_state, tmp_path: Path) -> None:
+    """13 of 14 agents deleted (the measured Phase 1 repro) must not read as fresh."""
+    _sources(tmp_path)
+    _cursor_mirror(tmp_path)
+    (tmp_path / ".cursor" / "agents" / "principal-agent.md").unlink()
+    assert bridge_state.mirror_missing(tmp_path, "cursor") is True
+
+
+def test_cursor_mirror_missing_mcp_json_is_stale(bridge_state, tmp_path: Path) -> None:
+    _sources(tmp_path)
+    _cursor_mirror(tmp_path)
+    (tmp_path / ".cursor" / "mcp.json").unlink()
+    assert bridge_state.mirror_missing(tmp_path, "cursor") is True
+
+
+def test_cursor_mirror_complete_is_fresh(bridge_state, tmp_path: Path) -> None:
+    """The positive case: a genuinely complete Cursor mirror is not stale."""
+    _sources(tmp_path)
+    _cursor_mirror(tmp_path)
+    assert bridge_state.mirror_missing(tmp_path, "cursor") is False
+
+
+def test_cursor_mirror_missing_one_rendered_rule_is_stale(
+    bridge_state, tmp_path: Path
+) -> None:
+    """A rules/ source file with no rendered .mdc counterpart is drift, not noise."""
+    (tmp_path / "commands").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "commands" / "start.md").write_text("---\nx: 1\n---\nb\n", encoding="utf-8")
+    (tmp_path / "agents").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "agents" / "principal_agent.md").write_text(
+        "---\nname: principal-agent\ndescription: Lead agent.\n---\nBody.\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "rules").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "rules" / "code_craft.md").write_text("# Rule\nBody.\n", encoding="utf-8")
+    _cursor_mirror(tmp_path)
+    assert bridge_state.mirror_missing(tmp_path, "cursor") is True

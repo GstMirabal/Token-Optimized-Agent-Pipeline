@@ -180,3 +180,141 @@ def test_main_resolve_mechanical_via_cli(
     out = capsys.readouterr().out
     assert code == 0
     assert "modelId=composer-2.5" in out
+
+
+# --- F-049-4: applied-vs-map drift must fail --check, not just print it ----
+
+
+def test_author_cell_discrepancy_true_when_both_known_and_differ() -> None:
+    """Measured live: `make cursor-tiers` printed this exact pair and exited 0."""
+    assert acm.author_cell_discrepancy("grok-4.6", "glm-5.2") is True
+
+
+def test_author_cell_discrepancy_false_when_equal() -> None:
+    assert acm.author_cell_discrepancy("glm-5.2", "glm-5.2") is False
+
+
+def test_author_cell_discrepancy_false_when_either_side_unknown() -> None:
+    assert acm.author_cell_discrepancy(None, "glm-5.2") is False
+    assert acm.author_cell_discrepancy("glm-5.2", None) is False
+    assert acm.author_cell_discrepancy(None, None) is False
+
+
+def _stub_catalogue(monkeypatch: pytest.MonkeyPatch, models: list[dict[str, Any]]) -> None:
+    monkeypatch.setattr(acm, "open_catalogue", lambda db_path: models)
+
+
+def test_run_report_flags_author_discrepancy(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _stub_catalogue(
+        monkeypatch,
+        [
+            {
+                "name": "grok-4.6",
+                "supportsAgent": True,
+                "degradationStatus": 0,
+                "parameterDefinitions": [{"id": "effort"}],
+            }
+        ],
+    )
+    monkeypatch.setattr(acm, "read_applied_model_id", lambda db_path: "grok-4.6")
+    monkeypatch.setattr(acm, "read_map_author_cursor", lambda: ("glm-5.2", "zhipu"))
+    monkeypatch.setattr(acm, "read_map_gate_claude_family", lambda: None)
+    proposals = acm.run_report(tmp_path / "fake.vscdb")
+    assert proposals["author_discrepancy"] is True
+
+
+def test_run_report_no_discrepancy_when_applied_matches_map(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _stub_catalogue(
+        monkeypatch,
+        [
+            {
+                "name": "glm-5.2",
+                "supportsAgent": True,
+                "degradationStatus": 0,
+                "parameterDefinitions": [{"id": "effort"}],
+            }
+        ],
+    )
+    monkeypatch.setattr(acm, "read_applied_model_id", lambda db_path: "glm-5.2")
+    monkeypatch.setattr(acm, "read_map_author_cursor", lambda: ("glm-5.2", "zhipu"))
+    monkeypatch.setattr(acm, "read_map_gate_claude_family", lambda: None)
+    proposals = acm.run_report(tmp_path / "fake.vscdb")
+    assert proposals["author_discrepancy"] is False
+
+
+def test_run_report_db_absent_no_discrepancy(tmp_path: Path) -> None:
+    """`open_catalogue` returns None for a missing DB; nothing to compare."""
+    proposals = acm.run_report(tmp_path / "does-not-exist.vscdb")
+    assert proposals["author_discrepancy"] is False
+
+
+def test_main_check_exits_2_on_author_discrepancy(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """The CLI regression: before this fix, --check printed the mismatch and
+    still exited 0 (measured: `make cursor-tiers` on this repository)."""
+    _stub_catalogue(
+        monkeypatch,
+        [
+            {
+                "name": "grok-4.6",
+                "supportsAgent": True,
+                "degradationStatus": 0,
+                "parameterDefinitions": [{"id": "effort"}],
+            },
+            {
+                "name": "claude-opus-5",
+                "supportsAgent": True,
+                "degradationStatus": 0,
+                "parameterDefinitions": [{"id": "effort"}],
+            },
+        ],
+    )
+    monkeypatch.setattr(acm, "read_applied_model_id", lambda db_path: "grok-4.6")
+    monkeypatch.setattr(acm, "read_map_author_cursor", lambda: ("glm-5.2", "zhipu"))
+    monkeypatch.setattr(acm, "read_map_gate_claude_family", lambda: "anthropic")
+    fake_db = tmp_path / "fake.vscdb"
+    fake_db.write_bytes(b"")
+    code = acm.main(["--check", "--db", str(fake_db)])
+    err = capsys.readouterr().err
+    assert code == 2
+    assert "differs from the tier map" in err
+
+
+def test_main_check_passes_when_applied_matches_map(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _stub_catalogue(
+        monkeypatch,
+        [
+            {
+                "name": "glm-5.2",
+                "supportsAgent": True,
+                "degradationStatus": 0,
+                "parameterDefinitions": [{"id": "effort"}],
+            },
+            {
+                "name": "claude-opus-5",
+                "supportsAgent": True,
+                "degradationStatus": 0,
+                "parameterDefinitions": [{"id": "effort"}],
+            },
+        ],
+    )
+    monkeypatch.setattr(acm, "read_applied_model_id", lambda db_path: "glm-5.2")
+    monkeypatch.setattr(acm, "read_map_author_cursor", lambda: ("glm-5.2", "zhipu"))
+    monkeypatch.setattr(acm, "read_map_gate_claude_family", lambda: "anthropic")
+    fake_db = tmp_path / "fake.vscdb"
+    fake_db.write_bytes(b"")
+    code = acm.main(["--check", "--db", str(fake_db)])
+    out = capsys.readouterr().out
+    assert code == 0
+    assert "gate proposals present, author cell matches applied model" in out
