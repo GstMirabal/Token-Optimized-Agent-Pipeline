@@ -22,8 +22,13 @@ progress, whatever the transcript says.
 invoked_by: pipeline_workflow.md#loop_guard (first action of every iteration).
 
 Usage:
-    python3 scripts/loop_guard.py check
+    python3 scripts/loop_guard.py check [--sprint-dir DIR]
     python3 scripts/loop_guard.py start --max-iterations N [--success "<condition>"]
+        [--sprint-dir DIR]
+
+``--sprint-dir`` names the directory holding ``task_scope.md``; omitted, it comes
+from the anchor's ``current_sprint.path``. Same flag as the sibling checks
+``check_task_scope.py`` and ``check_forge_ladder.py``.
 
 Exit codes:
     0 — the loop may continue
@@ -39,7 +44,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ACTIVE_STATE = Path("docs/active_state.json")
-TASK_SCOPE = Path("task_scope.md")
+TASK_SCOPE_NAME = "task_scope.md"
 REQUIRED_FIELDS = ("iteration", "max_iterations", "success_condition")
 
 
@@ -65,16 +70,53 @@ def head_sha() -> str:
     return result.stdout.strip() if result.returncode == 0 else ""
 
 
-def status_hash() -> str:
+def task_scope_path(sprint_dir: str | None = None) -> Path:
+    """Where this sprint's ``task_scope.md`` is, host-scoped.
+
+    ``agents.md §5 mandatory_topology`` puts it inside the sprint directory,
+    ``docs/sprints/[Sprint_ID]-[Stack]-[Layer]/``, and the anchor's
+    ``current_sprint.path`` names that directory. A bare ``Path("task_scope.md")``
+    resolved to the repository root instead, where the file does not exist in any
+    host — and ``status_hash`` returns ``""`` for a missing file, so the failure
+    was **silent**: the fingerprint was empty on every iteration, which means the
+    Status-column half of the progress signal never fired. A guard that cannot
+    see movement cannot see its absence either, and fail-closed is the whole
+    design of this script.
+
+    Resolved without ``scripts/_root.py``: this script is host-scoped by charter
+    (Sprint 023 ``C0.3``), and the sprint belongs to the host, not the framework.
+
+    Args:
+        sprint_dir: explicit override, the ``--sprint-dir`` of this script's
+            siblings ``check_task_scope.py`` and ``check_forge_ladder.py``.
+
+    Returns:
+        Path: the sprint directory's file when one is named, else the
+        repository-root path, which keeps the pre-Sprint-051 behaviour for a
+        repository that really does keep it there.
+    """
+    if sprint_dir:
+        return Path(sprint_dir) / TASK_SCOPE_NAME
+    declared = (load_state().get("current_sprint") or {}).get("path")
+    if declared:
+        candidate = Path(declared) / TASK_SCOPE_NAME
+        if candidate.exists():
+            return candidate
+    return Path(TASK_SCOPE_NAME)
+
+
+def status_hash(sprint_dir: str | None = None) -> str:
     """Fingerprint of the Status column, so 'nothing moved' is measurable."""
-    if not TASK_SCOPE.exists():
+    path = task_scope_path(sprint_dir)
+    if not path.exists():
         return ""
-    statuses = [line for line in TASK_SCOPE.read_text(encoding="utf-8").splitlines()
+    statuses = [line for line in path.read_text(encoding="utf-8").splitlines()
                 if line.startswith("|")]
     return hashlib.sha256("\n".join(statuses).encode()).hexdigest()[:16]
 
 
-def start(max_iterations: int, success_condition: str) -> int:
+def start(max_iterations: int, success_condition: str,
+          sprint_dir: str | None = None) -> int:
     """Declare the stop set before the first iteration runs."""
     if not success_condition:
         print("❌ A loop needs a machine-checkable success condition declared up "
@@ -88,7 +130,7 @@ def start(max_iterations: int, success_condition: str) -> int:
         "max_iterations": max_iterations,
         "success_condition": success_condition,
         "last_commit_sha": head_sha(),
-        "last_status_hash": status_hash(),
+        "last_status_hash": status_hash(sprint_dir),
         "stagnant_iterations": 0,
         "last_updated": now(),
     }
@@ -97,7 +139,7 @@ def start(max_iterations: int, success_condition: str) -> int:
     return 0
 
 
-def check() -> int:
+def check(sprint_dir: str | None = None) -> int:
     """Advance the counter and decide whether the loop may continue."""
     state = load_state()
     loop = state.get("loop")
@@ -116,7 +158,7 @@ def check() -> int:
               f"   Success condition was: {loop['success_condition']}", file=sys.stderr)
         return 2
 
-    sha, statuses = head_sha(), status_hash()
+    sha, statuses = head_sha(), status_hash(sprint_dir)
     moved = sha != loop.get("last_commit_sha") or statuses != loop.get("last_status_hash")
     # This check runs at the START of an iteration, so the first one compares
     # against the baseline written by `start` before any work could happen.
@@ -150,15 +192,23 @@ def check() -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = parser.add_subparsers(dest="command", required=True)
-    sub.add_parser("check", help="Advance one iteration and enforce the stops.")
+    # Both subcommands take --sprint-dir, matching this script's siblings
+    # `check_task_scope.py` and `check_forge_ladder.py`. Omitted, the sprint
+    # directory comes from the anchor's `current_sprint.path`.
+    scope_help = "Sprint directory holding task_scope.md; default: the anchor's."
+    check_parser = sub.add_parser(
+        "check", help="Advance one iteration and enforce the stops."
+    )
+    check_parser.add_argument("--sprint-dir", default=None, help=scope_help)
     start_parser = sub.add_parser("start", help="Arm the loop with its stop set.")
     start_parser.add_argument("--max-iterations", type=int, required=True)
     start_parser.add_argument("--success", default="", help="Machine-checkable success condition.")
+    start_parser.add_argument("--sprint-dir", default=None, help=scope_help)
 
     args = parser.parse_args()
     if args.command == "start":
-        return start(args.max_iterations, args.success)
-    return check()
+        return start(args.max_iterations, args.success, args.sprint_dir)
+    return check(args.sprint_dir)
 
 
 if __name__ == "__main__":
