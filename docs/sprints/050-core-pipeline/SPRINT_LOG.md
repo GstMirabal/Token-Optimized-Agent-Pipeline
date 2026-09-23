@@ -31,8 +31,8 @@ Tracking of atomic goals achieved during the session.
 - [x] **Phase 4.2 — Skill Assignment**: `skill_assignment.md` — no reusable skill found; fresh script confirmed correct (`195eba9`)
 - [x] **Phase 4.3 — Rule Audit**: `task_scope.md` — `check_task_scope.py` exit `0`, APPROVED for Phase 5 (`549d35d`)
 - [x] **Phase 5 — Approval Gate**: Approved by GstMirabal, 2026-09-20, against `532b508` — two holds resolved (missing Phase 2-4.3 artifacts; stale `audit_plan.py` result) — sealed (`35c3863`)
-- [x] **Phase 6 — Execution**: complete — all 12 units (`U1`-`U10` + `U2a`) landed, `make verify` exit `0` (806 passed), `check_task_scope.py` exit `0`
-- [ ] **Phase 7 — Quality Gate**
+- [x] **Phase 6 — Execution**: complete — all 11 units (`U1`-`U10` + `U2a`) landed, `make verify` exit `0` (806 passed), `check_task_scope.py` exit `0`
+- [~] **Phase 7 — Quality Gate**: round 1 both `RECORD`/`testifying` (QA, Tester) — remediation of accumulated findings in progress, round 2 pending on both gates
 - [ ] **Phase 8 — Sprint Closeout**: `PHASE_REGISTER.md`, Master Ledger entry
 
 ---
@@ -75,41 +75,81 @@ here, not renegotiated after the fact.
 
 **Measured** (`python3 scripts/quality_audit.py --report .` from the `.agents`
 root, `DEFAULT_EXCLUDE_DIRS` — `venv_skillopt/`, `node_modules/`, `.git/` —
-applied by the script itself):
+applied by the script itself), at the measurement window `80bb5e1..43e60b3`
+(no `*.py` files changed between the two — `git diff --stat 80bb5e1 43e60b3
+-- '*.py'` is empty, so any commit in that window gives the same figure;
+both Gate 1 and Gate 2 independently reproduced it, each at a different
+commit in the same window):
 
-| Figure | Value |
-| :--- | :--- |
-| First-party Python functions scanned | 1428 |
-| Compliant | 1337 |
-| Violating | 91 |
-| Violation rate | 91/1428 = 6.37% |
-| Unparsed | 0 |
+| Figure | At `80bb5e1..43e60b3` | At HEAD (`a198f91`, Phase 6 close) |
+| :--- | :--- | :--- |
+| First-party Python functions scanned | 1428 | 1445 |
+| Compliant | 1337 | 1354 |
+| Violating | 91 | 91 |
+| Violation rate | 91/1428 = 6.37% | 91/1445 = 6.30% |
+| Unparsed | 0 | 0 |
 
-91/1428 = 6.37% is **> 0 and ≤ 20%**, so **`D5` Branch B applies**: `U3` ships
-the standalone `make quality-audit` target only; `quality-audit` is
-deliberately **not** added to `verify`'s dependency chain — same convention as
-the existing `bridge-state` and `cursor-era-audit` targets, each carrying its
-own stated reason as a `Makefile` comment. Remediation of the 91 violating
-units is **routed to Sprint 051**, per `D5`'s own text ("`U3` ships the
-standalone target only, the violating units are listed in `SPRINT_LOG.md`, and
-their remediation is routed to Sprint 051").
+The HEAD figure is higher in denominator only — later units in the sprint
+(chiefly `U6`) added functions to the tree; the violation count held at 91
+throughout. 91/1428 = 6.37% is **> 0 and ≤ 20%**, so **`D5` Branch B
+applies**: `U3` ships the standalone `make quality-audit` target only;
+`quality-audit` is deliberately **not** added to `verify`'s dependency
+chain — same convention as the existing `bridge-state` and
+`cursor-era-audit` targets, each carrying its own stated reason as a
+`Makefile` comment. Remediation of the 91 violating units is **routed to
+Sprint 051**, per `D5`'s own text ("`U3` ships the standalone target only,
+the violating units are listed in `SPRINT_LOG.md`, and their remediation is
+routed to Sprint 051").
 
-The full 91-unit register is reproducible on demand and not duplicated here in
-full (`agents.md §2 token_saver`):
+The full register is reproducible on demand and not duplicated here in full
+(`agents.md §2 token_saver`):
 
 ```
 python3 scripts/quality_audit.py --report . | grep '^FAIL'
 ```
 
-At time of measurement the 91 violations span `hooks/`, `scripts/`, `skills/`
-and `tests/`; none is `unparsed`. Representative entries (full list via the
-command above): `hooks/on_commit.py:835 main lines=40 depth=4`,
-`scripts/session_state.py:354 main lines=51 depth=2`,
-`skills/skill-creator/scripts/run_eval.py:35 run_single_query lines=100 depth=10`.
+At the `80bb5e1..43e60b3` measurement window the 91 violations span `hooks/`,
+`scripts/`, `skills/` and `tests/`; none is `unparsed`. Representative
+entries, anchored to that window (full list via the command above, against
+HEAD — line numbers on files touched later in the sprint will differ from
+this table, which is frozen at the measurement commit):
+`hooks/on_commit.py:835 main lines=40 depth=4`,
+`scripts/session_state.py:354 main lines=51 depth=2` (at HEAD, after `U6`:
+`scripts/session_state.py:433 main lines=57 depth=2` — grew during this
+sprint with the instrument already in the tree; see the Sprint 051 scope
+note below),
+`skills/skill-creator/scripts/run_eval.py:35 run_single_query lines=100 depth=10`,
+and — named explicitly rather than omitted, per Gate 1 F5 — the auditor's
+own worst violation: `scripts/quality_audit.py:299 _mask_non_code lines=103
+depth=5`, inside the 91 and pre-authorized by the plan's own Verification
+table (`quality_audit.py scripts/` → "`2` under branch B with each
+violation named").
 
 `make quality-audit` therefore exits `2` against the current tree — this is
 the instrument correctly reporting the measured baseline, not a defect in the
 target.
+
+---
+
+## 📋 Sprint 051 scope (accumulated from Phase 7 findings)
+
+Not remediated here — `D5` branch B already routes the 91 baseline violations
+to Sprint 051, and these are additions to that same routed scope, not new
+work for 050:
+
+- The 91 baseline violations (reproduce: `python3 scripts/quality_audit.py
+  --report . | grep '^FAIL'`), including the auditor's own worst case,
+  `scripts/quality_audit.py:299 _mask_non_code` (103 executable lines, 206%
+  of the limit) — Gate 1 finding F5.
+- `scripts/session_state.py:main` grew from 51 to 57 executable lines during
+  `U6`, with the auditor already available in the tree — Gate 1 finding F6.
+- `scripts/quality_audit.py`'s JS/TS scanner: a `.js`/`.ts` file using only
+  self-closing JSX tags (no closing-tag signature) is scanned rather than
+  reported `unparsed` — the measurement itself stays correct (Gate 2
+  independently confirmed a 60-line self-closing-JSX sample correctly FAILs
+  at lines=62/depth=5, and `agents.md §1` already enumerates the exact
+  `unparsed` trigger signals, so this is not a false governance claim) — Gate
+  2 finding (c).
 
 ---
 
@@ -122,8 +162,19 @@ verify` and `config/template_gates.json`) rejects any placeholder verdict token,
 and a fabricated row would teach authors to invent verdicts
 (`config/template_gates.json` `gate_exceptions`).
 
+**Gate 2 provenance note.** The `tester_agent` dispatch for Gate 1 round 1 was
+interrupted when the hosting Claude Code session ended before it finished (no
+completion record, transcript preserved). It was resumed via `SendMessage` to
+its existing agent id, preserving its own accumulated context rather than
+restarting fresh — the resume message carried only continuation instructions,
+no new findings or steering from the resuming session. Its verdict below is
+its own work product, produced across two session windows, not a
+session-authored row.
+
 | Gate | Round | Verdict | Class | Notes |
 | :--- | :--- | :--- | :--- | :--- |
+| QA (Gate 1) | 1 | RECORD | testifying | Mechanical checks all green and independently reproduced: pytest 806/806 exit 0, `make verify` exit 0, `verify_references.py`/`check_task_scope.py`/`check_gate_log.py`/`map_workflows.py --check`/`audit_plan.py` all exit 0, 31/31 commits carry `#050`, no TODO/FIXME, no absolute paths, Spanish confined to the plan. Over-crediting check passes: every clause of `agents.md:41,43,47,48` and both `config/invocation_exceptions.json` notes verified against `scripts/quality_audit.py`'s actual behavior; exit 2/0, D1 executable-line and D2 ancestor-set definitions match `_BLOCK_STMT_TYPES` exactly; F-049-7 not reintroduced. D5 Branch B correctly wired (`Makefile:26,136`, not a `verify` dependency, reason stated); U2 `80bb5e1` and U6 `0ddc0f8` each carry their paired test in-commit; U1/U5 sequential per D8; U2a documented as a mid-execution generated-file consequence; workflows name the literal `set-topology` command with done-criteria (`close_workflow.md:28`, `deployment_workflow.md:27` `topology_writeback`, RA-13-separated). Eight record-class findings (F1-F8), all reconciled in this document and the linked files at Phase 7 remediation; none was `charter` or `instructing`. |
+| Tester (Gate 2) | 1 | RECORD | testifying | Suite green: pytest 806 passed exit 0 (780 main + 14 test_quality_audit + 12 test_session_state); make verify exit 0; tree clean. JS/TS unparsed guarantee reproduced on independent samples (.jsx, typed .ts, @decorator .ts/.js, closing-tag JSX in .js all UNPARSED; none counted compliant) — no HIGH finding. U6 defect reproduced on main (set-topology invalid choice, exit 2; 0 topology_version writers); fix derives value (sandbox CHANGELOG [7.1.4] + sprint 7 -> 7.1.4-007-in_progress), idempotent, refusal paths exit 2. Mutations M1-M3, M5-M7 killed; M4 (hardcoding "4.32.0" in set_topology) survived — closed at Phase 7 remediation by adding a differently-versioned fixture. Findings (a)-(d) reconciled in this document and the linked files at Phase 7 remediation. D5 baseline 91/1428 (6.37%) independently reproduced at `80bb5e1`, confirmed same measurement window as Gate 1's `43e60b3` (`git diff --stat 80bb5e1 43e60b3 -- '*.py'` empty). Abort 1/2 not triggered: stdlib-only, no Node dependency; 6.37% < 20%. |
 
 ---
 
