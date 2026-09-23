@@ -38,11 +38,20 @@ written in stdlib Python, not a Node-equivalent parser. It recognises:
 - Class/object method shorthand (`name(params) { ... }`), detected by excluding
   JS reserved keywords from the header-name position -- this also matches
   object-literal method shorthand, not class bodies exclusively.
-- Arrow functions assigned to a binding with a parenthesised parameter list
-  (`const foo = (...) => { ... }`), when the arrow has a block body. A
-  single-bare-parameter arrow without parens (`const f = x => {}`) is NOT
-  recognised. An expression-bodied arrow (`const f = (x) => x + 1`, no `{}`)
-  has no measurable body and is not counted as a unit.
+- Arrow functions assigned to a binding, with either a parenthesised
+  parameter list (`const foo = (...) => { ... }`) or a single bare parameter
+  without parens (`const foo = x => { ... }`), when the arrow has a block
+  body. An expression-bodied arrow (`const f = (x) => x + 1` or
+  `const f = x => x + 1`, no `{}`) has no measurable body and is not counted
+  as a unit -- neither form is marked `unparsed`.
+- A bare-parameter arrow used as an inline callback argument (`items.map(x
+  => x + 1)`, not assigned to a binding) is not itself a recognised unit;
+  its lines are counted as part of the enclosing function/method that
+  contains it, the same as any other statement in that body. It does not
+  mark the file `unparsed` -- inline single-parameter callbacks are
+  idiomatic in nearly all real-world JS (`.map`/`.filter`/`.reduce`
+  arguments), and treating one as a whole-file parse failure measured
+  almost nothing on real code (`F-049-8`, this fix).
 
 It explicitly does **not** parse JSX, TypeScript type-level syntax, or
 decorators. A file/construct it cannot confidently handle is reported
@@ -63,10 +72,11 @@ parser over-crediting itself). Concretely:
 - A file whose braces do not balance (a truncated or malformed file) is
   `unparsed` -- brace-depth scanning has no reliable answer once the file's
   own braces never close.
-- A bare-parameter arrow function without surrounding parentheses (`x => ...`
-  rather than `(x) => ...`) makes the whole file `unparsed` -- this is the
-  declared arrow-recognition limit above, surfaced in the register instead of
-  silently producing zero units.
+- A bare-parameter arrow assigned to a binding (`const f = x => { ... }`) is
+  recognised and measured like any other declared function -- see the
+  binding-recognition bullet above. A bare-parameter arrow used inline as a
+  callback argument is folded into its enclosing unit's line count, never
+  flagged `unparsed` on its own.
 
 JS/TS line counting is physical-line granularity (non-blank lines inside the
 matched `{ ... }` span, including any nested inner function's lines, which are
@@ -287,6 +297,8 @@ JS_KEYWORDS = frozenset(
 _HEADER_RE = re.compile(
     r"(?P<func_kw>\bfunction\b)\s*\*?\s*(?P<func_name>[A-Za-z_$][\w$]*)?\s*(?=\()"
     r"|\b(?:const|let|var)\s+(?P<arrow_name>[A-Za-z_$][\w$]*)\s*(?::[^=(]*)?=\s*(?:async\s+)?(?=\()"
+    r"|\b(?:const|let|var)\s+(?P<bound_bare_name>[A-Za-z_$][\w$]*)\s*(?::[^=(]*)?"
+    r"=\s*(?:async\s+)?[A-Za-z_$][\w$]*\s*=>\s*(?=\{)"
     r"|(?<![\w$.])(?P<method_name>[A-Za-z_$][\w$]*)\s*(?=\()"
 )
 
@@ -299,13 +311,6 @@ _TS_TYPE_SIGNAL_RE = re.compile(
     r"|<[A-Za-z_$][\w$]*(?:\s*,\s*[A-Za-z_$][\w$]*)*>\s*\("
     r"|:\s*[A-Za-z_$]"
 )
-
-# A bare identifier immediately followed by `=>` (whitespace only in between)
-# is a single-parameter arrow function without surrounding parens -- the
-# declared arrow-recognition limit. Excludes `) =>` (a real, recognised
-# parenthesised parameter list, whose token immediately before `=>` is `)`,
-# not the parameter name).
-_BARE_ARROW_SIGNAL_RE = re.compile(r"(?<!\))\b[A-Za-z_$][\w$]*\s*=>")
 
 _KEYWORD_BLOCK_PRECEDERS = frozenset({"else", "try", "do", "finally"})
 
@@ -426,6 +431,21 @@ def _mask_non_code(source: str) -> str:
     return "".join(out)
 
 
+def _next_brace_depth(c: str, depth: int) -> int:
+    """Depth after consuming one character of a brace-only stream.
+
+    `{` increments, `}` decrements; any other character leaves `depth`
+    unchanged. A `}` can only ever take `depth` down to `-1` from `0` here
+    (it was never negative on entry -- the caller returns as soon as it is),
+    so the caller's single `depth < 0` check catches every unmatched `}`.
+    """
+    if c == "{":
+        return depth + 1
+    if c == "}":
+        return depth - 1
+    return depth
+
+
 def _has_unbalanced_braces(masked: str) -> bool:
     """True when `masked` is not a well-formed balanced brace sequence.
 
@@ -435,12 +455,9 @@ def _has_unbalanced_braces(masked: str) -> bool:
     """
     depth = 0
     for c in masked:
-        if c == "{":
-            depth += 1
-        elif c == "}":
-            depth -= 1
-            if depth < 0:
-                return True
+        depth = _next_brace_depth(c, depth)
+        if depth < 0:
+            return True
     return depth != 0
 
 
@@ -456,11 +473,6 @@ def _detect_unparsed_reason(masked: str, suffix: str) -> str | None:
         return "decorator syntax detected (`@Name`): scanner does not parse decorators"
     if suffix == ".ts" and _TS_TYPE_SIGNAL_RE.search(masked):
         return "TypeScript type-level syntax detected (interface/type/enum/generic/annotation)"
-    if _BARE_ARROW_SIGNAL_RE.search(masked):
-        return (
-            "bare-parameter arrow function detected (`x =>` without parens): "
-            "scanner does not recognise this construct"
-        )
     return None
 
 
@@ -548,6 +560,55 @@ def _measure_js_body(masked: str, body_start: int, body_end: int) -> tuple[int, 
     return executable_lines, max_depth
 
 
+def _locate_paren_body(masked: str, m: re.Match[str]) -> tuple[int, int] | None:
+    """Body span for a `function`/method/parenthesised-arrow header match.
+
+    Finds the matching `)` of the parameter list right after the header, then
+    confirms a `{`/`=> {` body after it (`_confirm_body_start`). `None` when
+    there is no `(` immediately after the header, no matching `)`, or no
+    block body -- a plain call, or an expression-bodied arrow, not a unit.
+    """
+    open_paren = m.end()
+    if open_paren >= len(masked) or masked[open_paren] != "(":
+        return None
+    close_paren = _find_matching(masked, open_paren, "(", ")")
+    if close_paren == -1:
+        return None
+    body_start = _confirm_body_start(masked, close_paren + 1)
+    if body_start is None:
+        return None
+    return body_start, _find_matching(masked, body_start, "{", "}")
+
+
+def _locate_header_body(masked: str, m: re.Match[str]) -> tuple[str, int, int] | None:
+    """Name and body span for one `_HEADER_RE` match, or `None` if not a unit.
+
+    A bound bare-parameter arrow (`const f = x => { ... }`) has no
+    parameter-list parens: `_HEADER_RE`'s own lookahead already confirmed the
+    `{` immediately follows, so the body starts right at `m.end()`. Every
+    other header shape goes through `_locate_paren_body`.
+    """
+    if m.group("bound_bare_name") is not None:
+        name = m.group("bound_bare_name")
+        body_start, body_end = m.end(), _find_matching(masked, m.end(), "{", "}")
+    else:
+        if m.group("func_kw") is not None:
+            name = m.group("func_name") or "<anonymous>"
+        elif m.group("arrow_name") is not None:
+            name = m.group("arrow_name")
+        else:
+            name = m.group("method_name") or ""
+            if name in JS_KEYWORDS:
+                return None
+        located = _locate_paren_body(masked, m)
+        if located is None:
+            return None
+        body_start, body_end = located
+    if body_end == -1:
+        return None
+    return name, body_start, body_end
+
+
 def scan_js_file(path: Path) -> list[Unit]:
     """All recognised function/arrow/method units in one JS/TS file.
 
@@ -566,28 +627,10 @@ def scan_js_file(path: Path) -> list[Unit]:
 
     units: list[Unit] = []
     for m in _HEADER_RE.finditer(masked):
-        if m.group("func_kw") is not None:
-            name = m.group("func_name") or "<anonymous>"
-        elif m.group("arrow_name") is not None:
-            name = m.group("arrow_name")
-        else:
-            name = m.group("method_name") or ""
-            if name in JS_KEYWORDS:
-                continue
-
-        open_paren = m.end()
-        if open_paren >= len(masked) or masked[open_paren] != "(":
+        located = _locate_header_body(masked, m)
+        if located is None:
             continue
-        close_paren = _find_matching(masked, open_paren, "(", ")")
-        if close_paren == -1:
-            continue
-        body_start = _confirm_body_start(masked, close_paren + 1)
-        if body_start is None:
-            continue
-        body_end = _find_matching(masked, body_start, "{", "}")
-        if body_end == -1:
-            continue
-
+        name, body_start, body_end = located
         lineno = masked.count("\n", 0, m.start()) + 1
         executable_lines, max_depth = _measure_js_body(masked, body_start, body_end)
         units.append(

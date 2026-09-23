@@ -207,25 +207,68 @@ def test_js_unbalanced_braces_reported_unparsed_not_silently_dropped(
     assert unparsed == 1
 
 
-def test_js_bare_parameter_arrow_reported_unparsed_not_silently_dropped(
+def test_js_bare_parameter_arrow_expression_body_not_counted_not_unparsed(
     tmp_path: Path,
 ) -> None:
-    """A bare-parameter arrow (`x => ...`, no parens) -> unparsed, never absent.
-
-    Declared scanner limit (`D4`): single-bare-parameter arrows without parens
-    are not recognised. Before this fix that limit produced an empty register
-    instead of an `unparsed` entry.
+    """A bound but expression-bodied bare arrow (`const f = x => x + 1;`, no
+    `{}`) has no measurable body -- same treatment as the already-documented
+    parenthesised expression-bodied arrow: not counted as a unit, and NOT
+    marked `unparsed` (fixed from the pre-fix over-broad whole-file signal).
     """
     path = tmp_path / "bare_arrow.js"
     path.write_text("const f = x => x + 1;\n", encoding="utf-8")
 
     units = qa.scan_js_file(path)
 
+    assert units == []
+
+
+def test_js_inline_bare_arrow_callbacks_measured_not_unparsed(tmp_path: Path) -> None:
+    """Idiomatic inline single-param arrow callbacks (`.map`/`.filter`/
+    `.reduce`) inside a normal declared function must be measured as part of
+    the enclosing function, not flag the whole file `unparsed` (F-049-8: the
+    prior fix's `_BARE_ARROW_SIGNAL_RE` fired on ANY bare arrow anywhere).
+    """
+    source = (
+        "function processItems(items) {\n"
+        "  return items.map(x => x + 1)"
+        ".filter(x => x > 0)"
+        ".reduce((acc, x) => acc + x, 0);\n"
+        "}\n"
+    )
+    path = tmp_path / "process.js"
+    path.write_text(source, encoding="utf-8")
+
+    units = qa.scan_js_file(path)
+
     assert len(units) == 1
-    assert units[0].status == "unparsed"
-    compliant, measured, unparsed = qa.compliance_figure(units)
-    assert compliant == 0
-    assert unparsed == 1
+    unit = units[0]
+    assert unit.name == "processItems"
+    assert unit.status == "PASS"
+    assert unit.executable_lines < 50
+    assert unit.max_depth <= 3
+
+
+def test_js_bound_bare_arrow_block_body_recognised_and_measured(
+    tmp_path: Path,
+) -> None:
+    """A bare-parameter arrow assigned to a binding, WITH a block body
+    (`const f = x => { ... }`), is a recognised function header (`D4`) and
+    is measured -- reported FAIL when it exceeds the length threshold, never
+    `unparsed` and never silently dropped.
+    """
+    body_lines = "\n  ".join(f"const x{i} = {i};" for i in range(60))
+    source = f"const handler = x => {{\n  {body_lines}\n  return x59;\n}};\n"
+    path = tmp_path / "handler.js"
+    path.write_text(source, encoding="utf-8")
+
+    units = qa.scan_js_file(path)
+
+    assert len(units) == 1
+    unit = units[0]
+    assert unit.name == "handler"
+    assert unit.status == "FAIL"
+    assert unit.executable_lines > 50
 
 
 # --------------------------------------------------------------------------
