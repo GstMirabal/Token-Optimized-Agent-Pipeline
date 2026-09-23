@@ -73,6 +73,23 @@ inferred from where the section sits.
 | **Opened, still open** | **`F-093-G1`** — Double-Gate has no severity class. Reproduced against `84201d2` (commands in that entry). Not patched |
 | **Still open (unchanged)** | **`F-021-A2`**, **`F-026-A2`** (closed later in Sprint 030 — see status table above) |
 
+**Status at Sprint 051 (2026-09-23, `ai-sprint/051`).** A host re-verified every
+framework-class finding it had ever recorded — 26 in all — against `v4.32.0`
+rather than against any register, and the result is why this block exists: **the
+`/start` briefing was reporting `Still open: 0`.** Against nine reproducible
+defects. `agents.md §0` tells every nucleus session to read this file before
+planning, so a register that reports nothing open misdirects precisely the
+sessions that obey it.
+
+| | |
+| :--- | :--- |
+| **Closed, and never marked as such** | `F-086-A1` (resolved by design — `implementer_agent` owns those trees, `ADR-0009`) · `F-087-P1` (`session_probe.py:447` adds `UNDETERMINED`) · `F-086-S1` (`SCANNED_SUFFIXES` covers `.tf`/`.yml`/`.yaml`/`.toml` plus whole-name files) · `F-086-S2` (`on_commit.py:128` adds the unquoted pattern) · `F-086-S3` (`SKILL.md` is 247 lines, not a 20-line stub) · `F-093-N1` (`agents.md §0` states it is host-only by design) · `F-093-N2` (`check_readme_counts.py` `main()` does `os.chdir(agents_root())`; verified from `/` and from a home directory, exit `0` both) · `G-03` (`check_task_scope.py` gained `--sprint-dir`) · `C5` (`agents.md §3 symlink_gate_exclusion`) · `#12` (14 of 14 profiles declare `model:`) |
+| **Closed since the host last looked** | `_bridge_permission_denied` generalised beyond `.cursor` in Sprint 044 — its own docstring records it · `ci_gate.py:55,148` handles the HTTP 403 a private repository returns · `check_forge_ladder.py` `_skill_forge_claimed` no longer scans prose for a skill path · `F-107-N1` `check_role_artifact.py` moved off `SubagentStop` to `config/template_gates.json:84` |
+| **Closed by this sprint** | `F-112-N1` drift judged against HEAD rather than the integration branch · `F-112-N2` no pytest configuration, so rootdir escaped into the host · `F-112-N3` and its shell sibling, tests naming a platform temporary path instead of honouring `TMPDIR` · `H099-3` `node_delta` raising `TypeError` on a present-but-null count, **unchanged for eleven sprints because this file said nothing was open** · `loop_guard.py` looking for `task_scope.md` at the repository root, where no host keeps it · the IDE-branch-prefix gap in `RA-03`/`RA-12` · the Phase 5 approval that did not say it names one `Sprint_ID` |
+| **Still open** | **`F-051-R1`**, opened by this sprint — `config/artifact_registry.json` and `pipeline_workflow.md` Phase 8 name `principal_agent` as the author of `IMPLEMENTATION_PLAN.md`, `PHASE_REGISTER.md` and `CHANGELOG.md`, and `agents/principal_agent.md:4` declares `tools: Read, Glob, Grep, TodoWrite` — no `Write`, no `Edit`. Reproduced live: a Sprint 051 session dispatched that profile to author its Implementation Plan and had to file the text itself. Wider than the host's report, which named only the `CHANGELOG` row. **Not patched here**: either the profile gains `Write` for its own declared documents, or the registry names a writer separately from the owner, and choosing between those redraws a role boundary — which `§9`'s principle says is not resolved by improvisation inside a sprint |
+| **Verdict changed, not closed** | **`REVDOC-G1`** — the graph dropping unprocessable files is **not a framework defect**: `Makefile graphify-update`/`-rebuild` shell straight to a third-party package and the nucleus carries no wrapper that could record a drop (`grep` for skip/unprocessable/dropped across `scripts/` and `hooks/` → 0). The **risk** is still the nucleus's, because `§2 graph_sovereignty` mandates querying the graph before any codebase research, and a silently incomplete graph answers confidently. Closing it would need a new reconciliation mechanism, not a fix |
+| **Ticked on what basis** | Re-measurement against `v4.32.0`, never on a sprint record. Two of the host's own verdicts were **wrong on first pass and corrected**: `F-093-N2` was reported open by reading the symptom line and not the call path, and the `_bridge_permission_denied` lead was carried from a stale session note. Both are recorded above as closed |
+
 **The corrections reproduction produced are recorded where a reader needs them**,
 not collected in a list. `F-086-S3` carries three: it was **narrower** than
 reported in one respect, **wider** in another, and its Evidence block was
