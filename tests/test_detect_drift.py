@@ -215,3 +215,80 @@ def test_integration_ref_is_none_when_head_is_the_integration_branch(
     assert dd.integration_ref() is None
     _git(repo, "checkout", "-q", "-b", "ai-sprint/051")
     assert dd.integration_ref() == "main"
+
+
+# --- Sprint 051: landed work that the ledger already accounts for -------------
+
+
+def _add_unreleased_entry(repo: Path, text: str) -> None:
+    """Append one bullet under `## [Unreleased]`, leaving the file otherwise alone."""
+    path = repo / "CHANGELOG.md"
+    body = path.read_text(encoding="utf-8")
+    path.write_text(
+        body.replace("## [Unreleased]\n", f"## [Unreleased]\n\n- {text}\n", 1),
+        encoding="utf-8",
+    )
+
+
+def test_a_ledger_maintenance_commit_cannot_appear_in_the_ledger_it_writes(
+    repo: Path,
+) -> None:
+    """`reconciliation_workflow.md` Phase 3 produces exactly this commit.
+
+    The reporting host had the commit that authored an `[Unreleased]` entry
+    flagged as uncovered by that same entry, on every session afterwards.
+    """
+    _seal(repo)
+    baseline = _head(repo)
+    _write_anchor(repo, status="X", last_close_commit=baseline)
+    _add_unreleased_entry(repo, "reconstructed entry")
+    _commit_all(repo, "docs(changelog): reconstruct the missing entry")
+    assert dd.main() == 0
+
+
+def test_a_changelog_commit_that_also_touches_code_is_still_drift(repo: Path) -> None:
+    """The exemption needs both halves; a mis-subjected commit is still counted."""
+    _seal(repo)
+    baseline = _head(repo)
+    _write_anchor(repo, status="X", last_close_commit=baseline)
+    _add_unreleased_entry(repo, "an entry")
+    (repo / "code.txt").write_text("and code\n")
+    _commit_all(repo, "docs(changelog): but also code")
+    assert dd.main() == 2
+
+
+def test_an_unreleased_entry_naming_the_commit_is_per_commit_proof(
+    repo: Path,
+) -> None:
+    """Verdict C: citation is the evidence reachability cannot supply."""
+    _seal(repo)
+    baseline = _head(repo)
+    _write_anchor(repo, status="X", last_close_commit=baseline)
+    (repo / "landed.txt").write_text("landed on main\n")
+    _commit_all(repo, "feat: landed on main")
+    sha = _head(repo)[:7]
+    _add_unreleased_entry(repo, f"landed in `{sha}`")
+    _commit_all(repo, "docs(changelog): record the landed commit")
+
+    verdict, _every, unsealed, _tags, _flight = dd.classify(baseline)
+    assert verdict == "C"
+    assert unsealed == []
+    assert dd.main() == 0
+
+
+def test_an_unreleased_entry_that_names_nothing_still_asks_a_human(
+    repo: Path,
+) -> None:
+    """Verdict A survives: a non-empty section is not proof about a given commit."""
+    _seal(repo)
+    baseline = _head(repo)
+    _write_anchor(repo, status="X", last_close_commit=baseline)
+    (repo / "landed.txt").write_text("landed on main\n")
+    _commit_all(repo, "feat: landed on main")
+    _add_unreleased_entry(repo, "something happened, unattributed")
+    _commit_all(repo, "docs(changelog): an entry naming no commit")
+
+    verdict, _every, unsealed, _tags, _flight = dd.classify(baseline)
+    assert verdict == "A"
+    assert len(unsealed) == 1
+    assert dd.main() == 2
