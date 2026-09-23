@@ -60,6 +60,13 @@ parser over-crediting itself). Concretely:
   untyped functions is reported unparsed in full rather than partially scanned,
   because a colon can equally be an object-literal key, and guessing wrong in
   the compliant direction is the exact failure this sprint exists to end.
+- A file whose braces do not balance (a truncated or malformed file) is
+  `unparsed` -- brace-depth scanning has no reliable answer once the file's
+  own braces never close.
+- A bare-parameter arrow function without surrounding parentheses (`x => ...`
+  rather than `(x) => ...`) makes the whole file `unparsed` -- this is the
+  declared arrow-recognition limit above, surfaced in the register instead of
+  silently producing zero units.
 
 JS/TS line counting is physical-line granularity (non-blank lines inside the
 matched `{ ... }` span, including any nested inner function's lines, which are
@@ -293,6 +300,13 @@ _TS_TYPE_SIGNAL_RE = re.compile(
     r"|:\s*[A-Za-z_$]"
 )
 
+# A bare identifier immediately followed by `=>` (whitespace only in between)
+# is a single-parameter arrow function without surrounding parens -- the
+# declared arrow-recognition limit. Excludes `) =>` (a real, recognised
+# parenthesised parameter list, whose token immediately before `=>` is `)`,
+# not the parameter name).
+_BARE_ARROW_SIGNAL_RE = re.compile(r"(?<!\))\b[A-Za-z_$][\w$]*\s*=>")
+
 _KEYWORD_BLOCK_PRECEDERS = frozenset({"else", "try", "do", "finally"})
 
 
@@ -412,16 +426,41 @@ def _mask_non_code(source: str) -> str:
     return "".join(out)
 
 
+def _has_unbalanced_braces(masked: str) -> bool:
+    """True when `masked` is not a well-formed balanced brace sequence.
+
+    A negative depth (an unmatched `}`) or a nonzero depth at end of file (an
+    unmatched `{`) both mean the file is truncated or malformed -- brace-depth
+    scanning has no reliable answer for it.
+    """
+    depth = 0
+    for c in masked:
+        if c == "{":
+            depth += 1
+        elif c == "}":
+            depth -= 1
+            if depth < 0:
+                return True
+    return depth != 0
+
+
 def _detect_unparsed_reason(masked: str, suffix: str) -> str | None:
     """A declared-limit reason string, or `None` if the file is confidently scannable."""
     if suffix in (".jsx", ".tsx"):
         return "JSX file extension (.jsx/.tsx): scanner does not parse JSX markup"
+    if _has_unbalanced_braces(masked):
+        return "unbalanced braces detected: malformed or truncated file"
     if _JSX_SIGNAL_RE.search(masked):
         return "JSX markup detected (`</Tag`): scanner does not parse JSX"
     if _DECORATOR_SIGNAL_RE.search(masked):
         return "decorator syntax detected (`@Name`): scanner does not parse decorators"
     if suffix == ".ts" and _TS_TYPE_SIGNAL_RE.search(masked):
         return "TypeScript type-level syntax detected (interface/type/enum/generic/annotation)"
+    if _BARE_ARROW_SIGNAL_RE.search(masked):
+        return (
+            "bare-parameter arrow function detected (`x =>` without parens): "
+            "scanner does not recognise this construct"
+        )
     return None
 
 

@@ -185,6 +185,49 @@ def test_ts_type_level_syntax_reported_unparsed(tmp_path: Path) -> None:
     assert units[0].status == "unparsed"
 
 
+def test_js_unbalanced_braces_reported_unparsed_not_silently_dropped(
+    tmp_path: Path,
+) -> None:
+    """A malformed/truncated file (unbalanced braces) -> unparsed, never absent.
+
+    Gate 2 finding (F-049-7 follow-up): before the fix this produced an empty
+    register (0 entries) -- neither `compliant` nor `unparsed` -- which is
+    indistinguishable, at the exit-code level, from a file with no violations.
+    """
+    path = tmp_path / "truncated.js"
+    path.write_text("function foo(a, b) {\n  return a + b;\n", encoding="utf-8")
+
+    units = qa.scan_js_file(path)
+
+    assert len(units) == 1
+    assert units[0].status == "unparsed"
+    assert units[0].name == "<file>"
+    compliant, measured, unparsed = qa.compliance_figure(units)
+    assert compliant == 0
+    assert unparsed == 1
+
+
+def test_js_bare_parameter_arrow_reported_unparsed_not_silently_dropped(
+    tmp_path: Path,
+) -> None:
+    """A bare-parameter arrow (`x => ...`, no parens) -> unparsed, never absent.
+
+    Declared scanner limit (`D4`): single-bare-parameter arrows without parens
+    are not recognised. Before this fix that limit produced an empty register
+    instead of an `unparsed` entry.
+    """
+    path = tmp_path / "bare_arrow.js"
+    path.write_text("const f = x => x + 1;\n", encoding="utf-8")
+
+    units = qa.scan_js_file(path)
+
+    assert len(units) == 1
+    assert units[0].status == "unparsed"
+    compliant, measured, unparsed = qa.compliance_figure(units)
+    assert compliant == 0
+    assert unparsed == 1
+
+
 # --------------------------------------------------------------------------
 # CLI: exit codes and --report
 # --------------------------------------------------------------------------
