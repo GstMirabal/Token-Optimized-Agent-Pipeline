@@ -372,11 +372,33 @@ def check_graph_stats_gaps(report: FreshnessReport, repo_root: Path) -> None:
             report.warn(f"docs/sprints/{expected:03d}*/graph_stats.json missing inside a populated range")
 
 
+def _count(snapshot: dict, key: str) -> int:
+    """A snapshot's count for ``key``, treating a missing or null value as 0.
+
+    ``dict.get(key, 0)`` is not a null guard: when a snapshot stores
+    ``"communities": null`` the key **is present**, so the default never
+    applies and ``get`` returns ``None``. The subtraction below then raised
+    ``TypeError: unsupported operand type(s) for -: 'NoneType' and 'int'`` and
+    took down a mandatory close step. Measured at a host's Sprint 099 close
+    against a real ``graph_stats.json`` carrying that value, reported, and left
+    unchanged for eleven sprints because the findings register said nothing was
+    open (`H099-3`).
+
+    A non-numeric value is coerced rather than raising: this runs inside a close
+    gate, and a snapshot written by an older graph build should not be able to
+    stop a close over a field this function only counts.
+    """
+    value = snapshot.get(key)
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return 0
+    return int(value)
+
+
 def node_delta(previous: dict, current: dict) -> int:
     """Absolute change in node/edge count plus any new community, per §4.3."""
-    node_change = abs(current.get("nodes", 0) - previous.get("nodes", 0))
-    edge_change = abs(current.get("edges", 0) - previous.get("edges", 0))
-    community_change = max(0, current.get("communities", 0) - previous.get("communities", 0))
+    node_change = abs(_count(current, "nodes") - _count(previous, "nodes"))
+    edge_change = abs(_count(current, "edges") - _count(previous, "edges"))
+    community_change = max(0, _count(current, "communities") - _count(previous, "communities"))
     return node_change + edge_change + (community_change * 100)
 
 
