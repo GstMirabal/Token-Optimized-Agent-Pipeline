@@ -15,15 +15,16 @@ Claiming the lock and recording the session are the same act, so they are one
 command rather than two steps that both rewrite the same file.
 
 invoked_by: start_workflow.md#state_claim (claim), close_workflow.md#state_sync
-(release), rules/token_economy.md#3.1 (suspend, at the hard threshold),
-deployment_workflow.md#sprint_seal_gate (require-released),
-deployment_workflow.md#baseline_refresh (refresh-baseline).
+(release, set-topology), rules/token_economy.md#3.1 (suspend, at the hard
+threshold), deployment_workflow.md#sprint_seal_gate (require-released),
+deployment_workflow.md#baseline_refresh (refresh-baseline),
+deployment_workflow.md#topology_writeback (set-topology).
 
-`set-topology` has no invoker yet: Sprint 050 `D7` ships the writer in `U6`
-and wires it into `close_workflow.md` Phase 4 `state_sync` and
-`deployment_workflow.md` Phase 4 `baseline_refresh` in the separate `U7`/`U8`
-units. Until then it is run directly (see the Sprint 050 report for the
-one-off correction it made against the stale `4.31.0-049-closed` value).
+`set-topology` (Sprint 050 `D7`) is wired into both workflows as its own
+`RA-13` invocation, never chained with the step before it: `close_workflow.md`
+Phase 4 `state_sync` runs it as a separate call right after `release` (`U7`),
+and `deployment_workflow.md` Phase 4 runs it as its own dedicated step
+`topology_writeback`, after `baseline_refresh`, not folded into it (`U8`).
 
 Usage:
     python3 scripts/session_state.py claim [--session-id <uid>] [--takeover]

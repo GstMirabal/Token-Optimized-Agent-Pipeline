@@ -115,6 +115,39 @@ def test_set_topology_zero_pads_sprint_id(repo: Path):
     assert state["topology_version"] == "4.32.0-007-in_progress"
 
 
+DIFFERENT_VERSION_CHANGELOG = """# Changelog
+
+## [Unreleased]
+
+### Added
+- something not yet released
+
+## [7.1.4] - 2027-01-05
+
+### Fixed
+- newest sealed release, deliberately not 4.32.0
+
+## [7.1.3] - 2026-12-20
+
+### Fixed
+- older sealed release
+"""
+
+
+def test_set_topology_writes_the_derived_version_not_a_fixed_one(repo: Path):
+    """Every other fixture's newest sealed section is `4.32.0`, so a mutant
+    that hardcodes that literal instead of using `newest_sealed_version`'s
+    result passes them all undetected. This fixture's newest sealed section
+    is `7.1.4` — distinguishing "derived" from "hardcoded to 4.32.0"."""
+    _write_changelog(repo, DIFFERENT_VERSION_CHANGELOG)
+    _write_anchor(repo, {"current_sprint": {"id": 12, "status": "IN_PROGRESS"}})
+
+    assert ss.set_topology() == 0
+
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert state["topology_version"] == "7.1.4-012-in_progress"
+
+
 # --- set-topology: write-back preserves the rest of the anchor -------------
 
 def test_set_topology_does_not_disturb_other_fields(repo: Path):
