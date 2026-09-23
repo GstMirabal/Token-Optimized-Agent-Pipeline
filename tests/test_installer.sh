@@ -7,7 +7,12 @@
 set -euo pipefail
 
 AGENTS_SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-WORK="$(mktemp -d)"
+# An explicit template is what makes `mktemp` honour TMPDIR. macOS `mktemp -d`
+# with no template ignores the variable and uses a built-in per-user directory,
+# so under a sandbox this failed with "Operation not permitted" and took
+# `make verify` down after the whole Python suite had already passed. Same
+# family as the TMPDIR defect in tests/test_on_push.py. Sprint 051.
+WORK="$(mktemp -d "${TMPDIR:-/tmp}/agents-installer.XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
 
 fail() { echo "❌ FAIL: $1" >&2; exit 1; }
