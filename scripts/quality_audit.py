@@ -38,20 +38,32 @@ written in stdlib Python, not a Node-equivalent parser. It recognises:
 - Class/object method shorthand (`name(params) { ... }`), detected by excluding
   JS reserved keywords from the header-name position -- this also matches
   object-literal method shorthand, not class bodies exclusively.
-- Arrow functions assigned to a binding, with either a parenthesised
-  parameter list (`const foo = (...) => { ... }`) or a single bare parameter
-  without parens (`const foo = x => { ... }`), when the arrow has a block
-  body. An expression-bodied arrow (`const f = (x) => x + 1` or
-  `const f = x => x + 1`, no `{}`) has no measurable body and is not counted
-  as a unit -- neither form is marked `unparsed`.
-- A bare-parameter arrow used as an inline callback argument (`items.map(x
-  => x + 1)`, not assigned to a binding) is not itself a recognised unit;
-  its lines are counted as part of the enclosing function/method that
-  contains it, the same as any other statement in that body. It does not
-  mark the file `unparsed` -- inline single-parameter callbacks are
-  idiomatic in nearly all real-world JS (`.map`/`.filter`/`.reduce`
-  arguments), and treating one as a whole-file parse failure measured
-  almost nothing on real code (`F-049-8`, this fix).
+- Every arrow-function header (`=>`), wherever it occurs -- bound to a binding
+  (`const foo = (...) => { ... }`), or unbound/anonymous, at any nesting
+  level, including a bare call-argument callback with no enclosing named
+  function or binding (`app.get('/', (req, res) => { ... })`, `app.get('/',
+  req => { ... })`), parenthesised or single bare parameter, `async` or not.
+  A block-bodied arrow (`=> { ... }`) is always measured as its own unit --
+  named after its binding when the arrow is `const`/`let`/`var`-bound,
+  `<anonymous>` otherwise (the same treatment an anonymous
+  `function (...) {...}` already gets). A **bound** arrow with an expression
+  body (`const f = x => x + 1;`, no `{}`) is measured as a 1-line unit
+  (`C`). An **unbound** expression-bodied arrow (`.map(x => x + 1)`, not
+  assigned to a binding) has no separately countable body of its own and is
+  not its own unit -- its characters fall inside whatever source range
+  encloses it, the same as any other statement, never `unparsed` on that
+  account alone (`F-049-8`).
+- **Fail-closed conservation check (`A`)**, run after every recogniser above:
+  every `) {` in the masked source is classified as either a control-flow
+  block (`if`/`for`/`while`/`catch`/`switch`/`with` -- excluded) or a
+  function/method body. If a function/method-shaped `) {` is found whose body
+  span was not claimed by any unit created above -- e.g. a computed method
+  name (`[Symbol.iterator]() { ... }`), or any other header shape the
+  recognisers above do not cover -- the **whole file** is reported
+  `unparsed`, citing the offending line, rather than silently omitting that
+  body from the register. This is the structural guarantee: a
+  function-introducing construct either lands inside a measured unit's line
+  range, or the file is `unparsed` -- there is no third, silent outcome.
 
 It explicitly does **not** parse JSX, TypeScript type-level syntax, or
 decorators. A file/construct it cannot confidently handle is reported
@@ -72,15 +84,16 @@ parser over-crediting itself). Concretely:
 - A file whose braces do not balance (a truncated or malformed file) is
   `unparsed` -- brace-depth scanning has no reliable answer once the file's
   own braces never close.
-- A bare-parameter arrow assigned to a binding (`const f = x => { ... }`) is
-  recognised and measured like any other declared function -- see the
-  binding-recognition bullet above. A bare-parameter arrow used inline as a
-  callback argument is folded into its enclosing unit's line count, never
-  flagged `unparsed` on its own.
+- Any function/method-shaped body the recognisers above could not attribute to
+  a unit is caught by the fail-closed conservation check (`A`, above) and
+  marks the whole file `unparsed`, with the reason citing the offending line.
 
 JS/TS line counting is physical-line granularity (non-blank lines inside the
 matched `{ ... }` span, including any nested inner function's lines, which are
-therefore double-counted between the outer and inner unit) -- a coarser,
+therefore double-counted between the outer and inner unit -- e.g. an anonymous
+callback argument is counted once as its own unit and again inside whatever
+enclosing unit's span contains it, the same declared double-counting Python
+nested `def`s already have with their enclosing scope) -- a coarser,
 explicitly declared approximation of `D1`, not the AST-exact Python count.
 Nesting depth distinguishes block braces (preceded by `)`, `=>`, `else`, `try`,
 `do`, `finally`) from object/array-literal braces via the single preceding
@@ -296,9 +309,6 @@ JS_KEYWORDS = frozenset(
 
 _HEADER_RE = re.compile(
     r"(?P<func_kw>\bfunction\b)\s*\*?\s*(?P<func_name>[A-Za-z_$][\w$]*)?\s*(?=\()"
-    r"|\b(?:const|let|var)\s+(?P<arrow_name>[A-Za-z_$][\w$]*)\s*(?::[^=(]*)?=\s*(?:async\s+)?(?=\()"
-    r"|\b(?:const|let|var)\s+(?P<bound_bare_name>[A-Za-z_$][\w$]*)\s*(?::[^=(]*)?"
-    r"=\s*(?:async\s+)?[A-Za-z_$][\w$]*\s*=>\s*(?=\{)"
     r"|(?<![\w$.])(?P<method_name>[A-Za-z_$][\w$]*)\s*(?=\()"
 )
 
@@ -493,25 +503,18 @@ def _find_matching(text: str, open_idx: int, open_ch: str, close_ch: str) -> int
 
 
 def _confirm_body_start(text: str, idx: int) -> int | None:
-    """Index of the `{` opening a block body starting at/after `idx`, or `None`.
-
-    Accepts a `{` immediately, or `=>` followed by a `{` (arrow function block
-    body). Anything else (`;`, a bare expression, end of file) is a signature
-    or expression body, not a countable unit.
+    """Index of the `{` opening a function/method body starting at/after
+    `idx`, or `None` if what follows isn't a block body (a bare `;` or a
+    signature-only declaration, not a countable unit). Arrow bodies (which
+    may also take `=> { ... }` or an expression body) are located separately
+    by `_arrow_body_span` -- this function only serves `function`/method
+    headers, which are never followed by `=>`.
     """
     n = len(text)
     i = idx
     while i < n and text[i] in " \t\r\n":
         i += 1
-    if i < n and text[i] == "{":
-        return i
-    if text[i : i + 2] == "=>":
-        i += 2
-        while i < n and text[i] in " \t\r\n":
-            i += 1
-        if i < n and text[i] == "{":
-            return i
-    return None
+    return i if i < n and text[i] == "{" else None
 
 
 def _preceding_token(text: str, idx: int) -> str:
@@ -561,12 +564,13 @@ def _measure_js_body(masked: str, body_start: int, body_end: int) -> tuple[int, 
 
 
 def _locate_paren_body(masked: str, m: re.Match[str]) -> tuple[int, int] | None:
-    """Body span for a `function`/method/parenthesised-arrow header match.
+    """Body span for a `function`/method header match.
 
     Finds the matching `)` of the parameter list right after the header, then
-    confirms a `{`/`=> {` body after it (`_confirm_body_start`). `None` when
-    there is no `(` immediately after the header, no matching `)`, or no
-    block body -- a plain call, or an expression-bodied arrow, not a unit.
+    confirms a `{` body after it (`_confirm_body_start`). `None` when there is
+    no `(` immediately after the header, no matching `)`, or no block body --
+    a plain call, or a signature-only declaration, not a unit. Arrow headers
+    never reach this function -- see `_arrow_body_span`.
     """
     open_paren = m.end()
     if open_paren >= len(masked) or masked[open_paren] != "(":
@@ -580,40 +584,283 @@ def _locate_paren_body(masked: str, m: re.Match[str]) -> tuple[int, int] | None:
     return body_start, _find_matching(masked, body_start, "{", "}")
 
 
-def _locate_header_body(masked: str, m: re.Match[str]) -> tuple[str, int, int] | None:
-    """Name and body span for one `_HEADER_RE` match, or `None` if not a unit.
+def _resolve_header_name(m: re.Match[str]) -> str | None:
+    """Unit name for one `_HEADER_RE` match (`function`/method only), or
+    `None` when `method_name` resolved to a JS reserved keyword (not a real
+    header -- e.g. `if (` briefly matching before its `(` is excluded)."""
+    if m.group("func_kw") is not None:
+        return m.group("func_name") or "<anonymous>"
+    name = m.group("method_name") or ""
+    return None if name in JS_KEYWORDS else name
 
-    A bound bare-parameter arrow (`const f = x => { ... }`) has no
-    parameter-list parens: `_HEADER_RE`'s own lookahead already confirmed the
-    `{` immediately follows, so the body starts right at `m.end()`. Every
-    other header shape goes through `_locate_paren_body`.
+
+def _locate_header_body(masked: str, m: re.Match[str]) -> tuple[str, int, int] | None:
+    """Name and body span for one `_HEADER_RE` match (`function`/method), or
+    `None` if not a unit. Arrow headers (bound and unbound, block and
+    expression body) are handled separately by `_iter_arrow_units` (`B`/`C`).
     """
-    if m.group("bound_bare_name") is not None:
-        name = m.group("bound_bare_name")
-        body_start, body_end = m.end(), _find_matching(masked, m.end(), "{", "}")
-    else:
-        if m.group("func_kw") is not None:
-            name = m.group("func_name") or "<anonymous>"
-        elif m.group("arrow_name") is not None:
-            name = m.group("arrow_name")
-        else:
-            name = m.group("method_name") or ""
-            if name in JS_KEYWORDS:
-                return None
-        located = _locate_paren_body(masked, m)
-        if located is None:
-            return None
-        body_start, body_end = located
+    name = _resolve_header_name(m)
+    if name is None:
+        return None
+    located = _locate_paren_body(masked, m)
+    if located is None:
+        return None
+    body_start, body_end = located
     if body_end == -1:
         return None
     return name, body_start, body_end
 
 
+# --------------------------------------------------------------------------
+# Arrow-function scanning (`B`/`C`): every `=>` header, bound or not, block
+# or expression body -- independent of `_HEADER_RE`, which no longer matches
+# arrows at all.
+# --------------------------------------------------------------------------
+
+
+def _find_matching_backward(text: str, close_idx: int, open_ch: str, close_ch: str) -> int:
+    """Index of the `open_ch` matching `text[close_idx]` (must be `close_ch`),
+    scanning backward, or -1. Mirrors `_find_matching`, reversed; flattened
+    (sequential, not nested, ifs) to stay within `max_indentation` (`D`)."""
+    depth = 0
+    i = close_idx
+    while i >= 0:
+        if text[i] == close_ch:
+            depth += 1
+        if text[i] == open_ch:
+            depth -= 1
+        if depth == 0 and text[i] == open_ch:
+            return i
+        i -= 1
+    return -1
+
+
+def _match_arrow_params_backward(masked: str, arrow_idx: int) -> tuple[int, int] | None:
+    """`(params_start, params_end)` for the parameter head ending right
+    before the `=>` at `arrow_idx`, or `None` if what precedes it isn't a
+    valid arrow parameter shape -- a parenthesised list or a single bare
+    identifier."""
+    i = arrow_idx - 1
+    while i >= 0 and masked[i] in " \t\r\n":
+        i -= 1
+    if i < 0:
+        return None
+    if masked[i] == ")":
+        open_idx = _find_matching_backward(masked, i, "(", ")")
+        return None if open_idx == -1 else (open_idx, i + 1)
+    j = i
+    while j >= 0 and (masked[j].isalnum() or masked[j] in "_$"):
+        j -= 1
+    if j == i:
+        return None
+    ident = masked[j + 1 : i + 1]
+    if not ident or ident in JS_KEYWORDS:
+        return None
+    return j + 1, i + 1
+
+
+def _skip_async_backward(masked: str, idx: int) -> int:
+    """Start index including a preceding `async` keyword, or `idx` unchanged
+    when there isn't one immediately before it."""
+    i = idx - 1
+    while i >= 0 and masked[i] in " \t\r\n":
+        i -= 1
+    j = i
+    while j >= 0 and masked[j].isalnum():
+        j -= 1
+    return j + 1 if masked[j + 1 : i + 1] == "async" else idx
+
+
+def _preceded_by_binding_keyword(masked: str, ident_end: int) -> bool:
+    """True when the token immediately before index `ident_end` (exclusive)
+    is `const`, `let`, or `var`."""
+    i = ident_end
+    while i >= 0 and masked[i] in " \t\r\n":
+        i -= 1
+    k = i
+    while k >= 0 and masked[k].isalnum():
+        k -= 1
+    return masked[k + 1 : i + 1] in ("const", "let", "var")
+
+
+def _detect_arrow_binding(masked: str, header_start: int) -> str | None:
+    """Bound name if `header_start` is directly preceded by `const|let|var
+    NAME =`, else `None` (an unbound/anonymous arrow header -- a call
+    argument, object-literal property, default parameter, etc.)."""
+    i = header_start - 1
+    while i >= 0 and masked[i] in " \t\r\n":
+        i -= 1
+    if i < 0 or masked[i] != "=":
+        return None
+    i -= 1
+    while i >= 0 and masked[i] in " \t\r\n":
+        i -= 1
+    j = i
+    while j >= 0 and (masked[j].isalnum() or masked[j] in "_$"):
+        j -= 1
+    name = masked[j + 1 : i + 1]
+    if not name or name in JS_KEYWORDS:
+        return None
+    return name if _preceded_by_binding_keyword(masked, j) else None
+
+
+def _classify_expr_char(c: str, depth: int) -> str:
+    """Classify one masked character for `_locate_expression_body_end`:
+    `"open"` (a nested `(`/`[`/`{`), `"close"` (closes a nested one, still
+    inside the expression), `"stop"` (this char ends the expression body --
+    an unmatched close bracket, `;`, or newline at depth 0), or `"other"`."""
+    if c in "([{":
+        return "open"
+    if c in ")]}":
+        return "stop" if depth == 0 else "close"
+    if depth == 0 and c in ";\n":
+        return "stop"
+    return "other"
+
+
+def _locate_expression_body_end(masked: str, start: int) -> int:
+    """End index (exclusive) of a single-statement expression-arrow body
+    starting at `start` (`C`) -- a coarse single-statement scan, not a full
+    expression parser."""
+    depth = 0
+    i = start
+    n = len(masked)
+    while i < n:
+        kind = _classify_expr_char(masked[i], depth)
+        if kind == "stop":
+            break
+        if kind == "open":
+            depth += 1
+        if kind == "close":
+            depth -= 1
+        i += 1
+    return i
+
+
+def _skip_ws_forward(masked: str, idx: int) -> int:
+    """First index at/after `idx` that isn't whitespace."""
+    i = idx
+    while i < len(masked) and masked[i] in " \t\r\n":
+        i += 1
+    return i
+
+
+def _block_arrow_span(masked: str, body_idx: int) -> tuple[int, int, int, int, bool] | None:
+    """`(body_start, body_end, executable_lines, max_depth, True)` for a
+    block-bodied arrow whose `{` is at `body_idx`, or `None` if its `}` never
+    closes (malformed -- the caller's caller reports the file `unparsed` via
+    the pre-existing unbalanced-braces check, never silently)."""
+    body_end = _find_matching(masked, body_idx, "{", "}")
+    if body_end == -1:
+        return None
+    lines, depth = _measure_js_body(masked, body_idx, body_end)
+    return body_idx, body_end, lines, depth, True
+
+
+def _expression_arrow_span(masked: str, body_idx: int) -> tuple[int, int, int, int, bool]:
+    """`(body_start, body_end, executable_lines, 1, False)` for an
+    expression-bodied arrow starting at `body_idx` (`C`)."""
+    body_end = _locate_expression_body_end(masked, body_idx)
+    span = masked[body_idx:body_end]
+    lines = sum(1 for line in span.split("\n") if line.strip())
+    return body_idx, body_end, max(lines, 1), 1, False
+
+
+def _arrow_body_span(masked: str, arrow_idx: int) -> tuple[int, int, int, int, bool] | None:
+    """`(body_start, body_end, executable_lines, max_depth, is_block)` for
+    the body following the `=>` at `arrow_idx` -- a block body
+    (`_block_arrow_span`) or a single expression body
+    (`_expression_arrow_span`, `C`)."""
+    body_idx = _skip_ws_forward(masked, arrow_idx + 2)
+    if body_idx < len(masked) and masked[body_idx] == "{":
+        return _block_arrow_span(masked, body_idx)
+    return _expression_arrow_span(masked, body_idx)
+
+
+def _iter_arrow_units(
+    masked: str,
+) -> list[tuple[str, int, int, int, int, int]]:
+    """Every arrow-function header in `masked`:
+    `(name, lineno, body_start, body_end, executable_lines, max_depth)`.
+
+    Covers block-bodied arrows regardless of binding (bound or anonymous --
+    `B`) and bound expression-bodied arrows (`C`). An *unbound*
+    expression-bodied arrow (an inline callback like `.map(x => x + 1)`) has
+    no separately countable body and is not itself a unit -- it is folded
+    into whatever source range encloses it, unchanged from before this fix.
+    """
+    results: list[tuple[str, int, int, int, int, int]] = []
+    for m in re.finditer(r"=>", masked):
+        params = _match_arrow_params_backward(masked, m.start())
+        if params is None:
+            continue
+        header_start = _skip_async_backward(masked, params[0])
+        bound_name = _detect_arrow_binding(masked, header_start)
+        span = _arrow_body_span(masked, m.start())
+        if span is None:
+            continue
+        body_start, body_end, executable_lines, max_depth, is_block = span
+        if not is_block and bound_name is None:
+            continue
+        name = bound_name if bound_name is not None else "<anonymous>"
+        lineno = masked.count("\n", 0, header_start) + 1
+        results.append((name, lineno, body_start, body_end, executable_lines, max_depth))
+    return results
+
+
+# --------------------------------------------------------------------------
+# Fail-closed conservation check (`A`): every `) {` is either a control-flow
+# block or a function/method body -- if the latter and uncovered, `unparsed`.
+# --------------------------------------------------------------------------
+
+_CONTROL_KEYWORDS = frozenset({"if", "for", "while", "catch", "switch", "with"})
+_PAREN_BRACE_RE = re.compile(r"\)\s*\{")
+
+
+def _is_control_paren(masked: str, open_paren_idx: int) -> bool:
+    """True when `open_paren_idx` opens an `if`/`for`/`while`/`catch`/
+    `switch`/`with` condition, not a function/method parameter list."""
+    i = open_paren_idx - 1
+    while i >= 0 and masked[i] in " \t\r\n":
+        i -= 1
+    j = i
+    while j >= 0 and masked[j].isalnum():
+        j -= 1
+    return masked[j + 1 : i + 1] in _CONTROL_KEYWORDS
+
+
+def _find_unattributed_function_body(
+    masked: str, covered_spans: list[tuple[int, int]]
+) -> int | None:
+    """1-based line of the first `) {` function/method header whose body is
+    not covered by any measured unit's span, or `None` if every such header
+    is accounted for (`A`).
+
+    A `)` directly followed by `{` is either a control-flow block
+    (`_is_control_paren`, excluded) or a function/method body -- there is no
+    third JS construct shaped this way. Arrow bodies (`=> {`) are always
+    captured by `_iter_arrow_units` on the same pass and need no re-check
+    here (a `)` closing an arrow's parameter list is followed by `=>`, never
+    directly by `{`, so `_PAREN_BRACE_RE` never matches it).
+    """
+    for m in _PAREN_BRACE_RE.finditer(masked):
+        open_paren = _find_matching_backward(masked, m.start(), "(", ")")
+        if open_paren == -1 or _is_control_paren(masked, open_paren):
+            continue
+        body_start = m.end() - 1
+        if not any(start <= body_start <= end for start, end in covered_spans):
+            return masked.count("\n", 0, body_start) + 1
+    return None
+
+
 def scan_js_file(path: Path) -> list[Unit]:
     """All recognised function/arrow/method units in one JS/TS file.
 
-    Returns one `unparsed` unit (never a partial scan) when `_detect_unparsed_reason`
-    finds JSX, a decorator, or (for `.ts`) type-level syntax.
+    Returns one `unparsed` unit (never a partial scan) when
+    `_detect_unparsed_reason` finds JSX, a decorator, or (for `.ts`)
+    type-level syntax -- or when the fail-closed conservation check (`A`,
+    `_find_unattributed_function_body`) finds a function/method-shaped body
+    no recogniser above attributed to a unit.
     """
     try:
         text = path.read_text(encoding="utf-8", errors="replace")
@@ -626,6 +873,7 @@ def scan_js_file(path: Path) -> list[Unit]:
         return [Unit(path, "<file>", 1, 0, 0, "js", "unparsed", reason)]
 
     units: list[Unit] = []
+    covered_spans: list[tuple[int, int]] = []
     for m in _HEADER_RE.finditer(masked):
         located = _locate_header_body(masked, m)
         if located is None:
@@ -634,16 +882,27 @@ def scan_js_file(path: Path) -> list[Unit]:
         lineno = masked.count("\n", 0, m.start()) + 1
         executable_lines, max_depth = _measure_js_body(masked, body_start, body_end)
         units.append(
-            Unit(
-                path=path,
-                name=name,
-                lineno=lineno,
-                executable_lines=executable_lines,
-                max_depth=max_depth,
-                language="js",
-                status=_status(executable_lines, max_depth),
-            )
+            Unit(path, name, lineno, executable_lines, max_depth, "js",
+                 _status(executable_lines, max_depth))
         )
+        covered_spans.append((body_start, body_end))
+
+    for name, lineno, body_start, body_end, executable_lines, max_depth in _iter_arrow_units(
+        masked
+    ):
+        units.append(
+            Unit(path, name, lineno, executable_lines, max_depth, "js",
+                 _status(executable_lines, max_depth))
+        )
+        covered_spans.append((body_start, body_end))
+
+    gap_line = _find_unattributed_function_body(masked, covered_spans)
+    if gap_line is not None:
+        reason = (
+            f"function-introducing header at line {gap_line} produced a "
+            "block body no recognised unit could be attributed to"
+        )
+        return [Unit(path, "<file>", gap_line, 0, 0, "js", "unparsed", reason)]
     return units
 
 

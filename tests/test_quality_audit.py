@@ -207,20 +207,26 @@ def test_js_unbalanced_braces_reported_unparsed_not_silently_dropped(
     assert unparsed == 1
 
 
-def test_js_bare_parameter_arrow_expression_body_not_counted_not_unparsed(
+def test_js_bound_bare_arrow_expression_body_measured_as_one_line_unit(
     tmp_path: Path,
 ) -> None:
-    """A bound but expression-bodied bare arrow (`const f = x => x + 1;`, no
-    `{}`) has no measurable body -- same treatment as the already-documented
-    parenthesised expression-bodied arrow: not counted as a unit, and NOT
-    marked `unparsed` (fixed from the pre-fix over-broad whole-file signal).
+    """A bound, expression-bodied bare arrow (`const f = x => x + 1;`, no
+    `{}`) IS measured -- as a 1-line unit (`C`, Sprint 050 attempt 3). Not
+    `unparsed` (the pre-fix over-broad whole-file signal, `F-049-8`) and not
+    silently absent either (the defect this row previously asserted, which
+    `RA-14` forbids papering over -- a test edited to expect the defect is
+    not a fix).
     """
     path = tmp_path / "bare_arrow.js"
     path.write_text("const f = x => x + 1;\n", encoding="utf-8")
 
     units = qa.scan_js_file(path)
 
-    assert units == []
+    assert len(units) == 1
+    unit = units[0]
+    assert unit.name == "f"
+    assert unit.status == "PASS"
+    assert unit.executable_lines == 1
 
 
 def test_js_inline_bare_arrow_callbacks_measured_not_unparsed(tmp_path: Path) -> None:
@@ -269,6 +275,195 @@ def test_js_bound_bare_arrow_block_body_recognised_and_measured(
     assert unit.name == "handler"
     assert unit.status == "FAIL"
     assert unit.executable_lines > 50
+
+
+# --------------------------------------------------------------------------
+# Fail-closed conservation matrix (Sprint 050 attempt 3, `A`/`B`/`C`)
+#
+# {function decl, function expr, method shorthand, arrow-with-parens,
+# arrow-bare} x {block body, expression body} x {bound, module-level call
+# argument, call argument nested inside another function}. Not every cell is
+# syntactically meaningful (a `function` declaration/expression and a method
+# shorthand cannot have an expression body in JS at all), so those cells are
+# omitted rather than padded with N/A rows. Every included cell asserts one
+# of two outcomes -- MEASURED (>=1 unit, none `unparsed`) or the
+# `EXEMPT_EMPTY` cells, the one documented exception (an *unbound*
+# expression-bodied arrow has no separately countable body and is folded
+# into its enclosing statement, same as before this fix, `F-049-8`) -- never
+# silent absence disguised as a clean scan.
+# --------------------------------------------------------------------------
+
+MEASURED = "measured"
+EXEMPT_EMPTY = "exempt_empty"
+
+_MATRIX_CASES = [
+    ("function_decl_block_module", "function foo() { return 1; }\n", MEASURED),
+    (
+        "function_decl_block_nested",
+        "function outer() { function inner() { return 1; } return inner(); }\n",
+        MEASURED,
+    ),
+    ("function_expr_block_bound", "const foo = function() { return 1; };\n", MEASURED),
+    (
+        "function_expr_block_module_call_arg",
+        "setTimeout(function() { return 1; }, 0);\n",
+        MEASURED,
+    ),
+    (
+        "function_expr_block_nested_call_arg",
+        "function outer() { setTimeout(function() { return 1; }, 0); }\n",
+        MEASURED,
+    ),
+    ("method_shorthand_block_module", "const obj = { method() { return 1; } };\n", MEASURED),
+    (
+        "method_shorthand_block_nested",
+        "function outer() { return { method() { return 1; } }; }\n",
+        MEASURED,
+    ),
+    ("arrow_paren_block_bound", "const f = (x) => { return x; };\n", MEASURED),
+    (
+        "arrow_paren_block_module_call_arg",
+        "app.get('/', (req, res) => { return 1; });\n",
+        MEASURED,
+    ),
+    (
+        "arrow_paren_block_nested_call_arg",
+        "function outer() { items.forEach((x) => { return x; }); }\n",
+        MEASURED,
+    ),
+    ("arrow_paren_expr_bound", "const f = (x) => x + 1;\n", MEASURED),
+    ("arrow_paren_expr_module_call_arg", "items.map((x) => x + 1);\n", EXEMPT_EMPTY),
+    (
+        "arrow_paren_expr_nested_call_arg",
+        "function outer() { return items.map((x) => x + 1); }\n",
+        MEASURED,
+    ),
+    ("arrow_bare_block_bound", "const f = x => { return x; };\n", MEASURED),
+    ("arrow_bare_block_module_call_arg", "app.get('/', req => { return 1; });\n", MEASURED),
+    (
+        "arrow_bare_block_nested_call_arg",
+        "function outer() { items.forEach(x => { return x; }); }\n",
+        MEASURED,
+    ),
+    ("arrow_bare_expr_bound", "const f = x => x + 1;\n", MEASURED),
+    ("arrow_bare_expr_module_call_arg", "items.map(x => x + 1);\n", EXEMPT_EMPTY),
+    (
+        "arrow_bare_expr_nested_call_arg",
+        "function outer() { return items.map(x => x + 1); }\n",
+        MEASURED,
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "source,expected_kind", [(src, kind) for _id, src, kind in _MATRIX_CASES],
+    ids=[case_id for case_id, _src, _kind in _MATRIX_CASES],
+)
+def test_conservation_matrix_never_silently_absent(
+    tmp_path: Path, source: str, expected_kind: str
+) -> None:
+    """Every header-kind x body-kind x position cell either measures at
+    least one non-`unparsed` unit, or is the single documented exemption
+    (an unbound expression-bodied arrow) -- silent absence (0 units, exit 0,
+    scored compliant) is never a third outcome (`A`)."""
+    path = tmp_path / "case.js"
+    path.write_text(source, encoding="utf-8")
+
+    units = qa.scan_js_file(path)
+
+    if expected_kind == EXEMPT_EMPTY:
+        assert units == []
+        return
+    assert len(units) >= 1
+    assert all(u.status != "unparsed" for u in units)
+
+
+# --------------------------------------------------------------------------
+# Gate 2 round-2 regression samples: a module-level callback with no
+# enclosing named function or binding must never silently vanish (`A`/`B`).
+# --------------------------------------------------------------------------
+
+
+def test_module_level_parenthesised_arrow_callback_not_silently_absent(
+    tmp_path: Path,
+) -> None:
+    """`app.get('/', (req, res) => { <64 lines> });` at module level
+    (parenthesised form, exact Gate 2 round-2 sample) -- must be measured (as
+    `<anonymous>`, `B`) or `unparsed` (`A`), never 0 entries/exit 0."""
+    body = "\n  ".join(f"const x{i} = {i};" for i in range(64))
+    source = f"app.get('/', (req, res) => {{\n  {body}\n  return x63;\n}});\n"
+    path = tmp_path / "server.js"
+    path.write_text(source, encoding="utf-8")
+
+    units = qa.scan_js_file(path)
+
+    assert units != []
+    if units[0].status == "unparsed":
+        return
+    assert units[0].name == "<anonymous>"
+    assert units[0].executable_lines > 50
+    assert units[0].status == "FAIL"
+
+
+def test_module_level_bare_arrow_callback_not_silently_absent(tmp_path: Path) -> None:
+    """`app.get('/', req => { <62 lines> });` at module level (bare-param
+    form, exact Gate 2 round-2 sample) -- must be measured (as `<anonymous>`,
+    `B`) or `unparsed` (`A`), never 0 entries/exit 0."""
+    body = "\n  ".join(f"const x{i} = {i};" for i in range(62))
+    source = f"app.get('/', req => {{\n  {body}\n  return x61;\n}});\n"
+    path = tmp_path / "server.js"
+    path.write_text(source, encoding="utf-8")
+
+    units = qa.scan_js_file(path)
+
+    assert units != []
+    if units[0].status == "unparsed":
+        return
+    assert units[0].name == "<anonymous>"
+    assert units[0].executable_lines > 50
+    assert units[0].status == "FAIL"
+
+
+def test_mixed_file_with_unenclosed_callback_not_scored_100_percent_compliant(
+    tmp_path: Path,
+) -> None:
+    """A file mixing `function small(){return 1;}` with an unenclosed 62-line
+    module-level callback must NOT score 100% compliant while the 62-line
+    callback goes unmeasured -- the literal `F-049-7` over-credit pattern
+    this sprint exists to eliminate. Either the callback becomes its own
+    violating unit, or the whole file is `unparsed` (`A`/`B`)."""
+    body = "\n  ".join(f"const x{i} = {i};" for i in range(62))
+    source = (
+        "function small(){return 1;}\n"
+        f"app.get('/', req => {{\n  {body}\n  return x61;\n}});\n"
+    )
+    path = tmp_path / "mixed.js"
+    path.write_text(source, encoding="utf-8")
+
+    units = qa.scan_js_file(path)
+
+    assert units != []
+    if len(units) == 1 and units[0].status == "unparsed":
+        return
+    compliant, measured, _unparsed = qa.compliance_figure(units)
+    assert not (compliant == measured and measured == 1)
+
+
+def test_computed_method_name_unattributed_body_reported_unparsed(tmp_path: Path) -> None:
+    """A computed method name (`[Symbol.iterator]() { ... }`) is a real
+    function header `_HEADER_RE` does not recognise -- the fail-closed
+    conservation check (`A`) must catch this rather than silently drop it.
+    Demonstrates `A` guards constructs beyond the specific gaps `B`/`C` fix.
+    """
+    source = "const obj = {\n  [Symbol.iterator]() {\n    return 1;\n  }\n};\n"
+    path = tmp_path / "iterable.js"
+    path.write_text(source, encoding="utf-8")
+
+    units = qa.scan_js_file(path)
+
+    assert len(units) == 1
+    assert units[0].status == "unparsed"
+    assert "function-introducing header" in units[0].reason
 
 
 # --------------------------------------------------------------------------
