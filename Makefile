@@ -131,8 +131,8 @@ bridge-state:
 # is 91/1428 first-party Python functions (6.37%) in violation, so wiring this
 # into `verify` then would have red the gate on pre-existing code rather than
 # on a regression. The violation count holds at 91 as the tree grows (91/1445,
-# 6.30%, at Phase 6 close) -- wiring stays deferred either way. Remediation of
-# the 91 units is routed to Sprint 051; `docs/sprints/050-core-pipeline/SPRINT_LOG.md`
+# 6.30%, at commit a198f91, Phase 6 close) -- wiring stays deferred either way.
+# Remediation of the 91 units is routed to Sprint 051; `docs/sprints/050-core-pipeline/SPRINT_LOG.md`
 # records the baseline and its measurement window. Exit 2 on any violation;
 # `--report` prints the full register and exits 0 regardless.
 quality-audit:

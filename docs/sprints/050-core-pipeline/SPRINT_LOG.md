@@ -63,7 +63,7 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | Friction Point | Resolution / Workaround | KI ID |
 | :--- | :--- | :--- |
 | Phase 3's Cost row "Prior session ratio" names `python3 scripts/session_cost.py --from-anchor --json` as the measuring command, but the `orchestrator` profile (`agents.md §6`) holds no code-execution tool — `restriction`: "Does NOT execute code or write business logic" — and this dispatch's tool set carried no shell/Bash primitive. Filling the cell would have required either fabricating a figure or a profile running code it is chartered not to run. | `orchestrator` left the placeholder text unedited rather than writing an invented ratio, and recorded the blocker here. Resolved in the same Phase 3 window by the Bash-capable session: `python3 scripts/session_cost.py --from-anchor --json` → `ratio: 2.9` (peak 107612 / first-turn 37002 tokens, session `5aead9ab`), written into `IMPLEMENTATION_PLAN.md`'s Cost table. Confirms `triple_lock` Lock 1 never required the table numerically complete before commit — the split-profile handoff is the durable lesson, not a gap. | `KI-050-1` |
-| Phase 6 `U4` and `U5` dispatches, both staffed to `rule_validator` per `agent_assignment.md`, produced correct content edits but neither could commit, run `make verify`, or update `task_scope.md`'s status cell — `agent_assignment.md:112` records this profile's toolset as `Read, Glob, Grep, Write, Edit` (marked *verified*), which holds no `Bash`. This is not circumstantial like the Phase 4.3 rate-limit interruption (`task_scope.md`'s provenance note): it is structural — `rule_validator` cannot satisfy Phase 6's per-unit done-criterion (commit + `make verify` exit 0) on its own for any unit it authors. The session completed the commit/verify/status-update step for both `U4` (`c702d29`) and `U5` (`ac7dcca`) after reviewing each diff against its dispatch instructions; no content was rewritten. **Extended**: `U7` and `U8`, staffed to `doc_orchestrator` (`agent_assignment.md:114`, toolset `Read, Glob, Grep, Write, Edit`, also *verified*), hit the identical gap — same pattern, third profile, confirming this is a framework-class toolset defect, not a `rule_validator`-specific one. Both content edits (`workflows/close_workflow.md` and `workflows/deployment_workflow.md`) were correct; the session completed commit (`6d12c26`, `8eff243`) and status update for both. `task_scope.md`'s `Assignee` column denotes authorship of the edit, not who committed it — a distinction this corpus does not currently declare anywhere, and now confirmed across three of the sprint's four staffed profiles. | `KI-050-2` |
+| Phase 6 `U4` and `U5` dispatches, both staffed to `rule_validator` per `agent_assignment.md`, produced correct content edits but neither could commit, run `make verify`, or update `task_scope.md`'s status cell — `agent_assignment.md:112` records this profile's toolset as `Read, Glob, Grep, Write, Edit` (marked *verified*), which holds no `Bash`. This is not circumstantial like the Phase 4.3 rate-limit interruption (`task_scope.md`'s provenance note): it is structural — `rule_validator` cannot satisfy Phase 6's per-unit done-criterion (commit + `make verify` exit 0) on its own for any unit it authors. The session completed the commit/verify/status-update step for both `U4` (`c702d29`) and `U5` (`ac7dcca`) after reviewing each diff against its dispatch instructions; no content was rewritten. **Extended**: `U7` and `U8`, staffed to `doc_orchestrator` (`agent_assignment.md:114`, toolset `Read, Glob, Grep, Write, Edit`, also *verified*), hit the identical gap — same pattern, third profile, confirming this is a framework-class toolset defect, not a `rule_validator`-specific one. Both content edits (`workflows/close_workflow.md` and `workflows/deployment_workflow.md`) were correct; the session completed commit (`6d12c26`, `8eff243`) and status update for both. `task_scope.md`'s `Assignee` column denotes authorship of the edit, not who committed it — a distinction this corpus does not currently declare anywhere, and now confirmed across three of the sprint's four staffed profiles. **Fourth instance**: `rule_validator`'s Phase 7 remediation dispatch for F7/F8 (commit `ba606be`) hit the identical gap again — same profile as `U4`/`U5`, same toolset, same absence of `Bash`, confirming the pattern is stable across both Phase 6 execution and Phase 7 remediation dispatches of this profile, not a one-time Phase 6 artifact. | `KI-050-2` |
 
 ---
 
@@ -81,7 +81,7 @@ applied by the script itself), at the measurement window `80bb5e1..43e60b3`
 both Gate 1 and Gate 2 independently reproduced it, each at a different
 commit in the same window):
 
-| Figure | At `80bb5e1..43e60b3` | At HEAD (`a198f91`, Phase 6 close) |
+| Figure | At `80bb5e1..43e60b3` | At `a198f91` (Phase 6 close) |
 | :--- | :--- | :--- |
 | First-party Python functions scanned | 1428 | 1445 |
 | Compliant | 1337 | 1354 |
@@ -89,7 +89,7 @@ commit in the same window):
 | Violation rate | 91/1428 = 6.37% | 91/1445 = 6.30% |
 | Unparsed | 0 | 0 |
 
-The HEAD figure is higher in denominator only — later units in the sprint
+The `a198f91` figure is higher in denominator only — later units in the sprint
 (chiefly `U6`) added functions to the tree; the violation count held at 91
 throughout. 91/1428 = 6.37% is **> 0 and ≤ 20%**, so **`D5` Branch B
 applies**: `U3` ships the standalone `make quality-audit` target only;
@@ -111,8 +111,8 @@ python3 scripts/quality_audit.py --report . | grep '^FAIL'
 At the `80bb5e1..43e60b3` measurement window the 91 violations span `hooks/`,
 `scripts/`, `skills/` and `tests/`; none is `unparsed`. Representative
 entries, anchored to that window (full list via the command above, against
-HEAD — line numbers on files touched later in the sprint will differ from
-this table, which is frozen at the measurement commit):
+the current tip — line numbers on files touched later in the sprint will
+differ from this table, which is frozen at the measurement commit):
 `hooks/on_commit.py:835 main lines=40 depth=4`,
 `scripts/session_state.py:354 main lines=51 depth=2` (at commit `ba606be`:
 `scripts/session_state.py:434 main lines=57 depth=2` — grew during this
@@ -171,15 +171,24 @@ positive on the masking side): `` `Hello, {name}!` `` template literals and
 `/\{[a-z]+\}/g` regex literals do NOT trigger `_has_unbalanced_braces` —
 masking is sound; the bug is specifically the arrow-detection scope.
 
-Both are fixed in the commit that follows this entry, per the Principal
-Agent's design: `ident =>` assigned to a binding (in `D4`'s declared scope,
-"arrow functions assigned to a binding") is now recognised as a function
-header and measured, not marked unparsed; an inline callback's lines count
-toward its containing function rather than flagging the whole file;
-unbalanced braces still report `unparsed`. `_has_unbalanced_braces` itself is
-flattened to depth ≤3. Fact criterion: the violating set at the fix commit
-is a subset of the `80bb5e1..43e60b3` baseline (91 violations, all
-pre-existing) — the fix commit is named in the entry that follows.
+An attempt to fix both landed at `982d197`, per the Principal Agent's design:
+`ident =>` assigned to a binding (in `D4`'s declared scope, "arrow functions
+assigned to a binding") is recognised as a function header and measured;
+`_has_unbalanced_braces` is flattened to depth ≤3. **That attempt did not
+satisfy its own fact criterion and both Gate 1 round 2 and Gate 2 round 2
+independently rejected it** (see the Quality Gate table below): the
+violating set at `982d197` is equal in count (91) but not a name-subset of
+the `80bb5e1..43e60b3` baseline — `scan_js_file` (a baseline violator) was
+split into `_locate_header_body` (a NEW function, depth=5, not in the
+baseline) and `_locate_paren_body`, so the count held at 91 by swapping one
+violation for another rather than by staying inside the baseline. Both gates
+also found the fix left a silent gap: a module-level inline callback with no
+enclosing named function or binding (e.g. `app.get('/', req => {...})`)
+produces **zero register entries** — neither measured nor `unparsed` — which
+both gates read as a recurrence of the exact defect class (`F-049-7`) this
+sprint exists to eliminate. Remediation in progress; the entry naming the
+passing fix commit is written after that commit exists and both gates confirm
+it in fresh-context rounds, not as a promise ahead of it.
 
 ---
 
@@ -227,6 +236,8 @@ session-authored row.
 | :--- | :--- | :--- | :--- | :--- |
 | QA (Gate 1) | 1 | RECORD | testifying | Mechanical checks all green and independently reproduced: pytest 806/806 exit 0, `make verify` exit 0, `verify_references.py`/`check_task_scope.py`/`check_gate_log.py`/`map_workflows.py --check`/`audit_plan.py` all exit 0, 31/31 commits carry `#050`, no TODO/FIXME, no absolute paths, Spanish confined to the plan. Over-crediting check passes: every clause of `agents.md:41,43,47,48` and both `config/invocation_exceptions.json` notes verified against `scripts/quality_audit.py`'s actual behavior; exit 2/0, D1 executable-line and D2 ancestor-set definitions match `_BLOCK_STMT_TYPES` exactly; F-049-7 not reintroduced. D5 Branch B correctly wired (`Makefile:26,136`, not a `verify` dependency, reason stated); U2 `80bb5e1` and U6 `0ddc0f8` each carry their paired test in-commit; U1/U5 sequential per D8; U2a documented as a mid-execution generated-file consequence; workflows name the literal `set-topology` command with done-criteria (`close_workflow.md:28`, `deployment_workflow.md:27` `topology_writeback`, RA-13-separated). Eight record-class findings (F1-F8), all reconciled in this document and the linked files at Phase 7 remediation; none was `charter` or `instructing`. |
 | Tester (Gate 2) | 1 | RECORD | testifying | Suite green: pytest 806 passed exit 0 (780 main + 14 test_quality_audit + 12 test_session_state); make verify exit 0; tree clean. JS/TS unparsed guarantee reproduced on independent samples (.jsx, typed .ts, @decorator .ts/.js, closing-tag JSX in .js all UNPARSED; none counted compliant) — no HIGH finding. U6 defect reproduced on main (set-topology invalid choice, exit 2; 0 topology_version writers); fix derives value (sandbox CHANGELOG [7.1.4] + sprint 7 -> 7.1.4-007-in_progress), idempotent, refusal paths exit 2. Mutations M1-M3, M5-M7 killed; M4 (hardcoding "4.32.0" in set_topology) survived — closed at Phase 7 remediation by adding a differently-versioned fixture. Findings (a)-(d) reconciled in this document and the linked files at Phase 7 remediation. D5 baseline 91/1428 (6.37%) independently reproduced at `80bb5e1`, confirmed same measurement window as Gate 1's `43e60b3` (`git diff --stat 80bb5e1 43e60b3 -- '*.py'` empty). Abort 1/2 not triggered: stdlib-only, no Node dependency; 6.37% < 20%. |
+| QA (Gate 1) | 2 | REJECTED | charter | F1-F8 verified landed: "12"->"11" (F1); window `80bb5e1..43e60b3` with reproduced figures 91/1428 @`43e60b3`, 91/1445 @`a198f91`, 92/1449 @`ba606be` (F2/F3); `_mask_non_code` named and Sprint 051 scope carries baseline/`session_state.py` main growth/self-closing JSX (F5/F6/(c)); `scripts/session_state.py:17-27` `invoked_by:` names `close_workflow.md#state_sync (release, set-topology)` and `deployment_workflow.md#topology_writeback (set-topology)`, "no invoker yet" removed, `verify_references.py` exit 0 (F4); `agents.md:47,48` both restore "`make verify` does NOT run `make quality-audit`" (F7) and row 47 gains the JS/TS heuristic caveat (F8). Mechanical at `982d197`: pytest 811 passed exit 0, `make verify` exit 0, `check_task_scope.py` exit 0 (`task_scope.md` untouched), `check_gate_log.py` exit 0. REJECTED (charter): `982d197` introduces `scripts/quality_audit.py:583 _locate_header_body lines=17 depth=5` — the 91 count at `982d197` is a swap (`scan_js_file` out, `_locate_header_body` in), not a name-subset of the `80bb5e1..43e60b3` baseline, falsifying this document's own fact criterion for that commit and the "new functions don't inherit the baseline's deferral" ruling `982d197`'s own message quotes; `D5` Branch B defers only the measured baseline, and no sprint artifact named `_locate_header_body`. Also found: a top-level block-bodied callback (`app.get('/', req => {...})`, no enclosing function/binding) yields 0 units, exit 0, silently absent from the register (was UNPARSED at `5c82c16`; regression from `982d197`); the `const f = x => x + 1;` fixture from finding (b) was re-scoped to expect `[]` rather than fixed. Record-class in the same round: the fix-commit entry promised in this document was written before the fix existed (corrected); `KI-050-2` lacked its 4th instance (corrected); "HEAD" citations without SHA anchors at three sites (corrected). |
+| Tester (Gate 2) | 2 | REJECTED | charter | M4 independently re-killed via an archived copy (profile is read-only): hardcoding the written version to "4.32.0" fails `test_set_topology_writes_the_derived_version_not_a_fixed_one` (1 failed/12 passed); full-string and "7.1.4" hardcodes kill 3 and 6 tests; reverted copy byte-identical, 13/13 pass. `982d197` fix confirmed on fresh independent samples: inline `.map(x => ...)` callback inside a declared function → PASS, measured correctly (was UNPARSED at `5c82c16`); `const handler = x => {58 stmts}` → FAIL lines=58, exit 2, correctly measured; unbalanced braces → still UNPARSED. Self-check 7 violations (`_has_unbalanced_braces` flattened to depth 3, PASS). Repo 91 FAIL/0 UNPARSED (1363/1454); baseline independently reproduced at `80bb5e1` (91, 1337/1428), spot-checks match. REJECTED (charter), independently confirming Gate 1 round 2 from a different angle: repo set is count-equal (91=91) but not name-equal to the baseline — `scan_js_file` (depth=5, baseline) relocated into new `_locate_header_body` (depth=5, not baseline) at `982d197`. Additional evidence Gate 1 did not produce: a module-level inline callback with NO enclosing named function is silently dropped at `982d197` — `app.get('/', (req, res) => {64 lines})` (parenthesised form) → 0 entries, exit 0, never fixed across either remediation commit; bare-param form `app.get('/', req => {62 lines})` → 0 entries at `982d197`, a regression from `5c82c16` where it was UNPARSED; a file mixing a small named function with the 62-line unenclosed callback scores 100% compliant (1/1), exit 0 — the literal `F-049-7` over-credit pattern recurring inside the sprint that exists to eliminate it. `scripts/quality_audit.py`'s own docstring ("callback lines counted as part of the enclosing function") is false when nothing encloses; no test covers the unenclosed case. Remediation target: `scan_js_file`/`_HEADER_RE` — an unenclosed arrow block body must become its own unit or report `unparsed`, never disappear, with paired tests for both parenthesised and bare-param forms. |
 
 ---
 
