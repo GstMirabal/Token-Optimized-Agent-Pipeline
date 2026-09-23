@@ -6,6 +6,14 @@ those read as drift (verdict `U`/`A`) and force a no-op `/agents:reconcile` on
 every session in between. They are outside the drift range by construction; a
 commit that also touches another file, or one without the `docs(state)`
 subject, is still counted.
+
+Sprint 051 adds the second exclusion, on a different axis: commits that have
+not reached the integration branch. `RA-12` puts every sprint on
+`ai-sprint/[ID]` and `RA-05` puts its ledger entry at Sprint Closeout, so
+in-flight work is correctly unrecorded and must not block. What must still
+block is unrecorded work that already landed — the `PRs #26-#30` failure this
+check exists for — and the last three tests assert that boundary from both
+sides.
 """
 
 from __future__ import annotations
@@ -124,3 +132,86 @@ def test_routine_shas_helper_identifies_only_the_state_only_docs_commit(
     routine = dd._routine_state_shas(lines)
     assert len(routine) == 1
     assert next(iter(routine)).startswith(sha_routine[:7])
+
+
+# --- Sprint 051: the in-flight half of the range is listed, never blocking ----
+
+
+def _seal(repo: Path, version: str = "1.0.0") -> None:
+    """A ledger with a non-empty `[Unreleased]` plus one released section, tagged.
+
+    Both are required to reach verdict `A`: `sealing_tags` only counts a tag
+    whose version owns a section, and `A` is the verdict that fires when
+    `[Unreleased]` is not empty. Without this setup the fixture reaches `R`,
+    which exits 2 for a different reason and would not test the split.
+    """
+    (repo / "CHANGELOG.md").write_text(
+        "# Changelog\n\n"
+        "## [Unreleased]\n\n- an entry, so the section is not empty\n\n"
+        f"## [{version}] - 2026-01-01\n\n- sealed\n",
+        encoding="utf-8",
+    )
+    _commit_all(repo, "docs(changelog): seal")
+    _git(repo, "tag", f"v{version}")
+
+
+def test_in_flight_sprint_commits_do_not_block(repo: Path) -> None:
+    """RA-12 work on `ai-sprint/[ID]` is not drift: its entry is due at close.
+
+    Against the pre-Sprint-051 tree this is verdict `A` and exits 2, which is
+    what stopped a host's boot before its briefing could deliver the
+    Documentation Entry Point.
+    """
+    _seal(repo)
+    baseline = _head(repo)
+    _write_anchor(repo, status="X", last_close_commit=baseline)
+    _git(repo, "checkout", "-q", "-b", "ai-sprint/051")
+    (repo / "design.md").write_text("in-flight sprint work\n")
+    _commit_all(repo, "docs(design): sprint work not yet merged")
+    assert dd.main() == 0
+
+
+def test_landed_unrecorded_work_still_blocks_from_a_sprint_branch(repo: Path) -> None:
+    """The `PRs #26-#30` failure: unrecorded work ON the integration branch.
+
+    Checked out on a sprint branch, so it proves the split does not let a
+    sprint branch launder a commit that already reached `main`.
+    """
+    _seal(repo)
+    baseline = _head(repo)
+    _write_anchor(repo, status="X", last_close_commit=baseline)
+    (repo / "landed.txt").write_text("merged but never recorded\n")
+    _commit_all(repo, "feat: landed on main with no ledger entry")
+    _git(repo, "checkout", "-q", "-b", "ai-sprint/051")
+    assert dd.main() == 2
+
+
+def test_a_sprint_branch_does_not_hide_a_landed_commit(repo: Path) -> None:
+    """Mixed range: one landed and unrecorded, one in flight. Only one blocks."""
+    _seal(repo)
+    baseline = _head(repo)
+    _write_anchor(repo, status="X", last_close_commit=baseline)
+    (repo / "landed.txt").write_text("merged but never recorded\n")
+    _commit_all(repo, "feat: landed on main with no ledger entry")
+    landed = _head(repo)[:7]
+    _git(repo, "checkout", "-q", "-b", "ai-sprint/051")
+    (repo / "design.md").write_text("in-flight sprint work\n")
+    _commit_all(repo, "docs(design): sprint work not yet merged")
+    in_flight = _head(repo)[:7]
+
+    verdict, every, unsealed, _tags, flight = dd.classify(baseline)
+    assert verdict == "A"
+    assert [c.split()[0] for c in unsealed] == [landed]
+    assert [c.split()[0] for c in every] == [landed]
+    assert [c.split()[0] for c in flight] == [in_flight]
+    assert dd.main() == 2
+
+
+def test_integration_ref_is_none_when_head_is_the_integration_branch(
+    repo: Path,
+) -> None:
+    """On `main` there is no in-flight half, so the pre-051 path runs unchanged."""
+    assert _git(repo, "rev-parse", "--abbrev-ref", "HEAD") == "main"
+    assert dd.integration_ref() is None
+    _git(repo, "checkout", "-q", "-b", "ai-sprint/051")
+    assert dd.integration_ref() == "main"

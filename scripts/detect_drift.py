@@ -193,36 +193,107 @@ def _routine_state_shas(commits: list[str]) -> set[str]:
     return routine
 
 
-def classify(baseline: str) -> tuple[str, list[str], list[str], list[str]]:
+def integration_ref() -> str | None:
+    """The ref a sprint merges into, or None when there is no in-flight half.
+
+    Resolution order: the anchor's own name for it, then ``main``, then
+    ``master``, each tried as a local branch and then as ``origin/``. Not
+    hardcoded to ``main``, because a repository that names it otherwise would
+    silently get the pre-Sprint-051 behaviour back.
+
+    Returns None when nothing resolves, or when HEAD *is* that branch. Both
+    mean the same thing for this check: every commit in range has landed, so
+    there is nothing to separate and ``classify`` behaves as it always did.
+    """
+    candidates: list[str] = []
+    if ACTIVE_STATE.exists():
+        try:
+            state = json.loads(ACTIVE_STATE.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            state = {}
+        named = state.get("integration_branch") or state.get("base_branch")
+        if named:
+            candidates.append(str(named))
+    candidates.extend(["main", "master"])
+
+    head = git("rev-parse", "--abbrev-ref", "HEAD")
+    for name in candidates:
+        if name == head:
+            return None
+        for ref in (name, f"origin/{name}"):
+            if git("rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}") is not None:
+                return ref
+    return None
+
+
+def _in_flight_shas(commits: list[str]) -> set[str]:
+    """SHAs in ``commits`` that have not reached the integration branch.
+
+    ``RA-12`` puts every sprint on ``ai-sprint/[ID]``, so its commits are
+    absent from every release tag by construction. ``agents.md §0`` and
+    ``RA-05`` place the sprint's ledger entry at **Sprint Closeout**, which
+    means a sprint stopped earlier is *correctly* unrecorded — and the
+    reconciliation this check would force must then reconstruct nothing, which
+    ``reconciliation_workflow.md`` Phase 3 prohibits.
+
+    Separating them keeps the failure this check exists for: ``PRs #26-#30``
+    were unrecorded work **on the integration branch**, which stays in the
+    blocking half.
+    """
+    ref = integration_ref()
+    if ref is None:
+        return set()
+    # `merge-base --is-ancestor` exits 0 when the sha has landed, and `git()`
+    # returns None only on a non-zero exit — the idiom `covering_tags` uses.
+    return {
+        sha
+        for sha in (line.split()[0] for line in commits if line.strip())
+        if git("merge-base", "--is-ancestor", sha, ref) is None
+    }
+
+
+def classify(baseline: str) -> tuple[str, list[str], list[str], list[str], list[str]]:
     """Decide the verdict for the range `baseline..HEAD`.
+
+    The verdict is computed over the **landed** half of the range only. The
+    in-flight half is returned so the caller can list it, never counted as
+    drift (Sprint 051).
 
     Args:
         baseline: a commit reachable from HEAD.
 
     Returns:
-        tuple: (verdict, every commit in range, unsealed commits, sealing tags).
+        tuple: (verdict, landed commits, unsealed commits, sealing tags,
+        in-flight commits).
     """
     every = commits_since(baseline)
     routine = _routine_state_shas(every)
     if routine:
         every = [c for c in every if c.split()[0] not in routine]
+
+    in_flight = _in_flight_shas(every)
+    in_flight_lines = [c for c in every if c.split()[0] in in_flight]
+    if in_flight:
+        every = [c for c in every if c.split()[0] not in in_flight]
+
     if not every:
-        return "CLEAN", [], [], []
+        return "CLEAN", [], [], [], in_flight_lines
 
     tags = sealing_tags()
     if not tags:
-        return "R", every, every, []
+        return "R", every, every, [], in_flight_lines
 
     unsealed = [
         c
         for c in commits_since(baseline, *(f"^{tag}" for tag in tags))
-        if c.split()[0] not in routine
+        if c.split()[0] not in routine and c.split()[0] not in in_flight
     ]
     if not unsealed:
-        return "S", every, [], tags
+        return "S", every, [], tags, in_flight_lines
     if not unreleased_is_empty():
-        return "A", every, unsealed, tags
-    return ("U" if len(unsealed) == len(every) else "M"), every, unsealed, tags
+        return "A", every, unsealed, tags, in_flight_lines
+    verdict = "U" if len(unsealed) == len(every) else "M"
+    return verdict, every, unsealed, tags, in_flight_lines
 
 
 def enumerate_commits(commits: list[str], stream) -> None:
@@ -315,6 +386,19 @@ def report_drift(verdict: str, every: list[str], unsealed: list[str]) -> int:
     return 2
 
 
+def report_in_flight(commits: list[str]) -> None:
+    """List sprint work that has not merged. Informational — never blocks.
+
+    Printed for every verdict, including ``CLEAN``, so the half that is
+    deliberately not counted stays visible. A branch that never merges must
+    not become a blind spot just because it stopped blocking.
+    """
+    print(f"ℹ️  {len(commits)} commit(s) on this branch have not reached the "
+          f"integration branch. Their ledger entry is due at Sprint Closeout "
+          f"(RA-05), so they are listed here and not counted as drift:")
+    enumerate_commits(commits, sys.stdout)
+
+
 def read_baseline() -> str | None:
     """The recorded `last_close_commit`, or None with the reason printed."""
     if not ACTIVE_STATE.exists():
@@ -354,7 +438,9 @@ def main() -> int:
     if note:
         print(f"⚠️  {note}", file=sys.stderr)
 
-    verdict, every, unsealed, tags = classify(baseline)
+    verdict, every, unsealed, tags, in_flight = classify(baseline)
+    if in_flight:
+        report_in_flight(in_flight)
     if verdict == "CLEAN":
         print(f"✅ No drift — HEAD matches the last sealed close ({baseline[:7]}).")
         return 0
