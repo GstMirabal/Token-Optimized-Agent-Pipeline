@@ -312,3 +312,49 @@ closed.
 This plan is committed before Phase 5 requests Human OK (`agents.md §2 triple_lock`,
 `pipeline_workflow.md` Phase 5). The approval names exactly one `Sprint_ID` — which
 `W-11` is about to make a written rule.
+
+---
+
+## Amendment 1 — 2026-09-23, during Phase A execution
+
+Appended, never rewriting the tables above.
+
+**What happened.** `W-01` landed and satisfied verification rows 4 and 5. Run against
+the reporting host's real state, it narrowed 18 flagged commits to 2 — and then still
+exited `2` on those 2. Both were landed on the integration branch and recorded only
+under `[Unreleased]`, which is verdict `A` behaving exactly as designed.
+
+**Why that was not good enough.** `A` asks a human to read the section. It asks again
+on the next session, and the next, until a deployment seals it. That is the same
+desensitisation the sprint exists to remove, reached by a different route: a reader who
+clears the same warning five times clears the sixth without reading it.
+
+**Two causes, not one.** `2f098b3`'s `[Unreleased]` entry cites the string `2f098b3`, so
+its coverage *is* provable per commit — `report_drift`'s claim that it cannot be holds
+for reachability, not for a citation. `29b2b86` is the commit that **wrote** that entry
+and cannot cite itself, and the routine-commit exemption missed it because it required
+touching `docs/active_state.json` alone while a reconciliation commit also touches the
+ledger.
+
+**Approved extension** (human, 2026-09-23), three units:
+
+| # | File | Op | Done-criterion |
+| :--- | :--- | :--- | :--- |
+| **W-15** | `scripts/detect_drift.py` | modify | Ledger-maintenance exemption widened to the anchor **and** the ledger, both halves still required; `_cited_in_unreleased` plus verdict `C` and `report_cited`. Second sequential claim on this file after `W-01` — never concurrent (`§2 jurisdictional_lock`) |
+| **W-16** | `tests/test_detect_drift.py` | modify | Four tests: the exemption fires, a mis-subjected commit still counts, a citing entry yields `C` and exit `0`, a non-citing entry keeps `A` and exit `2` |
+| **W-17** | `agents.md` | modify | `§0 Master Ledger` states that an `[Unreleased]` entry names its commit by short SHA, and why. Landed **before** the code that depends on it |
+
+**One further unit, added on discovery rather than by approval**, because `make verify`
+could not reach green without it:
+
+| # | File | Op | Done-criterion |
+| :--- | :--- | :--- | :--- |
+| **W-18** | `tests/test_installer.sh` | modify | `mktemp -d` takes an explicit template under `${TMPDIR:-/tmp}`. macOS ignores TMPDIR without one, so the gate died at its last step after the whole Python suite had passed. Same family as `W-04` |
+
+**Measured after the extension**, against the state that stopped the host's boot at
+session start: exit `2` with 18 commits flagged becomes exit `0` — 16 listed as in
+flight, one exempt as ledger maintenance, one accounted for by its citation.
+`make verify` green end to end: 788 tests plus all seven installer scenarios.
+
+**Cost restated** (`RA-14` headline-metrics clause — grep-reproducible from the tables
+above, not carried from prose): **18 units**, was 14.
