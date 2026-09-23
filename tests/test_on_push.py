@@ -1,7 +1,7 @@
 """Tests for hooks/on_push.py — force-push and history-rewrite rejection.
 
 Four named tests (P9.2), symmetric with P8.1. Each drives ``on_push.py`` through
-a real ``pre-push`` hook against a bare remote under ``/private/tmp``.
+a real ``pre-push`` hook against a bare remote in a writable temporary directory.
 """
 
 from __future__ import annotations
@@ -29,11 +29,27 @@ def _run(cwd: Path, *args: str, check: bool = True) -> subprocess.CompletedProce
 
 
 def _sandbox_pair(tmp_path: Path) -> tuple[Path, Path]:
-    """Create a bare remote and a clone under ``/private/tmp`` when possible."""
-    base = Path("/private/tmp")
-    if not base.is_dir():
-        base = tmp_path
-    work = Path(tempfile.mkdtemp(prefix="p92-on-push-", dir=str(base)))
+    """Create a bare remote and a clone in a writable temporary directory.
+
+    ``mkdtemp`` with no ``dir=`` honours ``TMPDIR``, which is how a sandboxed
+    environment names the one temporary directory it grants writes in. Naming a
+    platform temporary path literally did not: ``is_dir()`` passed, because such
+    a directory exists and is readable, and then ``mkdtemp`` raised
+    ``PermissionError`` — so the fallback guarded the wrong condition and never
+    ran. Four tests failed under the default macOS Seatbelt profile for that
+    reason (reported by a host, Sprint 051).
+
+    Args:
+        tmp_path: pytest's per-test directory, used only if ``TMPDIR`` itself
+            is unwritable.
+
+    Returns:
+        tuple: the bare remote and the clone.
+    """
+    try:
+        work = Path(tempfile.mkdtemp(prefix="p92-on-push-"))
+    except OSError:
+        work = Path(tempfile.mkdtemp(prefix="p92-on-push-", dir=str(tmp_path)))
     bare = work / "remote.git"
     clone = work / "clone"
     _run(work, "git", "init", "--bare", str(bare))
