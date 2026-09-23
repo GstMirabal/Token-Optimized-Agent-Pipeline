@@ -114,8 +114,8 @@ entries, anchored to that window (full list via the command above, against
 HEAD — line numbers on files touched later in the sprint will differ from
 this table, which is frozen at the measurement commit):
 `hooks/on_commit.py:835 main lines=40 depth=4`,
-`scripts/session_state.py:354 main lines=51 depth=2` (at HEAD, after `U6`:
-`scripts/session_state.py:433 main lines=57 depth=2` — grew during this
+`scripts/session_state.py:354 main lines=51 depth=2` (at commit `ba606be`:
+`scripts/session_state.py:434 main lines=57 depth=2` — grew during this
 sprint with the instrument already in the tree; see the Sprint 051 scope
 note below),
 `skills/skill-creator/scripts/run_eval.py:35 run_single_query lines=100 depth=10`,
@@ -123,11 +123,63 @@ and — named explicitly rather than omitted, per Gate 1 F5 — the auditor's
 own worst violation: `scripts/quality_audit.py:299 _mask_non_code lines=103
 depth=5`, inside the 91 and pre-authorized by the plan's own Verification
 table (`quality_audit.py scripts/` → "`2` under branch B with each
-violation named").
+violation named"). Every figure in this document is anchored to a commit
+SHA, never to "HEAD" — a figure anchored to a SHA does not expire; one
+anchored to "HEAD" goes stale at the next commit, which is exactly what
+happened to this paragraph once (corrected here).
 
 `make quality-audit` therefore exits `2` against the current tree — this is
 the instrument correctly reporting the measured baseline, not a defect in the
 target.
+
+### Author finding, pre-Gate-round-2 (self-discovered, self-remediated)
+
+Before dispatching Gate round 2, the session ran its own diligence pass on
+the two just-landed remediation commits (`06a3e6c`, `5c82c16`) and found two
+issues, both fixed in the commit immediately following this entry — recorded
+here first, per the Principal Agent's instruction that an author-found defect
+must stay visible in the sprint history rather than disappear before a gate
+ever saw it.
+
+**1. Violation 92 — the remediation's own new function violates the rule it
+enforces.** At commit `ba606be`, `python3 scripts/quality_audit.py --report
+scripts/quality_audit.py` shows 8 violations in the instrument's own file
+(previously 7, per Gate 1 F5) — the new one is `scripts/quality_audit.py:429
+_has_unbalanced_braces lines=9 depth=5`, the function added by finding-(b)'s
+fix (`5c82c16`). Repo-wide: 92/1449 violating (was 91/1445), because
+`_has_unbalanced_braces` and three new test functions (one in
+`tests/test_session_state.py`, two in `tests/test_quality_audit.py`) entered
+the scanned set; only `_has_unbalanced_braces` itself violates.
+
+**2. Arrow-function over-correction — a real coverage loss, reproduced.**
+Finding (b)'s bare-arrow detection (`_BARE_ARROW_SIGNAL_RE`) fires on ANY
+`ident =>` occurrence anywhere in a file, not only when the file's only
+content is an unparseable arrow construct. Reproduced:
+
+```js
+function processItems(items) {
+  return items.map(x => x + 1).filter(x => x > 0).reduce((acc, x) => acc + x, 0);
+}
+```
+
+is reported `UNPARSED` ("bare-parameter arrow function detected (`x =>`
+without parens): scanner does not recognise this construct") despite having
+a normal, fully-measurable declared function — the inline callback is
+idiomatic JS that appears in most real-world files, so the JS/TS path would
+measure almost nothing on a real codebase. Negative control (no false
+positive on the masking side): `` `Hello, {name}!` `` template literals and
+`/\{[a-z]+\}/g` regex literals do NOT trigger `_has_unbalanced_braces` —
+masking is sound; the bug is specifically the arrow-detection scope.
+
+Both are fixed in the commit that follows this entry, per the Principal
+Agent's design: `ident =>` assigned to a binding (in `D4`'s declared scope,
+"arrow functions assigned to a binding") is now recognised as a function
+header and measured, not marked unparsed; an inline callback's lines count
+toward its containing function rather than flagging the whole file;
+unbalanced braces still report `unparsed`. `_has_unbalanced_braces` itself is
+flattened to depth ≤3. Fact criterion: the violating set at the fix commit
+is a subset of the `80bb5e1..43e60b3` baseline (91 violations, all
+pre-existing) — the fix commit is named in the entry that follows.
 
 ---
 
