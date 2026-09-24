@@ -240,8 +240,19 @@ def _cited_in_unreleased(commits: list[str]) -> set[str]:
     Returns:
         set[str]: the short SHA of each commit its own entry names.
     """
-    section = unreleased_section()
-    if not section.strip():
+    # Only entry lines count. Scanning the whole section let prose, a URL, a
+    # filename or a fenced command clear a commit — worst of all a
+    # ``git revert <sha>`` in a code block, where the ledger says the work was
+    # undone and the gate read it as recorded (Gate 2). It also disagreed with
+    # `unreleased_is_empty`, which has always required a ``-``/``*`` line: two
+    # readers of one section differing on what an entry is, which
+    # `unreleased_section`'s own docstring exists to prevent.
+    entries = "\n".join(
+        raw.lstrip()
+        for raw in unreleased_section().splitlines()
+        if raw.lstrip().startswith(("-", "*"))
+    )
+    if not entries:
         return set()
     cited: set[str] = set()
     for line in commits:
@@ -250,12 +261,13 @@ def _cited_in_unreleased(commits: list[str]) -> set[str]:
         sha = line.split()[0]
         if len(sha) < 7:
             continue
-        # A plain substring test cleared a commit whose abbreviation happened to
-        # sit inside a longer hex run — `abc1234` matching inside `9abc1234`, a
-        # different commit entirely (Gate 1, `F-2`). The lookbehind refuses a
-        # match that starts mid-hex; the trailing class still accepts the same
-        # commit cited at a longer width.
-        if re.search(rf"(?<![0-9a-fA-F]){re.escape(sha)}[0-9a-fA-F]*\b", section):
+        # The lookbehind refuses a match starting mid-hex — `abc1234` inside
+        # `9abc1234` is a different commit (Gate 1, `F-2`) — while the trailing
+        # class still accepts the same commit cited at 8, 12 or 40 characters.
+        # Case-insensitive because both guards already accept either case, so
+        # rejecting `ABC1234` was an asymmetry rather than a decision (Gate 2).
+        if re.search(rf"(?<![0-9a-fA-F]){re.escape(sha)}[0-9a-fA-F]*\b",
+                     entries, re.IGNORECASE):
             cited.add(sha)
     return cited
 
@@ -298,11 +310,17 @@ def integration_refs() -> list[str]:
     candidates.extend(["main", "master"])
 
     head = git("rev-parse", "--abbrev-ref", "HEAD")
+    # Every configured remote, not a hardcoded `origin`. Gate 2 found the
+    # `charter` hole reopening under a different remote name: the fork workflow
+    # `agents.md §4 feedback_upstream` *mandates* leaves the integration branch on
+    # `upstream/`, and consulting only `origin/` put work already landed there back
+    # into the in-flight half.
+    remotes = (git("remote") or "").split()
     refs: list[str] = []
     for name in candidates:
         if name == head:
             return []
-        for ref in (name, f"origin/{name}"):
+        for ref in (name, *(f"{remote}/{name}" for remote in remotes)):
             if git("rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}") is not None:
                 refs.append(ref)
     return refs

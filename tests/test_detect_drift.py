@@ -423,3 +423,77 @@ def test_verdict_m_when_only_some_commits_are_unsealed(repo: Path) -> None:
     verdict, every, unsealed, _tags, _flight = dd.classify(baseline)
     assert verdict == "M"
     assert len(unsealed) < len(every)
+
+
+# --- Gate 2: the charter hole under a different remote name, and the citation --
+
+
+def test_an_integration_branch_on_a_remote_not_named_origin_still_blocks(
+    repo: Path,
+) -> None:
+    """Gate 2 finding 1. `agents.md §4 feedback_upstream` mandates the fork
+    workflow, which leaves the integration branch on `upstream/`. Consulting only
+    `origin/` reopened the `charter` hole Gate 1 rejected round 1 for — and it was
+    the one place HEAD was less safe than the baseline."""
+    _seal(repo)
+    baseline = _head(repo)
+    _write_anchor(repo, status="X", last_close_commit=baseline)
+
+    upstream = repo.parent / "upstream.git"
+    _git(repo, "init", "-q", "--bare", str(upstream))
+    _git(repo, "remote", "add", "upstream", str(upstream))
+    (repo / "landed.txt").write_text("landed upstream, unrecorded\n")
+    _commit_all(repo, "feat: landed on the integration branch")
+    _git(repo, "push", "-q", "upstream", "main")
+    _git(repo, "fetch", "-q", "upstream")
+    _git(repo, "checkout", "-q", "-b", "ai-sprint/051")
+    _git(repo, "branch", "-f", "main", baseline)
+
+    assert "upstream/main" in dd.integration_refs()
+    assert dd.classify(baseline)[4] == []
+    assert dd.main() == 2
+
+
+def test_a_sha_outside_a_ledger_entry_does_not_clear_a_commit(repo: Path) -> None:
+    """Gate 2 finding 2, the worst case it built: a `git revert` in a code fence.
+
+    The ledger says the work was undone and the gate read it as recorded."""
+    _seal(repo)
+    baseline = _head(repo)
+    _write_anchor(repo, status="X", last_close_commit=baseline)
+    (repo / "landed.txt").write_text("landed on main\n")
+    _commit_all(repo, "feat: landed on main")
+    sha = _head(repo)[:7]
+
+    path = repo / "CHANGELOG.md"
+    body = path.read_text(encoding="utf-8")
+    path.write_text(
+        body.replace(
+            "## [Unreleased]\n",
+            f"## [Unreleased]\n\nRolled back, see:\n\n```sh\ngit revert {sha}\n```\n",
+            1,
+        ),
+        encoding="utf-8",
+    )
+    _commit_all(repo, "docs(changelog): a fence, not an entry")
+
+    verdict, _every, unsealed, _tags, _flight = dd.classify(baseline)
+    assert verdict == "A"
+    assert len(unsealed) == 1
+    assert dd.main() == 2
+
+
+def test_an_uppercase_citation_clears_the_commit(repo: Path) -> None:
+    """Gate 2 finding 3: both hex guards accepted either case and the match did
+    not, which was an asymmetry rather than a decision."""
+    _seal(repo)
+    baseline = _head(repo)
+    _write_anchor(repo, status="X", last_close_commit=baseline)
+    (repo / "landed.txt").write_text("landed on main\n")
+    _commit_all(repo, "feat: landed on main")
+    sha = _head(repo)[:7]
+    _add_unreleased_entry(repo, f"landed in `{sha.upper()}`")
+    _commit_all(repo, "docs(changelog): cited in uppercase")
+
+    assert dd.classify(baseline)[0] == "C"
+    assert dd.main() == 0

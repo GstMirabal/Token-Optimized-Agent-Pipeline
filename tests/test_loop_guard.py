@@ -183,3 +183,19 @@ def test_the_two_scope_flags_together_are_refused(repo):
     """Two ways to name one thing is a caller error, not a precedence puzzle."""
     _nested_sprint(repo, "| a | f.py | qa | PENDING |\n")
     assert _cli(repo, "check", "--current-sprint", "--sprint-dir", "x") == 2
+
+
+def test_current_sprint_stops_when_the_named_directory_has_no_task_scope(repo):
+    """Gate 2 finding 4: naming a path is not having one.
+
+    The anchor named a directory that was never created, `status_hash` returned ""
+    as it does for any missing file, and the loop reported "no change in the Status
+    column" for three iterations instead of saying the file was absent — reaching
+    the original defect straight through the flag added to prevent it."""
+    (repo / "docs" / "active_state.json").write_text(
+        json.dumps({"current_sprint": {"path": "docs/sprints/051-core-pipeline"}}),
+        encoding="utf-8",
+    )
+    assert _cli(repo, "start", "--max-iterations", "3", "--success", "x",
+                "--current-sprint") == 2
+    assert _cli(repo, "check", "--current-sprint") == 2

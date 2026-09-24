@@ -227,6 +227,19 @@ def main() -> int:
                   "repository root: a loop measuring progress from a file that is "
                   "not there reads every iteration as stagnant.", file=sys.stderr)
             return 2
+        # Naming a path is not having one. Gate 2 reached the original defect
+        # straight through this flag: the anchor named a directory that did not
+        # exist, `status_hash` returned "" as it does for any missing file, and the
+        # loop reported "no change in the Status column" for three iterations
+        # instead of "task_scope.md not found".
+        declared = Path(sprint_dir) / TASK_SCOPE_NAME
+        if not declared.exists():
+            print(f"❌ --current-sprint resolved to {declared}, which does not "
+                  f"exist. The anchor names a sprint whose task_scope.md is not "
+                  f"there, so progress cannot be measured from it — and an "
+                  f"unmeasurable loop must stop, not read as stagnant.",
+                  file=sys.stderr)
+            return 2
 
     if args.command == "start":
         return start(args.max_iterations, args.success, sprint_dir)
