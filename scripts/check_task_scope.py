@@ -64,7 +64,29 @@ def sprint_id_from_dir(sprint_dir: Path) -> int | None:
 
 
 def current_sprint_dir(root: Path) -> Path | None:
-    """Canonical sprint directory for the anchor's ``current_sprint.id``."""
+    """Canonical sprint directory for the anchor's ``current_sprint.id``.
+
+    Accepts the id as a string or an integer. It required ``int`` until Sprint
+    051, while every other reader of the same field — ``session_start.py:102``,
+    ``check_role_artifact.py:154``, ``persist_session_context.py:33`` — takes it
+    untyped, and real anchors carry the zero-padded string form (``"051"``,
+    ``"112"``) because that is what the canonical directory name uses.
+
+    The consequence was not a crash. This function returns ``None`` for an
+    unusable id and both callers read ``None`` as *no current sprint, skip* — so
+    ``check_task_scope.py --current-sprint`` and ``check_gate_log.py
+    --current-sprint``, two steps of ``make verify``, printed ``[OK] … (skip)``
+    and exited ``0`` in every repository whose anchor used the string form. A
+    gate that fails open reports success for work it never looked at, which is
+    the `PR #28` shape this corpus keeps naming (`F-051-R2`).
+
+    Args:
+        root: repository root holding ``docs/active_state.json``.
+
+    Returns:
+        Path | None: the sprint directory, or None when the anchor names no
+        usable sprint — the one case where skipping is correct.
+    """
     anchor = root / "docs" / "active_state.json"
     if not anchor.is_file():
         return None
@@ -72,10 +94,13 @@ def current_sprint_dir(root: Path) -> Path | None:
         data = json.loads(anchor.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
         return None
-    sprint_id = data.get("current_sprint", {}).get("id")
-    if not isinstance(sprint_id, int):
+    raw = (data.get("current_sprint") or {}).get("id")
+    if isinstance(raw, bool) or not isinstance(raw, (int, str)):
         return None
-    matches = sorted((root / "docs" / "sprints").glob(f"{sprint_id:03d}-*"))
+    text = str(raw).strip()
+    if not text.isdigit():
+        return None
+    matches = sorted((root / "docs" / "sprints").glob(f"{int(text):03d}-*"))
     dirs = [path for path in matches if path.is_dir()]
     return dirs[0] if dirs else None
 
