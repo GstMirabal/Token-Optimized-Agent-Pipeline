@@ -104,6 +104,49 @@ separate writer redraws a role boundary, which `§9`'s principle keeps out of a 
 that did not plan it. `W-13` changes verdict rather than closing — the graph drop is
 third-party behaviour, while the risk stays the nucleus's under `§2 graph_sovereignty`.
 
+## Phase F — Opened at Closeout and at Gate 1
+
+`W-19`/`W-20` were **undeclared when they landed** (Gate 1 `F-6`): the resolver defect
+`F-051-R2` was found while closing, fixed, and committed without a row here. Declared now,
+which is late — the row is what `jurisdictional_lock` reads, so a file changed without one
+is unclaimed while it is being changed.
+
+`W-21`..`W-25` are Gate 1's remediation.
+
+| # | File | Operation | Risk | Assignee | Model | Effort | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| W-19 | `scripts/check_task_scope.py` | modify | medium | `implementer_agent` | sonnet | medium | ✅ `1cb4be8` |
+| W-20 | `tests/test_check_task_scope.py` | modify | low | `implementer_agent` | sonnet | medium | ✅ `1cb4be8` |
+| W-21 | `scripts/detect_drift.py` | modify | high | `implementer_agent` | sonnet | medium | ⬜ Gate 1 `F-1`,`F-2` |
+| W-22 | `tests/test_detect_drift.py` | modify | medium | `implementer_agent` | sonnet | medium | ⬜ Gate 1 `F-1`,`F-2` |
+| W-23 | `scripts/loop_guard.py` | modify | medium | `implementer_agent` | sonnet | medium | ⬜ Gate 1 `F-5` |
+| W-24 | `tests/test_loop_guard.py` | modify | low | `implementer_agent` | sonnet | medium | ⬜ Gate 1 `F-5` |
+| W-25 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | low | `governance_learner` | sonnet | medium | ⬜ Gate 1 `F-3` |
+
+`W-21` is the **third** sequential claim on `scripts/detect_drift.py` (`W-01`, `W-15`,
+`W-21`) and `W-23` the second on `scripts/loop_guard.py`. Sequential, each after its
+predecessor landed; `jurisdictional_lock` caps concurrent claims, not lifetime touches.
+
+### Commit `1cb4be8` carries two structural subjects — Gate 1 `F-4`, confirmed
+
+Recorded rather than rewritten. `git add` was given
+`docs/sprints/051-core-pipeline/task_scope.md` together with the gitignored
+`docs/active_state.json`; the ignored path made the command exit non-zero, the `&&` chain
+dropped the intended first commit, and the next commit swept the already-staged
+`task_scope.md` in with `scripts/check_task_scope.py`. Its message describes only the
+resolver fix.
+
+| File in `1cb4be8` | Belongs to |
+| :--- | :--- |
+| `docs/sprints/051-core-pipeline/task_scope.md` | the Phase 4 artifact, described in this file's own header note |
+| `scripts/check_task_scope.py` | `W-19` |
+| `tests/test_check_task_scope.py` | `W-20` |
+
+**Not rewritten, and the reason is not convenience.** The branch is pushed and
+`.git/hooks/pre-push` blocks force-push for every tool, so splitting it would mean
+disabling a guard this sprint exists to strengthen. A commit whose contents are
+truthfully mapped here is auditable; a bypassed push hook is a precedent.
+
 ---
 
 ## Rule audit — findings against current `rules/`
