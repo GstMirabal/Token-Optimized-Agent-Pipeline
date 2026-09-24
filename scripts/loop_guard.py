@@ -196,19 +196,41 @@ def main() -> int:
     # `check_task_scope.py` and `check_forge_ladder.py`. Omitted, the sprint
     # directory comes from the anchor's `current_sprint.path`.
     scope_help = "Sprint directory holding task_scope.md; default: the anchor's."
-    check_parser = sub.add_parser(
-        "check", help="Advance one iteration and enforce the stops."
-    )
-    check_parser.add_argument("--sprint-dir", default=None, help=scope_help)
-    start_parser = sub.add_parser("start", help="Arm the loop with its stop set.")
-    start_parser.add_argument("--max-iterations", type=int, required=True)
-    start_parser.add_argument("--success", default="", help="Machine-checkable success condition.")
-    start_parser.add_argument("--sprint-dir", default=None, help=scope_help)
+    # `--current-sprint` is not an alias for the default. The default falls back
+    # to the repository root when the anchor names no sprint; this flag refuses
+    # to, which is the fail-closed behaviour this script is built on. A caller
+    # who means "the sprint the anchor names" should get a stop, not a silent
+    # fingerprint of a file that is not there.
+    current_help = "Require the anchor to name a sprint; fail closed if it does not."
+    for name, helptext in (("check", "Advance one iteration and enforce the stops."),
+                           ("start", "Arm the loop with its stop set.")):
+        sub_parser = sub.add_parser(name, help=helptext)
+        sub_parser.add_argument("--sprint-dir", default=None, help=scope_help)
+        sub_parser.add_argument("--current-sprint", action="store_true",
+                                help=current_help)
+        if name == "start":
+            sub_parser.add_argument("--max-iterations", type=int, required=True)
+            sub_parser.add_argument("--success", default="",
+                                    help="Machine-checkable success condition.")
 
     args = parser.parse_args()
+    sprint_dir = args.sprint_dir
+    if args.current_sprint:
+        if sprint_dir:
+            print("❌ --current-sprint and --sprint-dir name the same thing two "
+                  "ways. Pass one.", file=sys.stderr)
+            return 2
+        sprint_dir = (load_state().get("current_sprint") or {}).get("path")
+        if not sprint_dir:
+            print("❌ --current-sprint was passed and the anchor names no sprint "
+                  "(`current_sprint.path`). Refusing to fall back to the "
+                  "repository root: a loop measuring progress from a file that is "
+                  "not there reads every iteration as stagnant.", file=sys.stderr)
+            return 2
+
     if args.command == "start":
-        return start(args.max_iterations, args.success, args.sprint_dir)
-    return check(args.sprint_dir)
+        return start(args.max_iterations, args.success, sprint_dir)
+    return check(sprint_dir)
 
 
 if __name__ == "__main__":

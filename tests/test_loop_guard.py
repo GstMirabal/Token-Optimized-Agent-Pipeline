@@ -150,3 +150,36 @@ def test_the_repository_root_path_still_works_without_an_anchor_sprint(repo):
     (repo / "task_scope.md").write_text("| a | f.py | qa | PENDING |\n")
     assert lg.task_scope_path() == Path("task_scope.md")
     assert lg.status_hash() != ""
+
+
+def _cli(repo: Path, *args: str) -> int:
+    """Run the script as a process, which is how every caller reaches it."""
+    return subprocess.run(
+        [sys.executable, str(Path(lg.__file__).resolve()), *args],
+        cwd=repo, capture_output=True, text=True,
+    ).returncode
+
+
+def test_current_sprint_fails_closed_when_the_anchor_names_no_sprint(repo):
+    """Gate 1's `F-5`: the flag the done-criterion demanded was never shipped.
+
+    It is not an alias for the default. The default falls back to the repository
+    root; this refuses to, because a loop measuring progress from a file that is
+    not there reads every iteration as stagnant — and fail-closed is the whole
+    design of this script."""
+    (repo / "task_scope.md").write_text("| a | f.py | qa | PENDING |\n")
+    assert _cli(repo, "check", "--current-sprint") == 2
+
+
+def test_current_sprint_resolves_the_nested_directory_the_anchor_names(repo):
+    """With a sprint declared, the flag targets it rather than the root."""
+    _nested_sprint(repo, "| a | f.py | qa | PENDING |\n")
+    assert _cli(repo, "start", "--max-iterations", "3", "--success", "tests pass",
+                "--current-sprint") == 0
+    assert loop_block(repo)["last_status_hash"] != ""
+
+
+def test_the_two_scope_flags_together_are_refused(repo):
+    """Two ways to name one thing is a caller error, not a precedence puzzle."""
+    _nested_sprint(repo, "| a | f.py | qa | PENDING |\n")
+    assert _cli(repo, "check", "--current-sprint", "--sprint-dir", "x") == 2
