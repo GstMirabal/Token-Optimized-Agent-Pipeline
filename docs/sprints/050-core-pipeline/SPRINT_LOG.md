@@ -33,7 +33,7 @@ Tracking of atomic goals achieved during the session.
 - [x] **Phase 5 — Approval Gate**: Approved by GstMirabal, 2026-09-20, against `532b508` — two holds resolved (missing Phase 2-4.3 artifacts; stale `audit_plan.py` result) — sealed (`35c3863`)
 - [x] **Phase 6 — Execution**: complete — all 11 units (`U1`-`U10` + `U2a`) landed, `make verify` exit `0` (806 passed), `check_task_scope.py` exit `0`
 - [x] **Phase 7 — Quality Gate**: round 1 both `RECORD`/`testifying`; rounds 2 and 3 both `REJECTED`/`charter` on the JS/TS scanner logic block (four consecutive rejections total: QA r2, Tester r2, Tester r3, QA r3) — **escalated to `workflows/remediation_workflow.md`**, human chose **Abort 1**, lock lifted (`AB0`) — a fresh, zero-strike Phase 7 round runs against the `AB1`-`AB3` diff once landed
-- [ ] **Phase 8 — Sprint Closeout**: `PHASE_REGISTER.md`, Master Ledger entry — pending `AB1`-`AB3` execution and their gate round
+- [x] **Phase 8 — Sprint Closeout**: `PHASE_REGISTER.md` written; `CHANGELOG.md` `[Unreleased]` entry added. `AB1`-`AB3` landed directly by the human/session after the Principal Agent's escalation process was judged disproportionate to the remaining risk (a code deletion + doc revert) — no fresh adversarial gate round re-run for that diff, by explicit human instruction
 
 ---
 
