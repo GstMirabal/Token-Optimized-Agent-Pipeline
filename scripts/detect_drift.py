@@ -272,6 +272,11 @@ def _cited_in_unreleased(commits: list[str]) -> set[str]:
     return cited
 
 
+def _resolves(ref: str) -> bool:
+    """True when ``ref`` names a commit in this repository."""
+    return git("rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}") is not None
+
+
 def integration_refs() -> list[str]:
     """**Every** resolvable ref a sprint might merge into, local and remote.
 
@@ -320,9 +325,8 @@ def integration_refs() -> list[str]:
     for name in candidates:
         if name == head:
             return []
-        for ref in (name, *(f"{remote}/{name}" for remote in remotes)):
-            if git("rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}") is not None:
-                refs.append(ref)
+        forms = (name, *(f"{remote}/{name}" for remote in remotes))
+        refs.extend(form for form in forms if _resolves(form))
     return refs
 
 
