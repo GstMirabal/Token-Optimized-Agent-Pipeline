@@ -111,17 +111,21 @@ third-party behaviour, while the risk stays the nucleus's under `§2 graph_sover
 which is late — the row is what `jurisdictional_lock` reads, so a file changed without one
 is unclaimed while it is being changed.
 
-`W-21`..`W-25` are Gate 1's remediation.
+`W-21`..`W-25` are Gate 1's remediation, and they had **already landed** when this
+table was written. Gate 1 round 2 (`G2-1`) caught them carrying `⬜` beside `W-19`'s
+`✅` two rows up, so the file contradicted itself about what the marker asserts —
+and `close_workflow.md` Phase 2.6 reads this file as phase evidence, where five
+units reported as not started is a false report. Corrected to their landing SHAs.
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | W-19 | `scripts/check_task_scope.py` | modify | medium | `implementer_agent` | sonnet | medium | ✅ `1cb4be8` |
 | W-20 | `tests/test_check_task_scope.py` | modify | low | `implementer_agent` | sonnet | medium | ✅ `1cb4be8` |
-| W-21 | `scripts/detect_drift.py` | modify | high | `implementer_agent` | sonnet | medium | ⬜ Gate 1 `F-1`,`F-2` |
-| W-22 | `tests/test_detect_drift.py` | modify | medium | `implementer_agent` | sonnet | medium | ⬜ Gate 1 `F-1`,`F-2` |
-| W-23 | `scripts/loop_guard.py` | modify | medium | `implementer_agent` | sonnet | medium | ⬜ Gate 1 `F-5` |
-| W-24 | `tests/test_loop_guard.py` | modify | low | `implementer_agent` | sonnet | medium | ⬜ Gate 1 `F-5` |
-| W-25 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | low | `governance_learner` | sonnet | medium | ⬜ Gate 1 `F-3` |
+| W-21 | `scripts/detect_drift.py` | modify | high | `implementer_agent` | sonnet | medium | ✅ `153effc` |
+| W-22 | `tests/test_detect_drift.py` | modify | medium | `implementer_agent` | sonnet | medium | ✅ `153effc` |
+| W-23 | `scripts/loop_guard.py` | modify | medium | `implementer_agent` | sonnet | medium | ✅ `e8ba5e0` |
+| W-24 | `tests/test_loop_guard.py` | modify | low | `implementer_agent` | sonnet | medium | ✅ `e8ba5e0` |
+| W-25 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | low | `governance_learner` | sonnet | medium | ✅ `7d7167f` |
 
 `W-21` is the **third** sequential claim on `scripts/detect_drift.py` (`W-01`, `W-15`,
 `W-21`) and `W-23` the second on `scripts/loop_guard.py`. Sequential, each after its
@@ -142,10 +146,20 @@ resolver fix.
 | `scripts/check_task_scope.py` | `W-19` |
 | `tests/test_check_task_scope.py` | `W-20` |
 
-**Not rewritten, and the reason is not convenience.** The branch is pushed and
-`.git/hooks/pre-push` blocks force-push for every tool, so splitting it would mean
-disabling a guard this sprint exists to strengthen. A commit whose contents are
-truthfully mapped here is auditable; a bypassed push hook is a precedent.
+**Not rewritten — and the first version of this note argued it badly.** It said the
+push hook made a split impossible. That presented a policy choice as a technical
+one: `agents.md §2 destructive_flags` supplies the door explicitly, since a
+destructive operation is refused *unless the human grants explicit approval*. The
+hook is a prompt nobody raised, not a wall (Gate 1 round 2).
+
+The sound reasons are different and they hold. **The boundary is transient**:
+`RA-08` and `deployment_workflow.md` Phase 1 squash-merge this branch, so `1cb4be8`
+never reaches `main` as a distinct commit — a rewrite buys an audit property the
+merge then deletes. **And a rewrite is actively worse for audit**: it invalidates
+every SHA already cited against that commit, including this table and
+`UPSTREAM_FINDINGS_FROM_HOSTS.md`'s `F-051-R2` entry, converting one recorded
+deviation into a set of dangling citations. What makes the commit auditable is the
+mapping above, which is what `jurisdictional_lock` is read for.
 
 ---
 
