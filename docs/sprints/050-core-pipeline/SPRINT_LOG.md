@@ -32,8 +32,8 @@ Tracking of atomic goals achieved during the session.
 - [x] **Phase 4.3 — Rule Audit**: `task_scope.md` — `check_task_scope.py` exit `0`, APPROVED for Phase 5 (`549d35d`)
 - [x] **Phase 5 — Approval Gate**: Approved by GstMirabal, 2026-09-20, against `532b508` — two holds resolved (missing Phase 2-4.3 artifacts; stale `audit_plan.py` result) — sealed (`35c3863`)
 - [x] **Phase 6 — Execution**: complete — all 11 units (`U1`-`U10` + `U2a`) landed, `make verify` exit `0` (806 passed), `check_task_scope.py` exit `0`
-- [~] **Phase 7 — Quality Gate**: round 1 both `RECORD`/`testifying` (QA, Tester) — remediation of accumulated findings in progress, round 2 pending on both gates
-- [ ] **Phase 8 — Sprint Closeout**: `PHASE_REGISTER.md`, Master Ledger entry
+- [~] **Phase 7 — Quality Gate**: round 1 both `RECORD`/`testifying`; rounds 2 and 3 both `REJECTED`/`charter` on the JS/TS scanner logic block (four consecutive rejections total: QA r2, Tester r2, Tester r3, QA r3) — **escalated to `workflows/remediation_workflow.md`**, see below
+- [ ] **Phase 8 — Sprint Closeout**: `PHASE_REGISTER.md`, Master Ledger entry — blocked pending human decision
 
 ---
 
@@ -63,7 +63,7 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | Friction Point | Resolution / Workaround | KI ID |
 | :--- | :--- | :--- |
 | Phase 3's Cost row "Prior session ratio" names `python3 scripts/session_cost.py --from-anchor --json` as the measuring command, but the `orchestrator` profile (`agents.md §6`) holds no code-execution tool — `restriction`: "Does NOT execute code or write business logic" — and this dispatch's tool set carried no shell/Bash primitive. Filling the cell would have required either fabricating a figure or a profile running code it is chartered not to run. | `orchestrator` left the placeholder text unedited rather than writing an invented ratio, and recorded the blocker here. Resolved in the same Phase 3 window by the Bash-capable session: `python3 scripts/session_cost.py --from-anchor --json` → `ratio: 2.9` (peak 107612 / first-turn 37002 tokens, session `5aead9ab`), written into `IMPLEMENTATION_PLAN.md`'s Cost table. Confirms `triple_lock` Lock 1 never required the table numerically complete before commit — the split-profile handoff is the durable lesson, not a gap. | `KI-050-1` |
-| Phase 6 `U4` and `U5` dispatches, both staffed to `rule_validator` per `agent_assignment.md`, produced correct content edits but neither could commit, run `make verify`, or update `task_scope.md`'s status cell — `agent_assignment.md:112` records this profile's toolset as `Read, Glob, Grep, Write, Edit` (marked *verified*), which holds no `Bash`. This is not circumstantial like the Phase 4.3 rate-limit interruption (`task_scope.md`'s provenance note): it is structural — `rule_validator` cannot satisfy Phase 6's per-unit done-criterion (commit + `make verify` exit 0) on its own for any unit it authors. The session completed the commit/verify/status-update step for both `U4` (`c702d29`) and `U5` (`ac7dcca`) after reviewing each diff against its dispatch instructions; no content was rewritten. **Extended**: `U7` and `U8`, staffed to `doc_orchestrator` (`agent_assignment.md:114`, toolset `Read, Glob, Grep, Write, Edit`, also *verified*), hit the identical gap — same pattern, third profile, confirming this is a framework-class toolset defect, not a `rule_validator`-specific one. Both content edits (`workflows/close_workflow.md` and `workflows/deployment_workflow.md`) were correct; the session completed commit (`6d12c26`, `8eff243`) and status update for both. `task_scope.md`'s `Assignee` column denotes authorship of the edit, not who committed it — a distinction this corpus does not currently declare anywhere, and now confirmed across three of the sprint's four staffed profiles. **Fourth instance**: `rule_validator`'s Phase 7 remediation dispatch for F7/F8 (commit `ba606be`) hit the identical gap again — same profile as `U4`/`U5`, same toolset, same absence of `Bash`, confirming the pattern is stable across both Phase 6 execution and Phase 7 remediation dispatches of this profile, not a one-time Phase 6 artifact. **Fifth and sixth instances**: the two follow-up `rule_validator` dispatches during the JS/TS-scanner remediation sequence — the `agents.md §1` F-sentence dispatch (commit `b2a42ab`) and the three-row consolidation dispatch (commit `edea677`) — both hit the same gap. Six instances across a single sprint, every one on this profile's declared toolset, is no longer a pattern to note — it is the toolset itself. Routed `nucleus` at Extract (Phase 8): `agents/rule_validator.md` needs `Bash` added to its declared tool grant, or Phase 6/7 dispatch to this profile needs to assume a session-side commit/verify handoff as the default, not the exception. | `KI-050-2` |
+| Phase 6 `U4` and `U5` dispatches, both staffed to `rule_validator` per `agent_assignment.md`, produced correct content edits but neither could commit, run `make verify`, or update `task_scope.md`'s status cell — `agent_assignment.md:112` records this profile's toolset as `Read, Glob, Grep, Write, Edit` (marked *verified*), which holds no `Bash`. This is not circumstantial like the Phase 4.3 rate-limit interruption (`task_scope.md`'s provenance note): it is structural — `rule_validator` cannot satisfy Phase 6's per-unit done-criterion (commit + `make verify` exit 0) on its own for any unit it authors. The session completed the commit/verify/status-update step for both `U4` (`c702d29`) and `U5` (`ac7dcca`) after reviewing each diff against its dispatch instructions; no content was rewritten. **Extended**: `U7` and `U8`, staffed to `doc_orchestrator` (`agent_assignment.md:114`, toolset `Read, Glob, Grep, Write, Edit`, also *verified*), hit the identical gap — same pattern, third profile, confirming this is a framework-class toolset defect, not a `rule_validator`-specific one. Both content edits (`workflows/close_workflow.md` and `workflows/deployment_workflow.md`) were correct; the session completed commit (`6d12c26`, `8eff243`) and status update for both. `task_scope.md`'s `Assignee` column denotes authorship of the edit, not who committed it — a distinction this corpus does not currently declare anywhere, and now confirmed across three of the sprint's four staffed profiles. **Fourth instance**: `rule_validator`'s Phase 7 remediation dispatch for F7/F8 (commit `ba606be`) hit the identical gap again — same profile as `U4`/`U5`, same toolset, same absence of `Bash`, confirming the pattern is stable across both Phase 6 execution and Phase 7 remediation dispatches of this profile, not a one-time Phase 6 artifact. **Fifth and sixth instances**: the two follow-up `rule_validator` dispatches during the JS/TS-scanner remediation sequence — the `agents.md §1` F-sentence dispatch (commit `b2a42ab`) and the three-row consolidation dispatch (commit `edea677`) — both hit the same gap. **Count corrected from the list itself, not from summary prose (`RA-14` headline-metrics clause — Gate 1 round 3 caught the same drift this KI is about)**: the full instance list is `rule_validator` on `U4`, `U5`, `ba606be`, `b2a42ab`, `edea677` (five) plus `doc_orchestrator` on `U7`/`U8` (two, one dispatch covering both units) — **seven instances across two profiles**, not "six... every one on this profile" as an earlier draft of this entry claimed. Both profiles share the identical declared toolset (`Read, Glob, Grep, Write, Edit`, no `Bash`), so the finding is unchanged in substance: this is the toolset itself, not a per-profile anomaly. **Proposed** `routing_class: nucleus` for the human to confirm at `close_workflow.md` Phase 2.5 (routing class is an attended decision, not one this document can finalize on its own): `agents/rule_validator.md` and `agents/doc_orchestrator.md` need `Bash` added to their declared tool grants, or Phase 6/7 dispatch to either profile needs to assume a session-side commit/verify handoff as the documented default, not an exception. | `KI-050-2` |
 
 ---
 
@@ -166,10 +166,18 @@ is reported `UNPARSED` ("bare-parameter arrow function detected (`x =>`
 without parens): scanner does not recognise this construct") despite having
 a normal, fully-measurable declared function — the inline callback is
 idiomatic JS that appears in most real-world files, so the JS/TS path would
-measure almost nothing on a real codebase. Negative control (no false
-positive on the masking side): `` `Hello, {name}!` `` template literals and
-`/\{[a-z]+\}/g` regex literals do NOT trigger `_has_unbalanced_braces` —
-masking is sound; the bug is specifically the arrow-detection scope.
+measure almost nothing on a real codebase. Negative control tried at the
+time: `` `Hello, {name}!` `` template literals and `/\{[a-z]+\}/g` regex
+literals do NOT trigger `_has_unbalanced_braces` on that specific sample —
+read at the time as "masking is sound," which **both Gate 1 round 3 and
+Gate 2 round 3 independently falsified**: a regex literal containing a
+literal quote character (e.g. `/^["']|["']$/g`) desyncs `_mask_non_code`'s
+string-tracking state across the rest of the file, silently erasing
+everything after it from the scanned register. The negative control above
+happened not to contain a quote inside the regex; a regex that does was
+never tried. Corrected in the Quality Gate table below, not in this
+sentence — the sentence stays as a record of what was actually checked at
+the time, which was narrower than "masking is sound" claimed.
 
 An attempt to fix both landed at `982d197`, per the Principal Agent's design:
 `ident =>` assigned to a binding (in `D4`'s declared scope, "arrow functions
@@ -189,6 +197,37 @@ both gates read as a recurrence of the exact defect class (`F-049-7`) this
 sprint exists to eliminate. Remediation in progress; the entry naming the
 passing fix commit is written after that commit exists and both gates confirm
 it in fresh-context rounds, not as a promise ahead of it.
+
+### Author finding, pre-attempt-3 (self-discovered, before any gate saw it)
+
+The Principal Agent, reviewing the plan for the attempt-3 strategy change (a
+fail-closed conservation check rather than case-by-case patching), read
+`_PAREN_BRACE_RE`/`_find_unattributed_function_body` as they stood after
+`982d197` and found the check covered only `) {` (function/method) headers —
+`=> {` (arrow) headers were entirely unchecked, resting on the unverified
+assumption that `_iter_arrow_units` always captures every arrow body
+correctly. That assumption is exactly the "trust the recognizer" reasoning
+the conservation-check strategy was designed to replace. No gate emitted
+this — it is not a strike — but it is recorded here per the standing
+instruction that an author-found defect stay visible in sprint history.
+
+The extension landed at `e2cb5dc`, and in implementing it the author found a
+genuine, previously-unknown gap in `_iter_arrow_units`: `async` was present
+in `JS_KEYWORDS`, the reserved-word list the arrow recognizer excludes from
+bare-parameter matching — but `async` is a legal, non-reserved JS binding
+identifier, so `list.map(async => { ... })` (a bare arrow literally
+parameter-named `async`) caused `_iter_arrow_units` to return `[]` for that
+header, and the body silently evaded measurement. Verified directly before
+the fix (`_iter_arrow_units(masked) == []` on that construct) and confirmed
+closed after (`_find_unattributed_arrow_body` now flags it `unparsed`,
+proven load-bearing by disabling the check in a scratch copy and observing
+the sample silently pass through again).
+
+`b2a42ab` (the `agents.md §1` sentence documenting the JS/TS trigger list)
+was accurate when written — the conservation check genuinely excluded
+arrows at that point — and became inaccurate the moment `e2cb5dc` landed
+minutes later. `edea677` corrected it. Both commits are named here so the
+sequence is traceable without re-deriving it from diffs.
 
 ---
 
@@ -238,13 +277,102 @@ session-authored row.
 | Tester (Gate 2) | 1 | RECORD | testifying | Suite green: pytest 806 passed exit 0 (780 main + 14 test_quality_audit + 12 test_session_state); make verify exit 0; tree clean. JS/TS unparsed guarantee reproduced on independent samples (.jsx, typed .ts, @decorator .ts/.js, closing-tag JSX in .js all UNPARSED; none counted compliant) — no HIGH finding. U6 defect reproduced on main (set-topology invalid choice, exit 2; 0 topology_version writers); fix derives value (sandbox CHANGELOG [7.1.4] + sprint 7 -> 7.1.4-007-in_progress), idempotent, refusal paths exit 2. Mutations M1-M3, M5-M7 killed; M4 (hardcoding "4.32.0" in set_topology) survived — closed at Phase 7 remediation by adding a differently-versioned fixture. Findings (a)-(d) reconciled in this document and the linked files at Phase 7 remediation. D5 baseline 91/1428 (6.37%) independently reproduced at `80bb5e1`, confirmed same measurement window as Gate 1's `43e60b3` (`git diff --stat 80bb5e1 43e60b3 -- '*.py'` empty). Abort 1/2 not triggered: stdlib-only, no Node dependency; 6.37% < 20%. |
 | QA (Gate 1) | 2 | REJECTED | charter | F1-F8 verified landed: "12"->"11" (F1); window `80bb5e1..43e60b3` with reproduced figures 91/1428 @`43e60b3`, 91/1445 @`a198f91`, 92/1449 @`ba606be` (F2/F3); `_mask_non_code` named and Sprint 051 scope carries baseline/`session_state.py` main growth/self-closing JSX (F5/F6/(c)); `scripts/session_state.py:17-27` `invoked_by:` names `close_workflow.md#state_sync (release, set-topology)` and `deployment_workflow.md#topology_writeback (set-topology)`, "no invoker yet" removed, `verify_references.py` exit 0 (F4); `agents.md:47,48` both restore "`make verify` does NOT run `make quality-audit`" (F7) and row 47 gains the JS/TS heuristic caveat (F8). Mechanical at `982d197`: pytest 811 passed exit 0, `make verify` exit 0, `check_task_scope.py` exit 0 (`task_scope.md` untouched), `check_gate_log.py` exit 0. REJECTED (charter): `982d197` introduces `scripts/quality_audit.py:583 _locate_header_body lines=17 depth=5` — the 91 count at `982d197` is a swap (`scan_js_file` out, `_locate_header_body` in), not a name-subset of the `80bb5e1..43e60b3` baseline, falsifying this document's own fact criterion for that commit and the "new functions don't inherit the baseline's deferral" ruling `982d197`'s own message quotes; `D5` Branch B defers only the measured baseline, and no sprint artifact named `_locate_header_body`. Also found: a top-level block-bodied callback (`app.get('/', req => {...})`, no enclosing function/binding) yields 0 units, exit 0, silently absent from the register (was UNPARSED at `5c82c16`; regression from `982d197`); the `const f = x => x + 1;` fixture from finding (b) was re-scoped to expect `[]` rather than fixed. Record-class in the same round: the fix-commit entry promised in this document was written before the fix existed (corrected); `KI-050-2` lacked its 4th instance (corrected); "HEAD" citations without SHA anchors at three sites (corrected). |
 | Tester (Gate 2) | 2 | REJECTED | charter | M4 independently re-killed via an archived copy (profile is read-only): hardcoding the written version to "4.32.0" fails `test_set_topology_writes_the_derived_version_not_a_fixed_one` (1 failed/12 passed); full-string and "7.1.4" hardcodes kill 3 and 6 tests; reverted copy byte-identical, 13/13 pass. `982d197` fix confirmed on fresh independent samples: inline `.map(x => ...)` callback inside a declared function → PASS, measured correctly (was UNPARSED at `5c82c16`); `const handler = x => {58 stmts}` → FAIL lines=58, exit 2, correctly measured; unbalanced braces → still UNPARSED. Self-check 7 violations (`_has_unbalanced_braces` flattened to depth 3, PASS). Repo 91 FAIL/0 UNPARSED (1363/1454); baseline independently reproduced at `80bb5e1` (91, 1337/1428), spot-checks match. REJECTED (charter), independently confirming Gate 1 round 2 from a different angle: repo set is count-equal (91=91) but not name-equal to the baseline — `scan_js_file` (depth=5, baseline) relocated into new `_locate_header_body` (depth=5, not baseline) at `982d197`. Additional evidence Gate 1 did not produce: a module-level inline callback with NO enclosing named function is silently dropped at `982d197` — `app.get('/', (req, res) => {64 lines})` (parenthesised form) → 0 entries, exit 0, never fixed across either remediation commit; bare-param form `app.get('/', req => {62 lines})` → 0 entries at `982d197`, a regression from `5c82c16` where it was UNPARSED; a file mixing a small named function with the 62-line unenclosed callback scores 100% compliant (1/1), exit 0 — the literal `F-049-7` over-credit pattern recurring inside the sprint that exists to eliminate it. `scripts/quality_audit.py`'s own docstring ("callback lines counted as part of the enclosing function") is false when nothing encloses; no test covers the unenclosed case. Remediation target: `scan_js_file`/`_HEADER_RE` — an unenclosed arrow block body must become its own unit or report `unparsed`, never disappear, with paired tests for both parenthesised and bare-param forms. |
+| QA (Gate 1) | 3 | REJECTED | charter | Round-2 defects closed: identity subset holds (90/1476 FAIL, 0 unparsed at `8dfa2e1`; baseline `80bb5e1` 91/1428; the tip's violations are a strict subset, only `scan_js_file` gone; 6 self-violations); all functions added in `ab32296`/`e2cb5dc` PASS (depth ≤3, ≤17 lines); both conservation halves (`_find_unattributed_function_body`, `_find_unattributed_arrow_body`) independently live, each fails its own test when disabled; all three Gate-2-round-2 samples measured and FAIL correctly, mixed files score 1/2 not 100%; pytest 835, `make verify`/`check_task_scope`/`check_gate_log`/`verify_references` all exit 0; `task_scope.md` untouched. REJECTED (charter, `D4`/`IMPLEMENTATION_PLAN.md:79-80` unmet — "a file counted as compliant because the parser did not understand it"), two over-credit paths: (1) `ab32296` introduced: bound expression-bodied arrow spans enter `covered_spans` with depth hard-coded to 1, so an unrecognised body nested inside one counts as "covered" with its real depth lost — repro `const makeIter = (arr) => ({ [Symbol.iterator]() { for{if{while{...}}} } });` gives `depth=1 PASS`, 100% compliant, exit 0; the same swallows `async =>` bodies nested inside a bound expression arrow, the exact gap `e2cb5dc` claims to close. (2) Present since `80bb5e1`: `_mask_non_code` does not mask regex literals — `function tokenize(s) { const CLOSE = /\}/; const OPEN = /\{/; <60 stmts>; if{if{if{}}} }` gives `lines=1 depth=1 PASS`, 100% compliant, exit 0, because the regex's braces balance the real ones and `_has_unbalanced_braces` never fires. Record-class, same round: `agents.md:43` calls its list "complete" but omits unbalanced-braces and read-error triggers as unparsed causes; `quality_audit.py` docstrings overstate what `_iter_arrow_units` coverage means; `SPRINT_LOG.md:170-172` "masking is sound" was narrower than stated (corrected above); `KI-050-2`'s count did not match its own list (corrected above); `SPRINT_LOG.md`'s Phase 7 progression line was stale (corrected above); 4 new ruff findings in this sprint's own test files (registered below, not fixed — code is locked pending the human's Abort-1 decision). |
+| Tester (Gate 2) | 3 | REJECTED | charter | Mechanical checks green at `8dfa2e1`: pytest 835 passed, `make verify` exit 0, tree clean. Identity subset confirmed independently: tip 90 FAIL (1386/1476) is a strict name-subset of baseline `80bb5e1` 91 (1337/1428); only `scan_js_file` removed; self-audit 6. `async =>` gap reproduced at `ab32296` (0 entries) and closed at the tip (`unparsed`); `await`/`yield`/`let`/`static`/`of`/`get` bare parameters all `unparsed`. Both conservation halves proven load-bearing by mutation (each returning `None` turns a correctly-`unparsed` sample into 0 silent entries, each killed by one paired test). 40 adversarial samples built independently; most constructs (generators, async functions/methods, getters/setters, static/private methods, class-field arrows, IIFEs, nested callbacks, computed method names, reserved-word bare-arrow params) handled correctly. REJECTED (charter): two construct families still produce 0 register entries, falsifying `agents.md:43` ("never silently counted as compliant") and `scripts/quality_audit.py`'s "no third, silent outcome" claim — both present unchanged since `80bb5e1` (`U2`), not regressions of this remediation. (A) A method NAMED after a control keyword (`catch`, `if`, `with`, `switch`, `for`, `while`, incl. `async catch`) is skipped by `_is_control_paren` and dropped by `_resolve_header_name`'s `JS_KEYWORDS` check — a `Deferred` class with a 58-statement `catch(onRejected)` scores 1/1 (100%) compliant, exit 0 — the literal `F-049-7` pattern, on a Promise-idiomatic method name. (B) A regex literal containing a quote or backtick (`/^["']|["']$/g`) desyncs `_mask_non_code`'s quote-tracking state across the rest of the file (its `squote`/`dquote` states cross newlines and have no regex-literal awareness), masking every later function with accidentally-balanced braces — `total scanned: 0`, exit 0. Secondary (non-blocking): `catch {` without a binding is absent from `_KEYWORD_BLOCK_PRECEDERS`, so two structurally identical three-level try/catch nests score `depth=2` (no binding) vs. `depth=4` (with binding). Remediation options offered, not prescriptive: (A) treat a control-keyword name as a method when the preceding significant character places it at class/object member position, else fail closed; (B) mask regex literals properly (a `'`/`"` reaching a raw newline cannot be a legal JS string and should force `unparsed`; backtick-in-regex needs regex-literal state in `_mask_non_code`). |
+
+---
+
+## 🚨 Escalation — `workflows/remediation_workflow.md`
+
+Four consecutive `REJECTED`/`charter` verdicts on the same logic block (the
+JS/TS scanner path of `scripts/quality_audit.py`): QA round 2, Tester round
+2, Tester round 3, QA round 3. This satisfies both readings of the
+escalation threshold found in this framework's own corpus (`KI-050-3`
+below), so the discrepancy does not change the outcome here — it is
+recorded as a framework finding, not resolved by picking whichever reading
+is convenient mid-remediation.
+
+**Why a fourth patch was not attempted.** Each of the three prior
+remediation rounds (`5c82c16`, `982d197`, `ab32296`+`e2cb5dc`) closed the
+specific gap the previous gate round found and opened, or left standing, a
+different one. Round 3's two gates each independently found defects present
+since the instrument's first commit (`80bb5e1`) — a regex-literal masking
+gap and a control-keyword-as-method-name gap — meaning the prior three
+rounds were not closing self-inflicted regressions so much as discovering
+an unbounded surface. The plan's own pre-declared `Abort criterion` #1
+anticipated exactly this: *"If a correct-enough JS/TS function-boundary
+scan cannot be written in stdlib Python, stop — do not add a Node
+parser... the JS/TS half is re-planned as its own sprint."* Both gate
+rounds converged independently on the same underlying cause: JS/TS's lexical
+grammar is context-sensitive (a `/` can open a regex literal or mean
+division, depending on what precedes it; an identifier can be a keyword or
+a legal binding name, depending on position) in a way a brace-depth scanner
+without a real lexer cannot resolve in general. Three rounds of evidence
+match Abort 1's own stated trigger condition.
+
+**Scope of actual impact.** `quality-audit` was never wired into `verify`
+(`D5` Branch B) — no gate or CI path depends on the JS/TS scanner's
+correctness. What fails is a documentation promise (`agents.md §1`
+overstating what the instrument guarantees for JS/TS), not a production
+pipeline.
+
+### `KI-050-3` — framework threshold discrepancy (routed `nucleus`, proposed)
+
+`workflows/pipeline_workflow.md` and this Principal Agent's own operating
+rule both name **"third"** consecutive `REJECTED` as the escalation trigger.
+`agents.md RA-01` and `workflows/remediation_workflow.md` Phase 0 both name
+**">3"**. Under the stricter ("third") reading, escalation was already due
+after round 2 alone (two `REJECTED` rows in one round); under the looser
+(">3") reading it required round 3's second rejection to cross the
+threshold — which also happened here, so the discrepancy is real but did
+not change today's outcome. The stricter reading was adopted *before* round
+3 ran (recorded in the Principal Agent's dispatch to the session ahead of
+round 3), specifically so the decision would not be renegotiated with
+completed work sitting on the table. Proposed `routing_class: nucleus` for
+Phase 8 Extract — the two documents should state one number.
+
+### `KI-050-4` — `state_nuke`'s promise exceeds its command (routed `nucleus`, proposed)
+
+`workflows/remediation_workflow.md` Phase 1 `state_nuke` names the goal
+"Pre-Sprint pristine" state but its actual command (`git restore . && git
+clean -fd`) only discards uncommitted working-tree changes — it does not
+reset the branch or undo commits. Applied literally in this remediation: no
+committed work (the correct Python-path delivery, `U6`'s `topology_version`
+writer, the `capsys` riders) is discarded, because none of it is
+uncommitted. Executing the *promise* instead of the *command* would mean
+resetting `ai-sprint/050` to its pre-sprint tip, which is a mass deletion
+`agents.md §2 destructive_flags` does not permit without explicit human
+approval — and was not requested here. Proposed `routing_class: nucleus`:
+either narrow the phase's stated goal to match the command, or make the
+command match the stated goal with an explicit, separately-gated
+confirmation step.
+
+### Registered, not fixed (code is locked pending the human's decision)
+
+Four new `ruff` findings (`I001`/`RUF100`, unused-import-order and
+redundant-noqa classes) in `tests/test_quality_audit.py:17` and
+`tests/test_session_state.py`, introduced across this sprint's own
+remediation commits — repo-wide count moved from 187 at base (`753fbe1`) to
+191 at the escalation tip (`8dfa2e1`). Not corrected now: doing so would be
+a commit against `ai-sprint/050` after the lock takes effect, and if the
+human chooses Abort 1, these two test files are rewritten anyway as part of
+re-scoping the Python-only instrument.
+
+### Session lock
+
+Per `remediation_workflow.md` Phase 3 `session_lock`: `docs/active_state.json`
+`current_sprint.status` set to `BLOCKED: TERMINAL_REMEDIATION_LOOP`. No
+further commits land on `ai-sprint/050` beyond this entry and the paired
+`governance_learner` correction to `agents.md §1` (next commit) until the
+human decides. `release` is not run — it would seal a blocked sprint as
+closed, which it is not.
 
 ---
 
 ## ⚓ Documentation Entry Point Seal
 Closing the session state and certifying traceability.
 
-**Strategic Lock**: LOCKED
-**Next Phase**: Phase 7 — Quality Gate (`qa_agent`, `tester_agent`)
+**Strategic Lock**: LOCKED — sprint execution frozen, remediation-workflow lock in effect
+**Next Phase**: Human decision on Sprint 050's JS/TS scope (see Escalation above) — Phase 8 does not open until that decision lands
 
 *Certified under conventional commit standard: docs(sprint-050): open roadmap and sprint log #050*
