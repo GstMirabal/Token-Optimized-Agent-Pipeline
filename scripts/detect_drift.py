@@ -242,24 +242,48 @@ def _cited_in_unreleased(commits: list[str]) -> set[str]:
     section = unreleased_section()
     if not section.strip():
         return set()
-    return {
-        sha
-        for sha in (line.split()[0] for line in commits if line.strip())
-        if len(sha) >= 7 and sha in section
-    }
+    cited: set[str] = set()
+    for line in commits:
+        if not line.strip():
+            continue
+        sha = line.split()[0]
+        if len(sha) < 7:
+            continue
+        # A plain substring test cleared a commit whose abbreviation happened to
+        # sit inside a longer hex run — `abc1234` matching inside `9abc1234`, a
+        # different commit entirely (Gate 1, `F-2`). The lookbehind refuses a
+        # match that starts mid-hex; the trailing class still accepts the same
+        # commit cited at a longer width.
+        if re.search(rf"(?<![0-9a-fA-F]){re.escape(sha)}[0-9a-fA-F]*\b", section):
+            cited.add(sha)
+    return cited
 
 
-def integration_ref() -> str | None:
-    """The ref a sprint merges into, or None when there is no in-flight half.
+def integration_refs() -> list[str]:
+    """**Every** resolvable ref a sprint might merge into, local and remote.
 
-    Resolution order: the anchor's own name for it, then ``main``, then
-    ``master``, each tried as a local branch and then as ``origin/``. Not
-    hardcoded to ``main``, because a repository that names it otherwise would
-    silently get the pre-Sprint-051 behaviour back.
+    Returns a list, not the first match, and the distinction is the whole
+    correctness argument. Gate 1 of Sprint 051 rejected the single-ref form as
+    `charter`-class: it tried the local branch before ``origin/``, so in a clone
+    whose local ``main`` is behind ``origin/main`` — the normal state of a clone
+    that has not pulled — a commit that had landed on ``origin/main`` was absent
+    from the ref being consulted, got classified **in flight**, and was
+    suppressed from the half that blocks. That is the `PRs #26-#30` failure this
+    whole script exists to catch, reintroduced by the fix meant to sharpen it.
 
-    Returns None when nothing resolves, or when HEAD *is* that branch. Both
-    mean the same thing for this check: every commit in range has landed, so
-    there is nothing to separate and ``classify`` behaves as it always did.
+    Callers therefore treat a commit as in flight only when it is absent from
+    **all** of these. Being wrong in that direction over-reports; being wrong in
+    the other direction hides drift, and only one of those is recoverable by a
+    reader.
+
+    Candidate names: the anchor's own, then ``main``, then ``master``. Not
+    hardcoded to ``main``, or a repository naming it otherwise would silently get
+    the pre-Sprint-051 behaviour back.
+
+    Returns:
+        list[str]: resolvable refs, empty when none resolve or when HEAD is
+        itself an integration branch — both meaning every commit in range has
+        landed, so there is no in-flight half to separate.
     """
     candidates: list[str] = []
     if ACTIVE_STATE.exists():
@@ -273,13 +297,14 @@ def integration_ref() -> str | None:
     candidates.extend(["main", "master"])
 
     head = git("rev-parse", "--abbrev-ref", "HEAD")
+    refs: list[str] = []
     for name in candidates:
         if name == head:
-            return None
+            return []
         for ref in (name, f"origin/{name}"):
             if git("rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}") is not None:
-                return ref
-    return None
+                refs.append(ref)
+    return refs
 
 
 def _in_flight_shas(commits: list[str]) -> set[str]:
@@ -296,15 +321,18 @@ def _in_flight_shas(commits: list[str]) -> set[str]:
     were unrecorded work **on the integration branch**, which stays in the
     blocking half.
     """
-    ref = integration_ref()
-    if ref is None:
+    refs = integration_refs()
+    if not refs:
         return set()
     # `merge-base --is-ancestor` exits 0 when the sha has landed, and `git()`
     # returns None only on a non-zero exit — the idiom `covering_tags` uses.
+    # `all()` is load-bearing: a commit counts as in flight only when **every**
+    # integration ref lacks it. Consulting one ref let a stale local branch hide
+    # work that had already landed on its remote (Gate 1, `charter`).
     return {
         sha
         for sha in (line.split()[0] for line in commits if line.strip())
-        if git("merge-base", "--is-ancestor", sha, ref) is None
+        if all(git("merge-base", "--is-ancestor", sha, ref) is None for ref in refs)
     }
 
 

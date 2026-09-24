@@ -207,14 +207,71 @@ def test_a_sprint_branch_does_not_hide_a_landed_commit(repo: Path) -> None:
     assert dd.main() == 2
 
 
-def test_integration_ref_is_none_when_head_is_the_integration_branch(
+def test_integration_refs_is_empty_when_head_is_the_integration_branch(
     repo: Path,
 ) -> None:
     """On `main` there is no in-flight half, so the pre-051 path runs unchanged."""
     assert _git(repo, "rev-parse", "--abbrev-ref", "HEAD") == "main"
-    assert dd.integration_ref() is None
+    assert dd.integration_refs() == []
     _git(repo, "checkout", "-q", "-b", "ai-sprint/051")
-    assert dd.integration_ref() == "main"
+    assert dd.integration_refs() == ["main"]
+
+
+def test_a_stale_local_branch_cannot_hide_work_that_landed_on_its_remote(
+    repo: Path,
+) -> None:
+    """Gate 1's `charter` finding, pinned.
+
+    The first form of `integration_ref` tried the local branch before `origin/`
+    and returned the first that resolved. In a clone whose local `main` is behind
+    `origin/main` — the normal state of a clone that has not pulled — a commit
+    already on `origin/main` was absent from the ref consulted, read as in
+    flight, and dropped from the half that blocks. That is the `PRs #26-#30`
+    failure, reintroduced by the fix meant to sharpen it.
+    """
+    _seal(repo)
+    baseline = _head(repo)
+    _write_anchor(repo, status="X", last_close_commit=baseline)
+
+    # A remote whose `main` carries a commit the local `main` has not caught up to.
+    remote = repo.parent / "remote.git"
+    _git(repo, "init", "-q", "--bare", str(remote))
+    _git(repo, "remote", "add", "origin", str(remote))
+    (repo / "landed.txt").write_text("landed on the remote\n")
+    _commit_all(repo, "feat: landed on the integration branch, unrecorded")
+    _git(repo, "push", "-q", "origin", "main")
+    _git(repo, "fetch", "-q", "origin")
+    # Leave `main` before rewinding it: git refuses `branch -f` on the checked-out
+    # branch. Then local `main` sits behind `origin/main`, which is the state
+    # under test.
+    _git(repo, "checkout", "-q", "-b", "ai-sprint/051")
+    _git(repo, "branch", "-f", "main", baseline)
+
+    assert "origin/main" in dd.integration_refs()
+    # Absent from the stale local `main`, present on `origin/main` — so NOT in
+    # flight, and the verdict must still block.
+    assert dd.classify(baseline)[4] == []
+    assert dd.main() == 2
+
+
+def test_a_citation_inside_a_longer_hex_run_does_not_clear_a_commit(
+    repo: Path,
+) -> None:
+    """Gate 1's `F-2`: a substring test matched a different commit's SHA."""
+    _seal(repo)
+    baseline = _head(repo)
+    _write_anchor(repo, status="X", last_close_commit=baseline)
+    (repo / "landed.txt").write_text("landed on main\n")
+    _commit_all(repo, "feat: landed on main")
+    sha = _head(repo)[:7]
+    # A longer hex run that CONTAINS the short sha but starts one nibble earlier.
+    _add_unreleased_entry(repo, f"unrelated blob `0{sha}`")
+    _commit_all(repo, "docs(changelog): an entry citing something else")
+
+    verdict, _every, unsealed, _tags, _flight = dd.classify(baseline)
+    assert verdict == "A"
+    assert len(unsealed) == 1
+    assert dd.main() == 2
 
 
 # --- Sprint 051: landed work that the ledger already accounts for -------------
