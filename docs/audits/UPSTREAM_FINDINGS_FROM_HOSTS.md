@@ -86,7 +86,7 @@ sessions that obey it.
 | **Closed, and never marked as such** | `F-086-A1` (resolved by design — `implementer_agent` owns those trees, `ADR-0009`) · `F-087-P1` (`session_probe.py:447` adds `UNDETERMINED`) · `F-086-S1` (`SCANNED_SUFFIXES` covers `.tf`/`.yml`/`.yaml`/`.toml` plus whole-name files) · `F-086-S2` (`on_commit.py:128` adds the unquoted pattern) · `F-086-S3` (`SKILL.md` is 247 lines, not a 20-line stub) · `F-093-N1` (`agents.md §0` states it is host-only by design) · `F-093-N2` (`check_readme_counts.py` `main()` does `os.chdir(agents_root())`; verified from `/` and from a home directory, exit `0` both) · `G-03` (`check_task_scope.py` gained `--sprint-dir`) · `C5` (`agents.md §3 symlink_gate_exclusion`) · `#12` (14 of 14 profiles declare `model:`) |
 | **Closed since the host last looked** | `_bridge_permission_denied` generalised beyond `.cursor` in Sprint 044 — its own docstring records it · `ci_gate.py:55,148` handles the HTTP 403 a private repository returns · `check_forge_ladder.py` `_skill_forge_claimed` no longer scans prose for a skill path · `F-107-N1` `check_role_artifact.py` moved off `SubagentStop` to `config/template_gates.json:84` |
 | **Closed by this sprint** | `F-112-N1` drift judged against HEAD rather than the integration branch · `F-112-N2` no pytest configuration, so rootdir escaped into the host · `F-112-N3` and its shell sibling, tests naming a platform temporary path instead of honouring `TMPDIR` · `H099-3` `node_delta` raising `TypeError` on a present-but-null count, **unchanged for eleven sprints because this file said nothing was open** · `loop_guard.py` looking for `task_scope.md` at the repository root, where no host keeps it · the IDE-branch-prefix gap in `RA-03`/`RA-12` · the Phase 5 approval that did not say it names one `Sprint_ID` |
-| **Still open** | Five, each with its own entry below: **`REVDOC-G1`** (verdict changed, not a framework defect, risk retained), **`ADR-0006`**, **`ADR-0007`**, **`#13`** (`owned-by-050`), and **`F-051-R1`** opened by this sprint. The briefing's count is of *rows* in this table, not of items — read the entries. `F-051-R1`: `config/artifact_registry.json` and `pipeline_workflow.md` Phase 8 name `principal_agent` as the author of `IMPLEMENTATION_PLAN.md`, `PHASE_REGISTER.md` and `CHANGELOG.md`, and `agents/principal_agent.md:4` declares `tools: Read, Glob, Grep, TodoWrite` — no `Write`, no `Edit`. Reproduced live: a Sprint 051 session dispatched that profile to author its Implementation Plan and had to file the text itself. Wider than the host's report, which named only the `CHANGELOG` row. **Not patched here**: either the profile gains `Write` for its own declared documents, or the registry names a writer separately from the owner, and choosing between those redraws a role boundary — which `§9`'s principle says is not resolved by improvisation inside a sprint |
+| **Still open** | Six, each with its own entry below: **`REVDOC-G1`** (verdict changed, not a framework defect, risk retained), **`ADR-0006`**, **`ADR-0007`**, **`#13`** (`owned-by-050`), and **`F-051-R1`** plus **`F-051-R3`** opened by this sprint. The briefing's count is of *rows* in this table, not of items — read the entries. `F-051-R1`: `config/artifact_registry.json` and `pipeline_workflow.md` Phase 8 name `principal_agent` as the author of `IMPLEMENTATION_PLAN.md`, `PHASE_REGISTER.md` and `CHANGELOG.md`, and `agents/principal_agent.md:4` declares `tools: Read, Glob, Grep, TodoWrite` — no `Write`, no `Edit`. Reproduced live: a Sprint 051 session dispatched that profile to author its Implementation Plan and had to file the text itself. Wider than the host's report, which named only the `CHANGELOG` row. **Not patched here**: either the profile gains `Write` for its own declared documents, or the registry names a writer separately from the owner, and choosing between those redraws a role boundary — which `§9`'s principle says is not resolved by improvisation inside a sprint |
 | **Verdict changed, not closed** | **`REVDOC-G1`** — the graph dropping unprocessable files is **not a framework defect**: `Makefile graphify-update`/`-rebuild` shell straight to a third-party package and the nucleus carries no wrapper that could record a drop (`grep` for skip/unprocessable/dropped across `scripts/` and `hooks/` → 0). The **risk** is still the nucleus's, because `§2 graph_sovereignty` mandates querying the graph before any codebase research, and a silently incomplete graph answers confidently. Closing it would need a new reconciliation mechanism, not a fix |
 | **Ticked on what basis** | Re-measurement against `v4.32.0`, never on a sprint record. Two of the host's own verdicts were **wrong on first pass and corrected**: `F-093-N2` was reported open by reading the symptom line and not the call path, and the `_bridge_permission_denied` lead was carried from a stale session note. Both are recorded above as closed |
 
@@ -1272,12 +1272,25 @@ Proposed: state the rule as *isolate the test database*, with the engine chosen
 by fidelity requirements — or name in-memory SQLite as the default with a
 declared-deviation path, which is what hosts end up building anyway.
 
+> **Sprint 051 — not re-measured, and still a lead.** This entry and `ADR-0007`
+> below sit in *Inherited from host sprint records*, whose own rule is that each
+> item is a lead to reproduce before acting. Sprint 051 reproduced neither: both
+> describe a host's **declared deviation** from a rule rather than a defect in the
+> rule's machinery, so neither has a failing command to run. That is a different
+> state from the eight items this sprint closed by measurement, and saying so is
+> the point — an unexamined lead and a verified closure must not read alike.
+
 ### - [ ] `ADR-0007` — pipeline phase enforcement and the delegation conflict
 
 Recorded by a host against phase enforcement and the delegation rules. Note that
 `start_workflow.md` Phase 2 `delegation_conflict` already covers part of this
 ground and was written from the same incident; check what remains before
 drafting.
+
+> **Sprint 051 — not re-measured; see the note on `ADR-0006` above.** Worth one
+> pointer for whoever takes it: this sprint executed all five of its phases
+> in-session and produced `task_scope.md` only at Closeout, which is the enforcement
+> gap this item names, happening again inside the repository that owns the rule.
 
 ### - [x] `C5` — a tracked symlink into the submodule enters host gate scope
 
@@ -1421,6 +1434,34 @@ documents, or have the registry name a writer separately from the owner — and
 `ADR-0009` used the *second* reasoning to refuse `devops_agent` `Write` over
 `scripts/`. Choosing needs the argument made once, for all roles, which is a design
 session and not a unit inside a sprint that did not plan it.
+
+### - [ ] `F-051-R3` — the role-artifact hook asks the wrong repository for its evidence
+
+`scripts/check_role_artifact.py` fires on a gate subagent's stop and demands a
+`SPRINT_LOG.md` row. When the gate runs against a **different repository from the
+session's host** — a nucleus clone opened from inside a host, which
+`agents.md §4 feedback_upstream` makes the sanctioned way to contribute — the hook
+resolves the *host's* copy of the script against the session cwd. Sprint 051's
+Gate 1 audited the nucleus for sprint `051` and the hook asked it, eight times, for
+a QA row in the **host's** `SPRINT_LOG.md` for sprint `112`.
+
+Writing that row would have been the breach: `agents.md §3 jurisdiction` puts a
+session's records where its anchor is, and the gate's anchor was the nucleus's. So
+the hook cannot be satisfied without violating a rule, and cannot be cleared
+without being satisfied — it simply repeats.
+
+Distinct from the closed `F-107-N1`, and the distinction is the useful part. That
+finding was about *which stop* the check fires on and was closed by moving it to
+`config/template_gates.json`. This is about *which repository it resolves against*,
+which the move did not touch. Reported by the gate agent itself.
+
+**Related, and worth a separate look**: across six gate-subagent runs in three
+sprints, each agent ended its turn with a one-line report, having put its findings
+in a non-final message that never reaches the caller — twice at a cost of 126k and
+146k tokens of reasoning that arrived as a single sentence. The caller recovered the
+register only by asking a third time with the transport spelled out. Whether the
+repeating hook causes that truncation or merely accompanies it is not established
+here, and establishing it is the next step.
 
 ---
 
