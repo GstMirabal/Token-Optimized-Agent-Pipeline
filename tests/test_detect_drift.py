@@ -349,3 +349,77 @@ def test_an_unreleased_entry_that_names_nothing_still_asks_a_human(
     assert verdict == "A"
     assert len(unsealed) == 1
     assert dd.main() == 2
+
+
+# --- Sprint 051 Gate 1 round 2 (`G2-3`): every verdict asserted directly -------
+#
+# `main()` collapses CLEAN/S/C to exit 0 and R/U/M/A to exit 2, so a
+# verdict-identity regression is invisible through the CLI. This sprint made that
+# exact argument about `check_task_scope.py` (`F-051-R2`) and had not applied it
+# to the file it claimed three times.
+
+
+def _ledger(repo: Path, version: str = "1.0.0", unreleased: str = "") -> None:
+    """A ledger whose `[Unreleased]` is empty unless `unreleased` is given."""
+    (repo / "CHANGELOG.md").write_text(
+        "# Changelog\n\n"
+        f"## [Unreleased]\n\n{unreleased}\n"
+        f"## [{version}] - 2026-01-01\n\n- sealed\n",
+        encoding="utf-8",
+    )
+    _git(repo, "add", "CHANGELOG.md")
+    _git(repo, "commit", "-qm", "docs(changelog): ledger")
+
+
+def test_verdict_clean_when_the_range_is_empty(repo: Path) -> None:
+    _write_anchor(repo, status="X", last_close_commit=_head(repo))
+    assert dd.classify(_head(repo))[0] == "CLEAN"
+
+
+def test_verdict_r_when_no_tag_owns_a_released_section(repo: Path) -> None:
+    """Unproven coverage is not coverage — `R` blocks for that reason."""
+    baseline = _head(repo)
+    _write_anchor(repo, status="X", last_close_commit=baseline)
+    (repo / "g.txt").write_text("work\n")
+    _commit_all(repo, "feat: unprovable")
+    assert dd.classify(baseline)[0] == "R"
+    assert dd.main() == 2
+
+
+def test_verdict_s_when_a_sealing_tag_reaches_every_commit(repo: Path) -> None:
+    baseline = _head(repo)
+    _write_anchor(repo, status="X", last_close_commit=baseline)
+    (repo / "g.txt").write_text("work\n")
+    _commit_all(repo, "feat: sealed work")
+    _ledger(repo)
+    _git(repo, "tag", "v1.0.0")
+    assert dd.classify(baseline)[0] == "S"
+    assert dd.main() == 0
+
+
+def test_verdict_u_when_every_commit_is_unsealed_and_unreleased_is_empty(
+    repo: Path,
+) -> None:
+    baseline = _head(repo)
+    _write_anchor(repo, status="X", last_close_commit=baseline)
+    _ledger(repo)
+    _git(repo, "tag", "v1.0.0")
+    (repo / "g.txt").write_text("work\n")
+    _commit_all(repo, "feat: after the tag")
+    verdict, every, unsealed, _tags, _flight = dd.classify(baseline)
+    assert verdict == "U"
+    assert len(unsealed) == len(every) == 1
+
+
+def test_verdict_m_when_only_some_commits_are_unsealed(repo: Path) -> None:
+    baseline = _head(repo)
+    _write_anchor(repo, status="X", last_close_commit=baseline)
+    (repo / "a.txt").write_text("first\n")
+    _commit_all(repo, "feat: before the tag")
+    _ledger(repo)
+    _git(repo, "tag", "v1.0.0")
+    (repo / "b.txt").write_text("second\n")
+    _commit_all(repo, "feat: after the tag")
+    verdict, every, unsealed, _tags, _flight = dd.classify(baseline)
+    assert verdict == "M"
+    assert len(unsealed) < len(every)

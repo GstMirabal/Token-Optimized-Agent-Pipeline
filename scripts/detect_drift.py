@@ -73,6 +73,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from typing import TextIO
 
 ACTIVE_STATE = Path("docs/active_state.json")
 CHANGELOG = Path("CHANGELOG.md")
@@ -383,7 +384,7 @@ def classify(baseline: str) -> tuple[str, list[str], list[str], list[str], list[
     return verdict, every, unsealed, tags, in_flight_lines
 
 
-def enumerate_commits(commits: list[str], stream) -> None:
+def enumerate_commits(commits: list[str], stream: TextIO) -> None:
     """Print at most 20 commits, then say how many were withheld."""
     for line in commits[:20]:
         print(f"   • {line}", file=stream)
