@@ -15,9 +15,16 @@ Claiming the lock and recording the session are the same act, so they are one
 command rather than two steps that both rewrite the same file.
 
 invoked_by: start_workflow.md#state_claim (claim), close_workflow.md#state_sync
-(release), rules/token_economy.md#3.1 (suspend, at the hard threshold),
-deployment_workflow.md#sprint_seal_gate (require-released),
-deployment_workflow.md#baseline_refresh (refresh-baseline).
+(release, set-topology), rules/token_economy.md#3.1 (suspend, at the hard
+threshold), deployment_workflow.md#sprint_seal_gate (require-released),
+deployment_workflow.md#baseline_refresh (refresh-baseline),
+deployment_workflow.md#topology_writeback (set-topology).
+
+`set-topology` (Sprint 050 `D7`) is wired into both workflows as its own
+`RA-13` invocation, never chained with the step before it: `close_workflow.md`
+Phase 4 `state_sync` runs it as a separate call right after `release` (`U7`),
+and `deployment_workflow.md` Phase 4 runs it as its own dedicated step
+`topology_writeback`, after `baseline_refresh`, not folded into it (`U8`).
 
 Usage:
     python3 scripts/session_state.py claim [--session-id <uid>] [--takeover]
@@ -31,15 +38,22 @@ Usage:
         # deployment preflight: refuse SUSPENDED; tip must equal last_close_commit
     python3 scripts/session_state.py refresh-baseline [--sha HEX]
         # post-deploy: set last_close_commit to the integrated tip (default HEAD)
+    python3 scripts/session_state.py set-topology
+        # writes topology_version as X.Y.Z-NNN-<status>, derived from the
+        # newest sealed `## [X.Y.Z]` section of CHANGELOG.md plus
+        # current_sprint.id/current_sprint.status (Sprint 050 `D7`)
 
 Exit codes:
-    0 — lock claimed or released, or deploy preflight passed, or baseline refreshed
-    2 — a different session holds the lock, or deploy refused (RA-11: only 2 blocks)
+    0 — lock claimed or released, deploy preflight passed, baseline refreshed,
+        or topology_version written
+    2 — a different session holds the lock, deploy refused, or set-topology
+        cannot derive a value (RA-11: only 2 blocks)
 """
 
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -49,6 +63,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from hooks.state_mirror import mirror_active_state  # noqa: E402
 
 ACTIVE_STATE = Path("docs/active_state.json")
+CHANGELOG = Path("CHANGELOG.md")
 IN_PROGRESS = "IN_PROGRESS"
 CLOSED = "CLOSED_SUCCESSFULLY"
 SUSPENDED = "SUSPENDED"  # session ended, sprint still open (token_economy.md §3.1)
@@ -351,6 +366,71 @@ def require_released(branch: str | None = None) -> int:
     return 0
 
 
+def newest_sealed_version(changelog_text: str) -> str | None:
+    """The newest sealed `## [X.Y.Z]` section header in a Keep a Changelog file.
+
+    Keep a Changelog format lists releases newest-first with `[Unreleased]`
+    on top, so the first `## [...]` header that is not `Unreleased` is the
+    newest sealed release.
+
+    Args:
+        changelog_text: Full content of `CHANGELOG.md`.
+
+    Returns:
+        str | None: e.g. `"4.32.0"`, or None when no sealed section exists.
+    """
+    for line in changelog_text.splitlines():
+        match = re.match(r"##\s*\[([^\]]+)\]", line)
+        if match and match.group(1).strip().lower() != "unreleased":
+            return match.group(1).strip()
+    return None
+
+
+def set_topology() -> int:
+    """Derive and write `topology_version` from CHANGELOG.md and the anchor.
+
+    `docs/active_state.json` is gitignored, so a hand-edited `topology_version`
+    is exactly the anti-pattern Sprint 050 `D7` replaces: this derives the
+    value instead — `X.Y.Z` from the newest sealed CHANGELOG.md section,
+    `NNN` from `current_sprint.id`, `<status>` (lowercased) from
+    `current_sprint.status`.
+
+    Returns:
+        int: 0 on success; 2 when the CHANGELOG has no sealed section or the
+            anchor has no usable `current_sprint` (RA-11: only 2 blocks).
+    """
+    if not CHANGELOG.exists():
+        print(f"Refusing set-topology: {CHANGELOG} not found.", file=sys.stderr)
+        return 2
+    version = newest_sealed_version(CHANGELOG.read_text(encoding="utf-8"))
+    if version is None:
+        print(
+            f"Refusing set-topology: no sealed `## [X.Y.Z]` section in "
+            f"{CHANGELOG} (only `[Unreleased]`, or the file is empty).",
+            file=sys.stderr,
+        )
+        return 2
+
+    state = load_state()
+    sprint = state.get("current_sprint") or {}
+    sprint_id = sprint.get("id")
+    status = sprint.get("status")
+    if sprint_id is None or not status:
+        print(
+            "Refusing set-topology: `current_sprint.id`/`current_sprint.status` "
+            "missing from docs/active_state.json.",
+            file=sys.stderr,
+        )
+        return 2
+
+    value = f"{version}-{int(sprint_id):03d}-{str(status).lower()}"
+    state["topology_version"] = value
+    state["last_updated"] = now()
+    save_state(state)
+    print(f"✅ topology_version set to {value}.")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -394,6 +474,10 @@ def main() -> int:
         default=None,
         help="Commit to record (default: HEAD). Use after squash on main.",
     )
+    sub.add_parser(
+        "set-topology",
+        help="Write topology_version, derived from CHANGELOG.md + current_sprint.",
+    )
 
     args = parser.parse_args()
     if args.command == "claim":
@@ -404,6 +488,8 @@ def main() -> int:
         return require_released(args.branch)
     if args.command == "refresh-baseline":
         return refresh_baseline(args.sha)
+    if args.command == "set-topology":
+        return set_topology()
     return release()
 
 

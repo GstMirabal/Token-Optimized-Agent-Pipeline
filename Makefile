@@ -23,7 +23,7 @@ PY_EXCLUDES := -not -path "*/.git/*" -not -path "*/node_modules/*" -not -path "*
 VENV_PY := $(AGENTS_DIR)/venv_skillopt/bin/python3
 PY := $(if $(wildcard $(VENV_PY)),$(VENV_PY),python3)
 
-.PHONY: graphify-update graphify-rebuild verify docs-freshness-check session-start model-ledger cursor-tiers cursor-era-audit bridge-state role-artifacts
+.PHONY: graphify-update graphify-rebuild verify docs-freshness-check session-start model-ledger cursor-tiers cursor-era-audit bridge-state role-artifacts quality-audit
 
 
 # Incremental AST sync after code changes (close_workflow Phase 1, no LLM cost).
@@ -125,6 +125,18 @@ cursor-era-audit:
 # running `make verify` is a local-environment fact, not a code defect.
 bridge-state:
 	cd $(AGENTS_DIR) && python3 scripts/bridge_state.py
+
+# Deterministic function-length/nesting-depth auditor (Sprint 050, D5 branch B).
+# Not a `verify` dependency: measured at commit 80bb5e1..43e60b3, the baseline
+# is 91/1428 first-party Python functions (6.37%) in violation, so wiring this
+# into `verify` then would have red the gate on pre-existing code rather than
+# on a regression. The violation count holds at 91 as the tree grows (91/1445,
+# 6.30%, at commit a198f91, Phase 6 close) -- wiring stays deferred either way.
+# Remediation of the 91 units is routed to Sprint 051; `docs/sprints/050-core-pipeline/SPRINT_LOG.md`
+# records the baseline and its measurement window. Exit 2 on any violation;
+# `--report` prints the full register and exits 0 regardless.
+quality-audit:
+	cd $(AGENTS_DIR) && python3 scripts/quality_audit.py .
 
 # Sprint 027: verify a role left its required sprint-scoped artifacts (portable
 # SubagentStop counterpart). SPRINT_DIR must be the canonical sprint path.

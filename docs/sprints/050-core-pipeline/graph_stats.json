@@ -1,0 +1,9 @@
+{
+  "nodes": 10586,
+  "edges": 13726,
+  "communities": 903,
+  "source": "graphify-out/graph.json",
+  "sprint": 50,
+  "built_at_commit": "da852f7",
+  "note": "Counts from `make graphify-update` (AST, no LLM) at HEAD before the close-workflow closeout commits (this file, model_ledger_regen). Delta vs Sprint 049 (10371/13368/890) reflects scripts/quality_audit.py (created then partially reduced by AB1), scripts/session_state.py, and this sprint's directory artifacts."
+}

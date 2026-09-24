@@ -205,7 +205,9 @@ def _stub_catalogue(monkeypatch: pytest.MonkeyPatch, models: list[dict[str, Any]
 
 
 def test_run_report_flags_author_discrepancy(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
     _stub_catalogue(
         monkeypatch,
@@ -223,10 +225,17 @@ def test_run_report_flags_author_discrepancy(
     monkeypatch.setattr(acm, "read_map_gate_claude_family", lambda: None)
     proposals = acm.run_report(tmp_path / "fake.vscdb")
     assert proposals["author_discrepancy"] is True
+    captured = capsys.readouterr()
+    assert (
+        "Applied model (discrepancy): grok-4.6 — differs from map author glm-5.2"
+        in captured.out
+    )
 
 
 def test_run_report_no_discrepancy_when_applied_matches_map(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
     _stub_catalogue(
         monkeypatch,
@@ -244,12 +253,19 @@ def test_run_report_no_discrepancy_when_applied_matches_map(
     monkeypatch.setattr(acm, "read_map_gate_claude_family", lambda: None)
     proposals = acm.run_report(tmp_path / "fake.vscdb")
     assert proposals["author_discrepancy"] is False
+    captured = capsys.readouterr()
+    assert "Applied model: glm-5.2 (agrees with map author)" in captured.out
 
 
-def test_run_report_db_absent_no_discrepancy(tmp_path: Path) -> None:
+def test_run_report_db_absent_no_discrepancy(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
     """`open_catalogue` returns None for a missing DB; nothing to compare."""
-    proposals = acm.run_report(tmp_path / "does-not-exist.vscdb")
+    db_path = tmp_path / "does-not-exist.vscdb"
+    proposals = acm.run_report(db_path)
     assert proposals["author_discrepancy"] is False
+    captured = capsys.readouterr()
+    assert f"Cursor state DB not found at {db_path}" in captured.out
 
 
 def test_main_check_exits_2_on_author_discrepancy(

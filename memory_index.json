@@ -1,6 +1,6 @@
 {
-  "last_update": "2026-09-20",
-  "sprint_id": "049",
+  "last_update": "2026-09-24",
+  "sprint_id": "050",
   "_schema": "Entries are summary-only Knowledge Items. The 'file' field is omitted once the raw log has been purged (agents.md §4 definitive_amnesia) — the 1-line summary IS the retained knowledge.",
   "items": [
     {
@@ -137,6 +137,36 @@
     {
       "id": "F-20260920-049D",
       "summary": "Correcting one false clause in governance prose can silently invert an adjacent true one in the same edit (Sprint 049 U11 fixed a style-score claim but replaced a correct \"NOT enforced by make verify\" framing with its negation) — re-verify the whole edited sentence, not just the clause you targeted.",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20260924-050A",
+      "summary": "The rule_validator and doc_orchestrator profiles' declared toolset (Read/Glob/Grep/Write/Edit, no Bash) cannot satisfy Phase 6/7's per-unit done-criterion (commit + make verify) — hit 7 times in one sprint; either grant Bash or document the session-side commit handoff as the default.",
+      "routing_class": "nucleus"
+    },
+    {
+      "id": "F-20260924-050B",
+      "summary": "pipeline_workflow.md/the Principal Agent's own rule say \"third\" consecutive REJECTED triggers remediation escalation; agents.md RA-01 and remediation_workflow.md Phase 0 say \">3\" — the two documents disagree on the threshold number.",
+      "routing_class": "nucleus"
+    },
+    {
+      "id": "F-20260924-050C",
+      "summary": "remediation_workflow.md's state_nuke phase promises \"Pre-Sprint pristine\" status but its literal command (git restore . && git clean -fd) only clears uncommitted changes and never resets the branch — the stated goal exceeds what the command does.",
+      "routing_class": "nucleus"
+    },
+    {
+      "id": "F-20260924-050D",
+      "summary": "remediation_workflow.md's Execution Flow ends at Phase 3 session_lock with no procedure for resuming work after a human lifts the lock — a sprint that escalates has no documented exit.",
+      "routing_class": "nucleus"
+    },
+    {
+      "id": "F-20260924-050E",
+      "summary": "Adversarial gate-round ceremony (fresh-context QA/Tester dispatches, multi-round mutation testing) scaled to a decision's actual risk poorly in Sprint 050: an already-decided, low-risk code deletion (Abort 1 execution) got the same treatment as the original high-risk feature build, until the human intervened to stop it — match verification depth to the decision's risk, not to the phase it falls in.",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20260924-050F",
+      "summary": "A heuristic scanner over a context-sensitive lexical grammar (JS/TS: regex-literal-vs-division, keyword-vs-identifier) cannot be fail-closed without a real lexer — three remediation rounds on scripts/quality_audit.py's JS/TS path each fixed one silent-compliance case and surfaced a new one; the plan's own pre-declared Abort criterion, not a fourth patch, was the correct exit.",
       "routing_class": "host"
     }
   ]

@@ -52,12 +52,12 @@
     {
       "path": "skills/python-quality-auditor",
       "reason": "model-invoked",
-      "note": "Named by agents.md §1's linter_command/max_indentation/max_lines_per_func rows. Corrected at Sprint 049 (F-049-7): its script shells to ruff/mypy/bandit/radon and prints a pass/fail line per tool; it computes no numeric score, never checks indentation or function length, and never exits non-zero. `ruff check .` remains the real deterministic linter for Python. The exception is kept, not withdrawn: no deterministic instrument exists yet to replace this model-invoked call (routed to Sprint 050)."
+      "note": "Named by agents.md §1's linter_command/max_indentation/max_lines_per_func rows. Corrected at Sprint 049 (F-049-7): its script shells to ruff/mypy/bandit/radon and prints a pass/fail line per tool; it computes no numeric score, never checks indentation or function length, and never exits non-zero. `ruff check .` remains the real deterministic linter for Python. The exception is kept, not withdrawn: this skill stays a model-invoked helper — Sprint 050 delivered the deterministic instrument for function length and nesting depth as `scripts/quality_audit.py` (invoked via `make quality-audit`), not as a replacement for this skill."
     },
     {
       "path": "skills/js-standardizer",
       "reason": "model-invoked",
-      "note": "Named by agents.md §1's linter_command/max_indentation/max_lines_per_func rows. Corrected at Sprint 049 (F-049-7): its script checks for lint-tool config file presence and a single repo-wide boolean (any .js/.ts file anywhere contains \"@param\" or \"@returns\"), not per-function JSDoc coverage; it computes no numeric score, never checks indentation or function length, and never exits non-zero. `pnpm run lint` remains the real deterministic linter for JS/TS. The exception is kept, not withdrawn: no deterministic instrument exists yet to replace this model-invoked call (routed to Sprint 050)."
+      "note": "Named by agents.md §1's linter_command/max_indentation/max_lines_per_func rows. Corrected at Sprint 049 (F-049-7): its script checks for lint-tool config file presence and a single repo-wide boolean (any .js/.ts file anywhere contains \"@param\" or \"@returns\"), not per-function JSDoc coverage; it computes no numeric score, never checks indentation or function length, and never exits non-zero. `pnpm run lint` remains the real deterministic linter for JS/TS. The exception is kept, not withdrawn: this skill stays a model-invoked helper. Sprint 050 built a deterministic JS/TS instrument in `scripts/quality_audit.py` and withdrew it (Abort criterion 1) after four consecutive gate rejections found silent-compliance defects a stdlib-only scanner can't fix in general; no deterministic instrument currently exists for JS/TS complexity. Re-planned as its own sprint: `KI-050-6`."
     },
     {
       "path": "skills/mcp-registry",
