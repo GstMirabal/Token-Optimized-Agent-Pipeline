@@ -32,8 +32,8 @@ Tracking of atomic goals achieved during the session.
 - [x] **Phase 4.3 — Rule Audit**: `task_scope.md` — `check_task_scope.py` exit `0`, APPROVED for Phase 5 (`549d35d`)
 - [x] **Phase 5 — Approval Gate**: Approved by GstMirabal, 2026-09-20, against `532b508` — two holds resolved (missing Phase 2-4.3 artifacts; stale `audit_plan.py` result) — sealed (`35c3863`)
 - [x] **Phase 6 — Execution**: complete — all 11 units (`U1`-`U10` + `U2a`) landed, `make verify` exit `0` (806 passed), `check_task_scope.py` exit `0`
-- [~] **Phase 7 — Quality Gate**: round 1 both `RECORD`/`testifying`; rounds 2 and 3 both `REJECTED`/`charter` on the JS/TS scanner logic block (four consecutive rejections total: QA r2, Tester r2, Tester r3, QA r3) — **escalated to `workflows/remediation_workflow.md`**, see below
-- [ ] **Phase 8 — Sprint Closeout**: `PHASE_REGISTER.md`, Master Ledger entry — blocked pending human decision
+- [x] **Phase 7 — Quality Gate**: round 1 both `RECORD`/`testifying`; rounds 2 and 3 both `REJECTED`/`charter` on the JS/TS scanner logic block (four consecutive rejections total: QA r2, Tester r2, Tester r3, QA r3) — **escalated to `workflows/remediation_workflow.md`**, human chose **Abort 1**, lock lifted (`AB0`) — a fresh, zero-strike Phase 7 round runs against the `AB1`-`AB3` diff once landed
+- [ ] **Phase 8 — Sprint Closeout**: `PHASE_REGISTER.md`, Master Ledger entry — pending `AB1`-`AB3` execution and their gate round
 
 ---
 
@@ -367,12 +367,91 @@ further commits land on `ai-sprint/050` beyond this entry and the paired
 human decides. `release` is not run — it would seal a blocked sprint as
 closed, which it is not.
 
+### `KI-050-5` — `remediation_workflow.md` has no exit procedure (routed `nucleus`, proposed)
+
+The workflow's Execution Flow table ends at Phase 3 `session_lock` — "Exit
+and enforce **SESSION LOCKED**" — and names no step for resuming work after
+the human decides. This sprint's lock was lifted by human instruction
+outside the workflow's own text (below), not by a procedure the workflow
+itself defines. Proposed `routing_class: nucleus` for Phase 8 Extract: the
+workflow needs a Phase 4 (or equivalent) naming who re-opens
+`current_sprint.status`, under what human input, and what artifact records
+the resumption — this sprint's own `AB0` unit is that record by necessity,
+not by the workflow's design.
+
+---
+
+## 🟢 `AB0` — Lock lifted: human decision, Abort 1
+
+**Human decision, quoted verbatim** (delivered to the session in response to
+the blocking alert above): *"1"* — selecting, from the two options
+presented, **"(Recomendada) Ejecutar el Aborto 1 del plan que aprobaste"**.
+
+**`IMPLEMENTATION_PLAN.md`'s pre-declared Abort criterion #1, the governing
+text**: *"The JS/TS path needs a runtime dependency. If a correct-enough
+JS/TS function-boundary scan cannot be written in stdlib Python, stop — do
+not add a Node parser. `U2` ships Python-only, `U5` states the JS/TS rows
+remain instrument-less, and the JS/TS half is re-planned as its own
+sprint."* Three remediation rounds' worth of gate evidence (rounds 2 and 3,
+four consecutive `charter` rejections) stand in as the "cannot be written in
+stdlib Python" finding this criterion anticipated — the plan did not require
+literally attempting a Node parser before this criterion could fire; it
+required exhausting the stdlib-only approach in good faith, which the three
+rounds did.
+
+**Lock lifted**: `docs/active_state.json` `current_sprint.status` restored
+to `IN_PROGRESS`; `python3 scripts/session_state.py set-topology` re-run
+(gitignored file, no commit) to keep `topology_version` coherent with the
+resumed sprint.
+
+**Work units added** to `task_scope.md` (`AB1`-`AB3`, 8-column form,
+`RA-14`-consistent — not a renumbering of `U1`-`U10`/`U2a`, a new set for a
+new decision):
+- `AB1`: `scripts/quality_audit.py` withdraws the JS/TS scanner entirely
+  (functions, regexes, constants used only by that path); Python-only
+  discovery; JS/TS files are counted and printed as `not measured (JS/TS
+  instrument withdrawn — Sprint 050 Abort 1)`, never silently counted as
+  compliant — an Abort executed silently would be `F-049-7` recurring
+  through the exit door instead of the scanner.
+- `AB2`: `agents.md §1` — JS/TS complexity rows return to declaring no
+  instrument exists, citing `KI-050-6` (not a sprint number — a KI
+  reference doesn't expire the way "routed to Sprint 050" already did
+  once this sprint). `D1`/`D2` unit-of-measure definitions, the
+  `negative_ki` lexer-honesty prohibition, and the F7 verify-gating
+  disclosure are preserved — those are true regardless of whether an
+  instrument exists.
+- `AB3`: `config/invocation_exceptions.json` — the `js-standardizer` note
+  stops naming `quality_audit.py` as a JS/TS instrument; routes to
+  `KI-050-6`.
+
+**`KI-050-6`** (proposed `routing_class: nucleus`, destination
+`docs/roadmaps/core/pipeline/021-030-program-queue.md`): JS/TS complexity
+measurement re-planned as its own sprint, evaluating either a real lexer as
+a justified dependency (`rules/code_craft.md §7`) or an explicitly declared,
+bounded subset. **The corpus for that sprint's acceptance criteria already
+exists** — the five failure families both gates found by hand across rounds
+2-3 (arrow over-broad detection, module-level unenclosed callbacks, nested
+expression-arrow depth loss, control-keyword method names, regex-literal
+masking desync) are a stronger starting test suite than a fresh sprint would
+otherwise have.
+
+Fact criterion for `AB1`, checked at commit time, not assumed: for every
+`.py` file other than `scripts/quality_audit.py` and
+`tests/test_quality_audit.py`, the measured register at the `AB1` commit is
+byte-identical to the register at `ef7a885` (diff empty); `comm -23` against
+the `80bb5e1` baseline is empty; the instrument's own self-violation count is
+derived and anchored to the `AB1` SHA, not asserted in advance — the JS-scanner
+violations (including `_mask_non_code`) are expected to disappear along with
+the code that produced them.
+
+`python3 scripts/check_task_scope.py --sprint-dir docs/sprints/050-core-pipeline` → exit `0`.
+
 ---
 
 ## ⚓ Documentation Entry Point Seal
 Closing the session state and certifying traceability.
 
-**Strategic Lock**: LOCKED — sprint execution frozen, remediation-workflow lock in effect
-**Next Phase**: Human decision on Sprint 050's JS/TS scope (see Escalation above) — Phase 8 does not open until that decision lands
+**Strategic Lock**: LOCKED (ordinary sprint lock, not the remediation lock — `AB0` lifted `BLOCKED: TERMINAL_REMEDIATION_LOOP`)
+**Next Phase**: `AB1` — withdraw the JS/TS scanner from `scripts/quality_audit.py` (`implementer_agent`)
 
 *Certified under conventional commit standard: docs(sprint-050): open roadmap and sprint log #050*
