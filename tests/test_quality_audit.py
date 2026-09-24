@@ -202,7 +202,7 @@ def test_js_unbalanced_braces_reported_unparsed_not_silently_dropped(
     assert len(units) == 1
     assert units[0].status == "unparsed"
     assert units[0].name == "<file>"
-    compliant, measured, unparsed = qa.compliance_figure(units)
+    compliant, _measured, unparsed = qa.compliance_figure(units)
     assert compliant == 0
     assert unparsed == 1
 
@@ -447,6 +447,42 @@ def test_mixed_file_with_unenclosed_callback_not_scored_100_percent_compliant(
         return
     compliant, measured, _unparsed = qa.compliance_figure(units)
     assert not (compliant == measured and measured == 1)
+
+
+def test_bare_arrow_param_named_async_unattributed_body_reported_unparsed(
+    tmp_path: Path,
+) -> None:
+    """`list.map(async => { ... })` -- a bare-parameter arrow whose parameter
+    is literally named `async` -- is valid JS (`async` is a contextual
+    keyword, not a reserved word, so it is a legal binding identifier here).
+
+    `_match_arrow_params_backward` rejects it: it checks the identifier
+    against `JS_KEYWORDS`, which lists `async`, so `_iter_arrow_units`
+    produces zero units for this arrow and its `=> {` body is claimed by no
+    covered span. Before the arrow half of the fail-closed conservation
+    check existed, this meant `scan_js_file` returned an EMPTY register for
+    the file (0 units) -- not `unparsed`, not a violation, indistinguishable
+    from a file with nothing to measure -- while a 60-executable-line body
+    went completely uncounted. The extended check must catch this and mark
+    the whole file `unparsed`, proving the check is load-bearing rather than
+    decorative (it fails closed on a real recogniser gap, not a
+    hypothetical one).
+    """
+    body = "\n  ".join(f"const x{i} = {i};" for i in range(60))
+    source = f"list.map(async => {{\n  {body}\n  return x59;\n}});\n"
+    path = tmp_path / "async_param.js"
+    path.write_text(source, encoding="utf-8")
+
+    # Confirm the recogniser gap directly: `_iter_arrow_units` really does
+    # miss this header, so the conservation check below is proven, not assumed.
+    masked = qa._mask_non_code(source)
+    assert qa._iter_arrow_units(masked) == []
+
+    units = qa.scan_js_file(path)
+
+    assert len(units) == 1
+    assert units[0].status == "unparsed"
+    assert "function-introducing header" in units[0].reason
 
 
 def test_computed_method_name_unattributed_body_reported_unparsed(tmp_path: Path) -> None:

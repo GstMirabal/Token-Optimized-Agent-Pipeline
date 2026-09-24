@@ -53,15 +53,26 @@ written in stdlib Python, not a Node-equivalent parser. It recognises:
   not its own unit -- its characters fall inside whatever source range
   encloses it, the same as any other statement, never `unparsed` on that
   account alone (`F-049-8`).
-- **Fail-closed conservation check (`A`)**, run after every recogniser above:
-  every `) {` in the masked source is classified as either a control-flow
-  block (`if`/`for`/`while`/`catch`/`switch`/`with` -- excluded) or a
-  function/method body. If a function/method-shaped `) {` is found whose body
-  span was not claimed by any unit created above -- e.g. a computed method
-  name (`[Symbol.iterator]() { ... }`), or any other header shape the
-  recognisers above do not cover -- the **whole file** is reported
-  `unparsed`, citing the offending line, rather than silently omitting that
-  body from the register. This is the structural guarantee: a
+- **Fail-closed conservation check (`A`)**, run after every recogniser above,
+  in two independent halves -- neither trusts that the recogniser it checks
+  caught everything, both verify it:
+  - `) {` **coverage**: every `) {` in the masked source is classified as
+    either a control-flow block (`if`/`for`/`while`/`catch`/`switch`/`with`
+    -- excluded) or a function/method body. If a function/method-shaped
+    `) {` is found whose body span was not claimed by any unit created
+    above -- e.g. a computed method name (`[Symbol.iterator]() { ... }`), or
+    any other header shape the recognisers above do not cover -- the
+    **whole file** is reported `unparsed`, citing the offending line.
+  - `=> {` **coverage**: every `=> {` in the masked source must likewise fall
+    inside a unit `_iter_arrow_units` actually produced. If it does not --
+    e.g. a bare arrow parameter literally named `async`
+    (`list.map(async => { ... })`), which `_match_arrow_params_backward`
+    rejects because `async` is listed in `JS_KEYWORDS` even though it is a
+    legal binding identifier there -- the **whole file** is reported
+    `unparsed`, citing the offending line.
+
+  Either half can independently trigger `unparsed`, rather than silently
+  omitting a body from the register. This is the structural guarantee: a
   function-introducing construct either lands inside a measured unit's line
   range, or the file is `unparsed` -- there is no third, silent outcome.
 
@@ -84,9 +95,10 @@ parser over-crediting itself). Concretely:
 - A file whose braces do not balance (a truncated or malformed file) is
   `unparsed` -- brace-depth scanning has no reliable answer once the file's
   own braces never close.
-- Any function/method-shaped body the recognisers above could not attribute to
-  a unit is caught by the fail-closed conservation check (`A`, above) and
-  marks the whole file `unparsed`, with the reason citing the offending line.
+- Any function/method-shaped (`) {`) or arrow-shaped (`=> {`) body the
+  recognisers above could not attribute to a unit is caught by the
+  fail-closed conservation check (`A`, above) and marks the whole file
+  `unparsed`, with the reason citing the offending line.
 
 JS/TS line counting is physical-line granularity (non-blank lines inside the
 matched `{ ... }` span, including any nested inner function's lines, which are
@@ -838,10 +850,12 @@ def _find_unattributed_function_body(
 
     A `)` directly followed by `{` is either a control-flow block
     (`_is_control_paren`, excluded) or a function/method body -- there is no
-    third JS construct shaped this way. Arrow bodies (`=> {`) are always
-    captured by `_iter_arrow_units` on the same pass and need no re-check
-    here (a `)` closing an arrow's parameter list is followed by `=>`, never
-    directly by `{`, so `_PAREN_BRACE_RE` never matches it).
+    third JS construct shaped this way. This check covers only that `) {`
+    shape; a `)` closing an arrow's parameter list is followed by `=>`, never
+    directly by `{`, so `_PAREN_BRACE_RE` never matches an arrow header.
+    Arrow headers (`=> {`) get their own independent check,
+    `_find_unattributed_arrow_body` -- this function does not verify arrow
+    coverage and must not be read as doing so.
     """
     for m in _PAREN_BRACE_RE.finditer(masked):
         open_paren = _find_matching_backward(masked, m.start(), "(", ")")
@@ -853,14 +867,45 @@ def _find_unattributed_function_body(
     return None
 
 
+_ARROW_BRACE_RE = re.compile(r"=>\s*\{")
+
+
+def _find_unattributed_arrow_body(
+    masked: str, covered_spans: list[tuple[int, int]]
+) -> int | None:
+    """1-based line of the first `=> {` arrow header whose body is not
+    covered by any unit `_iter_arrow_units` produced, or `None` if every
+    such header is accounted for.
+
+    This is the arrow-side counterpart to `_find_unattributed_function_body`
+    (`A`, extended). It does not trust that `_iter_arrow_units` recognised
+    every arrow header -- it independently locates every `=> {` occurrence
+    and verifies its body span is covered by a unit that recogniser actually
+    produced. This is a real gap, not a hypothetical one:
+    `_match_arrow_params_backward` rejects a bare parameter whose identifier
+    is listed in `JS_KEYWORDS`, but `async` in that set is a contextual
+    keyword, not a reserved word -- `list.map(async => { ... })` is valid JS
+    with a parameter literally named `async`, and before this check existed
+    that arrow's body silently produced zero units rather than being
+    measured or reported `unparsed`.
+    """
+    for m in _ARROW_BRACE_RE.finditer(masked):
+        body_start = m.end() - 1
+        if not any(start <= body_start <= end for start, end in covered_spans):
+            return masked.count("\n", 0, body_start) + 1
+    return None
+
+
 def scan_js_file(path: Path) -> list[Unit]:
     """All recognised function/arrow/method units in one JS/TS file.
 
     Returns one `unparsed` unit (never a partial scan) when
     `_detect_unparsed_reason` finds JSX, a decorator, or (for `.ts`)
-    type-level syntax -- or when the fail-closed conservation check (`A`,
-    `_find_unattributed_function_body`) finds a function/method-shaped body
-    no recogniser above attributed to a unit.
+    type-level syntax -- or when either half of the fail-closed conservation
+    check (`A`) finds a header-shaped body no recogniser above attributed to
+    a unit: `_find_unattributed_function_body` for `) {` (function/method)
+    headers, `_find_unattributed_arrow_body` for `=> {` (arrow) headers. Both
+    run independently and either can trigger `unparsed` on its own.
     """
     try:
         text = path.read_text(encoding="utf-8", errors="replace")
@@ -897,6 +942,8 @@ def scan_js_file(path: Path) -> list[Unit]:
         covered_spans.append((body_start, body_end))
 
     gap_line = _find_unattributed_function_body(masked, covered_spans)
+    if gap_line is None:
+        gap_line = _find_unattributed_arrow_body(masked, covered_spans)
     if gap_line is not None:
         reason = (
             f"function-introducing header at line {gap_line} produced a "
