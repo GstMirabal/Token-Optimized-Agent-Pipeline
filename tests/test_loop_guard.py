@@ -92,3 +92,110 @@ def test_task_scope_status_change_counts_as_progress(repo):
     (repo / "task_scope.md").write_text("| a | f.py | qa | DONE |\n")
     assert lg.check() == 0
     assert loop_block(repo)["stagnant_iterations"] == 0
+
+
+# --- Sprint 051: the canonical task_scope.md is inside the sprint directory ---
+
+
+def _nested_sprint(repo: Path, rows: str) -> Path:
+    """A host's real layout: task_scope.md inside `docs/sprints/[ID]-...`."""
+    sprint = repo / "docs" / "sprints" / "051-core-pipeline"
+    sprint.mkdir(parents=True)
+    (sprint / "task_scope.md").write_text(rows, encoding="utf-8")
+    (repo / "docs" / "active_state.json").write_text(
+        json.dumps({"current_sprint": {"id": "051", "path": str(
+            sprint.relative_to(repo))}}),
+        encoding="utf-8",
+    )
+    return sprint
+
+
+def test_a_nested_task_scope_is_found_through_the_anchor(repo):
+    """`agents.md §5` puts the file in the sprint directory, and the anchor
+    names that directory. A bare relative path resolved to the repository root
+    instead — where no host keeps it."""
+    sprint = _nested_sprint(repo, "| a | f.py | qa | PENDING |\n")
+    # Relative by design: `agents.md §1 path_type` forbids absolute paths, and
+    # the anchor stores the sprint directory relative to the repository root.
+    assert lg.task_scope_path() == sprint.relative_to(repo) / "task_scope.md"
+    assert lg.status_hash() != ""
+
+
+def test_a_nested_status_change_counts_as_progress(repo):
+    """The defect this closes was silent: `status_hash` returns "" for a missing
+    file, so the Status-column half of the progress signal never fired in any
+    host with a nested sprint directory. A guard that cannot see movement
+    cannot see its absence either."""
+    sprint = _nested_sprint(repo, "| a | f.py | qa | PENDING |\n")
+    lg.start(10, "tests pass")
+    lg.check()
+    (sprint / "task_scope.md").write_text("| a | f.py | qa | DONE |\n")
+    assert lg.check() == 0
+    assert loop_block(repo)["stagnant_iterations"] == 0
+
+
+def test_sprint_dir_flag_overrides_the_anchor(repo):
+    """Same flag as the sibling checks, and it wins over the anchor."""
+    _nested_sprint(repo, "| a | f.py | qa | PENDING |\n")
+    other = repo / "elsewhere"
+    other.mkdir()
+    (other / "task_scope.md").write_text("| b | g.py | qa | DONE |\n", encoding="utf-8")
+    assert lg.task_scope_path(str(other)) == other / "task_scope.md"
+    assert lg.status_hash(str(other)) != lg.status_hash()
+
+
+def test_the_repository_root_path_still_works_without_an_anchor_sprint(repo):
+    """Backward compatibility: a repository that really keeps it at the root
+    must not regress just because the anchor names no sprint."""
+    (repo / "task_scope.md").write_text("| a | f.py | qa | PENDING |\n")
+    assert lg.task_scope_path() == Path("task_scope.md")
+    assert lg.status_hash() != ""
+
+
+def _cli(repo: Path, *args: str) -> int:
+    """Run the script as a process, which is how every caller reaches it."""
+    return subprocess.run(
+        [sys.executable, str(Path(lg.__file__).resolve()), *args],
+        cwd=repo, capture_output=True, text=True,
+    ).returncode
+
+
+def test_current_sprint_fails_closed_when_the_anchor_names_no_sprint(repo):
+    """Gate 1's `F-5`: the flag the done-criterion demanded was never shipped.
+
+    It is not an alias for the default. The default falls back to the repository
+    root; this refuses to, because a loop measuring progress from a file that is
+    not there reads every iteration as stagnant — and fail-closed is the whole
+    design of this script."""
+    (repo / "task_scope.md").write_text("| a | f.py | qa | PENDING |\n")
+    assert _cli(repo, "check", "--current-sprint") == 2
+
+
+def test_current_sprint_resolves_the_nested_directory_the_anchor_names(repo):
+    """With a sprint declared, the flag targets it rather than the root."""
+    _nested_sprint(repo, "| a | f.py | qa | PENDING |\n")
+    assert _cli(repo, "start", "--max-iterations", "3", "--success", "tests pass",
+                "--current-sprint") == 0
+    assert loop_block(repo)["last_status_hash"] != ""
+
+
+def test_the_two_scope_flags_together_are_refused(repo):
+    """Two ways to name one thing is a caller error, not a precedence puzzle."""
+    _nested_sprint(repo, "| a | f.py | qa | PENDING |\n")
+    assert _cli(repo, "check", "--current-sprint", "--sprint-dir", "x") == 2
+
+
+def test_current_sprint_stops_when_the_named_directory_has_no_task_scope(repo):
+    """Gate 2 finding 4: naming a path is not having one.
+
+    The anchor named a directory that was never created, `status_hash` returned ""
+    as it does for any missing file, and the loop reported "no change in the Status
+    column" for three iterations instead of saying the file was absent — reaching
+    the original defect straight through the flag added to prevent it."""
+    (repo / "docs" / "active_state.json").write_text(
+        json.dumps({"current_sprint": {"path": "docs/sprints/051-core-pipeline"}}),
+        encoding="utf-8",
+    )
+    assert _cli(repo, "start", "--max-iterations", "3", "--success", "x",
+                "--current-sprint") == 2
+    assert _cli(repo, "check", "--current-sprint") == 2

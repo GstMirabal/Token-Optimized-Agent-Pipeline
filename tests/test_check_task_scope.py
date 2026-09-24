@@ -5,12 +5,18 @@ A gate proven only on a healthy tree proves nothing — fixtures must fail.
 
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 CHECK = REPO / "scripts" / "check_task_scope.py"
+
+# The F-051-R2 tests call `current_sprint_dir` directly: the resolver's bug was
+# invisible through the CLI, which exits 0 either way — skipping and passing are
+# the same exit code, which is precisely why it went unnoticed.
+sys.path.insert(0, str(REPO / "scripts"))
 
 
 def _run(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
@@ -178,3 +184,50 @@ def test_absent_task_scope_skips_outside_a_sprint_directory(tmp_path: Path) -> N
 def test_current_sprint_skips_when_anchor_absent(tmp_path: Path) -> None:
     result = _run("--current-sprint", cwd=tmp_path)
     assert result.returncode == 0
+
+
+# --- F-051-R2: the resolver required an int and real anchors carry a string ---
+
+
+def _anchor(root: Path, sprint_id: object) -> Path:
+    """An anchor naming `sprint_id`, plus the matching sprint directory."""
+    (root / "docs" / "sprints" / "051-core-pipeline").mkdir(parents=True)
+    (root / "docs" / "active_state.json").write_text(
+        json.dumps({"current_sprint": {"id": sprint_id}}), encoding="utf-8"
+    )
+    return root / "docs" / "sprints" / "051-core-pipeline"
+
+
+def test_a_zero_padded_string_id_resolves_like_an_int(tmp_path: Path) -> None:
+    """Real anchors carry `"051"`, because that is the directory-name form.
+
+    The resolver required `int` and returned None otherwise, and both callers
+    read None as "no current sprint, skip" — so two steps of `make verify`
+    printed `[OK] … (skip)` and exited 0 in every repository using the string
+    form. A gate that fails open reports success for work it never looked at.
+    """
+    import check_task_scope as cts
+
+    expected = _anchor(tmp_path, "051")
+    assert cts.current_sprint_dir(tmp_path) == expected
+
+
+def test_an_integer_id_still_resolves(tmp_path: Path) -> None:
+    """The pre-051 form must not regress."""
+    import check_task_scope as cts
+
+    expected = _anchor(tmp_path, 51)
+    assert cts.current_sprint_dir(tmp_path) == expected
+
+
+def test_a_non_numeric_id_is_the_one_case_where_skipping_is_right(
+    tmp_path: Path,
+) -> None:
+    """An unusable id is not a silent pass for a real sprint — there is none."""
+    import check_task_scope as cts
+
+    _anchor(tmp_path, "not-a-sprint")
+    assert cts.current_sprint_dir(tmp_path) is None
+    _anchor2 = tmp_path / "docs" / "active_state.json"
+    _anchor2.write_text(json.dumps({"current_sprint": {"id": True}}), encoding="utf-8")
+    assert cts.current_sprint_dir(tmp_path) is None

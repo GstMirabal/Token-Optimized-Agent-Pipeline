@@ -405,3 +405,38 @@ def test_sprint_zero_is_not_inspected(tmp_path):
     report = dfc.FreshnessReport()
     dfc.check_phase_artifacts(tmp_path, 0, report)
     assert report.findings == []
+
+
+# --- node_delta: a present-but-null count is not a missing one (H099-3) ------
+
+
+def test_node_delta_survives_a_null_community_count():
+    """`.get(key, 0)` never fired: the key is present, so it returned None.
+
+    Reported from a host's Sprint 099 close against a real `graph_stats.json`
+    carrying `"communities": null`, where the subtraction raised TypeError and
+    took down a mandatory close step. `node_delta` had no test at all until
+    this one, which is how it stayed broken for eleven sprints.
+    """
+    previous = {"nodes": 10, "edges": 20, "communities": None}
+    current = {"nodes": 12, "edges": 20, "communities": None}
+    assert dfc.node_delta(previous, current) == 2
+
+
+def test_node_delta_treats_a_null_previous_community_as_zero():
+    """A first snapshot with null communities must read as growth, not a crash."""
+    assert dfc.node_delta({"communities": None}, {"communities": 3}) == 300
+
+
+def test_node_delta_counts_normally_when_every_field_is_present():
+    """The regression guard must not have changed the arithmetic it guards."""
+    previous = {"nodes": 100, "edges": 200, "communities": 5}
+    current = {"nodes": 90, "edges": 260, "communities": 6}
+    # |90-100| + |260-200| + one new community * 100
+    assert dfc.node_delta(previous, current) == 10 + 60 + 100
+
+
+def test_node_delta_ignores_a_non_numeric_count_rather_than_raising():
+    """This runs inside a close gate, so an older snapshot's field must not be
+    able to stop a close over a value the function only counts."""
+    assert dfc.node_delta({"nodes": "many"}, {"nodes": 4}) == 4

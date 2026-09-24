@@ -73,6 +73,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from typing import TextIO
 
 ACTIVE_STATE = Path("docs/active_state.json")
 CHANGELOG = Path("CHANGELOG.md")
@@ -86,6 +87,21 @@ def git(*args: str) -> str | None:
     return result.stdout.strip() if result.returncode == 0 else None
 
 
+def unreleased_section() -> str:
+    """The text under ``## [Unreleased]``, or empty when there is none.
+
+    One reader for the section, because two would drift: `unreleased_is_empty`
+    asks whether it holds anything and `_cited_in_unreleased` asks what it
+    names, and both must agree on where the section ends.
+    """
+    if not CHANGELOG.exists():
+        return ""
+    text = CHANGELOG.read_text(encoding="utf-8")
+    if "## [Unreleased]" not in text:
+        return ""
+    return text.split("## [Unreleased]", 1)[1].split("\n## ", 1)[0]
+
+
 def unreleased_is_empty() -> bool:
     """True when the Master Ledger has no entries under [Unreleased].
 
@@ -93,12 +109,11 @@ def unreleased_is_empty() -> bool:
     unrecorded work from work that may be recorded but unprovable. What was
     false was the conclusion drawn from it, not the measurement.
     """
-    if not CHANGELOG.exists():
+    if not CHANGELOG.exists() or "## [Unreleased]" not in (
+        CHANGELOG.read_text(encoding="utf-8")
+    ):
         return False
-    text = CHANGELOG.read_text(encoding="utf-8")
-    if "## [Unreleased]" not in text:
-        return False
-    section = text.split("## [Unreleased]", 1)[1].split("\n## ", 1)[0]
+    section = unreleased_section()
     return not any(line.lstrip().startswith(("-", "*")) for line in section.splitlines())
 
 
@@ -153,11 +168,12 @@ def commits_since(baseline: str, *exclude: str) -> list[str]:
     return [line for line in log.splitlines() if line]
 
 
-_STATE_SUBJECT = re.compile(r"^docs\(state\)")
+_STATE_SUBJECT = re.compile(r"^docs\((?:state|changelog)\)")
+_LEDGER_PATHS = frozenset({"docs/active_state.json", "CHANGELOG.md"})
 
 
 def _routine_state_shas(commits: list[str]) -> set[str]:
-    """SHAs in ``commits`` that are a routine ``docs(state)`` anchor write.
+    """SHAs in ``commits`` that only maintain the anchor or the ledger.
 
     ``close_workflow.md`` Phase 4 and ``deployment_workflow.md`` both append a
     commit touching only ``docs/active_state.json`` after ``last_close_commit``.
@@ -167,15 +183,23 @@ def _routine_state_shas(commits: list[str]) -> set[str]:
     by construction, not by severity — the same principle as
     ``ADR-0002-drift-verdict-exit-codes``.
 
-    Both conditions are required: a substantive commit mis-subjected
-    ``docs(state)`` still changes other files and is still counted.
+    Sprint 051 widens this from the anchor alone to the anchor **and** the
+    ledger, for a reason that is structural rather than lenient: **a commit
+    that writes the ledger cannot appear in the ledger it writes.**
+    ``reconciliation_workflow.md`` Phase 3 produces exactly such a commit —
+    it adds the missing ``[Unreleased]`` entries — and the reporting host then
+    had that commit flagged as uncovered on every subsequent session, by the
+    very entry it had just authored.
+
+    Both conditions are still required: a substantive commit mis-subjected
+    ``docs(state)`` or ``docs(changelog)`` touches other files and is counted.
 
     Args:
         commits: ``git log --oneline`` lines for the range under judgement.
 
     Returns:
-        set[str]: the leading short SHA of each line that is a routine state
-        commit.
+        set[str]: the leading short SHA of each line that is a ledger- or
+        anchor-maintenance commit.
     """
     routine: set[str] = set()
     for line in commits:
@@ -187,45 +211,202 @@ def _routine_state_shas(commits: list[str]) -> set[str]:
         if not _STATE_SUBJECT.match(subject):
             continue
         files = git("diff-tree", "--no-commit-id", "--name-only", "-r", sha) or ""
-        changed = [f for f in files.splitlines() if f.strip()]
-        if changed == ["docs/active_state.json"]:
+        changed = {f for f in files.splitlines() if f.strip()}
+        if changed and changed <= _LEDGER_PATHS:
             routine.add(sha)
     return routine
 
 
-def classify(baseline: str) -> tuple[str, list[str], list[str], list[str]]:
+def _cited_in_unreleased(commits: list[str]) -> set[str]:
+    """SHAs that an entry under ``[Unreleased]`` names outright.
+
+    ``report_drift`` tells the reader that reachability cannot prove coverage
+    per commit, and that is true of reachability. It is not true of a ledger
+    entry that **cites the commit**: the citation is direct, per-commit
+    evidence, and it is the one signal verdict ``A`` was missing.
+
+    Without this, every host sits on verdict ``A`` for every session between
+    the moment work lands on the integration branch and the next deployment's
+    tag, re-asking a human to read a section they already read. That is the
+    desensitisation this check cannot afford, because a reader who has cleared
+    the same warning five times clears the sixth without reading.
+
+    The convention it depends on — an ``[Unreleased]`` entry names the commit
+    it describes — is stated in ``agents.md §0 Master Ledger``.
+
+    Args:
+        commits: ``git log --oneline`` lines still unaccounted for.
+
+    Returns:
+        set[str]: the short SHA of each commit its own entry names.
+    """
+    # Only entry lines count. Scanning the whole section let prose, a URL, a
+    # filename or a fenced command clear a commit — worst of all a
+    # ``git revert <sha>`` in a code block, where the ledger says the work was
+    # undone and the gate read it as recorded (Gate 2). It also disagreed with
+    # `unreleased_is_empty`, which has always required a ``-``/``*`` line: two
+    # readers of one section differing on what an entry is, which
+    # `unreleased_section`'s own docstring exists to prevent.
+    entries = "\n".join(
+        raw.lstrip()
+        for raw in unreleased_section().splitlines()
+        if raw.lstrip().startswith(("-", "*"))
+    )
+    if not entries:
+        return set()
+    cited: set[str] = set()
+    for line in commits:
+        if not line.strip():
+            continue
+        sha = line.split()[0]
+        if len(sha) < 7:
+            continue
+        # The lookbehind refuses a match starting mid-hex — `abc1234` inside
+        # `9abc1234` is a different commit (Gate 1, `F-2`) — while the trailing
+        # class still accepts the same commit cited at 8, 12 or 40 characters.
+        # Case-insensitive because both guards already accept either case, so
+        # rejecting `ABC1234` was an asymmetry rather than a decision (Gate 2).
+        if re.search(rf"(?<![0-9a-fA-F]){re.escape(sha)}[0-9a-fA-F]*\b",
+                     entries, re.IGNORECASE):
+            cited.add(sha)
+    return cited
+
+
+def _resolves(ref: str) -> bool:
+    """True when ``ref`` names a commit in this repository."""
+    return git("rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}") is not None
+
+
+def integration_refs() -> list[str]:
+    """**Every** resolvable ref a sprint might merge into, local and remote.
+
+    Returns a list, not the first match, and the distinction is the whole
+    correctness argument. Gate 1 of Sprint 051 rejected the single-ref form as
+    `charter`-class: it tried the local branch before ``origin/``, so in a clone
+    whose local ``main`` is behind ``origin/main`` — the normal state of a clone
+    that has not pulled — a commit that had landed on ``origin/main`` was absent
+    from the ref being consulted, got classified **in flight**, and was
+    suppressed from the half that blocks. That is the `PRs #26-#30` failure this
+    whole script exists to catch, reintroduced by the fix meant to sharpen it.
+
+    Callers therefore treat a commit as in flight only when it is absent from
+    **all** of these. Being wrong in that direction over-reports; being wrong in
+    the other direction hides drift, and only one of those is recoverable by a
+    reader.
+
+    Candidate names: the anchor's own, then ``main``, then ``master``. Not
+    hardcoded to ``main``, or a repository naming it otherwise would silently get
+    the pre-Sprint-051 behaviour back.
+
+    Returns:
+        list[str]: resolvable refs, empty when none resolve or when HEAD is
+        itself an integration branch — both meaning every commit in range has
+        landed, so there is no in-flight half to separate.
+    """
+    candidates: list[str] = []
+    if ACTIVE_STATE.exists():
+        try:
+            state = json.loads(ACTIVE_STATE.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            state = {}
+        named = state.get("integration_branch") or state.get("base_branch")
+        if named:
+            candidates.append(str(named))
+    candidates.extend(["main", "master"])
+
+    head = git("rev-parse", "--abbrev-ref", "HEAD")
+    # Every configured remote, not a hardcoded `origin`. Gate 2 found the
+    # `charter` hole reopening under a different remote name: the fork workflow
+    # `agents.md §4 feedback_upstream` *mandates* leaves the integration branch on
+    # `upstream/`, and consulting only `origin/` put work already landed there back
+    # into the in-flight half.
+    remotes = (git("remote") or "").split()
+    refs: list[str] = []
+    for name in candidates:
+        if name == head:
+            return []
+        forms = (name, *(f"{remote}/{name}" for remote in remotes))
+        refs.extend(form for form in forms if _resolves(form))
+    return refs
+
+
+def _in_flight_shas(commits: list[str]) -> set[str]:
+    """SHAs in ``commits`` that have not reached the integration branch.
+
+    ``RA-12`` puts every sprint on ``ai-sprint/[ID]``, so its commits are
+    absent from every release tag by construction. ``agents.md §0`` and
+    ``RA-05`` place the sprint's ledger entry at **Sprint Closeout**, which
+    means a sprint stopped earlier is *correctly* unrecorded — and the
+    reconciliation this check would force must then reconstruct nothing, which
+    ``reconciliation_workflow.md`` Phase 3 prohibits.
+
+    Separating them keeps the failure this check exists for: ``PRs #26-#30``
+    were unrecorded work **on the integration branch**, which stays in the
+    blocking half.
+    """
+    refs = integration_refs()
+    if not refs:
+        return set()
+    # `merge-base --is-ancestor` exits 0 when the sha has landed, and `git()`
+    # returns None only on a non-zero exit — the idiom `covering_tags` uses.
+    # `all()` is load-bearing: a commit counts as in flight only when **every**
+    # integration ref lacks it. Consulting one ref let a stale local branch hide
+    # work that had already landed on its remote (Gate 1, `charter`).
+    return {
+        sha
+        for sha in (line.split()[0] for line in commits if line.strip())
+        if all(git("merge-base", "--is-ancestor", sha, ref) is None for ref in refs)
+    }
+
+
+def classify(baseline: str) -> tuple[str, list[str], list[str], list[str], list[str]]:
     """Decide the verdict for the range `baseline..HEAD`.
+
+    The verdict is computed over the **landed** half of the range only. The
+    in-flight half is returned so the caller can list it, never counted as
+    drift (Sprint 051).
 
     Args:
         baseline: a commit reachable from HEAD.
 
     Returns:
-        tuple: (verdict, every commit in range, unsealed commits, sealing tags).
+        tuple: (verdict, landed commits, unsealed commits, sealing tags,
+        in-flight commits).
     """
     every = commits_since(baseline)
     routine = _routine_state_shas(every)
     if routine:
         every = [c for c in every if c.split()[0] not in routine]
+
+    in_flight = _in_flight_shas(every)
+    in_flight_lines = [c for c in every if c.split()[0] in in_flight]
+    if in_flight:
+        every = [c for c in every if c.split()[0] not in in_flight]
+
     if not every:
-        return "CLEAN", [], [], []
+        return "CLEAN", [], [], [], in_flight_lines
 
     tags = sealing_tags()
     if not tags:
-        return "R", every, every, []
+        return "R", every, every, [], in_flight_lines
 
     unsealed = [
         c
         for c in commits_since(baseline, *(f"^{tag}" for tag in tags))
-        if c.split()[0] not in routine
+        if c.split()[0] not in routine and c.split()[0] not in in_flight
     ]
+    cited = _cited_in_unreleased(unsealed)
+    if cited:
+        unsealed = [c for c in unsealed if c.split()[0] not in cited]
     if not unsealed:
-        return "S", every, [], tags
+        return ("C" if cited else "S"), every, [], tags, in_flight_lines
     if not unreleased_is_empty():
-        return "A", every, unsealed, tags
-    return ("U" if len(unsealed) == len(every) else "M"), every, unsealed, tags
+        return "A", every, unsealed, tags, in_flight_lines
+    verdict = "U" if len(unsealed) == len(every) else "M"
+    return verdict, every, unsealed, tags, in_flight_lines
 
 
-def enumerate_commits(commits: list[str], stream) -> None:
+def enumerate_commits(commits: list[str], stream: TextIO) -> None:
     """Print at most 20 commits, then say how many were withheld."""
     for line in commits[:20]:
         print(f"   • {line}", file=stream)
@@ -315,6 +496,35 @@ def report_drift(verdict: str, every: list[str], unsealed: list[str]) -> int:
     return 2
 
 
+def report_cited(every: list[str]) -> int:
+    """Verdict C: nothing is left unaccounted, and a citation closed the gap.
+
+    Distinct from ``S`` on purpose. ``S`` means a release tag reaches the work;
+    ``C`` means the ledger names it by commit while it is still unreleased.
+    Reporting both as ``S`` would claim a seal that has not happened.
+    """
+    print(f"✅ {len(every)} landed commit(s) since the last sealed close are "
+          f"accounted for: by a released section, or by an entry under "
+          f"[Unreleased] that names the commit.")
+    enumerate_commits(every, sys.stdout)
+    print("\n   A citing entry is per-commit evidence, which reachability alone "
+          "cannot give. The next deployment seals these into a released section.")
+    return 0
+
+
+def report_in_flight(commits: list[str]) -> None:
+    """List sprint work that has not merged. Informational — never blocks.
+
+    Printed for every verdict, including ``CLEAN``, so the half that is
+    deliberately not counted stays visible. A branch that never merges must
+    not become a blind spot just because it stopped blocking.
+    """
+    print(f"ℹ️  {len(commits)} commit(s) on this branch have not reached the "
+          f"integration branch. Their ledger entry is due at Sprint Closeout "
+          f"(RA-05), so they are listed here and not counted as drift:")
+    enumerate_commits(commits, sys.stdout)
+
+
 def read_baseline() -> str | None:
     """The recorded `last_close_commit`, or None with the reason printed."""
     if not ACTIVE_STATE.exists():
@@ -354,10 +564,14 @@ def main() -> int:
     if note:
         print(f"⚠️  {note}", file=sys.stderr)
 
-    verdict, every, unsealed, tags = classify(baseline)
+    verdict, every, unsealed, tags, in_flight = classify(baseline)
+    if in_flight:
+        report_in_flight(in_flight)
     if verdict == "CLEAN":
         print(f"✅ No drift — HEAD matches the last sealed close ({baseline[:7]}).")
         return 0
+    if verdict == "C":
+        return report_cited(every)
     if verdict == "S":
         return report_sealed(every, tags)
     if verdict == "R":
