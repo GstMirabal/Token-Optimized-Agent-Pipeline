@@ -597,17 +597,31 @@ def test_a_transient_failure_is_undetermined_not_a_verdict(repo, gh_installed, m
     assert bs.merged_pr_exists("feature") == bs.UNKNOWN
 
 
+def _transient_then_success(cmd: list[str], attempt: int) -> subprocess.CompletedProcess:
+    """Build the `gh` response for one attempt of a flaky-then-successful call.
+
+    Args:
+        cmd: The command passed to the stubbed `subprocess.run`.
+        attempt: 1-indexed count of `gh` calls made so far, including this one.
+
+    Returns:
+        subprocess.CompletedProcess: an HTTP 503 failure while `attempt` is
+            below `bs.ATTEMPTS`, then a successful pull-request lookup.
+    """
+    if attempt < bs.ATTEMPTS:
+        return subprocess.CompletedProcess(cmd, 1, "", "HTTP 503: unavailable")
+    return subprocess.CompletedProcess(cmd, 0, '[{"number": 41}]', "")
+
+
 def test_a_transient_failure_is_retried_before_giving_up(repo, gh_installed, monkeypatch):
     """The retry is what makes UNKNOWN rare enough to be worth blocking on."""
     calls = []
 
     def run(cmd, **kwargs):
-        if cmd and cmd[0] == "gh":
-            calls.append(1)
-            if len(calls) < bs.ATTEMPTS:
-                return subprocess.CompletedProcess(cmd, 1, "", "HTTP 503: unavailable")
-            return subprocess.CompletedProcess(cmd, 0, '[{"number": 41}]', "")
-        return REAL_RUN(cmd, **kwargs)
+        if not (cmd and cmd[0] == "gh"):
+            return REAL_RUN(cmd, **kwargs)
+        calls.append(1)
+        return _transient_then_success(cmd, len(calls))
 
     monkeypatch.setattr(bs.subprocess, "run", run)
     assert bs.merged_pr_exists("feature") == bs.YES
