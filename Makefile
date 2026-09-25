@@ -29,6 +29,7 @@ PY := $(if $(wildcard $(VENV_PY)),$(VENV_PY),python3)
 # Incremental AST sync after code changes (close_workflow Phase 1, no LLM cost).
 graphify-update:
 	$(GRAPHIFY) update .
+	python3 $(AGENTS_DIR)/scripts/graph_reconcile.py --root .
 
 # Full AST rebuild — required when documentation changed (close_workflow Phase 1,
 # pipeline_workflow Phase 8). Runs offline: `close_workflow` Phase 5 and every
@@ -38,6 +39,7 @@ graphify-update:
 #   $(AGENTS_DIR)/venv_skillopt/bin/graphify . --mode deep   # needs GEMINI_API_KEY
 graphify-rebuild:
 	$(AGENTS_DIR)/venv_skillopt/bin/python -m graphify update . --force
+	python3 $(AGENTS_DIR)/scripts/graph_reconcile.py --root .
 
 # Framework self-check. THIS is the full set: `.github/workflows/ci.yml` invokes
 # this target rather than listing its own steps, so a green local run and a green
