@@ -16,6 +16,112 @@ from skillopt.envs.base import EnvAdapter
 from skillopt.model.router import chat_target
 
 
+def _save_conversation_transcript(conv_path: str, conv: list[dict[str, str]]) -> None:
+    """Persists a rollout conversation transcript to disk.
+
+    Module-level (not a method) so this nested try/with does not add the
+    enclosing class as an extra ancestor toward the nesting-depth budget.
+
+    Args:
+        conv_path: Destination JSON file path.
+        conv: List of role/content message dictionaries.
+    """
+    try:
+        with open(conv_path, "w", encoding="utf-8") as f:
+            json.dump(conv, f, indent=2)
+    except Exception as e:
+        logging.error("Failed to save conversation: %s", e)
+
+
+def _grade_eval_system_prompt() -> str:
+    """Returns the hardcoded judge system prompt for prediction grading.
+
+    Returns:
+        Prompt text instructing the evaluation judge.
+    """
+    return (
+        "You are an automated evaluation judge.\n"
+        "Compare the Model Prediction with the expected Ground Truth for "
+        "a rule validation scenario.\n"
+        "The Ground Truth specifies why a code change or proposal is "
+        "non-compliant with the rules.\n"
+        "Determine if the Model Prediction correctly identified that the "
+        "proposal is non-compliant and gave a reason matching the Ground Truth.\n"
+        "Respond with exactly:\n"
+        "- hard: 1 (if correct) or 0 (if incorrect)\n"
+        "- soft: 1.0 (if correct) or 0.0 (if incorrect)\n"
+        "- reasoning: a brief explanation of why.\n"
+        "Format your output as a JSON block:\n"
+        "```json\n"
+        "{\n"
+        "  \"hard\": 1,\n"
+        "  \"soft\": 1.0,\n"
+        "  \"reasoning\": \"...\"\n"
+        "}\n"
+        "```"
+    )
+
+
+def _grade_via_judge(question: str, gold: str, pred: str) -> tuple[int, float, str]:
+    """Calls the judge model and parses its grading response.
+
+    Module-level (not a method) so the try/if pair here does not stack on
+    top of the enclosing class as an extra nesting-depth ancestor.
+
+    Args:
+        question: Scenario description.
+        gold: Expected ground truth.
+        pred: Actual prediction.
+
+    Returns:
+        A tuple of hard score (0/1), soft score (0.0-1.0), and reason.
+    """
+    eval_system = _grade_eval_system_prompt()
+    eval_user = (
+        f"## Question\n{question}\n\n"
+        f"## Expected Ground Truth\n{gold}\n\n"
+        f"## Model Prediction\n{pred}"
+    )
+    try:
+        eval_response, _ = chat_target(
+            system=eval_system,
+            user=eval_user,
+            max_completion_tokens=1024,
+            stage="eval_judge",
+        )
+        from skillopt.gradient.reflect import extract_json
+
+        eval_json = extract_json(eval_response)
+        if eval_json:
+            hard = int(eval_json.get("hard", 0))
+            soft = float(eval_json.get("soft", 0.0))
+            reason = eval_json.get("reasoning", "")
+            return hard, soft, reason
+    except Exception as e:
+        logging.error("Grading prediction failed: %s", e)
+    return 0, 0.0, "Grading process encountered an error."
+
+
+def _dedupe_task_types(items: list[dict[str, Any]]) -> list[str]:
+    """Deduplicates task_type values across dataset items, preserving order.
+
+    Module-level (not a method) so the for/if pair here does not stack on
+    top of the enclosing class as an extra nesting-depth ancestor.
+
+    Args:
+        items: Scenario dictionaries, each optionally carrying "task_type".
+
+    Returns:
+        Ordered list of distinct task_type strings.
+    """
+    seen: list[str] = []
+    for item in items:
+        tt = str(item.get("task_type") or "general_rule")
+        if tt not in seen:
+            seen.append(tt)
+    return seen
+
+
 class AgentsOptEnv(EnvAdapter):
     """Adapter for testing and evaluating agents governance rules."""
 
@@ -177,50 +283,7 @@ class AgentsOptEnv(EnvAdapter):
         Returns:
             A tuple of hard score (0/1), soft score (0.0-1.0), and reason.
         """
-        eval_system = (
-            "You are an automated evaluation judge.\n"
-            "Compare the Model Prediction with the expected Ground Truth for "
-            "a rule validation scenario.\n"
-            "The Ground Truth specifies why a code change or proposal is "
-            "non-compliant with the rules.\n"
-            "Determine if the Model Prediction correctly identified that the "
-            "proposal is non-compliant and gave a reason matching the Ground Truth.\n"
-            "Respond with exactly:\n"
-            "- hard: 1 (if correct) or 0 (if incorrect)\n"
-            "- soft: 1.0 (if correct) or 0.0 (if incorrect)\n"
-            "- reasoning: a brief explanation of why.\n"
-            "Format your output as a JSON block:\n"
-            "```json\n"
-            "{\n"
-            "  \"hard\": 1,\n"
-            "  \"soft\": 1.0,\n"
-            "  \"reasoning\": \"...\"\n"
-            "}\n"
-            "```"
-        )
-        eval_user = (
-            f"## Question\n{question}\n\n"
-            f"## Expected Ground Truth\n{gold}\n\n"
-            f"## Model Prediction\n{pred}"
-        )
-        try:
-            eval_response, _ = chat_target(
-                system=eval_system,
-                user=eval_user,
-                max_completion_tokens=1024,
-                stage="eval_judge",
-            )
-            from skillopt.gradient.reflect import extract_json
-
-            eval_json = extract_json(eval_response)
-            if eval_json:
-                hard = int(eval_json.get("hard", 0))
-                soft = float(eval_json.get("soft", 0.0))
-                reason = eval_json.get("reasoning", "")
-                return hard, soft, reason
-        except Exception as e:
-            logging.error("Grading prediction failed: %s", e)
-        return 0, 0.0, "Grading process encountered an error."
+        return _grade_via_judge(question, gold, pred)
 
     def rollout(
         self,
@@ -258,11 +321,7 @@ class AgentsOptEnv(EnvAdapter):
                 {"role": "user", "content": question},
                 {"role": "assistant", "content": pred},
             ]
-            try:
-                with open(conv_path, "w", encoding="utf-8") as f:
-                    json.dump(conv, f, indent=2)
-            except Exception as e:
-                logging.error("Failed to save conversation: %s", e)
+            _save_conversation_transcript(conv_path, conv)
 
             results.append({
                 "id": str(item_id),
@@ -325,17 +384,12 @@ class AgentsOptEnv(EnvAdapter):
         Returns:
             List of task type strings.
         """
-        seen: list[str] = []
         all_items = (
             self.dataloader.train_items
             + self.dataloader.val_items
             + self.dataloader.test_items
         )
-        for item in all_items:
-            tt = str(item.get("task_type") or "general_rule")
-            if tt not in seen:
-                seen.append(tt)
-        return seen or ["general_rule"]
+        return _dedupe_task_types(all_items) or ["general_rule"]
 
     def get_error_minibatch_prompt(self) -> str:
         """Returns the hardcoded error analyst prompt.
