@@ -1,6 +1,6 @@
 # 📜 ADR-0015: `config/artifact_registry.json` separates artifact owner from writer
 
-**Status**: `Accepted`
+**Status**: `Superseded by ADR-0017` — implementation (companion unit `U9`, `config/artifact_registry.json`) found the `role`/`writer` split true for the three Principal-Agent-owned artifacts this ADR examined, and false for `active_state.json`, `mirror.json` and `graph.json`, whose owner (DevOps Agent) holds no `Write` and whose files are materialized by a script or Makefile target, not by any profile editing them. `ADR-0017` carries the full decision, typed to admit a script/make-target writer alongside a profile one; this record is kept intact as the reasoning it restates and the gap it did not yet cover.
 **Date**: 2026-09-25
 **Triggers**: 2 (`rules/documentation_standard.md §3.1`) — changes a contract (`config/artifact_registry.json`'s schema) consumed by other containers (`scripts/docs_freshness_check.py`, `scripts/map_workflows.py`, `close_workflow.md` Phase 2.6, `scripts/check_role_artifact.py`). Trigger #2 does not auto-escalate individually (`§3.2`), so this ADR is Nygard-format.
 
