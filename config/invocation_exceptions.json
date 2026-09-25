@@ -68,6 +68,16 @@
       "path": "skills/topology-scaffolder",
       "reason": "model-invoked",
       "note": "The instrument topology_mapper reaches for when scaffolding [Stack]/[Layer] directories. The agent profile owns the decision; the skill performs it."
+    },
+    {
+      "path": "skills/env-shielding-auditor/scripts/env_shielding_auditor.py",
+      "reason": "model-invoked",
+      "note": "SKILL.md:3 description ('Scans for hardcoded secrets (API keys, tokens) and validates .env security via Gitignore.') directs the model to exactly the capability this script's main() implements (scan_files + check_gitignore); workflows/standardization_workflow.md:28 shield_gate names the skill `env-shielding-auditor` by name as the instrument for that step. README.md:41 documents a sibling `scripts/shield_audit.sh` that does not exist anywhere in this skill's tree (only scripts/__init__.py and scripts/env_shielding_auditor.py are present) — that doc reference is stale, and this Python script is the actual instrument the named capability resolves to. A per-file entry is required in addition to any skill-directory resolution: `check_skill_scripts_invoked` in scripts/verify_references.py keys on the full script path (`str(script)`), not the directory. Sprint 052 U20."
+    },
+    {
+      "path": "skills/js-standardizer/scripts/js_standardizer.py",
+      "reason": "model-invoked",
+      "note": "agents.md §1 linter_command (JS/TS row) names this skill and precisely describes this exact script's behavior — 'checks for lint-tool config file presence and a single repo-wide boolean... any .js/.ts file anywhere contains \"@param\" or \"@returns\"' — matching `ecosystem` discovery and `check_jsdoc`/`_file_has_jsdoc` in js_standardizer.py line-for-line. SKILL.md:3 description ('Universal alignment for JS/TS projects (ESLint, Prettier, JSDoc) ensuring legal governance compliance.') directs the model to the same capability. The existing `skills/js-standardizer` directory-level exception above does not cover this file: `check_skill_scripts_invoked` in scripts/verify_references.py keys on the full script path (`str(script)`), not the directory, so this script needs its own entry. Sprint 052 U20."
     }
   ]
 }
