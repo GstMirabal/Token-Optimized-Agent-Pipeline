@@ -185,6 +185,48 @@ def _is_docstring_stmt(stmt: ast.stmt) -> bool:
     )
 
 
+def _scan_stmt(stmt: ast.stmt, depth: int, lines: set[int], depth_box: list[int]) -> None:
+    """Record one statement's own line(s)/depth into `lines`/`depth_box`.
+
+    Every statement's own depth counts (`D2` applies to any statement, not
+    only compound-statement headers) -- a simple `return` two levels inside
+    a single `if` is level 2, not level 1. A nested `FunctionDef`/
+    `AsyncFunctionDef`/`ClassDef` is a boundary: only its header line/depth
+    is recorded here, never its own body (measured as a separate unit). A
+    compound statement recurses into its child blocks via `_scan_stmts`.
+
+    Args:
+        stmt: The statement to record.
+        depth: `stmt`'s own ancestor-count level (`D2`).
+        lines: Executable-line accumulator, mutated in place.
+        depth_box: Single-element max-depth accumulator, mutated in place.
+    """
+    depth_box[0] = max(depth_box[0], depth)
+    if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+        lines.add(stmt.lineno)
+        return
+    if isinstance(stmt, _BLOCK_STMT_TYPES):
+        lines.add(stmt.lineno)
+        for child_list in _child_stmt_lists(stmt):
+            _scan_stmts(child_list, depth + 1, lines, depth_box)
+        return
+    end = getattr(stmt, "end_lineno", stmt.lineno) or stmt.lineno
+    lines.update(range(stmt.lineno, end + 1))
+
+
+def _scan_stmts(stmts: list[ast.stmt], depth: int, lines: set[int], depth_box: list[int]) -> None:
+    """Record every statement in `stmts` (all at ancestor level `depth`).
+
+    Args:
+        stmts: Statement list to record, one AST block level.
+        depth: Ancestor-count level shared by every statement in `stmts`.
+        lines: Executable-line accumulator, mutated in place.
+        depth_box: Single-element max-depth accumulator, mutated in place.
+    """
+    for stmt in stmts:
+        _scan_stmt(stmt, depth, lines, depth_box)
+
+
 def _measure_python_unit(func: ast.FunctionDef | ast.AsyncFunctionDef, body_depth: int) -> tuple[int, int]:
     """Executable-line count and max nesting depth for one function's own body.
 
@@ -199,26 +241,51 @@ def _measure_python_unit(func: ast.FunctionDef | ast.AsyncFunctionDef, body_dept
 
     lines: set[int] = set()
     depth_box = [body_depth]
-
-    def scan(stmts: list[ast.stmt], depth: int) -> None:
-        for stmt in stmts:
-            # Every statement's own depth counts (D2 applies to any statement,
-            # not only compound-statement headers) -- a simple `return` two
-            # levels inside a single `if` is level 2, not level 1.
-            depth_box[0] = max(depth_box[0], depth)
-            if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
-                lines.add(stmt.lineno)
-                continue
-            if isinstance(stmt, _BLOCK_STMT_TYPES):
-                lines.add(stmt.lineno)
-                for child_list in _child_stmt_lists(stmt):
-                    scan(child_list, depth + 1)
-                continue
-            end = getattr(stmt, "end_lineno", stmt.lineno) or stmt.lineno
-            lines.update(range(stmt.lineno, end + 1))
-
-    scan(body, body_depth)
+    _scan_stmts(body, body_depth, lines, depth_box)
     return len(lines), depth_box[0]
+
+
+def _record_python_unit(
+    stmt: ast.FunctionDef | ast.AsyncFunctionDef, depth: int, path: Path, out: list[Unit]
+) -> None:
+    """Measure one function/method `stmt`, append its `Unit` to `out`, and
+    recurse into its body (at `depth + 1`) for nested units.
+
+    Args:
+        stmt: The function/method definition to measure.
+        depth: `stmt`'s own ancestor-count level (`D2`).
+        path: Source file `stmt` was found in.
+        out: Unit register, appended to in place.
+    """
+    body_depth = depth + 1
+    executable_lines, max_depth = _measure_python_unit(stmt, body_depth)
+    out.append(
+        Unit(
+            path=path,
+            name=stmt.name,
+            lineno=stmt.lineno,
+            executable_lines=executable_lines,
+            max_depth=max_depth,
+            language="python",
+            status=_status(executable_lines, max_depth),
+        )
+    )
+    _discover_python_units(stmt.body, body_depth, path, out)
+
+
+def _discover_block_children(stmt: ast.stmt, depth: int, path: Path, out: list[Unit]) -> None:
+    """Recurse into every child statement list of a non-def compound `stmt`.
+
+    Args:
+        stmt: A block-introducing statement (`If`/`For`/`While`/... ) that is
+            not itself a function/method definition.
+        depth: `stmt`'s own ancestor-count level (`D2`); children are one
+            level deeper.
+        path: Source file `stmt` was found in.
+        out: Unit register, appended to in place.
+    """
+    for child_list in _child_stmt_lists(stmt):
+        _discover_python_units(child_list, depth + 1, path, out)
 
 
 def _discover_python_units(
@@ -227,23 +294,10 @@ def _discover_python_units(
     """Recursively find every function/method unit in `stmts` (`depth` ancestors deep)."""
     for stmt in stmts:
         if isinstance(stmt, _DEF_TYPES):
-            body_depth = depth + 1
-            executable_lines, max_depth = _measure_python_unit(stmt, body_depth)
-            out.append(
-                Unit(
-                    path=path,
-                    name=stmt.name,
-                    lineno=stmt.lineno,
-                    executable_lines=executable_lines,
-                    max_depth=max_depth,
-                    language="python",
-                    status=_status(executable_lines, max_depth),
-                )
-            )
-            _discover_python_units(stmt.body, body_depth, path, out)
-        elif isinstance(stmt, _BLOCK_STMT_TYPES):
-            for child_list in _child_stmt_lists(stmt):
-                _discover_python_units(child_list, depth + 1, path, out)
+            _record_python_unit(stmt, depth, path, out)
+            continue
+        if isinstance(stmt, _BLOCK_STMT_TYPES):
+            _discover_block_children(stmt, depth, path, out)
 
 
 def scan_python_file(path: Path) -> list[Unit]:
@@ -268,24 +322,44 @@ def scan_python_file(path: Path) -> list[Unit]:
 # --------------------------------------------------------------------------
 
 
+def _add_if_source_file(path: Path, all_suffixes: frozenset[str], found: set[Path]) -> None:
+    """Add `path` to `found` if its suffix is a scanned Python/JS/TS suffix.
+
+    Args:
+        path: Candidate file.
+        all_suffixes: Scanned suffixes (`PY_SUFFIXES | JS_SUFFIXES`).
+        found: Accumulator set, mutated in place.
+    """
+    if path.suffix.lower() in all_suffixes:
+        found.add(path)
+
+
+def _walk_directory(directory: Path, all_suffixes: frozenset[str], found: set[Path]) -> None:
+    """Add every non-excluded source file under `directory` (recursive).
+
+    Args:
+        directory: Directory to walk.
+        all_suffixes: Scanned suffixes (`PY_SUFFIXES | JS_SUFFIXES`).
+        found: Accumulator set, mutated in place.
+    """
+    for child in directory.rglob("*"):
+        if not child.is_file():
+            continue
+        if any(part in DEFAULT_EXCLUDE_DIRS for part in child.parts):
+            continue
+        _add_if_source_file(child, all_suffixes, found)
+
+
 def iter_source_files(paths: list[Path]) -> list[Path]:
     """Every Python/JS/TS file under `paths`, excluding `DEFAULT_EXCLUDE_DIRS`."""
     all_suffixes = PY_SUFFIXES | JS_SUFFIXES
     found: set[Path] = set()
     for given in paths:
         if given.is_file():
-            if given.suffix.lower() in all_suffixes:
-                found.add(given)
+            _add_if_source_file(given, all_suffixes, found)
             continue
-        if not given.is_dir():
-            continue
-        for child in given.rglob("*"):
-            if not child.is_file():
-                continue
-            if any(part in DEFAULT_EXCLUDE_DIRS for part in child.parts):
-                continue
-            if child.suffix.lower() in all_suffixes:
-                found.add(child)
+        if given.is_dir():
+            _walk_directory(given, all_suffixes, found)
     return sorted(found)
 
 
