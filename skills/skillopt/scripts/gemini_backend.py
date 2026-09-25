@@ -46,6 +46,54 @@ def _format_messages(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return contents
 
 
+def _is_retryable_gemini_error(err_str: str) -> bool:
+    """True if `err_str` indicates a Gemini rate-limit/quota error.
+
+    Args:
+        err_str: String representation of the raised exception.
+
+    Returns:
+        True when the error looks like a transient rate-limit condition.
+    """
+    return (
+        "429" in err_str
+        or "Quota exceeded" in err_str
+        or "limit" in err_str
+        or "ResourceExhausted" in err_str
+    )
+
+
+def _handle_gemini_retry_error(error: Exception, attempt: int, max_retries: int) -> None:
+    """Sleeps on a retryable Gemini error, or re-raises the original error.
+
+    Module-level (not inlined in `_call_gemini`) so this if/raise does not
+    stack a third nesting level on top of the caller's for/try.
+
+    Args:
+        error: The exception raised by the Gemini API call.
+        attempt: Zero-based index of the current retry attempt.
+        max_retries: Total number of retries configured for the caller.
+
+    Raises:
+        Exception: the original `error`, re-raised unchanged, when it is
+            not a retryable rate limit.
+    """
+    import time
+
+    err_str = str(error)
+    if not _is_retryable_gemini_error(err_str):
+        raise error
+    sleep_time = 62
+    logging.warning(
+        "Gemini API rate limit (429) hit. Retrying in %d seconds... (Attempt %d/%d). Error: %s",
+        sleep_time,
+        attempt + 1,
+        max_retries,
+        err_str
+    )
+    time.sleep(sleep_time)
+
+
 def _call_gemini(
     messages: list[dict[str, Any]],
     model_name: str,
@@ -61,12 +109,10 @@ def _call_gemini(
     Returns:
         A tuple of the response text and the token usage dict.
     """
-    import time
-    
     contents = _format_messages(messages)
     max_retries = 5
     response = None
-    
+
     for attempt in range(max_retries):
         try:
             model = genai.GenerativeModel(
@@ -79,19 +125,7 @@ def _call_gemini(
             )
             break
         except Exception as e:
-            err_str = str(e)
-            if "429" in err_str or "Quota exceeded" in err_str or "limit" in err_str or "ResourceExhausted" in err_str:
-                sleep_time = 62
-                logging.warning(
-                    "Gemini API rate limit (429) hit. Retrying in %d seconds... (Attempt %d/%d). Error: %s",
-                    sleep_time,
-                    attempt + 1,
-                    max_retries,
-                    err_str
-                )
-                time.sleep(sleep_time)
-            else:
-                raise e
+            _handle_gemini_retry_error(e, attempt, max_retries)
     else:
         raise Exception("Max retries exceeded for Gemini API call due to rate limits.")
 
