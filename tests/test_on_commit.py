@@ -605,3 +605,96 @@ def test_unquoted_form_does_not_flag_lookups_or_placeholders(filename, content):
 def test_quoted_dotenv_assignment_is_still_caught():
     assert on_commit.find_hardcoded_secret(
         f'API_KEY="{LIVE}"\n', Path(".env")) == "API_KEY"
+
+
+# --- D7 / ADR-0007: task_scope.md precondition on sprint commits ------------
+#
+# Sprint 051 ran all five of its phases in-session and produced task_scope.md
+# only at Closeout — this guard is the enforcement this reminder-only rule
+# lacked. `_current_branch` is mocked directly rather than built through a
+# real git checkout: the guard's own git call is one line and the fixture
+# under test is the file-scope logic around it.
+
+@pytest.fixture
+def sprint_repo(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    return tmp_path
+
+
+def _on_branch(monkeypatch, branch):
+    monkeypatch.setattr(on_commit, "_current_branch", lambda: branch)
+
+
+def test_refuses_outside_path_while_scope_absent(sprint_repo, monkeypatch):
+    _on_branch(monkeypatch, "ai-sprint/052")
+    reason = on_commit.audit_task_scope_precondition(
+        "feat(hooks): add guard #052", ["scripts/on_commit.py"])
+    assert reason is not None
+    assert "task_scope.md" in reason
+
+
+def test_passes_when_scope_exists_on_disk(sprint_repo, monkeypatch):
+    _on_branch(monkeypatch, "ai-sprint/052")
+    scope_dir = sprint_repo / "docs" / "sprints" / "052-core-pipeline"
+    scope_dir.mkdir(parents=True)
+    (scope_dir / "task_scope.md").write_text("# scope\n")
+    reason = on_commit.audit_task_scope_precondition(
+        "feat(hooks): add guard #052", ["scripts/on_commit.py"])
+    assert reason is None
+
+
+def test_passes_when_every_staged_path_is_inside_the_sprint_dir(
+        sprint_repo, monkeypatch):
+    _on_branch(monkeypatch, "ai-sprint/052")
+    staged = [
+        "docs/sprints/052-core-pipeline/IMPLEMENTATION_PLAN.md",
+        "docs/sprints/052-core-pipeline/SPRINT_LOG.md",
+    ]
+    reason = on_commit.audit_task_scope_precondition(
+        "docs(sprint): draft plan #052", staged)
+    assert reason is None
+
+
+def test_passes_on_a_non_sprint_branch(sprint_repo, monkeypatch):
+    _on_branch(monkeypatch, "main")
+    reason = on_commit.audit_task_scope_precondition(
+        "feat(hooks): add guard #052", ["scripts/on_commit.py"])
+    assert reason is None
+
+
+def test_passes_on_a_hotfix_branch(sprint_repo, monkeypatch):
+    _on_branch(monkeypatch, "hotfix/H003")
+    reason = on_commit.audit_task_scope_precondition(
+        "fix(hooks): patch #H003", ["scripts/on_commit.py"])
+    assert reason is None
+
+
+def test_passes_when_commit_id_differs_from_branch_id(sprint_repo, monkeypatch):
+    _on_branch(monkeypatch, "ai-sprint/052")
+    reason = on_commit.audit_task_scope_precondition(
+        "feat(hooks): add guard #051", ["scripts/on_commit.py"])
+    assert reason is None
+
+
+def test_staged_but_uncommitted_scope_counts_as_present(sprint_repo, monkeypatch):
+    _on_branch(monkeypatch, "ai-sprint/052")
+    staged = [
+        "scripts/on_commit.py",
+        "docs/sprints/052-core-pipeline/task_scope.md",
+    ]
+    reason = on_commit.audit_task_scope_precondition(
+        "feat(hooks): add guard #052", staged)
+    assert reason is None
+
+
+def test_zero_padding_is_reconciled_between_branch_and_directory(
+        sprint_repo, monkeypatch):
+    """`ai-sprint/052` vs a directory literally named `052-core-pipeline`,
+    matched by numeric value rather than string equality."""
+    _on_branch(monkeypatch, "ai-sprint/052")
+    scope_dir = sprint_repo / "docs" / "sprints" / "052-core-pipeline"
+    scope_dir.mkdir(parents=True)
+    (scope_dir / "task_scope.md").write_text("# scope\n")
+    reason = on_commit.audit_task_scope_precondition(
+        "feat(hooks): add guard #052", ["hooks/on_commit.py"])
+    assert reason is None
