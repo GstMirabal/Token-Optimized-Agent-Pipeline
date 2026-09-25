@@ -177,14 +177,30 @@ def test_sprint_scoped_paths_use_the_canonical_sprint_directory():
             )
 
 
+def _paths_not_ending_in_their_filename(artifacts: list[dict]) -> list[str]:
+    """List registry entries whose `host_path`/`nucleus_path` disagrees with `filename`.
+
+    Args:
+        artifacts: registry entries, each carrying `filename`, `host_path`
+            and `nucleus_path`.
+
+    Returns:
+        list[str]: `"<filename>.<field>"` for every populated path field that
+            does not end with the entry's own `filename`.
+    """
+    return [
+        f"{entry['filename']}.{field}"
+        for entry in artifacts
+        for field in ("host_path", "nucleus_path")
+        if entry[field] is not None and not entry[field].endswith(entry["filename"])
+    ]
+
+
 def test_a_path_ends_with_the_filename_it_declares():
     """A registry whose path and filename disagree would make one consumer look
     in the right place while another reports the wrong name."""
-    for entry in ARTIFACTS:
-        for field in ("host_path", "nucleus_path"):
-            if entry[field] is None:
-                continue
-            assert entry[field].endswith(entry["filename"])
+    mismatches = _paths_not_ending_in_their_filename(ARTIFACTS)
+    assert not mismatches, f"path does not end with declared filename: {mismatches}"
 
 
 def test_filenames_are_unique():
