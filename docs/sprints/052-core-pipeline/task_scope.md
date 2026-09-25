@@ -44,18 +44,18 @@ Status is `contingency`, not `⏳`, and rows are added under it only if triggere
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| U1 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| U1 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | low | `doc_orchestrator` | sonnet | medium | ✅ `97a34e3` |
 
 ### Wave 2 — Session and anchor defects
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| U2 | `scripts/session_start.py` (subject) + paired `tests/test_session_start.py` | fix( | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U3 | `scripts/session_state.py` (subject) + paired `tests/test_session_state.py` | fix( | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U4 | `scripts/session_state.py` (subject) + paired `tests/test_session_state.py` | feat( | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U5 | `scripts/session_start.py` (subject) + paired `tests/test_session_start.py` | fix( | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U6 | `workflows/start_workflow.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U7 | `commands/start.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| U2 | `scripts/session_start.py` (subject) + paired `tests/test_session_start.py` | fix( | medium | `implementer_agent` | sonnet | medium | ✅ `0622cb5` |
+| U3 | `scripts/session_state.py` (subject) + paired `tests/test_session_state.py` | fix( | low | `implementer_agent` | sonnet | medium | ✅ `7382890` |
+| U4 | `scripts/session_state.py` (subject) + paired `tests/test_session_state.py` | feat( | medium | `implementer_agent` | sonnet | medium | ✅ `3937194` |
+| U5 | `scripts/session_start.py` (subject) + paired `tests/test_session_start.py` | fix( | low | `implementer_agent` | sonnet | medium | ✅ `fb820f1` |
+| U6 | `workflows/start_workflow.md` | modify | low | `doc_orchestrator` | sonnet | medium | ✅ `aa03002` |
+| U7 | `commands/start.md` | modify | low | `doc_orchestrator` | sonnet | medium | ✅ `980fb3f` |
 
 `U6` carries an `RA-14` propagation obligation (grep `--takeover` across
 `workflows/` — `IMPLEMENTATION_PLAN.md` U6), owed at the unit's own commit, not
@@ -65,17 +65,20 @@ restated here.
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| U8 | `docs/decisions/ADR-0015-artifact-owner-writer-separation.md` | create | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U9 | `config/artifact_registry.json` (subject) + paired `tests/test_artifact_registry.py` | feat( | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U10 | `workflows/pipeline_workflow.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U11 | `scripts/check_role_artifact.py` (subject) + paired `tests/test_check_role_artifact.py` | fix( | high | `implementer_agent` | sonnet | medium | ⏳ |
-| U12 | `scripts/graph_reconcile.py` (subject) + paired `tests/test_graph_reconcile.py` | create | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U13 | `Makefile` | modify | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U14 | `docs/decisions/ADR-0016-test-database-isolation.md` | create | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U15 | `agents.md` | modify | medium | `rule_validator` | sonnet | medium | ⏳ |
-| U16 | `hooks/on_commit.py` (subject) + paired `tests/test_on_commit.py` | feat( | high | `implementer_agent` | sonnet | medium | ⏳ |
-| U17 | `agents/qa_agent.md` | modify | low | `rule_validator` | sonnet | medium | ⏳ |
-| U18 | `agents/tester_agent.md` | modify | low | `rule_validator` | sonnet | medium | ⏳ |
+| U8 | `docs/decisions/ADR-0015-artifact-owner-writer-separation.md` | create | low | `doc_orchestrator` | sonnet | medium | ✅ `b2eba19` |
+| U8a | `docs/decisions/ADR-0017-typed-artifact-writer.md` (subject) + `Superseded by` annotation in ADR-0015 | create | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| U9 | `config/artifact_registry.json` (subject) + paired `tests/test_artifact_registry.py` | feat( | medium | `implementer_agent` | sonnet | medium | ✅ `0a55351` |
+| U10 | `workflows/pipeline_workflow.md` | modify | low | `doc_orchestrator` | sonnet | medium | ✅ `c35c634` |
+| U11 | `scripts/check_role_artifact.py` (subject) + paired `tests/test_check_role_artifact.py` | fix( | high | `implementer_agent` | sonnet | medium | ✅ `11933ce` |
+| U12 | `scripts/graph_reconcile.py` (subject) + paired `tests/test_graph_reconcile.py` | create | medium | `implementer_agent` | sonnet | medium | ✅ `a830894` |
+| U13 | `Makefile` | modify | low | `implementer_agent` | sonnet | medium | ✅ `e59795a` |
+| U14 | `docs/decisions/ADR-0016-test-database-isolation.md` | create | low | `doc_orchestrator` | sonnet | medium | ✅ `30a14db` |
+| U15 | `agents.md` | modify | medium | `rule_validator` | sonnet | medium | ✅ `bbd8d0c` |
+| U16 | `hooks/on_commit.py` (subject) + paired `tests/test_on_commit.py` | feat( | high | `implementer_agent` | sonnet | medium | ✅ `3c217ed` |
+| U17 | `agents/qa_agent.md` | modify | low | `rule_validator` | sonnet | medium | ✅ `56d11c8` |
+| U18 | `agents/tester_agent.md` | modify | low | `rule_validator` | sonnet | medium | ✅ `700913a` |
+
+`U8a` was **added during Phase 6**, not planned. `U9` found that ADR-0015's "`writer` is always a Write-holding profile" is false for artifacts a script or Makefile target materializes (`active_state.json`, `mirror.json`, `graph.json`), and shipped a typed `writer` (`0a55351`). `rules/documentation_standard.md:50` makes an accepted ADR immutable, so the changed decision gets a superseding ADR.
 
 `U10` carries an `RA-14` obligation (grep `principal_agent` authorship claims
 across `pipeline_workflow.md`), owed at its own commit.
