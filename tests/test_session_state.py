@@ -212,6 +212,106 @@ def test_set_topology_refuses_without_current_sprint(repo: Path, capsys: pytest.
     assert "current_sprint" in capsys.readouterr().err
 
 
+# --- claim: entry-point-aware refusal message (S052-2) ---------------------
+
+def _write_locked_anchor(root: Path) -> None:
+    """An anchor already IN_PROGRESS under a different session, so a
+    same-process `claim()` call is refused (the collision this guard
+    exists to prevent)."""
+    state = {
+        "session_id": "other-session",
+        "status": ss.IN_PROGRESS,
+        "current_sprint": {"id": 52, "status": "IN_PROGRESS"},
+    }
+    (root / "docs" / "active_state.json").write_text(json.dumps(state), encoding="utf-8")
+
+
+def test_retry_hint_for_boot_entry_point():
+    assert ss.retry_hint("boot") == "python3 scripts/session_start.py --boot --takeover"
+
+
+def test_retry_hint_for_claim_entry_point():
+    assert ss.retry_hint("claim") == "python3 scripts/session_state.py claim --takeover"
+
+
+def test_retry_hint_defaults_to_claim_wording_for_unknown_values():
+    assert ss.retry_hint("anything-else") == "python3 scripts/session_state.py claim --takeover"
+
+
+def test_claim_refusal_names_boot_invocation_when_entry_point_is_boot(
+    repo: Path, capsys: pytest.CaptureFixture
+):
+    _write_locked_anchor(repo)
+
+    rc = ss.claim("me", False, "terminal", entry_point="boot")
+
+    assert rc == 2
+    err = capsys.readouterr().err
+    assert "python3 scripts/session_start.py --boot --takeover" in err
+    assert "session_state.py claim --takeover" not in err
+
+
+def test_claim_refusal_names_claim_invocation_by_default(
+    repo: Path, capsys: pytest.CaptureFixture
+):
+    _write_locked_anchor(repo)
+
+    rc = ss.claim("me", False, "terminal")
+
+    assert rc == 2
+    err = capsys.readouterr().err
+    assert "python3 scripts/session_state.py claim --takeover" in err
+    assert "session_start.py --boot" not in err
+
+
+def test_claim_refusal_names_claim_invocation_when_entry_point_is_claim(
+    repo: Path, capsys: pytest.CaptureFixture
+):
+    _write_locked_anchor(repo)
+
+    rc = ss.claim("me", False, "terminal", entry_point="claim")
+
+    assert rc == 2
+    err = capsys.readouterr().err
+    assert "python3 scripts/session_state.py claim --takeover" in err
+
+
+def test_claim_succeeds_with_takeover_regardless_of_entry_point(repo: Path):
+    _write_locked_anchor(repo)
+
+    rc = ss.claim("me", True, "terminal", entry_point="boot")
+
+    assert rc == 0
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert state["session_id"] == "me"
+    assert state["status"] == ss.IN_PROGRESS
+
+
+def test_main_claim_passes_entry_point_boot_into_refusal_message(
+    repo: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
+):
+    _write_locked_anchor(repo)
+    monkeypatch.setattr(
+        sys, "argv",
+        ["session_state.py", "claim", "--session-id", "me", "--entry-point", "boot"],
+    )
+
+    assert ss.main() == 2
+    assert "session_start.py --boot --takeover" in capsys.readouterr().err
+
+
+def test_main_claim_defaults_entry_point_to_claim(
+    repo: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
+):
+    _write_locked_anchor(repo)
+    monkeypatch.setattr(
+        sys, "argv", ["session_state.py", "claim", "--session-id", "me"],
+    )
+
+    assert ss.main() == 2
+    assert "session_state.py claim --takeover" in capsys.readouterr().err
+
+
 # --- CLI wiring --------------------------------------------------------------
 
 def test_main_dispatches_set_topology(repo: Path, monkeypatch: pytest.MonkeyPatch):

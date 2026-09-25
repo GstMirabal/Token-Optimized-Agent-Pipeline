@@ -29,9 +29,13 @@ and `deployment_workflow.md` Phase 4 runs it as its own dedicated step
 Usage:
     python3 scripts/session_state.py claim [--session-id <uid>] [--takeover]
         [--tool claude-code|cursor|terminal] [--delegation-mode native|sequential]
+        [--entry-point boot|claim]
         # --session-id is generated (see generate_session_id()) when the
         # harness exposes none, e.g. Cursor.
         # --delegation-mode defaults: cursor→sequential, others→native.
+        # --entry-point (default claim) words the refusal message's retry
+        # hint for the caller that issued this claim: session_start.py
+        # --boot passes --entry-point boot (S052-2).
     python3 scripts/session_state.py release   # seals the SPRINT (sprint-branch tip)
     python3 scripts/session_state.py suspend   # ends the SESSION only
     python3 scripts/session_state.py require-released [--branch <ref>]
@@ -172,7 +176,29 @@ def suspend() -> int:
     return 0
 
 
-def claim(session_id: str | None, takeover: bool, tool: str, delegation_mode: str | None = None) -> int:
+def retry_hint(entry_point: str) -> str:
+    """The re-run invocation valid for the entry point that issued a claim.
+
+    Args:
+        entry_point: `"boot"` when `session_start.py --boot` issued the
+            claim, `"claim"` when `session_state.py claim` was invoked
+            directly.
+
+    Returns:
+        str: the exact command line to re-run with `--takeover`.
+    """
+    if entry_point == "boot":
+        return "python3 scripts/session_start.py --boot --takeover"
+    return "python3 scripts/session_state.py claim --takeover"
+
+
+def claim(
+    session_id: str | None,
+    takeover: bool,
+    tool: str,
+    delegation_mode: str | None = None,
+    entry_point: str = "claim",
+) -> int:
     """Record this session as the holder of the lock.
 
     Args:
@@ -187,6 +213,12 @@ def claim(session_id: str | None, takeover: bool, tool: str, delegation_mode: st
         delegation_mode: Execution mode — `native` (8 roles) or `sequential`
             (manual). When None, derived from tool: `cursor` → `sequential`,
             others → `native`.
+        entry_point: Which caller issued this claim — `"boot"` for
+            `session_start.py --boot`, or `"claim"` for a direct invocation
+            of `session_state.py claim` (the default). Used only to word the
+            refusal message's retry hint with the invocation valid for that
+            caller (S052-2): `session_start.py --boot --takeover` for boot,
+            `session_state.py claim --takeover` otherwise.
 
     Returns:
         int: 0 when claimed, 2 when another live session holds the lock.
@@ -203,7 +235,7 @@ def claim(session_id: str | None, takeover: bool, tool: str, delegation_mode: st
         # of them is safe to overwrite. The human decides which this is.
         print(
             f"❌ Session lock held by {holder}, still IN_PROGRESS.\n"
-            f"   If that session crashed, re-run with --takeover.\n"
+            f"   If that session crashed, re-run with `{retry_hint(entry_point)}`.\n"
             f"   If it is still running, do not: two sessions writing one anchor "
             f"is the collision this guard exists to prevent.",
             file=sys.stderr,
@@ -454,6 +486,13 @@ def main() -> int:
         help="Execution mode (native: 8 roles; sequential: manual). "
              "If omitted, derived from --tool: cursor→sequential, others→native.",
     )
+    claim_parser.add_argument(
+        "--entry-point", choices=["boot", "claim"], default="claim",
+        help="Caller issuing this claim, used only to word the refusal "
+             "message's retry hint (S052-2): `boot` for "
+             "`session_start.py --boot`, `claim` (default) for a direct "
+             "invocation of this command.",
+    )
     sub.add_parser("release", help="Seal the SPRINT at close.")
     sub.add_parser("suspend", help="End the SESSION with the sprint still open.")
     require_parser = sub.add_parser(
@@ -481,7 +520,10 @@ def main() -> int:
 
     args = parser.parse_args()
     if args.command == "claim":
-        return claim(args.session_id, args.takeover, args.tool, args.delegation_mode)
+        return claim(
+            args.session_id, args.takeover, args.tool, args.delegation_mode,
+            args.entry_point,
+        )
     if args.command == "suspend":
         return suspend()
     if args.command == "require-released":
