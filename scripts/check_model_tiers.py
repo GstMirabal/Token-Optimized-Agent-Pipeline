@@ -56,6 +56,33 @@ def declared() -> dict[str, dict[str, str]]:
     return found
 
 
+def _profile_mismatches(name: str, fields: dict[str, str] | None, tier: str,
+                        expected: str) -> list[str]:
+    """Compare one profile's declared fields against one tier's expectations.
+
+    Args:
+        name: Profile stem (filename without extension).
+        fields: The profile's declared `{"model": ..., "tier": ...}`, or
+            `None` if the map names a profile that does not exist.
+        tier: The tier name the map claims this profile belongs to.
+        expected: The model alias that tier maps to.
+
+    Returns:
+        Human-readable problem strings, empty if the profile agrees.
+    """
+    problems = []
+    if fields is None:
+        problems.append(f"{name}: named in tier `{tier}` but no such profile exists")
+        return problems
+    if fields.get("tier") != tier:
+        problems.append(f"{name}: declares tier `{fields.get('tier', '<none>')}`, "
+                        f"map says `{tier}`")
+    if fields.get("model") != expected:
+        problems.append(f"{name}: declares model `{fields.get('model', '<none>')}`, "
+                        f"tier `{tier}` maps to `{expected}`")
+    return problems
+
+
 def check_agreement(tiers: dict, profiles: dict[str, dict[str, str]]) -> list[str]:
     """Every profile the map claims must declare that tier and that model."""
     problems = []
@@ -63,15 +90,7 @@ def check_agreement(tiers: dict, profiles: dict[str, dict[str, str]]) -> list[st
         expected = spec["claude_code"]["model"]
         for name in spec.get("profiles", []):
             fields = profiles.get(name)
-            if fields is None:
-                problems.append(f"{name}: named in tier `{tier}` but no such profile exists")
-                continue
-            if fields.get("tier") != tier:
-                problems.append(f"{name}: declares tier `{fields.get('tier', '<none>')}`, "
-                                f"map says `{tier}`")
-            if fields.get("model") != expected:
-                problems.append(f"{name}: declares model `{fields.get('model', '<none>')}`, "
-                                f"tier `{tier}` maps to `{expected}`")
+            problems.extend(_profile_mismatches(name, fields, tier, expected))
     mapped = {n for spec in tiers.get("tiers", {}).values() for n in spec.get("profiles", [])}
     for name, fields in profiles.items():
         if name not in mapped and (fields.get("tier") or fields.get("model")):
