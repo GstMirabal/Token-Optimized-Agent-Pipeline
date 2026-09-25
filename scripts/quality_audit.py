@@ -60,15 +60,28 @@ exclusions the Implementation Plan's own measurement commands use.
 Compliance figure: `compliant_units / total_units`, with `unparsed` and
 `not_measured` units counted separately and never counted as compliant.
 
+## Exclusions (Sprint 052 `D1`)
+
+`config/quality_audit_exclusions.json` (schema: `_doc`, `exclusions: [{path,
+reason, provenance}]`) names files this scan skips entirely -- their
+violations never enter the register or the exit-code decision. An absent
+file means no exclusions, not an error. An entry whose `path` no longer
+exists under the audited root is a stale exemption and exits `2` (same
+shape as `RA-16`'s stale-exception check, `scripts/verify_references.py`
+check (d)); so does a malformed file. `--report` lists excluded files
+separately (count + paths) so an exclusion is never silent.
+
 Exit codes:
     0 -- no violation (or any run under `--report`)
-    2 -- at least one function-length or nesting-depth violation
+    2 -- at least one function-length or nesting-depth violation, or an
+         exclusion-file error (stale entry, malformed file)
 """
 
 from __future__ import annotations
 
 import argparse
 import ast
+import json
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -79,6 +92,14 @@ MAX_NESTING_DEPTH = 3
 DEFAULT_EXCLUDE_DIRS = frozenset({"venv_skillopt", "node_modules", ".git"})
 PY_SUFFIXES = frozenset({".py"})
 JS_SUFFIXES = frozenset({".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"})
+
+DEFAULT_EXCLUSIONS_RELPATH = Path("config/quality_audit_exclusions.json")
+_REQUIRED_EXCLUSION_KEYS = ("path", "reason", "provenance")
+
+
+class ExclusionError(Exception):
+    """Malformed `quality_audit_exclusions.json`, or an entry whose `path`
+    no longer exists (stale exemption -- `D1`)."""
 
 
 @dataclass
@@ -284,13 +305,85 @@ def _not_measured_unit(path: Path) -> Unit:
     return Unit(path, "<file>", 1, 0, 0, "js", "not_measured", NOT_MEASURED_REASON)
 
 
-def audit(paths: list[Path]) -> list[Unit]:
+def _validate_exclusion_entry(entry: object, exclusions_path: Path, root: Path) -> Path:
+    """One exclusion entry -> its resolved, existing path.
+
+    Args:
+        entry: One element of the `exclusions` list.
+        exclusions_path: File the entry came from, for error messages.
+        root: Directory the entry's `path` is resolved against (`D1`).
+
+    Returns:
+        Path: the resolved, existing excluded file.
+
+    Raises:
+        ExclusionError: a required key is missing, or the resolved path does
+            not exist (stale exemption).
+    """
+    if not isinstance(entry, dict) or any(k not in entry for k in _REQUIRED_EXCLUSION_KEYS):
+        raise ExclusionError(
+            f"{exclusions_path}: entry {entry!r} missing one of "
+            f"{_REQUIRED_EXCLUSION_KEYS} -- malformed exclusion."
+        )
+    resolved = (root / str(entry["path"])).resolve()
+    if not resolved.exists():
+        raise ExclusionError(
+            f"{exclusions_path}: '{entry['path']}' does not exist -- stale exemption."
+        )
+    return resolved
+
+
+def load_exclusions(exclusions_path: Path, root: Path) -> frozenset[Path]:
+    """Load and validate `config/quality_audit_exclusions.json` (`D1`).
+
+    Args:
+        exclusions_path: Path to the exclusion-list file. An absent file
+            means no exclusions -- not an error.
+        root: Directory each entry's `path` is resolved against (the
+            audited root).
+
+    Returns:
+        frozenset[Path]: resolved, existing files the scan must skip.
+
+    Raises:
+        ExclusionError: the file is malformed (bad JSON, or an entry
+            missing `path`/`reason`/`provenance`), or an entry's `path`
+            does not exist under `root` (stale exemption).
+    """
+    if not exclusions_path.exists():
+        return frozenset()
+    try:
+        entries = json.loads(exclusions_path.read_text(encoding="utf-8"))["exclusions"]
+        return frozenset(
+            _validate_exclusion_entry(entry, exclusions_path, root) for entry in entries
+        )
+    except (OSError, json.JSONDecodeError, KeyError, TypeError) as exc:
+        raise ExclusionError(
+            f"{exclusions_path}: malformed exclusion file -- {exc}"
+        ) from exc
+
+
+def _excluded_files(paths: list[Path], exclude: frozenset[Path]) -> list[Path]:
+    """Discovered files skipped by `exclude`, sorted for a stable `--report`.
+
+    Kept separate from the unit register so an exclusion is never silent
+    (`D1`) -- `--report` lists these files distinctly from PASS/FAIL/
+    unparsed units.
+    """
+    return sorted(p for p in iter_source_files(paths) if p.resolve() in exclude)
+
+
+def audit(paths: list[Path], exclude: frozenset[Path] = frozenset()) -> list[Unit]:
     """Scan `paths`: every Python function/method is measured; every JS/TS
     file is discovered but reported `not_measured` (the JS/TS scanner was
-    withdrawn -- Sprint 050 `AB1`), never silently dropped.
+    withdrawn -- Sprint 050 `AB1`), never silently dropped. Files resolved
+    in `exclude` are skipped entirely: their violations never enter the
+    register or the exit-code decision (`D1`).
     """
     units: list[Unit] = []
     for file_path in iter_source_files(paths):
+        if file_path.resolve() in exclude:
+            continue
         if file_path.suffix.lower() in PY_SUFFIXES:
             units.extend(scan_python_file(file_path))
         else:
@@ -319,8 +412,11 @@ def _format_unit_line(u: Unit) -> str:
     return f"{u.status}  {location}  {u.name}  lines={u.executable_lines} depth={u.max_depth}"
 
 
-def format_report(units: list[Unit]) -> str:
-    """Full register: one line per unit, plus the compliance figure."""
+def format_report(units: list[Unit], excluded: list[Path] | None = None) -> str:
+    """Full register: one line per unit, the compliance figure, and --
+    listed separately so an exclusion is never silent (`D1`) -- the
+    excluded files."""
+    excluded = excluded if excluded is not None else []
     lines: list[str] = [_format_unit_line(u) for u in units]
     compliant, measured, unparsed = compliance_figure(units)
     pct = (compliant / measured * 100) if measured else 0.0
@@ -329,6 +425,8 @@ def format_report(units: list[Unit]) -> str:
         f"Compliant units: {compliant}/{measured} ({pct:.1f}%); "
         f"unparsed: {unparsed}; total scanned: {len(units)}"
     )
+    lines.append(f"Excluded files: {len(excluded)}")
+    lines.extend(f"  {p}" for p in excluded)
     return "\n".join(lines)
 
 
@@ -340,13 +438,27 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--report", action="store_true", help="Print the full register and exit 0 regardless"
     )
+    parser.add_argument(
+        "--exclusions",
+        type=Path,
+        default=None,
+        help="Exclusion-list file (default: <root>/config/quality_audit_exclusions.json)",
+    )
     args = parser.parse_args(argv)
     targets = args.paths or [Path(".")]
+    root = Path(".")
+    exclusions_path = args.exclusions or (root / DEFAULT_EXCLUSIONS_RELPATH)
 
-    units = audit(targets)
+    try:
+        exclude = load_exclusions(exclusions_path, root)
+    except ExclusionError as exc:
+        print(f"quality_audit: {exc}", file=sys.stderr)
+        return 2
+
+    units = audit(targets, exclude)
 
     if args.report:
-        print(format_report(units))
+        print(format_report(units, _excluded_files(targets, exclude)))
         return 0
 
     violations = [u for u in units if u.status == "FAIL"]
