@@ -240,6 +240,29 @@ def run_case(root: Path, case: dict, scratch: Path) -> str | None:
     return f"{case['id']}: {' '.join(case['command'][1:])} exited {result.returncode} — {tail}"
 
 
+def _run_cases(root: Path, spec: dict, scratch: Path, unsafe_scratch: list[str]) -> list[str]:
+    """Run every declared case against the scratch tree.
+
+    Args:
+        root: Framework root.
+        spec: The parsed pairing declaration.
+        scratch: Temporary directory each case renders its scratch sprint into.
+        unsafe_scratch: Findings from `check_scratch_name`; a non-empty list
+            means the declared scratch directory name is unsafe, so no case
+            is run against it.
+
+    Returns:
+        A finding per case whose command failed, empty when all passed.
+    """
+    findings = []
+    for case in spec["cases"] if not unsafe_scratch else []:
+        case = {**case, "scratch_sprint_dir": spec["scratch_sprint_dir"]}
+        finding = run_case(root, case, scratch)
+        if finding:
+            findings.append(finding)
+    return findings
+
+
 def check(root: Path, config: Path) -> int:
     """Run every declared case plus the completeness rule.
 
@@ -256,11 +279,7 @@ def check(root: Path, config: Path) -> int:
     findings += unsafe_scratch
     with tempfile.TemporaryDirectory() as tmp:
         scratch = Path(tmp)
-        for case in spec["cases"] if not unsafe_scratch else []:
-            case = {**case, "scratch_sprint_dir": spec["scratch_sprint_dir"]}
-            finding = run_case(root, case, scratch)
-            if finding:
-                findings.append(finding)
+        findings += _run_cases(root, spec, scratch, unsafe_scratch)
     if findings:
         print(f"❌ check_template_gates: {len(findings)} finding(s)", file=sys.stderr)
         for item in findings:
