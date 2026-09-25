@@ -414,6 +414,23 @@ def enumerate_commits(commits: list[str], stream: TextIO) -> None:
         print(f"   … and {len(commits) - 20} more", file=stream)
 
 
+def _tag_ancestors_any(tag: str, shas: list[str]) -> bool:
+    """Check whether ``tag`` descends from at least one commit in ``shas``.
+
+    Args:
+        tag: Candidate sealing tag.
+        shas: Commit SHAs from the drift range.
+
+    Returns:
+        bool: True if any ``sha`` is an ancestor of ``tag``.
+    """
+    for sha in shas:
+        # merge-base --is-ancestor exits 0 when sha is ancestor of tag.
+        if git("merge-base", "--is-ancestor", sha, tag) is not None:
+            return True
+    return False
+
+
 def covering_tags(every: list[str], tags: list[str]) -> list[str]:
     """Sealing tags that contain at least one commit from the drift range.
 
@@ -430,14 +447,7 @@ def covering_tags(every: list[str], tags: list[str]) -> list[str]:
         list[str]: Covering tags in catalogue order; empty if none match.
     """
     shas = [line.split()[0] for line in every if line.strip()]
-    covering: list[str] = []
-    for tag in tags:
-        for sha in shas:
-            # merge-base --is-ancestor exits 0 when sha is ancestor of tag.
-            if git("merge-base", "--is-ancestor", sha, tag) is not None:
-                covering.append(tag)
-                break
-    return covering
+    return [tag for tag in tags if _tag_ancestors_any(tag, shas)]
 
 
 def report_sealed(every: list[str], tags: list[str]) -> int:
