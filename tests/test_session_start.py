@@ -200,7 +200,10 @@ def test_boot_claims_when_drift_is_clean(
     monkeypatch.setattr(session_start, "_commands_body_stale", lambda *a, **k: False)
 
     assert session_start.main(["--boot", "--tool", "cursor"]) == 0
-    assert ("scripts/session_state.py", ("claim", "--tool", "cursor")) in calls
+    assert (
+        "scripts/session_state.py",
+        ("claim", "--tool", "cursor", "--entry-point", "boot"),
+    ) in calls
 
 
 def test_boot_lock_only_when_commands_fresh(
@@ -506,7 +509,82 @@ def test_tool_defaults_to_terminal_not_an_ide(
     )
 
     assert session_start.main(["--boot"]) == 0
-    assert ("scripts/session_state.py", ("claim", "--tool", "terminal")) in calls
+    assert (
+        "scripts/session_state.py",
+        ("claim", "--tool", "terminal", "--entry-point", "boot"),
+    ) in calls
+
+
+def test_claim_args_defaults_omit_only_session_id_and_takeover(
+    session_start,
+) -> None:
+    """S052-1/S052-2 (D10): omitting --session-id/--takeover leaves the rest
+    of the boot claim invocation unchanged; --entry-point boot is always
+    forwarded from the boot path so the refusal message names --boot
+    (`session_state.py` `retry_hint`).
+    """
+    assert session_start._claim_args("cursor", None, False) == [
+        "claim", "--tool", "cursor", "--entry-point", "boot",
+    ]
+
+
+def test_repeat_boot_with_same_session_id_reclaims_instead_of_refusing(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """S052-1: --boot must forward --session-id, so a second boot in the same
+    session re-claims (exit 0) instead of minting a fresh UID and refusing
+    itself against its own prior claim.
+    """
+    root = _write_minimal_root(tmp_path / "repo")
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    holder: dict[str, str | None] = {"session_id": None}
+    seen_session_ids: list[str | None] = []
+
+    def mock_run_script(
+        root_path: Path, relative: str, *args: str, cwd: Path | None = None
+    ) -> int:
+        if relative != "scripts/session_state.py":
+            return 0
+        session_id = (
+            args[args.index("--session-id") + 1]
+            if "--session-id" in args
+            else None
+        )
+        seen_session_ids.append(session_id)
+        if holder["session_id"] in (None, session_id):
+            holder["session_id"] = session_id
+            return 0
+        return 2
+
+    monkeypatch.setattr(session_start, "_run_script", mock_run_script)
+    assert session_start.main(["--boot", "--session-id", "SAME-UID"]) == 0
+    assert session_start.main(["--boot", "--session-id", "SAME-UID"]) == 0
+    assert seen_session_ids == ["SAME-UID", "SAME-UID"]
+
+
+def test_boot_takeover_flag_parses_and_forwards_to_claim(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """S052-2: session_start.py must accept --takeover (the flag the claim
+    refusal message recommends) and forward it to `session_state.py claim`.
+    """
+    root = _write_minimal_root(tmp_path / "repo")
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    calls: list[tuple[str, tuple[str, ...]]] = []
+    monkeypatch.setattr(
+        session_start,
+        "_run_script",
+        lambda root_path, relative, *args, **kwargs: calls.append(
+            (relative, args)
+        )
+        or 0,
+    )
+
+    assert session_start.main(["--boot", "--takeover"]) == 0
+    assert (
+        "scripts/session_state.py",
+        ("claim", "--tool", "terminal", "--entry-point", "boot", "--takeover"),
+    ) in calls
 
 
 def test_cursor_tiers_section_is_for_cursor_sessions_only(

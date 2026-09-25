@@ -449,8 +449,51 @@ def _bridge_triage(root: Path, target: str | None) -> tuple[int, list[str]]:
     return 0, []
 
 
-def run_boot(root: Path, tool: str) -> int:
-    """Execute binding steps; return 2 on hard stop, else 0 after briefing."""
+def _claim_args(tool: str, session_id: str | None, takeover: bool) -> list[str]:
+    """Build the argument list forwarded to ``session_state.py claim``.
+
+    Always used from the boot path, so ``--entry-point boot`` is forwarded
+    unconditionally: it words the refusal message's retry hint as
+    ``session_start.py --boot --takeover`` rather than the direct-``claim``
+    form (S052-2, `session_state.py` `retry_hint`).
+
+    Args:
+        tool: Harness claiming the lock (``--tool``).
+        session_id: UID to claim with, or ``None`` to let ``claim`` mint one
+            (unchanged default behaviour, S052-1).
+        takeover: Whether to forward ``--takeover`` (S052-2).
+
+    Returns:
+        list[str]: Positional/flag arguments after the script path, starting
+        with the ``claim`` subcommand.
+    """
+    args = ["claim", "--tool", tool, "--entry-point", "boot"]
+    if session_id is not None:
+        args.extend(["--session-id", session_id])
+    if takeover:
+        args.append("--takeover")
+    return args
+
+
+def run_boot(
+    root: Path,
+    tool: str,
+    session_id: str | None = None,
+    takeover: bool = False,
+) -> int:
+    """Execute binding steps; return 2 on hard stop, else 0 after briefing.
+
+    Args:
+        root: The ``.agents`` checkout (``repo_root()``).
+        tool: Harness for claim/bridge (``--tool``).
+        session_id: UID forwarded to ``claim --session-id`` so a second boot
+            in the same session re-claims instead of refusing (S052-1). Omit
+            to keep today's behaviour (a UID is minted by ``claim``).
+        takeover: Forwarded to ``claim --takeover`` (S052-2).
+
+    Returns:
+        int: 0 on success (including advisory notes), 2 on hard stop.
+    """
     anchor_cwd = _anchor_cwd(root)
     drift_rc = _run_script(root, "scripts/detect_drift.py", cwd=anchor_cwd)
     if drift_rc == 2:
@@ -461,7 +504,10 @@ def run_boot(root: Path, tool: str) -> int:
         return 2
 
     claim_rc = _run_script(
-        root, "scripts/session_state.py", "claim", "--tool", tool, cwd=anchor_cwd
+        root,
+        "scripts/session_state.py",
+        *_claim_args(tool, session_id, takeover),
+        cwd=anchor_cwd,
     )
     if claim_rc == 2:
         print("boot: claim refused (exit 2).", file=sys.stderr)
@@ -505,10 +551,23 @@ def main(argv: list[str] | None = None) -> int:
              "matching session_state.py; naming an IDE here claims the anchor "
              "as that IDE).",
     )
+    parser.add_argument(
+        "--session-id",
+        required=False,
+        default=None,
+        help="UID forwarded to `session_state.py claim --session-id` when "
+             "--boot (S052-1). Omit to keep the minted-UID default.",
+    )
+    parser.add_argument(
+        "--takeover",
+        action="store_true",
+        help="Forwarded to `session_state.py claim --takeover` when --boot "
+             "(S052-2): the flag the refusal message recommends.",
+    )
     args = parser.parse_args(argv)
     root = repo_root()
     if args.boot:
-        return run_boot(root, args.tool)
+        return run_boot(root, args.tool, args.session_id, args.takeover)
     briefing = apply_line_cap(build_briefing(root))
     sys.stdout.write("\n".join(briefing) + "\n")
     return 0
