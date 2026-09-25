@@ -157,38 +157,33 @@ def section_upstream(root: Path) -> list[str]:
         lines.append(f"unreadable: {exc}")
         return lines
     file_lines = text.count("\n") + (0 if text.endswith("\n") or not text else 1)
-    open_rows = _still_open_rows_from_latest_status(text)
+    open_entries = _open_entry_count(text)
     lines.append(f"file lines: {file_lines} — do not load full UPSTREAM at start")
-    lines.append(f"| **Still open** | rows (non-empty): {open_rows}")
+    lines.append(f"open entries (### - [ ]): {open_entries}")
     return lines
 
 
-_STATUS_SPRINT = re.compile(r"^\*\*Status at Sprint (\d+)\b", re.MULTILINE)
+_OPEN_ENTRY = re.compile(r"^### - \[ \]", re.MULTILINE)
 
 
-def _still_open_rows_from_latest_status(text: str) -> int:
-    """Count Still-open rows in the Status table with the highest sprint id.
+def _open_entry_count(text: str) -> int:
+    r"""Count open findings by their canonical per-entry marker.
 
-    Historical Status snapshots keep closed findings visible; summing them
-    inflates the /start briefing (Sprint 038 M1). No Status table → 0.
+    ``### - [ ]`` opens a finding's heading; ``### - [x]`` closes one. The
+    prior counter summed ``| **Still open**`` table rows from the Status
+    table with the highest sprint id — a snapshot that names several
+    findings in one row, so Sprint 051 left it reporting `1` against `6`
+    open entries (S052-3). Counting the heading marker directly matches
+    ``grep -c '^### - \[ \]'``, the reproduce command this defect was filed
+    against, and needs no Status table at all.
+
+    Args:
+        text: Full contents of UPSTREAM_FINDINGS_FROM_HOSTS.md.
+
+    Returns:
+        int: Number of lines matching ``^### - \[ \]``.
     """
-    matches = list(_STATUS_SPRINT.finditer(text))
-    if not matches:
-        return 0
-    best_i = max(range(len(matches)), key=lambda i: int(matches[i].group(1)))
-    start = matches[best_i].end()
-    end = matches[best_i + 1].start() if best_i + 1 < len(matches) else len(text)
-    span = text[start:end]
-    open_rows = 0
-    for raw in span.splitlines():
-        if "| **Still open" not in raw:
-            continue
-        cells = [c.strip() for c in raw.split("|")]
-        value = cells[2] if len(cells) >= 3 else ""
-        if not value or "*(none" in value.lower():
-            continue
-        open_rows += 1
-    return open_rows
+    return len(_OPEN_ENTRY.findall(text))
 
 
 def section_chat_vs_map(root: Path) -> list[str]:
