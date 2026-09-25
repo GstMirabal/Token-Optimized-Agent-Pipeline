@@ -46,12 +46,18 @@ Usage:
         # writes topology_version as X.Y.Z-NNN-<status>, derived from the
         # newest sealed `## [X.Y.Z]` section of CHANGELOG.md plus
         # current_sprint.id/current_sprint.status (Sprint 050 `D7`)
+    python3 scripts/session_state.py open-sprint --id <N>
+        # writes current_sprint.{id: N, status: OPEN}, preserving layer/app/
+        # last_audit_sprint and any other current_sprint keys; idempotent
+        # when current_sprint.id already equals N; refuses (exit 2) while
+        # current_sprint.status is IN_PROGRESS for a different id (S052-4)
 
 Exit codes:
     0 — lock claimed or released, deploy preflight passed, baseline refreshed,
-        or topology_version written
-    2 — a different session holds the lock, deploy refused, or set-topology
-        cannot derive a value (RA-11: only 2 blocks)
+        topology_version written, or a sprint opened (or already open)
+    2 — a different session holds the lock, deploy refused, set-topology
+        cannot derive a value, or open-sprint would overwrite an
+        IN_PROGRESS sprint (RA-11: only 2 blocks)
 """
 
 import argparse
@@ -463,6 +469,52 @@ def set_topology() -> int:
     return 0
 
 
+def open_sprint(sprint_id: int) -> int:
+    """Open a sprint in `current_sprint`, or confirm it is already open.
+
+    Writes `current_sprint.id = sprint_id` and `current_sprint.status =
+    "OPEN"`, preserving every other key already present under
+    `current_sprint` (`layer`, `app`, `last_audit_sprint`, ...) — this
+    writes only the two fields the open act owns. Until this command
+    (`S052-4`), nothing wrote `current_sprint`: the anchor was a hand edit
+    with no gate.
+
+    Args:
+        sprint_id: The sprint number to open.
+
+    Returns:
+        int: 0 when opened, or when `sprint_id` already matches
+            `current_sprint.id` (idempotent — a repeat call changes
+            nothing); 2 when a different sprint is `IN_PROGRESS`
+            (RA-11: only 2 blocks).
+    """
+    state = load_state()
+    sprint = state.get("current_sprint") or {}
+    current_id = sprint.get("id")
+    current_status = sprint.get("status")
+
+    if current_id == sprint_id:
+        print(f"✅ Sprint {sprint_id} already the current sprint — idempotent, nothing changed.")
+        return 0
+
+    if current_status == IN_PROGRESS:
+        print(
+            f"Refusing open-sprint: sprint {current_id} is still IN_PROGRESS. "
+            f"Close it before opening sprint {sprint_id}.",
+            file=sys.stderr,
+        )
+        return 2
+
+    updated_sprint = dict(sprint)
+    updated_sprint["id"] = sprint_id
+    updated_sprint["status"] = "OPEN"
+    state["current_sprint"] = updated_sprint
+    state["last_updated"] = now()
+    save_state(state)
+    print(f"✅ Sprint {sprint_id} opened.")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -517,6 +569,14 @@ def main() -> int:
         "set-topology",
         help="Write topology_version, derived from CHANGELOG.md + current_sprint.",
     )
+    open_sprint_parser = sub.add_parser(
+        "open-sprint",
+        help="Write current_sprint.{id,status: OPEN}; refuse over an IN_PROGRESS sprint.",
+    )
+    open_sprint_parser.add_argument(
+        "--id", required=True, type=int, dest="sprint_id",
+        help="Sprint number to open.",
+    )
 
     args = parser.parse_args()
     if args.command == "claim":
@@ -532,6 +592,8 @@ def main() -> int:
         return refresh_baseline(args.sha)
     if args.command == "set-topology":
         return set_topology()
+    if args.command == "open-sprint":
+        return open_sprint(args.sprint_id)
     return release()
 
 
