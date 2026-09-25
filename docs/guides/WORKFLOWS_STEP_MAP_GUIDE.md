@@ -23,7 +23,7 @@ protocols that should mirror each other shows up there first.
 | `reverse_documentation_workflow` | — | — | — | — | — | — | — | — | — | — | — | — | — |
 | `skill_forge_workflow` | — | — | — | — | — | — | — | — | — | — | — | — | — |
 | `standardization_workflow` | — | — | — | — | — | — | — | — | — | — | — | — | — |
-| `start_workflow` | write | — | — | — | verify/write | — | — | read | write | — | write | read | — |
+| `start_workflow` | write | — | — | — | verify/write | — | — | read/write | write | — | write | read | — |
 
 **Columns**, from `config/artifact_registry.json` — the artifact and the phase
 that leaves it. A phase is defined by the artifact it leaves, which is what makes
@@ -230,7 +230,7 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 0. Zero-Memory | `read_graph` | write |
 | 0.4 Drift | `drift_check` | write |
 | 0.5 Claim | `state_claim` | write |
-| 0.6 Probe | `readiness_probe` | verify |
+| 0.6 Probe | `readiness_probe` | write |
 | 0.7 Probe | `platform_probe` | verify |
 | 1. Guard | `session_lock_check` | verify |
 | 1. Sync | `lightweight_sync` | write |
