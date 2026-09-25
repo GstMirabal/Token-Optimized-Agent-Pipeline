@@ -3,7 +3,7 @@
 **Canonical path**: `docs/sprints/052-core-pipeline/IMPLEMENTATION_PLAN.md`
 **Branch**: `ai-sprint/052` · **Base**: `main` at `ca70bfa`
 **Mode**: nucleus (`.git` is a real directory — `scripts/_mode.py`)
-**Status**: `DRAFT`
+**Status**: `APPROVED`
 
 > Authored at Phase 1 (Planning) by `principal_agent`, extracted to this path at
 > Phase 3, and **committed before Phase 5 approves it** (`agents.md §2 triple_lock`).
@@ -318,9 +318,9 @@ Decided before execution:
 
 | Field | Value |
 | :--- | :--- |
-| **Approved by** | {{HUMAN}} |
-| **Date** | {{ISO_DATE}} |
-| **Plan commit at approval** | `{{COMMIT_SHA}}` |
+| **Approved by** | GstMirabal (chat: "aprobado, continua") |
+| **Date** | 2026-09-25 |
+| **Plan commit at approval** | `979af67` (Phase 4 records `06d6b36`) |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an
