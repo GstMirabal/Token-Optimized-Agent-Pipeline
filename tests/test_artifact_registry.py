@@ -35,7 +35,7 @@ def profile_tools(profile: str, agents_dir: Path) -> list[str]:
 
     `profile` is a snake_case identifier matching the `agents/` filename
     stem — the same convention `config/artifact_registry.json`'s `writer`
-    field uses (ADR-0015's own `<writer>` notation, e.g. `orchestrator`,
+    field uses (ADR-0017's own `<writer>` notation, e.g. `orchestrator`,
     `doc_orchestrator`), so no kebab-case/display-name conversion is needed
     for a value already in that form; a profile absent from `agents_dir`
     resolves to an empty tool list rather than raising, so callers fail
@@ -61,8 +61,8 @@ def profile_tools(profile: str, agents_dir: Path) -> list[str]:
 def writer_holds_write(writer: str, agents_dir: Path) -> bool:
     """Whether `agents/<writer>.md` declares `Write` among its tools.
 
-    The assertion ADR-0015 requires of every registry `writer`
-    (`docs/decisions/ADR-0015-artifact-owner-writer-separation.md` §2): the
+    The assertion ADR-0017 requires of every registry `writer`
+    (`docs/decisions/ADR-0017-typed-artifact-writer.md` §2): the
     writer is the profile that holds `Write`/`Edit` and materializes the
     artifact — `role` alone (e.g. Principal Agent) does not satisfy it.
 
@@ -195,13 +195,13 @@ def test_filenames_are_unique():
 
 
 def test_every_entry_declares_a_writer():
-    """ADR-0015 §2: every artifact entry gains `writer`, alongside `role`."""
+    """ADR-0017 §2: every artifact entry gains `writer`, alongside `role`."""
     for entry in ARTIFACTS:
         assert entry.get("writer"), f"{entry.get('filename')} has no writer"
 
 
 def test_every_writer_resolves():
-    """ADR-0015 §2 (typed-writer rework, Sprint 052 `U9`): every declared
+    """ADR-0017 §2 (typed-writer rework, Sprint 052 `U9`): every declared
     `writer` resolves per its form — a bare profile id holds `Write`
     (the mechanism that fixed `F-051-R1`, a `role` without `Write`
     dispatched to author its own artifact); `script:`/`make:` name a real
@@ -306,7 +306,7 @@ def test_writer_holds_write_fails_closed_on_a_missing_profile_file(tmp_path: Pat
 
 
 def test_implementation_plan_writer_is_orchestrator_per_adr_0015():
-    """ADR-0015 §2 explicit table: the three artifacts Principal Agent owns
+    """ADR-0017 §2 explicit table: the three artifacts Principal Agent owns
     (no `Write`) each get a named `writer` distinct from `role`."""
     by_filename = {entry["filename"]: entry for entry in ARTIFACTS}
     assert by_filename["IMPLEMENTATION_PLAN.md"]["writer"] == "orchestrator"
