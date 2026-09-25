@@ -31,6 +31,100 @@ def analyze_patterns(data):
     patterns = Counter([(d['hook'], d['type']) for d in data])
     return patterns
 
+def _status_label(promoted: bool, threshold_met: bool) -> str:
+    """Renders the frequency-table status marker for one pattern.
+
+    Args:
+        promoted: Whether the pattern count reached PROMOTION_THRESHOLD.
+        threshold_met: Whether the pattern count reached the 3-occurrence floor.
+
+    Returns:
+        The emoji-prefixed status label for the frequency table row.
+    """
+    if promoted:
+        return "🔴 PROMOTED"
+    if threshold_met:
+        return "🟡 ACTION REQUIRED"
+    return "⚪ MONITORING"
+
+
+def _build_clause(clause_count: int, hook: str, err_type: str, count: int) -> str:
+    """Builds the Markdown block for one promoted Formal Clause.
+
+    Args:
+        clause_count: The 1-based sequence number of this clause.
+        hook: The hook identifier that produced the pattern.
+        err_type: The error type of the pattern.
+        count: The occurrence count of the pattern.
+
+    Returns:
+        The Markdown block describing the promoted clause.
+    """
+    # Simple heuristic mapping for now
+    rule_text = (
+        "The agent MUST trigger a Manual Correction Alert and stop execution "
+        "until the environment is restored (Manual Task)."
+        if err_type == "ENVIRONMENT_VIOLATION"
+        else "The agent MUST perform a structural audit before commit."
+    )
+    return (
+        f"### Clause RA-{clause_count:02d}: {err_type}\n"
+        f"- **Rule**: {rule_text}\n"
+        f"- **Source**: `{hook}`\n"
+        f"- **Frequency**: {count} occurrences\n"
+        "- **Status**: `PENDING_PROMOTION`\n\n"
+    )
+
+
+def _build_proposal_entry(proposed_count: int, hook: str, err_type: str, count: int) -> str:
+    """Builds the Markdown block for one proposed Rule Amendment.
+
+    Args:
+        proposed_count: The 1-based sequence number of this proposal.
+        hook: The hook identifier that produced the pattern.
+        err_type: The error type of the pattern.
+        count: The occurrence count of the pattern.
+
+    Returns:
+        The Markdown block describing the proposed amendment.
+    """
+    return (
+        f"### Proposal P-{proposed_count:02d}: {err_type} Mitigation\n"
+        f"**Detected in**: `{hook}`\n"
+        f"**Reasoning**: High frequency of this violation ({count} occurrences) "
+        "suggests a need for automated remediation or governance clarification.\n"
+        "**Proposed Clause**: *Pending heuristic distillation logic refinement.*\n\n"
+    )
+
+
+def _classify_pattern(
+    hook: str, err_type: str, count: int, clause_count: int, proposed_count: int
+) -> tuple[str, str, int, int]:
+    """Classifies one pattern and renders its Markdown contribution.
+
+    Args:
+        hook: The hook identifier that produced the pattern.
+        err_type: The error type of the pattern.
+        count: The occurrence count of the pattern.
+        clause_count: The number of clauses already promoted.
+        proposed_count: The number of proposals already recorded.
+
+    Returns:
+        A 4-tuple of (clause_markdown, proposal_markdown, new_clause_count,
+        new_proposed_count); at most one of the two Markdown strings is
+        non-empty, matching the original if/elif exclusivity.
+    """
+    promoted = count >= PROMOTION_THRESHOLD
+    threshold_met = count >= 3
+    if promoted:
+        clause_count += 1
+        return _build_clause(clause_count, hook, err_type, count), "", clause_count, proposed_count
+    if threshold_met:
+        proposed_count += 1
+        return "", _build_proposal_entry(proposed_count, hook, err_type, count), clause_count, proposed_count
+    return "", "", clause_count, proposed_count
+
+
 def generate_proposal(patterns):
     header = f"# Governance Heuristic Pulse ({datetime.now().strftime('%Y-%m-%d')})\n\n"
     header += "This report identifies recurrent friction points detected by pipeline hooks. Patterns exceeding the threshold are promoted to Formal Clauses.\n\n"
@@ -41,34 +135,21 @@ def generate_proposal(patterns):
 
     clauses = "\n## Formal Clauses (Promoted)\n\n"
     proposals = "\n## Proposed Amendments (Rule Amendments)\n\n"
-    
+
     proposed_count = 0
     clause_count = 0
-    
+
     for (hook, err_type), count in patterns.items():
         promoted = count >= PROMOTION_THRESHOLD
         threshold_met = count >= 3
-        status = "🔴 PROMOTED" if promoted else ("🟡 ACTION REQUIRED" if threshold_met else "⚪ MONITORING")
-        body += f"| `{hook}` | `{err_type}` | {count} | {status} |\n"
-        
-        if promoted:
-            clause_count += 1
-            # Simple heuristic mapping for now
-            rule_text = "The agent MUST trigger a Manual Correction Alert and stop execution until the environment is restored (Manual Task)." if err_type == "ENVIRONMENT_VIOLATION" else "The agent MUST perform a structural audit before commit."
-            
-            clauses += f"### Clause RA-{clause_count:02d}: {err_type}\n"
-            clauses += f"- **Rule**: {rule_text}\n"
-            clauses += f"- **Source**: `{hook}`\n"
-            clauses += f"- **Frequency**: {count} occurrences\n"
-            clauses += "- **Status**: `PENDING_PROMOTION`\n\n"
-            
-        elif threshold_met:
-            proposed_count += 1
-            proposals += f"### Proposal P-{proposed_count:02d}: {err_type} Mitigation\n"
-            proposals += f"**Detected in**: `{hook}`\n"
-            proposals += f"**Reasoning**: High frequency of this violation ({count} occurrences) suggests a need for automated remediation or governance clarification.\n"
-            proposals += "**Proposed Clause**: *Pending heuristic distillation logic refinement.*\n\n"
-            
+        body += f"| `{hook}` | `{err_type}` | {count} | {_status_label(promoted, threshold_met)} |\n"
+
+        clause_md, proposal_md, clause_count, proposed_count = _classify_pattern(
+            hook, err_type, count, clause_count, proposed_count
+        )
+        clauses += clause_md
+        proposals += proposal_md
+
     if clause_count == 0:
         clauses += "_No clauses have reached the promotion threshold yet._\n"
     if proposed_count == 0:
