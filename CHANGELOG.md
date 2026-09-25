@@ -4,6 +4,8 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.34.0] - 2026-09-25
+
 ### Fixed
 - **Sprint 051 `host-reported-defects-and-a-stale-register`** — a host re-verified all 26 framework-class findings it had recorded, against `v4.32.0` rather than against either register, because both were stale: its own inventory measured `v4.4.0` and `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` had not been updated in eleven sprints. The `/start` briefing was summarising that file as `Still open: 0` against nine reproducible defects, while `agents.md §0` tells every nucleus session to read it before planning. 25 units landed (`W-09` withdrawn, identifier retained per `RA-14`); `make verify` green, **813 tests pass** (780 baseline + 33), zero regression and zero tests lost. #051
   - **The boot could not reach its own briefing.** `detect_drift.py::classify()` judged `last_close_commit..HEAD` with no merge-base against the integration branch, so on `ai-sprint/[ID]` — which `RA-12` makes mandatory — it blocked on the sprint's own in-flight commits, whose ledger entry is not due until Closeout (`RA-05`). The `/start` briefing that delivers the Documentation Entry Point runs *after* that gate, so the reporting host planned an entire session without the anchor documents `§0` mandates. The range now splits at the merge-base: the landed half keeps every previous rule including exit `2`, the in-flight half is listed and never blocks (`db4dd3e`, `153effc`, `6207e06`).
