@@ -65,39 +65,128 @@ def is_scanned(filename: str) -> bool:
     )
 
 
+def _should_skip_dir(root: str) -> bool:
+    """Reports whether a walked directory is an excluded infrastructure path.
+
+    Args:
+        root: The directory path currently visited by `os.walk`.
+
+    Returns:
+        True when `root` contains one of the excluded path fragments.
+    """
+    return any(x in root for x in [".git", ".agents", "venv", "node_modules", ".agent_state"])
+
+
+def _scanned_files_in_root(root: str, files: list[str]) -> list[str]:
+    """Full paths, under `root`, of every file `is_scanned` accepts.
+
+    Args:
+        root: The directory these `files` were listed from.
+        files: Bare filenames as returned by `os.walk` for `root`.
+
+    Returns:
+        Full paths for the files that `is_scanned` accepts.
+    """
+    return [os.path.join(root, f) for f in files if is_scanned(f)]
+
+
+def _iter_scanned_files(directory: str):
+    """Yields full paths of every scan-eligible file under `directory`.
+
+    Args:
+        directory: The root directory to walk.
+
+    Yields:
+        Full paths for files that pass `_should_skip_dir` and `is_scanned`.
+    """
+    for root, _, files in os.walk(directory):
+        if _should_skip_dir(root):
+            continue
+        yield from _scanned_files_in_root(root, files)
+
+
+def _match_patterns(file_path: str, line_no: int, line: str) -> list[str]:
+    """Leak report strings for every SECRET_PATTERNS match on one line.
+
+    Args:
+        file_path: Path of the file the line was read from.
+        line_no: 1-based line number of `line` within `file_path`.
+        line: The line content to test against SECRET_PATTERNS.
+
+    Returns:
+        One formatted leak report string per matching pattern.
+    """
+    return [
+        f"🚨 {name} found: {file_path} (Line {line_no})"
+        for name, pattern in SECRET_PATTERNS.items()
+        if re.search(pattern, line)
+    ]
+
+
+def _leaks_in_lines(file_path: str, lines) -> list[str]:
+    """Leak report strings for every secret-pattern match across `lines`.
+
+    Args:
+        file_path: Path of the file `lines` were read from.
+        lines: An iterable of line strings, 1-indexed by enumeration.
+
+    Returns:
+        The concatenated leak reports for every matching line.
+    """
+    found = []
+    for i, line in enumerate(lines, 1):
+        found.extend(_match_patterns(file_path, i, line))
+    return found
+
+
+def _find_leaks_in_file(file_path: str) -> list[str]:
+    """Leak report strings found inside one file.
+
+    Args:
+        file_path: Path of the file to open and scan.
+
+    Returns:
+        The leak reports for `file_path`, or an empty list when the file
+        cannot be read (unreadable files are silently skipped).
+    """
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            return _leaks_in_lines(file_path, f)
+    except Exception as e:
+        # Silently skip unreadable files
+        pass
+    return []
+
+
 def scan_files(directory):
     leaks = []
-    for root, _, files in os.walk(directory):
-        if any(x in root for x in [".git", ".agents", "venv", "node_modules", ".agent_state"]):
-            continue
-
-        for file in files:
-            if is_scanned(file):
-                file_path = os.path.join(root, file)
-                try:
-                    with open(file_path, "r", encoding="utf-8") as f:
-                        for i, line in enumerate(f, 1):
-                            for name, pattern in SECRET_PATTERNS.items():
-                                if re.search(pattern, line):
-                                    leaks.append(f"🚨 {name} found: {file_path} (Line {i})")
-                except Exception as e:
-                    # Silently skip unreadable files
-                    pass
+    for file_path in _iter_scanned_files(directory):
+        leaks.extend(_find_leaks_in_file(file_path))
     return leaks
 
+def _check_env_in_gitignore(content: str) -> bool:
+    """Reports and prints whether `.env` appears in gitignore content.
+
+    Args:
+        content: The full text content of the `.gitignore` file.
+
+    Returns:
+        True when `.env` is present in `content`, False otherwise.
+    """
+    if ".env" in content:
+        print("✅ .env is present in .gitignore.")
+        return True
+    print("❌ .env is NOT in .gitignore! This is a Major Security Risk.")
+    return False
+
+
 def check_gitignore():
-    if os.path.exists(".gitignore"):
-        with open(".gitignore", "r") as f:
-            content = f.read()
-            if ".env" in content:
-                print("✅ .env is present in .gitignore.")
-                return True
-            else:
-                print("❌ .env is NOT in .gitignore! This is a Major Security Risk.")
-                return False
-    else:
+    if not os.path.exists(".gitignore"):
         print("⚠️ .gitignore not found. Skipping check.")
         return None
+    with open(".gitignore", "r") as f:
+        content = f.read()
+    return _check_env_in_gitignore(content)
 
 def main():
     print(f"🚀 Initializing Environment Shielding Audit...")
