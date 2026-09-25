@@ -159,17 +159,44 @@ def is_adr_superseded(path: Path) -> bool:
     return bool(ADR_STATUS_SUPERSEDED_RE.search(path.read_text(encoding="utf-8")))
 
 
+def _check_c4_override_ref(report: FreshnessReport, path: Path, adr_ref: str, known_ids: dict) -> None:
+    """§4.4(a) check for a single C4 Level Override citation.
+
+    Args:
+        report: Freshness report to warn into.
+        path: Blueprint file containing the citation.
+        adr_ref: Raw ADR reference text, e.g. ``ADR-0017``.
+        known_ids: Map of ADR id -> path, from `adr_ids_in_dir()`.
+    """
+    adr_id = adr_ref.removeprefix("ADR-")
+    if adr_id not in known_ids:
+        report.warn(f"{path}: C4 Level Override cites {adr_ref}, which does not exist")
+        return
+    if is_adr_superseded(known_ids[adr_id]):
+        report.warn(f"{path}: C4 Level Override cites {adr_ref}, which is superseded")
+
+
 def check_c4_override_pointers(report: FreshnessReport, blueprint_paths: list[Path], repo_root: Path) -> None:
     """§4.4(a): every C4 Level Override justification resolves to a real, live ADR."""
     known_ids = adr_ids_in_dir(repo_root)
     for path in blueprint_paths:
         text = path.read_text(encoding="utf-8")
         for adr_ref in C4_OVERRIDE_RE.findall(text):
-            adr_id = adr_ref.removeprefix("ADR-")
-            if adr_id not in known_ids:
-                report.warn(f"{path}: C4 Level Override cites {adr_ref}, which does not exist")
-            elif is_adr_superseded(known_ids[adr_id]):
-                report.warn(f"{path}: C4 Level Override cites {adr_ref}, which is superseded")
+            _check_c4_override_ref(report, path, adr_ref, known_ids)
+
+
+def _check_superseded_ref(report: FreshnessReport, path: Path, adr_ref: str, known_ids: dict) -> None:
+    """§4.4(b) check for a single 'Superseded by ADR-XXXX' reference.
+
+    Args:
+        report: Freshness report to warn into.
+        path: ADR file containing the reference.
+        adr_ref: Raw ADR reference text, e.g. ``ADR-0017``.
+        known_ids: Map of ADR id -> path, from `adr_ids_in_dir()`.
+    """
+    adr_id = adr_ref.removeprefix("ADR-")
+    if adr_id not in known_ids:
+        report.warn(f"{path}: 'Superseded by {adr_ref}' does not resolve to a real ADR")
 
 
 def check_superseded_chains(report: FreshnessReport, repo_root: Path) -> None:
@@ -178,9 +205,7 @@ def check_superseded_chains(report: FreshnessReport, repo_root: Path) -> None:
     for path in adr_files(repo_root):
         text = path.read_text(encoding="utf-8")
         for adr_ref in SUPERSEDED_RE.findall(text):
-            adr_id = adr_ref.removeprefix("ADR-")
-            if adr_id not in known_ids:
-                report.warn(f"{path}: 'Superseded by {adr_ref}' does not resolve to a real ADR")
+            _check_superseded_ref(report, path, adr_ref, known_ids)
 
 
 def load_active_state(repo_root: Path) -> dict:
@@ -530,6 +555,25 @@ def collect_blueprint_paths(repo_root: Path) -> list[Path]:
     return sorted(repo_root.glob(BLUEPRINT_GLOB))
 
 
+def _check_structural_change_delta(
+    report: FreshnessReport, repo_root: Path, last_audit_sprint: int, current_sprint: int
+) -> None:
+    """§4.4: block or warn on structural change since the last anchor refresh.
+
+    Args:
+        report: Freshness report to block/warn into.
+        repo_root: Host project root.
+        last_audit_sprint: Sprint id at which anchors were last refreshed.
+        current_sprint: The sprint ID being closed.
+    """
+    exceeded, mode = structural_change_status(repo_root, last_audit_sprint, current_sprint)
+    if exceeded and mode == "enforced":
+        report.block("Structural change since last audit exceeds the p90 delta threshold — refresh anchors")
+        return
+    if exceeded:
+        report.warn("Structural change detected, but <5 historical deltas — advisory only until baseline builds")
+
+
 def run(repo_root: Path, current_sprint: int, denylist_dir: Path = DENYLIST_DIR) -> FreshnessReport:
     """Run every check and return the aggregated report.
 
@@ -580,11 +624,7 @@ def run(repo_root: Path, current_sprint: int, denylist_dir: Path = DENYLIST_DIR)
             "`current_sprint_id`."
         )
     else:
-        exceeded, mode = structural_change_status(repo_root, int(last_audit_sprint), current_sprint)
-        if exceeded and mode == "enforced":
-            report.block("Structural change since last audit exceeds the p90 delta threshold — refresh anchors")
-        elif exceeded:
-            report.warn("Structural change detected, but <5 historical deltas — advisory only until baseline builds")
+        _check_structural_change_delta(report, repo_root, int(last_audit_sprint), current_sprint)
 
     return report
 
