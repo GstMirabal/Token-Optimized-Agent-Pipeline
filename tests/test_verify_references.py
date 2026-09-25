@@ -245,3 +245,184 @@ def test_check_invoked_by_anchors_covers_skills_scripts_and_tests_trees(
         '# Other\n\n<a id="missing-anchor"></a>\n\nBody text.\n', encoding="utf-8"
     )
     assert verify_mod.check_invoked_by_anchors() == []
+
+
+# --- Sprint 052 U19 (KI-048-1 D9): check (d) coverage over skills/*/scripts/*.py
+# and tests/*.py, with typed per-tree rules rather than a blanket exception.
+# `check_invocation_coverage` glob'd only workflows/, scripts/, hooks/ before this
+# unit; these prove the two added trees actually fail the checker when nothing
+# invokes them, not merely that a healthy tree stays quiet.
+
+
+def _base_tree(root: Path) -> None:
+    """Scaffold the minimal directories `check_invocation_coverage` reads."""
+    for name in (
+        "workflows", "scripts", "hooks", "skills",
+        "rules", "agents", "config", "commands", "tests",
+    ):
+        (root / name).mkdir(parents=True, exist_ok=True)
+    (root / "agents.md").write_text("# governance\n", encoding="utf-8")
+    (root / "config" / "invocation_exceptions.json").write_text(
+        json.dumps({"exceptions": []}), encoding="utf-8"
+    )
+
+
+def _write_pytest_makefile(root: Path) -> None:
+    """A `verify:` recipe that collects `tests/` via pytest, like the real one."""
+    (root / "Makefile").write_text(
+        "verify:\n\tpython3 scripts/py_compile_tree.py\n\t$(PY) -m pytest tests/ -q\n",
+        encoding="utf-8",
+    )
+
+
+def test_uninvoked_skill_script_is_flagged(
+    verify_mod, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """D9: a skills/<s>/scripts/*.py named by nothing and imported by nothing fails."""
+    root = tmp_path
+    _base_tree(root)
+    (root / "skills" / "x" / "scripts").mkdir(parents=True)
+    (root / "skills" / "x" / "scripts" / "helper.py").write_text("VALUE = 1\n", encoding="utf-8")
+    monkeypatch.chdir(root)
+    errors = verify_mod.check_invocation_coverage("")
+    assert any("skills/x/scripts/helper.py" in e for e in errors)
+
+
+def test_skill_script_named_in_makefile_recipe_passes(
+    verify_mod, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """D9 coordinator extension: a Makefile recipe line (any target, not just
+    `verify`) naming the script's repo-relative path resolves it."""
+    root = tmp_path
+    _base_tree(root)
+    (root / "skills" / "x" / "scripts").mkdir(parents=True)
+    (root / "skills" / "x" / "scripts" / "helper.py").write_text("VALUE = 1\n", encoding="utf-8")
+    (root / "Makefile").write_text(
+        "other-target:\n\tpython3 skills/x/scripts/helper.py\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(root)
+    errors = verify_mod.check_invocation_coverage("")
+    assert not any("skills/x/scripts/helper.py" in e for e in errors)
+
+
+def test_skill_script_declaring_invoked_by_passes(
+    verify_mod, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """D9 coordinator extension: the script's own `invoked_by:` docstring
+    resolves it — the same mechanism scripts/ and hooks/ already use."""
+    root = tmp_path
+    _base_tree(root)
+    (root / "skills" / "x" / "scripts").mkdir(parents=True)
+    (root / "skills" / "x" / "scripts" / "helper.py").write_text(
+        '"""\ninvoked_by: human-entry-point.\n"""\nVALUE = 1\n', encoding="utf-8"
+    )
+    monkeypatch.chdir(root)
+    errors = verify_mod.check_invocation_coverage("")
+    assert not any("skills/x/scripts/helper.py" in e for e in errors)
+
+
+def test_skill_script_mentioned_only_in_makefile_comment_is_still_flagged(
+    verify_mod, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """D9 coordinator extension: a mention that lives only in a Makefile
+    comment — top-level `#` line or a `#`-led line inside a recipe — is not a
+    real invocation and must not silence the finding."""
+    root = tmp_path
+    _base_tree(root)
+    (root / "skills" / "x" / "scripts").mkdir(parents=True)
+    (root / "skills" / "x" / "scripts" / "helper.py").write_text("VALUE = 1\n", encoding="utf-8")
+    (root / "Makefile").write_text(
+        "# See skills/x/scripts/helper.py for the procedure.\n"
+        "other-target:\n"
+        "\t# skills/x/scripts/helper.py is documented, not run, here.\n"
+        "\ttrue\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(root)
+    errors = verify_mod.check_invocation_coverage("")
+    assert any("skills/x/scripts/helper.py" in e for e in errors)
+
+
+def test_skill_script_named_in_skill_md_passes(
+    verify_mod, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """D9: naming the script in SKILL.md resolves it."""
+    root = tmp_path
+    _base_tree(root)
+    (root / "skills" / "x" / "scripts").mkdir(parents=True)
+    (root / "skills" / "x" / "scripts" / "helper.py").write_text("VALUE = 1\n", encoding="utf-8")
+    (root / "skills" / "x" / "SKILL.md").write_text(
+        "---\nname: x\ndescription: stub\n---\nRun `helper.py` to do the thing.\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(root)
+    errors = verify_mod.check_invocation_coverage("")
+    assert not any("skills/x/scripts/helper.py" in e for e in errors)
+
+
+def test_skill_script_imported_by_named_script_passes(
+    verify_mod, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """D9: a helper imported by a resolved sibling script resolves via the import scan."""
+    root = tmp_path
+    _base_tree(root)
+    (root / "skills" / "x" / "scripts").mkdir(parents=True)
+    (root / "skills" / "x" / "scripts" / "helper.py").write_text("VALUE = 1\n", encoding="utf-8")
+    (root / "skills" / "x" / "scripts" / "run.py").write_text(
+        '"""\ninvoked_by: human-entry-point.\n"""\nfrom helper import VALUE\n',
+        encoding="utf-8",
+    )
+    (root / "skills" / "x" / "SKILL.md").write_text(
+        "---\nname: x\ndescription: stub\n---\nRun `run.py`.\n", encoding="utf-8"
+    )
+    monkeypatch.chdir(root)
+    errors = verify_mod.check_invocation_coverage("")
+    assert not any("skills/x/scripts/helper.py" in e for e in errors)
+
+
+def test_test_file_passes_via_pytest_collection_with_no_invoked_by(
+    verify_mod, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """D9: tests/test_*.py needs no invoked_by — make verify's pytest step covers it."""
+    root = tmp_path
+    _base_tree(root)
+    _write_pytest_makefile(root)
+    (root / "tests" / "test_foo.py").write_text(
+        "def test_x():\n    assert True\n", encoding="utf-8"
+    )
+    monkeypatch.chdir(root)
+    errors = verify_mod.check_invocation_coverage("")
+    assert not any("tests/test_foo.py" in e for e in errors)
+
+
+def test_uninvoked_test_helper_is_flagged(
+    verify_mod, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """D9: tests/_util.py imported by nothing and declaring no invoked_by fails."""
+    root = tmp_path
+    _base_tree(root)
+    _write_pytest_makefile(root)
+    (root / "tests" / "_util.py").write_text("VALUE = 1\n", encoding="utf-8")
+    monkeypatch.chdir(root)
+    errors = verify_mod.check_invocation_coverage("")
+    assert any("tests/_util.py" in e for e in errors)
+
+
+def test_pytest_coverage_claim_is_derived_from_makefile_not_hardcoded(
+    verify_mod, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """D9: if `verify:` stops running pytest, a bare test_*.py must be flagged
+    again rather than staying silently exempt on a hard-coded assumption."""
+    root = tmp_path
+    _base_tree(root)
+    (root / "Makefile").write_text(
+        "verify:\n\tpython3 scripts/py_compile_tree.py\n", encoding="utf-8"
+    )
+    (root / "tests" / "test_foo.py").write_text(
+        "def test_x():\n    assert True\n", encoding="utf-8"
+    )
+    monkeypatch.chdir(root)
+    assert verify_mod._pytest_covers_tests_dir() is False
+    errors = verify_mod.check_invocation_coverage("")
+    assert any("tests/test_foo.py" in e for e in errors)

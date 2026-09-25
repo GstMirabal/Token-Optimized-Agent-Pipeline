@@ -10,12 +10,17 @@ Checks (run from the .agents root; CI fails the PR on any violation):
   (c) Every numbered "Rule NN" citation resolves to an entry in
       rules/LEGACY_RULE_CONCORDANCE.md (the numbering system was abolished
       by the tabular refactor; unmapped numbers are phantom references).
-  (d) Every workflow, script and executable skill has a declared invoker, or a
-      declared exception (RA-16 INVOCATION_COVERAGE, agents.md §7). Every
-      ``invoked_by:`` token of the form ``path#fragment`` also resolves its
-      ``#fragment`` — a GitHub heading slug, an ``<a id=>`` / ``<a name=>``
-      anchor, or a workflow step-id token — in the file ``path`` names
-      (Sprint 047 U11, S045-22).
+  (d) Every workflow, script, executable skill, ``skills/*/scripts/*.py``
+      module and ``tests/*.py`` file has a declared invoker, or a declared
+      exception (RA-16 INVOCATION_COVERAGE, agents.md §7). ``tests/test_*.py``
+      and ``tests/conftest.py`` resolve to pytest collection under
+      ``make verify`` (confirmed against the Makefile recipe, not assumed);
+      other ``tests/*.py`` files and ``skills/*/scripts/*.py`` modules resolve
+      via an import or their own skill's SKILL.md/README.md (KI-048-1 D9,
+      Sprint 052 U19). Every ``invoked_by:`` token of the form
+      ``path#fragment`` also resolves its ``#fragment`` — a GitHub heading
+      slug, an ``<a id=>`` / ``<a name=>`` anchor, or a workflow step-id token
+      — in the file ``path`` names (Sprint 047 U11, S045-22).
   (e) config/rule_triggers.json mirrors rules/*.md.
   (f) Living docs (guides, decisions, audits) that cite ``path:line`` point at a
       file whose line count is at least that line — Sprint 029 J6. Does **not**
@@ -191,15 +196,26 @@ def load_exceptions() -> tuple[dict[str, str], list[str]]:
 
 
 def imported_modules() -> set[str]:
-    """Module names imported by any tracked Python file.
+    """Module names imported by any tracked, first-party Python file.
 
     A script imported as a module has an invoker even though its filename is
     never written anywhere. Missing this is not theoretical: `merge_json.py`
     looked orphaned to a filename-only scan while `scripts/install.py`
     depends on it, and deleting it would have broken the bridge installer.
+
+    Scans `scripts/`, `hooks/`, `skills/*/scripts/` and `tests/` — the same
+    four trees check (d) evaluates for coverage (KI-048-1 D9) — so a skill
+    script imported by another skill script, or a test helper imported by a
+    `test_*.py` module, resolves through this one shared scan rather than a
+    second, divergent import walk.
     """
     modules: set[str] = set()
-    for path in [*Path("scripts").glob("*.py"), *Path("hooks").glob("*.py")]:
+    for path in [
+        *Path("scripts").glob("*.py"),
+        *Path("hooks").glob("*.py"),
+        *Path("skills").glob("*/scripts/*.py"),
+        *Path("tests").glob("*.py"),
+    ]:
         try:
             tree = ast.parse(path.read_text(encoding="utf-8"))
         except SyntaxError:
@@ -210,6 +226,194 @@ def imported_modules() -> set[str]:
             elif isinstance(node, ast.ImportFrom) and node.module:
                 modules.add(node.module.split(".")[-1])
     return modules
+
+
+def _makefile_target_recipe_lines(target: str) -> list[str]:
+    """Tab-indented, non-comment recipe lines belonging to one Makefile target.
+
+    Comments and blank lines interleaved in the recipe (this Makefile carries
+    several) are skipped rather than treated as the end of the target — only
+    a new `name:` rule header ends it. A tab-indented line whose content opens
+    with `#` is a shell comment inside the recipe, not a command Make
+    executes, so it is excluded too: a script merely mentioned in prose must
+    not resolve as invoked (KI-048-1 D9 coordinator extension).
+
+    Args:
+        target: The target name, e.g. `"verify"`.
+
+    Returns:
+        list[str]: Recipe lines for that target, tab-stripped, in file order.
+    """
+    makefile = Path("Makefile")
+    if not makefile.exists():
+        return []
+    lines: list[str] = []
+    in_target = False
+    for line in makefile.read_text(encoding="utf-8").splitlines():
+        if re.match(rf"^{re.escape(target)}:", line):
+            in_target = True
+            continue
+        if not in_target:
+            continue
+        if line.startswith("\t") and not line[1:].strip().startswith("#"):
+            lines.append(line[1:])
+            continue
+        if line.startswith("\t"):
+            continue
+        if re.match(r"^[\w.-]+:", line):
+            break
+    return lines
+
+
+def _makefile_recipe_lines() -> list[str]:
+    """Tab-indented, non-comment recipe lines from every Makefile target.
+
+    The "any target" counterpart of `_makefile_target_recipe_lines`: a skill
+    script named in a recipe belonging to a target other than `verify` still
+    resolves (KI-048-1 D9 coordinator extension).
+
+    Returns:
+        list[str]: Recipe lines, tab-stripped, in file order, across the
+            whole file.
+    """
+    makefile = Path("Makefile")
+    if not makefile.exists():
+        return []
+    return [
+        line[1:] for line in makefile.read_text(encoding="utf-8").splitlines()
+        if line.startswith("\t") and not line[1:].strip().startswith("#")
+    ]
+
+
+def _pytest_covers_tests_dir() -> bool:
+    """Confirm the Makefile's `verify` target actually collects `tests/` via pytest.
+
+    `tests/test_*.py` and `tests/conftest.py` are only treated as invoked by
+    "make verify" (pytest's own filename-based collection) when this holds —
+    the claim is derived from the Makefile recipe rather than hard-coded, so a
+    future edit that drops the pytest step re-exposes the whole tree as
+    unresolved instead of silently trusting a stale assumption (KI-048-1 D9).
+
+    Returns:
+        bool: True when the `verify:` recipe contains a line invoking
+            `pytest` over a `tests/` argument.
+    """
+    return any(
+        "pytest" in line and "tests/" in line
+        for line in _makefile_target_recipe_lines("verify")
+    )
+
+
+def _skill_script_in_makefile(script: Path) -> bool:
+    """(d) True when a Makefile recipe line, any target, names this script.
+
+    Checks both the bare repo-relative form (`skills/<s>/scripts/f.py`) and
+    the `$(AGENTS_DIR)/`-prefixed form the Makefile uses for recipes that run
+    from the host root rather than the framework root. Reuses
+    `_makefile_recipe_lines`, so a comment-only mention (top-level `#` line,
+    or a `#`-led line inside a recipe) never counts (KI-048-1 D9 coordinator
+    extension).
+
+    Args:
+        script: A `skills/<s>/scripts/*.py` path.
+
+    Returns:
+        bool: True when a real recipe line contains either form of the path.
+    """
+    key = str(script)
+    prefixed = f"$(AGENTS_DIR)/{key}"
+    return any(key in line or prefixed in line for line in _makefile_recipe_lines())
+
+
+def _skill_doc_text(skill_dir: Path) -> str:
+    """Concatenate a skill's SKILL.md and README.md text, if present.
+
+    Args:
+        skill_dir: Path to `skills/<name>`.
+
+    Returns:
+        str: Combined text of the two documents; empty when neither exists.
+    """
+    text = ""
+    for doc_name in ("SKILL.md", "README.md"):
+        doc = skill_dir / doc_name
+        if doc.exists():
+            text += doc.read_text(encoding="utf-8", errors="ignore")
+    return text
+
+
+def check_skill_scripts_invoked(exceptions: dict[str, str], modules: set[str]) -> list[str]:
+    """(d) skills/<s>/scripts/*.py resolves via docs, an import, the Makefile, or invoked_by (D9).
+
+    A per-script rule, distinct from the existing per-skill-directory check.
+    Four independent resolutions, any one of which counts: the script's own
+    skill's SKILL.md/README.md names it; a resolved module imports it (the
+    `merge_json.py` precedent, generalised to the skills tree); a Makefile
+    recipe line, any target, names its path bare or `$(AGENTS_DIR)/`-prefixed;
+    or the script declares its own `invoked_by:` — the same substring check
+    the workflows/scripts/hooks loop above already applies.
+
+    Args:
+        exceptions: Declared exception registry (path -> reason).
+        modules: Module names imported by any tracked first-party Python file.
+
+    Returns:
+        list[str]: One error per script none of the four resolutions cover.
+    """
+    errors: list[str] = []
+    for script in sorted(Path("skills").glob("*/scripts/*.py")):
+        key = str(script)
+        if key in exceptions or script.name == "__init__.py":
+            continue
+        if script.stem in modules:
+            continue
+        if "invoked_by:" in script.read_text(encoding="utf-8"):
+            continue
+        if _skill_script_in_makefile(script):
+            continue
+        doc_text = _skill_doc_text(script.parent.parent)
+        if script.name in doc_text or script.stem in doc_text:
+            continue
+        errors.append(
+            f"(d) {key} is named by no SKILL.md/README.md/Makefile recipe, "
+            f"imported by no resolved module, and declares no `invoked_by:`."
+        )
+    return errors
+
+
+def check_test_files_invoked(exceptions: dict[str, str], modules: set[str]) -> list[str]:
+    """(d) tests/*.py resolves via pytest collection, an import, or invoked_by (D9).
+
+    `tests/test_*.py` and `tests/conftest.py` resolve to "make verify" when
+    `_pytest_covers_tests_dir` confirms the recipe still runs pytest over that
+    directory. Any other `tests/*.py` file (a helper or fixture module) must
+    instead be imported by a resolved module or declare its own `invoked_by:`.
+
+    Args:
+        exceptions: Declared exception registry (path -> reason).
+        modules: Module names imported by any tracked first-party Python file.
+
+    Returns:
+        list[str]: One error per test-tree file nothing invokes.
+    """
+    errors: list[str] = []
+    pytest_covers = _pytest_covers_tests_dir()
+    for path in sorted(Path("tests").glob("*.py")):
+        key = str(path)
+        if key in exceptions or path.name == "__init__.py":
+            continue
+        is_pytest_named = path.name == "conftest.py" or path.name.startswith("test_")
+        if is_pytest_named and pytest_covers:
+            continue
+        if path.stem in modules:
+            continue
+        if "invoked_by:" in path.read_text(encoding="utf-8"):
+            continue
+        errors.append(
+            f"(d) {key} matches no pytest collection pattern, is imported by "
+            f"no resolved module, and declares no `invoked_by:`."
+        )
+    return errors
 
 
 def check_invocation_coverage(corpus: str) -> list[str]:
@@ -256,6 +460,8 @@ def check_invocation_coverage(corpus: str) -> list[str]:
             continue
         errors.append(f"(d) {key} is an executable skill nothing invokes and nothing excuses.")
 
+    errors += check_skill_scripts_invoked(exceptions, modules)
+    errors += check_test_files_invoked(exceptions, modules)
     errors += check_invoked_by_anchors()
     return errors
 
