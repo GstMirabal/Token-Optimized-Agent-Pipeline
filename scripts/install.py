@@ -49,15 +49,28 @@ from merge_json import merge  # noqa: E402
 import json  # noqa: E402
 
 
+def _symlink_matches(dest: Path, target: str) -> bool:
+    """Whether dest is already a symlink pointing at target.
+
+    Args:
+        dest: Existing symlink to inspect.
+        target: Expected relative link target.
+
+    Returns:
+        bool: True if dest's readlink equals target; False on mismatch or OSError.
+    """
+    try:
+        return str(dest.readlink()) == target
+    except OSError:
+        return False
+
+
 def link_one(target: str, dest: Path) -> None:
     """Creates dest as a relative symlink to target, never clobbering host content."""
     dest.parent.mkdir(parents=True, exist_ok=True)
     if dest.is_symlink():
-        try:
-            if str(dest.readlink()) == target:
-                return  # already correctly linked
-        except OSError:
-            pass
+        if _symlink_matches(dest, target):
+            return  # already correctly linked
         print(f"⚠️  Skipping {dest}: exists as a different symlink.")
         return
     if dest.exists():
@@ -396,10 +409,9 @@ def install_profile_from_dir(profile_dir: Path) -> None:
             link_one(os.path.relpath(agent_file, dest.parent), dest)
     skills_src = profile_dir / "skills"
     if skills_src.is_dir():
-        for skill_dir in sorted(skills_src.iterdir()):
-            if skill_dir.is_dir():
-                dest = HOST_DIR / ".claude" / "skills" / skill_dir.name
-                link_one(os.path.relpath(skill_dir, dest.parent), dest)
+        for skill_dir in sorted(p for p in skills_src.iterdir() if p.is_dir()):
+            dest = HOST_DIR / ".claude" / "skills" / skill_dir.name
+            link_one(os.path.relpath(skill_dir, dest.parent), dest)
     rules_src = profile_dir / "rules"
     if rules_src.is_dir():
         for rule_file in sorted(rules_src.glob("*.md")):
