@@ -52,6 +52,30 @@ NOT_PROTECTED = "gh: Branch not protected (HTTP 404)"
 NO_SUCH_BRANCH = "gh: Branch not found (HTTP 404)"
 
 
+def _first_matching_answer(
+    joined: str, responses: dict[str, tuple[object, str]]
+) -> tuple[object, str]:
+    """Find the response whose fragment appears in `joined`.
+
+    Args:
+        joined: The `gh` argument list the call was made with, space-joined.
+        responses: fragment of the `gh` argument list mapped to the
+            `(payload, error)` pair `gh_json` would return for it.
+
+    Returns:
+        tuple[object, str]: the `(payload, error)` pair for the first
+            fragment found in `joined`.
+
+    Raises:
+        AssertionError: no fragment in `responses` matched `joined` — the
+            test did not anticipate this call.
+    """
+    for fragment, answer in responses.items():
+        if fragment in joined:
+            return answer
+    raise AssertionError(f"unexpected gh call: {joined}")
+
+
 def fake_gh(responses: dict[str, tuple[object, str]]) -> Callable[[list[str]], tuple[object, str]]:
     """Build a `gh_json` replacement that answers by substring of the endpoint.
 
@@ -82,11 +106,7 @@ def fake_gh(responses: dict[str, tuple[object, str]]) -> Callable[[list[str]], t
                 f"`gh` was called {calls} times for one verdict — the gate is "
                 f"looping without an exit condition"
             )
-        joined = " ".join(args)
-        for fragment, answer in responses.items():
-            if fragment in joined:
-                return answer
-        raise AssertionError(f"unexpected gh call: {joined}")
+        return _first_matching_answer(" ".join(args), responses)
     return _call
 
 
