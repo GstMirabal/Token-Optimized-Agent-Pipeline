@@ -1,0 +1,115 @@
+{
+  "_doc": "Per-file quality_audit exclusion list (agents.md \u00a71 max_indentation/max_lines_per_func). D1: skips these paths so refactoring vendored upstream code, which forks it on every future sync, is not forced. D2: an entry is added only after its file's provenance is verified byte-by-byte against Anthropic's upstream skill-creator (Apache-2.0, github.com/anthropics/skills, path skills/skill-creator/) at commit 3d59511518591fa82e6cfcf0438d68dd5dad3e76 (chore: export latest skills (#465)). Stale-entry rule: quality_audit.py exits 2 when an entry's path no longer exists in the tree, so this list cannot silently outlive the files it names.",
+  "exclusions": [
+    {
+      "path": "skills/skill-creator/scripts/__init__.py",
+      "reason": "vendored upstream code; refactoring forks it on every sync",
+      "provenance": {
+        "upstream": "https://github.com/anthropics/skills",
+        "upstream_path": "skills/skill-creator/scripts/__init__.py",
+        "upstream_commit": "3d59511518591fa82e6cfcf0438d68dd5dad3e76",
+        "match": "identical",
+        "license": "Apache-2.0"
+      }
+    },
+    {
+      "path": "skills/skill-creator/scripts/aggregate_benchmark.py",
+      "reason": "vendored upstream code; refactoring forks it on every sync",
+      "provenance": {
+        "upstream": "https://github.com/anthropics/skills",
+        "upstream_path": "skills/skill-creator/scripts/aggregate_benchmark.py",
+        "upstream_commit": "3d59511518591fa82e6cfcf0438d68dd5dad3e76",
+        "match": "trivial diff: docstrings reformatted single-line vs triple-quoted multi-line (4 occurrences), `from datetime import UTC` vs `from datetime import timezone` with matching `datetime.now(UTC)` vs `datetime.now(timezone.utc)` call (same stdlib value under a different Python 3.11+ alias), and one f-string prefix on a literal with no placeholders (`f\"\\nSummary:\"` vs `\"\\nSummary:\"`) - no behavioral difference",
+        "license": "Apache-2.0"
+      }
+    },
+    {
+      "path": "skills/skill-creator/scripts/generate_report.py",
+      "reason": "vendored upstream code; refactoring forks it on every sync",
+      "provenance": {
+        "upstream": "https://github.com/anthropics/skills",
+        "upstream_path": "skills/skill-creator/scripts/generate_report.py",
+        "upstream_commit": "3d59511518591fa82e6cfcf0438d68dd5dad3e76",
+        "match": "identical",
+        "license": "Apache-2.0"
+      }
+    },
+    {
+      "path": "skills/skill-creator/scripts/improve_description.py",
+      "reason": "vendored upstream code; refactoring forks it on every sync",
+      "provenance": {
+        "upstream": "https://github.com/anthropics/skills",
+        "upstream_path": "skills/skill-creator/scripts/improve_description.py",
+        "upstream_commit": "3d59511518591fa82e6cfcf0438d68dd5dad3e76",
+        "match": "identical",
+        "license": "Apache-2.0"
+      }
+    },
+    {
+      "path": "skills/skill-creator/scripts/package_skill.py",
+      "reason": "vendored upstream code; refactoring forks it on every sync",
+      "provenance": {
+        "upstream": "https://github.com/anthropics/skills",
+        "upstream_path": "skills/skill-creator/scripts/package_skill.py",
+        "upstream_commit": "3d59511518591fa82e6cfcf0438d68dd5dad3e76",
+        "match": "trivial diff: two docstrings reformatted single-line vs triple-quoted multi-line, no wording or code change",
+        "license": "Apache-2.0"
+      }
+    },
+    {
+      "path": "skills/skill-creator/scripts/quick_validate.py",
+      "reason": "vendored upstream code; refactoring forks it on every sync",
+      "provenance": {
+        "upstream": "https://github.com/anthropics/skills",
+        "upstream_path": "skills/skill-creator/scripts/quick_validate.py",
+        "upstream_commit": "3d59511518591fa82e6cfcf0438d68dd5dad3e76",
+        "match": "trivial diff: module docstring reformatted single-line vs triple-quoted multi-line, upstream carries one additional `import os` that is unused in both versions (dead import, no behavioral difference), and trailing-whitespace/final-newline differences - no behavioral difference",
+        "license": "Apache-2.0"
+      }
+    },
+    {
+      "path": "skills/skill-creator/scripts/run_eval.py",
+      "reason": "vendored upstream code; refactoring forks it on every sync",
+      "provenance": {
+        "upstream": "https://github.com/anthropics/skills",
+        "upstream_path": "skills/skill-creator/scripts/run_eval.py",
+        "upstream_commit": "3d59511518591fa82e6cfcf0438d68dd5dad3e76",
+        "match": "trivial diff: one `if A: triggered = True / elif C: triggered = True` rewritten as `if A or C: triggered = True` (Python `and` binds tighter than `or`, so both branches of the original condense into the same combined boolean without changing which inputs set `triggered`) - no behavioral difference",
+        "license": "Apache-2.0"
+      }
+    },
+    {
+      "path": "skills/skill-creator/scripts/run_loop.py",
+      "reason": "vendored upstream code; refactoring forks it on every sync",
+      "provenance": {
+        "upstream": "https://github.com/anthropics/skills",
+        "upstream_path": "skills/skill-creator/scripts/run_loop.py",
+        "upstream_commit": "3d59511518591fa82e6cfcf0438d68dd5dad3e76",
+        "match": "trivial diff: one f-string prefix on a literal with no placeholders (`f\"\\nImproving description...\"` vs `\"\\nImproving description...\"`) - no behavioral difference",
+        "license": "Apache-2.0"
+      }
+    },
+    {
+      "path": "skills/skill-creator/scripts/utils.py",
+      "reason": "vendored upstream code; refactoring forks it on every sync",
+      "provenance": {
+        "upstream": "https://github.com/anthropics/skills",
+        "upstream_path": "skills/skill-creator/scripts/utils.py",
+        "upstream_commit": "3d59511518591fa82e6cfcf0438d68dd5dad3e76",
+        "match": "identical",
+        "license": "Apache-2.0"
+      }
+    },
+    {
+      "path": "skills/skill-creator/eval-viewer/generate_review.py",
+      "reason": "vendored upstream code; refactoring forks it on every sync",
+      "provenance": {
+        "upstream": "https://github.com/anthropics/skills",
+        "upstream_path": "skills/skill-creator/eval-viewer/generate_review.py",
+        "upstream_commit": "3d59511518591fa82e6cfcf0438d68dd5dad3e76",
+        "match": "trivial diff: three f-string prefixes on literals with no placeholders (print statements) - no behavioral difference",
+        "license": "Apache-2.0"
+      }
+    }
+  ]
+}
