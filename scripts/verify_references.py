@@ -108,12 +108,17 @@ def loadable_text() -> str:
 
 
 def scan_files():
-    for pattern in ("**/*.md", "**/*.py"):
-        for p in Path(".").glob(pattern):
-            sp = str(p)
-            if any(x in sp for x in SCAN_EXCLUDE):
-                continue
-            yield p
+    """Yield every tracked markdown/Python file outside `SCAN_EXCLUDE`.
+
+    Returns:
+        Iterator[Path]: Markdown files first, then Python files — the same
+            order the original two-pattern loop produced.
+    """
+    candidates = [*Path(".").glob("**/*.md"), *Path(".").glob("**/*.py")]
+    for p in candidates:
+        if any(x in str(p) for x in SCAN_EXCLUDE):
+            continue
+        yield p
 
 
 def check_rules_reachable(corpus: str) -> list[str]:
@@ -151,17 +156,32 @@ def check_templates_exist(corpus: str) -> list[str]:
     return errors
 
 
+def _rule_citation_errors(path: Path, mapped: set[str]) -> list[str]:
+    """(c) Numbered `Rule NN` citations in one file, checked against `mapped`.
+
+    Args:
+        path: File to scan for `Rule NN` citations.
+        mapped: Rule numbers documented in `rules/LEGACY_RULE_CONCORDANCE.md`.
+
+    Returns:
+        list[str]: One error per citation number absent from `mapped`.
+    """
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    errors = []
+    # 41 covers 041/41.x style; normalize citations to their integer part.
+    for num in re.findall(r"Rule[s]? 0*(\d+)(?:\.\d+)?", text):
+        if num not in mapped:
+            errors.append(f"(c) {path}: cites Rule {num}, not mapped in the concordance.")
+    return errors
+
+
 def check_rule_citations() -> list[str]:
     if not CONCORDANCE.exists():
         return [f"(c) {CONCORDANCE} missing — numbered citations cannot be resolved."]
     mapped = set(re.findall(r"\*\*Rule (\d+)", CONCORDANCE.read_text(encoding="utf-8")))
-    # 41 covers 041/41.x style; normalize citations to their integer part.
-    errors = []
+    errors: list[str] = []
     for p in scan_files():
-        text = p.read_text(encoding="utf-8", errors="ignore")
-        for num in re.findall(r"Rule[s]? 0*(\d+)(?:\.\d+)?", text):
-            if num not in mapped:
-                errors.append(f"(c) {p}: cites Rule {num}, not mapped in the concordance.")
+        errors += _rule_citation_errors(p, mapped)
     return sorted(set(errors))
 
 
@@ -195,6 +215,32 @@ def load_exceptions() -> tuple[dict[str, str], list[str]]:
     return exceptions, errors
 
 
+def _module_names_imported_by(path: Path) -> set[str]:
+    """AST-parse one Python file and return the module names it imports.
+
+    Args:
+        path: A first-party `.py` file.
+
+    Returns:
+        set[str]: Top-level import names; empty when the file fails to parse.
+    """
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+    except SyntaxError:
+        return set()
+    names: set[str] = set()
+    for node in ast.walk(tree):
+        # Two sibling `if`s, not `if`/`elif`: `ast.Import` and `ast.ImportFrom`
+        # are mutually exclusive types, so this is behaviourally identical —
+        # and an `elif` nests one AST level deeper (a nested `If` in the first
+        # `If`'s `orelse`), which is what pushed this unit past depth 3.
+        if isinstance(node, ast.Import):
+            names.update(alias.name.split(".")[0] for alias in node.names)
+        if isinstance(node, ast.ImportFrom) and node.module:
+            names.add(node.module.split(".")[-1])
+    return names
+
+
 def imported_modules() -> set[str]:
     """Module names imported by any tracked, first-party Python file.
 
@@ -216,15 +262,7 @@ def imported_modules() -> set[str]:
         *Path("skills").glob("*/scripts/*.py"),
         *Path("tests").glob("*.py"),
     ]:
-        try:
-            tree = ast.parse(path.read_text(encoding="utf-8"))
-        except SyntaxError:
-            continue
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Import):
-                modules.update(alias.name.split(".")[0] for alias in node.names)
-            elif isinstance(node, ast.ImportFrom) and node.module:
-                modules.add(node.module.split(".")[-1])
+        modules |= _module_names_imported_by(path)
     return modules
 
 
@@ -634,6 +672,50 @@ def resolve_cited_path(cited: str) -> Path | None:
     return None
 
 
+def _line_count(target: Path) -> int | None:
+    """Count lines in `target`.
+
+    Args:
+        target: File to count.
+
+    Returns:
+        int | None: Line count, or None on an OS-level read failure.
+    """
+    try:
+        return sum(1 for _ in target.open(encoding="utf-8", errors="ignore"))
+    except OSError:
+        return None
+
+
+def _out_of_range_citations(path: Path) -> list[str]:
+    """(f) ``path:line`` citations in one living doc, checked against file length.
+
+    Args:
+        path: A markdown file under `FILE_LINE_CORPUS`.
+
+    Returns:
+        list[str]: One error per citation whose line number falls outside the
+            cited file's range.
+    """
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    errors: list[str] = []
+    for match in FILE_LINE_RE.finditer(text):
+        cited, line_s = match.group(1), match.group(2)
+        line_no = int(line_s)
+        target = resolve_cited_path(cited)
+        if target is None:
+            continue
+        n_lines = _line_count(target)
+        if n_lines is None:
+            continue
+        if line_no < 1 or line_no > n_lines:
+            errors.append(
+                f"(f) {path}: cites `{cited}:{line_no}` but "
+                f"{target} has {n_lines} lines."
+            )
+    return errors
+
+
 def check_file_line_citations() -> list[str]:
     """(f) ``path:line`` citations in living docs must be inside the file.
 
@@ -646,22 +728,7 @@ def check_file_line_citations() -> list[str]:
         if not root.is_dir():
             continue
         for path in sorted(root.rglob("*.md")):
-            text = path.read_text(encoding="utf-8", errors="ignore")
-            for match in FILE_LINE_RE.finditer(text):
-                cited, line_s = match.group(1), match.group(2)
-                line_no = int(line_s)
-                target = resolve_cited_path(cited)
-                if target is None:
-                    continue
-                try:
-                    n_lines = sum(1 for _ in target.open(encoding="utf-8", errors="ignore"))
-                except OSError:
-                    continue
-                if line_no < 1 or line_no > n_lines:
-                    errors.append(
-                        f"(f) {path}: cites `{cited}:{line_no}` but "
-                        f"{target} has {n_lines} lines."
-                    )
+            errors += _out_of_range_citations(path)
     return sorted(set(errors))
 
 
