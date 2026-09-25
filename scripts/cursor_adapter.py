@@ -147,13 +147,7 @@ def _write_commands(cursor_dir: Path, *, nucleus: bool) -> set[str]:
     commands_dir.mkdir(parents=True, exist_ok=True)
     expected: set[str] = set()
     for src in sorted((AGENTS_DIR / "commands").glob("*.md")):
-        text = src.read_text(encoding="utf-8")
-        if text.startswith("---"):
-            parts = text.split("---", 2)
-            if len(parts) >= 3:
-                front = parts[1]
-                body = _rewrite_command_body(parts[2].lstrip("\n"), nucleus=nucleus)
-                text = f"---{front}---\n{body}"
+        text = expected_cursor_command_text(src.read_text(encoding="utf-8"), nucleus=nucleus)
         (commands_dir / src.name).write_text(text, encoding="utf-8")
         expected.add(src.name)
     return expected
@@ -247,6 +241,42 @@ def _profile_rule_fallback(text: str) -> tuple[str, str] | None:
     return description, globs
 
 
+def _resolve_profile_rule_fields(
+    src: Path, text: str, key: str, triggers: dict[str, dict], profile_dir: Path
+) -> tuple[str, str, str]:
+    """Resolve one profile rule's description/globs/body via the `D3` cascade.
+
+    Args:
+        src: The rule source file, named in the error when both rungs fail.
+        text: Full source text (frontmatter, if any, plus body).
+        key: Trigger lookup key, ``"rules/<filename>"``.
+        triggers: The profile's own ``rule_triggers.json`` entries, keyed by
+            ``key``. Empty when the profile carries no such file.
+        profile_dir: Profile root, named in the error when both rungs fail.
+
+    Returns:
+        tuple[str, str, str]: ``(description, globs, body)``.
+
+    Raises:
+        ProfileRuleTriggerError: Neither cascade rung resolves the rule.
+    """
+    if key in triggers:
+        trigger = triggers[key]
+        description = trigger["trigger_prose"].replace('"', "'")
+        globs = _globs_for_mdc(trigger["globs"])
+        return description, globs, text
+    fallback = _profile_rule_fallback(text)
+    if fallback is None:
+        raise ProfileRuleTriggerError(
+            f"{src}: no entry for {key!r} in "
+            f"{profile_dir / 'rule_triggers.json'}, and no "
+            "description/globs frontmatter of its own"
+        )
+    description, globs = fallback
+    _, body = _split_frontmatter(text)
+    return description, globs, body
+
+
 def _write_profile_rules(cursor_dir: Path, profile_dir: Path) -> set[str]:
     """Upsert a profile's rule ``.mdc`` files; return expected filenames.
 
@@ -267,21 +297,9 @@ def _write_profile_rules(cursor_dir: Path, profile_dir: Path) -> set[str]:
     for src in sorted(rules_src.glob("*.md")):
         key = f"rules/{src.name}"
         text = src.read_text(encoding="utf-8")
-        if key in triggers:
-            trigger = triggers[key]
-            description = trigger["trigger_prose"].replace('"', "'")
-            globs = _globs_for_mdc(trigger["globs"])
-            body = text
-        else:
-            fallback = _profile_rule_fallback(text)
-            if fallback is None:
-                raise ProfileRuleTriggerError(
-                    f"{src}: no entry for {key!r} in "
-                    f"{profile_dir / 'rule_triggers.json'}, and no "
-                    "description/globs frontmatter of its own"
-                )
-            description, globs = fallback
-            _, body = _split_frontmatter(text)
+        description, globs, body = _resolve_profile_rule_fields(
+            src, text, key, triggers, profile_dir
+        )
         fields = {
             "description": description,
             "globs": globs,
