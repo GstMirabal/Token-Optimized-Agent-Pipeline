@@ -65,7 +65,7 @@ The Token-Optimized Agent Pipeline is an AI agent governance framework designed 
 ### At a Glance
 
 <!-- COUNTED_START -->
-| **Infrastructure** | 40 Python scripts in [`scripts/`](scripts/) · 7 JSON registries in [`config/`](config/) |
+| **Infrastructure** | 41 Python scripts in [`scripts/`](scripts/) · 8 JSON registries in [`config/`](config/) |
 <!-- COUNTED_END -->
 
 | | |
