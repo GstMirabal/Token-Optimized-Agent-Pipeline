@@ -253,6 +253,58 @@ def load_anchor(project: Path) -> dict:
         return {}
 
 
+def _report_result(result: dict, as_json: bool) -> None:
+    """Print one measurement, as JSON or rendered text.
+
+    Args:
+        result: A `measure()`/`measure_previous()` return value.
+        as_json: True to print machine-readable JSON, else render as text.
+    """
+    if as_json:
+        print(json.dumps(result, indent=2))
+    else:
+        render(result)
+
+
+def _report_from_anchor_absence(state: dict, as_json: bool) -> None:
+    """Print that `--from-anchor` found no prior transcript to measure.
+
+    Args:
+        state: Parsed `active_state.json` contents.
+        as_json: True to print machine-readable JSON, else a warning line.
+    """
+    payload = {"measurable": False, "reason": "no prior Claude transcript",
+               "session_tool": state.get("session_tool")}
+    if as_json:
+        print(json.dumps(payload, indent=2))
+    else:
+        print("⚠️  No prior Claude transcript to measure "
+              f"(session_tool={state.get('session_tool')!r}).")
+
+
+def _run_from_anchor(project: Path, as_json: bool) -> int:
+    """`--from-anchor` mode: measure the previous session via `active_state.json`.
+
+    Args:
+        project: Repository root passed as `--project`.
+        as_json: True to print machine-readable JSON.
+
+    Returns:
+        int: Always 0 -- absence of a prior transcript is reported, not an error.
+    """
+    state = load_anchor(project)
+    result = measure_previous(
+        project,
+        exclude_session=state.get("session_id"),
+        session_tool=state.get("session_tool"),
+    )
+    if result is None:
+        _report_from_anchor_absence(state, as_json)
+        return 0
+    _report_result(result, as_json)
+    return 0
+
+
 def main() -> int:
     """Measure a session and report it in tokens, per context cycle."""
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
@@ -268,26 +320,7 @@ def main() -> int:
     args = parser.parse_args()
 
     if args.from_anchor:
-        state = load_anchor(args.project)
-        result = measure_previous(
-            args.project,
-            exclude_session=state.get("session_id"),
-            session_tool=state.get("session_tool"),
-        )
-        if result is None:
-            payload = {"measurable": False, "reason": "no prior Claude transcript",
-                       "session_tool": state.get("session_tool")}
-            if args.json:
-                print(json.dumps(payload, indent=2))
-            else:
-                print("⚠️  No prior Claude transcript to measure "
-                      f"(session_tool={state.get('session_tool')!r}).")
-            return 0
-        if args.json:
-            print(json.dumps(result, indent=2))
-        else:
-            render(result)
-        return 0
+        return _run_from_anchor(args.project, args.json)
 
     transcript = find_transcript(args.session, args.project)
     if transcript is None:
@@ -296,10 +329,7 @@ def main() -> int:
         return 1
 
     result = measure(transcript)
-    if args.json:
-        print(json.dumps(result, indent=2))
-    else:
-        render(result)
+    _report_result(result, args.json)
     return 0
 
 
