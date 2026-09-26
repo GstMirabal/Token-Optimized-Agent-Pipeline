@@ -125,6 +125,44 @@ def vendored_skill_md(skill_path: Path) -> Path | None:
     return nested[0] if nested else None
 
 
+def _resolve_existing_symlink(skill_md: Path, target: Path) -> bool:
+    """Removes a stale symlink at `skill_md` if it doesn't already point at `target`.
+
+    Args:
+        skill_md: The skill's root `SKILL.md`, known to be a symlink.
+        target: The relative path the symlink must resolve to.
+
+    Returns:
+        True when a fresh symlink still needs to be created, False when the
+        existing symlink already matches `target` and there is nothing to do.
+    """
+    if Path(os.readlink(skill_md)) == target:
+        return False
+    skill_md.unlink()
+    return True
+
+
+def _replace_shadowing_file(skill_md: Path, target: Path, scaffold: str, base_dir: Path) -> bool:
+    """Removes `skill_md` if it is this script's own untouched scaffolding.
+
+    Args:
+        skill_md: The skill's root `SKILL.md`, known to exist and not be a symlink.
+        target: The relative path the eventual symlink must resolve to.
+        scaffold: What this script would have written here, from `render_skill_md`.
+        base_dir: The framework root, for relative reporting.
+
+    Returns:
+        True when a fresh symlink still needs to be created, False when the
+        file was left untouched because a human wrote it (reported to stdout).
+    """
+    if skill_md.read_text() != scaffold:
+        print(f"  [!] {skill_md.relative_to(base_dir)} is not this script's scaffolding "
+              f"and shadows {target} — left untouched, resolve by hand.")
+        return False
+    skill_md.unlink()
+    return True
+
+
 def point_at_vendored(skill_md: Path, vendored: Path, scaffold: str, base_dir: Path) -> None:
     """Make a skill's root `SKILL.md` resolve to the vendored one it shadowed.
 
@@ -150,15 +188,13 @@ def point_at_vendored(skill_md: Path, vendored: Path, scaffold: str, base_dir: P
     """
     target = Path(os.path.relpath(vendored, skill_md.parent))
     if skill_md.is_symlink():
-        if Path(os.readlink(skill_md)) == target:
-            return
-        skill_md.unlink()
+        needs_link = _resolve_existing_symlink(skill_md, target)
     elif skill_md.exists():
-        if skill_md.read_text() != scaffold:
-            print(f"  [!] {skill_md.relative_to(base_dir)} is not this script's scaffolding "
-                  f"and shadows {target} — left untouched, resolve by hand.")
-            return
-        skill_md.unlink()
+        needs_link = _replace_shadowing_file(skill_md, target, scaffold, base_dir)
+    else:
+        needs_link = True
+    if not needs_link:
+        return
     skill_md.symlink_to(target)
     print(f"  [+] {skill_md.relative_to(base_dir)} -> {target}")
 
