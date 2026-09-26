@@ -106,8 +106,10 @@ def test_upstream_open_entries_counts_the_canonical_marker(
             "",
             "| | |",
             "| :--- | :--- |",
-            "| **Still open** | Six, each with its own entry below: "
-            "F-1, F-2, F-3, F-4, F-5, F-6 |",
+            (
+                "| **Still open** | Six, each with its own entry below: "
+                "F-1, F-2, F-3, F-4, F-5, F-6 |"
+            ),
             "",
             "### - [ ] `F-1` — open finding one",
             "### - [ ] `F-2` — open finding two",
