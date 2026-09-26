@@ -66,7 +66,7 @@ restated here.
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | U8 | `docs/decisions/ADR-0015-artifact-owner-writer-separation.md` | create | low | `doc_orchestrator` | sonnet | medium | ✅ `b2eba19` |
-| U8a | `docs/decisions/ADR-0017-typed-artifact-writer.md` (subject) + `Superseded by` annotation in ADR-0015 | create | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| U8a | `docs/decisions/ADR-0017-typed-artifact-writer.md` (subject) + `Superseded by` annotation in ADR-0015 | create | low | `doc_orchestrator` | sonnet | medium | ✅ `b0cc724` |
 | U9 | `config/artifact_registry.json` (subject) + paired `tests/test_artifact_registry.py` | feat( | medium | `implementer_agent` | sonnet | medium | ✅ `0a55351` |
 | U10 | `workflows/pipeline_workflow.md` | modify | low | `doc_orchestrator` | sonnet | medium | ✅ `c35c634` |
 | U11 | `scripts/check_role_artifact.py` (subject) + paired `tests/test_check_role_artifact.py` | fix( | high | `implementer_agent` | sonnet | medium | ✅ `11933ce` |
@@ -87,8 +87,8 @@ across `pipeline_workflow.md`), owed at its own commit.
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| U19 | `scripts/verify_references.py` (subject) + paired `tests/test_verify_references.py` | feat( | high | `implementer_agent` | sonnet | medium | ⏳ |
-| U20 | `config/invocation_exceptions.json` | modify | low | `rule_validator` | sonnet | medium | ⏳ |
+| U19 | `scripts/verify_references.py` (subject) + paired `tests/test_verify_references.py` | feat( | high | `implementer_agent` | sonnet | medium | ✅ `6a7fe27` |
+| U20 | `config/invocation_exceptions.json` | modify | low | `rule_validator` | sonnet | medium | ✅ `3a11230` |
 
 `U20`: reassigned from the plan's proposed `implementer_agent` to `rule_validator`
 by `agent_assignment.md`'s recorded disagreement (`config/invocation_exceptions.json`
@@ -99,56 +99,56 @@ write scope) — transcribed here, not re-litigated.
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| U21 | `config/quality_audit_exclusions.json` | create | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U22 | `scripts/quality_audit.py` (subject) + paired `tests/test_quality_audit.py` | feat( | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| U21 | `config/quality_audit_exclusions.json` | create | medium | `implementer_agent` | sonnet | medium | ✅ `e0922dd` |
+| U22 | `scripts/quality_audit.py` (subject) + paired `tests/test_quality_audit.py` | feat( | medium | `implementer_agent` | sonnet | medium | ✅ `6bc75b9` |
 
 ### Wave 6 — Refactor to zero (`R`, one file per unit, 42 independent units)
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| U23 | `hooks/on_commit.py` | R | high | `implementer_agent` | sonnet | medium | ⏳ |
-| U24 | `hooks/on_init.py` | R | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U25 | `hooks/state_mirror.py` | R | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U26 | `scripts/audit_cursor_era.py` | R | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U27 | `scripts/branch_sovereignty.py` | R | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U28 | `scripts/check_absolute_paths.py` | R | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U29 | `scripts/check_forge_ladder.py` | R | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U30 | `scripts/check_gate_log.py` | R | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U31 | `scripts/check_model_tiers.py` | R | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U32 | `scripts/check_task_scope.py` | R | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U33 | `scripts/check_template_gates.py` | R | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U34 | `scripts/ci_gate.py` | R | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U35 | `scripts/cursor_adapter.py` | R | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U36 | `scripts/detect_drift.py` | R | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U37 | `scripts/detect_new_models.py` | R | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U38 | `scripts/docs_freshness_check.py` | R | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U39 | `scripts/install.py` | R | high | `implementer_agent` | sonnet | medium | ⏳ |
-| U40 | `scripts/merge_json.py` | R | high | `implementer_agent` | sonnet | medium | ⏳ |
-| U41 | `scripts/model_ledger.py` | R | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U42 | `scripts/quality_audit.py` | R | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U43 | `scripts/session_cost.py` | R | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U44 | `scripts/session_probe.py` | R | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U45 | `scripts/session_start.py` | R | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U46 | `scripts/session_state.py` | R | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U47 | `scripts/sync_agents_pin.py` | R | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U48 | `scripts/verify_references.py` | R | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U49 | `skills/compliance-checker/scripts/distill.py` | R | low | `skill_architect` | sonnet | medium | ⏳ |
-| U50 | `skills/env-shielding-auditor/scripts/env_shielding_auditor.py` | R | medium | `skill_architect` | sonnet | medium | ⏳ |
-| U51 | `skills/js-standardizer/scripts/js_standardizer.py` | R | low | `skill_architect` | sonnet | medium | ⏳ |
-| U52 | `skills/mass-standardizer/scripts/generate_manifest.py` | R | medium | `skill_architect` | sonnet | medium | ⏳ |
-| U53 | `skills/mass-standardizer/scripts/mass_standardizer.py` | R | low | `skill_architect` | sonnet | medium | ⏳ |
-| U54 | `skills/omni-context-minimizer/scripts/omni_minimizer.py` | R | medium | `skill_architect` | sonnet | medium | ⏳ |
-| U55 | `skills/skillopt/scripts/dataloader.py` | R | low | `skill_architect` | sonnet | medium | ⏳ |
-| U56 | `skills/skillopt/scripts/env.py` | R | medium | `skill_architect` | sonnet | medium | ⏳ |
-| U57 | `skills/skillopt/scripts/gemini_backend.py` | R | low | `skill_architect` | sonnet | medium | ⏳ |
-| U58 | `skills/skillopt/scripts/train_runner.py` | R | medium | `skill_architect` | sonnet | medium | ⏳ |
-| U59 | `skills/topology-monitor/scripts/coverage_auditor.py` | R | low | `skill_architect` | sonnet | medium | ⏳ |
-| U60 | `skills/topology-monitor/scripts/legacy_app_auditor.py` | R | medium | `skill_architect` | sonnet | medium | ⏳ |
-| U61 | `skills/topology-monitor/scripts/task_auditor.py` | R | low | `skill_architect` | sonnet | medium | ⏳ |
-| U62 | `tests/test_artifact_registry.py` | R | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U63 | `tests/test_ci_gate.py` | R | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U64 | `tests/test_session_protocol.py` | R | low | `implementer_agent` | sonnet | medium | ⏳ |
-| K1..Kn | `skills/skill-creator/{scripts,eval-viewer}/*.py` whose provenance `U21` cannot verify (up to 20 units in 11 files, `D2`) | R | medium | `skill_architect` | sonnet | medium | contingency |
+| U23 | `hooks/on_commit.py` | R | high | `implementer_agent` | sonnet | medium | ✅ `bdb3b40` |
+| U24 | `hooks/on_init.py` | R | medium | `implementer_agent` | sonnet | medium | ✅ `18235fb` |
+| U25 | `hooks/state_mirror.py` | R | medium | `implementer_agent` | sonnet | medium | ✅ `4e8e297` |
+| U26 | `scripts/audit_cursor_era.py` | R | low | `implementer_agent` | sonnet | medium | ✅ `c542959` |
+| U27 | `scripts/branch_sovereignty.py` | R | medium | `implementer_agent` | sonnet | medium | ✅ `67c406f` |
+| U28 | `scripts/check_absolute_paths.py` | R | low | `implementer_agent` | sonnet | medium | ✅ `dd70ac2` |
+| U29 | `scripts/check_forge_ladder.py` | R | medium | `implementer_agent` | sonnet | medium | ✅ `2185d74` |
+| U30 | `scripts/check_gate_log.py` | R | medium | `implementer_agent` | sonnet | medium | ✅ `4945d43` |
+| U31 | `scripts/check_model_tiers.py` | R | low | `implementer_agent` | sonnet | medium | ✅ `a41bac5` |
+| U32 | `scripts/check_task_scope.py` | R | medium | `implementer_agent` | sonnet | medium | ✅ `ba0a244` |
+| U33 | `scripts/check_template_gates.py` | R | medium | `implementer_agent` | sonnet | medium | ✅ `254d8f0` |
+| U34 | `scripts/ci_gate.py` | R | low | `implementer_agent` | sonnet | medium | ✅ `c2bb934` |
+| U35 | `scripts/cursor_adapter.py` | R | medium | `implementer_agent` | sonnet | medium | ✅ `c17be99` |
+| U36 | `scripts/detect_drift.py` | R | medium | `implementer_agent` | sonnet | medium | ✅ `a2fc516` |
+| U37 | `scripts/detect_new_models.py` | R | low | `implementer_agent` | sonnet | medium | ✅ `aa31333` |
+| U38 | `scripts/docs_freshness_check.py` | R | medium | `implementer_agent` | sonnet | medium | ✅ `6ff17bf` |
+| U39 | `scripts/install.py` | R | high | `implementer_agent` | sonnet | medium | ✅ `f2e4822` |
+| U40 | `scripts/merge_json.py` | R | high | `implementer_agent` | sonnet | medium | ✅ `244f70c` |
+| U41 | `scripts/model_ledger.py` | R | low | `implementer_agent` | sonnet | medium | ✅ `c08d3ef` |
+| U42 | `scripts/quality_audit.py` | R | medium | `implementer_agent` | sonnet | medium | ✅ `1de54b5` |
+| U43 | `scripts/session_cost.py` | R | low | `implementer_agent` | sonnet | medium | ✅ `e62f648` |
+| U44 | `scripts/session_probe.py` | R | medium | `implementer_agent` | sonnet | medium | ✅ `119b8df` |
+| U45 | `scripts/session_start.py` | R | low | `implementer_agent` | sonnet | medium | ✅ `e1c8557` |
+| U46 | `scripts/session_state.py` | R | medium | `implementer_agent` | sonnet | medium | ✅ `3c77a4b` |
+| U47 | `scripts/sync_agents_pin.py` | R | low | `implementer_agent` | sonnet | medium | ✅ `aa06616` |
+| U48 | `scripts/verify_references.py` | R | medium | `implementer_agent` | sonnet | medium | ✅ `aefb4ca` |
+| U49 | `skills/compliance-checker/scripts/distill.py` | R | low | `skill_architect` | sonnet | medium | ✅ `23d17a5` |
+| U50 | `skills/env-shielding-auditor/scripts/env_shielding_auditor.py` | R | medium | `skill_architect` | sonnet | medium | ✅ `8afb5ea` |
+| U51 | `skills/js-standardizer/scripts/js_standardizer.py` | R | low | `skill_architect` | sonnet | medium | ✅ `a3c3b10` |
+| U52 | `skills/mass-standardizer/scripts/generate_manifest.py` | R | medium | `skill_architect` | sonnet | medium | ✅ `d3277fe` |
+| U53 | `skills/mass-standardizer/scripts/mass_standardizer.py` | R | low | `skill_architect` | sonnet | medium | ✅ `613c376` |
+| U54 | `skills/omni-context-minimizer/scripts/omni_minimizer.py` | R | medium | `skill_architect` | sonnet | medium | ✅ `5c84a61` |
+| U55 | `skills/skillopt/scripts/dataloader.py` | R | low | `skill_architect` | sonnet | medium | ✅ `b586cf2` |
+| U56 | `skills/skillopt/scripts/env.py` | R | medium | `skill_architect` | sonnet | medium | ✅ `147b276` |
+| U57 | `skills/skillopt/scripts/gemini_backend.py` | R | low | `skill_architect` | sonnet | medium | ✅ `3931024` |
+| U58 | `skills/skillopt/scripts/train_runner.py` | R | medium | `skill_architect` | sonnet | medium | ✅ `4334548` |
+| U59 | `skills/topology-monitor/scripts/coverage_auditor.py` | R | low | `skill_architect` | sonnet | medium | obsolete — file deleted `3d65f37` |
+| U60 | `skills/topology-monitor/scripts/legacy_app_auditor.py` | R | medium | `skill_architect` | sonnet | medium | ✅ `0add610` |
+| U61 | `skills/topology-monitor/scripts/task_auditor.py` | R | low | `skill_architect` | sonnet | medium | obsolete — file deleted `3d65f37` |
+| U62 | `tests/test_artifact_registry.py` | R | low | `implementer_agent` | sonnet | medium | ✅ `2fef0de` |
+| U63 | `tests/test_ci_gate.py` | R | low | `implementer_agent` | sonnet | medium | ✅ `7dbf116` |
+| U64 | `tests/test_session_protocol.py` | R | low | `implementer_agent` | sonnet | medium | ✅ `c3d2aef` |
+| K1..Kn | `skills/skill-creator/{scripts,eval-viewer}/*.py` whose provenance `U21` cannot verify (up to 20 units in 11 files, `D2`) | R | medium | `skill_architect` | sonnet | medium | not triggered — `e0922dd` |
 
 `U56` and `U51` refactor `env.py` and `js_standardizer.py` for **complexity only**
 (latent `F821`/`E722` findings stay for Sprint 054 — `IMPLEMENTATION_PLAN.md`
@@ -158,9 +158,9 @@ write scope) — transcribed here, not re-litigated.
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| U65 | `agents.md` | modify | medium | `rule_validator` | sonnet | medium | ⏳ |
-| U66 | `Makefile` | modify | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U67 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| U65 | `agents.md` | modify | medium | `rule_validator` | sonnet | medium | ✅ `ac33d04` |
+| U66 | `Makefile` | modify | medium | `implementer_agent` | sonnet | medium | ✅ `1449e65` |
+| U67 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | low | `doc_orchestrator` | sonnet | medium | ✅ `8f65dcf` |
 
 `U65` carries an `RA-14` obligation (grep "does NOT run `make quality-audit`"
 corpus-wide). `U66` is deliberately **last** in execution order (`D13`: refactors
