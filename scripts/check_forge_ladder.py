@@ -64,7 +64,11 @@ def _is_separator(line: str) -> bool:
 
 
 def _is_table_start(line: str) -> bool:
-    """True when `line` opens a markdown table (a pipe row, not a separator)."""
+    """True when `line` opens a markdown table (a pipe row, not a separator).
+
+    Args:
+        line: One raw line from the source document.
+    """
     return line.strip().startswith("|") and not _is_separator(line)
 
 
