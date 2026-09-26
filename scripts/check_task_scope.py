@@ -116,7 +116,11 @@ def _is_separator(line: str) -> bool:
 
 
 def _is_work_header(line: str) -> bool:
-    """True when this line is a table header row naming every WORK_KEYS."""
+    """True when this line is a table header row naming every WORK_KEYS.
+
+    Args:
+        line: One raw line from the source document.
+    """
     return (line.strip().startswith("|") and not _is_separator(line)
             and all(key in _cells(line) for key in WORK_KEYS))
 
