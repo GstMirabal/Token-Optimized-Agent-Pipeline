@@ -10,6 +10,7 @@ invoked_by: scripts/install.py (import; non-destructive settings/mcp merge).
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 # Hook command strings shipped by PREVIOUS template versions. Pruned from the
 # destination before merging so a re-install upgrades them instead of leaving
@@ -59,7 +60,7 @@ def _merge_list_append(dest_list: list, value_list: list) -> None:
             dest_list.append(item)
 
 
-def _merge_value(dest: dict, key: str, value) -> None:
+def _merge_value(dest: dict, key: str, value: Any) -> None:
     """Merges a single template value into dest[key], in place, per its JSON kind.
 
     Args:
