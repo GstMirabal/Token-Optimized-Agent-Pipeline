@@ -443,6 +443,10 @@ def _excluded_files(paths: list[Path], exclude: frozenset[Path]) -> list[Path]:
     Kept separate from the unit register so an exclusion is never silent
     (`D1`) -- `--report` lists these files distinctly from PASS/FAIL/
     unparsed units.
+
+    Args:
+        paths: Root paths passed to the audit (files or directories).
+        exclude: Resolved paths the exclusion file marked as skipped.
     """
     return sorted(p for p in iter_source_files(paths) if p.resolve() in exclude)
 
