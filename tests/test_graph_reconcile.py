@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
-import graph_reconcile as gr  # noqa: E402
+import graph_reconcile as gr
 
 
 def _repo_with_tracked(tmp_path: Path, files: dict[str, str]) -> Path:
