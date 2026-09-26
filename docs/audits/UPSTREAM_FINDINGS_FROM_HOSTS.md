@@ -86,7 +86,7 @@ sessions that obey it.
 | **Closed, and never marked as such** | `F-086-A1` (resolved by design — `implementer_agent` owns those trees, `ADR-0009`) · `F-087-P1` (`session_probe.py:447` adds `UNDETERMINED`) · `F-086-S1` (`SCANNED_SUFFIXES` covers `.tf`/`.yml`/`.yaml`/`.toml` plus whole-name files) · `F-086-S2` (`on_commit.py:128` adds the unquoted pattern) · `F-086-S3` (`SKILL.md` is 247 lines, not a 20-line stub) · `F-093-N1` (`agents.md §0` states it is host-only by design) · `F-093-N2` (`check_readme_counts.py` `main()` does `os.chdir(agents_root())`; verified from `/` and from a home directory, exit `0` both) · `G-03` (`check_task_scope.py` gained `--sprint-dir`) · `C5` (`agents.md §3 symlink_gate_exclusion`) · `#12` (14 of 14 profiles declare `model:`) |
 | **Closed since the host last looked** | `_bridge_permission_denied` generalised beyond `.cursor` in Sprint 044 — its own docstring records it · `ci_gate.py:55,148` handles the HTTP 403 a private repository returns · `check_forge_ladder.py` `_skill_forge_claimed` no longer scans prose for a skill path · `F-107-N1` `check_role_artifact.py` moved off `SubagentStop` to `config/template_gates.json:84` |
 | **Closed by this sprint** | `F-112-N1` drift judged against HEAD rather than the integration branch · `F-112-N2` no pytest configuration, so rootdir escaped into the host · `F-112-N3` and its shell sibling, tests naming a platform temporary path instead of honouring `TMPDIR` · `H099-3` `node_delta` raising `TypeError` on a present-but-null count, **unchanged for eleven sprints because this file said nothing was open** · `loop_guard.py` looking for `task_scope.md` at the repository root, where no host keeps it · the IDE-branch-prefix gap in `RA-03`/`RA-12` · the Phase 5 approval that did not say it names one `Sprint_ID` |
-| **Still open** | Six, each with its own entry below: **`REVDOC-G1`** (verdict changed, not a framework defect, risk retained), **`ADR-0006`**, **`ADR-0007`**, **`#13`** (`owned-by-050`), and **`F-051-R1`** plus **`F-051-R3`** opened by this sprint. The briefing's count is of *rows* in this table, not of items — read the entries. `F-051-R1`: `config/artifact_registry.json` and `pipeline_workflow.md` Phase 8 name `principal_agent` as the author of `IMPLEMENTATION_PLAN.md`, `PHASE_REGISTER.md` and `CHANGELOG.md`, and `agents/principal_agent.md:4` declares `tools: Read, Glob, Grep, TodoWrite` — no `Write`, no `Edit`. Reproduced live: a Sprint 051 session dispatched that profile to author its Implementation Plan and had to file the text itself. Wider than the host's report, which named only the `CHANGELOG` row. **Not patched here**: either the profile gains `Write` for its own declared documents, or the registry names a writer separately from the owner, and choosing between those redraws a role boundary — which `§9`'s principle says is not resolved by improvisation inside a sprint |
+| **Still open** | Six, each with its own entry below: **`REVDOC-G1`** (verdict changed, not a framework defect, risk retained), **`ADR-0006`**, **`ADR-0007`**, **`#13`** (`owned-by-050`), and **`F-051-R1`** plus **`F-051-R3`** opened by this sprint. The briefing's count is of *rows* in this table, not of items — read the entries (Sprint 052 unit `S052-3`, commit `fb820f1`, changed the briefing to count `### - [ ]` entries directly, closing this distinction going forward). `F-051-R1`: `config/artifact_registry.json` and `pipeline_workflow.md` Phase 8 name `principal_agent` as the author of `IMPLEMENTATION_PLAN.md`, `PHASE_REGISTER.md` and `CHANGELOG.md`, and `agents/principal_agent.md:4` declares `tools: Read, Glob, Grep, TodoWrite` — no `Write`, no `Edit`. Reproduced live: a Sprint 051 session dispatched that profile to author its Implementation Plan and had to file the text itself. Wider than the host's report, which named only the `CHANGELOG` row. **Not patched here**: either the profile gains `Write` for its own declared documents, or the registry names a writer separately from the owner, and choosing between those redraws a role boundary — which `§9`'s principle says is not resolved by improvisation inside a sprint |
 | **Verdict changed, not closed** | **`REVDOC-G1`** — the graph dropping unprocessable files is **not a framework defect**: `Makefile graphify-update`/`-rebuild` shell straight to a third-party package and the nucleus carries no wrapper that could record a drop (`grep` for skip/unprocessable/dropped across `scripts/` and `hooks/` → 0). The **risk** is still the nucleus's, because `§2 graph_sovereignty` mandates querying the graph before any codebase research, and a silently incomplete graph answers confidently. Closing it would need a new reconciliation mechanism, not a fix |
 | **Ticked on what basis** | Re-measurement against `v4.32.0`, never on a sprint record. Two of the host's own verdicts were **wrong on first pass and corrected**: `F-093-N2` was reported open by reading the symptom line and not the call path, and the `_bridge_permission_denied` lead was carried from a stale session note. Both are recorded above as closed |
 
@@ -105,6 +105,16 @@ request**. The commit is recorded and the pull request is named `pending 023`.
 Writing a PR number that does not exist yet would make this file assert something
 unverifiable — the failure shape most of these findings describe. `#12` is the one
 item that closed earlier, in Sprint 022, and it carries its real PR.
+
+**Status at Sprint 052 (2026-09-26, `ai-sprint/052`).** The orchestrator
+re-measured every item the Sprint 051 block above left open — the six entries it
+names in its **Still open** row — against `ac33d04`. All six closed.
+
+| | |
+| :--- | :--- |
+| **Closed** | **`REVDOC-G1`** — `scripts/graph_reconcile.py` (`a830894`) reconciles `git ls-files` against the graph's `source_file` set and writes `graphify-out/unmapped_files.json`, advisory exit `0`; `Makefile` `graphify-update`/`-rebuild` run it after every graph write (`e59795a`). Re-measured: 42 tracked files unmapped on the current, pre-rebuild graph; an absent graph stays advisory. The third-party drop itself is not fixed — it is now observable, which is the risk the entry retained · **`ADR-0006`** — `ADR-0016` (`30a14db`) restates `agents.md §3 local_testing` as *isolate the test database*, SQLite in-memory as the default, a host ADR as the sanctioned deviation; applied in `agents.md` (`bbd8d0c`) and `agents/tester_agent.md` (`700913a`). Re-measured: both files cite `ADR-0016` · **`ADR-0007`** — `hooks/on_commit.py` Guard 5 `audit_task_scope_precondition` (`3c217ed`) refuses a `#ID` commit on `ai-sprint/ID` staging paths outside `docs/sprints/ID-*/` while `task_scope.md` is absent; sprint-directory-only commits pass. Re-measured: its tests pass (23-test run below) · **`#13`** — the decorator clause is now stated in `agents.md §1 max_lines_per_func` (`ac33d04`) and pinned by two tests in `tests/test_quality_audit.py` (`6bc75b9`); `make verify` now runs the quality audit (`1449e65`) with 0 violations over 1638 units · **`F-051-R1`** — the registry separates owner (`role`) from a typed `writer` (`0a55351`; `ADR-0015` `b2eba19`, superseded by `ADR-0017` `b0cc724` because script/make-target writers exist); `pipeline_workflow.md` names owner and writer (`c35c634`, `e366940`). `principal_agent` keeps no `Write`. Re-measured: `tests/test_artifact_registry.py` asserts every writer resolves · **`F-051-R3`** — `scripts/check_role_artifact.py` (`11933ce`) resolves the sprint directory from an `Audited repository: <absolute path>` line in the gate's `last_assistant_message` (payload `cwd` cannot distinguish repositories — Claude Code docs: a subagent cannot change the session cwd), then payload cwd, then process cwd; `qa_agent`/`tester_agent` profiles require that line and the full verdict register in the final message (`56d11c8`, `700913a` — which also answers the "Related" note above about one-line final messages, `D12`). Re-measured: tests pass |
+| **Still open** | None |
+| **Re-measurement command** | `venv_skillopt/bin/python -m pytest -q tests/test_check_role_artifact.py tests/test_on_commit.py tests/test_artifact_registry.py tests/test_quality_audit.py tests/test_graph_reconcile.py -k "audited or declared or task_scope or writer or decorator or unmapped or cwd"` → 23 passed; `python3 scripts/graph_reconcile.py` → 42 unmapped; `grep -c ADR-0016 agents.md agents/tester_agent.md` → 1, 2 |
 
 ---
 
@@ -1242,7 +1252,7 @@ intact in both documents. A document specifying an artifact at the wrong path wa
 also specifying it in the wrong shape, in the profile of the very agent that
 writes it.
 
-### - [ ] `REVDOC-G1` — the graph drops files silently
+### - [x] `REVDOC-G1` — the graph drops files silently
 
 The knowledge graph omits files it cannot process without recording that it did.
 A consumer cannot distinguish "not in the graph" from "not in the repository".
@@ -1261,7 +1271,18 @@ Proposed: emit a skipped-file manifest alongside the graph.
 > reconciliation mechanism** — files on disk against nodes in the graph — which is
 > a sprint of its own, not a repair.
 
-### - [ ] `ADR-0006` — `local_testing` mandates in-memory SQLite
+**Closed — Sprint 052.** `scripts/graph_reconcile.py` (`a830894`) is the
+reconciliation mechanism the Sprint 051 note said this needed: it reconciles
+`git ls-files` against the graph's `source_file` set and writes
+`graphify-out/unmapped_files.json`, exiting `0` (advisory, never blocking);
+`Makefile` `graphify-update`/`graphify-rebuild` now run it after every graph
+write (`e59795a`). Re-measured directly (`python3 scripts/graph_reconcile.py`):
+42 tracked files unmapped against the current, pre-rebuild graph; with no graph
+present it stays advisory rather than failing. The third-party drop that causes
+the omission is still not fixed — the Sprint 051 verdict on that point stands —
+but it is now observable, which is the risk this entry retained and closes on.
+
+### - [x] `ADR-0006` — `local_testing` mandates in-memory SQLite
 
 `agents.md §3 local_testing` requires `sqlite:///:memory:`. A host with money
 columns whose behaviour differs by database engine cannot honour it without the
@@ -1280,7 +1301,14 @@ declared-deviation path, which is what hosts end up building anyway.
 > state from the eight items this sprint closed by measurement, and saying so is
 > the point — an unexamined lead and a verified closure must not read alike.
 
-### - [ ] `ADR-0007` — pipeline phase enforcement and the delegation conflict
+**Closed — Sprint 052.** `ADR-0016` (`30a14db`) is the rule-text fix the proposal
+above asked for: it restates `agents.md §3 local_testing` as *isolate the test
+database*, names SQLite in-memory as the default, and names a host ADR as the
+sanctioned deviation path — the exact shape the deviating host had already built.
+Applied in `agents.md` (`bbd8d0c`) and `agents/tester_agent.md` (`700913a`).
+Re-measured: `grep -c ADR-0016 agents.md agents/tester_agent.md` → `1`, `2`.
+
+### - [x] `ADR-0007` — pipeline phase enforcement and the delegation conflict
 
 Recorded by a host against phase enforcement and the delegation rules. Note that
 `start_workflow.md` Phase 2 `delegation_conflict` already covers part of this
@@ -1291,6 +1319,13 @@ drafting.
 > pointer for whoever takes it: this sprint executed all five of its phases
 > in-session and produced `task_scope.md` only at Closeout, which is the enforcement
 > gap this item names, happening again inside the repository that owns the rule.
+
+**Closed — Sprint 052.** `hooks/on_commit.py` Guard 5
+`audit_task_scope_precondition` (`3c217ed`) closes the enforcement gap the Sprint
+051 note reproduced against itself: it refuses a `#ID` commit on `ai-sprint/ID`
+whose staged paths fall outside `docs/sprints/ID-*/` while `task_scope.md` is
+absent, and passes commits confined to the sprint directory. Re-measured: its
+tests pass in the 23-test run cited in the Sprint 052 status block above.
 
 ### - [x] `C5` — a tracked symlink into the submodule enters host gate scope
 
@@ -1353,7 +1388,7 @@ from `qa_agent` or `tester_agent`, `C4` was rejected three times over a
 destructive regression its author could not see, and `C10` took six rounds and
 four rejections. A cheaper gate is the one economy this file argues against.
 
-### - [ ] `#13` — `max_lines_per_func` is a magnitude with no definition
+### - [x] `#13` — `max_lines_per_func` is a magnitude with no definition
 
 `agents.md §1` declares `max_lines_per_func = 50 lines` and never states what
 counts as a line, while the same table mandates Google-style docstrings.
@@ -1388,6 +1423,12 @@ mechanises a different rule while reporting compliance with this one.
 > `Makefile`. **Not closed** — an item owned by another sprint is still open until
 > that sprint lands it.
 
+**Closed — Sprint 052.** The decorator clause this entry named as undefined is
+now stated in `agents.md §1 max_lines_per_func` (`ac33d04`) and pinned by two
+tests in `tests/test_quality_audit.py` (`6bc75b9`), and `make verify` now runs
+the quality audit (`1449e65`) rather than leaving it standalone. Re-measured:
+`make quality-audit` reports 0 violations over 1638 units.
+
 ---
 
 ### - [x] `F-051-R2` — two `make verify` gates skipped every sprint whose anchor named its id as a string
@@ -1410,7 +1451,7 @@ checks still skipped. **Closed by Sprint 051** (`1cb4be8`). The regression tests
 call the resolver directly, because through the CLI skipping and passing are the
 same exit code — that indistinguishability is why it went unnoticed.
 
-### - [ ] `F-051-R1` — the profile that owns three artifacts cannot write any of them
+### - [x] `F-051-R1` — the profile that owns three artifacts cannot write any of them
 
 `config/artifact_registry.json` names **Principal Agent** as the role for
 `IMPLEMENTATION_PLAN.md` (`:37`), `PHASE_REGISTER.md` (`:96`) and `CHANGELOG.md`
@@ -1435,7 +1476,16 @@ documents, or have the registry name a writer separately from the owner — and
 `scripts/`. Choosing needs the argument made once, for all roles, which is a design
 session and not a unit inside a sprint that did not plan it.
 
-### - [ ] `F-051-R3` — the role-artifact hook asks the wrong repository for its evidence
+**Closed — Sprint 052.** The registry now separates owner (`role`) from a typed
+`writer` (`0a55351`; `ADR-0015` `b2eba19`, superseded by `ADR-0017` `b0cc724`
+because script/make-target writers exist alongside profile writers), and
+`pipeline_workflow.md` names owner and writer separately (`c35c634`, `e366940`).
+`principal_agent` keeps no `Write` — the design session this entry deferred to
+chose the registry-side fix, not a tools grant. Re-measured:
+`tests/test_artifact_registry.py` asserts every writer the registry names
+resolves to a role or mechanism that can actually write it.
+
+### - [x] `F-051-R3` — the role-artifact hook asks the wrong repository for its evidence
 
 `scripts/check_role_artifact.py` fires on a gate subagent's stop and demands a
 `SPRINT_LOG.md` row. When the gate runs against a **different repository from the
@@ -1462,6 +1512,16 @@ in a non-final message that never reaches the caller — twice at a cost of 126k
 register only by asking a third time with the transport spelled out. Whether the
 repeating hook causes that truncation or merely accompanies it is not established
 here, and establishing it is the next step.
+
+**Closed — Sprint 052.** `scripts/check_role_artifact.py` (`11933ce`) now
+resolves the sprint directory from an `Audited repository: <absolute path>`
+line in the gate's `last_assistant_message` first — payload `cwd` cannot
+distinguish repositories, since a subagent cannot change the session cwd — and
+falls back to payload cwd, then process cwd, only when that line is absent.
+`qa_agent`/`tester_agent` profiles now require that line, and the full verdict
+register, in the final message (`56d11c8`, `700913a`), which also answers the
+**Related** note above about one-line final messages losing the register
+(`D12`). Re-measured: tests pass.
 
 ---
 
