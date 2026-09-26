@@ -3,9 +3,10 @@
 Agnostic health-check script for JS/TS repositories to ensure framework compliance.
 """
 
-import os
 import json
+import os
 import subprocess
+from collections.abc import Iterator
 
 def _should_skip_dir(root: str) -> bool:
     """Reports whether a walked directory is an excluded build/tooling path.
@@ -32,7 +33,7 @@ def _js_files_in_root(root: str, files: list[str]) -> list[str]:
     return [os.path.join(root, f) for f in files if f.endswith((".js", ".ts"))]
 
 
-def _iter_js_files(directory: str):
+def _iter_js_files(directory: str) -> Iterator[str]:
     """Yields full paths of every `.js`/`.ts` file under `directory`.
 
     Args:
