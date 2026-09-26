@@ -2,7 +2,7 @@ import sys
 import re
 import ast
 
-def _print_node_line(node, lines: list[str]) -> None:
+def _print_node_line(node: ast.AST, lines: list[str]) -> None:
     """Prints the source line for one AST node's header.
 
     Args:
@@ -30,7 +30,7 @@ def _print_class_methods(node: ast.ClassDef, lines: list[str]) -> int:
     return matched
 
 
-def _process_top_level_node(node, lines: list[str]) -> int:
+def _process_top_level_node(node: ast.AST, lines: list[str]) -> int:
     """Prints and counts one top-level AST node if it is structural.
 
     Args:
