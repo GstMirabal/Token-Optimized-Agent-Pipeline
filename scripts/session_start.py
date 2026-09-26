@@ -186,6 +186,22 @@ def _open_entry_count(text: str) -> int:
     return len(_OPEN_ENTRY.findall(text))
 
 
+def _cursor_author_model(data: object) -> object:
+    """``tiers.author.cursor.model`` from a parsed ``model_tiers.json``.
+
+    Args:
+        data: Parsed JSON contents of ``config/model_tiers.json``.
+
+    Returns:
+        object: The model name, or ``"(unset)"`` when any step of the path
+            is absent or not the expected shape.
+    """
+    tiers = data.get("tiers") if isinstance(data, dict) else None
+    author = tiers.get("author") if isinstance(tiers, dict) else None
+    cursor = author.get("cursor") if isinstance(author, dict) else None
+    return cursor.get("model", "(unset)") if isinstance(cursor, dict) else "(unset)"
+
+
 def section_chat_vs_map(root: Path) -> list[str]:
     lines = ["## Chat vs map (Cursor tiers)"]
     path = root / "config" / "model_tiers.json"
@@ -197,15 +213,7 @@ def section_chat_vs_map(root: Path) -> list[str]:
     except (OSError, json.JSONDecodeError) as exc:
         lines.append(f"unreadable: {exc}")
         return lines
-    author_model: object = "(unset)"
-    tiers = data.get("tiers") if isinstance(data, dict) else None
-    if isinstance(tiers, dict):
-        author = tiers.get("author")
-        if isinstance(author, dict):
-            cursor = author.get("cursor")
-            if isinstance(cursor, dict):
-                author_model = cursor.get("model", "(unset)")
-    lines.append(f"map author (cursor): {author_model}")
+    lines.append(f"map author (cursor): {_cursor_author_model(data)}")
     lines.append(
         "Applied chat model may differ from the map — run `make cursor-tiers`."
     )
