@@ -515,10 +515,12 @@ def open_sprint(sprint_id: int) -> int:
     return 0
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    sub = parser.add_subparsers(dest="command", required=True)
+def _add_claim_subparser(sub: argparse._SubParsersAction) -> None:
+    """Register the `claim` subcommand and its flags on `sub`.
 
+    Args:
+        sub: Subparsers action from `parser.add_subparsers()`.
+    """
     claim_parser = sub.add_parser("claim", help="Record this session as lock holder.")
     claim_parser.add_argument(
         "--session-id", required=False, default=None,
@@ -545,6 +547,14 @@ def main() -> int:
              "`session_start.py --boot`, `claim` (default) for a direct "
              "invocation of this command.",
     )
+
+
+def _add_other_subparsers(sub: argparse._SubParsersAction) -> None:
+    """Register every subcommand but `claim` (which `_add_claim_subparser` owns).
+
+    Args:
+        sub: Subparsers action from `parser.add_subparsers()`.
+    """
     sub.add_parser("release", help="Seal the SPRINT at close.")
     sub.add_parser("suspend", help="End the SESSION with the sprint still open.")
     require_parser = sub.add_parser(
@@ -578,7 +588,31 @@ def main() -> int:
         help="Sprint number to open.",
     )
 
-    args = parser.parse_args()
+
+def _build_parser() -> argparse.ArgumentParser:
+    """Construct the `session_state.py` CLI parser (all subcommands/flags).
+
+    Returns:
+        argparse.ArgumentParser: Parser with every subcommand (`claim`,
+            `release`, `suspend`, `require-released`, `refresh-baseline`,
+            `set-topology`, `open-sprint`) and their flags registered.
+    """
+    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    sub = parser.add_subparsers(dest="command", required=True)
+    _add_claim_subparser(sub)
+    _add_other_subparsers(sub)
+    return parser
+
+
+def _dispatch(args: argparse.Namespace) -> int:
+    """Run the subcommand `args.command` names.
+
+    Args:
+        args: Parsed namespace from `_build_parser().parse_args()`.
+
+    Returns:
+        int: Exit code of the invoked subcommand.
+    """
     if args.command == "claim":
         return claim(
             args.session_id, args.takeover, args.tool, args.delegation_mode,
@@ -595,6 +629,12 @@ def main() -> int:
     if args.command == "open-sprint":
         return open_sprint(args.sprint_id)
     return release()
+
+
+def main() -> int:
+    """Parse CLI arguments and dispatch to the named subcommand."""
+    args = _build_parser().parse_args()
+    return _dispatch(args)
 
 
 if __name__ == "__main__":
