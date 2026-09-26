@@ -36,7 +36,11 @@ Usage:
         # --entry-point (default claim) words the refusal message's retry
         # hint for the caller that issued this claim: session_start.py
         # --boot passes --entry-point boot (S052-2).
-    python3 scripts/session_state.py release   # seals the SPRINT (sprint-branch tip)
+    python3 scripts/session_state.py release   # seals the SPRINT (sprint-branch tip);
+        # also writes current_sprint.status = CLOSED when current_sprint
+        # exists, preserving every other key — a SPRINT fact, not a SESSION
+        # one, so the next session's `claim` (which resets top-level status
+        # to IN_PROGRESS) does not un-seal it (S052 QA Gate 1 round 2)
     python3 scripts/session_state.py suspend   # ends the SESSION only
     python3 scripts/session_state.py require-released [--branch <ref>]
         # deployment preflight: refuse SUSPENDED; tip must equal last_close_commit
@@ -49,15 +53,21 @@ Usage:
     python3 scripts/session_state.py open-sprint --id <N>
         # writes current_sprint.{id: N, status: OPEN}, preserving layer/app/
         # last_audit_sprint and any other current_sprint keys; idempotent
-        # when current_sprint.id already equals N; refuses (exit 2) while
-        # current_sprint.status is IN_PROGRESS for a different id (S052-4)
+        # when current_sprint.id already equals N; refuses (exit 2) for a
+        # different id while that sprint is not sealed — sealed means
+        # current_sprint.status == CLOSED ("CLOSED_SUCCESSFULLY"), the SPRINT
+        # fact `release()` writes, never the top-level SESSION status (which
+        # `claim` resets to IN_PROGRESS at the start of every session,
+        # including the one that opens the next sprint) and never
+        # current_sprint.status == IN_PROGRESS, which no writer ever
+        # produces (F-3, S052 QA Gate 1, both remediation rounds)
 
 Exit codes:
     0 — lock claimed or released, deploy preflight passed, baseline refreshed,
         topology_version written, or a sprint opened (or already open)
     2 — a different session holds the lock, deploy refused, set-topology
-        cannot derive a value, or open-sprint would overwrite an
-        IN_PROGRESS sprint (RA-11: only 2 blocks)
+        cannot derive a value, or open-sprint would overwrite a sprint that
+        has not been sealed by `release()` (RA-11: only 2 blocks)
 """
 
 import argparse
@@ -283,6 +293,15 @@ def release() -> int:
     Clears ``resume_pointer`` so the next ``/start`` on ``main`` does not
     advisory-flag a closed sprint's branch (Sprint 040 R1). Mid-sprint
     ``claim`` still must not auto-clear resume (Sprint 039 D-P1).
+
+    Also writes ``current_sprint.status = CLOSED`` when ``current_sprint``
+    exists, preserving every other key already there. This is the SPRINT
+    fact ``open_sprint()``'s sealed-check reads (``_sprint_is_sealed``) — the
+    top-level ``status`` this function also sets is a SESSION fact that
+    ``claim()`` resets to ``IN_PROGRESS`` at the boot of every session,
+    including the one that opens the next sprint, so it cannot be the
+    sealed signal without refusing the very step it is meant to allow
+    (S052 QA Gate 1 round 2).
     """
     state = load_state()
     state.update({
@@ -291,6 +310,9 @@ def release() -> int:
         "last_updated": now(),
     })
     state["resume_pointer"] = {}
+    sprint = state.get("current_sprint")
+    if isinstance(sprint, dict):
+        state["current_sprint"] = {**sprint, "status": CLOSED}
     sha = head_sha()
     if sha:
         # Sprint-branch tip for require-released. Squash-merge orphans this SHA
@@ -469,6 +491,29 @@ def set_topology() -> int:
     return 0
 
 
+def _sprint_is_sealed(current_sprint_status: str | None) -> bool:
+    """Whether the anchor's previous `current_sprint` was sealed by `release()`.
+
+    Keys **only** on the SPRINT fact `release()` writes onto `current_sprint`
+    itself (`current_sprint.status = CLOSED`) — never on the top-level
+    `status`. That field is a SESSION fact: `claim()` resets it to
+    `IN_PROGRESS` at the boot of *every* session, including the one that
+    opens the next sprint, so a check keyed on it would refuse the very
+    `open-sprint` call it exists to allow (reported against this function's
+    first version, S052 QA Gate 1 round 2). `current_sprint.status` is
+    written only by `open_sprint()` (`"OPEN"`) and `release()` (`CLOSED`),
+    never `IN_PROGRESS` — the F-3 defect's original guard checked a value no
+    writer ever produces.
+
+    Args:
+        current_sprint_status: `current_sprint.status` from the anchor.
+
+    Returns:
+        bool: True when it equals `CLOSED` (`"CLOSED_SUCCESSFULLY"`).
+    """
+    return current_sprint_status == CLOSED
+
+
 def open_sprint(sprint_id: int) -> int:
     """Open a sprint in `current_sprint`, or confirm it is already open.
 
@@ -483,10 +528,11 @@ def open_sprint(sprint_id: int) -> int:
         sprint_id: The sprint number to open.
 
     Returns:
-        int: 0 when opened, or when `sprint_id` already matches
+        int: 0 when opened, when `sprint_id` already matches
             `current_sprint.id` (idempotent — a repeat call changes
-            nothing); 2 when a different sprint is `IN_PROGRESS`
-            (RA-11: only 2 blocks).
+            nothing), or when a different current sprint is sealed
+            (`_sprint_is_sealed`); 2 when a different current sprint is
+            not sealed (RA-11: only 2 blocks; F-3, S052 QA Gate 1).
     """
     state = load_state()
     sprint = state.get("current_sprint") or {}
@@ -497,10 +543,12 @@ def open_sprint(sprint_id: int) -> int:
         print(f"✅ Sprint {sprint_id} already the current sprint — idempotent, nothing changed.")
         return 0
 
-    if current_status == IN_PROGRESS:
+    if current_id is not None and not _sprint_is_sealed(current_status):
         print(
-            f"Refusing open-sprint: sprint {current_id} is still IN_PROGRESS. "
-            f"Close it before opening sprint {sprint_id}.",
+            f"Refusing open-sprint: sprint {current_id} is not sealed "
+            f"(current_sprint.status={current_status!r}). Seal it with "
+            f"`python3 scripts/session_state.py release` before opening "
+            f"sprint {sprint_id}.",
             file=sys.stderr,
         )
         return 2
@@ -581,7 +629,7 @@ def _add_other_subparsers(sub: argparse._SubParsersAction) -> None:
     )
     open_sprint_parser = sub.add_parser(
         "open-sprint",
-        help="Write current_sprint.{id,status: OPEN}; refuse over an IN_PROGRESS sprint.",
+        help="Write current_sprint.{id,status: OPEN}; refuse over an unsealed sprint.",
     )
     open_sprint_parser.add_argument(
         "--id", required=True, type=int, dest="sprint_id",

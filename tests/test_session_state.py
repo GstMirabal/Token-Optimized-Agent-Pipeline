@@ -409,6 +409,89 @@ def test_main_open_sprint_propagates_refusal_exit_code(
     assert "IN_PROGRESS" in capsys.readouterr().err
 
 
+# --- open-sprint: sealed-vs-unsealed refusal (F-3, S052 QA Gate 1) ----------
+
+def test_open_sprint_refuses_a_second_call_over_its_own_unsealed_open(
+    repo: Path, capsys: pytest.CaptureFixture
+):
+    """Reproduces the live defect: nothing writes `current_sprint.status`
+    to `IN_PROGRESS`, so `open_sprint()` itself is the only real writer —
+    and its own output (`status: "OPEN"`) must not read as sealed. Fails on
+    HEAD: the old guard (`current_status == IN_PROGRESS`) never matches
+    `"OPEN"`, so `open_sprint(53)` used to succeed silently over an
+    unclosed sprint 52 that `open_sprint(52)` itself opened."""
+    assert ss.open_sprint(52) == 0
+    before = json.loads((repo / "docs" / "active_state.json").read_text())
+
+    rc = ss.open_sprint(53)
+
+    assert rc == 2
+    err = capsys.readouterr().err
+    assert "52" in err
+    after = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert after == before
+
+
+def test_release_writes_current_sprint_status_closed_preserving_siblings(repo: Path):
+    """The SPRINT fact `_sprint_is_sealed` reads — a `current_sprint` sibling
+    key (`layer`), not a field `open_sprint()` owns, must survive untouched."""
+    _write_anchor(repo, {"current_sprint": {"id": 52, "status": "OPEN", "layer": "core"}})
+
+    assert ss.release() == 0
+
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert state["current_sprint"] == {"id": 52, "status": "CLOSED_SUCCESSFULLY", "layer": "core"}
+
+
+def test_release_does_not_add_current_sprint_when_absent(repo: Path):
+    """`release()` must not invent a `current_sprint` the anchor never had."""
+    (repo / "docs" / "active_state.json").write_text(
+        json.dumps({"session_id": "keep-me"}), encoding="utf-8"
+    )
+
+    assert ss.release() == 0
+
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert "current_sprint" not in state
+
+
+def test_open_sprint_succeeds_after_release_then_a_new_session_claims(repo: Path):
+    """The exact flow this fix protects: sprint 52 opened, released — sealed
+    as a SPRINT fact — then a *new* session `claim`s (which resets the
+    top-level SESSION status back to `IN_PROGRESS`) before Phase 3 opens
+    sprint 53. Regression guard for the round-1 fix, which keyed sealed-ness
+    on that top-level field and would have refused this exact call."""
+    assert ss.open_sprint(52) == 0
+    assert ss.release() == 0
+    assert ss.claim("next-session", False, "terminal") == 0
+
+    rc = ss.open_sprint(53)
+
+    assert rc == 0
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert state["status"] == ss.IN_PROGRESS  # claim() reset it; must not matter
+    assert state["current_sprint"]["id"] == 53
+    assert state["current_sprint"]["status"] == "OPEN"
+
+
+def test_open_sprint_refuses_after_claim_without_a_release_between(
+    repo: Path, capsys: pytest.CaptureFixture
+):
+    """A new session claiming the lock must not, by itself, read as a seal:
+    sprint 52 was opened but never released before `open_sprint(53)` runs."""
+    assert ss.open_sprint(52) == 0
+    assert ss.claim("some-session", False, "terminal") == 0
+    before = json.loads((repo / "docs" / "active_state.json").read_text())
+
+    rc = ss.open_sprint(53)
+
+    assert rc == 2
+    err = capsys.readouterr().err
+    assert "52" in err
+    after = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert after == before
+
+
 # --- CLI wiring --------------------------------------------------------------
 
 def test_main_dispatches_set_topology(repo: Path, monkeypatch: pytest.MonkeyPatch):
