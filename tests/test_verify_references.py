@@ -361,6 +361,42 @@ def test_skill_script_named_in_skill_md_passes(
     assert not any("skills/x/scripts/helper.py" in e for e in errors)
 
 
+def test_skill_script_named_as_dotted_module_in_skill_md_passes(
+    verify_mod, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """D9: `python -m scripts.helper` in SKILL.md resolves `scripts/helper.py`."""
+    root = tmp_path
+    _base_tree(root)
+    (root / "skills" / "x" / "scripts").mkdir(parents=True)
+    (root / "skills" / "x" / "scripts" / "helper.py").write_text("VALUE = 1\n", encoding="utf-8")
+    (root / "skills" / "x" / "SKILL.md").write_text(
+        "---\nname: x\ndescription: stub\n---\nRun `python -m scripts.helper` to do the thing.\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(root)
+    errors = verify_mod.check_invocation_coverage("")
+    assert not any("skills/x/scripts/helper.py" in e for e in errors)
+
+
+def test_skill_script_dotted_module_prefix_of_longer_name_does_not_pass(
+    verify_mod, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """D9: `scripts.helper_extra` must not resolve `scripts/helper.py` — a
+    dotted-module mention that is only a prefix of a longer module name is
+    not a whole-token match."""
+    root = tmp_path
+    _base_tree(root)
+    (root / "skills" / "x" / "scripts").mkdir(parents=True)
+    (root / "skills" / "x" / "scripts" / "helper.py").write_text("VALUE = 1\n", encoding="utf-8")
+    (root / "skills" / "x" / "SKILL.md").write_text(
+        "---\nname: x\ndescription: stub\n---\nRun `python -m scripts.helper_extra` instead.\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(root)
+    errors = verify_mod.check_invocation_coverage("")
+    assert any("skills/x/scripts/helper.py" in e for e in errors)
+
+
 def test_skill_script_imported_by_named_script_passes(
     verify_mod, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -407,6 +443,70 @@ def test_uninvoked_test_helper_is_flagged(
     monkeypatch.chdir(root)
     errors = verify_mod.check_invocation_coverage("")
     assert any("tests/_util.py" in e for e in errors)
+
+
+def test_skill_scripts_naming_import_and_cycle_bypasses_are_closed(
+    verify_mod, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """F-1: doc-token, import-path, and mutual-import bypasses are closed.
+
+    Reproduces the gate's five-file fixture: a SKILL.md containing the
+    unrelated word "environment" must not resolve `env.py` (bug a); a
+    stdlib `import json` in an unrelated `scripts/tool.py` must not resolve
+    `skills/foo/scripts/json.py`, since `tool.py` is not a sibling in that
+    directory (bug c); and two mutually-importing orphans (`cyc_a.py` /
+    `cyc_b.py`), neither directly resolved, must not resolve each other
+    (bug b). `orphan_helper.py` has no resolution path at all and stays
+    flagged as a control.
+    """
+    root = tmp_path
+    _base_tree(root)
+    skill_scripts = root / "skills" / "foo" / "scripts"
+    skill_scripts.mkdir(parents=True)
+    for name, body in (
+        ("json.py", "VALUE = 1\n"),
+        ("env.py", "VALUE = 1\n"),
+        ("cyc_a.py", "import cyc_b\n"),
+        ("cyc_b.py", "import cyc_a\n"),
+        ("orphan_helper.py", "VALUE = 1\n"),
+    ):
+        (skill_scripts / name).write_text(body, encoding="utf-8")
+    (root / "skills" / "foo" / "SKILL.md").write_text(
+        "---\nname: foo\ndescription: stub\n---\nRuns in this environment.\n",
+        encoding="utf-8",
+    )
+    (root / "scripts" / "tool.py").write_text("import json\n", encoding="utf-8")
+    monkeypatch.chdir(root)
+
+    errors = verify_mod.check_invocation_coverage("")
+    for expected in ("json.py", "env.py", "cyc_a.py", "cyc_b.py", "orphan_helper.py"):
+        assert any(f"skills/foo/scripts/{expected}" in e for e in errors), (
+            f"expected {expected} to be flagged, got: {errors}"
+        )
+
+
+def test_script_imported_only_by_its_test_file_is_still_flagged(
+    verify_mod, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """F-2 regression (vs `ca70bfa`): a test importing production code does
+    not invoke it. `scripts/orphan.py`, imported only by
+    `tests/test_orphan.py`, must stay flagged — Sprint 052 U19 widened
+    `imported_modules()` to also scan `tests/`, and the scripts/hooks
+    invocation loop reused that same widened set, so this passed silently."""
+    root = tmp_path
+    _base_tree(root)
+    _write_pytest_makefile(root)
+    (root / "scripts" / "orphan.py").write_text("VALUE = 1\n", encoding="utf-8")
+    (root / "tests" / "test_orphan.py").write_text(
+        "from orphan import VALUE\n\ndef test_x():\n    assert VALUE == 1\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(root)
+
+    errors = verify_mod.check_invocation_coverage("")
+    assert any("scripts/orphan.py" in e for e in errors), (
+        f"expected scripts/orphan.py to be flagged, got: {errors}"
+    )
 
 
 def test_pytest_coverage_claim_is_derived_from_makefile_not_hardcoded(
