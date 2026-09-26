@@ -16,7 +16,7 @@ protocols that should mirror each other shows up there first.
 | `close_workflow` | write | write | write | write | write | write | write | write | write | verify/write | write | — | — |
 | `deployment_workflow` | — | — | — | — | — | — | — | write | write | — | — | — | — |
 | `extract_workflow` | — | — | — | — | — | — | — | — | — | ?/verify/write | — | — | — |
-| `pipeline_workflow` | write | write | write | write | verify/write | — | write | — | write | — | — | — | — |
+| `pipeline_workflow` | write | write | write | write | verify/write | — | write | write | write | — | — | — | — |
 | `reconciliation_workflow` | — | — | — | — | — | — | — | write | write | — | — | write | — |
 | `remediation_workflow` | — | — | — | — | — | — | — | write | — | — | — | — | — |
 | `repository_hardening_workflow` | — | — | — | — | — | — | — | — | — | — | — | — | — |
