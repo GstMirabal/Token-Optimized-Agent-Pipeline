@@ -926,7 +926,13 @@ def audit_task_scope_precondition(message: str, staged: list[str]) -> str | None
     `task_scope.md` only at Closeout — the enforcement gap this guard closes,
     found inside the repository that owns the rule. Commits that stay inside
     `docs/sprints/[ID]-*/` (the plan, the log, the scope itself) always pass,
-    because Phases 3-4 write nothing else before Phase 4.3 produces the scope.
+    because Phases 3-4 write nothing else *inside the sprint directory*
+    before Phase 4.3 produces the scope. The one Phase 4 write outside that
+    directory is Phase 4.2's P4 skill forge (`workflows/pipeline_workflow.md`
+    Phase 4.2 row; `agents/skill_architect.md` `skill_search` P4 rung), which
+    lands at the host forge destination (e.g. `.claude/skills/`), not under
+    `docs/sprints/`; this guard still requires that forge commit to land
+    after `task_scope.md` exists (4.3).
 
     Args:
         message: The commit message.
