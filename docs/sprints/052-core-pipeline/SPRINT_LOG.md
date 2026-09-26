@@ -44,6 +44,7 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 
 | Friction Point | Resolution / Workaround | KI ID |
 | :--- | :--- | :--- |
+| `D4` said to fall back to cwd only when no audited path is given; U11 also falls back when a declared `Audited repository:` path does not resolve inside git (`scripts/check_role_artifact.py:250`). QA Gate 1 `F-9` found this was not declared. | Deliberate: the hook skips advisorily on an unresolved sprint and never blocks, so failing closed on a malformed declaration would add a stricter failure mode than it was designed with. The fallback order is documented in the module docstring. | — |
 | `SPRINT_LOG.md` was not created at Phase 3; nothing detected the absence until Phase 7 needed a place for gate rows — `hooks/on_commit.py` Guard 5 (`U16`) checks `task_scope.md` only, not `SPRINT_LOG.md`. | Created at the start of Phase 7 instead (this file). Recorded so a future Phase 3 checklist can name `SPRINT_LOG.md` explicitly rather than relying on author discipline. | — |
 | `U11`'s first fix read the `SubagentStop` payload `cwd`, which Claude Code's own docs show is the **parent session's** directory — a subagent cannot move it — and would have reproduced `F-051-R3` exactly. | Caught by the orchestrator checking the docs before commit; reworked to a declared `Audited repository:` line (`11933ce`). | — |
 | `U9`'s first mapping named `topology_mapper` as writer of script-materialized JSON artifacts — a false writer, since those artifacts are written by a script/Makefile target, not a Write-holding profile. | Reworked to typed writers (`0a55351`), which falsified `ADR-0015`'s premise; `ADR-0017` supersedes it (`b0cc724`) — unplanned unit `U8a`. | — |
@@ -82,6 +83,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 
 | Gate | Round | Verdict | Class | Notes |
 | :--- | :--- | :--- | :--- | :--- |
+| QA Gate 1 | 1 | `REJECTED` | `charter` | Four blocking findings. `F-1` (Abort criterion 2, one remediation round): the U19 tree rules mark uninvoked skill scripts as covered in three ways — a stem substring in the docs, an importer that is itself unresolved (two orphans importing each other), and a stdlib-name collision (`json.py` covered by `import json`). `F-2`: the widened import scan lets a test-only import cover a `scripts/` file, a regression against `ca70bfa`. `F-3`: the `open-sprint` refusal only fires on `IN_PROGRESS`, a status nothing writes, so a sprint opened with `OPEN` is overwritten silently. `F-4`: `pipeline_workflow.md` Phase 3 lacks the `open-sprint` step the plan named. Record-only: `F-5` `principal_agent.md` writer wording, `F-6` six missing type hints and three missing `Args:`, `F-7` four new ruff findings, `F-8` Guard 5 docstring overclaims, `F-9` `D4` fallback deviation undeclared. `make verify` 0; quality_audit 0/1638; 908 passed; Wave 6 behaviour-preserving |
 
 ---
 
