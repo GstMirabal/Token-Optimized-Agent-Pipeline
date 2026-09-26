@@ -5,6 +5,7 @@ Agnostic security check script for avoiding PII leaks and hardcoded secrets.
 
 import os
 import re
+from collections.abc import Iterable, Iterator
 
 # Secret Patterns (High-level samples)
 SECRET_PATTERNS = {
@@ -90,7 +91,7 @@ def _scanned_files_in_root(root: str, files: list[str]) -> list[str]:
     return [os.path.join(root, f) for f in files if is_scanned(f)]
 
 
-def _iter_scanned_files(directory: str):
+def _iter_scanned_files(directory: str) -> Iterator[str]:
     """Yields full paths of every scan-eligible file under `directory`.
 
     Args:
@@ -123,7 +124,7 @@ def _match_patterns(file_path: str, line_no: int, line: str) -> list[str]:
     ]
 
 
-def _leaks_in_lines(file_path: str, lines) -> list[str]:
+def _leaks_in_lines(file_path: str, lines: Iterable[str]) -> list[str]:
     """Leak report strings for every secret-pattern match across `lines`.
 
     Args:
