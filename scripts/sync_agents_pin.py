@@ -62,6 +62,24 @@ def git(
     )
 
 
+def _leading_digits(raw: str) -> str:
+    """Digits at the start of ``raw``, stopping at the first non-digit.
+
+    Args:
+        raw: One dot-separated component of a version tag.
+
+    Returns:
+        str: The leading digit run; empty when ``raw`` starts with a
+            non-digit.
+    """
+    digits = ""
+    for char in raw:
+        if not char.isdigit():
+            break
+        digits += char
+    return digits
+
+
 def parse_version(tag: str) -> tuple[int, ...]:
     """Numeric tuple from a ``vX.Y.Z`` tag. Non-digits inside a part stop it.
 
@@ -74,12 +92,7 @@ def parse_version(tag: str) -> tuple[int, ...]:
     body = tag.removeprefix("v")
     parts: list[int] = []
     for raw in body.split("."):
-        digits = ""
-        for char in raw:
-            if char.isdigit():
-                digits += char
-            else:
-                break
+        digits = _leading_digits(raw)
         parts.append(int(digits) if digits else 0)
     return tuple(parts)
 
