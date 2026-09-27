@@ -494,6 +494,42 @@ def test_open_sprint_refuses_after_claim_without_a_release_between(
 
 # --- CLI wiring --------------------------------------------------------------
 
+# --- open-sprint: legacy seal alias (KI-052-2, Sprint 053 A1) ---------------
+
+def test_sealed_statuses_contains_both_the_canonical_and_legacy_literal():
+    assert ss.SEALED_STATUSES == frozenset({"CLOSED_SUCCESSFULLY", "CLOSED"})
+
+
+def test_open_sprint_accepts_a_legacy_closed_alias(repo: Path):
+    """`release()` wrote the bare `"CLOSED"` literal before Sprint 050;
+    every host that sealed a sprint under that pin carries it in its anchor.
+    Fails on HEAD: `_sprint_is_sealed` compares only against
+    `CLOSED_SUCCESSFULLY`, so a legacy anchor refuses forever."""
+    _write_anchor(repo, {"current_sprint": {"id": 51, "status": "CLOSED"}})
+
+    rc = ss.open_sprint(52)
+
+    assert rc == 0
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert state["current_sprint"]["id"] == 52
+    assert state["current_sprint"]["status"] == "OPEN"
+
+
+def test_open_sprint_refuses_missing_status_and_names_release(
+    repo: Path, capsys: pytest.CaptureFixture
+):
+    """A `current_sprint` with an `id` but no `status` key is genuinely
+    unknown — possibly live — and must stay refused, naming the one-command
+    remediation."""
+    _write_anchor(repo, {"current_sprint": {"id": 51}})
+
+    rc = ss.open_sprint(52)
+
+    assert rc == 2
+    err = capsys.readouterr().err
+    assert "python3 scripts/session_state.py release" in err
+
+
 def test_main_dispatches_set_topology(repo: Path, monkeypatch: pytest.MonkeyPatch):
     _write_changelog(repo, MULTI_SECTION_CHANGELOG)
     _write_anchor(repo)
