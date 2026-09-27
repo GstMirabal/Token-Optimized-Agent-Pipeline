@@ -11,7 +11,7 @@ This document explicitly defines the strict structural routing inside the active
 *This section governs host projects. The nucleus ships no `docker-compose.yml` and no `./.docker-db-data`; its DB triggers never fire.*
 - **Container Exclusivity**: Local databases or broker services (Postgres, Redis) must run purely via `docker-compose.yml`. Emulating or installing engines on the host OS is forbidden.
 - **Physical Volume Sieve**: Agents must map persistent DB states forcefully into the hidden local directory `./.docker-db-data` to prevent accidental tracking.
-- **Testing Purity**: Utilizing the local development database for Unit/Integration testing is **PROHIBITED**. Tests must dynamically instantiate purely ephemeral DB layers (e.g., `sqlite:///:memory:`).
+- **Testing Purity**: Utilizing the local development database for Unit/Integration testing is **PROHIBITED**. Tests must dynamically instantiate purely ephemeral DB layers (default: `sqlite:///:memory:`). A host whose fidelity requirement SQLite cannot meet MAY substitute a real engine only through the declared-deviation path of `agents.md §3 local_testing` (`ADR-0016`): a host ADR naming the engine and an ephemeral per-run database or schema torn down after the run — never a shared or persistent one.
 
 ## 3. Data Persistence Policy
 - **Mass Generation** (host-only): Scripts generating ETL outputs, PDFs, or raw heavy logs must dump directly to `./data/output/` or `./tmp/` and exclude themselves from the repository tracking index. The nucleus has no `./data/output/` referent.
