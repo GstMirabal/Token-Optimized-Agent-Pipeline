@@ -227,8 +227,10 @@ def probe_anchor_hygiene(state: dict) -> str | None:
     """Flag IN_PROGRESS sessions whose sprint looks already closed or resumed wrong.
 
     After deploy, a new claim on ``main`` often leaves ``current_sprint.status``
-    at ``CLOSED`` and ``resume_pointer.branch`` at the prior ``ai-sprint/[ID]``
-    while HEAD is not that branch — silent until Sprint 039 P1.
+    sealed (`session_state.SEALED_STATUSES` — ``CLOSED_SUCCESSFULLY`` or the
+    legacy ``CLOSED`` alias) and ``resume_pointer.branch`` at the prior
+    ``ai-sprint/[ID]`` while HEAD is not that branch — silent until Sprint 039
+    P1.
 
     Args:
         state (dict): Parsed ``docs/active_state.json``.
@@ -240,9 +242,11 @@ def probe_anchor_hygiene(state: dict) -> str | None:
         return None
     parts: list[str] = []
     sprint = state.get("current_sprint")
-    if isinstance(sprint, dict) and sprint.get("status") == "CLOSED":
+    sprint_status = sprint.get("status") if isinstance(sprint, dict) else None
+    if sprint_status in session_state.SEALED_STATUSES:
         parts.append(
-            "`current_sprint.status` is CLOSED while the session is IN_PROGRESS"
+            f"`current_sprint.status` is {sprint_status} while the session "
+            "is IN_PROGRESS"
         )
     pointer = state.get("resume_pointer")
     if isinstance(pointer, dict):
