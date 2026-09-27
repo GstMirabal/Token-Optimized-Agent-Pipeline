@@ -209,7 +209,7 @@ def tier_status(tiers: dict, catalogue: dict[str, dict]) -> tuple[list[str], lis
         if entry["status"] == "Retired":
             retired.append(f"tier `{tier}` resolves to {alias}, which is RETIRED "
                            f"— a retired model returns 404")
-        elif entry["status"] == "Deprecated":
+        if entry["status"] == "Deprecated":
             when = f", retires {entry['retires']}" if entry["retires"] else ""
             deprecated.append(f"tier `{tier}` resolves to {alias}, now Deprecated{when}")
     return retired, deprecated

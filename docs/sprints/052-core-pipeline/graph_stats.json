@@ -1,0 +1,9 @@
+{
+  "nodes": 11761,
+  "edges": 15788,
+  "communities": 950,
+  "source": "graphify-out/graph.json",
+  "sprint": 52,
+  "built_at_commit": "34d685b",
+  "note": "Counts from `make graphify-update` (AST, no LLM) at HEAD before the close-workflow closeout commits (this file, model_ledger_regen, the ledger entry). Sprint 051 persisted no snapshot, so the previous one is Sprint 050's (10586/13726/903). The delta reflects scripts/graph_reconcile.py, the Wave 6 helper extractions across 42 files, three deleted orphan scripts, ADR-0015/0016/0017 and this sprint's directory artifacts."
+}

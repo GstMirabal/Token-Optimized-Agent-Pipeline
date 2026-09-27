@@ -27,12 +27,37 @@ Exit codes:
 The CLI refuses an unrecognised role; ``--from-hook`` only warns, because a
 SubagentStop payload carries arbitrary agent types including the runtime's own
 built-ins, and blocking those would stop unrelated subagents.
+
+``--from-hook`` resolves the sprint directory against the repository the gate
+*audits*, never against this process's own working directory (F-051-R3,
+Sprint 052 D4). A subagent starts in, and cannot change, the parent
+session's own cwd (Claude Code ``sub-agents.md``/``hooks.md``: a Bash ``cd``
+does not persist inside a subagent), so the SubagentStop payload's ``cwd``
+is the **parent session's** directory even when the gate subagent audited a
+nested clone opened for ``agents.md §4 feedback_upstream`` — it does not,
+by itself, distinguish the two repositories.
+
+The declared contract (Sprint 052 U17/U18 add this to
+``agents/qa_agent.md`` / ``agents/tester_agent.md``'s final-message
+register): a gate's own final message is the only thing that knows which
+repository it audited, so ``--from-hook`` reads
+``payload["last_assistant_message"]`` for a line of the exact form (key
+case-insensitive, path may be wrapped in backticks)::
+
+    Audited repository: `/absolute/path/to/repository`
+
+Resolution order, each tried with ``git rev-parse --show-toplevel``, first
+match wins: (1) the declared ``Audited repository:`` line, (2) the
+payload's own ``cwd``, (3) this process's own working directory when
+neither of the above resolves to a git working tree.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -40,6 +65,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _root import agents_root
 
 ACTIVE_STATE = Path("docs/active_state.json")
+
+# Sprint 052 U17/U18 contract: a gate's final message declares the
+# repository it audited with this exact line (key case-insensitive, path
+# optionally backticked). See module docstring.
+_AUDITED_REPO_RE = re.compile(
+    r"(?i)audited repository:\s*`?(?P<path>[^`\r\n]+?)`?\s*(?:\r?\n|$)"
+)
 
 # Profile name (agent frontmatter ``name``, or the snake_case filename the
 # framework writes in task_scope.md) → artifact_registry role display name.
@@ -142,12 +174,118 @@ def resolve_role(name: str) -> str | None:
     return role_from_agent_type(raw)
 
 
-def sprint_dir_from_anchor(anchor: Path = ACTIVE_STATE) -> Path | None:
-    """Derive ``docs/sprints/[ID]-[Stack]-[Layer]`` from the active anchor."""
-    if not anchor.is_file():
+def _git_toplevel(path: Path) -> Path | None:
+    """Return the git repository root containing ``path``, or None outside one.
+
+    Runs ``git rev-parse --show-toplevel`` anchored at ``path`` itself (or
+    its nearest existing ancestor — the sprint directory this script is
+    asked about may not exist yet). This is "the anchor of the repository
+    the gate audits" (``agents.md §3 jurisdiction``), which is not
+    necessarily this process's own working directory (F-051-R3).
+
+    Args:
+        path: A path inside, or naming, the repository to anchor to.
+
+    Returns:
+        Path | None: Absolute repository root, or None when ``path`` is not
+            inside a git working tree, or ``git`` cannot be run at all.
+    """
+    start = path if path.is_dir() else path.parent
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            cwd=start,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        print(f"⚠️ [ROLE-ARTIFACT] git rev-parse failed for {start}: {exc}", file=sys.stderr)
+        return None
+    if result.returncode != 0 or not result.stdout.strip():
+        return None
+    return Path(result.stdout.strip())
+
+
+def _declared_audited_path(payload: dict) -> Path | None:
+    """Extract the gate's self-declared audited repository, if any.
+
+    Reads ``payload["last_assistant_message"]`` for the U17/U18 contract
+    line ``Audited repository: <path>`` (key case-insensitive, path
+    optionally backticked — see module docstring). This, not the payload's
+    ``cwd``, is the only field that can name a repository other than the
+    parent session's own: a subagent starts in, and cannot change, the
+    parent session's cwd (F-051-R3 rework — the original fix read ``cwd``
+    for this and modelled a payload shape Claude Code does not produce).
+
+    Args:
+        payload: Parsed SubagentStop JSON.
+
+    Returns:
+        Path | None: The declared path, or None when no such line is
+            present in the message.
+    """
+    message = str(payload.get("last_assistant_message") or "")
+    match = _AUDITED_REPO_RE.search(message)
+    if not match:
+        return None
+    return Path(match.group("path").strip())
+
+
+def _audited_root(candidates: list[Path]) -> Path:
+    """Repository root to resolve the sprint anchor against (D4, F-051-R3).
+
+    Args:
+        candidates: Paths inside the repository the gate audits, tried in
+            priority order (the declared ``Audited repository:`` line, then
+            the payload's own ``cwd``). An empty list is the "no path was
+            given" case.
+
+    Returns:
+        Path: ``git rev-parse --show-toplevel`` of the first candidate that
+            names a path inside a git working tree. The process's own
+            current working directory in every other case — both "no
+            candidate was given" (the documented fallback, D4) and "no
+            given candidate is inside a git repository". The second case is
+            deliberately the same fallback rather than a hard fail-closed
+            exit: this function only feeds ``sprint_dir_from_anchor``,
+            whose only caller (``main_from_hook``) already treats an
+            unresolved sprint as an advisory skip, never a block — see its
+            docstring — so failing closed here would add a stricter
+            failure mode than the one the hook was designed to have.
+    """
+    for candidate in candidates:
+        toplevel = _git_toplevel(candidate)
+        if toplevel is not None:
+            return toplevel
+    return Path.cwd()
+
+
+def sprint_dir_from_anchor(
+    anchor: Path | None = None, audited_paths: list[Path] | None = None
+) -> Path | None:
+    """Derive ``docs/sprints/[ID]-[Stack]-[Layer]`` from the audited anchor.
+
+    Args:
+        anchor: Explicit path to ``active_state.json``, overriding root
+            resolution entirely (direct callers/tests only). None resolves
+            it from ``audited_paths`` instead (D4).
+        audited_paths: Paths inside the repository the gate audits, in
+            priority order. Resolved to a repository root via ``git
+            rev-parse --show-toplevel`` (F-051-R3), first match wins, so the
+            returned directory belongs to that repository, never to this
+            process's own working directory.
+
+    Returns:
+        Path | None: Absolute sprint directory, or None when no current
+            sprint is recorded or the anchor file is unreadable.
+    """
+    root = _audited_root(list(audited_paths or []))
+    resolved_anchor = anchor if anchor is not None else root / ACTIVE_STATE
+    if not resolved_anchor.is_file():
         return None
     try:
-        state = json.loads(anchor.read_text(encoding="utf-8"))
+        state = json.loads(resolved_anchor.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
         return None
     sprint = state.get("current_sprint") or {}
@@ -156,7 +294,7 @@ def sprint_dir_from_anchor(anchor: Path = ACTIVE_STATE) -> Path | None:
         return None
     layer = sprint.get("layer") or "core"
     app = sprint.get("app") or "pipeline"
-    return Path(f"docs/sprints/{int(sprint_id):03d}-{layer}-{app}")
+    return root / f"docs/sprints/{int(sprint_id):03d}-{layer}-{app}"
 
 
 def missing_gate_row(role: str, sprint_dir: Path) -> str | None:
@@ -221,6 +359,17 @@ def main_from_hook(stdin_text: str | None = None) -> int:
 
     Exit 0 (advisory skip) when agent_type or sprint cannot be resolved — the
     portable guarantee remains ``make role-artifacts`` / close Phase 2.6.
+
+    Sprint resolution anchors to the repository the gate audited (D4,
+    F-051-R3), tried in order: (1) the ``Audited repository:`` line the
+    gate's own ``last_assistant_message`` declares (U17/U18 contract — see
+    module docstring); (2) the payload's own ``cwd``; (3) this process's own
+    working directory. ``cwd`` is checked before falling all the way to the
+    process's own cwd because it is occasionally already correct — but it is
+    the *parent session's* directory, never the subagent's own (a subagent
+    cannot change it), so it cannot by itself distinguish a gate that audited
+    a nested clone opened for ``agents.md §4 feedback_upstream`` from one
+    that audited the host.
     """
     raw = stdin_text if stdin_text is not None else sys.stdin.read()
     try:
@@ -238,7 +387,10 @@ def main_from_hook(stdin_text: str | None = None) -> int:
         )
         return 0
 
-    sprint_dir = sprint_dir_from_anchor()
+    declared = _declared_audited_path(payload)
+    raw_cwd = payload.get("cwd")
+    candidates = [p for p in (declared, Path(raw_cwd) if raw_cwd else None) if p is not None]
+    sprint_dir = sprint_dir_from_anchor(audited_paths=candidates)
     if sprint_dir is None:
         print("⚠️ [ROLE-ARTIFACT] --from-hook: no current_sprint; skip", file=sys.stderr)
         return 0

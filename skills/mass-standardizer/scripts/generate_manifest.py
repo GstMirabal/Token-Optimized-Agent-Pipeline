@@ -17,6 +17,29 @@ SKILLS_DIR = Path("skills")
 MANIFEST = SKILLS_DIR / "manifest_skills.json"
 
 
+def _apply_frontmatter_line(line: str, fields: dict, current: str | None) -> str | None:
+    """Applies one frontmatter line to `fields`, mutating it in place.
+
+    Args:
+        line: One raw line from the frontmatter block.
+        fields: The fields dict accumulated so far; mutated in place.
+        current: The key currently accepting continuation lines, or None.
+
+    Returns:
+        The key that should accept the next continuation line, or None.
+    """
+    km = re.match(r"^(name|description):\s*(.*)$", line)
+    if km:
+        current = km.group(1)
+        fields[current] = km.group(2).strip().strip('"')
+        return current
+    if re.match(r"^(\w+):", line):
+        return None  # other key, stop appending
+    if current and line.startswith((" ", "\t")):
+        fields[current] = (fields[current] + " " + line.strip()).strip()
+    return current
+
+
 def parse_frontmatter(skill_md: Path) -> dict:
     """Minimal YAML reader for name/description, tolerating multi-line
     (indent-continued) description values."""
@@ -27,14 +50,7 @@ def parse_frontmatter(skill_md: Path) -> dict:
     fields = {}
     current = None
     for line in m.group(1).splitlines():
-        km = re.match(r"^(name|description):\s*(.*)$", line)
-        if km:
-            current = km.group(1)
-            fields[current] = km.group(2).strip().strip('"')
-        elif re.match(r"^(\w+):", line):
-            current = None  # other key, stop appending
-        elif current and line.startswith((" ", "\t")):
-            fields[current] = (fields[current] + " " + line.strip()).strip()
+        current = _apply_frontmatter_line(line, fields, current)
     return {k: v for k, v in fields.items() if v}
 
 

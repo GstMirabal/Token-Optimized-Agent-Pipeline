@@ -115,6 +115,37 @@ def _is_separator(line: str) -> bool:
     return stripped.startswith("|") and set(stripped) <= set("|:- ")
 
 
+def _is_work_header(line: str) -> bool:
+    """True when this line is a table header row naming every WORK_KEYS.
+
+    Args:
+        line: One raw line from the source document.
+    """
+    return (line.strip().startswith("|") and not _is_separator(line)
+            and all(key in _cells(line) for key in WORK_KEYS))
+
+
+def _collect_rows(lines: list[str], start: int) -> tuple[list[list[str]], int]:
+    """Collect the body rows of a table starting at ``start``.
+
+    Args:
+        lines: All lines of the source document.
+        start: Index of the first line after the header (and its
+            separator, if already skipped by the caller).
+
+    Returns:
+        tuple[list[list[str]], int]: The parsed rows, and the index of the
+        first line that is no longer part of this table.
+    """
+    rows: list[list[str]] = []
+    index = start
+    while index < len(lines) and lines[index].strip().startswith("|"):
+        if not _is_separator(lines[index]):
+            rows.append(_cells(lines[index]))
+        index += 1
+    return rows, index
+
+
 def work_tables(text: str) -> list[tuple[list[str], list[list[str]]]]:
     """Work tables: headers that include File, Operation, Risk, Assignee."""
     tables: list[tuple[list[str], list[list[str]]]] = []
@@ -122,20 +153,15 @@ def work_tables(text: str) -> list[tuple[list[str], list[list[str]]]]:
     index = 0
     while index < len(lines):
         line = lines[index]
-        if line.strip().startswith("|") and not _is_separator(line):
-            header = _cells(line)
-            if all(key in header for key in WORK_KEYS):
-                index += 1
-                if index < len(lines) and _is_separator(lines[index]):
-                    index += 1
-                rows: list[list[str]] = []
-                while index < len(lines) and lines[index].strip().startswith("|"):
-                    if not _is_separator(lines[index]):
-                        rows.append(_cells(lines[index]))
-                    index += 1
-                tables.append((header, rows))
-                continue
+        if not _is_work_header(line):
+            index += 1
+            continue
+        header = _cells(line)
         index += 1
+        if index < len(lines) and _is_separator(lines[index]):
+            index += 1
+        rows, index = _collect_rows(lines, index)
+        tables.append((header, rows))
     return tables
 
 
@@ -198,7 +224,8 @@ def _capability_findings(
         tools = profile_tools(profile, root)
         if tools is None:
             findings.append(f"Unit {unit}: assignee {profile!r} has no profile file.")
-        elif not tools & WRITE_TOOLS:
+            continue
+        if not tools & WRITE_TOOLS:
             findings.append(
                 f"Unit {unit}: {profile} is assigned a {operation!r} but declares "
                 f"no Write/Edit tool (declares: {', '.join(sorted(tools)) or 'none'})."

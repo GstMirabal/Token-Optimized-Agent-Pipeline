@@ -4,6 +4,34 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Added
+- **Sprint 052 `quality-audit-verify-wiring`** — closed the Python `quality_audit` baseline (87 non-compliant units / 1487, 94.1%, gate exit `2`) into a wired `make verify` gate at zero violations (`1449e65`), extended invocation coverage to `tests/` and `skills/*/scripts/*.py`, and closed all six long-open upstream findings alongside five session-boot defects `/agents:start` found on 2026-09-25. 67 planned units + unplanned wiring/propagation commits landed across seven waves; `make verify` green, 917 tests pass. #052
+  - `scripts/graph_reconcile.py` (new) — compares `git ls-files` against `graphify-out/graph.json`'s mapped set, writes `graphify-out/unmapped_files.json`, advisory exit `0` (`REVDOC-G1`); wired into `Makefile` `graphify-update`/`graphify-rebuild` (`a830894`, `e59795a`).
+  - `scripts/session_state.py open-sprint --id <N>` gives `current_sprint` a real writer instead of hand-editing the anchor (`S052-4`) (`3937194`).
+  - `config/quality_audit_exclusions.json` (new) — typed, provenance-verified exclusion list for vendored `skill-creator` paths; `quality_audit.py` exits `2` on a stale entry (`6bc75b9`, `e0922dd`).
+  - `Makefile` `verify` now runs `quality-audit` (`1449e65`), deliberately wired last so the gate measures the post-refactor tree.
+  - `config/artifact_registry.json` gains a typed `writer` field, distinct from `role` (owner), tested against each writer's `Write` grant (`0a55351`) — recorded as `ADR-0015`, superseded the same sprint by `ADR-0017` once the typed-writer finding falsified its premise (`b0cc724`).
+  - `hooks/on_commit.py` Guard 5 — refuses a `#[ID]` sprint commit that stages any path outside `docs/sprints/[ID]-*/` while that sprint's `task_scope.md` is absent (`ADR-0007`) (`3c217ed`).
+  - `scripts/verify_references.py` check (d) extended to `tests/*.py` and `skills/*/scripts/*.py` with typed tree rules (`KI-048-1`) (`6a7fe27`), remediated at QA Gate 1 round 1 after three coverage-bypass findings (`ef2b0bc`); residue declared in `config/invocation_exceptions.json` (`3a11230`).
+
+### Fixed
+- **`S052-1`/`S052-2`** — `session_start.py --boot` minted a new session UID on every boot instead of forwarding `--session-id`, so a second boot in the same session refused itself; the refusal message then recommended `--takeover`, a flag `session_start.py` itself did not accept. Both flags are now accepted and forwarded (`0622cb5`, `7382890`).
+- **`S052-3`** — the `/agents:start` briefing counted `Still open` **table rows** instead of open `### - [ ]` entries, printing `1` against 6 real open upstream findings (`fb820f1`).
+- **`F-051-R3`** — `check_role_artifact.py` resolved the sprint directory against the session cwd rather than the anchor of the audited repository, so a gate auditing the nucleus read another repository's sprint log; now resolves via the audited path's own `git rev-parse --show-toplevel` (`11933ce`), with the final-message register contract propagated to `agents/qa_agent.md` and `agents/tester_agent.md` (`56d11c8`, `700913a`).
+- **Open-sprint seal** — `open-sprint`'s refusal only fired on `current_sprint.status == "IN_PROGRESS"`, a value nothing writes; `release()` now writes `CLOSED_SUCCESSFULLY` and `open-sprint` refuses a different sprint unless that seal is present (`dc38968`).
+- `README.md` file/script counts, stale after a new script landed mid-sprint (`b37d508`).
+- Six long-open upstream findings closed — `REVDOC-G1`, `ADR-0006`, `ADR-0007`, `#13`, `F-051-R1`, `F-051-R3` — `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` now records zero open entries (`8f65dcf`).
+
+### Changed
+- **`agents.md §3 local_testing`** restated as an isolate-the-test-database rule with a declared-deviation path for host SQLite fidelity, rather than a silent departure (`bbd8d0c`, `ADR-0016` `30a14db`); the same substantive constraint stated a second time in `rules/project_topology.md` "Testing Purity" now cross-references it, closing a propagation gap this sprint's own closeout audit found (`9f20149`).
+- **`agents.md §1`** complexity rows — states plainly that `verify` now runs `quality-audit`, names the exclusion file, and answers the decorator clause (`#13`) (`ac33d04`).
+- **Wave 6 — refactor to zero**: the measured baseline (87 non-compliant units / 1487, 53 files) reduced to 0 across 1657 scanned units, in 42 independent, behaviour-preserving `refactor(` commits: `bdb3b40` `18235fb` `4e8e297` `c542959` `67c406f` `dd70ac2` `2185d74` `4945d43` `a41bac5` `ba0a244` `254d8f0` `c2bb934` `c17be99` `a2fc516` `aa31333` `6ff17bf` `f2e4822` `244f70c` `c08d3ef` `1de54b5` `e62f648` `119b8df` `e1c8557` `3c77a4b` `aa06616` `aefb4ca` `23d17a5` `8afb5ea` `a3c3b10` `d3277fe` `613c376` `5c84a61` `b586cf2` `147b276` `3931024` `4334548` `0add610` `2fef0de` `7dbf116` `c3d2aef` (two planned units, `skills/topology-monitor/scripts/coverage_auditor.py` and `task_auditor.py`, went `Removed` instead — see below).
+  - `workflows/pipeline_workflow.md`, `workflows/start_workflow.md`, `commands/start.md` and `agents/principal_agent.md` now name the owner/writer split (`ADR-0017`) and boot flag forwarding (`aa03002`, `980fb3f`, `c35c634`, `e366940`, `9c913e8`, `860da0f`).
+- `CONTRIBUTING.md` names the two contribution gates Sprint 052 added (`1700aaa`).
+
+### Removed
+- Three orphaned skill scripts with no `RA-16` invoker — `context_refresher.py` (+ its skill-local test), `coverage_auditor.py`, `task_auditor.py` — deleted on human decision rather than routed to a Knowledge Item (`6e86e95`, `3d65f37`).
+
 ## [4.34.0] - 2026-09-25
 
 ### Fixed

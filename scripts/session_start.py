@@ -157,38 +157,49 @@ def section_upstream(root: Path) -> list[str]:
         lines.append(f"unreadable: {exc}")
         return lines
     file_lines = text.count("\n") + (0 if text.endswith("\n") or not text else 1)
-    open_rows = _still_open_rows_from_latest_status(text)
+    open_entries = _open_entry_count(text)
     lines.append(f"file lines: {file_lines} — do not load full UPSTREAM at start")
-    lines.append(f"| **Still open** | rows (non-empty): {open_rows}")
+    lines.append(f"open entries (### - [ ]): {open_entries}")
     return lines
 
 
-_STATUS_SPRINT = re.compile(r"^\*\*Status at Sprint (\d+)\b", re.MULTILINE)
+_OPEN_ENTRY = re.compile(r"^### - \[ \]", re.MULTILINE)
 
 
-def _still_open_rows_from_latest_status(text: str) -> int:
-    """Count Still-open rows in the Status table with the highest sprint id.
+def _open_entry_count(text: str) -> int:
+    r"""Count open findings by their canonical per-entry marker.
 
-    Historical Status snapshots keep closed findings visible; summing them
-    inflates the /start briefing (Sprint 038 M1). No Status table → 0.
+    ``### - [ ]`` opens a finding's heading; ``### - [x]`` closes one. The
+    prior counter summed ``| **Still open**`` table rows from the Status
+    table with the highest sprint id — a snapshot that names several
+    findings in one row, so Sprint 051 left it reporting `1` against `6`
+    open entries (S052-3). Counting the heading marker directly matches
+    ``grep -c '^### - \[ \]'``, the reproduce command this defect was filed
+    against, and needs no Status table at all.
+
+    Args:
+        text: Full contents of UPSTREAM_FINDINGS_FROM_HOSTS.md.
+
+    Returns:
+        int: Number of lines matching ``^### - \[ \]``.
     """
-    matches = list(_STATUS_SPRINT.finditer(text))
-    if not matches:
-        return 0
-    best_i = max(range(len(matches)), key=lambda i: int(matches[i].group(1)))
-    start = matches[best_i].end()
-    end = matches[best_i + 1].start() if best_i + 1 < len(matches) else len(text)
-    span = text[start:end]
-    open_rows = 0
-    for raw in span.splitlines():
-        if "| **Still open" not in raw:
-            continue
-        cells = [c.strip() for c in raw.split("|")]
-        value = cells[2] if len(cells) >= 3 else ""
-        if not value or "*(none" in value.lower():
-            continue
-        open_rows += 1
-    return open_rows
+    return len(_OPEN_ENTRY.findall(text))
+
+
+def _cursor_author_model(data: object) -> object:
+    """``tiers.author.cursor.model`` from a parsed ``model_tiers.json``.
+
+    Args:
+        data: Parsed JSON contents of ``config/model_tiers.json``.
+
+    Returns:
+        object: The model name, or ``"(unset)"`` when any step of the path
+            is absent or not the expected shape.
+    """
+    tiers = data.get("tiers") if isinstance(data, dict) else None
+    author = tiers.get("author") if isinstance(tiers, dict) else None
+    cursor = author.get("cursor") if isinstance(author, dict) else None
+    return cursor.get("model", "(unset)") if isinstance(cursor, dict) else "(unset)"
 
 
 def section_chat_vs_map(root: Path) -> list[str]:
@@ -202,15 +213,7 @@ def section_chat_vs_map(root: Path) -> list[str]:
     except (OSError, json.JSONDecodeError) as exc:
         lines.append(f"unreadable: {exc}")
         return lines
-    author_model: object = "(unset)"
-    tiers = data.get("tiers") if isinstance(data, dict) else None
-    if isinstance(tiers, dict):
-        author = tiers.get("author")
-        if isinstance(author, dict):
-            cursor = author.get("cursor")
-            if isinstance(cursor, dict):
-                author_model = cursor.get("model", "(unset)")
-    lines.append(f"map author (cursor): {author_model}")
+    lines.append(f"map author (cursor): {_cursor_author_model(data)}")
     lines.append(
         "Applied chat model may differ from the map — run `make cursor-tiers`."
     )
@@ -449,8 +452,51 @@ def _bridge_triage(root: Path, target: str | None) -> tuple[int, list[str]]:
     return 0, []
 
 
-def run_boot(root: Path, tool: str) -> int:
-    """Execute binding steps; return 2 on hard stop, else 0 after briefing."""
+def _claim_args(tool: str, session_id: str | None, takeover: bool) -> list[str]:
+    """Build the argument list forwarded to ``session_state.py claim``.
+
+    Always used from the boot path, so ``--entry-point boot`` is forwarded
+    unconditionally: it words the refusal message's retry hint as
+    ``session_start.py --boot --takeover`` rather than the direct-``claim``
+    form (S052-2, `session_state.py` `retry_hint`).
+
+    Args:
+        tool: Harness claiming the lock (``--tool``).
+        session_id: UID to claim with, or ``None`` to let ``claim`` mint one
+            (unchanged default behaviour, S052-1).
+        takeover: Whether to forward ``--takeover`` (S052-2).
+
+    Returns:
+        list[str]: Positional/flag arguments after the script path, starting
+        with the ``claim`` subcommand.
+    """
+    args = ["claim", "--tool", tool, "--entry-point", "boot"]
+    if session_id is not None:
+        args.extend(["--session-id", session_id])
+    if takeover:
+        args.append("--takeover")
+    return args
+
+
+def run_boot(
+    root: Path,
+    tool: str,
+    session_id: str | None = None,
+    takeover: bool = False,
+) -> int:
+    """Execute binding steps; return 2 on hard stop, else 0 after briefing.
+
+    Args:
+        root: The ``.agents`` checkout (``repo_root()``).
+        tool: Harness for claim/bridge (``--tool``).
+        session_id: UID forwarded to ``claim --session-id`` so a second boot
+            in the same session re-claims instead of refusing (S052-1). Omit
+            to keep today's behaviour (a UID is minted by ``claim``).
+        takeover: Forwarded to ``claim --takeover`` (S052-2).
+
+    Returns:
+        int: 0 on success (including advisory notes), 2 on hard stop.
+    """
     anchor_cwd = _anchor_cwd(root)
     drift_rc = _run_script(root, "scripts/detect_drift.py", cwd=anchor_cwd)
     if drift_rc == 2:
@@ -461,7 +507,10 @@ def run_boot(root: Path, tool: str) -> int:
         return 2
 
     claim_rc = _run_script(
-        root, "scripts/session_state.py", "claim", "--tool", tool, cwd=anchor_cwd
+        root,
+        "scripts/session_state.py",
+        *_claim_args(tool, session_id, takeover),
+        cwd=anchor_cwd,
     )
     if claim_rc == 2:
         print("boot: claim refused (exit 2).", file=sys.stderr)
@@ -505,10 +554,23 @@ def main(argv: list[str] | None = None) -> int:
              "matching session_state.py; naming an IDE here claims the anchor "
              "as that IDE).",
     )
+    parser.add_argument(
+        "--session-id",
+        required=False,
+        default=None,
+        help="UID forwarded to `session_state.py claim --session-id` when "
+             "--boot (S052-1). Omit to keep the minted-UID default.",
+    )
+    parser.add_argument(
+        "--takeover",
+        action="store_true",
+        help="Forwarded to `session_state.py claim --takeover` when --boot "
+             "(S052-2): the flag the refusal message recommends.",
+    )
     args = parser.parse_args(argv)
     root = repo_root()
     if args.boot:
-        return run_boot(root, args.tool)
+        return run_boot(root, args.tool, args.session_id, args.takeover)
     briefing = apply_line_cap(build_briefing(root))
     sys.stdout.write("\n".join(briefing) + "\n")
     return 0

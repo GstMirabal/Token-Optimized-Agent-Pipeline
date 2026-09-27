@@ -42,6 +42,23 @@ def candidate_files() -> list[str]:
     return [f for f in result.stdout.splitlines() if f and not f.startswith("venv_skillopt/")]
 
 
+def _violations_in_text(path: str, text: str) -> list[str]:
+    """Home-path matches in `text` whose user segment is not allow-listed.
+
+    Args:
+        path: source file path, used to build each violation message.
+        text: file content to scan for `HOME_PATH` matches.
+
+    Returns:
+        list[str]: one `"{path}: {match}"` entry per non-allow-listed match.
+    """
+    found = []
+    for match in HOME_PATH.finditer(text):
+        if match.group(1).lower() not in ALLOWED_USERS:
+            found.append(f"{path}: {match.group(0)}")
+    return found
+
+
 def main() -> int:
     violations = []
     for path in candidate_files():
@@ -50,9 +67,7 @@ def main() -> int:
         except OSError as exc:
             print(f"⚠️  Could not read {path}: {exc}")
             continue
-        for match in HOME_PATH.finditer(text):
-            if match.group(1).lower() not in ALLOWED_USERS:
-                violations.append(f"{path}: {match.group(0)}")
+        violations.extend(_violations_in_text(path, text))
 
     if violations:
         print("❌ Real-looking local developer paths found (use a generic placeholder):")

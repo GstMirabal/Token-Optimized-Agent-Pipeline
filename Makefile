@@ -29,6 +29,7 @@ PY := $(if $(wildcard $(VENV_PY)),$(VENV_PY),python3)
 # Incremental AST sync after code changes (close_workflow Phase 1, no LLM cost).
 graphify-update:
 	$(GRAPHIFY) update .
+	python3 $(AGENTS_DIR)/scripts/graph_reconcile.py --root .
 
 # Full AST rebuild — required when documentation changed (close_workflow Phase 1,
 # pipeline_workflow Phase 8). Runs offline: `close_workflow` Phase 5 and every
@@ -38,6 +39,7 @@ graphify-update:
 #   $(AGENTS_DIR)/venv_skillopt/bin/graphify . --mode deep   # needs GEMINI_API_KEY
 graphify-rebuild:
 	$(AGENTS_DIR)/venv_skillopt/bin/python -m graphify update . --force
+	python3 $(AGENTS_DIR)/scripts/graph_reconcile.py --root .
 
 # Framework self-check. THIS is the full set: `.github/workflows/ci.yml` invokes
 # this target rather than listing its own steps, so a green local run and a green
@@ -67,6 +69,7 @@ verify:
 	cd $(AGENTS_DIR) && python3 scripts/check_manifest_parity.py
 	cd $(AGENTS_DIR) && python3 scripts/check_absolute_paths.py
 	cd $(AGENTS_DIR) && python3 skills/topology-monitor/scripts/legacy_app_auditor.py
+	cd $(AGENTS_DIR) && python3 scripts/quality_audit.py .
 	cd $(AGENTS_DIR) && python3 skills/mass-standardizer/scripts/generate_manifest.py \
 	  && git -C $(AGENTS_DIR) diff --exit-code skills/manifest_skills.json
 # A test must not leave the tracked tree changed. Once `C0.3` anchored
@@ -126,15 +129,14 @@ cursor-era-audit:
 bridge-state:
 	cd $(AGENTS_DIR) && python3 scripts/bridge_state.py
 
-# Deterministic function-length/nesting-depth auditor (Sprint 050, D5 branch B).
-# Not a `verify` dependency: measured at commit 80bb5e1..43e60b3, the baseline
-# is 91/1428 first-party Python functions (6.37%) in violation, so wiring this
-# into `verify` then would have red the gate on pre-existing code rather than
-# on a regression. The violation count holds at 91 as the tree grows (91/1445,
-# 6.30%, at commit a198f91, Phase 6 close) -- wiring stays deferred either way.
-# Remediation of the 91 units is routed to Sprint 051; `docs/sprints/050-core-pipeline/SPRINT_LOG.md`
-# records the baseline and its measurement window. Exit 2 on any violation;
-# `--report` prints the full register and exits 0 regardless.
+# Deterministic function-length/nesting-depth auditor (Sprint 050). A `verify`
+# step since Sprint 052 (U66): Sprint 050 withheld the wiring (D5 branch B)
+# because the baseline carried 87 non-compliant units, and Sprint 052's Wave 6
+# refactors brought them to 0 (1638 units scanned, 0 violations). Provenance-
+# verified vendored files are exempted per file in
+# config/quality_audit_exclusions.json; a stale or malformed entry exits 2.
+# Exit 2 on any violation; `--report` prints the full register and exits 0
+# regardless.
 quality-audit:
 	cd $(AGENTS_DIR) && python3 scripts/quality_audit.py .
 

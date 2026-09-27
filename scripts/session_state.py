@@ -29,10 +29,18 @@ and `deployment_workflow.md` Phase 4 runs it as its own dedicated step
 Usage:
     python3 scripts/session_state.py claim [--session-id <uid>] [--takeover]
         [--tool claude-code|cursor|terminal] [--delegation-mode native|sequential]
+        [--entry-point boot|claim]
         # --session-id is generated (see generate_session_id()) when the
         # harness exposes none, e.g. Cursor.
         # --delegation-mode defaults: cursor→sequential, others→native.
-    python3 scripts/session_state.py release   # seals the SPRINT (sprint-branch tip)
+        # --entry-point (default claim) words the refusal message's retry
+        # hint for the caller that issued this claim: session_start.py
+        # --boot passes --entry-point boot (S052-2).
+    python3 scripts/session_state.py release   # seals the SPRINT (sprint-branch tip);
+        # also writes current_sprint.status = CLOSED when current_sprint
+        # exists, preserving every other key — a SPRINT fact, not a SESSION
+        # one, so the next session's `claim` (which resets top-level status
+        # to IN_PROGRESS) does not un-seal it (S052 QA Gate 1 round 2)
     python3 scripts/session_state.py suspend   # ends the SESSION only
     python3 scripts/session_state.py require-released [--branch <ref>]
         # deployment preflight: refuse SUSPENDED; tip must equal last_close_commit
@@ -42,12 +50,24 @@ Usage:
         # writes topology_version as X.Y.Z-NNN-<status>, derived from the
         # newest sealed `## [X.Y.Z]` section of CHANGELOG.md plus
         # current_sprint.id/current_sprint.status (Sprint 050 `D7`)
+    python3 scripts/session_state.py open-sprint --id <N>
+        # writes current_sprint.{id: N, status: OPEN}, preserving layer/app/
+        # last_audit_sprint and any other current_sprint keys; idempotent
+        # when current_sprint.id already equals N; refuses (exit 2) for a
+        # different id while that sprint is not sealed — sealed means
+        # current_sprint.status == CLOSED ("CLOSED_SUCCESSFULLY"), the SPRINT
+        # fact `release()` writes, never the top-level SESSION status (which
+        # `claim` resets to IN_PROGRESS at the start of every session,
+        # including the one that opens the next sprint) and never
+        # current_sprint.status == IN_PROGRESS, which no writer ever
+        # produces (F-3, S052 QA Gate 1, both remediation rounds)
 
 Exit codes:
     0 — lock claimed or released, deploy preflight passed, baseline refreshed,
-        or topology_version written
-    2 — a different session holds the lock, deploy refused, or set-topology
-        cannot derive a value (RA-11: only 2 blocks)
+        topology_version written, or a sprint opened (or already open)
+    2 — a different session holds the lock, deploy refused, set-topology
+        cannot derive a value, or open-sprint would overwrite a sprint that
+        has not been sealed by `release()` (RA-11: only 2 blocks)
 """
 
 import argparse
@@ -172,7 +192,29 @@ def suspend() -> int:
     return 0
 
 
-def claim(session_id: str | None, takeover: bool, tool: str, delegation_mode: str | None = None) -> int:
+def retry_hint(entry_point: str) -> str:
+    """The re-run invocation valid for the entry point that issued a claim.
+
+    Args:
+        entry_point: `"boot"` when `session_start.py --boot` issued the
+            claim, `"claim"` when `session_state.py claim` was invoked
+            directly.
+
+    Returns:
+        str: the exact command line to re-run with `--takeover`.
+    """
+    if entry_point == "boot":
+        return "python3 scripts/session_start.py --boot --takeover"
+    return "python3 scripts/session_state.py claim --takeover"
+
+
+def claim(
+    session_id: str | None,
+    takeover: bool,
+    tool: str,
+    delegation_mode: str | None = None,
+    entry_point: str = "claim",
+) -> int:
     """Record this session as the holder of the lock.
 
     Args:
@@ -187,6 +229,12 @@ def claim(session_id: str | None, takeover: bool, tool: str, delegation_mode: st
         delegation_mode: Execution mode — `native` (8 roles) or `sequential`
             (manual). When None, derived from tool: `cursor` → `sequential`,
             others → `native`.
+        entry_point: Which caller issued this claim — `"boot"` for
+            `session_start.py --boot`, or `"claim"` for a direct invocation
+            of `session_state.py claim` (the default). Used only to word the
+            refusal message's retry hint with the invocation valid for that
+            caller (S052-2): `session_start.py --boot --takeover` for boot,
+            `session_state.py claim --takeover` otherwise.
 
     Returns:
         int: 0 when claimed, 2 when another live session holds the lock.
@@ -203,7 +251,7 @@ def claim(session_id: str | None, takeover: bool, tool: str, delegation_mode: st
         # of them is safe to overwrite. The human decides which this is.
         print(
             f"❌ Session lock held by {holder}, still IN_PROGRESS.\n"
-            f"   If that session crashed, re-run with --takeover.\n"
+            f"   If that session crashed, re-run with `{retry_hint(entry_point)}`.\n"
             f"   If it is still running, do not: two sessions writing one anchor "
             f"is the collision this guard exists to prevent.",
             file=sys.stderr,
@@ -245,6 +293,15 @@ def release() -> int:
     Clears ``resume_pointer`` so the next ``/start`` on ``main`` does not
     advisory-flag a closed sprint's branch (Sprint 040 R1). Mid-sprint
     ``claim`` still must not auto-clear resume (Sprint 039 D-P1).
+
+    Also writes ``current_sprint.status = CLOSED`` when ``current_sprint``
+    exists, preserving every other key already there. This is the SPRINT
+    fact ``open_sprint()``'s sealed-check reads (``_sprint_is_sealed``) — the
+    top-level ``status`` this function also sets is a SESSION fact that
+    ``claim()`` resets to ``IN_PROGRESS`` at the boot of every session,
+    including the one that opens the next sprint, so it cannot be the
+    sealed signal without refusing the very step it is meant to allow
+    (S052 QA Gate 1 round 2).
     """
     state = load_state()
     state.update({
@@ -253,6 +310,9 @@ def release() -> int:
         "last_updated": now(),
     })
     state["resume_pointer"] = {}
+    sprint = state.get("current_sprint")
+    if isinstance(sprint, dict):
+        state["current_sprint"] = {**sprint, "status": CLOSED}
     sha = head_sha()
     if sha:
         # Sprint-branch tip for require-released. Squash-merge orphans this SHA
@@ -431,10 +491,84 @@ def set_topology() -> int:
     return 0
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    sub = parser.add_subparsers(dest="command", required=True)
+def _sprint_is_sealed(current_sprint_status: str | None) -> bool:
+    """Whether the anchor's previous `current_sprint` was sealed by `release()`.
 
+    Keys **only** on the SPRINT fact `release()` writes onto `current_sprint`
+    itself (`current_sprint.status = CLOSED`) — never on the top-level
+    `status`. That field is a SESSION fact: `claim()` resets it to
+    `IN_PROGRESS` at the boot of *every* session, including the one that
+    opens the next sprint, so a check keyed on it would refuse the very
+    `open-sprint` call it exists to allow (reported against this function's
+    first version, S052 QA Gate 1 round 2). `current_sprint.status` is
+    written only by `open_sprint()` (`"OPEN"`) and `release()` (`CLOSED`),
+    never `IN_PROGRESS` — the F-3 defect's original guard checked a value no
+    writer ever produces.
+
+    Args:
+        current_sprint_status: `current_sprint.status` from the anchor.
+
+    Returns:
+        bool: True when it equals `CLOSED` (`"CLOSED_SUCCESSFULLY"`).
+    """
+    return current_sprint_status == CLOSED
+
+
+def open_sprint(sprint_id: int) -> int:
+    """Open a sprint in `current_sprint`, or confirm it is already open.
+
+    Writes `current_sprint.id = sprint_id` and `current_sprint.status =
+    "OPEN"`, preserving every other key already present under
+    `current_sprint` (`layer`, `app`, `last_audit_sprint`, ...) — this
+    writes only the two fields the open act owns. Until this command
+    (`S052-4`), nothing wrote `current_sprint`: the anchor was a hand edit
+    with no gate.
+
+    Args:
+        sprint_id: The sprint number to open.
+
+    Returns:
+        int: 0 when opened, when `sprint_id` already matches
+            `current_sprint.id` (idempotent — a repeat call changes
+            nothing), or when a different current sprint is sealed
+            (`_sprint_is_sealed`); 2 when a different current sprint is
+            not sealed (RA-11: only 2 blocks; F-3, S052 QA Gate 1).
+    """
+    state = load_state()
+    sprint = state.get("current_sprint") or {}
+    current_id = sprint.get("id")
+    current_status = sprint.get("status")
+
+    if current_id == sprint_id:
+        print(f"✅ Sprint {sprint_id} already the current sprint — idempotent, nothing changed.")
+        return 0
+
+    if current_id is not None and not _sprint_is_sealed(current_status):
+        print(
+            f"Refusing open-sprint: sprint {current_id} is not sealed "
+            f"(current_sprint.status={current_status!r}). Seal it with "
+            f"`python3 scripts/session_state.py release` before opening "
+            f"sprint {sprint_id}.",
+            file=sys.stderr,
+        )
+        return 2
+
+    updated_sprint = dict(sprint)
+    updated_sprint["id"] = sprint_id
+    updated_sprint["status"] = "OPEN"
+    state["current_sprint"] = updated_sprint
+    state["last_updated"] = now()
+    save_state(state)
+    print(f"✅ Sprint {sprint_id} opened.")
+    return 0
+
+
+def _add_claim_subparser(sub: argparse._SubParsersAction) -> None:
+    """Register the `claim` subcommand and its flags on `sub`.
+
+    Args:
+        sub: Subparsers action from `parser.add_subparsers()`.
+    """
     claim_parser = sub.add_parser("claim", help="Record this session as lock holder.")
     claim_parser.add_argument(
         "--session-id", required=False, default=None,
@@ -454,6 +588,21 @@ def main() -> int:
         help="Execution mode (native: 8 roles; sequential: manual). "
              "If omitted, derived from --tool: cursor→sequential, others→native.",
     )
+    claim_parser.add_argument(
+        "--entry-point", choices=["boot", "claim"], default="claim",
+        help="Caller issuing this claim, used only to word the refusal "
+             "message's retry hint (S052-2): `boot` for "
+             "`session_start.py --boot`, `claim` (default) for a direct "
+             "invocation of this command.",
+    )
+
+
+def _add_other_subparsers(sub: argparse._SubParsersAction) -> None:
+    """Register every subcommand but `claim` (which `_add_claim_subparser` owns).
+
+    Args:
+        sub: Subparsers action from `parser.add_subparsers()`.
+    """
     sub.add_parser("release", help="Seal the SPRINT at close.")
     sub.add_parser("suspend", help="End the SESSION with the sprint still open.")
     require_parser = sub.add_parser(
@@ -478,10 +627,45 @@ def main() -> int:
         "set-topology",
         help="Write topology_version, derived from CHANGELOG.md + current_sprint.",
     )
+    open_sprint_parser = sub.add_parser(
+        "open-sprint",
+        help="Write current_sprint.{id,status: OPEN}; refuse over an unsealed sprint.",
+    )
+    open_sprint_parser.add_argument(
+        "--id", required=True, type=int, dest="sprint_id",
+        help="Sprint number to open.",
+    )
 
-    args = parser.parse_args()
+
+def _build_parser() -> argparse.ArgumentParser:
+    """Construct the `session_state.py` CLI parser (all subcommands/flags).
+
+    Returns:
+        argparse.ArgumentParser: Parser with every subcommand (`claim`,
+            `release`, `suspend`, `require-released`, `refresh-baseline`,
+            `set-topology`, `open-sprint`) and their flags registered.
+    """
+    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    sub = parser.add_subparsers(dest="command", required=True)
+    _add_claim_subparser(sub)
+    _add_other_subparsers(sub)
+    return parser
+
+
+def _dispatch(args: argparse.Namespace) -> int:
+    """Run the subcommand `args.command` names.
+
+    Args:
+        args: Parsed namespace from `_build_parser().parse_args()`.
+
+    Returns:
+        int: Exit code of the invoked subcommand.
+    """
     if args.command == "claim":
-        return claim(args.session_id, args.takeover, args.tool, args.delegation_mode)
+        return claim(
+            args.session_id, args.takeover, args.tool, args.delegation_mode,
+            args.entry_point,
+        )
     if args.command == "suspend":
         return suspend()
     if args.command == "require-released":
@@ -490,7 +674,15 @@ def main() -> int:
         return refresh_baseline(args.sha)
     if args.command == "set-topology":
         return set_topology()
+    if args.command == "open-sprint":
+        return open_sprint(args.sprint_id)
     return release()
+
+
+def main() -> int:
+    """Parse CLI arguments and dispatch to the named subcommand."""
+    args = _build_parser().parse_args()
+    return _dispatch(args)
 
 
 if __name__ == "__main__":

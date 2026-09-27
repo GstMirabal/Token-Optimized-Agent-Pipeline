@@ -108,6 +108,27 @@ def _col(header: list[str], row: list[str], name: str) -> str:
     return row[index] if index < len(row) else ""
 
 
+def _tester_row_omits_tests_path(header: list[str], rows: list[list[str]]) -> bool:
+    """True if any Tester row cites pytest without a ``tests/`` path substring.
+
+    Args:
+        header: Table header cells for one gate table.
+        rows: Table body rows for that same gate table.
+
+    Returns:
+        True on the first Tester row whose Notes mention pytest but omit
+        ``tests/``; False if no such row exists.
+    """
+    for row in rows:
+        gate = _col(header, row, "Gate")
+        notes = _col(header, row, "Notes")
+        if not gate.startswith("Tester"):
+            continue
+        if "pytest" in notes and "tests/" not in notes:
+            return True
+    return False
+
+
 def ce4_count(sprint_dir: Path) -> int:
     """CE-4: Tester Notes name pytest but omit ``tests/`` as a path substring."""
     log = sprint_dir / "SPRINT_LOG.md"
@@ -116,13 +137,8 @@ def ce4_count(sprint_dir: Path) -> int:
     for header, rows in gate_tables(log.read_text(encoding="utf-8")):
         if "Gate" not in header or "Notes" not in header:
             continue
-        for row in rows:
-            gate = _col(header, row, "Gate")
-            notes = _col(header, row, "Notes")
-            if not gate.startswith("Tester"):
-                continue
-            if "pytest" in notes and "tests/" not in notes:
-                return 1
+        if _tester_row_omits_tests_path(header, rows):
+            return 1
     return 0
 
 

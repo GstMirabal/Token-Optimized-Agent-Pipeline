@@ -47,6 +47,33 @@ def audit_project_apps():
     return errors
 
 
+def _audit_skill_scripts(item: Path) -> int:
+    """Checks the Three-File Skill Standard's README/`__init__.py` rules.
+
+    Module-level (not inlined in `audit_repo_nodes`) so these two sibling
+    checks do not stack a fourth nesting level on top of the caller's
+    `for item in skills_root.iterdir(): if scripts.is_dir(): ...`.
+
+    Args:
+        item: One skill directory under `skills/`.
+
+    Returns:
+        Number of structural errors found for this skill's `scripts/` dir;
+        0 when the skill ships no `scripts/` (a knowledge-only skill).
+    """
+    errors = 0
+    scripts = item / "scripts"
+    if not scripts.is_dir():
+        return errors
+    if not (item / "README.md").exists():
+        print(f"❌ [STRUCTURE ERROR]: executable skill {item} missing README.md.")
+        errors += 1
+    if not (scripts / "__init__.py").exists():
+        print(f"❌ [STRUCTURE ERROR]: {scripts} missing __init__.py.")
+        errors += 1
+    return errors
+
+
 def audit_repo_nodes():
     """Validates the .agents core: agent frontmatter + flat skill topology."""
     print("🔍 [STRUCTURAL AUDITOR] ANALYZING PIPELINE CORE NODES...")
@@ -78,14 +105,7 @@ def audit_repo_nodes():
         if not head.startswith("---") or "name:" not in head or "description:" not in head:
             print(f"❌ [STRUCTURE ERROR]: {skill_md} missing name/description frontmatter.")
             errors += 1
-        scripts = item / "scripts"
-        if scripts.is_dir():
-            if not (item / "README.md").exists():
-                print(f"❌ [STRUCTURE ERROR]: executable skill {item} missing README.md.")
-                errors += 1
-            if not (scripts / "__init__.py").exists():
-                print(f"❌ [STRUCTURE ERROR]: {scripts} missing __init__.py.")
-                errors += 1
+        errors += _audit_skill_scripts(item)
 
     return errors
 

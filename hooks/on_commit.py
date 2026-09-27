@@ -46,52 +46,81 @@ def get_staged_files() -> list[str]:
 
         return []
 
+def _identify_modified_skills(staged_files: list[str]) -> set[Path]:
+    """Finds the skill roots that own at least one staged file.
+
+    Args:
+        staged_files: Paths staged for the current commit.
+
+    Returns:
+        The set of `skills/<name>` roots (flat topology) touched by this
+        commit.
+    """
+    modified_skills = set()
+    for file_path in staged_files:
+        path = Path(file_path)
+        if "skills/" not in file_path:
+            continue
+        # skills/skill-name/... -> skill-name is at index 1 (flat topology)
+        parts = path.parts
+        if len(parts) < 2 or parts[0] != "skills":
+            continue
+        modified_skills.add(Path(*parts[:2]))
+    return modified_skills
+
+
+def _audit_skill_structure(skill_path: Path) -> list[str]:
+    """Checks one skill root against the Three-File Standard.
+
+    Args:
+        skill_path: The `skills/<name>` root to audit.
+
+    Returns:
+        The violation messages for this skill, empty when it complies.
+    """
+    print(f"🔍 [DEVOPS AGENT] Auditing {skill_path}...")
+
+    violations = []
+    skill_md = skill_path / "SKILL.md"
+    scripts = skill_path / "scripts"
+
+    # Every skill needs a SKILL.md with name/description frontmatter.
+    if not skill_md.exists():
+        violations.append(f"{skill_path}: Missing SKILL.md")
+    else:
+        head = skill_md.read_text(encoding="utf-8")[:500]
+        if not head.startswith("---") or "name:" not in head or "description:" not in head:
+            violations.append(f"{skill_path}: SKILL.md missing name/description frontmatter")
+
+    # Full standard only applies to executable skills (agents.md §3 three_file_standard):
+    # a skill that ships scripts/ must also ship README.md and scripts/__init__.py.
+    # Knowledge skills (no scripts/) are complete with just SKILL.md.
+    if scripts.is_dir():
+        if not (skill_path / "README.md").exists():
+            violations.append(f"{skill_path}: Executable skill missing README.md")
+        if not (scripts / "__init__.py").exists():
+            violations.append(f"{skill_path}: scripts/ missing __init__.py")
+
+    return violations
+
+
 def audit_three_file_standard() -> bool:
     """Certifies the Three-File Skill Standard (agents.md §3 three_file_standard) for modified skills."""
     staged_files = get_staged_files()
     if not staged_files:
         return True
 
-    # Identify skills that have modified files
-    modified_skills = set()
-    for file_path in staged_files:
-        path = Path(file_path)
-        if "skills/" in file_path:
-            # skills/skill-name/... -> skill-name is at index 1 (flat topology)
-            parts = path.parts
-            if len(parts) >= 2 and parts[0] == "skills":
-                skill_root = Path(*parts[:2])
-                modified_skills.add(skill_root)
+    modified_skills = _identify_modified_skills(staged_files)
 
     violations = []
     for skill_path in modified_skills:
-        print(f"🔍 [DEVOPS AGENT] Auditing {skill_path}...")
-
-        skill_md = skill_path / "SKILL.md"
-        scripts = skill_path / "scripts"
-
-        # Every skill needs a SKILL.md with name/description frontmatter.
-        if not skill_md.exists():
-            violations.append(f"{skill_path}: Missing SKILL.md")
-        else:
-            head = skill_md.read_text(encoding="utf-8")[:500]
-            if not head.startswith("---") or "name:" not in head or "description:" not in head:
-                violations.append(f"{skill_path}: SKILL.md missing name/description frontmatter")
-
-        # Full standard only applies to executable skills (agents.md §3 three_file_standard):
-        # a skill that ships scripts/ must also ship README.md and scripts/__init__.py.
-        # Knowledge skills (no scripts/) are complete with just SKILL.md.
-        if scripts.is_dir():
-            if not (skill_path / "README.md").exists():
-                violations.append(f"{skill_path}: Executable skill missing README.md")
-            if not (scripts / "__init__.py").exists():
-                violations.append(f"{skill_path}: scripts/ missing __init__.py")
+        violations.extend(_audit_skill_structure(skill_path))
 
     if violations:
         for v in violations:
             print(f"❌ [ON_COMMIT] Structure Violation: {v}")
         return False
-    
+
     return True
 
 # A secret leaks when a secret-named identifier is assigned a STRING LITERAL.
@@ -581,47 +610,62 @@ def announce_waivers(content: str, path: Path, file_path: str) -> None:
             )
 
 
+def _scan_file_for_secrets(file_path: str) -> str | None:
+    """Scans one staged file and returns its violation message, if any.
+
+    Args:
+        file_path: Path of the staged file, as written by git.
+
+    Returns:
+        The violation message for this file, or None when it is clean.
+    """
+    path = Path(file_path)
+
+    if is_forbidden_secret_file(path):
+        return f"Forbidden file staged: {file_path}"
+
+    # Basic content scanning for API keys or secrets
+    try:
+        content = subprocess.run(
+            ["git", "show", f":{file_path}"],
+            capture_output=True,
+            text=True,
+            check=True
+        ).stdout
+
+        if _is_test_artifact(path):
+            return None
+
+        announce_waivers(content, path, file_path)
+
+        leak = find_hardcoded_secret(content, path)
+        if leak:
+            # The remedy travels with the refusal. A gate whose only
+            # visible option is to disable it gets disabled: the affordance
+            # existed one round before this message did, and a host that
+            # cannot find it is in the same position as a host without it.
+            return (
+                f"Hardcoded secret assigned to '{leak}' in {file_path}. "
+                "If this is a false positive, append "
+                "`# secret-scan: allow <reason>` to that line — the reason "
+                "is required and the waiver is printed on every commit."
+            )
+    except Exception:
+        # Skip binary files or git errors
+        return None
+
+    return None
+
+
 def audit_secret_shielding() -> bool:
     """Certifies secret shielding (agents.md §3 secret_sovereignty / RA-09)."""
     staged_files = get_staged_files()
-    
+
     violations = []
     for file_path in staged_files:
-        path = Path(file_path)
-
-        if is_forbidden_secret_file(path):
-            violations.append(f"Forbidden file staged: {file_path}")
-            continue
-
-        # Basic content scanning for API keys or secrets
-        try:
-            content = subprocess.run(
-                ["git", "show", f":{file_path}"],
-                capture_output=True,
-                text=True,
-                check=True
-            ).stdout
-            
-            if _is_test_artifact(path):
-                continue
-
-            announce_waivers(content, path, file_path)
-
-            leak = find_hardcoded_secret(content, path)
-            if leak:
-                # The remedy travels with the refusal. A gate whose only
-                # visible option is to disable it gets disabled: the affordance
-                # existed one round before this message did, and a host that
-                # cannot find it is in the same position as a host without it.
-                violations.append(
-                    f"Hardcoded secret assigned to '{leak}' in {file_path}. "
-                    "If this is a false positive, append "
-                    "`# secret-scan: allow <reason>` to that line — the reason "
-                    "is required and the waiver is printed on every commit."
-                )
-        except Exception:
-            # Skip binary files or git errors
-            continue
+        reason = _scan_file_for_secrets(file_path)
+        if reason:
+            violations.append(reason)
 
     if violations:
         for v in violations:
@@ -803,6 +847,128 @@ def audit_dependency_justification(message: str, staged: list[str]) -> str | Non
             "than a new dependency.")
 
 
+SPRINT_BRANCH_RE = re.compile(r"^ai-sprint/(\d+)$")
+SPRINT_DIR_RE = re.compile(r"^docs/sprints/(\d+)-[^/]+$")
+COMMIT_SPRINT_SUFFIX = re.compile(r"#(\d+)\s*$")
+
+
+def _current_branch() -> str | None:
+    """Returns the checked-out branch name, or None on a detached HEAD.
+
+    Mirrors `scripts/branch_sovereignty.py:current_branch`. Kept as its own
+    call rather than an import: `hooks/` has no jurisdiction to grow a
+    dependency on `scripts/`, and the check is one `git` call either way.
+    """
+    result = subprocess.run(
+        ["git", "symbolic-ref", "--quiet", "--short", "HEAD"],
+        capture_output=True, text=True, check=False,
+    )
+    return result.stdout.strip() if result.returncode == 0 else None
+
+
+def _commit_sprint_suffix(message: str) -> str | None:
+    """Returns the digits of a commit message's `#[ID]` suffix.
+
+    Args:
+        message: The commit message.
+
+    Returns:
+        The numeric suffix as written (zero-padding preserved), or None when
+        the first line carries no trailing `#<digits>` (e.g. a hotfix `#H003`).
+    """
+    first_line = message.splitlines()[0] if message else ""
+    match = COMMIT_SPRINT_SUFFIX.search(first_line)
+    return match.group(1) if match else None
+
+
+def _sprint_dir_for(sprint_id: str, staged: list[str]) -> str | None:
+    """Finds the canonical sprint directory naming one numeric sprint ID.
+
+    Checked against staged paths first, because Phase 3's very first commit
+    creates the directory in the same commit that names it: the directory
+    does not exist on disk yet when that commit is evaluated. Falls back to
+    the working tree, which covers every later commit of the sprint.
+
+    Args:
+        sprint_id: The sprint's numeric ID, zero-padded or not (e.g. "052").
+        staged: Paths staged for this commit.
+
+    Returns:
+        The directory's relative path (e.g. "docs/sprints/052-core-pipeline"),
+        or None when no directory anywhere names this sprint.
+    """
+    target = int(sprint_id)
+    for path in staged:
+        parts = path.split("/")
+        if len(parts) < 3 or parts[0] != "docs" or parts[1] != "sprints":
+            continue
+        match = SPRINT_DIR_RE.match(f"docs/sprints/{parts[2]}")
+        if match and int(match.group(1)) == target:
+            return f"docs/sprints/{parts[2]}"
+
+    sprints_root = Path("docs/sprints")
+    if not sprints_root.is_dir():
+        return None
+    for entry in sprints_root.iterdir():
+        if not entry.is_dir():
+            continue
+        match = SPRINT_DIR_RE.match(f"docs/sprints/{entry.name}")
+        if match and int(match.group(1)) == target:
+            return f"docs/sprints/{entry.name}"
+    return None
+
+
+def audit_task_scope_precondition(message: str, staged: list[str]) -> str | None:
+    """A sprint commit outside its own directory needs `task_scope.md` first.
+
+    `ADR-0007` / `D7` (`docs/sprints/052-core-pipeline/IMPLEMENTATION_PLAN.md`):
+    Sprint 051 ran all five of its phases in-session and produced
+    `task_scope.md` only at Closeout — the enforcement gap this guard closes,
+    found inside the repository that owns the rule. Commits that stay inside
+    `docs/sprints/[ID]-*/` (the plan, the log, the scope itself) always pass,
+    because Phases 3-4 write nothing else *inside the sprint directory*
+    before Phase 4.3 produces the scope. The one Phase 4 write outside that
+    directory is Phase 4.2's P4 skill forge (`workflows/pipeline_workflow.md`
+    Phase 4.2 row; `agents/skill_architect.md` `skill_search` P4 rung), which
+    lands at the host forge destination (e.g. `.claude/skills/`), not under
+    `docs/sprints/`; this guard still requires that forge commit to land
+    after `task_scope.md` exists (4.3).
+
+    Args:
+        message: The commit message.
+        staged: Paths staged for this commit.
+
+    Returns:
+        str | None: Failure reason, or None when the commit passes.
+    """
+    branch = _current_branch()
+    branch_match = SPRINT_BRANCH_RE.match(branch) if branch else None
+    if not branch_match:
+        return None
+
+    commit_id = _commit_sprint_suffix(message)
+    if commit_id is None or int(commit_id) != int(branch_match.group(1)):
+        return None
+
+    sprint_dir = _sprint_dir_for(branch_match.group(1), staged)
+    inside_prefix = f"{sprint_dir}/" if sprint_dir else None
+    outside = [p for p in staged if not inside_prefix or not p.startswith(inside_prefix)]
+    if not outside:
+        return None
+
+    scope_path = f"{sprint_dir}/task_scope.md" if sprint_dir else None
+    scope_present = bool(scope_path) and (scope_path in staged or Path(scope_path).exists())
+    if scope_present:
+        return None
+
+    return (
+        f"Commit stages paths outside {inside_prefix or 'the sprint directory'} "
+        "while task_scope.md is absent (agents.md §0, ADR-0007 D7). Phase 4.3 "
+        "must produce docs/sprints/[ID]-*/task_scope.md before this sprint "
+        "touches any other tree."
+    )
+
+
 def audit_submodule_purity() -> str | None:
     """Refuse a host commit while the framework submodule carries host work.
 
@@ -832,6 +998,45 @@ def block(reason: str) -> None:
     sys.exit(2)
 
 
+def _run_commit_message_guards(command: str) -> None:
+    """Runs Guards 2-4, which all need the parsed commit message.
+
+    Guards 2-4 need the commit message, which is only reliably available on
+    the agent path (the Bash command carries `-m`). At native pre-commit time
+    git has not yet finalised COMMIT_EDITMSG, so reading it there would test
+    the PREVIOUS commit's message — worse than not checking. Closing that gap
+    needs a `commit-msg` hook; until then this coverage is honestly partial,
+    not silently assumed.
+
+    Args:
+        command: The raw Bash command text from the PreToolUse payload.
+    """
+    message = extract_commit_message(command)
+    if message is None:
+        return
+
+    # Guard 2 (agents.md §5): Conventional Commit + #[Sprint_ID] suffix.
+    if not is_valid_commit_message(message):
+        log_error("on_commit", "COMMIT_MSG_VIOLATION", f"Non-conforming message: {message[:80]}")
+        block("Commit message must follow Conventional Commits and end with the "
+              "#[Sprint_ID] suffix, e.g. \"feat(auth): add login flow #078\" (agents.md §5).")
+
+    staged = get_staged_files()
+    # Guard 3 (rules/code_craft.md §6): a bug fix ships its test.
+    if reason := audit_regression_test(message, staged):
+        log_error("on_commit", "REGRESSION_TEST_MISSING", message[:80])
+        block(reason)
+    # Guard 4 (rules/code_craft.md §7): a new dependency says why.
+    if reason := audit_dependency_justification(message, staged):
+        log_error("on_commit", "DEPENDENCY_UNJUSTIFIED", message[:80])
+        block(reason)
+    # Guard 5 (D7, ADR-0007): a sprint commit needs task_scope.md
+    # before it touches anything outside its own sprint directory.
+    if reason := audit_task_scope_precondition(message, staged):
+        log_error("on_commit", "TASK_SCOPE_PRECONDITION", message[:80])
+        block(reason)
+
+
 def main():
     command = read_hook_command()
 
@@ -854,30 +1059,8 @@ def main():
         log_error("on_commit", "JURISDICTION_VIOLATION", reason[:80])
         block(reason)
 
-    # Guard 2 (agents.md §5): Conventional Commit + #[Sprint_ID] suffix.
-    # Guards 2-4 need the commit message, which is only reliably available on
-    # the agent path (the Bash command carries `-m`). At native pre-commit time
-    # git has not yet finalised COMMIT_EDITMSG, so reading it there would test
-    # the PREVIOUS commit's message — worse than not checking. Closing that gap
-    # needs a `commit-msg` hook; until then this coverage is honestly partial,
-    # not silently assumed.
     if command:
-        message = extract_commit_message(command)
-        if message is not None and not is_valid_commit_message(message):
-            log_error("on_commit", "COMMIT_MSG_VIOLATION", f"Non-conforming message: {message[:80]}")
-            block("Commit message must follow Conventional Commits and end with the "
-                  "#[Sprint_ID] suffix, e.g. \"feat(auth): add login flow #078\" (agents.md §5).")
-
-        if message is not None:
-            staged = get_staged_files()
-            # Guard 3 (rules/code_craft.md §6): a bug fix ships its test.
-            if reason := audit_regression_test(message, staged):
-                log_error("on_commit", "REGRESSION_TEST_MISSING", message[:80])
-                block(reason)
-            # Guard 4 (rules/code_craft.md §7): a new dependency says why.
-            if reason := audit_dependency_justification(message, staged):
-                log_error("on_commit", "DEPENDENCY_UNJUSTIFIED", message[:80])
-                block(reason)
+        _run_commit_message_guards(command)
 
     print("🛡️ [DEVOPS AGENT] Pre-Commit Integrity Handshake...")
 

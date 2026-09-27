@@ -199,6 +199,30 @@ def probe_anchor_sprint(state: dict) -> str | None:
             f"to {int(suffix)} in `docs/active_state.json` and refresh the mirror.")
 
 
+def _resume_pointer_mismatch(pointer: dict) -> str | None:
+    """Whether `resume_pointer.branch` disagrees with the checked-out HEAD.
+
+    Args:
+        pointer: Parsed `resume_pointer` object from the anchor.
+
+    Returns:
+        str | None: The mismatch text, or None when the branch is absent, not
+            an `ai-sprint/*` branch, or HEAD could not be read/agrees with it.
+    """
+    resume_branch = pointer.get("branch")
+    if not isinstance(resume_branch, str) or not resume_branch.startswith("ai-sprint/"):
+        return None
+    result = subprocess.run(
+        ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+        capture_output=True,
+        text=True,
+    )
+    head = result.stdout.strip() if result.returncode == 0 else ""
+    if head and head != resume_branch:
+        return f"`resume_pointer.branch` is `{resume_branch}` but HEAD is `{head}`"
+    return None
+
+
 def probe_anchor_hygiene(state: dict) -> str | None:
     """Flag IN_PROGRESS sessions whose sprint looks already closed or resumed wrong.
 
@@ -222,19 +246,9 @@ def probe_anchor_hygiene(state: dict) -> str | None:
         )
     pointer = state.get("resume_pointer")
     if isinstance(pointer, dict):
-        resume_branch = pointer.get("branch")
-        if isinstance(resume_branch, str) and resume_branch.startswith("ai-sprint/"):
-            result = subprocess.run(
-                ["git", "rev-parse", "--abbrev-ref", "HEAD"],
-                capture_output=True,
-                text=True,
-            )
-            head = result.stdout.strip() if result.returncode == 0 else ""
-            if head and head != resume_branch:
-                parts.append(
-                    f"`resume_pointer.branch` is `{resume_branch}` but HEAD is "
-                    f"`{head}`"
-                )
+        mismatch = _resume_pointer_mismatch(pointer)
+        if mismatch:
+            parts.append(mismatch)
     if not parts:
         return None
     detail = "; ".join(parts)
@@ -447,6 +461,30 @@ def analysis_state(security: dict | None, control: str) -> str:
     return DISABLED if status == "disabled" else UNDETERMINED
 
 
+def _record_control(control: str, control_state: str, off_text: str, cause: str,
+                    findings: list[str], undetermined: list[str]) -> None:
+    """File one control under the heading its state actually warrants.
+
+    `control_state` is one of `ENABLED`/`DISABLED`/`PAUSED`/`UNDETERMINED` —
+    mutually exclusive, so three independent `if`s (no `elif` chain) record
+    exactly the same outcome as the disjunction they replace.
+
+    Args:
+        control: Control name, for the undetermined-cause message.
+        control_state: State to file, as returned by a `*_state` classifier.
+        off_text: Finding text to record when the control is off.
+        cause: Cause text to record when the control's state is undetermined.
+        findings: Findings accumulator, mutated in place.
+        undetermined: Undetermined-controls accumulator, mutated in place.
+    """
+    if control_state == DISABLED:
+        findings.append(off_text)
+    if control_state == PAUSED:
+        findings.append(f"{control} enabled but PAUSED — no updates are being applied")
+    if control_state == UNDETERMINED:
+        undetermined.append(f"{control} — cannot determine ({cause})")
+
+
 def collect_security_controls(slug: str, security: dict | None,
                               is_admin: bool | None, branch: str | None) -> tuple[list[str], list[str]]:
     """Interrogate every platform security control, sorting answers from doubt.
@@ -464,30 +502,22 @@ def collect_security_controls(slug: str, security: dict | None,
     findings: list[str] = []
     undetermined: list[str] = []
 
-    def record(control: str, control_state: str, off_text: str, cause: str) -> None:
-        """File one control under the heading its state actually warrants."""
-        if control_state == DISABLED:
-            findings.append(off_text)
-        elif control_state == PAUSED:
-            findings.append(f"{control} enabled but PAUSED — no updates are being applied")
-        elif control_state == UNDETERMINED:
-            undetermined.append(f"{control} — cannot determine ({cause})")
-
     for control in ("secret_scanning", "secret_scanning_push_protection"):
-        record(control, analysis_state(security, control), f"{control} disabled",
+        _record_control(control, analysis_state(security, control), f"{control} disabled",
                "field not returned" if security is not None
-               else "the repository payload did not answer")
+               else "the repository payload did not answer", findings, undetermined)
 
     # One request per endpoint, feeding both the state and the doubt line that
     # explains it. Asking twice let a transient failure between the two calls
     # pair a cause with a state that a different response had produced.
     rc, out, err = gh_call("api", f"repos/{slug}/automated-security-fixes")
-    record("dependabot_security_updates", dependabot_updates_state(rc, out, err, is_admin),
-           "dependabot_security_updates disabled", undetermined_cause(rc, err, is_admin))
+    _record_control("dependabot_security_updates", dependabot_updates_state(rc, out, err, is_admin),
+           "dependabot_security_updates disabled", undetermined_cause(rc, err, is_admin),
+           findings, undetermined)
 
     rc, out, err = gh_call("api", f"repos/{slug}/vulnerability-alerts")
-    record("Dependabot alerts", state_from_exit(rc, err, is_admin),
-           "Dependabot alerts off", undetermined_cause(rc, err, is_admin))
+    _record_control("Dependabot alerts", state_from_exit(rc, err, is_admin),
+           "Dependabot alerts off", undetermined_cause(rc, err, is_admin), findings, undetermined)
 
     # The default branch is asked for, not assumed to be `main`: on a repository
     # that never had one, the old check reported "main not protected" forever
@@ -496,8 +526,9 @@ def collect_security_controls(slug: str, security: dict | None,
         undetermined.append("branch protection — cannot determine (no default branch reported)")
     else:
         rc, out, err = gh_call("api", f"repos/{slug}/branches/{branch}")
-        record(f"{branch} protection", branch_protection_state(rc, out, err, is_admin),
-               f"{branch} not protected", undetermined_cause(rc, err, is_admin))
+        _record_control(f"{branch} protection", branch_protection_state(rc, out, err, is_admin),
+               f"{branch} not protected", undetermined_cause(rc, err, is_admin),
+               findings, undetermined)
 
     return findings, undetermined
 
@@ -583,6 +614,29 @@ def stamp_last_platform_probe() -> None:
     session_state.save_state(state)
 
 
+def _platform_probe_cached(state: dict, force: bool) -> bool:
+    """Whether the 7-day platform-probe cache is still fresh.
+
+    Args:
+        state: Parsed anchor, read for `last_platform_probe`.
+        force: True to ignore the cache unconditionally.
+
+    Returns:
+        bool: True when the previous stamp is within `PLATFORM_TTL_DAYS` and
+            `force` is False -- the caller should skip re-interrogating GitHub.
+    """
+    if force:
+        return False
+    last = state.get("last_platform_probe")
+    if not last:
+        return False
+    try:
+        seen = datetime.strptime(last, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+    except ValueError:
+        return False
+    return datetime.now(timezone.utc) - seen < timedelta(days=PLATFORM_TTL_DAYS)
+
+
 def probe_platform(state: dict, force: bool) -> str | None:
     """Are the controls `repository_hardening_workflow.md` mandates enabled?"""
     if acknowledged(state, "platform") is not None:
@@ -590,15 +644,8 @@ def probe_platform(state: dict, force: bool) -> str | None:
     if not shutil.which("gh"):
         return None  # No GitHub CLI: skip silently, not every host has one.
 
-    if not force:
-        last = state.get("last_platform_probe")
-        if last:
-            try:
-                seen = datetime.strptime(last, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-                if datetime.now(timezone.utc) - seen < timedelta(days=PLATFORM_TTL_DAYS):
-                    return None
-            except ValueError:
-                pass
+    if _platform_probe_cached(state, force):
+        return None
 
     repo = gh_json("repo", "view", "--json",
                    "nameWithOwner,description,homepageUrl,defaultBranchRef")

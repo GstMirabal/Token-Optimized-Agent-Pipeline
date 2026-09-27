@@ -23,6 +23,27 @@ def _normalize_item(raw: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _load_first_json_array(json_file: Path) -> list[dict[str, Any]]:
+    """Loads and normalizes the JSON array from one split file.
+
+    Args:
+        json_file: Path to the split's JSON file.
+
+    Returns:
+        The normalized items from the JSON array.
+
+    Raises:
+        ValueError: If the JSON top-level value is not a list.
+    """
+    with json_file.open(encoding="utf-8") as f:
+        payload = json.load(f)
+    if not isinstance(payload, list):
+        raise ValueError(
+            f"Expected JSON array at top level of {json_file}"
+        )
+    return [_normalize_item(row) for row in payload]
+
+
 class AgentsOptDataLoader(SplitDataLoader):
     """Loads and splits the rule validation dataset for optimization."""
 
@@ -46,13 +67,7 @@ class AgentsOptDataLoader(SplitDataLoader):
         path = Path(split_path)
         json_files = sorted(path.glob("*.json"))
         if json_files:
-            with json_files[0].open(encoding="utf-8") as f:
-                payload = json.load(f)
-            if not isinstance(payload, list):
-                raise ValueError(
-                    f"Expected JSON array at top level of {json_files[0]}"
-                )
-            return [_normalize_item(row) for row in payload]
+            return _load_first_json_array(json_files[0])
 
         raise FileNotFoundError(
             f"No .json file found in split path: {split_path}"

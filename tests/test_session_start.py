@@ -74,7 +74,7 @@ def test_upstream_section_reports_size_not_full_dump(
     huge = "\n".join(
         [f"# dump line {i} {marker}" for i in range(500)]
         + [
-            "**Status at Sprint 033 (test).**",
+            "### - [ ] `F-999` — a fixture finding",
             "",
             "| | |",
             "| :--- | :--- |",
@@ -87,61 +87,57 @@ def test_upstream_section_reports_size_not_full_dump(
     assert len(briefing) <= session_start.LINE_CAP
     assert "file lines:" in text
     assert "do not load full UPSTREAM" in text
-    assert "rows (non-empty):" in text
+    assert "open entries (### - [ ]): 1" in text
     assert marker not in text
-    assert text.count("| **Still open** |") <= 1
 
 
-def test_upstream_still_open_uses_highest_sprint_status_only(
+def test_upstream_open_entries_counts_the_canonical_marker(
     session_start, tmp_path: Path
 ) -> None:
-    """Sprint 038 M1: historical Status snapshots must not inflate the count.
+    """S052-3: count `### - [ ]` headings, not `| **Still open**` table rows.
 
-    Fixture: Sprint 027 Still open non-empty + Sprint 033 *(none…)* → expect 0.
-    Fails against the pre-M1 counter that summed every Still-open row.
+    Fixture: 6 open (`### - [ ]`) entries and one `| **Still open**` row that
+    names all six in a single cell (Sprint 051's shape) → briefing must
+    report `6`, not `1`. Fails against the pre-fix Still-open-row counter.
     """
     body = "\n".join(
         [
-            "**Status at Sprint 027 (2026-08-25).**",
+            "**Status at Sprint 051 (2026-09-23).**",
             "",
             "| | |",
             "| :--- | :--- |",
-            "| **Still open** | **`F-021-A2`**, **`F-026-A2`** |",
+            (
+                "| **Still open** | Six, each with its own entry below: "
+                "F-1, F-2, F-3, F-4, F-5, F-6 |"
+            ),
             "",
-            "**Status at Sprint 033 (2026-08-25, `ai-sprint/033`).**",
-            "",
-            "| | |",
-            "| :--- | :--- |",
-            "| **Still open** | *(none in this file's open set)* |",
+            "### - [ ] `F-1` — open finding one",
+            "### - [ ] `F-2` — open finding two",
+            "### - [ ] `F-3` — open finding three",
+            "### - [ ] `F-4` — open finding four",
+            "### - [ ] `F-5` — open finding five",
+            "### - [ ] `F-6` — open finding six",
         ]
     )
     root = _write_minimal_root(tmp_path / "repo", upstream_body=body)
     section = "\n".join(session_start.section_upstream(root))
-    assert "rows (non-empty): 0" in section
+    assert "open entries (### - [ ]): 6" in section
 
 
-def test_upstream_still_open_counts_latest_nonempty_status(
+def test_upstream_open_entries_excludes_closed_markers(
     session_start, tmp_path: Path
 ) -> None:
-    """When the highest Status sprint still lists opens, count that row only."""
+    """`### - [x]` (closed) entries must not inflate the open count."""
     body = "\n".join(
         [
-            "**Status at Sprint 027 (2026-08-25).**",
-            "",
-            "| | |",
-            "| :--- | :--- |",
-            "| **Still open** | **`F-021-A2`**, **`F-026-A2`** |",
-            "",
-            "**Status at Sprint 030 (2026-08-25).**",
-            "",
-            "| | |",
-            "| :--- | :--- |",
-            "| **Still open** | **`F-021-A2`** |",
+            "### - [ ] `F-1` — open finding",
+            "### - [x] `F-2` — closed finding",
+            "### - [x] `F-3` — closed finding",
         ]
     )
     root = _write_minimal_root(tmp_path / "repo", upstream_body=body)
     section = "\n".join(session_start.section_upstream(root))
-    assert "rows (non-empty): 1" in section
+    assert "open entries (### - [ ]): 1" in section
 
 
 def test_cli_against_real_repo_stays_under_line_cap() -> None:
@@ -200,7 +196,10 @@ def test_boot_claims_when_drift_is_clean(
     monkeypatch.setattr(session_start, "_commands_body_stale", lambda *a, **k: False)
 
     assert session_start.main(["--boot", "--tool", "cursor"]) == 0
-    assert ("scripts/session_state.py", ("claim", "--tool", "cursor")) in calls
+    assert (
+        "scripts/session_state.py",
+        ("claim", "--tool", "cursor", "--entry-point", "boot"),
+    ) in calls
 
 
 def test_boot_lock_only_when_commands_fresh(
@@ -506,7 +505,82 @@ def test_tool_defaults_to_terminal_not_an_ide(
     )
 
     assert session_start.main(["--boot"]) == 0
-    assert ("scripts/session_state.py", ("claim", "--tool", "terminal")) in calls
+    assert (
+        "scripts/session_state.py",
+        ("claim", "--tool", "terminal", "--entry-point", "boot"),
+    ) in calls
+
+
+def test_claim_args_defaults_omit_only_session_id_and_takeover(
+    session_start,
+) -> None:
+    """S052-1/S052-2 (D10): omitting --session-id/--takeover leaves the rest
+    of the boot claim invocation unchanged; --entry-point boot is always
+    forwarded from the boot path so the refusal message names --boot
+    (`session_state.py` `retry_hint`).
+    """
+    assert session_start._claim_args("cursor", None, False) == [
+        "claim", "--tool", "cursor", "--entry-point", "boot",
+    ]
+
+
+def test_repeat_boot_with_same_session_id_reclaims_instead_of_refusing(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """S052-1: --boot must forward --session-id, so a second boot in the same
+    session re-claims (exit 0) instead of minting a fresh UID and refusing
+    itself against its own prior claim.
+    """
+    root = _write_minimal_root(tmp_path / "repo")
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    holder: dict[str, str | None] = {"session_id": None}
+    seen_session_ids: list[str | None] = []
+
+    def mock_run_script(
+        root_path: Path, relative: str, *args: str, cwd: Path | None = None
+    ) -> int:
+        if relative != "scripts/session_state.py":
+            return 0
+        session_id = (
+            args[args.index("--session-id") + 1]
+            if "--session-id" in args
+            else None
+        )
+        seen_session_ids.append(session_id)
+        if holder["session_id"] in (None, session_id):
+            holder["session_id"] = session_id
+            return 0
+        return 2
+
+    monkeypatch.setattr(session_start, "_run_script", mock_run_script)
+    assert session_start.main(["--boot", "--session-id", "SAME-UID"]) == 0
+    assert session_start.main(["--boot", "--session-id", "SAME-UID"]) == 0
+    assert seen_session_ids == ["SAME-UID", "SAME-UID"]
+
+
+def test_boot_takeover_flag_parses_and_forwards_to_claim(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """S052-2: session_start.py must accept --takeover (the flag the claim
+    refusal message recommends) and forward it to `session_state.py claim`.
+    """
+    root = _write_minimal_root(tmp_path / "repo")
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    calls: list[tuple[str, tuple[str, ...]]] = []
+    monkeypatch.setattr(
+        session_start,
+        "_run_script",
+        lambda root_path, relative, *args, **kwargs: calls.append(
+            (relative, args)
+        )
+        or 0,
+    )
+
+    assert session_start.main(["--boot", "--takeover"]) == 0
+    assert (
+        "scripts/session_state.py",
+        ("claim", "--tool", "terminal", "--entry-point", "boot", "--takeover"),
+    ) in calls
 
 
 def test_cursor_tiers_section_is_for_cursor_sessions_only(

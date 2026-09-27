@@ -158,6 +158,22 @@ PROTECTION_NOT_INSPECTABLE = "protection-not-inspectable-on-plan"
 NO_CLASSIC_PROTECTION = "Branch not protected"
 
 
+def _parsed_stdout(result: subprocess.CompletedProcess) -> tuple[Any, str]:
+    """Parse a successful `gh` call's stdout as JSON.
+
+    Args:
+        result: A completed subprocess run whose `returncode` is `0`.
+
+    Returns:
+        tuple: `(payload, "")` on success, `(None, reason)` when stdout is
+            not valid JSON.
+    """
+    try:
+        return json.loads(result.stdout or "null"), ""
+    except json.JSONDecodeError:
+        return None, f"unparseable output: {result.stdout.strip()[:120]}"
+
+
 def gh_json(args: list[str]) -> tuple[Any, str]:
     """Run a `gh` command expected to emit JSON, retrying transient failures.
 
@@ -175,10 +191,7 @@ def gh_json(args: list[str]) -> tuple[Any, str]:
     for attempt in range(1, ATTEMPTS + 1):
         result = subprocess.run(["gh", *args], capture_output=True, text=True, check=False)
         if result.returncode == 0:
-            try:
-                return json.loads(result.stdout or "null"), ""
-            except json.JSONDecodeError:
-                return None, f"unparseable output: {result.stdout.strip()[:120]}"
+            return _parsed_stdout(result)
 
         stderr = result.stderr.strip()
         if "HTTP 404" in stderr:

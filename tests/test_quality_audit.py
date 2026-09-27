@@ -9,6 +9,7 @@ fixture directory, so `jurisdictional_lock` has nothing extra to claim.
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -255,3 +256,191 @@ def test_js_files_reported_not_measured_never_compliant_exit_reflects_python_onl
     (violating_dir / "sample.js").write_text(js_source, encoding="utf-8")
 
     assert qa.main([str(violating_dir)]) == 2
+
+
+# --------------------------------------------------------------------------
+# Decorators (Sprint 052 `D8`, `#13`): a decorator line sits in
+# `decorator_list`, outside `FunctionDef.body` -- it must never count toward
+# the executable-line total. Regression guard: the instrument already
+# behaves this way (`_measure_python_unit` measures `func.body` only).
+# --------------------------------------------------------------------------
+
+
+def test_decorator_line_excluded_from_executable_line_count(tmp_path: Path) -> None:
+    """A single-line decorator is outside `FunctionDef.body` -- `D8`."""
+    source = (
+        "@some_decorator\n"
+        "def decorated():\n"
+        "    a = 1\n"
+        "    b = 2\n"
+        "    return a + b\n"
+    )
+    path = tmp_path / "dec.py"
+    path.write_text(source, encoding="utf-8")
+
+    units = qa.scan_python_file(path)
+
+    assert len(units) == 1
+    unit = units[0]
+    assert unit.name == "decorated"
+    assert unit.executable_lines == 3  # a, b, return -- decorator line excluded
+    assert unit.status == "PASS"
+
+
+def test_multiline_decorator_excluded_from_executable_line_count(tmp_path: Path) -> None:
+    """A decorator call spanning several source lines is still entirely
+    outside `FunctionDef.body` -- `D8`."""
+    source = (
+        "@some_decorator(\n"
+        "    option_one=True,\n"
+        "    option_two=False,\n"
+        ")\n"
+        "def decorated():\n"
+        "    a = 1\n"
+        "    b = 2\n"
+        "    return a + b\n"
+    )
+    path = tmp_path / "multidec.py"
+    path.write_text(source, encoding="utf-8")
+
+    units = qa.scan_python_file(path)
+
+    assert len(units) == 1
+    unit = units[0]
+    assert unit.executable_lines == 3  # a, b, return -- all decorator lines excluded
+    assert unit.status == "PASS"
+
+
+# --------------------------------------------------------------------------
+# Exclusions (Sprint 052 `D1`): `config/quality_audit_exclusions.json` names
+# files the scan skips entirely. Absent file -> no exclusions, not an error.
+# A stale entry (path no longer exists) or a malformed file -> exit 2, same
+# shape as RA-16's stale-exception check (`scripts/verify_references.py`
+# check (d)). `--report` lists excluded files separately so an exclusion is
+# never silent.
+# --------------------------------------------------------------------------
+
+
+def _write_exclusions(path: Path, entries: list[dict[str, object]]) -> None:
+    """Write a minimal, schema-valid `quality_audit_exclusions.json` fixture."""
+    path.write_text(
+        json.dumps({"_doc": "test fixture", "exclusions": entries}), encoding="utf-8"
+    )
+
+
+def test_absent_exclusions_file_is_not_an_error(tmp_path: Path) -> None:
+    """No `quality_audit_exclusions.json` on disk -> empty exclusion set,
+    not a raised error (`D1`)."""
+    missing = tmp_path / "config" / "quality_audit_exclusions.json"
+
+    assert qa.load_exclusions(missing, tmp_path) == frozenset()
+
+
+def test_excluded_file_violations_do_not_fail_the_scan(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A file named in `exclusions` is skipped entirely: its violations
+    never enter the register or the exit-code decision (`D1`)."""
+    monkeypatch.chdir(tmp_path)
+    statements = "\n    ".join(f"x{i} = {i}" for i in range(55))
+    (tmp_path / "bad.py").write_text(
+        f"def many_statements():\n    {statements}\n", encoding="utf-8"
+    )
+    (tmp_path / "good.py").write_text("def ok():\n    return 1\n", encoding="utf-8")
+    exclusions_path = tmp_path / "quality_audit_exclusions.json"
+    _write_exclusions(
+        exclusions_path,
+        [{"path": "bad.py", "reason": "vendored", "provenance": {"source": "test"}}],
+    )
+
+    exclude = qa.load_exclusions(exclusions_path, tmp_path)
+    units = qa.audit([Path(".")], exclude)
+    assert [u.name for u in units] == ["ok"]
+
+    code = qa.main([".", "--exclusions", str(exclusions_path)])
+    assert code == 0
+
+
+def test_stale_exclusion_entry_exits_2(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """An exclusion `path` that no longer exists is a stale exemption ->
+    exit 2, naming the entry in stderr (`D1`)."""
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "good.py").write_text("def ok():\n    return 1\n", encoding="utf-8")
+    exclusions_path = tmp_path / "quality_audit_exclusions.json"
+    _write_exclusions(
+        exclusions_path,
+        [{"path": "no_longer_here.py", "reason": "vendored", "provenance": {}}],
+    )
+
+    code = qa.main([".", "--exclusions", str(exclusions_path)])
+    err = capsys.readouterr().err
+
+    assert code == 2
+    assert "no_longer_here.py" in err
+    assert "stale" in err.lower()
+
+
+def test_stale_exclusion_entry_raises_from_load_exclusions(tmp_path: Path) -> None:
+    """Unit-level check: `load_exclusions` itself raises on a stale entry."""
+    exclusions_path = tmp_path / "quality_audit_exclusions.json"
+    _write_exclusions(
+        exclusions_path,
+        [{"path": "ghost.py", "reason": "vendored", "provenance": {}}],
+    )
+
+    with pytest.raises(qa.ExclusionError, match="ghost.py"):
+        qa.load_exclusions(exclusions_path, tmp_path)
+
+
+def test_malformed_exclusions_file_exits_2(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Invalid JSON in the exclusions file -> exit 2 (`D1`)."""
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "good.py").write_text("def ok():\n    return 1\n", encoding="utf-8")
+    exclusions_path = tmp_path / "quality_audit_exclusions.json"
+    exclusions_path.write_text("{not valid json", encoding="utf-8")
+
+    code = qa.main([".", "--exclusions", str(exclusions_path)])
+    err = capsys.readouterr().err
+
+    assert code == 2
+    assert "malformed" in err.lower()
+
+
+def test_exclusion_entry_missing_required_key_raises(tmp_path: Path) -> None:
+    """An entry without `path`/`reason`/`provenance` is malformed (`D1`)."""
+    exclusions_path = tmp_path / "quality_audit_exclusions.json"
+    _write_exclusions(exclusions_path, [{"path": "x.py", "reason": "vendored"}])
+
+    with pytest.raises(qa.ExclusionError):
+        qa.load_exclusions(exclusions_path, tmp_path)
+
+
+def test_report_lists_excluded_files_separately(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """`--report` names the excluded file and its count distinctly from the
+    unit register, and never folds it into the compliance figure (`D1`)."""
+    monkeypatch.chdir(tmp_path)
+    statements = "\n    ".join(f"x{i} = {i}" for i in range(55))
+    (tmp_path / "vendored.py").write_text(
+        f"def many_statements():\n    {statements}\n", encoding="utf-8"
+    )
+    (tmp_path / "good.py").write_text("def ok():\n    return 1\n", encoding="utf-8")
+    exclusions_path = tmp_path / "quality_audit_exclusions.json"
+    _write_exclusions(
+        exclusions_path,
+        [{"path": "vendored.py", "reason": "vendored", "provenance": {"source": "test"}}],
+    )
+
+    code = qa.main(["--report", ".", "--exclusions", str(exclusions_path)])
+    out = capsys.readouterr().out
+
+    assert code == 0
+    assert "Excluded files: 1" in out
+    assert "vendored.py" in out
+    assert "vendored.py" not in out.split("Excluded files:")[0]  # not in the unit register
+    assert "1/1 (100.0%)" in out  # only good.py counts toward compliant

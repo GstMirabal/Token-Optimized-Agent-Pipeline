@@ -51,26 +51,90 @@ def list_sprint_dirs(root: Path) -> list[Path]:
     return found
 
 
+def _classify_gate_row(header: list[str], row: list[str]) -> tuple[str | None, str | None]:
+    """Classify one Gate Log row's gate family and verdict label.
+
+    Args:
+        header: Column header names for the row's table.
+        row: A single Gate Log table row.
+
+    Returns:
+        tuple[str | None, str | None]: (gate_family, verdict_label). Family is
+        ``"qa"``, ``"tester"`` or None; label is the verdict text (suffixed
+        ``:<class>`` when a class is present) or None if unverdicted.
+    """
+    gate = _plain(_col(header, row, "Gate"))
+    verdict = _plain(_col(header, row, "Verdict")).upper()
+    klass = _plain(_col(header, row, "Class")).lower()
+    lower = gate.lower()
+    family = None
+    if lower.startswith("qa"):
+        family = "qa"
+    if lower.startswith("tester"):
+        family = "tester"
+    label = None
+    if verdict:
+        label = verdict if not klass else f"{verdict}:{klass}"
+    return family, label
+
+
+def _gate_table_counts(header: list[str], rows: list[list[str]], verdicts: list[str]) -> tuple[int, int]:
+    """Tally gate1/gate2 rounds for one Gate Log table, appending new verdict labels.
+
+    Args:
+        header: Column header names for the table.
+        rows: The table's data rows.
+        verdicts: Accumulator of verdict labels seen so far, extended in place.
+
+    Returns:
+        tuple[int, int]: (gate1_rounds, gate2_rounds) contributed by this table.
+    """
+    gate1 = 0
+    gate2 = 0
+    for row in rows:
+        family, label = _classify_gate_row(header, row)
+        if family == "qa":
+            gate1 += 1
+        if family == "tester":
+            gate2 += 1
+        if label and label not in verdicts:
+            verdicts.append(label)
+    return gate1, gate2
+
+
 def gate_round_counts(log_text: str) -> tuple[int, int, str]:
     """Return (gate1_rounds, gate2_rounds, verdict classes joined)."""
     gate1 = 0
     gate2 = 0
     verdicts: list[str] = []
     for header, rows in gate_tables(log_text):
-        for row in rows:
-            gate = _plain(_col(header, row, "Gate"))
-            verdict = _plain(_col(header, row, "Verdict")).upper()
-            klass = _plain(_col(header, row, "Class")).lower()
-            lower = gate.lower()
-            if lower.startswith("qa"):
-                gate1 += 1
-            elif lower.startswith("tester"):
-                gate2 += 1
-            if verdict:
-                label = verdict if not klass else f"{verdict}:{klass}"
-                if label not in verdicts:
-                    verdicts.append(label)
+        table_gate1, table_gate2 = _gate_table_counts(header, rows, verdicts)
+        gate1 += table_gate1
+        gate2 += table_gate2
     return gate1, gate2, ", ".join(verdicts)
+
+
+def _tally_work_row(header: list[str], row: list[str], models: set[str], efforts: set[str]) -> int:
+    """Tally one Work-table row into the running models/efforts accumulators.
+
+    Args:
+        header: Column header names for the row's table.
+        row: A single Work table row.
+        models: Accumulator of seen model names, extended in place.
+        efforts: Accumulator of seen effort labels, extended in place.
+
+    Returns:
+        int: 1 if the row counts as a unit, 0 if the row is blank.
+    """
+    if not any(cell.strip() for cell in row):
+        return 0
+    model = _plain(_col(header, row, "Model"))
+    effort = _plain(_col(header, row, "Effort"))
+    if model:
+        models.add(model)
+    if effort and effort.upper() != "N/A":
+        efforts.add(effort)
+    return 1
 
 
 def work_summary(scope_text: str) -> tuple[int, str, str, str]:
@@ -80,15 +144,7 @@ def work_summary(scope_text: str) -> tuple[int, str, str, str]:
     efforts: set[str] = set()
     for header, rows in work_tables(scope_text):
         for row in rows:
-            if not any(cell.strip() for cell in row):
-                continue
-            units += 1
-            model = _plain(_col(header, row, "Model"))
-            effort = _plain(_col(header, row, "Effort"))
-            if model:
-                models.add(model)
-            if effort and effort.upper() != "N/A":
-                efforts.add(effort)
+            units += _tally_work_row(header, row, models, efforts)
     model_id = ", ".join(sorted(models)) if models else ""
     effort = ", ".join(sorted(efforts)) if efforts else ""
     tier = ""

@@ -60,15 +60,28 @@ exclusions the Implementation Plan's own measurement commands use.
 Compliance figure: `compliant_units / total_units`, with `unparsed` and
 `not_measured` units counted separately and never counted as compliant.
 
+## Exclusions (Sprint 052 `D1`)
+
+`config/quality_audit_exclusions.json` (schema: `_doc`, `exclusions: [{path,
+reason, provenance}]`) names files this scan skips entirely -- their
+violations never enter the register or the exit-code decision. An absent
+file means no exclusions, not an error. An entry whose `path` no longer
+exists under the audited root is a stale exemption and exits `2` (same
+shape as `RA-16`'s stale-exception check, `scripts/verify_references.py`
+check (d)); so does a malformed file. `--report` lists excluded files
+separately (count + paths) so an exclusion is never silent.
+
 Exit codes:
     0 -- no violation (or any run under `--report`)
-    2 -- at least one function-length or nesting-depth violation
+    2 -- at least one function-length or nesting-depth violation, or an
+         exclusion-file error (stale entry, malformed file)
 """
 
 from __future__ import annotations
 
 import argparse
 import ast
+import json
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -79,6 +92,14 @@ MAX_NESTING_DEPTH = 3
 DEFAULT_EXCLUDE_DIRS = frozenset({"venv_skillopt", "node_modules", ".git"})
 PY_SUFFIXES = frozenset({".py"})
 JS_SUFFIXES = frozenset({".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"})
+
+DEFAULT_EXCLUSIONS_RELPATH = Path("config/quality_audit_exclusions.json")
+_REQUIRED_EXCLUSION_KEYS = ("path", "reason", "provenance")
+
+
+class ExclusionError(Exception):
+    """Malformed `quality_audit_exclusions.json`, or an entry whose `path`
+    no longer exists (stale exemption -- `D1`)."""
 
 
 @dataclass
@@ -164,6 +185,48 @@ def _is_docstring_stmt(stmt: ast.stmt) -> bool:
     )
 
 
+def _scan_stmt(stmt: ast.stmt, depth: int, lines: set[int], depth_box: list[int]) -> None:
+    """Record one statement's own line(s)/depth into `lines`/`depth_box`.
+
+    Every statement's own depth counts (`D2` applies to any statement, not
+    only compound-statement headers) -- a simple `return` two levels inside
+    a single `if` is level 2, not level 1. A nested `FunctionDef`/
+    `AsyncFunctionDef`/`ClassDef` is a boundary: only its header line/depth
+    is recorded here, never its own body (measured as a separate unit). A
+    compound statement recurses into its child blocks via `_scan_stmts`.
+
+    Args:
+        stmt: The statement to record.
+        depth: `stmt`'s own ancestor-count level (`D2`).
+        lines: Executable-line accumulator, mutated in place.
+        depth_box: Single-element max-depth accumulator, mutated in place.
+    """
+    depth_box[0] = max(depth_box[0], depth)
+    if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+        lines.add(stmt.lineno)
+        return
+    if isinstance(stmt, _BLOCK_STMT_TYPES):
+        lines.add(stmt.lineno)
+        for child_list in _child_stmt_lists(stmt):
+            _scan_stmts(child_list, depth + 1, lines, depth_box)
+        return
+    end = getattr(stmt, "end_lineno", stmt.lineno) or stmt.lineno
+    lines.update(range(stmt.lineno, end + 1))
+
+
+def _scan_stmts(stmts: list[ast.stmt], depth: int, lines: set[int], depth_box: list[int]) -> None:
+    """Record every statement in `stmts` (all at ancestor level `depth`).
+
+    Args:
+        stmts: Statement list to record, one AST block level.
+        depth: Ancestor-count level shared by every statement in `stmts`.
+        lines: Executable-line accumulator, mutated in place.
+        depth_box: Single-element max-depth accumulator, mutated in place.
+    """
+    for stmt in stmts:
+        _scan_stmt(stmt, depth, lines, depth_box)
+
+
 def _measure_python_unit(func: ast.FunctionDef | ast.AsyncFunctionDef, body_depth: int) -> tuple[int, int]:
     """Executable-line count and max nesting depth for one function's own body.
 
@@ -178,26 +241,51 @@ def _measure_python_unit(func: ast.FunctionDef | ast.AsyncFunctionDef, body_dept
 
     lines: set[int] = set()
     depth_box = [body_depth]
-
-    def scan(stmts: list[ast.stmt], depth: int) -> None:
-        for stmt in stmts:
-            # Every statement's own depth counts (D2 applies to any statement,
-            # not only compound-statement headers) -- a simple `return` two
-            # levels inside a single `if` is level 2, not level 1.
-            depth_box[0] = max(depth_box[0], depth)
-            if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
-                lines.add(stmt.lineno)
-                continue
-            if isinstance(stmt, _BLOCK_STMT_TYPES):
-                lines.add(stmt.lineno)
-                for child_list in _child_stmt_lists(stmt):
-                    scan(child_list, depth + 1)
-                continue
-            end = getattr(stmt, "end_lineno", stmt.lineno) or stmt.lineno
-            lines.update(range(stmt.lineno, end + 1))
-
-    scan(body, body_depth)
+    _scan_stmts(body, body_depth, lines, depth_box)
     return len(lines), depth_box[0]
+
+
+def _record_python_unit(
+    stmt: ast.FunctionDef | ast.AsyncFunctionDef, depth: int, path: Path, out: list[Unit]
+) -> None:
+    """Measure one function/method `stmt`, append its `Unit` to `out`, and
+    recurse into its body (at `depth + 1`) for nested units.
+
+    Args:
+        stmt: The function/method definition to measure.
+        depth: `stmt`'s own ancestor-count level (`D2`).
+        path: Source file `stmt` was found in.
+        out: Unit register, appended to in place.
+    """
+    body_depth = depth + 1
+    executable_lines, max_depth = _measure_python_unit(stmt, body_depth)
+    out.append(
+        Unit(
+            path=path,
+            name=stmt.name,
+            lineno=stmt.lineno,
+            executable_lines=executable_lines,
+            max_depth=max_depth,
+            language="python",
+            status=_status(executable_lines, max_depth),
+        )
+    )
+    _discover_python_units(stmt.body, body_depth, path, out)
+
+
+def _discover_block_children(stmt: ast.stmt, depth: int, path: Path, out: list[Unit]) -> None:
+    """Recurse into every child statement list of a non-def compound `stmt`.
+
+    Args:
+        stmt: A block-introducing statement (`If`/`For`/`While`/... ) that is
+            not itself a function/method definition.
+        depth: `stmt`'s own ancestor-count level (`D2`); children are one
+            level deeper.
+        path: Source file `stmt` was found in.
+        out: Unit register, appended to in place.
+    """
+    for child_list in _child_stmt_lists(stmt):
+        _discover_python_units(child_list, depth + 1, path, out)
 
 
 def _discover_python_units(
@@ -206,23 +294,10 @@ def _discover_python_units(
     """Recursively find every function/method unit in `stmts` (`depth` ancestors deep)."""
     for stmt in stmts:
         if isinstance(stmt, _DEF_TYPES):
-            body_depth = depth + 1
-            executable_lines, max_depth = _measure_python_unit(stmt, body_depth)
-            out.append(
-                Unit(
-                    path=path,
-                    name=stmt.name,
-                    lineno=stmt.lineno,
-                    executable_lines=executable_lines,
-                    max_depth=max_depth,
-                    language="python",
-                    status=_status(executable_lines, max_depth),
-                )
-            )
-            _discover_python_units(stmt.body, body_depth, path, out)
-        elif isinstance(stmt, _BLOCK_STMT_TYPES):
-            for child_list in _child_stmt_lists(stmt):
-                _discover_python_units(child_list, depth + 1, path, out)
+            _record_python_unit(stmt, depth, path, out)
+            continue
+        if isinstance(stmt, _BLOCK_STMT_TYPES):
+            _discover_block_children(stmt, depth, path, out)
 
 
 def scan_python_file(path: Path) -> list[Unit]:
@@ -247,24 +322,44 @@ def scan_python_file(path: Path) -> list[Unit]:
 # --------------------------------------------------------------------------
 
 
+def _add_if_source_file(path: Path, all_suffixes: frozenset[str], found: set[Path]) -> None:
+    """Add `path` to `found` if its suffix is a scanned Python/JS/TS suffix.
+
+    Args:
+        path: Candidate file.
+        all_suffixes: Scanned suffixes (`PY_SUFFIXES | JS_SUFFIXES`).
+        found: Accumulator set, mutated in place.
+    """
+    if path.suffix.lower() in all_suffixes:
+        found.add(path)
+
+
+def _walk_directory(directory: Path, all_suffixes: frozenset[str], found: set[Path]) -> None:
+    """Add every non-excluded source file under `directory` (recursive).
+
+    Args:
+        directory: Directory to walk.
+        all_suffixes: Scanned suffixes (`PY_SUFFIXES | JS_SUFFIXES`).
+        found: Accumulator set, mutated in place.
+    """
+    for child in directory.rglob("*"):
+        if not child.is_file():
+            continue
+        if any(part in DEFAULT_EXCLUDE_DIRS for part in child.parts):
+            continue
+        _add_if_source_file(child, all_suffixes, found)
+
+
 def iter_source_files(paths: list[Path]) -> list[Path]:
     """Every Python/JS/TS file under `paths`, excluding `DEFAULT_EXCLUDE_DIRS`."""
     all_suffixes = PY_SUFFIXES | JS_SUFFIXES
     found: set[Path] = set()
     for given in paths:
         if given.is_file():
-            if given.suffix.lower() in all_suffixes:
-                found.add(given)
+            _add_if_source_file(given, all_suffixes, found)
             continue
-        if not given.is_dir():
-            continue
-        for child in given.rglob("*"):
-            if not child.is_file():
-                continue
-            if any(part in DEFAULT_EXCLUDE_DIRS for part in child.parts):
-                continue
-            if child.suffix.lower() in all_suffixes:
-                found.add(child)
+        if given.is_dir():
+            _walk_directory(given, all_suffixes, found)
     return sorted(found)
 
 
@@ -284,13 +379,89 @@ def _not_measured_unit(path: Path) -> Unit:
     return Unit(path, "<file>", 1, 0, 0, "js", "not_measured", NOT_MEASURED_REASON)
 
 
-def audit(paths: list[Path]) -> list[Unit]:
+def _validate_exclusion_entry(entry: object, exclusions_path: Path, root: Path) -> Path:
+    """One exclusion entry -> its resolved, existing path.
+
+    Args:
+        entry: One element of the `exclusions` list.
+        exclusions_path: File the entry came from, for error messages.
+        root: Directory the entry's `path` is resolved against (`D1`).
+
+    Returns:
+        Path: the resolved, existing excluded file.
+
+    Raises:
+        ExclusionError: a required key is missing, or the resolved path does
+            not exist (stale exemption).
+    """
+    if not isinstance(entry, dict) or any(k not in entry for k in _REQUIRED_EXCLUSION_KEYS):
+        raise ExclusionError(
+            f"{exclusions_path}: entry {entry!r} missing one of "
+            f"{_REQUIRED_EXCLUSION_KEYS} -- malformed exclusion."
+        )
+    resolved = (root / str(entry["path"])).resolve()
+    if not resolved.exists():
+        raise ExclusionError(
+            f"{exclusions_path}: '{entry['path']}' does not exist -- stale exemption."
+        )
+    return resolved
+
+
+def load_exclusions(exclusions_path: Path, root: Path) -> frozenset[Path]:
+    """Load and validate `config/quality_audit_exclusions.json` (`D1`).
+
+    Args:
+        exclusions_path: Path to the exclusion-list file. An absent file
+            means no exclusions -- not an error.
+        root: Directory each entry's `path` is resolved against (the
+            audited root).
+
+    Returns:
+        frozenset[Path]: resolved, existing files the scan must skip.
+
+    Raises:
+        ExclusionError: the file is malformed (bad JSON, or an entry
+            missing `path`/`reason`/`provenance`), or an entry's `path`
+            does not exist under `root` (stale exemption).
+    """
+    if not exclusions_path.exists():
+        return frozenset()
+    try:
+        entries = json.loads(exclusions_path.read_text(encoding="utf-8"))["exclusions"]
+        return frozenset(
+            _validate_exclusion_entry(entry, exclusions_path, root) for entry in entries
+        )
+    except (OSError, json.JSONDecodeError, KeyError, TypeError) as exc:
+        raise ExclusionError(
+            f"{exclusions_path}: malformed exclusion file -- {exc}"
+        ) from exc
+
+
+def _excluded_files(paths: list[Path], exclude: frozenset[Path]) -> list[Path]:
+    """Discovered files skipped by `exclude`, sorted for a stable `--report`.
+
+    Kept separate from the unit register so an exclusion is never silent
+    (`D1`) -- `--report` lists these files distinctly from PASS/FAIL/
+    unparsed units.
+
+    Args:
+        paths: Root paths passed to the audit (files or directories).
+        exclude: Resolved paths the exclusion file marked as skipped.
+    """
+    return sorted(p for p in iter_source_files(paths) if p.resolve() in exclude)
+
+
+def audit(paths: list[Path], exclude: frozenset[Path] = frozenset()) -> list[Unit]:
     """Scan `paths`: every Python function/method is measured; every JS/TS
     file is discovered but reported `not_measured` (the JS/TS scanner was
-    withdrawn -- Sprint 050 `AB1`), never silently dropped.
+    withdrawn -- Sprint 050 `AB1`), never silently dropped. Files resolved
+    in `exclude` are skipped entirely: their violations never enter the
+    register or the exit-code decision (`D1`).
     """
     units: list[Unit] = []
     for file_path in iter_source_files(paths):
+        if file_path.resolve() in exclude:
+            continue
         if file_path.suffix.lower() in PY_SUFFIXES:
             units.extend(scan_python_file(file_path))
         else:
@@ -319,8 +490,11 @@ def _format_unit_line(u: Unit) -> str:
     return f"{u.status}  {location}  {u.name}  lines={u.executable_lines} depth={u.max_depth}"
 
 
-def format_report(units: list[Unit]) -> str:
-    """Full register: one line per unit, plus the compliance figure."""
+def format_report(units: list[Unit], excluded: list[Path] | None = None) -> str:
+    """Full register: one line per unit, the compliance figure, and --
+    listed separately so an exclusion is never silent (`D1`) -- the
+    excluded files."""
+    excluded = excluded if excluded is not None else []
     lines: list[str] = [_format_unit_line(u) for u in units]
     compliant, measured, unparsed = compliance_figure(units)
     pct = (compliant / measured * 100) if measured else 0.0
@@ -329,6 +503,8 @@ def format_report(units: list[Unit]) -> str:
         f"Compliant units: {compliant}/{measured} ({pct:.1f}%); "
         f"unparsed: {unparsed}; total scanned: {len(units)}"
     )
+    lines.append(f"Excluded files: {len(excluded)}")
+    lines.extend(f"  {p}" for p in excluded)
     return "\n".join(lines)
 
 
@@ -340,13 +516,27 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--report", action="store_true", help="Print the full register and exit 0 regardless"
     )
+    parser.add_argument(
+        "--exclusions",
+        type=Path,
+        default=None,
+        help="Exclusion-list file (default: <root>/config/quality_audit_exclusions.json)",
+    )
     args = parser.parse_args(argv)
     targets = args.paths or [Path(".")]
+    root = Path(".")
+    exclusions_path = args.exclusions or (root / DEFAULT_EXCLUSIONS_RELPATH)
 
-    units = audit(targets)
+    try:
+        exclude = load_exclusions(exclusions_path, root)
+    except ExclusionError as exc:
+        print(f"quality_audit: {exc}", file=sys.stderr)
+        return 2
+
+    units = audit(targets, exclude)
 
     if args.report:
-        print(format_report(units))
+        print(format_report(units, _excluded_files(targets, exclude)))
         return 0
 
     violations = [u for u in units if u.status == "FAIL"]

@@ -10,8 +10,24 @@ Checks (run from the .agents root; CI fails the PR on any violation):
   (c) Every numbered "Rule NN" citation resolves to an entry in
       rules/LEGACY_RULE_CONCORDANCE.md (the numbering system was abolished
       by the tabular refactor; unmapped numbers are phantom references).
-  (d) Every workflow, script and executable skill has a declared invoker, or a
-      declared exception (RA-16 INVOCATION_COVERAGE, agents.md §7). Every
+  (d) Every workflow, script, executable skill, ``skills/*/scripts/*.py``
+      module and ``tests/*.py`` file has a declared invoker, or a declared
+      exception (RA-16 INVOCATION_COVERAGE, agents.md §7). ``tests/test_*.py``
+      and ``tests/conftest.py`` resolve to pytest collection under
+      ``make verify`` (confirmed against the Makefile recipe, not assumed);
+      other ``tests/*.py`` files resolve via an import from ``scripts/`` or
+      ``hooks/`` or their own ``invoked_by:``. A ``skills/*/scripts/*.py``
+      module resolves via its own skill's SKILL.md/README.md naming its
+      filename, skill-relative path, or that path as a dotted module
+      (``scripts.env``, as in ``python -m scripts.env``) as a whole token
+      (never a bare-stem substring), a Makefile recipe, its own
+      ``invoked_by:``, or a
+      path-resolved import from another file that is itself resolved by one
+      of those — computed as a fixpoint closure over ``scripts/``, ``hooks/``
+      and ``skills/*/scripts/`` (``tests/`` importers excluded: a test
+      importing production code does not invoke it) so two mutually
+      -importing orphans never resolve each other (KI-048-1 D9, Sprint 052
+      U19; tightened Sprint 052 remediation round 1, F-1/F-2). Every
       ``invoked_by:`` token of the form ``path#fragment`` also resolves its
       ``#fragment`` — a GitHub heading slug, an ``<a id=>`` / ``<a name=>``
       anchor, or a workflow step-id token — in the file ``path`` names
@@ -103,12 +119,17 @@ def loadable_text() -> str:
 
 
 def scan_files():
-    for pattern in ("**/*.md", "**/*.py"):
-        for p in Path(".").glob(pattern):
-            sp = str(p)
-            if any(x in sp for x in SCAN_EXCLUDE):
-                continue
-            yield p
+    """Yield every tracked markdown/Python file outside `SCAN_EXCLUDE`.
+
+    Returns:
+        Iterator[Path]: Markdown files first, then Python files — the same
+            order the original two-pattern loop produced.
+    """
+    candidates = [*Path(".").glob("**/*.md"), *Path(".").glob("**/*.py")]
+    for p in candidates:
+        if any(x in str(p) for x in SCAN_EXCLUDE):
+            continue
+        yield p
 
 
 def check_rules_reachable(corpus: str) -> list[str]:
@@ -146,17 +167,32 @@ def check_templates_exist(corpus: str) -> list[str]:
     return errors
 
 
+def _rule_citation_errors(path: Path, mapped: set[str]) -> list[str]:
+    """(c) Numbered `Rule NN` citations in one file, checked against `mapped`.
+
+    Args:
+        path: File to scan for `Rule NN` citations.
+        mapped: Rule numbers documented in `rules/LEGACY_RULE_CONCORDANCE.md`.
+
+    Returns:
+        list[str]: One error per citation number absent from `mapped`.
+    """
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    errors = []
+    # 41 covers 041/41.x style; normalize citations to their integer part.
+    for num in re.findall(r"Rule[s]? 0*(\d+)(?:\.\d+)?", text):
+        if num not in mapped:
+            errors.append(f"(c) {path}: cites Rule {num}, not mapped in the concordance.")
+    return errors
+
+
 def check_rule_citations() -> list[str]:
     if not CONCORDANCE.exists():
         return [f"(c) {CONCORDANCE} missing — numbered citations cannot be resolved."]
     mapped = set(re.findall(r"\*\*Rule (\d+)", CONCORDANCE.read_text(encoding="utf-8")))
-    # 41 covers 041/41.x style; normalize citations to their integer part.
-    errors = []
+    errors: list[str] = []
     for p in scan_files():
-        text = p.read_text(encoding="utf-8", errors="ignore")
-        for num in re.findall(r"Rule[s]? 0*(\d+)(?:\.\d+)?", text):
-            if num not in mapped:
-                errors.append(f"(c) {p}: cites Rule {num}, not mapped in the concordance.")
+        errors += _rule_citation_errors(p, mapped)
     return sorted(set(errors))
 
 
@@ -190,26 +226,443 @@ def load_exceptions() -> tuple[dict[str, str], list[str]]:
     return exceptions, errors
 
 
+def _module_names_imported_by(path: Path) -> set[str]:
+    """AST-parse one Python file and return the module names it imports.
+
+    Args:
+        path: A first-party `.py` file.
+
+    Returns:
+        set[str]: Top-level import names; empty when the file fails to parse.
+    """
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+    except SyntaxError:
+        return set()
+    names: set[str] = set()
+    for node in ast.walk(tree):
+        # Two sibling `if`s, not `if`/`elif`: `ast.Import` and `ast.ImportFrom`
+        # are mutually exclusive types, so this is behaviourally identical —
+        # and an `elif` nests one AST level deeper (a nested `If` in the first
+        # `If`'s `orelse`), which is what pushed this unit past depth 3.
+        if isinstance(node, ast.Import):
+            names.update(alias.name.split(".")[0] for alias in node.names)
+        if isinstance(node, ast.ImportFrom) and node.module:
+            names.add(node.module.split(".")[-1])
+    return names
+
+
 def imported_modules() -> set[str]:
-    """Module names imported by any tracked Python file.
+    """Module names imported by any tracked `scripts/` or `hooks/` file.
 
     A script imported as a module has an invoker even though its filename is
     never written anywhere. Missing this is not theoretical: `merge_json.py`
     looked orphaned to a filename-only scan while `scripts/install.py`
     depends on it, and deleting it would have broken the bridge installer.
+
+    Restored to its original two-tree scope (`ca70bfa`) after Sprint 052
+    U19 widened it to also scan `skills/` and `tests/` — which let the
+    scripts/hooks invocation loop below treat a script imported only by its
+    own test file as invoked (F-2, Sprint 052 remediation round 1: a test
+    importing production code does not invoke it in production). Skills
+    scripts resolve through `_fixpoint_resolved_skill_scripts` instead, which
+    deliberately excludes `tests/` importers for the same reason; test files
+    resolve through `check_test_files_invoked`.
     """
     modules: set[str] = set()
     for path in [*Path("scripts").glob("*.py"), *Path("hooks").glob("*.py")]:
-        try:
-            tree = ast.parse(path.read_text(encoding="utf-8"))
-        except SyntaxError:
-            continue
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Import):
-                modules.update(alias.name.split(".")[0] for alias in node.names)
-            elif isinstance(node, ast.ImportFrom) and node.module:
-                modules.add(node.module.split(".")[-1])
+        modules |= _module_names_imported_by(path)
     return modules
+
+
+def _makefile_target_recipe_lines(target: str) -> list[str]:
+    """Tab-indented, non-comment recipe lines belonging to one Makefile target.
+
+    Comments and blank lines interleaved in the recipe (this Makefile carries
+    several) are skipped rather than treated as the end of the target — only
+    a new `name:` rule header ends it. A tab-indented line whose content opens
+    with `#` is a shell comment inside the recipe, not a command Make
+    executes, so it is excluded too: a script merely mentioned in prose must
+    not resolve as invoked (KI-048-1 D9 coordinator extension).
+
+    Args:
+        target: The target name, e.g. `"verify"`.
+
+    Returns:
+        list[str]: Recipe lines for that target, tab-stripped, in file order.
+    """
+    makefile = Path("Makefile")
+    if not makefile.exists():
+        return []
+    lines: list[str] = []
+    in_target = False
+    for line in makefile.read_text(encoding="utf-8").splitlines():
+        if re.match(rf"^{re.escape(target)}:", line):
+            in_target = True
+            continue
+        if not in_target:
+            continue
+        if line.startswith("\t") and not line[1:].strip().startswith("#"):
+            lines.append(line[1:])
+            continue
+        if line.startswith("\t"):
+            continue
+        if re.match(r"^[\w.-]+:", line):
+            break
+    return lines
+
+
+def _makefile_recipe_lines() -> list[str]:
+    """Tab-indented, non-comment recipe lines from every Makefile target.
+
+    The "any target" counterpart of `_makefile_target_recipe_lines`: a skill
+    script named in a recipe belonging to a target other than `verify` still
+    resolves (KI-048-1 D9 coordinator extension).
+
+    Returns:
+        list[str]: Recipe lines, tab-stripped, in file order, across the
+            whole file.
+    """
+    makefile = Path("Makefile")
+    if not makefile.exists():
+        return []
+    return [
+        line[1:] for line in makefile.read_text(encoding="utf-8").splitlines()
+        if line.startswith("\t") and not line[1:].strip().startswith("#")
+    ]
+
+
+def _pytest_covers_tests_dir() -> bool:
+    """Confirm the Makefile's `verify` target actually collects `tests/` via pytest.
+
+    `tests/test_*.py` and `tests/conftest.py` are only treated as invoked by
+    "make verify" (pytest's own filename-based collection) when this holds —
+    the claim is derived from the Makefile recipe rather than hard-coded, so a
+    future edit that drops the pytest step re-exposes the whole tree as
+    unresolved instead of silently trusting a stale assumption (KI-048-1 D9).
+
+    Returns:
+        bool: True when the `verify:` recipe contains a line invoking
+            `pytest` over a `tests/` argument.
+    """
+    return any(
+        "pytest" in line and "tests/" in line
+        for line in _makefile_target_recipe_lines("verify")
+    )
+
+
+def _skill_script_in_makefile(script: Path) -> bool:
+    """(d) True when a Makefile recipe line, any target, names this script.
+
+    Checks both the bare repo-relative form (`skills/<s>/scripts/f.py`) and
+    the `$(AGENTS_DIR)/`-prefixed form the Makefile uses for recipes that run
+    from the host root rather than the framework root. Reuses
+    `_makefile_recipe_lines`, so a comment-only mention (top-level `#` line,
+    or a `#`-led line inside a recipe) never counts (KI-048-1 D9 coordinator
+    extension).
+
+    Args:
+        script: A `skills/<s>/scripts/*.py` path.
+
+    Returns:
+        bool: True when a real recipe line contains either form of the path.
+    """
+    key = str(script)
+    prefixed = f"$(AGENTS_DIR)/{key}"
+    return any(key in line or prefixed in line for line in _makefile_recipe_lines())
+
+
+def _skill_doc_text(skill_dir: Path) -> str:
+    """Concatenate a skill's SKILL.md and README.md text, if present.
+
+    Args:
+        skill_dir: Path to `skills/<name>`.
+
+    Returns:
+        str: Combined text of the two documents; empty when neither exists.
+    """
+    text = ""
+    for doc_name in ("SKILL.md", "README.md"):
+        doc = skill_dir / doc_name
+        if doc.exists():
+            text += doc.read_text(encoding="utf-8", errors="ignore")
+    return text
+
+
+def _token_present(text: str, token: str) -> bool:
+    """True when `token` occurs in `text` as a whole token, not a substring.
+
+    Bounded on both sides by a character outside `[\\w.-]`, so a script
+    filename never matches inside an unrelated longer word — the defect that
+    let a SKILL.md containing "environment" satisfy `env.py` (F-1a, Sprint
+    052 remediation round 1). A path separator is a legitimate boundary, not
+    part of the token: a longer, differently-rooted mention such as
+    `.agents/skills/foo/scripts/env.py` still names `scripts/env.py` — only a
+    word/dot/hyphen character fusing the token into a longer identifier
+    (`environment` around `env`) must block the match.
+
+    Args:
+        text: Text to search.
+        token: Literal token to find (e.g. a filename or relative path).
+
+    Returns:
+        bool: True when `token` appears with a non-token boundary on each side.
+    """
+    pattern = re.compile(r"(?<![\w.-])" + re.escape(token) + r"(?![\w.-])")
+    return bool(pattern.search(text))
+
+
+def _skill_doc_names_script(script: Path) -> bool:
+    """(d)(a) True when the skill's own docs name this script as a whole token.
+
+    Accepts the bare filename (`env.py`), the skill-relative path
+    (`scripts/env.py`), or that same path written as a dotted module
+    (`scripts.env`, as in `python -m scripts.env`) — never a bare-stem
+    substring. The dotted form uses the same whole-token boundary rule as
+    the other two: `scripts.env` names `scripts/env.py`, but neither
+    `scripts.environment` nor `scripts.env_x` does, because the character
+    immediately after `env` is a word character in both.
+
+    Args:
+        script: A `skills/<name>/scripts/*.py` path.
+
+    Returns:
+        bool: True when any token form is present in SKILL.md/README.md.
+    """
+    doc_text = _skill_doc_text(script.parent.parent)
+    if not doc_text:
+        return False
+    tokens = (script.name, f"scripts/{script.name}", f"scripts.{script.stem}")
+    return any(_token_present(doc_text, token) for token in tokens)
+
+
+def _import_candidate_paths(importer: Path, node: ast.AST) -> set[Path]:
+    """Sibling/dotted candidate paths for one import node, before existence check.
+
+    `import name` and a single-component `from name import x` (no dot) are
+    sibling-scoped: they resolve only inside `importer`'s own directory,
+    matching the `sys.path.insert(0, ...)` pattern this codebase uses — the
+    same reason a bare `import json` must never be credited with resolving
+    `skills/foo/scripts/json.py` unless the importer lives in that exact
+    directory (F-1c). A relative import (`from .env import x`, `from . import
+    x`) is sibling-scoped for the same reason. A dotted `from scripts.env
+    import x` is ALSO sibling-scoped when `importer` itself lives in a
+    directory literally named `scripts` — the leading component then names
+    that directory, not a real top-level package (F-1c's own example) — and
+    resolves from the framework root only when it does not.
+
+    Args:
+        importer: The file the import statement lives in.
+        node: An `ast.Import` or `ast.ImportFrom` node from that file.
+
+    Returns:
+        set[Path]: Candidate paths, not yet filtered by existence on disk.
+    """
+    if isinstance(node, ast.Import):
+        return {importer.parent / f"{alias.name.split('.')[0]}.py" for alias in node.names}
+    if not isinstance(node, ast.ImportFrom):
+        return set()
+    if node.module is None:
+        return {importer.parent / f"{alias.name}.py" for alias in node.names}
+    parts = node.module.split(".")
+    if node.level == 0 and len(parts) > 1 and parts[0] != importer.parent.name:
+        return {Path(*parts).with_suffix(".py")}
+    return {importer.parent / f"{parts[-1]}.py"}
+
+
+def _resolve_import_target(importer: Path, node: ast.AST) -> set[Path]:
+    """Resolve one import node to first-party file paths that exist on disk.
+
+    Args:
+        importer: The file the import statement lives in.
+        node: An `ast.Import` or `ast.ImportFrom` node from that file.
+
+    Returns:
+        set[Path]: Candidate paths from `_import_candidate_paths` that exist.
+    """
+    return {c for c in _import_candidate_paths(importer, node) if c.is_file()}
+
+
+def _module_file_imports(path: Path) -> set[Path]:
+    """AST-parse one file and resolve its imports to first-party file paths.
+
+    Unlike `_module_names_imported_by` (bare import names, used for the
+    original scripts/hooks invocation loop), this resolves each import to an
+    actual path on disk, so a stdlib name never matches a same-named file
+    outside the importer's own directory (F-1c, Sprint 052 remediation
+    round 1).
+
+    Args:
+        path: A first-party `.py` file.
+
+    Returns:
+        set[Path]: Resolved import targets that exist in the tree.
+    """
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+    except SyntaxError:
+        return set()
+    import_nodes = [n for n in ast.walk(tree) if isinstance(n, (ast.Import, ast.ImportFrom))]
+    targets: set[Path] = set()
+    for node in import_nodes:
+        targets |= _resolve_import_target(path, node)
+    return targets
+
+
+def _skill_universe() -> list[Path]:
+    """First-party files eligible to resolve a skills script via import.
+
+    Deliberately excludes `tests/`: a test importing production code does
+    not invoke it in production (F-2, Sprint 052 remediation round 1).
+
+    Returns:
+        list[Path]: Every `scripts/`, `hooks/` and `skills/*/scripts/` file.
+    """
+    return [
+        *sorted(Path("scripts").glob("*.py")),
+        *sorted(Path("hooks").glob("*.py")),
+        *sorted(Path("skills").glob("*/scripts/*.py")),
+    ]
+
+
+def _skill_script_directly_resolved(path: Path, exceptions: dict[str, str]) -> bool:
+    """Non-import resolution for one file in the skills import universe.
+
+    A `scripts/`/`hooks/` file resolves directly only through its own
+    `invoked_by:` — its broader (import-based) resolution is evaluated by
+    `check_invocation_coverage`'s own loop, not duplicated here. A
+    `skills/*/scripts/*.py` file also resolves via a Makefile recipe or its
+    skill's own SKILL.md/README.md naming it as a whole token.
+
+    Args:
+        path: A `scripts/`, `hooks/` or `skills/*/scripts/` file.
+        exceptions: Declared exception registry (path -> reason).
+
+    Returns:
+        bool: True when the file's own declaration resolves it without
+            needing the import fixpoint.
+    """
+    if str(path) in exceptions:
+        return True
+    if "invoked_by:" in path.read_text(encoding="utf-8"):
+        return True
+    if "skills/" not in str(path):
+        return False
+    if _skill_script_in_makefile(path):
+        return True
+    return _skill_doc_names_script(path)
+
+
+def _newly_resolved_via(
+    importer: Path, graph: dict[Path, set[Path]], universe: set[Path], resolved: set[Path]
+) -> set[Path]:
+    """Targets of `importer` that enter the resolved set this fixpoint round.
+
+    Args:
+        importer: A file already in `resolved`.
+        graph: Import edges — `importer` -> the first-party files it imports.
+        universe: Every file eligible to be resolved.
+        resolved: The resolved set so far (read-only here).
+
+    Returns:
+        set[Path]: New targets, inside `universe` and not yet in `resolved`.
+    """
+    return {t for t in graph.get(importer, set()) if t in universe and t not in resolved}
+
+
+def _fixpoint_resolved_skill_scripts(exceptions: dict[str, str]) -> set[Path]:
+    """Which skills-universe files are invoked, directly or via a resolved import chain.
+
+    Seeds with every file that resolves directly (`invoked_by:`, a Makefile
+    recipe, its skill's own docs, or a declared exception), then repeatedly
+    adds a file once some already-resolved file imports it via a
+    path-resolved edge (F-1b, Sprint 052 remediation round 1) — so two
+    mutually-importing orphans, neither directly resolved, never resolve
+    each other.
+
+    Args:
+        exceptions: Declared exception registry (path -> reason).
+
+    Returns:
+        set[Path]: Every universe file reachable from a directly-resolved seed.
+    """
+    universe = set(_skill_universe())
+    graph = {path: _module_file_imports(path) for path in universe}
+    resolved = {p for p in universe if _skill_script_directly_resolved(p, exceptions)}
+    frontier = set(resolved)
+    while frontier:
+        next_frontier: set[Path] = set()
+        for importer in frontier:
+            newly = _newly_resolved_via(importer, graph, universe, resolved)
+            resolved |= newly
+            next_frontier |= newly
+        frontier = next_frontier
+    return resolved
+
+
+def check_skill_scripts_invoked(exceptions: dict[str, str]) -> list[str]:
+    """(d) skills/<s>/scripts/*.py resolves via docs, the Makefile, invoked_by,
+    or a fixpoint-resolved import chain (D9, tightened F-1/F-2).
+
+    A per-script rule, distinct from the existing per-skill-directory check.
+    Resolution is computed once for the whole tree by
+    `_fixpoint_resolved_skill_scripts`, so an importer only counts once it is
+    itself resolved.
+
+    Args:
+        exceptions: Declared exception registry (path -> reason).
+
+    Returns:
+        list[str]: One error per script none of the resolutions cover.
+    """
+    resolved = _fixpoint_resolved_skill_scripts(exceptions)
+    errors: list[str] = []
+    for script in sorted(Path("skills").glob("*/scripts/*.py")):
+        key = str(script)
+        if key in exceptions or script.name == "__init__.py":
+            continue
+        if script in resolved:
+            continue
+        errors.append(
+            f"(d) {key} is named by no SKILL.md/README.md/Makefile recipe, "
+            f"imported by no resolved module, and declares no `invoked_by:`."
+        )
+    return errors
+
+
+def check_test_files_invoked(exceptions: dict[str, str], modules: set[str]) -> list[str]:
+    """(d) tests/*.py resolves via pytest collection, an import, or invoked_by (D9).
+
+    `tests/test_*.py` and `tests/conftest.py` resolve to "make verify" when
+    `_pytest_covers_tests_dir` confirms the recipe still runs pytest over that
+    directory. Any other `tests/*.py` file (a helper or fixture module) must
+    instead be imported by a resolved module or declare its own `invoked_by:`.
+
+    Args:
+        exceptions: Declared exception registry (path -> reason).
+        modules: Module names imported by any tracked first-party Python file.
+
+    Returns:
+        list[str]: One error per test-tree file nothing invokes.
+    """
+    errors: list[str] = []
+    pytest_covers = _pytest_covers_tests_dir()
+    for path in sorted(Path("tests").glob("*.py")):
+        key = str(path)
+        if key in exceptions or path.name == "__init__.py":
+            continue
+        is_pytest_named = path.name == "conftest.py" or path.name.startswith("test_")
+        if is_pytest_named and pytest_covers:
+            continue
+        if path.stem in modules:
+            continue
+        if "invoked_by:" in path.read_text(encoding="utf-8"):
+            continue
+        errors.append(
+            f"(d) {key} matches no pytest collection pattern, is imported by "
+            f"no resolved module, and declares no `invoked_by:`."
+        )
+    return errors
 
 
 def check_invocation_coverage(corpus: str) -> list[str]:
@@ -256,6 +709,8 @@ def check_invocation_coverage(corpus: str) -> list[str]:
             continue
         errors.append(f"(d) {key} is an executable skill nothing invokes and nothing excuses.")
 
+    errors += check_skill_scripts_invoked(exceptions)
+    errors += check_test_files_invoked(exceptions, modules)
     errors += check_invoked_by_anchors()
     return errors
 
@@ -428,6 +883,50 @@ def resolve_cited_path(cited: str) -> Path | None:
     return None
 
 
+def _line_count(target: Path) -> int | None:
+    """Count lines in `target`.
+
+    Args:
+        target: File to count.
+
+    Returns:
+        int | None: Line count, or None on an OS-level read failure.
+    """
+    try:
+        return sum(1 for _ in target.open(encoding="utf-8", errors="ignore"))
+    except OSError:
+        return None
+
+
+def _out_of_range_citations(path: Path) -> list[str]:
+    """(f) ``path:line`` citations in one living doc, checked against file length.
+
+    Args:
+        path: A markdown file under `FILE_LINE_CORPUS`.
+
+    Returns:
+        list[str]: One error per citation whose line number falls outside the
+            cited file's range.
+    """
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    errors: list[str] = []
+    for match in FILE_LINE_RE.finditer(text):
+        cited, line_s = match.group(1), match.group(2)
+        line_no = int(line_s)
+        target = resolve_cited_path(cited)
+        if target is None:
+            continue
+        n_lines = _line_count(target)
+        if n_lines is None:
+            continue
+        if line_no < 1 or line_no > n_lines:
+            errors.append(
+                f"(f) {path}: cites `{cited}:{line_no}` but "
+                f"{target} has {n_lines} lines."
+            )
+    return errors
+
+
 def check_file_line_citations() -> list[str]:
     """(f) ``path:line`` citations in living docs must be inside the file.
 
@@ -440,22 +939,7 @@ def check_file_line_citations() -> list[str]:
         if not root.is_dir():
             continue
         for path in sorted(root.rglob("*.md")):
-            text = path.read_text(encoding="utf-8", errors="ignore")
-            for match in FILE_LINE_RE.finditer(text):
-                cited, line_s = match.group(1), match.group(2)
-                line_no = int(line_s)
-                target = resolve_cited_path(cited)
-                if target is None:
-                    continue
-                try:
-                    n_lines = sum(1 for _ in target.open(encoding="utf-8", errors="ignore"))
-                except OSError:
-                    continue
-                if line_no < 1 or line_no > n_lines:
-                    errors.append(
-                        f"(f) {path}: cites `{cited}:{line_no}` but "
-                        f"{target} has {n_lines} lines."
-                    )
+            errors += _out_of_range_citations(path)
     return sorted(set(errors))
 
 

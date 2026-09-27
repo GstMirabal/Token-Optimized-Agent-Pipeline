@@ -70,6 +70,27 @@ def _plain(cell: str) -> str:
     return cell.replace("*", "").replace("`", "").strip()
 
 
+def _parse_gate_table(lines: list[str], index: int) -> tuple[list[list[str]], int]:
+    """Parse the row block that follows one Verdict-bearing header line.
+
+    Args:
+        lines: All (comment-stripped) lines of the SPRINT_LOG.md content.
+        index: Index of the line right after the header line.
+
+    Returns:
+        tuple[list[list[str]], int]: (rows, next_index) — the table's data
+        rows and the index to resume scanning from.
+    """
+    if index < len(lines) and _is_separator(lines[index]):
+        index += 1
+    rows: list[list[str]] = []
+    while index < len(lines) and lines[index].strip().startswith("|"):
+        if not _is_separator(lines[index]):
+            rows.append(_cells(lines[index]))
+        index += 1
+    return rows, index
+
+
 def gate_tables(text: str) -> list[tuple[list[str], list[list[str]]]]:
     """Tables whose header includes Verdict."""
     tables: list[tuple[list[str], list[list[str]]]] = []
@@ -77,20 +98,15 @@ def gate_tables(text: str) -> list[tuple[list[str], list[list[str]]]]:
     index = 0
     while index < len(lines):
         line = lines[index]
-        if line.strip().startswith("|") and not _is_separator(line):
-            header = _cells(line)
-            if "Verdict" in header:
-                index += 1
-                if index < len(lines) and _is_separator(lines[index]):
-                    index += 1
-                rows: list[list[str]] = []
-                while index < len(lines) and lines[index].strip().startswith("|"):
-                    if not _is_separator(lines[index]):
-                        rows.append(_cells(lines[index]))
-                    index += 1
-                tables.append((header, rows))
-                continue
-        index += 1
+        if not (line.strip().startswith("|") and not _is_separator(line)):
+            index += 1
+            continue
+        header = _cells(line)
+        if "Verdict" not in header:
+            index += 1
+            continue
+        rows, index = _parse_gate_table(lines, index + 1)
+        tables.append((header, rows))
     return tables
 
 
@@ -118,16 +134,26 @@ def _row_finding(header: list[str], row: list[str]) -> str | None:
     return None
 
 
+def _table_findings(header: list[str], rows: list[list[str]]) -> list[str]:
+    """Vocabulary findings for every row of one gate table, in row order.
+
+    Args:
+        header: Column header names for the table.
+        rows: The table's data rows.
+
+    Returns:
+        list[str]: Non-empty finding messages.
+    """
+    return [item for row in rows if (item := _row_finding(header, row))]
+
+
 def collect_findings(text: str, sprint_id: int | None) -> list[str]:
     """Vocabulary mismatches. Empty means pass or skip."""
     if sprint_id is not None and sprint_id < SKIP_BEFORE:
         return []
     findings: list[str] = []
     for header, rows in gate_tables(text):
-        for row in rows:
-            item = _row_finding(header, row)
-            if item:
-                findings.append(item)
+        findings.extend(_table_findings(header, rows))
     return findings
 
 

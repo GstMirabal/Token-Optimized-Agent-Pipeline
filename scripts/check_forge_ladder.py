@@ -63,23 +63,64 @@ def _is_separator(line: str) -> bool:
     return stripped.startswith("|") and set(stripped) <= set("|:- ")
 
 
+def _is_table_start(line: str) -> bool:
+    """True when `line` opens a markdown table (a pipe row, not a separator).
+
+    Args:
+        line: One raw line from the source document.
+    """
+    return line.strip().startswith("|") and not _is_separator(line)
+
+
+def _collect_rows(lines: list[str], start: int) -> tuple[list[list[str]], int]:
+    """Collect table body rows from `lines[start]`, skipping separator lines.
+
+    Args:
+        lines: full document, split into lines.
+        start: index of the first line to consider as a body row.
+
+    Returns:
+        tuple: `(rows, next_index)` — `next_index` is the first line index
+            after the last consecutive `|`-prefixed line.
+    """
+    rows: list[list[str]] = []
+    index = start
+    while index < len(lines) and lines[index].strip().startswith("|"):
+        if not _is_separator(lines[index]):
+            rows.append(_cells(lines[index]))
+        index += 1
+    return rows, index
+
+
+def _parse_table_at(
+    lines: list[str], index: int
+) -> tuple[tuple[list[str], list[list[str]]], int]:
+    """Parse one table starting at `lines[index]` (already confirmed a start).
+
+    Args:
+        lines: full document, split into lines.
+        index: index of the table's header line.
+
+    Returns:
+        tuple: `((header, rows), next_index)` — `next_index` is where the
+            caller should resume scanning after this table.
+    """
+    header = _cells(lines[index])
+    index += 1
+    if index < len(lines) and _is_separator(lines[index]):
+        index += 1
+    rows, index = _collect_rows(lines, index)
+    return (header, rows), index
+
+
 def _tables(text: str) -> list[tuple[list[str], list[list[str]]]]:
     tables: list[tuple[list[str], list[list[str]]]] = []
     lines = text.splitlines()
     index = 0
     while index < len(lines):
-        line = lines[index]
-        if line.strip().startswith("|") and not _is_separator(line):
-            header = _cells(line)
-            index += 1
-            if index < len(lines) and _is_separator(lines[index]):
-                index += 1
-            rows: list[list[str]] = []
-            while index < len(lines) and lines[index].strip().startswith("|"):
-                if not _is_separator(lines[index]):
-                    rows.append(_cells(lines[index]))
-                index += 1
-            tables.append((header, rows))
+        if _is_table_start(lines[index]):
+            table, index = _parse_table_at(lines, index)
+            tables.append(table)
             continue
         index += 1
     return tables
@@ -176,6 +217,50 @@ def _check_host_agent(unit: str, name: str, dest: str) -> str | None:
     return f"Unit {unit}: host forge requires {FORGE_HOST}, got {dest!r}"
 
 
+def _check_agent_row(header: list[str], row: list[str], nucleus: bool) -> str | None:
+    """Validate one row already confirmed to be an agent-forge row.
+
+    Args:
+        header: table header cells.
+        row: table row cells.
+        nucleus: True when this session is in nucleus mode.
+
+    Returns:
+        str | None: a finding message, or None when the row is compliant.
+    """
+    unit = _col(header, row, "#") or "?"
+    target = _col(header, row, "Target")
+    dest = _col(header, row, "Destination")
+    name = _agent_basename(target)
+    if name is None:
+        return f"Unit {unit}: forge row Target is not an agent .md"
+    check = _check_nucleus_agent if nucleus else _check_host_agent
+    return check(unit, name, dest)
+
+
+def _findings_for_table(
+    header: list[str], rows: list[list[str]], nucleus: bool
+) -> list[str]:
+    """Findings for every agent-forge row in one table.
+
+    Args:
+        header: table header cells.
+        rows: table body rows.
+        nucleus: True when this session is in nucleus mode.
+
+    Returns:
+        list[str]: one finding per non-compliant forge row.
+    """
+    findings: list[str] = []
+    for row in rows:
+        if not _is_agent_forge_row(header, row):
+            continue
+        finding = _check_agent_row(header, row, nucleus)
+        if finding:
+            findings.append(finding)
+    return findings
+
+
 def check_agent_assignment(text: str) -> list[str]:
     """Validate forge-relevant rows in agent_assignment.md."""
     findings: list[str] = []
@@ -183,20 +268,7 @@ def check_agent_assignment(text: str) -> list[str]:
     for header, rows in _tables(text):
         if "Destination" not in header:
             continue
-        for row in rows:
-            if not _is_agent_forge_row(header, row):
-                continue
-            unit = _col(header, row, "#") or "?"
-            target = _col(header, row, "Target")
-            dest = _col(header, row, "Destination")
-            name = _agent_basename(target)
-            if name is None:
-                findings.append(f"Unit {unit}: forge row Target is not an agent .md")
-                continue
-            check = _check_nucleus_agent if nucleus else _check_host_agent
-            finding = check(unit, name, dest)
-            if finding:
-                findings.append(finding)
+        findings.extend(_findings_for_table(header, rows, nucleus))
     return findings
 
 

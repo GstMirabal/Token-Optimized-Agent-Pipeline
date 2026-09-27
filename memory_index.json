@@ -1,6 +1,6 @@
 {
-  "last_update": "2026-09-24",
-  "sprint_id": "050",
+  "last_update": "2026-09-27",
+  "sprint_id": "052",
   "_schema": "Entries are summary-only Knowledge Items. The 'file' field is omitted once the raw log has been purged (agents.md §4 definitive_amnesia) — the 1-line summary IS the retained knowledge.",
   "items": [
     {
@@ -167,6 +167,16 @@
     {
       "id": "F-20260924-050F",
       "summary": "A heuristic scanner over a context-sensitive lexical grammar (JS/TS: regex-literal-vs-division, keyword-vs-identifier) cannot be fail-closed without a real lexer — three remediation rounds on scripts/quality_audit.py's JS/TS path each fixed one silent-compliance case and surfaced a new one; the plan's own pre-declared Abort criterion, not a fourth patch, was the correct exit.",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20260927-S521",
+      "summary": "A SubagentStop hook payload's cwd is the parent session's directory (a subagent cannot move it; Bash cd does not persist), so verify hook payload semantics against the Claude Code docs before designing a routing rule on a payload field.",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20260927-S522",
+      "summary": "Eight concurrent subagent lanes exhausted the API session limit mid-wave; cap parallel lanes at about four and have lanes leave finished files uncommitted so the orchestrator can verify and commit them from the tree when an agent dies.",
       "routing_class": "host"
     }
   ]

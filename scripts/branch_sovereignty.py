@@ -150,6 +150,43 @@ def load_waivers() -> dict[str, str]:
     return {entry["branch"]: entry["reason"] for entry in data.get("abandoned", [])}
 
 
+def _one_pr_lookup(branch: str) -> tuple[str | None, str, bool]:
+    """Run one `gh pr list` lookup and classify its result.
+
+    Isolates the per-attempt work of `merged_pr_exists` so that its retry loop
+    does not have to nest a `try`/`except` inside two `if` levels of its own.
+
+    Args:
+        branch: local branch name, used as the pull request's head ref.
+
+    Returns:
+        tuple: `(verdict, error, retryable)`. `verdict` is `YES`/`NO` when the
+            lookup is conclusive, else `None`. `error` is the message to show
+            when `verdict` is `None`, else `""`. `retryable` is True only for a
+            transient `gh` failure that another attempt might resolve; an
+            unparseable response and a confirmed no-GitHub state are both
+            terminal, so `retryable` is False for those.
+    """
+    result = subprocess.run(
+        ["gh", "pr", "list", "--state", "merged", "--head", branch, "--json", "number"],
+        capture_output=True, text=True,
+    )
+    if result.returncode == 0:
+        try:
+            return (YES if json.loads(result.stdout or "[]") else NO), "", False
+        except json.JSONDecodeError:
+            error = f"unparseable output: {result.stdout.strip()[:120]}"
+            return None, error, False
+
+    stderr = result.stderr.strip()
+    # Retrying will not conjure a remote. This is an answer, not a failure.
+    if any(marker in stderr for marker in NO_GITHUB_SIDE):
+        return NO, "", False
+
+    error = stderr.splitlines()[0][:120] if stderr else f"exit {result.returncode}"
+    return None, error, True
+
+
 def merged_pr_exists(branch: str) -> str:
     """Whether a merged pull request exists for `branch` — or that it is unknown.
 
@@ -178,23 +215,12 @@ def merged_pr_exists(branch: str) -> str:
 
     last_error = ""
     for attempt in range(1, ATTEMPTS + 1):
-        result = subprocess.run(
-            ["gh", "pr", "list", "--state", "merged", "--head", branch, "--json", "number"],
-            capture_output=True, text=True,
-        )
-        if result.returncode == 0:
-            try:
-                return YES if json.loads(result.stdout or "[]") else NO
-            except json.JSONDecodeError:
-                last_error = f"unparseable output: {result.stdout.strip()[:120]}"
-                break
-
-        stderr = result.stderr.strip()
-        # Retrying will not conjure a remote. This is an answer, not a failure.
-        if any(marker in stderr for marker in NO_GITHUB_SIDE):
-            return NO
-
-        last_error = stderr.splitlines()[0][:120] if stderr else f"exit {result.returncode}"
+        verdict, error, retryable = _one_pr_lookup(branch)
+        if verdict is not None:
+            return verdict
+        last_error = error
+        if not retryable:
+            break
         if attempt < ATTEMPTS:
             time.sleep(BACKOFF_SECONDS * attempt)
 
@@ -233,6 +259,10 @@ def classify(base: str) -> tuple[list[str], list[str], list[str], dict[str, str]
     """
     waivers = load_waivers()
     integrated, unintegrated, indeterminate = [], [], []
+    # A dict dispatch, not `if state == YES: ... elif ...: ... else: ...`:
+    # the elif chain nests one `If` inside another in the AST, pushing the
+    # final `else` branch to depth 4. `.get` keeps every branch at depth 2.
+    buckets = {YES: integrated, NO: unintegrated, UNKNOWN: indeterminate}
     for branch in local_branches(base):
         if branch in waivers:
             continue
@@ -240,12 +270,7 @@ def classify(base: str) -> tuple[list[str], list[str], list[str], dict[str, str]
             integrated.append(branch)
             continue
         state = merged_pr_exists(branch)
-        if state == YES:
-            integrated.append(branch)
-        elif state == NO:
-            unintegrated.append(branch)
-        else:
-            indeterminate.append(branch)
+        buckets.get(state, indeterminate).append(branch)
     return integrated, unintegrated, indeterminate, waivers
 
 

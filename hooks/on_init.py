@@ -99,26 +99,46 @@ def bridge_intact() -> bool:
     )
 
 
+def _bridge_needs_resync(lock: Path) -> bool:
+    """Decides whether the Claude Code bridge must be (re)installed.
+
+    Args:
+        lock: Path to the framework's bridge lock file.
+
+    Returns:
+        True when the installer must run: the lock is missing, the linked
+        artifacts were wiped, or the submodule has moved since the lock was
+        written. Prints the operator-facing reason when re-linking is needed.
+    """
+    if not lock.exists():
+        return True
+
+    if not bridge_intact():
+        print(
+            "🔄 [ON_INIT] Bridge lock present but linked artifacts are missing "
+            "(likely wiped by `git clean` or a manual deletion). Re-linking bridge..."
+        )
+        return True
+
+    recorded = lock.read_text().strip()
+    current = current_submodule_commit()
+    if current == "unknown" or recorded == current:
+        return False
+
+    print(
+        f"🔄 [ON_INIT] .agents updated ({recorded[:12]} -> {current[:12]}). "
+        "Re-linking bridge..."
+    )
+    return True
+
+
 def sync_commands() -> bool:
     """Install or refresh the Claude Code bridge when the lock or artifacts drift."""
     lock = bridge_lock_path()
     installer = install_script_path()
 
-    if lock.exists():
-        if not bridge_intact():
-            print(
-                "🔄 [ON_INIT] Bridge lock present but linked artifacts are missing "
-                "(likely wiped by `git clean` or a manual deletion). Re-linking bridge..."
-            )
-        else:
-            recorded = lock.read_text().strip()
-            current = current_submodule_commit()
-            if current == "unknown" or recorded == current:
-                return True
-            print(
-                f"🔄 [ON_INIT] .agents updated ({recorded[:12]} -> {current[:12]}). "
-                "Re-linking bridge..."
-            )
+    if not _bridge_needs_resync(lock):
+        return True
 
     if not installer.is_file():
         print(f"⚠️ [ON_INIT] Warning: {installer} not found. Skipping bridge install.")

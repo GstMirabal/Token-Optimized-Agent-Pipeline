@@ -18,22 +18,22 @@ MIRROR_STATE = Path(".agent_state/mirror.json")
 
 def mirror_active_state():
     """State redundancy (agents.md §5 state_anchor, Sprint #031): shadow copy of the active state to prevent data loss."""
-    if ACTIVE_STATE.exists():
-        MIRROR_STATE.parent.mkdir(parents=True, exist_ok=True)
-        # Verify valid JSON before mirroring
-        try:
-            with open(ACTIVE_STATE, "r") as f:
-                json.load(f)
-            shutil.copy2(ACTIVE_STATE, MIRROR_STATE)
-        except json.JSONDecodeError:
-            # Non-fatal: the Stop hook must not interrupt the session. One stderr
-            # line satisfies agents.md §1 exception_handling without happy-path noise.
-            print(
-                "[state_mirror] active_state.json is not valid JSON; mirror skipped",
-                file=sys.stderr,
-            )
-    else:
-        pass
+    if not ACTIVE_STATE.exists():
+        return
+
+    MIRROR_STATE.parent.mkdir(parents=True, exist_ok=True)
+    # Verify valid JSON before mirroring
+    try:
+        with open(ACTIVE_STATE, "r") as f:
+            json.load(f)
+        shutil.copy2(ACTIVE_STATE, MIRROR_STATE)
+    except json.JSONDecodeError:
+        # Non-fatal: the Stop hook must not interrupt the session. One stderr
+        # line satisfies agents.md §1 exception_handling without happy-path noise.
+        print(
+            "[state_mirror] active_state.json is not valid JSON; mirror skipped",
+            file=sys.stderr,
+        )
 
 
 if __name__ == "__main__":

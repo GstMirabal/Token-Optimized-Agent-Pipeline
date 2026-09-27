@@ -212,6 +212,286 @@ def test_set_topology_refuses_without_current_sprint(repo: Path, capsys: pytest.
     assert "current_sprint" in capsys.readouterr().err
 
 
+# --- claim: entry-point-aware refusal message (S052-2) ---------------------
+
+def _write_locked_anchor(root: Path) -> None:
+    """An anchor already IN_PROGRESS under a different session, so a
+    same-process `claim()` call is refused (the collision this guard
+    exists to prevent)."""
+    state = {
+        "session_id": "other-session",
+        "status": ss.IN_PROGRESS,
+        "current_sprint": {"id": 52, "status": "IN_PROGRESS"},
+    }
+    (root / "docs" / "active_state.json").write_text(json.dumps(state), encoding="utf-8")
+
+
+def test_retry_hint_for_boot_entry_point():
+    assert ss.retry_hint("boot") == "python3 scripts/session_start.py --boot --takeover"
+
+
+def test_retry_hint_for_claim_entry_point():
+    assert ss.retry_hint("claim") == "python3 scripts/session_state.py claim --takeover"
+
+
+def test_retry_hint_defaults_to_claim_wording_for_unknown_values():
+    assert ss.retry_hint("anything-else") == "python3 scripts/session_state.py claim --takeover"
+
+
+def test_claim_refusal_names_boot_invocation_when_entry_point_is_boot(
+    repo: Path, capsys: pytest.CaptureFixture
+):
+    _write_locked_anchor(repo)
+
+    rc = ss.claim("me", False, "terminal", entry_point="boot")
+
+    assert rc == 2
+    err = capsys.readouterr().err
+    assert "python3 scripts/session_start.py --boot --takeover" in err
+    assert "session_state.py claim --takeover" not in err
+
+
+def test_claim_refusal_names_claim_invocation_by_default(
+    repo: Path, capsys: pytest.CaptureFixture
+):
+    _write_locked_anchor(repo)
+
+    rc = ss.claim("me", False, "terminal")
+
+    assert rc == 2
+    err = capsys.readouterr().err
+    assert "python3 scripts/session_state.py claim --takeover" in err
+    assert "session_start.py --boot" not in err
+
+
+def test_claim_refusal_names_claim_invocation_when_entry_point_is_claim(
+    repo: Path, capsys: pytest.CaptureFixture
+):
+    _write_locked_anchor(repo)
+
+    rc = ss.claim("me", False, "terminal", entry_point="claim")
+
+    assert rc == 2
+    err = capsys.readouterr().err
+    assert "python3 scripts/session_state.py claim --takeover" in err
+
+
+def test_claim_succeeds_with_takeover_regardless_of_entry_point(repo: Path):
+    _write_locked_anchor(repo)
+
+    rc = ss.claim("me", True, "terminal", entry_point="boot")
+
+    assert rc == 0
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert state["session_id"] == "me"
+    assert state["status"] == ss.IN_PROGRESS
+
+
+def test_main_claim_passes_entry_point_boot_into_refusal_message(
+    repo: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
+):
+    _write_locked_anchor(repo)
+    monkeypatch.setattr(
+        sys, "argv",
+        ["session_state.py", "claim", "--session-id", "me", "--entry-point", "boot"],
+    )
+
+    assert ss.main() == 2
+    assert "session_start.py --boot --takeover" in capsys.readouterr().err
+
+
+def test_main_claim_defaults_entry_point_to_claim(
+    repo: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
+):
+    _write_locked_anchor(repo)
+    monkeypatch.setattr(
+        sys, "argv", ["session_state.py", "claim", "--session-id", "me"],
+    )
+
+    assert ss.main() == 2
+    assert "session_state.py claim --takeover" in capsys.readouterr().err
+
+
+# --- open-sprint (S052-4) ---------------------------------------------------
+
+def test_open_sprint_writes_id_and_status_preserving_siblings(repo: Path):
+    _write_anchor(repo, {
+        "current_sprint": {"id": 51, "status": "CLOSED_SUCCESSFULLY",
+                            "layer": "core", "app": "pipeline", "last_audit_sprint": 49},
+    })
+
+    assert ss.open_sprint(52) == 0
+
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert state["current_sprint"] == {
+        "id": 52, "status": "OPEN",
+        "layer": "core", "app": "pipeline", "last_audit_sprint": 49,
+    }
+
+
+def test_open_sprint_creates_current_sprint_when_absent(repo: Path):
+    _write_anchor(repo, {"current_sprint": {}})
+
+    assert ss.open_sprint(52) == 0
+
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert state["current_sprint"] == {"id": 52, "status": "OPEN"}
+
+
+def test_open_sprint_refuses_in_progress_other_sprint(repo: Path, capsys: pytest.CaptureFixture):
+    _write_anchor(repo, {
+        "current_sprint": {"id": 51, "status": "IN_PROGRESS", "layer": "core"},
+    })
+    before = json.loads((repo / "docs" / "active_state.json").read_text())
+
+    rc = ss.open_sprint(52)
+
+    assert rc == 2
+    err = capsys.readouterr().err
+    assert "51" in err and "IN_PROGRESS" in err
+    after = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert after == before
+
+
+def test_open_sprint_same_id_is_idempotent(repo: Path):
+    _write_anchor(repo, {
+        "current_sprint": {"id": 52, "status": "OPEN", "layer": "core"},
+    })
+    before = json.loads((repo / "docs" / "active_state.json").read_text())
+
+    rc = ss.open_sprint(52)
+
+    assert rc == 0
+    after = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert after == before
+
+
+def test_open_sprint_same_id_is_idempotent_even_when_in_progress(repo: Path):
+    """Same id never refuses — the `IN_PROGRESS` guard applies only to
+    a *different* id (S052-4: "same id → idempotent exit 0")."""
+    _write_anchor(repo, {
+        "current_sprint": {"id": 52, "status": "IN_PROGRESS", "layer": "core"},
+    })
+    before = json.loads((repo / "docs" / "active_state.json").read_text())
+
+    rc = ss.open_sprint(52)
+
+    assert rc == 0
+    after = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert after == before
+
+
+def test_open_sprint_exits_0_and_prints_confirmation(repo: Path, capsys: pytest.CaptureFixture):
+    _write_anchor(repo, {"current_sprint": {"id": 51, "status": "CLOSED_SUCCESSFULLY"}})
+
+    assert ss.open_sprint(52) == 0
+    assert "52" in capsys.readouterr().out
+
+
+def test_main_dispatches_open_sprint(repo: Path, monkeypatch: pytest.MonkeyPatch):
+    _write_anchor(repo, {"current_sprint": {"id": 51, "status": "CLOSED_SUCCESSFULLY"}})
+    monkeypatch.setattr(sys, "argv", ["session_state.py", "open-sprint", "--id", "52"])
+
+    assert ss.main() == 0
+
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert state["current_sprint"]["id"] == 52
+    assert state["current_sprint"]["status"] == "OPEN"
+
+
+def test_main_open_sprint_propagates_refusal_exit_code(
+    repo: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
+):
+    _write_anchor(repo, {"current_sprint": {"id": 51, "status": "IN_PROGRESS"}})
+    monkeypatch.setattr(sys, "argv", ["session_state.py", "open-sprint", "--id", "52"])
+
+    assert ss.main() == 2
+    assert "IN_PROGRESS" in capsys.readouterr().err
+
+
+# --- open-sprint: sealed-vs-unsealed refusal (F-3, S052 QA Gate 1) ----------
+
+def test_open_sprint_refuses_a_second_call_over_its_own_unsealed_open(
+    repo: Path, capsys: pytest.CaptureFixture
+):
+    """Reproduces the live defect: nothing writes `current_sprint.status`
+    to `IN_PROGRESS`, so `open_sprint()` itself is the only real writer —
+    and its own output (`status: "OPEN"`) must not read as sealed. Fails on
+    HEAD: the old guard (`current_status == IN_PROGRESS`) never matches
+    `"OPEN"`, so `open_sprint(53)` used to succeed silently over an
+    unclosed sprint 52 that `open_sprint(52)` itself opened."""
+    assert ss.open_sprint(52) == 0
+    before = json.loads((repo / "docs" / "active_state.json").read_text())
+
+    rc = ss.open_sprint(53)
+
+    assert rc == 2
+    err = capsys.readouterr().err
+    assert "52" in err
+    after = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert after == before
+
+
+def test_release_writes_current_sprint_status_closed_preserving_siblings(repo: Path):
+    """The SPRINT fact `_sprint_is_sealed` reads — a `current_sprint` sibling
+    key (`layer`), not a field `open_sprint()` owns, must survive untouched."""
+    _write_anchor(repo, {"current_sprint": {"id": 52, "status": "OPEN", "layer": "core"}})
+
+    assert ss.release() == 0
+
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert state["current_sprint"] == {"id": 52, "status": "CLOSED_SUCCESSFULLY", "layer": "core"}
+
+
+def test_release_does_not_add_current_sprint_when_absent(repo: Path):
+    """`release()` must not invent a `current_sprint` the anchor never had."""
+    (repo / "docs" / "active_state.json").write_text(
+        json.dumps({"session_id": "keep-me"}), encoding="utf-8"
+    )
+
+    assert ss.release() == 0
+
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert "current_sprint" not in state
+
+
+def test_open_sprint_succeeds_after_release_then_a_new_session_claims(repo: Path):
+    """The exact flow this fix protects: sprint 52 opened, released — sealed
+    as a SPRINT fact — then a *new* session `claim`s (which resets the
+    top-level SESSION status back to `IN_PROGRESS`) before Phase 3 opens
+    sprint 53. Regression guard for the round-1 fix, which keyed sealed-ness
+    on that top-level field and would have refused this exact call."""
+    assert ss.open_sprint(52) == 0
+    assert ss.release() == 0
+    assert ss.claim("next-session", False, "terminal") == 0
+
+    rc = ss.open_sprint(53)
+
+    assert rc == 0
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert state["status"] == ss.IN_PROGRESS  # claim() reset it; must not matter
+    assert state["current_sprint"]["id"] == 53
+    assert state["current_sprint"]["status"] == "OPEN"
+
+
+def test_open_sprint_refuses_after_claim_without_a_release_between(
+    repo: Path, capsys: pytest.CaptureFixture
+):
+    """A new session claiming the lock must not, by itself, read as a seal:
+    sprint 52 was opened but never released before `open_sprint(53)` runs."""
+    assert ss.open_sprint(52) == 0
+    assert ss.claim("some-session", False, "terminal") == 0
+    before = json.loads((repo / "docs" / "active_state.json").read_text())
+
+    rc = ss.open_sprint(53)
+
+    assert rc == 2
+    err = capsys.readouterr().err
+    assert "52" in err
+    after = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert after == before
+
+
 # --- CLI wiring --------------------------------------------------------------
 
 def test_main_dispatches_set_topology(repo: Path, monkeypatch: pytest.MonkeyPatch):

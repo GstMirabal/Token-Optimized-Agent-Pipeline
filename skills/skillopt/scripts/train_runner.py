@@ -26,6 +26,74 @@ if _AGENTS_DIR not in sys.path:
     sys.path.insert(0, _AGENTS_DIR)
 
 
+_PROMPT_TEMPLATES: dict[str, str] = {
+    "analyst_error": (
+        "You are an expert rules analyst. Review the failed trajectories "
+        "and identify why the rules failed to produce the correct behavior. "
+        "Propose edits in JSON format.\n"
+        "Your output must be a JSON object containing a \"patch\" key with "
+        "a list of \"edits\", where each edit has \"target\" (exact string "
+        "in the skill to replace) and \"content\" (new string to insert).\n"
+        "Ensure the target is unique in the original text.\n\n"
+        "Example:\n"
+        "```json\n"
+        "{\n"
+        "  \"patch\": {\n"
+        "    \"edits\": [\n"
+        "      {\n"
+        "        \"target\": \"old rule text\",\n"
+        "        \"content\": \"new rule text\"\n"
+        "      }\n"
+        "    ]\n"
+        "  }\n"
+        "}\n"
+        "```"
+    ),
+    "analyst_success": (
+        "You are an expert rules analyst. Review the successful trajectories "
+        "and reinforce the current rules.\n"
+        "Propose edits in JSON format to clarify the rules further if needed.\n"
+        "Your output must be a JSON object containing a \"patch\" key with "
+        "a list of \"edits\", as described in the failure prompt."
+    ),
+    "merge_failure": (
+        "You are a rules merger. Merge the following proposed edits for "
+        "failures into a single cohesive patch.\n"
+        "Your output must be a JSON object containing a \"patch\" key with "
+        "a list of \"edits\"."
+    ),
+    "merge_success": (
+        "You are a rules merger. Merge the following proposed edits for "
+        "successes into a single cohesive patch.\n"
+        "Your output must be a JSON object containing a \"patch\" key with "
+        "a list of \"edits\"."
+    ),
+    "merge_final": (
+        "You are a rules merger. Merge the failure and success patches "
+        "into a final consolidated patch.\n"
+        "Your output must be a JSON object containing a \"patch\" key with "
+        "a list of \"edits\"."
+    ),
+    "rewrite_skill": (
+        "You are an instruction writer. Rewrite the instruction/rules "
+        "document to incorporate the following suggestions.\n"
+        "Your output must be the complete updated markdown text."
+    ),
+    "lr_autonomous": (
+        "Determine the best learning rate (edit budget) based on "
+        "training progress. Return a single number between 1 and 8."
+    ),
+    "slow_update": (
+        "Decide if the proposed rule update should be accepted based "
+        "on the evaluation scores. Return JSON with 'accept': true or false."
+    ),
+    "meta_skill": (
+        "Analyze the history of rule optimizations and summarize "
+        "key insights to guide future steps."
+    ),
+}
+
+
 def custom_load_prompt(name: str, env: str | None = None) -> str:
     """Provides memory-based fallbacks for required prompts.
 
@@ -40,81 +108,14 @@ def custom_load_prompt(name: str, env: str | None = None) -> str:
         The prompt string.
     """
     del env
-    prompts = {
-        "analyst_error": (
-            "You are an expert rules analyst. Review the failed trajectories "
-            "and identify why the rules failed to produce the correct behavior. "
-            "Propose edits in JSON format.\n"
-            "Your output must be a JSON object containing a \"patch\" key with "
-            "a list of \"edits\", where each edit has \"target\" (exact string "
-            "in the skill to replace) and \"content\" (new string to insert).\n"
-            "Ensure the target is unique in the original text.\n\n"
-            "Example:\n"
-            "```json\n"
-            "{\n"
-            "  \"patch\": {\n"
-            "    \"edits\": [\n"
-            "      {\n"
-            "        \"target\": \"old rule text\",\n"
-            "        \"content\": \"new rule text\"\n"
-            "      }\n"
-            "    ]\n"
-            "  }\n"
-            "}\n"
-            "```"
-        ),
-        "analyst_success": (
-            "You are an expert rules analyst. Review the successful trajectories "
-            "and reinforce the current rules.\n"
-            "Propose edits in JSON format to clarify the rules further if needed.\n"
-            "Your output must be a JSON object containing a \"patch\" key with "
-            "a list of \"edits\", as described in the failure prompt."
-        ),
-        "merge_failure": (
-            "You are a rules merger. Merge the following proposed edits for "
-            "failures into a single cohesive patch.\n"
-            "Your output must be a JSON object containing a \"patch\" key with "
-            "a list of \"edits\"."
-        ),
-        "merge_success": (
-            "You are a rules merger. Merge the following proposed edits for "
-            "successes into a single cohesive patch.\n"
-            "Your output must be a JSON object containing a \"patch\" key with "
-            "a list of \"edits\"."
-        ),
-        "merge_final": (
-            "You are a rules merger. Merge the failure and success patches "
-            "into a final consolidated patch.\n"
-            "Your output must be a JSON object containing a \"patch\" key with "
-            "a list of \"edits\"."
-        ),
-        "rewrite_skill": (
-            "You are an instruction writer. Rewrite the instruction/rules "
-            "document to incorporate the following suggestions.\n"
-            "Your output must be the complete updated markdown text."
-        ),
-        "lr_autonomous": (
-            "Determine the best learning rate (edit budget) based on "
-            "training progress. Return a single number between 1 and 8."
-        ),
-        "slow_update": (
-            "Decide if the proposed rule update should be accepted based "
-            "on the evaluation scores. Return JSON with 'accept': true or false."
-        ),
-        "meta_skill": (
-            "Analyze the history of rule optimizations and summarize "
-            "key insights to guide future steps."
-        ),
-    }
-
     base_name = name
     for suffix in ["_rewrite", "_full_rewrite"]:
         if base_name.endswith(suffix):
             base_name = base_name[: -len(suffix)]
             break
 
-    if base_name in prompts:
-        return prompts[base_name]
+    if base_name in _PROMPT_TEMPLATES:
+        return _PROMPT_TEMPLATES[base_name]
 
     return (
         f"You are a helpful assistant executing the '{name}' task. "
@@ -158,6 +159,24 @@ def apply_monkeypatches(cfg: dict[str, Any]) -> None:
         ao.chat_messages_with_deployment = gemini_backend.chat_messages_with_deployment
 
 
+def _find_config_path_arg(argv: list[str]) -> str:
+    """Locates the value following a `--config` flag in `argv`.
+
+    Module-level (not inlined in `main`) so this for/if pair does not stack
+    a third nesting level on top of `main`'s own `if is_eval:` branch.
+
+    Args:
+        argv: Command-line arguments (as in `sys.argv`).
+
+    Returns:
+        The config path if found, else an empty string.
+    """
+    for i, arg in enumerate(argv):
+        if arg == "--config" and i + 1 < len(argv):
+            return argv[i + 1]
+    return ""
+
+
 def main() -> None:
     """Main entrypoint wrapper for the SkillOpt training process."""
     from skills.skillopt.scripts.env import AgentsOptEnv
@@ -169,11 +188,7 @@ def main() -> None:
         import scripts.eval_only
         scripts.eval_only._ENV_REGISTRY["agents_opt"] = AgentsOptEnv
         # Locate the config file from sys.argv
-        cfg_path = ""
-        for i, arg in enumerate(sys.argv):
-            if arg == "--config" and i + 1 < len(sys.argv):
-                cfg_path = sys.argv[i + 1]
-                break
+        cfg_path = _find_config_path_arg(sys.argv)
         from skillopt.config import load_config
         cfg = load_config(cfg_path) if cfg_path else {}
     else:
