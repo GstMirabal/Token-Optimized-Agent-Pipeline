@@ -20,7 +20,8 @@ from hooks import on_commit
     "cd repo && git push origin main --tags",
 ])
 def test_push_to_main_is_blocked(command, monkeypatch, tmp_path):
-    monkeypatch.setattr(on_commit, "DEPLOY_UNLOCK", tmp_path / "absent")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(on_commit, "is_nucleus", lambda: False)
     assert on_commit.is_blocked_push(command)
 
 
@@ -32,15 +33,45 @@ def test_push_to_main_is_blocked(command, monkeypatch, tmp_path):
     "ls -la",
 ])
 def test_other_commands_pass(command, monkeypatch, tmp_path):
-    monkeypatch.setattr(on_commit, "DEPLOY_UNLOCK", tmp_path / "absent")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(on_commit, "is_nucleus", lambda: False)
     assert not on_commit.is_blocked_push(command)
 
 
-def test_deploy_unlock_marker_allows_sanctioned_push(monkeypatch, tmp_path):
-    marker = tmp_path / ".deploy_unlock"
-    marker.touch()
-    monkeypatch.setattr(on_commit, "DEPLOY_UNLOCK", marker)
+# --- Deploy-unlock marker resolution (KI-052-9, Sprint 053 A3) --------------
+# The marker path depends on checkout mode (`scripts/_mode.is_nucleus`),
+# resolved at call time so it can be monkeypatched per test.
+
+def test_host_mode_agents_marker_still_unlocks(monkeypatch, tmp_path):
+    """Regression guard: the pre-existing host layout must keep working."""
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(on_commit, "is_nucleus", lambda: False)
+    (tmp_path / ".agents").mkdir()
+    (tmp_path / ".agents" / ".deploy_unlock").touch()
+
     assert not on_commit.is_blocked_push("git push origin main")
+
+
+def test_nucleus_mode_root_marker_unlocks(monkeypatch, tmp_path):
+    """Fails on HEAD: the hardcoded `.agents/.deploy_unlock` constant never
+    resolves to a root-level marker, so a nucleus deployment could never
+    unlock without creating a stray `.agents/` directory (KI-052-9)."""
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(on_commit, "is_nucleus", lambda: True)
+    (tmp_path / ".deploy_unlock").touch()
+
+    assert not on_commit.is_blocked_push("git push origin main")
+
+
+def test_nucleus_mode_host_marker_alone_does_not_unlock(monkeypatch, tmp_path):
+    """The host-layout marker alone must not unlock a nucleus push — the two
+    modes name distinct paths (`D2`)."""
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(on_commit, "is_nucleus", lambda: True)
+    (tmp_path / ".agents").mkdir()
+    (tmp_path / ".agents" / ".deploy_unlock").touch()
+
+    assert on_commit.is_blocked_push("git push origin main")
 
 
 # --- Commit message validation (Conventional Commits + #[Sprint_ID]) -------

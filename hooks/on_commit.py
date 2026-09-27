@@ -29,7 +29,9 @@ from pathlib import Path
 import sys
 # Add parent directory to path so 'hooks' module can be found if run directly
 sys.path.append(str(Path(__file__).parent.parent))
+sys.path.append(str(Path(__file__).parent.parent / "scripts"))
 from hooks.telemetry import log_error
+from _mode import is_nucleus
 
 def get_staged_files() -> list[str]:
     """Retrieves the list of files staged for the current commit."""
@@ -674,7 +676,20 @@ def audit_secret_shielding() -> bool:
 
     return True
 
-DEPLOY_UNLOCK = Path(".agents/.deploy_unlock")
+def deploy_unlock_path() -> Path:
+    """Resolve the deploy-unlock marker path for the current checkout mode.
+
+    Nucleus mode (`scripts/_mode.is_nucleus`) keeps the marker at the
+    repository root; host mode keeps the legacy `.agents/.deploy_unlock`
+    submodule layout. Resolved at call time, not at import, so a nucleus
+    deployment does not have to create a stray `.agents/` directory just to
+    satisfy a host-only constant (`KI-052-9`, Sprint 053 `D2`).
+
+    Returns:
+        Path: `.deploy_unlock` in nucleus mode, `.agents/.deploy_unlock`
+            in host mode.
+    """
+    return Path(".deploy_unlock") if is_nucleus() else Path(".agents/.deploy_unlock")
 
 # Conventional Commit type + optional scope + description ending in #[Sprint_ID]
 # (agents.md §5 historical_log). Example: "feat(auth): add login flow #078".
@@ -700,12 +715,13 @@ def read_hook_command() -> str:
 
 def is_blocked_push(command: str) -> bool:
     """RA-12 mechanical enforcement: pushes to main/master are blocked unless the
-    deployment workflow has explicitly created the .agents/.deploy_unlock marker."""
+    deployment workflow has explicitly created the mode's deploy-unlock marker
+    (`deploy_unlock_path`)."""
     if "git push" not in command:
         return False
     if not re.search(r"git push\s+(?:-[^\s]+\s+)*\S+\s+(main|master)(?=\s|$|:)", command):
         return False
-    return not DEPLOY_UNLOCK.exists()
+    return not deploy_unlock_path().exists()
 
 
 HEREDOC_COMMIT_MSG_REGEX = re.compile(
@@ -1045,7 +1061,7 @@ def main():
         log_error("on_commit", "BRANCH_VIOLATION", "Direct push to main/master blocked (RA-12)")
         block("Push to main/master is PROHIBITED (RA-12 Branch Discipline). "
               "Merge through the deployment workflow (/agents:deployment), which creates "
-              ".agents/.deploy_unlock for its sanctioned fallback push.")
+              f"{deploy_unlock_path()} for its sanctioned fallback push.")
 
     # Everything below only applies to git commit invocations.
     if command and "git commit" not in command:
