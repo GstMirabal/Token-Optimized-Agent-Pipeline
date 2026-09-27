@@ -66,10 +66,10 @@ comparing every `File` cell in the Work tables of `IMPLEMENTATION_PLAN.md`).
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| A1 | `scripts/session_state.py` | modify — `fix(state)`: `SEALED_STATUSES` (legacy `"CLOSED"` accepted); `open_sprint` refusal names `release`; docstrings say `CLOSED_SUCCESSFULLY` (`D1`). Paired test: `tests/test_session_state.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| A2 | `scripts/session_probe.py` | modify — `fix(probe)`: hygiene check compares against `SEALED_STATUSES` (`D1`). Paired test: `tests/test_session_probe.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
-| A3 | `hooks/on_commit.py` | modify — `fix(hooks)`: deploy-unlock marker resolved through `scripts/_mode.py` at call time; blocked-push message names the mode's path (`D2`). Paired test: `tests/test_on_commit.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| A4 | `workflows/deployment_workflow.md` | modify — `docs(deploy)`: `deploy_unlock` names both paths (nucleus `./.deploy_unlock`, host `.agents/.deploy_unlock`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A1 | `scripts/session_state.py` | modify — `fix(state)`: `SEALED_STATUSES` (legacy `"CLOSED"` accepted); `open_sprint` refusal names `release`; docstrings say `CLOSED_SUCCESSFULLY` (`D1`). Paired test: `tests/test_session_state.py` | medium | `implementer_agent` | sonnet | medium | ✅ `c90dcea` |
+| A2 | `scripts/session_probe.py` | modify — `fix(probe)`: hygiene check compares against `SEALED_STATUSES` (`D1`). Paired test: `tests/test_session_probe.py` | low | `implementer_agent` | sonnet | medium | ✅ `41c8554` |
+| A3 | `hooks/on_commit.py` | modify — `fix(hooks)`: deploy-unlock marker resolved through `scripts/_mode.py` at call time; blocked-push message names the mode's path (`D2`). Paired test: `tests/test_on_commit.py` | medium | `implementer_agent` | sonnet | medium | ✅ `954182c` |
+| A4 | `workflows/deployment_workflow.md` | modify — `docs(deploy)`: `deploy_unlock` names both paths (nucleus `./.deploy_unlock`, host `.agents/.deploy_unlock`) | low | `doc_orchestrator` | sonnet | medium | ✅ `bdf64ca` |
 | B1 | `requirements-quality.txt` | create — `build(deps)`: four pins (Dependencies table) (`D5`) | low | `implementer_agent` | sonnet | medium | ⏳ |
 | B2 | `requirements-core.txt` | modify — `build(deps)`: `-r requirements-quality.txt` (`D5`) | low | `implementer_agent` | sonnet | medium | ⏳ |
 | B3 | `scripts/quality_audit.py` | modify — `feat(quality)`: tree-sitter JS/TS scanner, fail closed (`D3`, `D4`); the Python path unchanged and stdlib-only | high | `implementer_agent` | sonnet | medium | ⏳ |
