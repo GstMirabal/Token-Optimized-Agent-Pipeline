@@ -4,6 +4,8 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.35.0] - 2026-09-27
+
 ### Added
 - **Sprint 052 `quality-audit-verify-wiring`** — closed the Python `quality_audit` baseline (87 non-compliant units / 1487, 94.1%, gate exit `2`) into a wired `make verify` gate at zero violations (`1449e65`), extended invocation coverage to `tests/` and `skills/*/scripts/*.py`, and closed all six long-open upstream findings alongside five session-boot defects `/agents:start` found on 2026-09-25. 67 planned units + unplanned wiring/propagation commits landed across seven waves; `make verify` green, 917 tests pass. #052
   - `scripts/graph_reconcile.py` (new) — compares `git ls-files` against `graphify-out/graph.json`'s mapped set, writes `graphify-out/unmapped_files.json`, advisory exit `0` (`REVDOC-G1`); wired into `Makefile` `graphify-update`/`graphify-rebuild` (`a830894`, `e59795a`).
