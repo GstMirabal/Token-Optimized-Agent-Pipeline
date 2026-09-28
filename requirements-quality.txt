@@ -1,0 +1,10 @@
+# Instruments for agents.md §1 (Sprint 053 `D5`): the JS/TS path of
+# scripts/quality_audit.py (`max_indentation`/`max_lines_per_func`, `D3`) and
+# the pinned `ruff check .` linter (`D6`). Included by requirements-core.txt
+# so every host venv built by start_workflow.md pip_setup gets these
+# instruments; installed directly by CI (.github/workflows/ci.yml), which
+# needs no other core dependency (graphifyy).
+tree-sitter==0.26.0
+tree-sitter-javascript==0.25.0
+tree-sitter-typescript==0.23.2
+ruff==0.16.3
