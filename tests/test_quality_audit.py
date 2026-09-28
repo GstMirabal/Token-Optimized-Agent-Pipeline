@@ -1,10 +1,19 @@
 """Tests for scripts/quality_audit.py (Sprint 050 `U2`, paired with `D6`;
-JS/TS scanner withdrawn `AB1` -- see `docs/sprints/050-core-pipeline/
-SPRINT_LOG.md` `AB0`/`AB1`).
+JS/TS path added Sprint 053 `B3`/`B4`, closing `KI-050-6` -- see
+`docs/sprints/053-core-pipeline/IMPLEMENTATION_PLAN.md` `D3`/`D4`).
 
 Fixtures are inline source strings written to `tmp_path`, matching the
 convention `tests/test_audit_cursor_models.py` already uses -- no committed
 fixture directory, so `jurisdictional_lock` has nothing extra to claim.
+
+The JS/TS family tests below reproduce, with a real parser, the five
+failure families the Sprint 050 stdlib-only heuristic scanner could not
+survive (`docs/sprints/050-core-pipeline/SPRINT_LOG.md` lines ~150-260,
+Gate rounds 2-3): arrow over-detection, unenclosed module-level callbacks,
+nested-arrow depth loss, control-keyword method names, and regex-literal
+masking desync. Every expected figure is hand-computed in the test's own
+comments before being asserted, then was independently confirmed by
+running the implementation once (not the other way around).
 """
 
 from __future__ import annotations
@@ -217,23 +226,17 @@ def test_compliance_figure_never_counts_unparsed_as_compliant() -> None:
 
 
 # --------------------------------------------------------------------------
-# JS/TS: instrument withdrawn (Sprint 050 Abort 1, `AB1`) -- the scanner
-# (`scan_js_file` and its private helpers) no longer exists; JS/TS files
-# must still be discovered and reported, never silently dropped and never
-# counted as compliant.
+# JS/TS: real measurement via tree-sitter (Sprint 053 `D3`/`D4`, `KI-050-6`).
+# A directory mixing `.py` and `.js`/`.ts` files: both languages are
+# measured for real, and the exit code reflects the combined violations.
 # --------------------------------------------------------------------------
 
 
-def test_js_files_reported_not_measured_never_compliant_exit_reflects_python_only(
-    tmp_path: Path,
-) -> None:
-    """A directory mixing `.py` and `.js`/`.ts` files: the JS/TS files are
-    reported `not measured (JS/TS instrument withdrawn -- Sprint 050 Abort
-    1)`, are never counted toward `compliant`, and the exit code reflects
-    only the Python violations present -- checked both clean and violating,
-    so presence of unmeasured JS/TS files never masks or manufactures a
-    violation (the abort-path recurrence of `F-049-7` this unit exists to
-    prevent)."""
+def test_js_files_are_measured_not_skipped_mixed_with_python(tmp_path: Path) -> None:
+    """A `.py`/`.js`/`.ts` directory: every language is measured for real
+    (never a `not_measured` placeholder -- that instrument was withdrawn in
+    Sprint 050 and superseded here, `D3`), and the exit code reflects the
+    combined violations, checked both clean and violating."""
     js_source = "function foo(a, b) {\n  return a + b;\n}\n"
 
     clean_dir = tmp_path / "clean"
@@ -243,8 +246,9 @@ def test_js_files_reported_not_measured_never_compliant_exit_reflects_python_onl
     (clean_dir / "types.ts").write_text(js_source, encoding="utf-8")
 
     report = qa.format_report(qa.audit([clean_dir]))
-    assert report.count("not measured (JS/TS instrument withdrawn") == 2
-    assert "1/1 (100.0%)" in report  # only the Python unit counts toward compliant
+    # 3 real PASS units (ok, foo x2), 0 unparsed, 0 not_measured.
+    assert "3/3 (100.0%)" in report
+    assert "not measured" not in report
     assert qa.main([str(clean_dir)]) == 0
 
     violating_dir = tmp_path / "violating"
@@ -256,6 +260,395 @@ def test_js_files_reported_not_measured_never_compliant_exit_reflects_python_onl
     (violating_dir / "sample.js").write_text(js_source, encoding="utf-8")
 
     assert qa.main([str(violating_dir)]) == 2
+
+
+# --------------------------------------------------------------------------
+# The five Sprint 050 failure families (`SPRINT_LOG.md` lines ~150-260),
+# reproduced against the tree-sitter path. Each figure below was derived by
+# hand from the D3 unit-of-measure rules, then confirmed by one execution of
+# `qa.audit`/`qa.scan_js_file` against the same source (never the reverse).
+# --------------------------------------------------------------------------
+
+
+def test_family1_arrow_chain_is_not_over_detected_as_unparsed(tmp_path: Path) -> None:
+    """Sprint 050 finding: ANY `ident =>` occurrence anywhere in a file made
+    the stdlib heuristic report the whole file UNPARSED, even a normal,
+    fully-measurable declared function with idiomatic inline callbacks. A
+    real parser never confuses a call argument for a top-level construct.
+
+    Hand computation: `processItems` is a module-level function (depth 0),
+    so its body starts at depth 1; its body is one `return` statement (1
+    executable line, depth 1 -> `max_depth=1`). Each of the three arrows
+    (`x => x + 1`, `x => x > 0`, `(acc, x) => acc + x`) is discovered
+    nested inside that same `return` statement -- a generic leaf statement
+    passes discovery through at its OWN depth (1), so each arrow is found
+    at depth 1 and its own body starts at `depth + 1 = 2`. Each is
+    expression-bodied -- fixed size 1 (`D3`) -- so every arrow measures
+    `lines=1 depth=2`.
+    """
+    source = (
+        "function processItems(items) {\n"
+        "  return items.map(x => x + 1).filter(x => x > 0)"
+        ".reduce((acc, x) => acc + x, 0);\n"
+        "}\n"
+    )
+    path = tmp_path / "chain.js"
+    path.write_text(source, encoding="utf-8")
+
+    units = qa.scan_js_file(path, qa._load_grammars())
+
+    assert all(u.status != "unparsed" for u in units)
+    assert len(units) == 4  # processItems + 3 arrows
+    outer = next(u for u in units if u.name == "processItems")
+    assert (outer.executable_lines, outer.max_depth, outer.status) == (1, 1, "PASS")
+    arrows = [u for u in units if u.name != "processItems"]
+    assert len(arrows) == 3
+    assert all((u.executable_lines, u.max_depth, u.status) == (1, 2, "PASS") for u in arrows)
+
+
+def test_family2_module_level_unenclosed_callback_is_its_own_unit(tmp_path: Path) -> None:
+    """Sprint 050 finding: a callback passed straight to a module-level call
+    (`app.get('/', function(req, res) {...})`, no enclosing named function
+    or binding) produced zero register entries -- neither measured nor
+    `unparsed` -- silently absent (`F-049-7` recurring).
+
+    Hand computation: the `function(req, res) {...}` expression is found
+    inside the top-level `expression_statement` at module depth 0 (no
+    enclosing binding, so its name is `<anonymous>:1`); its body starts at
+    depth 1 and holds 2 statements (`const users = ...;`, `res.send(...);`),
+    each on its own line -> 2 executable lines, max depth 1.
+    """
+    source = (
+        "app.get('/users', function(req, res) {\n"
+        "  const users = getUsers();\n"
+        "  res.send(users);\n"
+        "});\n"
+    )
+    path = tmp_path / "unenclosed.js"
+    path.write_text(source, encoding="utf-8")
+
+    units = qa.scan_js_file(path, qa._load_grammars())
+
+    assert len(units) == 1
+    unit = units[0]
+    assert unit.name == "<anonymous>:1"
+    assert (unit.executable_lines, unit.max_depth, unit.status) == (2, 1, "PASS")
+
+
+def test_family2_bare_param_unenclosed_callback_over_50_lines_fails(tmp_path: Path) -> None:
+    """Same family, bare-parameter arrow form (`req => {...}`, the specific
+    construct the Sprint 050 heuristic's over-broad bare-arrow signal
+    mis-detected -- SPRINT_LOG.md finding 'Arrow-function over-correction').
+    51 statements -> 51 executable lines (> 50) -> FAIL, not silently
+    dropped and not UNPARSED."""
+    statements = "\n  ".join(f"const a{i} = {i};" for i in range(51))
+    source = f"app.get('/users', req => {{\n  {statements}\n}});\n"
+    path = tmp_path / "bare_unenclosed.js"
+    path.write_text(source, encoding="utf-8")
+
+    units = qa.scan_js_file(path, qa._load_grammars())
+
+    assert len(units) == 1
+    assert (units[0].executable_lines, units[0].status) == (51, "FAIL")
+
+
+def test_family3_nested_method_depth_in_returned_object_is_not_lost(tmp_path: Path) -> None:
+    """Sprint 050 finding: a method nested inside an object literal returned
+    by an expression-bodied arrow (`(arr) => ({ [Symbol.iterator]() {...} })`)
+    had its depth hard-coded to 1 by the heuristic's `covered_spans`
+    mechanism, so real nesting inside it (`for`/`if`/`while`) was silently
+    lost -- 100% compliant, exit 0, on a genuinely deep construct.
+
+    Hand computation: `makeIter` is an expression-bodied arrow at module
+    depth 0 -> fixed size 1, own depth = 0 + 1 = 1 (D3), regardless of what
+    is nested inside the returned object. The computed-key method
+    `[Symbol.iterator]` is discovered inside that expression at the arrow's
+    own depth (0, since discovery through `parenthesized_expression`/
+    `object` does not increment depth) -> its body starts at depth 1. Its
+    body has one statement, `for (const x of arr) {...}`, at depth 1
+    (header line credited, depth_box=1); `if (x) {...}` nested inside, at
+    depth 2 (header line, depth_box=2); `while (x) {...}` nested inside
+    that, at depth 3 (header line, depth_box=3); `break;` inside the while,
+    at depth 4 (depth_box=4). Four distinct header/leaf rows -> 4 executable
+    lines, max depth 4 (violates the JS/TS `D3` limit of 3, mirroring the
+    Python `max_indentation` threshold) -- FAIL, not the old bogus
+    `depth=1 PASS`.
+    """
+    source = (
+        "const makeIter = (arr) => ({\n"
+        "  [Symbol.iterator]() {\n"
+        "    for (const x of arr) {\n"
+        "      if (x) {\n"
+        "        while (x) {\n"
+        "          break;\n"
+        "        }\n"
+        "      }\n"
+        "    }\n"
+        "  }\n"
+        "});\n"
+    )
+    path = tmp_path / "nested_depth.js"
+    path.write_text(source, encoding="utf-8")
+
+    units = qa.scan_js_file(path, qa._load_grammars())
+
+    assert len(units) == 2
+    make_iter = next(u for u in units if u.name == "makeIter")
+    assert (make_iter.executable_lines, make_iter.max_depth, make_iter.status) == (1, 1, "PASS")
+    method = next(u for u in units if u.name != "makeIter")
+    assert method.name == "[Symbol.iterator]"
+    assert (method.executable_lines, method.max_depth, method.status) == (4, 5, "FAIL")
+
+
+def test_family4_control_keyword_method_names_are_measured(tmp_path: Path) -> None:
+    """Sprint 050 finding: a class method NAMED after a control keyword
+    (`catch`, `if`, `for`, `while`, `with`, `switch`) was skipped by the
+    heuristic's `_is_control_paren`/`JS_KEYWORDS` check -- a 58-statement
+    `catch(onRejected)` scored 1/1 (100%) compliant, exit 0, the literal
+    `F-049-7` pattern on a Promise-idiomatic method name. A real parser has
+    no such confusion: `catch` in method-name position is a
+    `property_identifier`, not the `catch` keyword.
+
+    Hand computation: the class is at module depth 0, so its members are
+    discovered at depth 1 and each method's own body starts at depth 2
+    (mirrors the existing Python class-method convention -- see
+    `test_python_compliant_function_passes`-adjacent class fixtures in this
+    module's history). `catch` holds 5 statements (`const a0`..`a4`) -> 5
+    executable lines, depth 2, PASS. `if`/`for`/`while` each hold 1
+    statement -> 1 executable line, depth 2, PASS. None is silently
+    skipped -- the whole point of this family.
+    """
+    source = (
+        "class Deferred {\n"
+        "  catch(onRejected) {\n"
+        "    const a0 = 0;\n"
+        "    const a1 = 1;\n"
+        "    const a2 = 2;\n"
+        "    const a3 = 3;\n"
+        "    const a4 = 4;\n"
+        "  }\n"
+        "  if(x) {\n"
+        "    return x;\n"
+        "  }\n"
+        "  for(x) {\n"
+        "    return x;\n"
+        "  }\n"
+        "  while(x) {\n"
+        "    return x;\n"
+        "  }\n"
+        "}\n"
+    )
+    path = tmp_path / "control_keyword_methods.js"
+    path.write_text(source, encoding="utf-8")
+
+    units = qa.scan_js_file(path, qa._load_grammars())
+
+    by_name = {u.name: u for u in units}
+    assert set(by_name) == {"catch", "if", "for", "while"}
+    assert (by_name["catch"].executable_lines, by_name["catch"].max_depth) == (5, 2)
+    for name in ("if", "for", "while"):
+        assert (by_name[name].executable_lines, by_name[name].max_depth) == (1, 2)
+    assert all(u.status == "PASS" for u in units)
+
+
+def test_family5_regex_literal_with_quotes_does_not_desync_masking(tmp_path: Path) -> None:
+    """Sprint 050 finding: a regex literal containing a quote character
+    (`/^["']|["']$/g`) desynced the heuristic's naive quote-tracking state
+    across the rest of the file, silently erasing every later function from
+    the register (`total scanned: 0`, exit 0). Tree-sitter parses a regex
+    literal as its own `regex` node, never touching string-tracking state,
+    so nothing after it can be masked away.
+
+    Hand computation: `afterRegex` holds 51 `const` statements -> 51
+    executable lines (> 50), depth 1 -> FAIL, correctly measured and
+    reported, not silently dropped.
+    """
+    statements = "\n  ".join(f"const a{i} = {i};" for i in range(51))
+    regex_line = "const RE = /^[\"']|[\"']$/g;\n"  # the exact SPRINT_LOG desync trigger
+    source = regex_line + f"function afterRegex() {{\n  {statements}\n}}\n"
+    path = tmp_path / "regex_desync.js"
+    path.write_text(source, encoding="utf-8")
+
+    units = qa.scan_js_file(path, qa._load_grammars())
+
+    assert len(units) == 1  # only afterRegex -- RE is a plain variable, not a unit
+    assert units[0].name == "afterRegex"
+    assert (units[0].executable_lines, units[0].status) == (51, "FAIL")
+
+
+# --------------------------------------------------------------------------
+# .ts / .tsx grammar selection (`D3`): distinct grammars from plain JS.
+# --------------------------------------------------------------------------
+
+
+def test_ts_file_uses_the_typescript_grammar(tmp_path: Path) -> None:
+    """A `.ts` file with type annotations parses cleanly under the
+    TypeScript grammar (the plain JS grammar rejects type syntax)."""
+    source = "function typed(a: number, b: number): number {\n  return a + b;\n}\n"
+    path = tmp_path / "typed.ts"
+    path.write_text(source, encoding="utf-8")
+
+    units = qa.scan_js_file(path, qa._load_grammars())
+
+    assert len(units) == 1
+    assert units[0].status == "PASS"
+    assert units[0].executable_lines == 1
+
+
+def test_tsx_file_uses_the_tsx_grammar(tmp_path: Path) -> None:
+    """A `.tsx` file with JSX parses cleanly under the TSX grammar."""
+    source = (
+        "function Component(props: { name: string }) {\n"
+        "  return <div>{props.name}</div>;\n"
+        "}\n"
+        "const Arrow = () => <span>hi</span>;\n"
+    )
+    path = tmp_path / "component.tsx"
+    path.write_text(source, encoding="utf-8")
+
+    units = qa.scan_js_file(path, qa._load_grammars())
+
+    assert len(units) == 2
+    by_name = {u.name: u for u in units}
+    assert by_name["Component"].status == "PASS"
+    assert by_name["Arrow"].status == "PASS"
+    assert by_name["Arrow"].executable_lines == 1  # expression-bodied JSX arrow
+
+
+# --------------------------------------------------------------------------
+# Threshold boundaries (`D3`): 50 vs 51 executable lines; depth 3 vs 4.
+# --------------------------------------------------------------------------
+
+
+def test_js_50_executable_lines_passes_51_fails(tmp_path: Path) -> None:
+    """Exact boundary: 50 statements PASS, 51 FAIL -- mirrors the Python
+    `MAX_EXECUTABLE_LINES` boundary tests above."""
+    fifty = "\n  ".join(f"const b{i} = {i};" for i in range(50))
+    ok_path = tmp_path / "fifty.js"
+    ok_path.write_text(f"app.get('/x', req => {{\n  {fifty}\n}});\n", encoding="utf-8")
+    fifty_one = "\n  ".join(f"const b{i} = {i};" for i in range(51))
+    bad_path = tmp_path / "fifty_one.js"
+    bad_path.write_text(f"app.get('/x', req => {{\n  {fifty_one}\n}});\n", encoding="utf-8")
+
+    ok_units = qa.scan_js_file(ok_path, qa._load_grammars())
+    bad_units = qa.scan_js_file(bad_path, qa._load_grammars())
+
+    assert (ok_units[0].executable_lines, ok_units[0].status) == (50, "PASS")
+    assert (bad_units[0].executable_lines, bad_units[0].status) == (51, "FAIL")
+
+
+def test_js_nesting_depth_3_passes_depth_4_fails(tmp_path: Path) -> None:
+    """Exact boundary: 2 nested `if`s -> depth 3 PASS; 3 nested `if`s ->
+    depth 4 FAIL. Hand computation (mirrors the Python `_scan_stmts`
+    convention this path deliberately reproduces): a module-level function's
+    body starts at depth 1; each nested `if`'s header is recorded at its
+    enclosing depth and its own body is one level deeper, so N nested `if`s
+    put the innermost `return` at depth `N + 1`."""
+    ok_source = (
+        "function depthOk(a, b) {\n"
+        "  if (a) {\n"
+        "    if (b) {\n"
+        "      return 1;\n"
+        "    }\n"
+        "  }\n"
+        "  return 0;\n"
+        "}\n"
+    )
+    bad_source = (
+        "function depthBad(a, b, c) {\n"
+        "  if (a) {\n"
+        "    if (b) {\n"
+        "      if (c) {\n"
+        "        return 1;\n"
+        "      }\n"
+        "    }\n"
+        "  }\n"
+        "  return 0;\n"
+        "}\n"
+    )
+    ok_path = tmp_path / "depth_ok.js"
+    ok_path.write_text(ok_source, encoding="utf-8")
+    bad_path = tmp_path / "depth_bad.js"
+    bad_path.write_text(bad_source, encoding="utf-8")
+
+    ok_units = qa.scan_js_file(ok_path, qa._load_grammars())
+    bad_units = qa.scan_js_file(bad_path, qa._load_grammars())
+
+    assert (ok_units[0].max_depth, ok_units[0].status) == (3, "PASS")
+    assert (bad_units[0].max_depth, bad_units[0].status) == (4, "FAIL")
+
+
+# --------------------------------------------------------------------------
+# UNPARSED on a genuine syntax error (`D4`) -- never silently skipped, never
+# silently compliant, and (unlike the withdrawn Sprint 050 instrument) also
+# makes `main()` exit 2 outside `--report`.
+# --------------------------------------------------------------------------
+
+
+def test_js_syntax_error_is_unparsed_and_exits_2(tmp_path: Path) -> None:
+    path = tmp_path / "broken.js"
+    path.write_text("function broken( {\n  return 1;\n", encoding="utf-8")
+
+    units = qa.scan_js_file(path, qa._load_grammars())
+
+    assert len(units) == 1
+    assert units[0].status == "unparsed"
+    assert "has_error" in units[0].reason
+    assert qa.main([str(path)]) == 2
+
+
+# --------------------------------------------------------------------------
+# Fail closed when tree_sitter cannot be imported (`D4`) -- never a silent
+# skip. Simulated via `sys.modules`, restored after each test.
+# --------------------------------------------------------------------------
+
+
+def test_missing_tree_sitter_exits_2_naming_the_install_command(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A JS/TS file in scope with `tree_sitter` unimportable -> exit 2,
+    naming `pip install -r requirements-quality.txt` (`D4`) -- never a
+    skip, never a `not_measured`/`unparsed` placeholder standing in for a
+    real answer."""
+    path = tmp_path / "sample.js"
+    path.write_text("function f() {\n  return 1;\n}\n", encoding="utf-8")
+    for name in ("tree_sitter", "tree_sitter_javascript", "tree_sitter_typescript"):
+        monkeypatch.setitem(sys.modules, name, None)  # `import X` raises ImportError
+
+    code = qa.main([str(path)])
+    err = capsys.readouterr().err
+
+    assert code == 2
+    assert "pip install -r requirements-quality.txt" in err
+
+
+def test_load_grammars_raises_tree_sitter_import_error_not_bare_import_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Unit-level check: `_load_grammars` itself raises the named
+    exception, so a caller needs one except clause (`D4`)."""
+    monkeypatch.setitem(sys.modules, "tree_sitter", None)
+
+    with pytest.raises(qa.TreeSitterImportError):
+        qa._load_grammars()
+
+
+def test_python_only_tree_never_imports_tree_sitter(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """`D5`: a tree with no JS/TS file never calls `_load_grammars` --
+    proven by making it raise if called, on a Python-only directory."""
+
+    def _must_not_be_called() -> None:
+        raise AssertionError("_load_grammars must not be called for a Python-only tree")
+
+    monkeypatch.setattr(qa, "_load_grammars", _must_not_be_called)
+    (tmp_path / "ok.py").write_text("def ok():\n    return 1\n", encoding="utf-8")
+
+    units = qa.audit([tmp_path])
+
+    assert len(units) == 1
+    assert units[0].status == "PASS"
 
 
 # --------------------------------------------------------------------------
