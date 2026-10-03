@@ -6,10 +6,10 @@ registers the custom `agents_opt` benchmark environment.
 
 from __future__ import annotations
 
-import argparse
 import os
 import sys
 from typing import Any
+
 from dotenv import load_dotenv
 
 # Ensure parent and package paths are accessible
@@ -131,9 +131,9 @@ def apply_monkeypatches(cfg: dict[str, Any]) -> None:
         cfg: The parsed configurations.
     """
     # 1. Intercept prompt loading
-    import skillopt.prompts
-    import skillopt.gradient.reflect
     import skillopt.envs.base
+    import skillopt.gradient.reflect
+    import skillopt.prompts
 
     skillopt.prompts.load_prompt = custom_load_prompt
     skillopt.gradient.reflect.load_prompt = custom_load_prompt
@@ -149,6 +149,7 @@ def apply_monkeypatches(cfg: dict[str, Any]) -> None:
         os.environ["TARGET_MODEL"] = str(cfg.get("target_model") or "gemini-1.5-flash")
 
         import skillopt.model.azure_openai as ao
+
         from skills.skillopt.scripts import gemini_backend
 
         ao.chat_optimizer = gemini_backend.chat_optimizer
