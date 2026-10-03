@@ -9,15 +9,18 @@ from __future__ import annotations
 import logging
 import os
 from typing import Any
+
 import google.generativeai as genai
 from skillopt.model.common import CompatAssistantMessage, tracker
+
+logger = logging.getLogger(__name__)
 
 
 def _init_client() -> None:
     """Configures the google.generativeai client using env keys."""
     api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if not api_key:
-        logging.warning("No GEMINI_API_KEY or GOOGLE_API_KEY found in environment.")
+        logger.warning("No GEMINI_API_KEY or GOOGLE_API_KEY found in environment.")
     genai.configure(api_key=api_key)
 
 
@@ -84,7 +87,7 @@ def _handle_gemini_retry_error(error: Exception, attempt: int, max_retries: int)
     if not _is_retryable_gemini_error(err_str):
         raise error
     sleep_time = 62
-    logging.warning(
+    logger.warning(
         "Gemini API rate limit (429) hit. Retrying in %d seconds... (Attempt %d/%d). Error: %s",
         sleep_time,
         attempt + 1,
@@ -124,10 +127,10 @@ def _call_gemini(
                 generation_config={"temperature": 0.0}
             )
             break
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001  # SDK boundary: _handle_gemini_retry_error re-raises every non-rate-limit error unchanged
             _handle_gemini_retry_error(e, attempt, max_retries)
     else:
-        raise Exception("Max retries exceeded for Gemini API call due to rate limits.")
+        raise RuntimeError("Max retries exceeded for Gemini API call due to rate limits.")
 
     # Extract token usage
     usage = response.usage_metadata if response else None
