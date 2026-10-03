@@ -34,7 +34,7 @@ the mode, and a module named for one question is the wrong place to answer the
 other.
 
 invoked_by: scripts/submodule_purity.py, scripts/session_probe.py,
-scripts/install.py, scripts/sync_agents_pin.py.
+scripts/install.py, scripts/sync_agents_pin.py, hooks/on_commit.py.
 
 Usage:
     from _mode import is_nucleus
