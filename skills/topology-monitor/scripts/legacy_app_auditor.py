@@ -1,7 +1,7 @@
-import os
-import re
-import sys
+#!/usr/bin/env python3
 import json
+import os
+import sys
 from pathlib import Path
 
 # 🛡️ Hybrid Structural Auditor (Repo & Project Mode)
