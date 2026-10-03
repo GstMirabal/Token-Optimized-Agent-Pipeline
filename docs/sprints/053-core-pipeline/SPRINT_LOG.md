@@ -61,6 +61,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 
 | Gate | Round | Verdict | Class | Notes |
 | :--- | :--- | :--- | :--- | :--- |
+| QA Agent (Gate 1) | 1 | REJECTED | charter | `D3` unmet: JS/TS scanner credits comment-only body rows as executable lines (`withComments` = 5, `D3` gives 2); ruff 0, quality_audit 0, Waves A/C/D otherwise verified. Observations: nested-function rows also counted in the enclosing unit (O1); `.mjs`/`.cjs` missing from `agents.md §1` (O4); `_mode.py` `invoked_by:` omits `hooks/on_commit.py` (O5); second commits on `env.py`/`gemini_backend.py` keep a logged broad `except Exception` (O3). |
 
 ---
 
