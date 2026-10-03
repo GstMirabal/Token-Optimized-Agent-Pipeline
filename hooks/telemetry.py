@@ -26,7 +26,7 @@ def log_error(hook_name: str, error_type: str, details: str):
             data = json.load(f)
         
         data.append({
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now().isoformat(),  # noqa: DTZ005  # naive local time is the existing log format; tz-aware would change recorded values
             "hook": hook_name,
             "type": error_type,
             "details": details
@@ -34,5 +34,5 @@ def log_error(hook_name: str, error_type: str, details: str):
         
         with open(TELEMETRY_PATH, "w") as f:
             json.dump(data, f, indent=2)
-    except Exception as e:
+    except (OSError, ValueError, AttributeError) as e:  # unreadable/corrupt/non-list log
         print(f"⚠️ [TELEMETRY] Failed to log error: {e}")
