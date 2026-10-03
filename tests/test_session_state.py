@@ -17,8 +17,7 @@ import pytest
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
-import session_state as ss  # noqa: E402
-
+import session_state as ss
 
 # --- fixtures ------------------------------------------------------------
 
