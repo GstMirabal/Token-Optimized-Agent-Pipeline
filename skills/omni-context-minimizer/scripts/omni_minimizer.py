@@ -1,6 +1,7 @@
-import sys
-import re
 import ast
+import re
+import sys
+
 
 def _print_node_line(node: ast.AST, lines: list[str]) -> None:
     """Prints the source line for one AST node's header.
@@ -60,7 +61,7 @@ def parse_python_ast(filepath):
 
     try:
         tree = ast.parse(source)
-    except Exception as e:
+    except (SyntaxError, ValueError, RecursionError) as e:
         print(f"[ERROR] Failed to parse Python AST: {e}")
         return
 
@@ -169,8 +170,8 @@ def parse_file(filepath):
             parse_python_ast(filepath)
         else:
             parse_heuristic(filepath)
-    except Exception as e:
-        print(f"[ERROR]: Failed to process file {filepath} - {str(e)}")
+    except (OSError, SyntaxError, ValueError, RecursionError) as e:
+        print(f"[ERROR]: Failed to process file {filepath} - {e!s}")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
