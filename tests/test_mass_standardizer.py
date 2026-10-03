@@ -65,7 +65,7 @@ import pytest
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = ROOT / "skills" / "mass-standardizer" / "scripts" / "mass_standardizer.py"
 sys.path.insert(0, str(SCRIPT.parent))
-import mass_standardizer as ms  # noqa: E402
+import mass_standardizer as ms
 
 VENDORED_BODY = "---\nname: vendored\ndescription: The real skill.\n---\n\n# Vendored\n"
 
