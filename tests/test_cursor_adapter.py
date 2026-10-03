@@ -10,7 +10,7 @@ import pytest
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
-import cursor_adapter as ca  # noqa: E402
+import cursor_adapter as ca
 
 
 def test_commands_stale_true_when_dest_digest_mismatch(tmp_path: Path) -> None:
