@@ -13,6 +13,15 @@ from typing import Any
 from skillopt.datasets.base import SplitDataLoader
 
 
+class DatasetShapeError(TypeError, ValueError):
+    """Raised when a dataset file holds a JSON value of the wrong type.
+
+    Subclasses both `TypeError` (the semantically correct class for an invalid
+    type) and `ValueError` (what callers caught before this class existed), so
+    existing `except ValueError` handlers keep working.
+    """
+
+
 def _normalize_item(raw: dict[str, Any]) -> dict[str, Any]:
     """Normalizes a raw data item into the expected format for SkillOpt."""
     return {
@@ -33,12 +42,12 @@ def _load_first_json_array(json_file: Path) -> list[dict[str, Any]]:
         The normalized items from the JSON array.
 
     Raises:
-        ValueError: If the JSON top-level value is not a list.
+        DatasetShapeError: If the JSON top-level value is not a list.
     """
     with json_file.open(encoding="utf-8") as f:
         payload = json.load(f)
     if not isinstance(payload, list):
-        raise ValueError(
+        raise DatasetShapeError(
             f"Expected JSON array at top level of {json_file}"
         )
     return [_normalize_item(row) for row in payload]
@@ -58,7 +67,7 @@ class AgentsOptDataLoader(SplitDataLoader):
             data = json.load(f)
 
         if not isinstance(data, list):
-            raise ValueError(f"Expected a JSON list of items, got {type(data)}")
+            raise DatasetShapeError(f"Expected a JSON list of items, got {type(data)}")
 
         return [_normalize_item(item) for item in data]
 
