@@ -12,7 +12,7 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
-import loop_guard as lg  # noqa: E402
+import loop_guard as lg
 
 
 @pytest.fixture
@@ -156,7 +156,7 @@ def _cli(repo: Path, *args: str) -> int:
     """Run the script as a process, which is how every caller reaches it."""
     return subprocess.run(
         [sys.executable, str(Path(lg.__file__).resolve()), *args],
-        cwd=repo, capture_output=True, text=True,
+        cwd=repo, capture_output=True, text=True, check=False,
     ).returncode
 
 
