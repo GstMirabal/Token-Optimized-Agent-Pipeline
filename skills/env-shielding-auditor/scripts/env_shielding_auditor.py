@@ -3,9 +3,12 @@
 Agnostic security check script for avoiding PII leaks and hardcoded secrets.
 """
 
+import logging
 import os
 import re
 from collections.abc import Iterable, Iterator
+
+logger = logging.getLogger(__name__)
 
 # Secret Patterns (High-level samples)
 SECRET_PATTERNS = {
@@ -153,9 +156,9 @@ def _find_leaks_in_file(file_path: str) -> list[str]:
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             return _leaks_in_lines(file_path, f)
-    except Exception as e:
-        # Silently skip unreadable files
-        pass
+    except (OSError, ValueError) as exc:
+        # Unreadable or undecodable files are skipped, not fatal.
+        logger.debug("Skipping unreadable file %s: %s", file_path, exc)
     return []
 
 
@@ -190,7 +193,7 @@ def check_gitignore():
     return _check_env_in_gitignore(content)
 
 def main():
-    print(f"🚀 Initializing Environment Shielding Audit...")
+    print("🚀 Initializing Environment Shielding Audit...")
     
     # Gitignore Validation
     check_gitignore()
