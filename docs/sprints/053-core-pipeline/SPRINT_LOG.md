@@ -22,7 +22,7 @@ Tracking of atomic goals achieved during the session.
 - [x] **Wave B**: JS/TS complexity instrument (B1-B5)
 - [x] **Wave C**: ruff to exit `0` and into `make verify` (C01-C56) — 55 units landed, `C03` withdrawn (its ordering note has been in `workflows/repository_hardening_workflow.md:44` since `10df9cd`, Sprint 048); `ruff check .` 176 → 0; 0 units converted to `fix(`; 3 of 10 `# noqa` used (table below)
     - `# noqa` register (`D8`): `hooks/telemetry.py:29` `DTZ005` — naive local timestamp is the recorded log format · `skills/slash-commander/__init__.py:1` `N999` — hyphenated skill directory name required by the Three-File Standard · `skills/slash-commander/scripts/__init__.py:1` `N999` — same
-- [ ] **Wave D**: governance and roadmap records (D01-D02)
+- [x] **Wave D**: governance and roadmap records (D01-D02) — D01 `ce4d31e` (`agents.md §1`), D02 `efad313` (programme queue; routes `KI-053-1`)
 
 ---
 
