@@ -18,20 +18,22 @@ Exit codes:
         ``sys.exit(2)``.
 """
 
-import subprocess
-import sys
 import itertools
 import json
+import logging
 import re
-from datetime import datetime
+import subprocess
+import sys
 from pathlib import Path
 
-import sys
 # Add parent directory to path so 'hooks' module can be found if run directly
 sys.path.append(str(Path(__file__).parent.parent))
 sys.path.append(str(Path(__file__).parent.parent / "scripts"))
-from hooks.telemetry import log_error
 from _mode import is_nucleus
+
+from hooks.telemetry import log_error
+
+logger = logging.getLogger(__name__)
 
 def get_staged_files() -> list[str]:
     """Retrieves the list of files staged for the current commit."""
@@ -652,8 +654,9 @@ def _scan_file_for_secrets(file_path: str) -> str | None:
                 "`# secret-scan: allow <reason>` to that line — the reason "
                 "is required and the waiver is printed on every commit."
             )
-    except Exception:
-        # Skip binary files or git errors
+    except (subprocess.CalledProcessError, OSError, ValueError) as exc:
+        # Skip binary files (UnicodeDecodeError is a ValueError) or git errors.
+        logger.debug("secret scan skipped %s: %s", file_path, exc)
         return None
 
     return None
@@ -815,7 +818,7 @@ def newly_added_dependencies(manifests: list[str], ref: str = "--cached") -> set
     """
     diff = subprocess.run(
         ["git", "diff", ref, "-U0", "--"] + manifests,
-        capture_output=True, text=True,
+        capture_output=True, text=True, check=False,
     )
     if diff.returncode != 0:
         return set()
@@ -1000,7 +1003,9 @@ def audit_submodule_purity() -> str | None:
         # A missing check is reported by RA-16's invocation coverage, not
         # silently treated as a pass here.
         return None
-    result = subprocess.run([sys.executable, str(script)], capture_output=True, text=True)
+    result = subprocess.run(
+        [sys.executable, str(script)], capture_output=True, text=True, check=False
+    )
     if result.returncode == 0:
         return None
     return (result.stderr.strip() or
