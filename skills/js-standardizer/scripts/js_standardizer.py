@@ -3,10 +3,12 @@
 Agnostic health-check script for JS/TS repositories to ensure framework compliance.
 """
 
-import json
+import logging
 import os
-import subprocess
 from collections.abc import Iterator
+
+logger = logging.getLogger(__name__)
+
 
 def _should_skip_dir(root: str) -> bool:
     """Reports whether a walked directory is an excluded build/tooling path.
@@ -57,16 +59,15 @@ def _file_has_jsdoc(file_path: str) -> bool:
 
     Returns:
         True when the file content contains `@param` or `@returns`, False
-        otherwise, including when the file cannot be read. The bare
-        `except:` below is pre-existing (ruff `E722`) and is Sprint 054's
-        scope; preserved unchanged here per the Sprint 052 refactor charter.
+        otherwise, including when the file cannot be read (the read error
+        is logged at debug level).
     """
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
         return "@param" in content or "@returns" in content
-    except:
-        pass
+    except (OSError, ValueError) as exc:
+        logger.debug("Skipping unreadable file %s: %s", file_path, exc)
     return False
 
 
@@ -81,8 +82,7 @@ def check_jsdoc(directory):
     return jsdoc_found
 
 def main():
-    root_path = os.getcwd()
-    print(f"🚀 Initializing JS/TS Standardization Audit...")
+    print("🚀 Initializing JS/TS Standardization Audit...")
 
     # Ecosystem Discovery
     ecosystem = {
