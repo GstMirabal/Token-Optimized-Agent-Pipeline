@@ -83,7 +83,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from hooks.state_mirror import mirror_active_state  # noqa: E402
+from hooks.state_mirror import mirror_active_state
 
 ACTIVE_STATE = Path("docs/active_state.json")
 CHANGELOG = Path("CHANGELOG.md")
@@ -119,7 +119,7 @@ def generate_session_id() -> str:
 def head_sha() -> str | None:
     """Current commit, or None outside a repository."""
     result = subprocess.run(
-        ["git", "rev-parse", "HEAD"], capture_output=True, text=True
+        ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=False
     )
     return result.stdout.strip() if result.returncode == 0 else None
 
@@ -150,7 +150,7 @@ def resume_pointer() -> dict:
 def git_branch() -> str | None:
     """The checked-out branch, or None on a detached HEAD."""
     result = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"],
-                            capture_output=True, text=True)
+                            capture_output=True, text=True, check=False)
     return result.stdout.strip() if result.returncode == 0 else None
 
 
@@ -374,6 +374,7 @@ def rev_parse(ref: str) -> str | None:
         ["git", "rev-parse", "--verify", ref],
         capture_output=True,
         text=True,
+        check=False,
     )
     return result.stdout.strip() if result.returncode == 0 else None
 
