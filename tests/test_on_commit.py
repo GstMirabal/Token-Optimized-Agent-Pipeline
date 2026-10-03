@@ -10,7 +10,6 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from hooks import on_commit
 
-
 # --- RA-12 push guard -------------------------------------------------------
 
 @pytest.mark.parametrize("command", [
