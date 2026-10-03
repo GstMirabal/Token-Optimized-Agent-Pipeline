@@ -24,7 +24,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _root import agents_root  # noqa: E402
+from _root import agents_root
 
 SKILLS_DIR = Path("skills")
 MANIFEST = SKILLS_DIR / "manifest_skills.json"
