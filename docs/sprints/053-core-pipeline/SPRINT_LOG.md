@@ -17,10 +17,11 @@
 ## 🏁 Sprint Progression
 Tracking of atomic goals achieved during the session.
 
-- [ ] **Wave A**: seal vocabulary and deploy-unlock marker path (A1-A4)
-    - `[ ]` A1 `scripts/session_state.py` · A2 `scripts/session_probe.py` · A3 `hooks/on_commit.py` · A4 `workflows/deployment_workflow.md`
-- [ ] **Wave B**: JS/TS complexity instrument (B1-B5)
-- [ ] **Wave C**: ruff to exit `0` and into `make verify` (C01-C56)
+- [x] **Wave A**: seal vocabulary and deploy-unlock marker path (A1-A4)
+    - `[x]` A1 `scripts/session_state.py` · A2 `scripts/session_probe.py` · A3 `hooks/on_commit.py` · A4 `workflows/deployment_workflow.md`
+- [x] **Wave B**: JS/TS complexity instrument (B1-B5)
+- [x] **Wave C**: ruff to exit `0` and into `make verify` (C01-C56) — 55 units landed, `C03` withdrawn (its ordering note has been in `workflows/repository_hardening_workflow.md:44` since `10df9cd`, Sprint 048); `ruff check .` 176 → 0; 0 units converted to `fix(`; 3 of 10 `# noqa` used (table below)
+    - `# noqa` register (`D8`): `hooks/telemetry.py:29` `DTZ005` — naive local timestamp is the recorded log format · `skills/slash-commander/__init__.py:1` `N999` — hyphenated skill directory name required by the Three-File Standard · `skills/slash-commander/scripts/__init__.py:1` `N999` — same
 - [ ] **Wave D**: governance and roadmap records (D01-D02)
 
 ---
@@ -31,6 +32,8 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | Friction Point | Resolution / Workaround | KI ID |
 | :--- | :--- | :--- |
 | Programme queue recorded the ruff baseline as 190 findings; the measurement on `3c6d341` is 176 | Plan Context P4 carries the command that reproduces 176; queue row corrected in D02 | — |
+| `C03` planned a note that Sprint 048 had already restored; the plan was drafted from the queue row without reading the target file | Unit withdrawn, identifier retained (`RA-14`); D02 marks `KI-047-5` delivered by `10df9cd` for its second half | — |
+| Ruff 0.16.3 with no config enables a curated set of 413 individual codes, not whole prefixes | `ruff.toml` `select` lists the 413 codes verbatim, so the pin reproduces the baseline exactly (`D6`) | — |
 
 ---
 
