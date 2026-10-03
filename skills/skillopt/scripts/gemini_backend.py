@@ -127,7 +127,8 @@ def _call_gemini(
                 generation_config={"temperature": 0.0}
             )
             break
-        except Exception as e:  # noqa: BLE001  # SDK boundary: _handle_gemini_retry_error re-raises every non-rate-limit error unchanged
+        except Exception as e:
+            logger.debug("Gemini call attempt %d failed", attempt + 1, exc_info=True)
             _handle_gemini_retry_error(e, attempt, max_retries)
     else:
         raise RuntimeError("Max retries exceeded for Gemini API call due to rate limits.")
