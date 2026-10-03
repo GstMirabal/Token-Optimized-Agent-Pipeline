@@ -11,7 +11,7 @@ import pytest
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
-import audit_cursor_models as acm  # noqa: E402
+import audit_cursor_models as acm
 
 MINIMAL_TIERS: dict[str, Any] = {
     "tiers": {
