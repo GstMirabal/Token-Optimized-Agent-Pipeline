@@ -26,7 +26,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
-import ci_gate  # noqa: E402
+import ci_gate
 
 REQUIRED = {"audit", "Analyze (python)", "CodeQL"}
 SLUG = "owner/name"
