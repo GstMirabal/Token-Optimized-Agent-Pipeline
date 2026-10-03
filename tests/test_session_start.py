@@ -100,24 +100,20 @@ def test_upstream_open_entries_counts_the_canonical_marker(
     names all six in a single cell (Sprint 051's shape) → briefing must
     report `6`, not `1`. Fails against the pre-fix Still-open-row counter.
     """
-    body = "\n".join(
-        [
-            "**Status at Sprint 051 (2026-09-23).**",
-            "",
-            "| | |",
-            "| :--- | :--- |",
-            (
-                "| **Still open** | Six, each with its own entry below: "
-                "F-1, F-2, F-3, F-4, F-5, F-6 |"
-            ),
-            "",
-            "### - [ ] `F-1` — open finding one",
-            "### - [ ] `F-2` — open finding two",
-            "### - [ ] `F-3` — open finding three",
-            "### - [ ] `F-4` — open finding four",
-            "### - [ ] `F-5` — open finding five",
-            "### - [ ] `F-6` — open finding six",
-        ]
+    body = (
+        "**Status at Sprint 051 (2026-09-23).**\n"
+        "\n"
+        "| | |\n"
+        "| :--- | :--- |\n"
+        "| **Still open** | Six, each with its own entry below: "
+        "F-1, F-2, F-3, F-4, F-5, F-6 |\n"
+        "\n"
+        "### - [ ] `F-1` — open finding one\n"
+        "### - [ ] `F-2` — open finding two\n"
+        "### - [ ] `F-3` — open finding three\n"
+        "### - [ ] `F-4` — open finding four\n"
+        "### - [ ] `F-5` — open finding five\n"
+        "### - [ ] `F-6` — open finding six"
     )
     root = _write_minimal_root(tmp_path / "repo", upstream_body=body)
     section = "\n".join(session_start.section_upstream(root))
@@ -128,12 +124,10 @@ def test_upstream_open_entries_excludes_closed_markers(
     session_start, tmp_path: Path
 ) -> None:
     """`### - [x]` (closed) entries must not inflate the open count."""
-    body = "\n".join(
-        [
-            "### - [ ] `F-1` — open finding",
-            "### - [x] `F-2` — closed finding",
-            "### - [x] `F-3` — closed finding",
-        ]
+    body = (
+        "### - [ ] `F-1` — open finding\n"
+        "### - [x] `F-2` — closed finding\n"
+        "### - [x] `F-3` — closed finding"
     )
     root = _write_minimal_root(tmp_path / "repo", upstream_body=body)
     section = "\n".join(session_start.section_upstream(root))
