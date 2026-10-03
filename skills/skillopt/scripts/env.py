@@ -102,8 +102,8 @@ def _grade_via_judge(question: str, gold: str, pred: str) -> tuple[int, float, s
             soft = float(eval_json.get("soft", 0.0))
             reason = eval_json.get("reasoning", "")
             return hard, soft, reason
-    except Exception as e:  # noqa: BLE001  # external model/SDK boundary: provider exception set is not importable here; failure is logged and scored as 0
-        logger.error("Grading prediction failed: %s", e)
+    except Exception:
+        logger.exception("Grading prediction failed")
     return 0, 0.0, "Grading process encountered an error."
 
 
@@ -273,8 +273,8 @@ class AgentsOptEnv(EnvAdapter):
                 stage="target_rollout",
             )
             return pred_answer
-        except Exception as e:  # noqa: BLE001  # external model/SDK boundary: provider exception set is not importable here; failure is logged and returns ""
-            logger.error("Target model execution failed: %s", e)
+        except Exception:
+            logger.exception("Target model execution failed")
             return ""
 
     def _grade_prediction(self, question: str, gold: str, pred: str) -> tuple[int, float, str]:
