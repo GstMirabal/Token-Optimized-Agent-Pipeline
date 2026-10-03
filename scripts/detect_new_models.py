@@ -71,7 +71,7 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _root import agents_root  # noqa: E402
+from _root import agents_root
 
 TIERS_FILE = agents_root() / "config" / "model_tiers.json"
 
@@ -179,7 +179,7 @@ def resolve(family: str, catalogue: dict[str, dict]) -> tuple[str, dict] | None:
     matches = {a: m for a, m in catalogue.items() if a.startswith(f"claude-{family}")}
     if not matches:
         return None
-    newest = sorted(matches)[-1]
+    newest = max(matches)
     return newest, matches[newest]
 
 
