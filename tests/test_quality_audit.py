@@ -361,18 +361,18 @@ def test_family3_nested_method_depth_in_returned_object_is_not_lost(tmp_path: Pa
 
     Hand computation: `makeIter` is an expression-bodied arrow at module
     depth 0 -> fixed size 1, own depth = 0 + 1 = 1 (D3), regardless of what
-    is nested inside the returned object. The computed-key method
-    `[Symbol.iterator]` is discovered inside that expression at the arrow's
-    own depth (0, since discovery through `parenthesized_expression`/
-    `object` does not increment depth) -> its body starts at depth 1. Its
-    body has one statement, `for (const x of arr) {...}`, at depth 1
-    (header line credited, depth_box=1); `if (x) {...}` nested inside, at
-    depth 2 (header line, depth_box=2); `while (x) {...}` nested inside
-    that, at depth 3 (header line, depth_box=3); `break;` inside the while,
-    at depth 4 (depth_box=4). Four distinct header/leaf rows -> 4 executable
-    lines, max depth 4 (violates the JS/TS `D3` limit of 3, mirroring the
-    Python `max_indentation` threshold) -- FAIL, not the old bogus
-    `depth=1 PASS`.
+    is nested inside the returned object. Discovery of the returned
+    expression starts at the arrow's body level (depth 1), because the arrow
+    is an ancestor of everything inside it. The computed-key method
+    `[Symbol.iterator]` is therefore found at depth 1 and its body starts at
+    depth 2. Its one statement, `for (const x of arr) {...}`, sits at depth 2
+    (header line credited, depth_box=2); `if (x) {...}` nested inside, at
+    depth 3 (header line, depth_box=3); `while (x) {...}` nested inside that,
+    at depth 4 (header line, depth_box=4); `break;` inside the while, at
+    depth 5 (depth_box=5) -- its ancestors are arrow, method, for, if, while.
+    Four distinct header/leaf rows -> 4 executable lines, max depth 5
+    (violates the JS/TS `D3` limit of 3, mirroring the Python
+    `max_indentation` threshold) -- FAIL, not the old bogus `depth=1 PASS`.
     """
     source = (
         "const makeIter = (arr) => ({\n"
