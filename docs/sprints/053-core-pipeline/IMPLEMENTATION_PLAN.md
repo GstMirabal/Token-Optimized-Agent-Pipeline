@@ -219,7 +219,7 @@ boundary: a cycle past 15× ends the session at the next unit boundary.
 | `venv_skillopt/bin/ruff check .; echo $?` | `All checks passed!`, `0` |
 | `venv_skillopt/bin/ruff --version` | `ruff 0.16.3` |
 | `venv_skillopt/bin/python scripts/quality_audit.py .; echo $?` | `0` |
-| `venv_skillopt/bin/python scripts/quality_audit.py tests/fixtures/<js corpus dir> --report` | every corpus unit measured, none `NOT_MEASURED` |
+| `venv_skillopt/bin/python -m pytest tests/test_quality_audit.py -q -k "family or js or ts"; echo $?` | `0` — every corpus unit measured, none `NOT_MEASURED` |
 | `make verify; echo $?` | `0`, with the ruff and quality-audit lines present in its output |
 | `grep -n '"CLOSED"' scripts/session_probe.py` | no match |
 | `grep -n 'DEPLOY_UNLOCK = Path(".agents' hooks/on_commit.py` | no match |
@@ -227,7 +227,7 @@ boundary: a cycle past 15× ends the session at the next unit boundary.
 | `python3 scripts/check_task_scope.py --sprint-dir docs/sprints/053-core-pipeline; echo $?` | `0` |
 | `git -C . status --porcelain` after `make verify` | empty |
 
-The corpus directory path is fixed at B4 and written into this row before Phase 7.
+The corpus has no fixture directory: B4 (`4585778`, `04e96c8`) writes each family's source inline to pytest's `tmp_path` (`tests/test_quality_audit.py` module docstring), so the corpus row runs the family tests rather than `quality_audit.py --report` over a path. Fixed before Phase 7.
 
 ---
 
