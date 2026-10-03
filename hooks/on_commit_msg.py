@@ -26,13 +26,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from hooks.on_commit import (  # noqa: E402
+from hooks.on_commit import (
     audit_dependency_justification,
     audit_regression_test,
     get_staged_files,
     is_valid_commit_message,
 )
-from hooks.telemetry import log_error  # noqa: E402
+from hooks.telemetry import log_error
 
 
 def strip_comments(raw: str) -> str:
