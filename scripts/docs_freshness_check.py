@@ -25,7 +25,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _root import agents_root  # noqa: E402
+from _root import agents_root
 
 GRAPH_JSON = Path("graphify-out/graph.json")
 DENYLIST_LANGUAGES = {"python", "js", "go"}
@@ -341,7 +341,7 @@ def percentile(sorted_values: list[float], pct: float) -> float:
     """Nearest-rank percentile over an already-sorted list."""
     if not sorted_values:
         return 0.0
-    index = min(len(sorted_values) - 1, int(round((pct / 100) * (len(sorted_values) - 1))))
+    index = min(len(sorted_values) - 1, round((pct / 100) * (len(sorted_values) - 1)))
     return sorted_values[index]
 
 
