@@ -554,9 +554,11 @@ def _scan_node(node: Node, depth: int, path: Path, out: list[Unit], acc: Acc | N
     discovery and enclosing-unit measurement are the same walk, not two
     passes.
     """
+    node_type = node.type
+    if node_type == "comment":
+        return  # `D3`: comment-only rows are not executable and open no unit
     if acc is not None:
         acc[1][0] = max(acc[1][0], depth)
-    node_type = node.type
     if node_type in FUNCTION_UNIT_TYPES:
         if acc is not None:
             acc[0].add(node.start_point.row + 1)

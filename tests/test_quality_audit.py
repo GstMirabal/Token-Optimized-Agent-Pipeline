@@ -579,6 +579,108 @@ def test_js_nesting_depth_3_passes_depth_4_fails(tmp_path: Path) -> None:
 
 
 # --------------------------------------------------------------------------
+# Comment-only and blank rows are not executable (`D3`): "rows covered by
+# statement nodes of the body, excluding comment-only and blank rows".
+# --------------------------------------------------------------------------
+
+
+def _measure_js_function(tmp_path: Path, source: str, name: str) -> int:
+    path = tmp_path / f"{name}.js"
+    path.write_text(source, encoding="utf-8")
+    units = {u.name: u for u in qa.scan_js_file(path, qa._load_grammars())}
+    return units[name].executable_lines
+
+
+def test_js_comment_and_blank_rows_in_function_body_are_not_executable(tmp_path: Path) -> None:
+    """Hand derivation (`D3`): rows 2-4 are `//` comment-only, row 6 is
+    blank; the statement rows are row 5 (`const a = 1;`) and row 7
+    (`return a;`) -> 2 executable lines. The defect measured 5 (the three
+    comment rows were credited as statement rows)."""
+    source = (
+        "function withComments(){\n"
+        "  // c1\n"
+        "  // c2\n"
+        "  // c3\n"
+        "  const a = 1;\n"
+        "\n"
+        "  return a;\n"
+        "}\n"
+    )
+    assert _measure_js_function(tmp_path, source, "withComments") == 2
+
+
+def test_js_comment_and_blank_rows_in_switch_case_are_not_executable(tmp_path: Path) -> None:
+    """Hand derivation (`D3`): row 2 is the `switch` header row (a block
+    header is one statement row); rows 3 and 7 (`case 1:`/`default:`) are
+    labels, not statements; row 4 (`//`), row 5 (blank) and rows 8-9 (a
+    two-row `/* */`) are not executable; statement rows are 6 (`return 1;`)
+    and 10 (`return 0;`) -> rows {2, 6, 10} = 3."""
+    source = (
+        "function sw(x) {\n"
+        "  switch (x) {\n"
+        "    case 1:\n"
+        "      // note\n"
+        "\n"
+        "      return 1;\n"
+        "    default:\n"
+        "      /* a\n"
+        "         b */\n"
+        "      return 0;\n"
+        "  }\n"
+        "}\n"
+    )
+    assert _measure_js_function(tmp_path, source, "sw") == 3
+
+
+def test_js_comment_and_blank_rows_in_catch_block_are_not_executable(tmp_path: Path) -> None:
+    """Hand derivation (`D3`): row 2 is the `try` header row, row 3 is
+    `risky();`, row 4 is the `} catch (e) {` clause row (not a statement
+    row), row 5 (`//`) and row 6 (blank) are not executable, row 7 is
+    `log(e);` -> rows {2, 3, 7} = 3. The defect credited row 5 -> 4."""
+    source = (
+        "function ct() {\n"
+        "  try {\n"
+        "    risky();\n"
+        "  } catch (e) {\n"
+        "    // swallow\n"
+        "\n"
+        "    log(e);\n"
+        "  }\n"
+        "}\n"
+    )
+    assert _measure_js_function(tmp_path, source, "ct") == 3
+
+
+def test_js_multirow_block_comment_in_function_body_is_not_executable(tmp_path: Path) -> None:
+    """Hand derivation (`D3`): rows 2-4 are one `/* ... */` spanning three
+    rows, none a statement row; statement rows are 5 (`const a = 1;`) and 6
+    (`return a;`) -> 2."""
+    source = (
+        "function blk() {\n"
+        "  /* a\n"
+        "     b\n"
+        "     c */\n"
+        "  const a = 1;\n"
+        "  return a;\n"
+        "}\n"
+    )
+    assert _measure_js_function(tmp_path, source, "blk") == 2
+
+
+def test_js_trailing_comment_does_not_reduce_the_count(tmp_path: Path) -> None:
+    """Hand derivation (`D3`): rows 2 and 3 each hold a statement plus a
+    trailing comment; a row holding a statement is a statement row, so the
+    comment must not remove it -> 2."""
+    source = (
+        "function tr() {\n"
+        "  const a = 1; // trailing\n"
+        "  return a; /* t */\n"
+        "}\n"
+    )
+    assert _measure_js_function(tmp_path, source, "tr") == 2
+
+
+# --------------------------------------------------------------------------
 # UNPARSED on a genuine syntax error (`D4`) -- never silently skipped, never
 # silently compliant, and (unlike the withdrawn Sprint 050 instrument) also
 # makes `main()` exit 2 outside `--report`.
