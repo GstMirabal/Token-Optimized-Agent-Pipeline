@@ -43,6 +43,7 @@ Exit codes:
 """
 
 import argparse
+import itertools
 import json
 import sys
 from pathlib import Path
@@ -118,7 +119,7 @@ def segment_cycles(turns: list[dict]) -> list[list[dict]]:
         if previous > RESET_FLOOR and current < previous * RESET_RATIO:
             cuts.append(index)
     cuts.append(len(turns))
-    return [turns[a:b] for a, b in zip(cuts, cuts[1:]) if b > a]
+    return [turns[a:b] for a, b in itertools.pairwise(cuts) if b > a]
 
 
 def cycle_summary(cycle: list[dict]) -> dict:
