@@ -4,6 +4,8 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.36.0] - 2026-10-04
+
 ### Added
 - **Sprint 053 `quality-instruments-and-seal-defects`** — a real-parser JS/TS complexity instrument closing `KI-050-6`, the Python linter gated in `make verify` at zero findings (former Sprint 054, merged in), and two seal/deploy defects found at the Sprint 052 deployment. 67 planned units (66 landed, `C03` withdrawn) plus one Gate 1 remediation; `make verify` green, 946 tests pass. #053
   - `scripts/quality_audit.py` measures `.js`/`.jsx`/`.ts`/`.tsx`/`.mjs`/`.cjs` with `tree-sitter` grammars: executable lines and block-nesting depth per function unit, failing closed (exit `2` naming `requirements-quality.txt`) when `tree_sitter` is absent and reporting a parse error as a non-compliant `UNPARSED` unit; the Python path stays stdlib-only (`0ec6616`). The five Sprint 050 failure families are its acceptance tests (`4585778`, `04e96c8`).
