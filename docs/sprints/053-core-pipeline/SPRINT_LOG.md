@@ -65,6 +65,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 | :--- | :--- | :--- | :--- | :--- |
 | QA Agent (Gate 1) | 1 | REJECTED | charter | `D3` unmet: JS/TS scanner credits comment-only body rows as executable lines (`withComments` = 5, `D3` gives 2); ruff 0, quality_audit 0, Waves A/C/D otherwise verified. Observations: nested-function rows also counted in the enclosing unit (O1); `.mjs`/`.cjs` missing from `agents.md §1` (O4); `_mode.py` `invoked_by:` omits `hooks/on_commit.py` (O5); second commits on `env.py`/`gemini_backend.py` keep a logged broad `except Exception` (O3). |
 | QA Agent (Gate 1) | 2 | APPROVED | | B1/B2 closed by `fbbc286`: comment-only rows excluded in bodies, switch, try/catch/finally, block comments; 11 scratch fixtures match hand counts; Python `--report` identical across the sprint; ruff 0, quality_audit 0 (1700 units), 946 passed, `make verify` 0. Observations to `/agents:extract`: O1 nested-function rows, O6 comment rows inside multi-row statements (Python parity; `agents.md §1` wording wider than both paths). |
+| Tester Agent (Gate 2) | 1 | RECORD | testifying | 946 passed, `make verify` 0, tree clean; all 11 Tests rows pinned and passing at HEAD (fail-at-base confirmed in a `3c6d341` worktree); no abort criterion triggered. Recorded: R1 plan Tests row 2 claimed a base failure that does not occur (corrected in the plan); R2 HEAD `test_on_commit.py` cannot run at base (`is_nucleus` absent), behaviour checked directly; R3 commits after `05eca80` not yet run on CI Linux/3.12 — due at the close push. |
 
 ---
 

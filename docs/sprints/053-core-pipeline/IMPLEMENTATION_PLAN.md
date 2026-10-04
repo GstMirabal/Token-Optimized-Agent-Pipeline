@@ -198,7 +198,7 @@ boundary: a cycle past 15× ends the session at the next unit boundary.
 | Check | Fails against the current tree? |
 | :--- | :--- |
 | `open_sprint(54)` on an anchor whose `current_sprint.status == "CLOSED"` returns `0` | **Yes** — returns `2` today (P1) |
-| `open_sprint(54)` on an anchor whose `current_sprint` has no `status` returns `2` and the message names `release` | **Yes** — returns `2` without naming the remediation |
+| `open_sprint(54)` on an anchor whose `current_sprint` has no `status` returns `2` and the message names `release` | **No** — regression to protect. *Corrected at Phase 7 (Gate 2 R1): the original cell said "Yes — returns `2` without naming the remediation"; `3c6d341:scripts/session_state.py:550` already names `release`, and the test passes at base.* |
 | `session_probe` hygiene fires for `current_sprint.status == "CLOSED_SUCCESSFULLY"` while the anchor is `IN_PROGRESS` | **Yes** — never fires today (P1) |
 | In nucleus mode, `is_blocked_push("git push origin main")` is `False` with `./.deploy_unlock` present and `True` with only `./.agents/.deploy_unlock` present | **Yes** — inverted today (P2) |
 | In host mode, `.agents/.deploy_unlock` still unlocks | **No** — regression to protect |
