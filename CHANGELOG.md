@@ -4,6 +4,24 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Added
+- **Sprint 053 `quality-instruments-and-seal-defects`** — a real-parser JS/TS complexity instrument closing `KI-050-6`, the Python linter gated in `make verify` at zero findings (former Sprint 054, merged in), and two seal/deploy defects found at the Sprint 052 deployment. 67 planned units (66 landed, `C03` withdrawn) plus one Gate 1 remediation; `make verify` green, 946 tests pass. #053
+  - `scripts/quality_audit.py` measures `.js`/`.jsx`/`.ts`/`.tsx`/`.mjs`/`.cjs` with `tree-sitter` grammars: executable lines and block-nesting depth per function unit, failing closed (exit `2` naming `requirements-quality.txt`) when `tree_sitter` is absent and reporting a parse error as a non-compliant `UNPARSED` unit; the Python path stays stdlib-only (`0ec6616`). The five Sprint 050 failure families are its acceptance tests (`4585778`, `04e96c8`).
+  - `requirements-quality.txt` (new) pins `tree-sitter` 0.26.0, `tree-sitter-javascript` 0.25.0, `tree-sitter-typescript` 0.23.2 and `ruff` 0.16.3 (`87cb3ce`); `requirements-core.txt` includes it (`dec55bd`) and CI installs it (`392ab03`).
+  - `ruff.toml` (new) — `required-version = "==0.16.3"`, an explicit 413-code `select` reproducing the measured baseline, and `extend-exclude` for the ten vendored `skills/skill-creator/` paths (`9242d3c`), whose parity with `config/quality_audit_exclusions.json` is pinned by `tests/test_ruff_config.py` (`e7a9848`).
+  - `Makefile` `verify` runs `$(PY) -m ruff check .` and `$(PY) scripts/quality_audit.py .` (`ce80b0d`), wired last so the gate never went red on the branch.
+
+### Fixed
+- **`KI-052-2`** — two spellings of the sprint seal: `scripts/session_state.py` exports `SEALED_STATUSES` (`CLOSED_SUCCESSFULLY` plus the legacy `CLOSED` alias), and `open-sprint`'s refusal names `release` (`c90dcea`); `scripts/session_probe.py`'s hygiene check reads the same set, so it fires again (`41c8554`).
+- **`KI-052-9`** — in nucleus mode the push guard resolved the deploy-unlock marker against the host layout; `hooks/on_commit.py` now resolves it through `scripts/_mode.py` at call time (`954182c`) and `workflows/deployment_workflow.md` names both paths (`bdf64ca`).
+- JS/TS comment-only rows were counted as executable lines, against the instrument's own definition — found by QA Gate 1 round 1 (`fbbc286`).
+
+### Changed
+- **Wave C — `ruff check .` from 176 findings to 0** (158 first-party in 52 files; the 18 vendored ones excluded on human decision), one behaviour-preserving `style(lint)` commit per file, 3 inline-justified `# noqa`: `65699f4` `cb13ef6` `b2077b8` `b92a305` `3ccfd1d` `b5875aa` `e3933e2` `41feffb` `c673214` `8427da0` `fbb1d01` `1cbe9a1` `7345729` `331e2ef` `18b309d` `6181d5f` `a7b0102` `dfbc840` `88155cb` `20a615b` `0308561` `7cc71c0` `e46d3d8` `43c55ad` `9ea4d82` `74d5a74` `69e33ec` `f97118f` `52cbd5e` `f8ed63c` `3ed9cc2` `1b8882b` `17adf7d` `cde42b2` `8e44628` `e5b0fd8` `574c09f` `a490374` `baa399e` `e711828` `0a79834` `79f6f7c` `1e83304` `dc3fb1a` `77000d3` `39b31ce` `2f9f044` `6b155f4` `347067c` `0f3d5dd` `2bd1647` `dc2c0ad` `6dc82b9` `392aef8`.
+- **`agents.md §1`** — the Python `linter_command` is verified by `make verify`; the JS/TS `linter_command`, `max_indentation` and `max_lines_per_func` rows name the tree-sitter instrument, keeping the heuristic-scanner prohibition as satisfied by a real parser (`ce4d31e`, `31a0cad`).
+- `docs/roadmaps/core/pipeline/021-030-program-queue.md` marks `KI-052-2`, `KI-052-9`, `KI-050-6`, `KI-047-5` and `T3` delivered, corrects the ruff baseline 190 → 176 and routes `KI-053-1` (`efad313`).
+- Close propagation: `CONTRIBUTING.md` names the ruff and JS/TS gates (`419e496`); the `skills/js-standardizer` invocation exception (`926de1c`) and `README.md`'s Python requirement (`df21f8d`) no longer contradict the delivery — both found by this close's structural audit (`aa30059`, `a68e8be`).
+
 ## [4.35.0] - 2026-09-27
 
 ### Added
