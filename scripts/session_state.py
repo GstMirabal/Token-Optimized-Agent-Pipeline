@@ -37,10 +37,12 @@ Usage:
         # hint for the caller that issued this claim: session_start.py
         # --boot passes --entry-point boot (S052-2).
     python3 scripts/session_state.py release   # seals the SPRINT (sprint-branch tip);
-        # also writes current_sprint.status = CLOSED when current_sprint
-        # exists, preserving every other key — a SPRINT fact, not a SESSION
-        # one, so the next session's `claim` (which resets top-level status
-        # to IN_PROGRESS) does not un-seal it (S052 QA Gate 1 round 2)
+        # also writes current_sprint.status = CLOSED_SUCCESSFULLY when
+        # current_sprint exists, preserving every other key — a SPRINT fact,
+        # not a SESSION one, so the next session's `claim` (which resets
+        # top-level status to IN_PROGRESS) does not un-seal it (S052 QA Gate 1
+        # round 2). `open-sprint` also accepts the legacy `CLOSED` literal
+        # written before Sprint 050 (SEALED_STATUSES, KI-052-2).
     python3 scripts/session_state.py suspend   # ends the SESSION only
     python3 scripts/session_state.py require-released [--branch <ref>]
         # deployment preflight: refuse SUSPENDED; tip must equal last_close_commit
@@ -55,8 +57,9 @@ Usage:
         # last_audit_sprint and any other current_sprint keys; idempotent
         # when current_sprint.id already equals N; refuses (exit 2) for a
         # different id while that sprint is not sealed — sealed means
-        # current_sprint.status == CLOSED ("CLOSED_SUCCESSFULLY"), the SPRINT
-        # fact `release()` writes, never the top-level SESSION status (which
+        # current_sprint.status is CLOSED_SUCCESSFULLY, or the legacy CLOSED
+        # literal (SEALED_STATUSES), the SPRINT fact `release()` writes,
+        # never the top-level SESSION status (which
         # `claim` resets to IN_PROGRESS at the start of every session,
         # including the one that opens the next sprint) and never
         # current_sprint.status == IN_PROGRESS, which no writer ever
@@ -80,13 +83,17 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from hooks.state_mirror import mirror_active_state  # noqa: E402
+from hooks.state_mirror import mirror_active_state
 
 ACTIVE_STATE = Path("docs/active_state.json")
 CHANGELOG = Path("CHANGELOG.md")
 IN_PROGRESS = "IN_PROGRESS"
 CLOSED = "CLOSED_SUCCESSFULLY"
 SUSPENDED = "SUSPENDED"  # session ended, sprint still open (token_economy.md §3.1)
+# "CLOSED" is the legacy literal `release()` wrote before Sprint 050; anchors
+# sealed under that pin still carry it, so `_sprint_is_sealed` must accept
+# both (KI-052-2, Sprint 053 `D1`).
+SEALED_STATUSES = frozenset({CLOSED, "CLOSED"})
 
 
 def now() -> str:
@@ -112,7 +119,7 @@ def generate_session_id() -> str:
 def head_sha() -> str | None:
     """Current commit, or None outside a repository."""
     result = subprocess.run(
-        ["git", "rev-parse", "HEAD"], capture_output=True, text=True
+        ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=False
     )
     return result.stdout.strip() if result.returncode == 0 else None
 
@@ -143,7 +150,7 @@ def resume_pointer() -> dict:
 def git_branch() -> str | None:
     """The checked-out branch, or None on a detached HEAD."""
     result = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"],
-                            capture_output=True, text=True)
+                            capture_output=True, text=True, check=False)
     return result.stdout.strip() if result.returncode == 0 else None
 
 
@@ -294,9 +301,10 @@ def release() -> int:
     advisory-flag a closed sprint's branch (Sprint 040 R1). Mid-sprint
     ``claim`` still must not auto-clear resume (Sprint 039 D-P1).
 
-    Also writes ``current_sprint.status = CLOSED`` when ``current_sprint``
-    exists, preserving every other key already there. This is the SPRINT
-    fact ``open_sprint()``'s sealed-check reads (``_sprint_is_sealed``) — the
+    Also writes ``current_sprint.status = CLOSED_SUCCESSFULLY`` when
+    ``current_sprint`` exists, preserving every other key already there.
+    This is the SPRINT fact ``open_sprint()``'s sealed-check reads
+    (``_sprint_is_sealed``, ``SEALED_STATUSES``) — the
     top-level ``status`` this function also sets is a SESSION fact that
     ``claim()`` resets to ``IN_PROGRESS`` at the boot of every session,
     including the one that opens the next sprint, so it cannot be the
@@ -366,6 +374,7 @@ def rev_parse(ref: str) -> str | None:
         ["git", "rev-parse", "--verify", ref],
         capture_output=True,
         text=True,
+        check=False,
     )
     return result.stdout.strip() if result.returncode == 0 else None
 
@@ -495,23 +504,26 @@ def _sprint_is_sealed(current_sprint_status: str | None) -> bool:
     """Whether the anchor's previous `current_sprint` was sealed by `release()`.
 
     Keys **only** on the SPRINT fact `release()` writes onto `current_sprint`
-    itself (`current_sprint.status = CLOSED`) — never on the top-level
-    `status`. That field is a SESSION fact: `claim()` resets it to
+    itself (`current_sprint.status = CLOSED_SUCCESSFULLY`) — never on the
+    top-level `status`. That field is a SESSION fact: `claim()` resets it to
     `IN_PROGRESS` at the boot of *every* session, including the one that
     opens the next sprint, so a check keyed on it would refuse the very
     `open-sprint` call it exists to allow (reported against this function's
     first version, S052 QA Gate 1 round 2). `current_sprint.status` is
-    written only by `open_sprint()` (`"OPEN"`) and `release()` (`CLOSED`),
-    never `IN_PROGRESS` — the F-3 defect's original guard checked a value no
-    writer ever produces.
+    written only by `open_sprint()` (`"OPEN"`) and `release()`
+    (`CLOSED_SUCCESSFULLY`), never `IN_PROGRESS` — the F-3 defect's original
+    guard checked a value no writer ever produces. A `None` status (the key
+    absent) is genuinely unknown, possibly a live sprint, and is never sealed.
 
     Args:
         current_sprint_status: `current_sprint.status` from the anchor.
 
     Returns:
-        bool: True when it equals `CLOSED` (`"CLOSED_SUCCESSFULLY"`).
+        bool: True when it is in `SEALED_STATUSES` — `CLOSED_SUCCESSFULLY`
+            or the legacy `CLOSED` literal `release()` wrote before
+            Sprint 050 (`KI-052-2`, Sprint 053 `D1`).
     """
-    return current_sprint_status == CLOSED
+    return current_sprint_status in SEALED_STATUSES
 
 
 def open_sprint(sprint_id: int) -> int:

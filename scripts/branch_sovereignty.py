@@ -62,7 +62,7 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _root import agents_root  # noqa: E402
+from _root import agents_root
 
 # **Mixed scope, deliberately**: every git command below runs against the HOST
 # repository in the cwd, while the waiver list is FRAMEWORK data. As a bare
@@ -101,7 +101,7 @@ NO_GITHUB_SIDE = (
 
 
 def git(*args: str) -> subprocess.CompletedProcess:
-    return subprocess.run(["git", *args], capture_output=True, text=True)
+    return subprocess.run(["git", *args], capture_output=True, text=True, check=False)
 
 
 def base_branch() -> str:
@@ -169,7 +169,7 @@ def _one_pr_lookup(branch: str) -> tuple[str | None, str, bool]:
     """
     result = subprocess.run(
         ["gh", "pr", "list", "--state", "merged", "--head", branch, "--json", "number"],
-        capture_output=True, text=True,
+        capture_output=True, text=True, check=False,
     )
     if result.returncode == 0:
         try:
@@ -317,12 +317,12 @@ def audit(base: str) -> int:
         for branch in indeterminate:
             print(f"   • {branch}", file=sys.stderr)
         print(
-            f"\n   This is not an accusation. `git cherry` cannot see a squash "
-            f"merge, and the pull request lookup did not answer — so nothing "
-            f"here says the work is missing, only that it is unproven.\n"
-            f"   Re-run this check: the cause is usually transient. Do NOT record "
-            f"a waiver for these — a waiver is permanent and would silence a "
-            f"branch that may be perfectly integrated.",
+            "\n   This is not an accusation. `git cherry` cannot see a squash "
+            "merge, and the pull request lookup did not answer — so nothing "
+            "here says the work is missing, only that it is unproven.\n"
+            "   Re-run this check: the cause is usually transient. Do NOT record "
+            "a waiver for these — a waiver is permanent and would silence a "
+            "branch that may be perfectly integrated.",
             file=sys.stderr,
         )
 

@@ -10,7 +10,7 @@ CI regenerates and fails on diff, so hand-editing the manifest is pointless.
 import json
 import re
 import sys
-from datetime import date
+from datetime import datetime
 from pathlib import Path
 
 SKILLS_DIR = Path("skills")
@@ -44,7 +44,7 @@ def parse_frontmatter(skill_md: Path) -> dict:
     """Minimal YAML reader for name/description, tolerating multi-line
     (indent-continued) description values."""
     text = skill_md.read_text(encoding="utf-8")
-    m = re.match(r"^---\n(.*?)\n---", text, re.S)
+    m = re.match(r"^---\n(.*?)\n---", text, re.DOTALL)
     if not m:
         return {}
     fields = {}
@@ -89,9 +89,10 @@ def main() -> int:
     # regenerate-and-diff check into a time bomb that fails at midnight.
     existing = json.loads(MANIFEST.read_text()) if MANIFEST.exists() else {}
     unchanged = existing.get("skills") == skills
+    today = str(datetime.now().astimezone().date())
     manifest = {
         "version": existing.get("version", "1.0.0"),
-        "updated_at": existing.get("updated_at", str(date.today())) if unchanged else str(date.today()),
+        "updated_at": existing.get("updated_at", today) if unchanged else today,
         "_generated_by": "skills/mass-standardizer/scripts/generate_manifest.py — do not edit by hand",
         "skills": skills,
     }

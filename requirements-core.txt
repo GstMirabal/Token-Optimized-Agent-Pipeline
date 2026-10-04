@@ -1,3 +1,5 @@
 # Core runtime for the .agents framework — installed by start_workflow pip_setup.
 # Keep this minimal: only what every host session actually needs.
 graphifyy==0.8.30
+# agents.md §1 linters/instruments (Sprint 053 D5) — every host venv gets these.
+-r requirements-quality.txt

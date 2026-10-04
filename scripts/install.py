@@ -45,8 +45,9 @@ AGENTS_DIR = SCRIPT_DIR.parent
 HOST_DIR = AGENTS_DIR.parent
 
 sys.path.insert(0, str(SCRIPT_DIR))
-from merge_json import merge  # noqa: E402
-import json  # noqa: E402
+import json
+
+from merge_json import merge
 
 
 def _symlink_matches(dest: Path, target: str) -> bool:
@@ -534,7 +535,7 @@ def main() -> int:
         help="Installation target: 'claude' (Claude Code, default), 'cursor' (Cursor), or 'both'"
     )
     args = parser.parse_args()
-    from cursor_adapter import install_cursor_bridge  # noqa: E402
+    from cursor_adapter import install_cursor_bridge
 
     if (AGENTS_DIR / ".git").is_dir():
         return install_nucleus(args, install_cursor_bridge)

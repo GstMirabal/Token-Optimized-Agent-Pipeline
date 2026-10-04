@@ -13,14 +13,13 @@ import pytest
 
 SCRIPTS = Path(__file__).parent.parent / "scripts"
 sys.path.insert(0, str(SCRIPTS))
-import _mode  # noqa: E402
-import session_cost as sc  # noqa: E402
-import branch_sovereignty as bs  # noqa: E402
-import detect_drift as dd  # noqa: E402
-import session_probe as spr  # noqa: E402
-import session_state as ss  # noqa: E402
-import submodule_purity as sp  # noqa: E402
-
+import _mode
+import branch_sovereignty as bs
+import detect_drift as dd
+import session_cost as sc
+import session_probe as spr
+import session_state as ss
+import submodule_purity as sp
 
 # --- jurisdiction: host work never lands inside the submodule -----------
 
@@ -556,7 +555,7 @@ def test_prune_never_deletes_unproven_work(repo):
     bs.prune("main")
     branches = subprocess.run(
         ["git", "for-each-ref", "--format=%(refname:short)", "refs/heads/"],
-        capture_output=True, text=True,
+        capture_output=True, text=True, check=False,
     ).stdout.split()
     assert "unmerged" in branches
 
@@ -693,7 +692,7 @@ def test_prune_never_deletes_an_undetermined_branch(repo, monkeypatch):
     bs.prune("main")
     branches = REAL_RUN(
         ["git", "for-each-ref", "--format=%(refname:short)", "refs/heads/"],
-        capture_output=True, text=True,
+        capture_output=True, text=True, check=False,
     ).stdout.split()
     assert "maybe-merged" in branches
 
@@ -701,7 +700,7 @@ def test_prune_never_deletes_an_undetermined_branch(repo, monkeypatch):
 def _heads() -> list[str]:
     return REAL_RUN(
         ["git", "for-each-ref", "--format=%(refname:short)", "refs/heads/"],
-        capture_output=True, text=True,
+        capture_output=True, text=True, check=False,
     ).stdout.split()
 
 
@@ -811,7 +810,7 @@ def test_no_baseline_is_reported_not_silently_passed(anchor, capsys):
 def test_commits_after_the_sealed_close_are_drift(repo):
     (repo / "docs").mkdir()
     baseline = subprocess.run(["git", "rev-parse", "HEAD"],
-                              capture_output=True, text=True).stdout.strip()
+                              capture_output=True, text=True, check=False).stdout.strip()
     (repo / "f.txt").write_text("out of protocol\n")
     subprocess.run(["git", "commit", "-aqm", "outside"], check=True)
     (repo / "docs" / "active_state.json").write_text(
@@ -823,7 +822,7 @@ def test_commits_after_the_sealed_close_are_drift(repo):
 def test_head_matching_the_sealed_close_is_clean(repo):
     (repo / "docs").mkdir()
     head = subprocess.run(["git", "rev-parse", "HEAD"],
-                          capture_output=True, text=True).stdout.strip()
+                          capture_output=True, text=True, check=False).stdout.strip()
     (repo / "docs" / "active_state.json").write_text(
         json.dumps({"status": "CLOSED_SUCCESSFULLY", "last_close_commit": head})
     )
@@ -865,7 +864,7 @@ def test_the_pipeline_record_is_not_hidden_from_git(path):
     """
     result = subprocess.run(
         ["git", "check-ignore", "-q", path],
-        cwd=REPO_ROOT, capture_output=True,
+        cwd=REPO_ROOT, capture_output=True, check=False,
     )
     assert result.returncode != 0, f"{path} is gitignored; submodule_purity cannot see it"
 
@@ -874,7 +873,7 @@ def test_the_pipeline_record_is_not_hidden_from_git(path):
 
 def _head() -> str:
     return subprocess.run(["git", "rev-parse", "HEAD"],
-                          capture_output=True, text=True).stdout.strip()
+                          capture_output=True, text=True, check=False).stdout.strip()
 
 
 def _commit(repo, text: str, message: str) -> str:
@@ -1018,7 +1017,7 @@ def test_refresh_baseline_writes_last_close_commit_without_changing_status(repo)
     """Post-deploy refresh records the integration tip; session status stays put."""
     (repo / "docs").mkdir(exist_ok=True)
     head = subprocess.run(
-        ["git", "rev-parse", "HEAD"], capture_output=True, text=True
+        ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=False
     ).stdout.strip()
     (repo / "docs" / "active_state.json").write_text(
         json.dumps({"status": "IN_PROGRESS", "session_id": "s1"})
@@ -1033,7 +1032,6 @@ def test_refresh_baseline_after_orphan_leaves_drift_without_merge_base_warning(
     repo, capsys
 ):
     """Refresh to HEAD clears the orphaned-baseline substitution on a clean tip."""
-    fork = _head()
     subprocess.run(["git", "checkout", "-qb", "sprint"], check=True)
     orphan = _commit(repo, "on the branch\n", "branch work")
     subprocess.run(["git", "checkout", "-q", "main"], check=True)
@@ -1433,7 +1431,7 @@ def test_suspend_does_not_launder_unrecorded_work(repo):
     have broken the detector Sprint 024 repaired."""
     (repo / "docs").mkdir()
     baseline = subprocess.run(["git", "rev-parse", "HEAD"],
-                              capture_output=True, text=True).stdout.strip()
+                              capture_output=True, text=True, check=False).stdout.strip()
     (repo / "docs" / "active_state.json").write_text(
         json.dumps({"status": "CLOSED_SUCCESSFULLY", "last_close_commit": baseline}))
     ss.claim("session-a", takeover=False, tool="terminal")
@@ -1445,8 +1443,8 @@ def test_suspend_does_not_launder_unrecorded_work(repo):
 
 # --- model tiering: the map, the detector, the guards --------------------
 
-import check_model_tiers as cmt  # noqa: E402
-import detect_new_models as dnm  # noqa: E402
+import check_model_tiers as cmt
+import detect_new_models as dnm
 
 CATALOGUE_FIXTURE = """\
 # Claude Model Catalog

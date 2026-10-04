@@ -9,11 +9,16 @@ from __future__ import annotations
 import json
 import logging
 import os
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from skillopt.datasets.base import BatchSpec
 from skillopt.envs.base import EnvAdapter
 from skillopt.model.router import chat_target
+
+if TYPE_CHECKING:
+    from skills.skillopt.scripts.dataloader import AgentsOptDataLoader
+
+logger = logging.getLogger(__name__)
 
 
 def _save_conversation_transcript(conv_path: str, conv: list[dict[str, str]]) -> None:
@@ -29,8 +34,8 @@ def _save_conversation_transcript(conv_path: str, conv: list[dict[str, str]]) ->
     try:
         with open(conv_path, "w", encoding="utf-8") as f:
             json.dump(conv, f, indent=2)
-    except Exception as e:
-        logging.error("Failed to save conversation: %s", e)
+    except (OSError, TypeError, ValueError) as e:
+        logger.error("Failed to save conversation: %s", e)
 
 
 def _grade_eval_system_prompt() -> str:
@@ -97,8 +102,8 @@ def _grade_via_judge(question: str, gold: str, pred: str) -> tuple[int, float, s
             soft = float(eval_json.get("soft", 0.0))
             reason = eval_json.get("reasoning", "")
             return hard, soft, reason
-    except Exception as e:
-        logging.error("Grading prediction failed: %s", e)
+    except Exception:
+        logger.exception("Grading prediction failed")
     return 0, 0.0, "Grading process encountered an error."
 
 
@@ -268,8 +273,8 @@ class AgentsOptEnv(EnvAdapter):
                 stage="target_rollout",
             )
             return pred_answer
-        except Exception as e:
-            logging.error("Target model execution failed: %s", e)
+        except Exception:
+            logger.exception("Target model execution failed")
             return ""
 
     def _grade_prediction(self, question: str, gold: str, pred: str) -> tuple[int, float, str]:

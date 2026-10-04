@@ -114,7 +114,7 @@ def test_host_skill_missing_forge_file_exits_2(
 
     assert mod.check(sprint) == 2
     err = capsys.readouterr().err
-    assert f"missing host skill file" in err
+    assert "missing host skill file" in err
     assert SKILL_NAME in err
 
 

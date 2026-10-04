@@ -32,10 +32,10 @@ import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
-import _mode  # noqa: E402
-import branch_sovereignty as bs  # noqa: E402
-import docs_freshness_check as dfc  # noqa: E402
-from _root import agents_root  # noqa: E402
+import _mode
+import branch_sovereignty as bs
+import docs_freshness_check as dfc
+from _root import agents_root
 
 FRAMEWORK_SCOPED = [
     ["scripts/check_manifest_parity.py"],
@@ -81,10 +81,10 @@ def test_a_framework_scoped_script_is_identical_from_any_directory(argv, tmp_pat
     reporting `[OK] no candidates found` over a directory holding no workflows.
     """
     command = [sys.executable, *argv]
-    from_root = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
+    from_root = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, check=False)
     from_elsewhere = subprocess.run(
         [sys.executable, str(ROOT / argv[0]), *argv[1:]], cwd=tmp_path,
-        capture_output=True, text=True,
+        capture_output=True, text=True, check=False,
     )
 
     assert from_elsewhere.returncode == from_root.returncode

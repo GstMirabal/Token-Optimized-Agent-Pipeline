@@ -10,8 +10,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
-
 REPO = Path(__file__).resolve().parent.parent
 AUDIT = REPO / "skills" / "token-saver-auditor" / "scripts" / "audit_plan.py"
 

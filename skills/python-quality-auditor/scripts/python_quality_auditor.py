@@ -5,12 +5,12 @@ Agnostic health-check script for Python repositories.
 
 import os
 import subprocess
-import json
+
 
 def run_audit_command(name, command):
     print(f"--- [Auditing {name}] ---")
     try:
-        result = subprocess.run(command, capture_output=True, text=True, shell=True)
+        result = subprocess.run(command, capture_output=True, text=True, shell=True, check=False)
         if result.returncode == 0:
             print(f"✅ {name}: 0 issues detected.")
             return True

@@ -19,7 +19,10 @@ PY_EXCLUDES := -not -path "*/.git/*" -not -path "*/node_modules/*" -not -path "*
 # Prefer the framework venv when it exists (a local checkout, where pytest lives
 # in venv_skillopt and not in the system interpreter), and fall back to the
 # system python3 (CI, which installs pytest into it and creates no venv). Only
-# the pytest step needs a third-party package; every other step is stdlib-only.
+# the pytest step, the ruff step and the tree-sitter-backed quality audit (JS/TS
+# path, fails closed with exit 2 without `tree_sitter`) need third-party
+# packages (`requirements-quality.txt` pins ruff and tree-sitter); every other
+# step is stdlib-only.
 VENV_PY := $(AGENTS_DIR)/venv_skillopt/bin/python3
 PY := $(if $(wildcard $(VENV_PY)),$(VENV_PY),python3)
 
@@ -69,7 +72,8 @@ verify:
 	cd $(AGENTS_DIR) && python3 scripts/check_manifest_parity.py
 	cd $(AGENTS_DIR) && python3 scripts/check_absolute_paths.py
 	cd $(AGENTS_DIR) && python3 skills/topology-monitor/scripts/legacy_app_auditor.py
-	cd $(AGENTS_DIR) && python3 scripts/quality_audit.py .
+	cd $(AGENTS_DIR) && $(PY) -m ruff check .
+	cd $(AGENTS_DIR) && $(PY) scripts/quality_audit.py .
 	cd $(AGENTS_DIR) && python3 skills/mass-standardizer/scripts/generate_manifest.py \
 	  && git -C $(AGENTS_DIR) diff --exit-code skills/manifest_skills.json
 # A test must not leave the tracked tree changed. Once `C0.3` anchored
@@ -138,7 +142,7 @@ bridge-state:
 # Exit 2 on any violation; `--report` prints the full register and exits 0
 # regardless.
 quality-audit:
-	cd $(AGENTS_DIR) && python3 scripts/quality_audit.py .
+	cd $(AGENTS_DIR) && $(PY) scripts/quality_audit.py .
 
 # Sprint 027: verify a role left its required sprint-scoped artifacts (portable
 # SubagentStop counterpart). SPRINT_DIR must be the canonical sprint path.

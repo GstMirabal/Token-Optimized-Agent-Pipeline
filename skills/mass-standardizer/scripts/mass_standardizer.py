@@ -36,7 +36,7 @@ from pathlib import Path
 # copy. A wrong level here raises ImportError instead of silently resolving to
 # the wrong tree, which is the defect this file carried.
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
-from _root import agents_root  # noqa: E402
+from _root import agents_root
 
 # Templates
 SKILL_MD_TEMPLATE = """---

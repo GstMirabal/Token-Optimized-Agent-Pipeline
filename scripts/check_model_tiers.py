@@ -33,7 +33,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _root import agents_root  # noqa: E402
+from _root import agents_root
 
 TIERS_FILE = agents_root() / "config" / "model_tiers.json"
 PROFILES = agents_root() / "agents"
@@ -48,10 +48,10 @@ def declared() -> dict[str, dict[str, str]]:
     """profile stem → {"model": ..., "tier": ...} as written in the frontmatter."""
     found = {}
     for path in sorted(PROFILES.glob("*.md")):
-        fields = dict(
-            (key, value) for key, value, *_ in
-            ((m.group(1), m.group(2)) for m in FIELD.finditer(path.read_text(encoding="utf-8")))
-        )
+        fields = {
+            m.group(1): m.group(2)
+            for m in FIELD.finditer(path.read_text(encoding="utf-8"))
+        }
         found[path.stem] = fields
     return found
 

@@ -1,6 +1,6 @@
 {
-  "last_update": "2026-09-27",
-  "sprint_id": "052",
+  "last_update": "2026-10-04",
+  "sprint_id": "053",
   "_schema": "Entries are summary-only Knowledge Items. The 'file' field is omitted once the raw log has been purged (agents.md §4 definitive_amnesia) — the 1-line summary IS the retained knowledge.",
   "items": [
     {
@@ -177,6 +177,11 @@
     {
       "id": "F-20260927-S522",
       "summary": "Eight concurrent subagent lanes exhausted the API session limit mid-wave; cap parallel lanes at about four and have lanes leave finished files uncommitted so the orchestrator can verify and commit them from the tree when an agent dies.",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20261004-S531",
+      "summary": "Before planning a unit from a programme-queue row, read the unit's target file, because the row may describe work an earlier sprint already delivered (Sprint 053 C03, delivered by 10df9cd in Sprint 048).",
       "routing_class": "host"
     }
   ]

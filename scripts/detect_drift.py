@@ -83,7 +83,9 @@ SECTION = re.compile(r"^## \[(\d[^\]]*)\]", re.MULTILINE)
 
 def git(*args: str) -> str | None:
     """Run a git command, returning stdout or None when it fails."""
-    result = subprocess.run(["git", *args], capture_output=True, text=True)
+    result = subprocess.run(
+        ["git", *args], capture_output=True, text=True, check=False
+    )
     return result.stdout.strip() if result.returncode == 0 else None
 
 

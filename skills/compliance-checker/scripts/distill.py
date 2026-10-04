@@ -1,7 +1,7 @@
 import json
-from pathlib import Path
 from collections import Counter
 from datetime import datetime
+from pathlib import Path
 
 # This file lives at <AGENTS_ROOT>/skills/compliance-checker/scripts/distill.py,
 # so 4 parents reach AGENTS_ROOT. Telemetry, though, lives at the *host's* root,
@@ -27,7 +27,6 @@ PROMOTION_THRESHOLD = 5
 
 def analyze_patterns(data):
     """Identifies recurring friction points."""
-    from collections import Counter
     patterns = Counter([(d['hook'], d['type']) for d in data])
     return patterns
 
@@ -126,7 +125,7 @@ def _classify_pattern(
 
 
 def generate_proposal(patterns):
-    header = f"# Governance Heuristic Pulse ({datetime.now().strftime('%Y-%m-%d')})\n\n"
+    header = f"# Governance Heuristic Pulse ({datetime.now().astimezone().strftime('%Y-%m-%d')})\n\n"
     header += "This report identifies recurrent friction points detected by pipeline hooks. Patterns exceeding the threshold are promoted to Formal Clauses.\n\n"
 
     body = "## Frequency Analysis\n\n"

@@ -15,9 +15,9 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _root import agents_root  # noqa: E402
-from check_gate_log import gate_tables  # noqa: E402
-from check_task_scope import (  # noqa: E402
+from _root import agents_root
+from check_gate_log import gate_tables
+from check_task_scope import (
     sprint_id_from_dir,
     work_tables,
 )
@@ -197,8 +197,8 @@ def render_markdown(
         "Derived by `scripts/model_ledger.py`. Do not edit by hand.",
         "Regenerate: `make model-ledger`.",
         "",
-        "| sprint_id | tier | model_id | effort | units | gate1_rounds |"
-        " gate2_rounds | verdicts |",
+        ("| sprint_id | tier | model_id | effort | units | gate1_rounds |"
+         " gate2_rounds | verdicts |"),
         "| ---: | :--- | :--- | :--- | ---: | ---: | ---: | :--- |",
     ]
     for row in rows:

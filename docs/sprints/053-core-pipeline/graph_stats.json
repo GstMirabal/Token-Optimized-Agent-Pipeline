@@ -1,0 +1,9 @@
+{
+  "nodes": 12375,
+  "edges": 16638,
+  "communities": 994,
+  "source": "graphify-out/graph.json",
+  "sprint": 53,
+  "built_at_commit": "0e854e1",
+  "note": "Counts from `make graphify-update` (AST, no LLM) at HEAD before the close-workflow closeout commits (this file, model_ledger_regen, the ledger entry). Previous snapshot is Sprint 052's (11761/15788/950). The delta reflects the tree-sitter JS/TS scanner in scripts/quality_audit.py and its tests, tests/test_ruff_config.py, ruff.toml, requirements-quality.txt, the Wave C lint edits across 52 files and this sprint's directory artifacts. graph_reconcile reported 31 tracked files unmapped (graphify-out/unmapped_files.json)."
+}

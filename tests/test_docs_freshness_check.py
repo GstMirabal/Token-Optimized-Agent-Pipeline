@@ -8,8 +8,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
-import docs_freshness_check as dfc  # noqa: E402
-
+import docs_freshness_check as dfc
 
 # --- metadata parsing --------------------------------------------------
 
@@ -148,7 +147,7 @@ def test_no_history_is_advisory_only(tmp_path):
 def test_bootstrap_floor_requires_five_deltas(tmp_path):
     for i in range(1, 4):  # only 3 snapshots -> 2 deltas, below the floor of 5
         _write_graph_stats(tmp_path, f"{i:03d}", nodes=10 * i, edges=20 * i)
-    exceeded, mode = dfc.structural_change_status(tmp_path, last_audit_sprint=1, current_sprint=3)
+    _exceeded, mode = dfc.structural_change_status(tmp_path, last_audit_sprint=1, current_sprint=3)
     assert mode == "advisory"
 
 

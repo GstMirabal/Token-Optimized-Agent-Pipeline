@@ -91,3 +91,42 @@ def test_missing_graph_file_proposes_update(graph_repo: Path) -> None:
     report = spr.probe_graph()
     assert report is not None
     assert "graphify-out" in report
+
+
+# --- probe_anchor_hygiene: sealed-status vocabulary (KI-052-2, Sprint 053 A2) -
+
+def test_hygiene_fires_for_the_literal_release_writes() -> None:
+    """`release()` writes `CLOSED_SUCCESSFULLY` (`session_state.CLOSED`), not
+    the bare `"CLOSED"` this check compared against. Fails on HEAD: the
+    finding never fires for the literal the writer actually produces."""
+    state = {
+        "status": "IN_PROGRESS",
+        "current_sprint": {"id": 52, "status": "CLOSED_SUCCESSFULLY"},
+    }
+
+    finding = spr.probe_anchor_hygiene(state)
+
+    assert finding is not None
+    assert "CLOSED_SUCCESSFULLY" in finding
+
+
+def test_hygiene_still_fires_for_the_legacy_closed_literal() -> None:
+    """Regression guard: the legacy `"CLOSED"` alias (written before Sprint
+    050) must keep firing once the comparison moves to `SEALED_STATUSES`."""
+    state = {
+        "status": "IN_PROGRESS",
+        "current_sprint": {"id": 52, "status": "CLOSED"},
+    }
+
+    finding = spr.probe_anchor_hygiene(state)
+
+    assert finding is not None
+
+
+def test_hygiene_does_not_fire_for_an_open_sprint() -> None:
+    state = {
+        "status": "IN_PROGRESS",
+        "current_sprint": {"id": 52, "status": "OPEN"},
+    }
+
+    assert spr.probe_anchor_hygiene(state) is None

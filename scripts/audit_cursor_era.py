@@ -28,14 +28,14 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _root import agents_root  # noqa: E402
-from check_gate_log import gate_tables  # noqa: E402
-from check_role_artifact import (  # noqa: E402
+from _root import agents_root
+from check_gate_log import gate_tables
+from check_role_artifact import (
     load_registry,
     missing_for_role,
     missing_gate_row,
 )
-from check_task_scope import collect_findings, sprint_id_from_dir  # noqa: E402
+from check_task_scope import collect_findings, sprint_id_from_dir
 
 SESSION_TOOL_RE = re.compile(r"tool `([a-z0-9_-]+)`")
 GATE_ROLES = ("QA Agent", "Tester Agent")

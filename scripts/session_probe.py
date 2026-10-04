@@ -33,6 +33,7 @@ Exit codes:
 
 import argparse
 import json
+import logging
 import re
 import shutil
 import subprocess
@@ -41,9 +42,11 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import session_cost  # noqa: E402
-import session_state  # noqa: E402
-from _mode import is_nucleus as _is_nucleus  # noqa: E402
+import session_cost
+import session_state
+from _mode import is_nucleus as _is_nucleus
+
+logger = logging.getLogger(__name__)
 
 HARD_RATIO = 15  # rules/token_economy.md §3.1
 
@@ -180,7 +183,7 @@ def probe_anchor_sprint(state: dict) -> str | None:
             no evidence either way, and is reported as neither.
     """
     result = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"],
-                            capture_output=True, text=True)
+                            capture_output=True, text=True, check=False)
     branch = result.stdout.strip()
     if result.returncode != 0 or not branch.startswith("ai-sprint/"):
         return None
@@ -216,6 +219,7 @@ def _resume_pointer_mismatch(pointer: dict) -> str | None:
         ["git", "rev-parse", "--abbrev-ref", "HEAD"],
         capture_output=True,
         text=True,
+        check=False,
     )
     head = result.stdout.strip() if result.returncode == 0 else ""
     if head and head != resume_branch:
@@ -227,8 +231,10 @@ def probe_anchor_hygiene(state: dict) -> str | None:
     """Flag IN_PROGRESS sessions whose sprint looks already closed or resumed wrong.
 
     After deploy, a new claim on ``main`` often leaves ``current_sprint.status``
-    at ``CLOSED`` and ``resume_pointer.branch`` at the prior ``ai-sprint/[ID]``
-    while HEAD is not that branch — silent until Sprint 039 P1.
+    sealed (`session_state.SEALED_STATUSES` — ``CLOSED_SUCCESSFULLY`` or the
+    legacy ``CLOSED`` alias) and ``resume_pointer.branch`` at the prior
+    ``ai-sprint/[ID]`` while HEAD is not that branch — silent until Sprint 039
+    P1.
 
     Args:
         state (dict): Parsed ``docs/active_state.json``.
@@ -240,9 +246,11 @@ def probe_anchor_hygiene(state: dict) -> str | None:
         return None
     parts: list[str] = []
     sprint = state.get("current_sprint")
-    if isinstance(sprint, dict) and sprint.get("status") == "CLOSED":
+    sprint_status = sprint.get("status") if isinstance(sprint, dict) else None
+    if sprint_status in session_state.SEALED_STATUSES:
         parts.append(
-            "`current_sprint.status` is CLOSED while the session is IN_PROGRESS"
+            f"`current_sprint.status` is {sprint_status} while the session "
+            "is IN_PROGRESS"
         )
     pointer = state.get("resume_pointer")
     if isinstance(pointer, dict):
@@ -282,7 +290,9 @@ def gh_call(*args: str) -> tuple[int, str, str]:
     Returns:
         tuple[int, str, str]: return code, stdout, stderr.
     """
-    result = subprocess.run(["gh", *args], capture_output=True, text=True)
+    result = subprocess.run(
+        ["gh", *args], capture_output=True, text=True, check=False
+    )
     return result.returncode, result.stdout, result.stderr
 
 
@@ -688,7 +698,7 @@ def probe_cost(state: dict) -> str | None:
     Returns:
         str | None: the finding, or None when clean or unmeasurable.
     """
-    if (note := acknowledged(state, "cost")):
+    if acknowledged(state, "cost"):
         return None
     try:
         result = session_cost.measure_previous(
@@ -696,8 +706,9 @@ def probe_cost(state: dict) -> str | None:
             exclude_session=state.get("session_id"),
             session_tool=state.get("session_tool"),
         )
-    except Exception:
+    except (OSError, ValueError, TypeError, AttributeError, KeyError) as exc:
         # A probe that crashes on a malformed transcript would block every start.
+        logger.warning("cost probe skipped, transcript unreadable: %s", exc)
         return None
     if result is None or not result.get("measurable"):
         return None

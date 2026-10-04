@@ -17,7 +17,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
-import map_workflows  # noqa: E402
+import map_workflows
 
 REGISTRY_PATH = ROOT / "config" / "artifact_registry.json"
 REGISTRY = json.loads(REGISTRY_PATH.read_text(encoding="utf-8"))

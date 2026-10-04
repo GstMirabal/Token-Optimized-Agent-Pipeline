@@ -27,7 +27,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install test dependencies
-        run: pip install -q pytest
+        run: pip install -q pytest -r requirements-quality.txt
 
       - name: Framework self-check (make verify)
         run: make verify

@@ -14,12 +14,11 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-import hooks.on_commit_msg as ocm  # noqa: E402
-from hooks.on_commit import (  # noqa: E402
+import hooks.on_commit_msg as ocm
+from hooks.on_commit import (
     audit_dependency_justification,
     audit_regression_test,
 )
-
 
 # --- regression test gate (rules/code_craft.md §6) ---------------------
 

@@ -34,7 +34,7 @@ the mode, and a module named for one question is the wrong place to answer the
 other.
 
 invoked_by: scripts/submodule_purity.py, scripts/session_probe.py,
-scripts/install.py, scripts/sync_agents_pin.py.
+scripts/install.py, scripts/sync_agents_pin.py, hooks/on_commit.py.
 
 Usage:
     from _mode import is_nucleus
@@ -46,7 +46,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _root import agents_root  # noqa: E402
+from _root import agents_root
 
 
 def is_nucleus() -> bool:

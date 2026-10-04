@@ -26,6 +26,7 @@ Exit codes:
 import re
 import subprocess
 import sys
+from pathlib import Path
 
 ALLOWED_USERS = {"developer", "user", "username", "yourname", "example"}
 HOME_PATH = re.compile(r"/(?:Users|home)/([A-Za-z0-9_.-]+)/")
@@ -38,6 +39,7 @@ def candidate_files() -> list[str]:
         ["git", "grep", "-lIn", GIT_GREP_PATTERN],
         capture_output=True,
         text=True,
+        check=False,
     )
     return [f for f in result.stdout.splitlines() if f and not f.startswith("venv_skillopt/")]
 
@@ -63,7 +65,7 @@ def main() -> int:
     violations = []
     for path in candidate_files():
         try:
-            text = open(path, encoding="utf-8", errors="ignore").read()
+            text = Path(path).read_text(encoding="utf-8", errors="ignore")
         except OSError as exc:
             print(f"⚠️  Could not read {path}: {exc}")
             continue
