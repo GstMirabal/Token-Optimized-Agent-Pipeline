@@ -183,6 +183,14 @@ rule, workflow, configuration or README file was edited by this audit.
 | `graph_stats.json` absent for sprints `024`, `025`, `051` | Still open: `docs/roadmaps/core/pipeline/021-030-program-queue.md`, *Still open for a later program* |
 | `code_containers` not declared (C4 L3 advisory) | Correct default per `documentation_standard.md §2.1` |
 
+**Remediated after this report, before the seal.** The two propagation gaps
+were closed inside the Sprint 053 close rather than carried, because both
+were left by this sprint's own change (`RA-14`): `config/invocation_exceptions.json`
+`skills/js-standardizer` note (`926de1c`) and `README.md:91` (`df21f8d`).
+`verify_references.py` and `check_readme_counts.py` exit `0` after both. The
+first two rows of the table above are therefore closed; the scores above are
+left as measured at the time of the sweep.
+
 `current_sprint.last_audit_sprint` remains written by no workflow and no
 script (the gap `-042.md`, `-047.md`, `-049.md` and `-052.md` recorded and
 still open).
