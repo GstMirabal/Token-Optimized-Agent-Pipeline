@@ -28,7 +28,9 @@ def test_fix_touching_source_without_a_test_is_blocked():
 
 def test_fix_shipping_a_test_passes():
     assert audit_regression_test(
-        "fix(auth): reject expired tokens #020", ["src/auth.py", "tests/test_auth.py"]
+        "fix(auth): reject expired tokens #020\n\n"
+        "Repro: tests/test_auth.py — fails at abc1234\n",
+        ["src/auth.py", "tests/test_auth.py"],
     ) is None
 
 
@@ -36,7 +38,8 @@ def test_fix_shipping_a_test_passes():
     "tests/test_auth.py", "src/__tests__/auth.js", "src/auth_test.go", "src/auth.test.ts",
 ])
 def test_test_paths_are_recognised_across_languages(path):
-    assert audit_regression_test("fix(x): y #020", ["src/a.py", path]) is None
+    message = f"fix(x): y #020\n\nRepro: {path} — fails at abc1234\n"
+    assert audit_regression_test(message, ["src/a.py", path]) is None
 
 
 def test_fix_touching_no_source_needs_no_test():
@@ -129,7 +132,9 @@ def test_message_file_passes_when_the_test_is_staged(repo, monkeypatch):
     stage("app.py", "def f(): pass\n")
     stage("tests/test_app.py", "def test_f(): pass\n")
     msg = repo / "MSG"
-    msg.write_text("fix(app): correct it #020\n")
+    msg.write_text(
+        "fix(app): correct it #020\n\nRepro: tests/test_app.py — fails at abc1234\n"
+    )
     monkeypatch.setattr(sys, "argv", ["on_commit_msg.py", str(msg)])
     assert ocm.main() == 0
 
