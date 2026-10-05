@@ -34,7 +34,7 @@ Write the minimum that solves the problem in front of you, not the minimum that 
 
 ## 4. Dependency admission
 
-`agents.md §8` governs **how** a dependency is installed (`pnpm 11+`, `ignore-scripts`, `minimum-release-age`). Nothing governed **whether it should enter at all**.
+`agents.md §8` governs **how** a dependency is installed (`pnpm 11+`, `ignoreScripts`, `minimumReleaseAge`, set in `pnpm-workspace.yaml`). Nothing governed **whether it should enter at all**.
 
 Every dependency is permanent code you do not control. Before adding one: check the standard library, then the dependencies already present. If it still earns its place, state why in the Implementation Plan and in the commit — see §7.
 
