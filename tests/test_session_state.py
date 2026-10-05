@@ -496,7 +496,37 @@ def test_open_sprint_refuses_after_claim_without_a_release_between(
 # --- open-sprint: legacy seal alias (KI-052-2, Sprint 053 A1) ---------------
 
 def test_sealed_statuses_contains_both_the_canonical_and_legacy_literal():
-    assert ss.SEALED_STATUSES == frozenset({"CLOSED_SUCCESSFULLY", "CLOSED"})
+    assert {"CLOSED_SUCCESSFULLY", "CLOSED"} <= ss.SEALED_STATUSES
+
+
+def test_sealed_statuses_contains_the_host_written_deployed_status():
+    """`DEPLOYED` is written by a host after merge and tag (F-114-N2, D9)."""
+    assert "DEPLOYED" in ss.SEALED_STATUSES
+
+
+def test_open_sprint_accepts_a_host_written_deployed_status(repo: Path):
+    """A host's deployment step moves `current_sprint.status` past
+    `CLOSED_SUCCESSFULLY` to `DEPLOYED`; refusing it blocks every later sprint."""
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": "DEPLOYED"}})
+
+    rc = ss.open_sprint(8)
+
+    assert rc == 0
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert state["current_sprint"]["id"] == 8
+    assert state["current_sprint"]["status"] == "OPEN"
+
+
+def test_open_sprint_still_refuses_an_open_sprint(
+    repo: Path, capsys: pytest.CaptureFixture
+):
+    """Regression guard: widening the sealed set must not admit `OPEN`."""
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": "OPEN"}})
+
+    rc = ss.open_sprint(8)
+
+    assert rc == 2
+    assert "7" in capsys.readouterr().err
 
 
 def test_open_sprint_accepts_a_legacy_closed_alias(repo: Path):

@@ -123,6 +123,20 @@ def test_hygiene_still_fires_for_the_legacy_closed_literal() -> None:
     assert finding is not None
 
 
+def test_hygiene_fires_for_a_host_written_deployed_status() -> None:
+    """`DEPLOYED` is sealed (F-114-N2, D9): a live session over it is flagged
+    exactly as over `CLOSED_SUCCESSFULLY`."""
+    state = {
+        "status": "IN_PROGRESS",
+        "current_sprint": {"id": 52, "status": "DEPLOYED"},
+    }
+
+    finding = spr.probe_anchor_hygiene(state)
+
+    assert finding is not None
+    assert "DEPLOYED" in finding
+
+
 def test_hygiene_does_not_fire_for_an_open_sprint() -> None:
     state = {
         "status": "IN_PROGRESS",

@@ -93,7 +93,10 @@ SUSPENDED = "SUSPENDED"  # session ended, sprint still open (token_economy.md §
 # "CLOSED" is the legacy literal `release()` wrote before Sprint 050; anchors
 # sealed under that pin still carry it, so `_sprint_is_sealed` must accept
 # both (KI-052-2, Sprint 053 `D1`).
-SEALED_STATUSES = frozenset({CLOSED, "CLOSED"})
+# "DEPLOYED" is a host-written post-seal status: the nucleus never writes it;
+# a host's deployment step does after merge and tag. It is later in the
+# lifecycle than CLOSED_SUCCESSFULLY, so it is sealed too (F-114-N2, D9).
+SEALED_STATUSES = frozenset({CLOSED, "CLOSED", "DEPLOYED"})
 
 
 def now() -> str:
@@ -521,7 +524,9 @@ def _sprint_is_sealed(current_sprint_status: str | None) -> bool:
     Returns:
         bool: True when it is in `SEALED_STATUSES` — `CLOSED_SUCCESSFULLY`
             or the legacy `CLOSED` literal `release()` wrote before
-            Sprint 050 (`KI-052-2`, Sprint 053 `D1`).
+            Sprint 050 (`KI-052-2`, Sprint 053 `D1`), or `DEPLOYED`, a
+            post-seal status a host's deployment step writes after merge and
+            tag (the nucleus never writes it; `F-114-N2`, Sprint 054 `D9`).
     """
     return current_sprint_status in SEALED_STATUSES
 
