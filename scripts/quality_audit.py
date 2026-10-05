@@ -633,7 +633,9 @@ def _walk_directory(directory: Path, all_suffixes: frozenset[str], found: set[Pa
     for child in directory.rglob("*"):
         if not child.is_file():
             continue
-        if any(part in DEFAULT_EXCLUDE_DIRS for part in child.parts):
+        # Only components BELOW the given root count: a root that itself sits
+        # under `node_modules/` is scanned (`D1`, Sprint 054).
+        if any(part in DEFAULT_EXCLUDE_DIRS for part in child.relative_to(directory).parts):
             continue
         _add_if_source_file(child, all_suffixes, found)
 
@@ -784,6 +786,32 @@ def format_report(units: list[Unit], excluded: list[Path] | None = None) -> str:
     return "\n".join(lines)
 
 
+def _unusable_input_message(targets: list[Path], files: list[Path]) -> str | None:
+    """Describe why the scan input is unusable, or `None` when it is usable.
+
+    Args:
+        targets: Paths given on the command line.
+        files: Source files discovered under `targets`.
+
+    Returns:
+        str | None: a message naming the offending paths and the current
+        working directory (relative paths are never resolved against a
+        repository root), or `None` when every path exists and at least
+        one source file was found.
+    """
+    cwd = Path.cwd()
+    missing = [str(t) for t in targets if not (t.is_file() or t.is_dir())]
+    if missing:
+        return (
+            f"quality_audit: path(s) not found: {', '.join(missing)} "
+            f"(cwd: {cwd}) -- neither a file nor a directory."
+        )
+    if not files:
+        given = ", ".join(str(t) for t in targets)
+        return f"quality_audit: 0 source files found under: {given} (cwd: {cwd})."
+    return None
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Deterministic function-length and nesting-depth auditor."
@@ -809,6 +837,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"quality_audit: {exc}", file=sys.stderr)
         return 2
 
+    problem = _unusable_input_message(targets, iter_source_files(targets))
+    if problem:
+        print(problem, file=sys.stderr)
+        return 2
+
     try:
         units = audit(targets, exclude)
     except TreeSitterImportError as exc:
@@ -827,7 +860,10 @@ def main(argv: list[str] | None = None) -> int:
         for u in violations:
             print(f"   • {_format_unit_line(u)}", file=sys.stderr)
         return 2
-    print(f"[OK] quality_audit: {len(units)} unit(s) scanned, 0 violations")
+    n_files = len(iter_source_files(targets)) - len(_excluded_files(targets, exclude))
+    print(
+        f"[OK] quality_audit: {n_files} file(s), {len(units)} unit(s) scanned, 0 violations"
+    )
     return 0
 
 
