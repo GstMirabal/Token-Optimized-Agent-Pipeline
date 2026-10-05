@@ -35,15 +35,27 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _mode import is_nucleus
 from _root import agents_root
 
 REQUIREMENTS_FILE = "requirements-core.txt"
 LOCK_FILE = "installed.lock"
 _INCLUDE = re.compile(r"^(?:-r|--requirement)(?:\s+|=)(\S+)")
-REINSTALL = (
-    "venv_skillopt/bin/python -m pip install -r requirements-core.txt "
-    "&& python3 scripts/install_lock.py write"
-)
+
+
+def reinstall_command() -> str:
+    """Spell the reinstall-and-record fix so it resolves from the cwd.
+
+    Returns:
+        str: The bare nucleus form when the framework is the work, or the
+            `.agents/`-prefixed form from a host root, where the bare paths do
+            not resolve (`F3`, Sprint 054, same class as `D11`).
+    """
+    prefix = "" if is_nucleus() else ".agents/"
+    return (
+        f"{prefix}venv_skillopt/bin/python -m pip install -r {prefix}requirements-core.txt "
+        f"&& python3 {prefix}scripts/install_lock.py write"
+    )
 
 
 class RequirementSetError(Exception):
@@ -162,7 +174,7 @@ def run_check(root: Path) -> int:
         return 0
     state = "absent, unreadable or legacy (no hash)" if recorded is None else "stale"
     print(f"[FAIL] install_lock: {LOCK_FILE} is {state}")
-    print(f"  fix: {REINSTALL}")
+    print(f"  fix: {reinstall_command()}")
     return 2
 
 
@@ -191,7 +203,11 @@ def run_write(root: Path) -> int:
 
 
 def main() -> int:
-    """Entry point. See the module docstring for exit codes."""
+    """Entry point.
+
+    Returns:
+        int: Process exit code; see the module docstring for the codes.
+    """
     parser = argparse.ArgumentParser(description="installed.lock requirement-set gate")
     parser.add_argument("command", choices=("check", "write"))
     parser.add_argument("--root", type=Path, default=agents_root())

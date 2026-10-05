@@ -88,3 +88,43 @@ def test_missing_included_file_exits_2(tmp_path: Path) -> None:
 
 def test_missing_core_file_exits_2(tmp_path: Path) -> None:
     assert _run("check", tmp_path) == 2
+
+
+def _module():
+    sys.path.insert(0, str(SCRIPT.parent))
+    import install_lock
+
+    return install_lock
+
+
+def test_fix_hint_names_nucleus_forms_in_nucleus_mode(monkeypatch, tmp_path: Path, capsys) -> None:
+    """F3: nucleus root resolves the bare paths."""
+    mod = _module()
+    _tree(tmp_path, {"requirements-core.txt": "pkg==1\n"})
+    monkeypatch.setattr(mod, "is_nucleus", lambda: True)
+    assert mod.run_check(tmp_path) == 2
+    out = capsys.readouterr().out
+    assert "venv_skillopt/bin/python -m pip install -r requirements-core.txt" in out
+    assert "python3 scripts/install_lock.py write" in out
+    assert ".agents/" not in out
+
+
+def test_fix_hint_names_agents_prefixed_forms_in_submodule_mode(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    """F3: a host root resolves only the `.agents/` forms."""
+    mod = _module()
+    _tree(tmp_path, {"requirements-core.txt": "pkg==1\n"})
+    monkeypatch.setattr(mod, "is_nucleus", lambda: False)
+    assert mod.run_check(tmp_path) == 2
+    out = capsys.readouterr().out
+    assert ".agents/venv_skillopt/bin/python -m pip install -r .agents/requirements-core.txt" in out
+    assert "python3 .agents/scripts/install_lock.py write" in out
+
+
+def test_main_returns_int_exit_code(monkeypatch, tmp_path: Path) -> None:
+    """F7: main returns the exit code its Returns section documents."""
+    mod = _module()
+    _tree(tmp_path, {"requirements-core.txt": "pkg==1\n"})
+    monkeypatch.setattr(sys, "argv", ["install_lock.py", "write", "--root", str(tmp_path)])
+    assert mod.main() == 0
