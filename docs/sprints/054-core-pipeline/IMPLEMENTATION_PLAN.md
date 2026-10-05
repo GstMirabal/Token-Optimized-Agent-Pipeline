@@ -216,7 +216,7 @@ in this planning session (the Context table gives the command). This applies
 | `python3 scripts/check_fix_reproduces.py --range d848302..HEAD; echo $?` | `0` — every `fix(` of this sprint reproduces red→green | not runnable (file absent) | its own test fixture with a non-reproducing fix exits `2` |
 | `python3 skills/token-saver-auditor/scripts/audit_plan.py docs/sprints/054-core-pipeline/IMPLEMENTATION_PLAN.md; echo $?` | `0` | run at Phase 1 and Phase 5 | the scratch plan from the Context table exits `2` after A08 |
 | `git grep -n "python3 scripts/session_start.py" -- commands workflows scripts` | each hit is either the nucleus form next to the host form, or a docstring that says it describes the nucleus | 3 host-blind hits (Context) | — |
-| `git grep -n "npmrc" -- agents.md rules workflows` | no output | 1 hit (`agents.md:174`) | the same command at `d848302` prints that hit |
+| `git grep -n "npmrc" -- agents.md rules workflows` | every hit states that `.npmrc` does **not** carry the `§8` keys (amended after approval: the original expectation, `no output`, contradicted C01's own `Location` row — QA Gate 1 round 1 `F2`, deviation recorded in `SPRINT_LOG.md`) | 1 hit (`agents.md:174`, the old instruction) | the same command at `d848302` prints that instruction |
 | `make verify; echo $?` | `0` | `0` at `d848302` | — |
 
 Exit codes are read with `$?` directly, **never through a pipe**.
