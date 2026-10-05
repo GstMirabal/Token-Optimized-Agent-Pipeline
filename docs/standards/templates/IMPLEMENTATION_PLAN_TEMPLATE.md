@@ -112,11 +112,16 @@ transcript exists for this tool.
 ## Tests
 
 **Reproduce before repairing.** A test that passes against the current tree proves
-nothing about a defect claimed to exist in it.
+nothing about a defect claimed to exist in it (`KI-053-4`).
 
-| Check | Fails against the current tree? |
-| :--- | :--- |
-| {{CHECK}} | **Yes** — this is the defect / **No** — this is a regression to protect |
+For every `**Yes**` row, `Observed at base` records the command run at the base
+commit and its exit code, read directly with `$?` and never through a pipe — or the
+literal word `unverified` followed by the reason it could not be run. A `**No**` row
+records the passing run instead. An empty `Observed at base` cell is not an answer.
+
+| Check | Fails against the current tree? | Observed at base |
+| :--- | :--- | :--- |
+| {{CHECK}} | **Yes** — this is the defect / **No** — this is a regression to protect | {{OBSERVED_AT_BASE}} |
 
 ---
 
@@ -125,9 +130,21 @@ nothing about a defect claimed to exist in it.
 The exact commands, and what each must return. Read exit codes with `$?` directly;
 **never through a pipe**, which reports the exit code of the last command in it.
 
-| Command | Expected |
-| :--- | :--- |
-| {{COMMAND}} | {{EXPECTED}} |
+**Dry-run rule.** Before Phase 5 approves the plan, the author runs every read-only
+command in this table against the current tree and records the exit code and the
+observed result in `Dry run`. A row that is destructive or slow says `run at close`
+and gives the reason. Every row whose `Expected` is "no output" or `0` hits names in
+`Positive control` a command, or a one-line variation of the row's own command, that
+produces output when the guarded defect is present, and records that it did
+(`F-114-N7` a, b). A guard that was never seen firing proves nothing by staying silent.
+
+**Alternation in a backticked command.** Do not write it as an escaped `\|`: ripgrep
+reads that literally and matches the characters `\|`, not either side. Inside a
+Markdown table cell an unescaped `|` splits the row. Use `-e a -e b` instead.
+
+| Command | Expected | Dry run | Positive control |
+| :--- | :--- | :--- | :--- |
+| {{COMMAND}} | {{EXPECTED}} | {{DRY_RUN}} | {{POSITIVE_CONTROL}} |
 
 ---
 
