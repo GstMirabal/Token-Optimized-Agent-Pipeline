@@ -45,6 +45,7 @@ or a `gate` profile.
 | A11 | `workflows/close_workflow.md` | modify (`repo_docs_check` conditional NOTICE) | low | `orchestrator` | sonnet | medium | ✅ `ff3a904` |
 | A12 | `workflows/standardization_workflow.md` | modify (census names NOTICE_TEMPLATE) | low | `orchestrator` | sonnet | medium | ✅ `737cea6` |
 | A13 | `config/template_gates.json` | modify (`exceptions` entry for `NOTICE_TEMPLATE.md`; lands right after A10) | low | `orchestrator` | sonnet | medium | ✅ `2f22aea` |
+| A14 | `README.md` | modify (script count 41→42, mandatory companion of A03: `check_readme_counts.py` in `make verify`; unplanned, recorded at `SPRINT_LOG.md` frictions; QA Gate 1 round 1 F8) | low | `doc_orchestrator` | sonnet | medium | ✅ `bcdb4ac` |
 | B01 | `scripts/session_state.py` | modify: `fix(` D9; companions `tests/test_session_state.py` and `tests/test_session_probe.py` | medium | `implementer_agent` | sonnet | medium | ✅ `23b8b48` |
 | B02 | `scripts/session_state.py` | modify: `fix(` D10; companion `tests/test_session_state.py` | medium | `implementer_agent` | sonnet | medium | ✅ `d86f521` |
 | B03 | `scripts/session_state.py` | modify: `fix(` D11; companion `tests/test_session_state.py` | low | `implementer_agent` | sonnet | medium | ✅ `09642e9` |
