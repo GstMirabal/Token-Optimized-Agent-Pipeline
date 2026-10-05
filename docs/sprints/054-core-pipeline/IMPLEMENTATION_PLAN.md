@@ -2,7 +2,7 @@
 
 **Canonical path**: `docs/sprints/054-core-pipeline/IMPLEMENTATION_PLAN.md`
 **Branch**: `ai-sprint/054` · **Base**: `main` at `d848302` (`v4.36.0` sealed)
-**Status**: `DRAFT`
+**Status**: `APPROVED`
 
 > Authored at Phase 1 (Planning) by `principal_agent`, extracted to this path at
 > Phase 3, and **committed before Phase 5 approves it**: `agents.md §2 triple_lock`
@@ -280,9 +280,9 @@ Decided before execution:
 
 | Field | Value |
 | :--- | :--- |
-| **Approved by** | _pending Phase 5_ |
-| **Date** | _pending_ |
-| **Plan commit at approval** | _pending_ |
+| **Approved by** | GstMirabal (human, attended chat approval) |
+| **Date** | 2026-10-05 |
+| **Plan commit at approval** | `5d1b8da` |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an
