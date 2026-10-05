@@ -5,7 +5,9 @@ Orchestrates existing local tools into a short English briefing for
 `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md`.
 
 With ``--boot``: run drift → claim → probe → sync → bridge, then print the
-briefing. Drift exit ``2`` propagates and skips claim (Sprint 039 B1). In
+briefing. A final advisory step runs ``install_lock.py check`` and, when the
+venv's recorded requirement set is stale, adds a finding naming the reinstall
+command; it never changes the exit code (``KI-053-1``, Sprint 054 ``D12``). Drift exit ``2`` propagates and skips claim (Sprint 039 B1). In
 submodule mode the host-scoped sub-scripts (drift, claim, probe) run with cwd at
 the host root, not the ``.agents`` checkout, so drift is measured against the
 host's git history and the host anchor is the one claimed (``F-BOOT-2`` for
@@ -22,8 +24,9 @@ mirror is missing or diverged, for every target rather than for Cursor alone
 invoked_by: workflows/start_workflow.md, make session-start, commands/start.md
 
 Usage:
-    python3 scripts/session_start.py
-    python3 scripts/session_start.py --boot --tool cursor
+    python3 .agents/scripts/session_start.py --boot --tool cursor   # from a host root
+    python3 scripts/session_start.py --boot --tool cursor           # in the nucleus
+    python3 scripts/session_start.py                                # briefing only
 
 Exit codes:
     0 — briefing printed (no --boot), or boot completed (including bridge
@@ -278,6 +281,46 @@ def _run_script(
     return int(proc.returncode)
 
 
+def _run_install_lock(root: Path) -> int:
+    """Exit code of ``install_lock.py check`` against ``root`` (output captured).
+
+    Args:
+        root: The ``.agents`` checkout.
+
+    Returns:
+        int: The script's exit code; ``2`` when the script is absent.
+    """
+    script = root / "scripts" / "install_lock.py"
+    if not script.is_file():
+        return 2
+    proc = subprocess.run(
+        [sys.executable, str(script), "check", "--root", str(root)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return int(proc.returncode)
+
+
+def _install_lock_notes(root: Path) -> list[str]:
+    """Advisory finding when the installed requirement set is stale.
+
+    Args:
+        root: The ``.agents`` checkout.
+
+    Returns:
+        list[str]: One advisory line naming the fix, or empty when current.
+    """
+    if _run_install_lock(root) == 0:
+        return []
+    note = (
+        "Readiness finding (advisory): installed.lock is stale or absent — run "
+        "`venv_skillopt/bin/python -m pip install -r requirements-core.txt` "
+        "then `python3 scripts/install_lock.py write`."
+    )
+    return [note]
+
+
 def _anchor_cwd(root: Path) -> Path:
     """Directory the host-scoped boot sub-scripts must resolve their paths against.
 
@@ -528,6 +571,7 @@ def run_boot(
     bridge_rc, bridge_notes = _bridge_triage(root, target)
     if bridge_rc != 0:
         return bridge_rc
+    bridge_notes = [*bridge_notes, *_install_lock_notes(root)]
 
     briefing = apply_line_cap(build_briefing(root, tool))
     if bridge_notes:

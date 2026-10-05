@@ -686,3 +686,34 @@ def test_section_drift_spawns_detect_drift_from_the_anchor_cwd(
     monkeypatch.setattr(session_start, "is_nucleus", lambda: True)
     session_start.section_drift(root)
     assert seen["cwd"] == str(root)
+
+
+def _boot_with_install_lock(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path, lock_rc: int
+) -> tuple[int, str]:
+    root = _write_minimal_root(tmp_path / "repo")
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    monkeypatch.setattr(session_start, "_run_script", lambda *a, **k: 0)
+    monkeypatch.setattr(session_start, "_run_install_lock", lambda r: lock_rc)
+    rc = session_start.main(["--boot", "--tool", "terminal"])
+    return rc, ""
+
+
+def test_boot_stale_install_lock_is_advisory_and_keeps_exit_code(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys
+) -> None:
+    """B05 (D12): a stale installed.lock adds a finding, never a hard stop."""
+    rc, _ = _boot_with_install_lock(session_start, monkeypatch, tmp_path, 2)
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "install_lock.py write" in out
+    assert "pip install -r requirements-core.txt" in out
+
+
+def test_boot_matching_install_lock_adds_no_advisory(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys
+) -> None:
+    rc, _ = _boot_with_install_lock(session_start, monkeypatch, tmp_path, 0)
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "install_lock" not in out
