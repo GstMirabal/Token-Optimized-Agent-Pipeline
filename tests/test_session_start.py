@@ -717,3 +717,28 @@ def test_boot_matching_install_lock_adds_no_advisory(
     out = capsys.readouterr().out
     assert rc == 0
     assert "install_lock" not in out
+
+
+def test_install_lock_advisory_names_nucleus_forms_in_nucleus_mode(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """F3: the nucleus root resolves the bare paths."""
+    monkeypatch.setattr(session_start, "_run_install_lock", lambda r: 2)
+    monkeypatch.setattr(session_start, "is_nucleus", lambda: True)
+    note = " ".join(session_start._install_lock_notes(tmp_path))
+    assert "`venv_skillopt/bin/python -m pip install -r requirements-core.txt`" in note
+    assert "`python3 scripts/install_lock.py write`" in note
+    assert ".agents/" not in note
+
+
+def test_install_lock_advisory_names_agents_forms_in_submodule_mode(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """F3: --boot runs from a host root, where only `.agents/` forms resolve."""
+    monkeypatch.setattr(session_start, "_run_install_lock", lambda r: 2)
+    monkeypatch.setattr(session_start, "is_nucleus", lambda: False)
+    note = " ".join(session_start._install_lock_notes(tmp_path))
+    assert (
+        "`.agents/venv_skillopt/bin/python -m pip install -r .agents/requirements-core.txt`" in note
+    )
+    assert "`python3 .agents/scripts/install_lock.py write`" in note

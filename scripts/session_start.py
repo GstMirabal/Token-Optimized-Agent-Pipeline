@@ -313,10 +313,11 @@ def _install_lock_notes(root: Path) -> list[str]:
     """
     if _run_install_lock(root) == 0:
         return []
+    prefix = "" if is_nucleus() else ".agents/"
     note = (
         "Readiness finding (advisory): installed.lock is stale or absent — run "
-        "`venv_skillopt/bin/python -m pip install -r requirements-core.txt` "
-        "then `python3 scripts/install_lock.py write`."
+        f"`{prefix}venv_skillopt/bin/python -m pip install -r {prefix}requirements-core.txt` "
+        f"then `python3 {prefix}scripts/install_lock.py write`."
     )
     return [note]
 
