@@ -9,7 +9,7 @@ that were not, and each of those states its own provenance.
 Genericized per `RA-15`: no host project name, no absolute paths, no host
 business logic. Where a measurement is quoted it is a count, not an identity.
 
-**Four sections, and the differences are load-bearing.**
+**Five sections, and the differences are load-bearing.**
 
 | Section | What it holds | Reproduction status |
 | :--- | :--- | :--- |
@@ -17,6 +17,7 @@ business logic. Where a measurement is quoted it is a count, not an identity.
 | *Added by Sprint 023* | Three items the nucleus found in itself | Measured against the tree at the time each was written. **Not** `v4.4.0` |
 | *Added by Sprint 026* | Three items the nucleus found in itself: one at the Agent Assignment phase, one at the Phase 4 tier audit, one during Hito 1 execution, none while repairing another entry | Measured against the tree at `b5bfb6a`, the commit `docs/sprints/026-core-pipeline/task_scope.md` names as Sprint 026's base |
 | *Inherited from host sprint records* | Leads from a host's sprint history | **Not** re-measured when written. Treat each as a lead, reproduce it first, and delete it if it no longer holds |
+| *Reported by a host — Sprint 054 intake* | Ten findings a host handed over on 2026-10-04: nine open, one (`F-103-N1`) closed on re-measurement | Each reproduced in the nucleus against `v4.36.0` (`d848302`) by Sprint 054 Phase 1, **except `F-115-N2`**, which is host-reported and not re-measured in the nucleus sandbox (its entry says so) |
 
 A finding carried forward on the strength of an old record is exactly the defect
 several of these findings are about — which is why *Inherited from host sprint
@@ -115,6 +116,20 @@ names in its **Still open** row — against `ac33d04`. All six closed.
 | **Closed** | **`REVDOC-G1`** — `scripts/graph_reconcile.py` (`a830894`) reconciles `git ls-files` against the graph's `source_file` set and writes `graphify-out/unmapped_files.json`, advisory exit `0`; `Makefile` `graphify-update`/`-rebuild` run it after every graph write (`e59795a`). Re-measured: 42 tracked files unmapped on the current, pre-rebuild graph; an absent graph stays advisory. The third-party drop itself is not fixed — it is now observable, which is the risk the entry retained · **`ADR-0006`** — `ADR-0016` (`30a14db`) restates `agents.md §3 local_testing` as *isolate the test database*, SQLite in-memory as the default, a host ADR as the sanctioned deviation; applied in `agents.md` (`bbd8d0c`) and `agents/tester_agent.md` (`700913a`). Re-measured: both files cite `ADR-0016` · **`ADR-0007`** — `hooks/on_commit.py` Guard 5 `audit_task_scope_precondition` (`3c217ed`) refuses a `#ID` commit on `ai-sprint/ID` staging paths outside `docs/sprints/ID-*/` while `task_scope.md` is absent; sprint-directory-only commits pass. Re-measured: its tests pass (23-test run below) · **`#13`** — the decorator clause is now stated in `agents.md §1 max_lines_per_func` (`ac33d04`) and pinned by two tests in `tests/test_quality_audit.py` (`6bc75b9`); `make verify` now runs the quality audit (`1449e65`) with 0 violations over 1638 units · **`F-051-R1`** — the registry separates owner (`role`) from a typed `writer` (`0a55351`; `ADR-0015` `b2eba19`, superseded by `ADR-0017` `b0cc724` because script/make-target writers exist); `pipeline_workflow.md` names owner and writer (`c35c634`, `e366940`). `principal_agent` keeps no `Write`. Re-measured: `tests/test_artifact_registry.py` asserts every writer resolves · **`F-051-R3`** — `scripts/check_role_artifact.py` (`11933ce`) resolves the sprint directory from an `Audited repository: <absolute path>` line in the gate's `last_assistant_message` (payload `cwd` cannot distinguish repositories — Claude Code docs: a subagent cannot change the session cwd), then payload cwd, then process cwd; `qa_agent`/`tester_agent` profiles require that line and the full verdict register in the final message (`56d11c8`, `700913a` — which also answers the "Related" note above about one-line final messages, `D12`). Re-measured: tests pass |
 | **Still open** | None |
 | **Re-measurement command** | `venv_skillopt/bin/python -m pytest -q tests/test_check_role_artifact.py tests/test_on_commit.py tests/test_artifact_registry.py tests/test_quality_audit.py tests/test_graph_reconcile.py -k "audited or declared or task_scope or writer or decorator or unmapped or cwd"` → 23 passed; `python3 scripts/graph_reconcile.py` → 42 unmapped; `grep -c ADR-0016 agents.md agents/tester_agent.md` → 1, 2 |
+
+**Status at Sprint 054 intake (2026-10-05, `ai-sprint/054`).** A host handed the
+nucleus every framework-class finding it had pending, checked against `v4.35.0`.
+Sprint 054 Phase 1 re-measured each id against `v4.36.0` (`d848302`) in the
+nucleus. `git grep -l <id>` over the tree returned no file for any of them, so
+none was recorded here before this intake.
+
+| | |
+| :--- | :--- |
+| **Opened** | Nine entries in *Reported by a host — Sprint 054 intake*: `F-115-N1`, `F-115-N2`, `F-115-N3` (same defect as `F-114-N4`), `F-114-N1`, `F-114-N2`, `F-114-N3`, `F-114-N5`, `F-114-N7`, `F-114-N8` |
+| **Closed on re-measurement** | **`F-103-N1`** — `scripts/session_start.py` `anchor_root()` (lines 61-80) returns the host root in submodule mode (`F-BOOT-2`, Sprint 044). Recorded ticked, so the id is no longer unknown |
+| **Routed** | Sprint 054 takes eight of the nine open entries (units named per entry). `F-115-N2` goes to Sprint 055; it also absorbs `F-114-N6`, an earlier and narrower draft of its S-1/S-2 |
+| **Already recorded, not re-filed** | `F-051-R1`, `F-051-R3`, `ADR-0006`, `ADR-0007`, `#13`, `REVDOC-G1`, and the items the host listed as closed, were checked against this file and `CHANGELOG.md` and are already recorded as closed above. Nothing was filed twice |
+| **Ticked on what basis** | Re-measurement against `d848302`, never on the host's claim. The host's `F-114-N5` write-up said its mechanism was read from source and not replayed; the nucleus replay below confirms it |
 
 ---
 
@@ -1522,6 +1537,314 @@ falls back to payload cwd, then process cwd, only when that line is absent.
 register, in the final message (`56d11c8`, `700913a`), which also answers the
 **Related** note above about one-line final messages losing the register
 (`D12`). Re-measured: tests pass.
+
+---
+
+## Reported by a host — Sprint 054 intake (measured against `v4.36.0`)
+
+Handed over on 2026-10-04 by a host that had checked each id against `v4.35.0`.
+Sprint 054 Phase 1 reproduced each one in the nucleus at `d848302` (`v4.36.0`),
+using the command in the entry. The reproduction below is the nucleus's, not the
+host's claim. Host evidence appears only as counts (`RA-15`). Line numbers are
+those of `d848302` and will drift; the function names are the stable handle.
+
+Routing source: `docs/sprints/054-core-pipeline/IMPLEMENTATION_PLAN.md` (unit ids
+`A01`..`C03`; design ids `D1`..`D13`).
+
+### - [ ] `F-115-N1` — `agents.md §8` names `.npmrc` for two supply-chain controls that pnpm 11.23.0 ignores there
+
+**Defect.** `agents.md:174` (`ignore_scripts`) and the neighbouring `§8` rows
+require `ignore-scripts=true` and `minimum-release-age=1440` in `.npmrc`; `RA-10`
+points at `§8`. A host that follows the rule has the 24 h release floor and the
+script block **off**, and nothing reports it, because pnpm drops an unknown `.npmrc`
+key without a message.
+
+**Reproduced at `d848302`.** In a scratch directory with a `package.json`, pnpm
+11.23.0 with both keys set in `.npmrc`: `pnpm config get minimumReleaseAge` →
+`undefined`, `pnpm config get ignore-scripts` → `undefined`. With the same values in
+`pnpm-workspace.yaml` (`minimumReleaseAge: 1440`, `ignoreScripts: true`,
+`onlyBuiltDependencies: [...]`): `1440`, `true` and the list. `git grep -n npmrc --
+agents.md rules workflows` → 1 hit (`agents.md:174`); `rules/code_craft.md:37` and
+`README.md:92` carry the `.npmrc` spelling too.
+
+**Host proposal, in brief.** Rewrite `§8` to name `pnpm-workspace.yaml` keys and
+the check `pnpm config get minimumReleaseAge`; state how pnpm 11+ treats
+`ignore-scripts`. The host measured the same effect on a newer pnpm major and fixed
+its own workspace file with a test asserting `1440`.
+
+**Routed:** Sprint 054 units `C01` (`agents.md §8`, `RA-10` pointer text), `C02`
+(`rules/code_craft.md`), `C03` (`README.md`); design `D13`. `RA-10` stays a pointer.
+
+### - [ ] `F-115-N2` — consolidated sandbox friction, eight failures `S-1`..`S-8` (absorbs `F-114-N6`)
+
+**Host-reported, not re-measured in the nucleus sandbox.** The evidence below is
+the host's, quoted as observed there. Reproducing each row inside the nucleus's own
+sandbox is **Sprint 055's first step**; no row here may be ticked or closed before it
+runs. Several rows are inferences about cause, not replays.
+
+**Defect.** Hosts that run inside the sandbox the nucleus ships lose time on the
+same failures, and several originate in the nucleus itself: its template
+(`claude/settings.hooks.json`, `sandbox.filesystem.denyRead` at lines 43-46 lists
+`./.env` and `./.env.*`), its installer (`scripts/install.py`), or a rule whose
+prescribed mechanism the template blocks (`RA-09`). Today the workarounds are the
+human running the command in their own shell, or the agent disabling the sandbox
+for one command.
+
+| ID | Defect | Host evidence (counts and signatures only) | Nucleus artifact | Host proposal, in brief |
+| :--- | :--- | :--- | :--- | :--- |
+| `S-1` | The bridge cannot write inside the sandbox: `--boot` runs `install.py`, whose `merge_into` writes the host `.claude/settings.json`, and Claude Code protects that path | Traceback ending `PermissionError: [Errno 1] Operation not permitted` on that file at **every** boot; boot degrades to an advisory and exits `0` | `scripts/install.py` (`merge_into`, `install_host_claude_bridge`); `scripts/session_start.py` bridge step | No traceback: detect the denied write, print the exact human command (`bash .agents/scripts/install.sh --target claude`), exit with a documented code; probe-write before attempting. The template cannot allow the path, by design |
+| `S-2` | `denyRead: ./.env.*` also hides the tracked, secret-free `.env.example` | `.env.example: Operation not permitted` printed 10+ times per session by `git status`/`git diff`; a tracked-tree secret-scan test fails in-session; a host-side override is undone because `install.py` re-merges the template at every boot | `claude/settings.hooks.json:43-46` | Exempt `./.env.example` and `./.env.sample`, or deny only secret-bearing names; keep `RA-09` intact |
+| `S-3` | `RA-09` prescribes `Makefile` or `source .env` in a subshell, and the template denies reading `.env`, so neither works for an agent | Replay script over backend tests failed in-sandbox on a missing required secret variable in its temporary worktree; 2 commits had to be replayed by the human; subagents wrote throwaway env files to work around it and the human rejected them | `agents.md §7 RA-09`, `§3 secret_sovereignty`; `claude/settings.hooks.json` | Pick one sanctioned path and write it into `RA-09`: (a) a wrapper `scripts/with_env.sh <cmd>` that is the only sandbox bypass; (b) state that secret-needing commands are human-run, with the exact form; (c) a sandbox allow rule for that one wrapper |
+| `S-4` | The `.env` deny also refuses `stat()`, so full-tree walkers abort | `graphify update .` and any pytest whose rootdir resolves above the `.env` fail with `PermissionError`; host-root `make` died at `include .env` (fixed host-side with `-include`); the nucleus `make verify` is already covered by its own `pytest.ini` | `claude/settings.hooks.json`; `rules/graphify.md` (`graph_sync` mandate) | Document in `rules/graphify.md` and the onboarding guide that `graphify update .` runs unsandboxed, or make the rebuild skip unreadable paths |
+| `S-5` | The sandbox network proxy breaks TLS for package registries and GitHub | `pnpm add` fails with `invalid peer certificate: OSStatus -26276` even with the registry in `allowed_domains`; `git push`, every `gh` call and `scripts/publish_github_release.py` fail the same way; `gh auth status` misreports "token invalid" | `workflows/deployment_workflow.md`; `workflows/repository_hardening_workflow.md`; `scripts/sync_agents_pin.py`; `rules/project_topology.md` | Name the unsandboxed steps in each workflow; record the TLS signature as a known sandbox failure in `rules/project_topology.md` |
+| `S-6` | The pnpm store is outside the sandbox write allowlist | After a change that makes pnpm re-verify `node_modules`, every in-sandbox `pnpm exec`/`run`/`test` fails with `ERR_PNPM_STORE_DIR_OPEN_OPERATION_LOCK` until one unsandboxed `pnpm install --frozen-lockfile` runs | `claude/settings.hooks.json` (write allowlist); `agents.md §8` (mandates pnpm) | Allow writes to the pnpm store directory (verify the locked path with `pnpm store path`), or document the unsandboxed reinstall |
+| `S-7` | A real browser cannot run in the sandbox | Chromium via Playwright fails to launch (Mach port denied); 4 red passes of one unit were run by the human | `rules/qa_and_testing.md` | Add a human-run verification path: the agent prepares the exact command and expected result per case, the human runs it, the agent records the pasted output as evidence |
+| `S-8` | Subagents spend turns on sandbox failures before reporting them; no rule lists the commands known to need the sandbox off | 4 sandbox deviations recorded in one unit | `rules/project_topology.md` | One table in `rules/project_topology.md` (loaded at "running local commands"): what fails in-sandbox, its signature, the sanctioned form, covering `S-1`..`S-7` |
+
+**Absorbs `F-114-N6`.** That earlier draft covered only `S-1` and `S-2`; its
+proposal tables are inputs to Sprint 055. It is not filed as a separate entry.
+
+**Why not Sprint 054.** `S-3` changes the `RA-09` secrets contract, which has
+competing options (a)/(b)/(c) and is a design decision, and the whole entry has to
+be measured in the real sandbox first.
+
+**Routed:** Sprint 055 (block D, routed by Sprint 054 unit `W02`). Not taken by
+Sprint 054.
+
+### - [ ] `F-115-N3` — the start command names a path that does not exist at a host root (`F-114-N4` is the same defect)
+
+**Defect.** `commands/start.md:5` says to run `python3 scripts/session_start.py`.
+In a host the file is at `.agents/scripts/session_start.py` (`agents.md §3
+federation`); a host's own `scripts/` is a different directory. The command file is
+written for the nucleus layout and read by hosts through the bridge symlink. The
+same host-blind path sits in two more places: `scripts/session_state.py:214`
+(`retry_hint`, the `--takeover` retry message) and `workflows/start_workflow.md:13`
+(also `:28`). **`F-114-N4`** is this defect reported earlier under another id by the
+same host; the two ids are one finding and are not filed separately. It is related
+to, and not the same as, `F-103-N1` (which root `--boot` uses once it runs): this
+one is whether the command can be found and launched as documented.
+
+**Reproduced at `d848302`.** `git grep -n "python3 scripts/session_start.py"` →
+3 host-blind hits in `commands/start.md`, `scripts/session_state.py`,
+`workflows/start_workflow.md`. The host observed `can't open file
+'<host>/scripts/session_start.py'`, exit `2`, and had to work out the prefix.
+
+**Host proposal, in brief.** Write the path as it resolves in each mode
+(`.agents/scripts/session_start.py` in a host, `scripts/session_start.py` in the
+nucleus), or provide a Makefile target in both modes. Nucleus note: a host-root
+`make` runs the **host's** Makefile, so the Makefile form would move the defect
+rather than remove it (`D11`).
+
+**Routed:** Sprint 054 units `B03` (`retry_hint` mode-aware), `B05`
+(`session_start.py` docstring usage lines), `B06` (`commands/start.md`), `B07`
+(`workflows/start_workflow.md`); design `D11`.
+
+### - [ ] `F-114-N1` — "watch it fail" in `rules/code_craft.md §6` is enforced by nothing
+
+**Defect.** `§6` is headed "Regression test first (enforced)" and requires the
+order: failing test, watch it fail, then fix. The only mechanism is
+`audit_regression_test` in `hooks/on_commit.py:775`, which checks that a path
+matching `TEST_PATH` is staged (`:799`). No line runs a test or inspects the parent
+tree, so a test that passes against the unfixed code, a test that fails on an import
+error, and a test written after the fix all satisfy it. The first place a fix is
+ever tested is then the Phase 7 gate, where each miss costs a full round toward
+`remediation_workflow.md`.
+
+**Reproduced at `d848302`.** `venv_skillopt/bin/python -c "from hooks.on_commit
+import audit_regression_test as a; print(a('fix(x): y #054',
+['scripts/a.py','tests/test_a.py']))"` → `None` (pass), with no evidence that the
+test ever failed.
+
+**Host evidence, as counts.** In one host sprint: 8 QA rounds, 5 of them
+`REJECTED/charter`; 3 blockers created by the previous round's remediation; 1
+round where the regression test passed against the unfixed code (it asserted
+synchronously before an async change propagated); 17 tests that matched source text
+instead of behaviour.
+
+**Host proposal, in brief.** (a) A `Repro: <test id> — fails at <parent short SHA>`
+trailer on `fix(` commits, `Repro: manual — <log section>` for the untestable. (b)
+A gate script, `--range <base>..HEAD`, replaying each `fix(` commit in a temporary
+worktree: tests must fail on the parent and pass at the commit, exit `2` otherwise;
+run first by QA Gate 1, never per commit (too slow). (c) A `remediation-regression`
+label inside a `charter` row of `rules/qa_and_testing.md §4`; at the second label in
+one sprint the block stops and is re-planned with the human. Prohibited by the host:
+a fourth verdict or fifth class (`RA-17` unchanged), treating the trailer as proof
+without the replay, and accepting a source-text assertion as reproduction. Six
+design lessons from the host's replay are carried into Sprint 054 `D4`: exit exactly
+`1` on the parent tree, `PYTHONDONTWRITEBYTECODE=1`, strip `GIT_*` and
+framework-settings variables, never validate the trailer SHA, link dependencies into
+the worktree (not needed for pytest-only `D3`), and always remove the worktree.
+
+**Routed:** Sprint 054 units `A02` (`hooks/on_commit.py` trailer), `A03`
+(`scripts/check_fix_reproduces.py`), `A04` (`agents/qa_agent.md` Gate 1), `A05`
+(`rules/qa_and_testing.md §4`), `A06` (`rules/code_craft.md §6`), `A09`
+(`workflows/pipeline_workflow.md` Phase 7); design `D2`..`D5`. A non-Python runner
+is routed out as `KI-054-1`.
+
+### - [ ] `F-114-N2` — `open-sprint` refuses a previous sprint whose status is `DEPLOYED`
+
+**Defect.** `scripts/session_state.py:96` defines `SEALED_STATUSES =
+frozenset({CLOSED, "CLOSED"})` and `_sprint_is_sealed` (`:503`) reads it. A host's
+deployment step writes `current_sprint.status = "DEPLOYED"` after the merge and tag.
+`DEPLOYED` is **later** in the lifecycle than `CLOSED_SUCCESSFULLY`, so refusing it
+reverses the guard's purpose, which is to stop a sprint opening over an unfinished
+one. The host had to run `release` against a sprint already merged and tagged, only
+to rewrite the status to the value the guard accepts.
+
+**Reproduced at `d848302`.** Scratch anchor `{"current_sprint":{"id":7,"status":
+"DEPLOYED",...}}`, then `python3 scripts/session_state.py open-sprint --id 8` →
+`Refusing open-sprint: sprint 7 is not sealed (current_sprint.status='DEPLOYED')`,
+exit `2`.
+
+**Host proposal, in brief.** Accept every post-seal status, or name the accepted set
+in one constant the deployment step also writes. Prohibited: dropping the sealed
+check.
+
+**Routed:** Sprint 054 unit `B01` (`SEALED_STATUSES` gains `DEPLOYED`; the second
+consumer, `scripts/session_probe.py` `probe_anchor_hygiene`, treats a `DEPLOYED`
+anchor on a live session like `CLOSED_SUCCESSFULLY`, which is intended); design
+`D9`.
+
+### - [ ] `F-114-N3` — `open-sprint` writes two fields of `current_sprint` and leaves `name`, `path`, `layer`, `app` and `branch` stale
+
+**Defect.** `open_sprint` (`scripts/session_state.py:529`) sets only `id` and
+`status` (`:569-570`); no command writes `path`, `layer`, `app`, `name` or `branch`.
+`scripts/loop_guard.py` reads `current_sprint.path` (2 call sites) for the
+task-scope check and refuses to fall back when it is absent;
+`scripts/check_role_artifact.py` derives the sprint directory from `layer`/`app`.
+After a new sprint opens, the first points at the previous sprint's directory.
+Writers of `current_sprint.path` in the framework: 0. The host needed 5
+`current_sprint` keys written by hand.
+
+**Reproduced at `d848302`.** The same scratch anchor with previous status
+`CLOSED_SUCCESSFULLY`, then `open-sprint --id 8`: the anchor reads `{'id': 8,
+'status': 'OPEN', 'name': 'old-name', 'path': 'docs/sprints/007-core-pipeline'}`.
+Name and path still point at sprint 7.
+
+**Host proposal, in brief.** `open-sprint` accepts `--name`, `--branch`, `--path`,
+`--layer`, `--app`, deriving `path` from `agents.md §5 mandatory_topology`; until
+then, make `loop_guard.py` and `check_role_artifact.py` name the missing key.
+Prohibited: dropping the sealed check, and writing `path` from the working
+directory.
+
+**Routed:** Sprint 054 units `B02` (`open-sprint --layer/--app/--name`, always
+writes `path` and `branch`, drops a stale `name`) and `B08`
+(`workflows/pipeline_workflow.md` Phase 3 cell); design `D10`. The reader-side
+proposal (better error in `loop_guard.py`) is rejected there: with the writer fixed
+it is no longer needed.
+
+### - [ ] `F-114-N5` — `quality_audit.py` exits `0` and reports `[OK]` when it scanned nothing
+
+**Defect.** `iter_source_files` (`scripts/quality_audit.py:641`) adds a given path
+if `is_file()`, walks it if `is_dir()`, and has no `else`: a path that is neither
+adds nothing, with no error. The count of scanned files is never compared to zero,
+so `0 unit(s) scanned, 0 violations` prints `[OK]` and exits `0`; under `--report`
+an empty register prints `0/0` as if clean. A relative path run from the wrong
+directory is a green result that measured nothing — the silent-compliance shape
+`F-049-7` exists to prevent. Second gap in the same loop: a source root whose path
+contains a `DEFAULT_EXCLUDE_DIRS` component (`venv_skillopt`, `node_modules`, `.git`)
+is filtered whole and scans `0` with exit `0`.
+
+**Reproduced at `d848302`.** `venv_skillopt/bin/python scripts/quality_audit.py
+does/not/exist; echo $?` → `[OK] quality_audit: 0 unit(s) scanned`, exit `0`. The
+same result for an empty directory, and for a directory whose path contains
+`node_modules`: three runs, exit `0` each. The host's write-up read this from source
+and did not replay it; this replay confirms it. In the host, one remediation note
+recorded such a run as evidence and was caught at the gate (1 instance).
+
+**Host proposal, in brief.** Exit `2` when the scan finds `0` files, naming the
+paths and the working directory; exit `2` for any given path that is neither file
+nor directory; print the file count in the `[OK]` line; pin with tests for a
+nonexistent path and an empty directory. Prohibited: resolving relative paths
+against a repository root silently, exempting `--report`, and counting `not_measured`
+JS/TS files as scanned.
+
+**Routed:** Sprint 054 unit `A01` (`fix(`, paired test
+`tests/test_quality_audit.py`); design `D1`. `DEFAULT_EXCLUDE_DIRS` is applied only
+to components below each given root.
+
+### - [ ] `F-114-N7` — plan Tests and Verification commands are approved at Phase 5 without ever being run (`KI-053-4` is the nucleus's own instance)
+
+**Defect.** An Implementation Plan carries a Tests table and a Verification table.
+No pipeline step requires those commands to be run against the tree the plan was
+written for, so the first run is at Phase 7 or Phase 8 and a check wrong from the
+day it was written is found there. `skills/token-saver-auditor/scripts/audit_plan.py`
+checks plan structure and does not parse a command or compare it with its
+expectation. An "expect no output" row proves nothing without a positive control: a
+command that errors or searches the wrong path also prints nothing.
+
+**Reproduced at `d848302`.** A plan whose Verification row is `` `rg "a\|b" x` `` →
+`no output` passes: `python3 skills/token-saver-auditor/scripts/audit_plan.py
+<scratch plan>; echo $?` → `0`, `[OK] audit_plan`. That escaped-pipe shape is itself a
+known recurrence (ripgrep reads `\|` as a literal pipe, so the scan exits `1`
+vacuously). **`KI-053-4`** records the same class inside the nucleus's own Sprint
+053 plan; this finding and that one are one root.
+
+**Host evidence, as counts.** 3 earlier host findings with the same root (an
+escaped-pipe alternation; a table-cell `|` that split a row and dropped trailing
+cells; a check that grepped a deliverable for a term the deliverable had to define,
+so it was unsatisfiable). New instance: one absence grep reported `18` hits at
+close, all inside test fixtures, `0` outside; found at Gate 2 and Phase 8, not at
+Phase 4 or 5. 1 further row had no recorded result until close.
+
+**Host proposal, in brief.** (a) Dry-run rule: before Phase 5 the author runs every
+Tests/Verification command and records command, exit code read directly, and result.
+(b) A positive control per "expect no output" row, in the plan template. (c) A row
+whose expectation contradicts a deliverable the plan requires is an `instructing`
+finding at Phase 4. (d) `audit_plan.py` flags an escaped `\|` inside a backticked
+command and a `no output`/`0` expectation with no control column. Prohibited:
+requiring checks to pass at planning time, a new verdict class, dry-running
+destructive or slow rows.
+
+**Routed:** Sprint 054 units `A05` (`rules/qa_and_testing.md §4`, item c), `A07`
+(`IMPLEMENTATION_PLAN_TEMPLATE.md` columns `Observed at base`, `Dry run`,
+`Positive control`), `A08` (`audit_plan.py` mechanical checks, header-gated so
+sealed plans keep passing), `A09` (`workflows/pipeline_workflow.md` Phase 5 dry
+run); design `D6`, `D7`. A07 lands before A08.
+
+### - [ ] `F-114-N8` — `NOTICE.md` is checked at every close and scaffolded by nothing
+
+**Defect.** `workflows/close_workflow.md:22` (`repo_docs_check`) tells the closing
+session to confirm repository documents and says a new vendored dependency changes
+`NOTICE.md`. Nothing in the framework creates the file in a host.
+`scripts/session_probe.py:567` probes only `CONTRIBUTING.md`, `SECURITY.md` and
+`CODE_OF_CONDUCT.md`, so a missing `NOTICE.md` is reported by nobody. There is no
+template. A host that vendors nothing owes no file but the close text does not say
+so; a host that vendors content has no shape to start from. Host evidence: sprints
+skipped the check as out of scope in at least 2 plans.
+
+**Reproduced at `d848302`.** `git grep -n NOTICE -- scripts docs/standards
+workflows` → `workflows/close_workflow.md:22` only; 0 hits in `scripts/` and
+`docs/standards/templates/`. The nucleus's own `NOTICE.md` is the only one the
+framework produced, written by hand.
+
+**Host proposal, in brief.** (a) State the condition in the close step: required
+only when the host vendors third-party content under another license, otherwise
+record `not applicable`. (b) Add `NOTICE_TEMPLATE.md` under
+`docs/standards/templates/`, with the nucleus's file as worked example. (c) Name it
+in the `standardization_workflow.md` census when vendored content is found, or add
+`NOTICE.md` to the probe tuple only under that condition. Prohibited: adding it
+unconditionally to the probe (a false finding in every host that owes nothing), and
+generating attribution text (a legal statement a human owns).
+
+**Routed:** Sprint 054 units `A10` (`NOTICE_TEMPLATE.md`), `A11`
+(`workflows/close_workflow.md`), `A12` (`workflows/standardization_workflow.md`),
+`A13` (`config/template_gates.json` `exceptions` entry, so `make verify` accepts
+the new template); design `D8`. Option (c)'s probe-tuple form is rejected there.
+
+### - [x] `F-103-N1` — `session_start.py` boot claimed the nucleus anchor instead of the host's — closed on re-measurement
+
+**Reported.** A host listed it as "to verify, not to fix": `--boot` in a host
+resolved the root to the submodule and wrote the nucleus anchor.
+
+**Re-measured at `d848302`: not reproduced, already closed.**
+`scripts/session_start.py` `anchor_root()` (lines 61-80) returns the host root in
+submodule mode (`F-BOOT-2`, Sprint 044). `sed -n 56,81p scripts/session_start.py`
+shows the mode test. The host's own latest session boot wrote the host anchor
+(`session_id` updated in the host's `docs/active_state.json`), which agrees.
+
+**Closed on that basis**, not on the sprint record that claimed the fix. Filed as
+ticked so the id is no longer unknown to this register. No Sprint 054 unit.
 
 ---
 
