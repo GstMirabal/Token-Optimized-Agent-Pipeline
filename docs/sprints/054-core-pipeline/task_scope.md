@@ -30,33 +30,33 @@ or a `gate` profile.
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| W01 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify (Sprint 054 intake section, RA-15 genericized) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| W02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify (route blocks D and E) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A01 | `scripts/quality_audit.py` | modify: `fix(` D1; companion `tests/test_quality_audit.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| A02 | `hooks/on_commit.py` | modify: `feat(` D2 trailer; companion `tests/test_on_commit.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| A03 | `scripts/check_fix_reproduces.py` | create: D2 gate half, D3, D4; companion `tests/test_check_fix_reproduces.py` | high | `implementer_agent` | sonnet | high | ⏳ |
-| A04 | `agents/qa_agent.md` | modify (Gate 1 first check) | low | `agent_orchestrator` | sonnet | medium | ⏳ |
-| A05 | `rules/qa_and_testing.md` | modify (§4 label, instructing finding) | medium | `rule_validator` | sonnet | medium | ⏳ |
-| A06 | `rules/code_craft.md` | modify (§6 names enforcement) | low | `rule_validator` | sonnet | medium | ⏳ |
-| A07 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify (D6 columns) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A08 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify: `feat(` D6/D7; companion `tests/test_token_saver_auditor.py` | medium | `skill_architect` | sonnet | medium | ⏳ |
-| A09 | `workflows/pipeline_workflow.md` | modify (Phase 5 dry run, Phase 7 replay) | medium | `orchestrator` | sonnet | medium | ⏳ |
-| A10 | `docs/standards/templates/NOTICE_TEMPLATE.md` | create (D8) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A11 | `workflows/close_workflow.md` | modify (`repo_docs_check` conditional NOTICE) | low | `orchestrator` | sonnet | medium | ⏳ |
-| A12 | `workflows/standardization_workflow.md` | modify (census names NOTICE_TEMPLATE) | low | `orchestrator` | sonnet | medium | ⏳ |
-| A13 | `config/template_gates.json` | modify (`exceptions` entry for `NOTICE_TEMPLATE.md`; lands right after A10) | low | `orchestrator` | sonnet | medium | ⏳ |
-| B01 | `scripts/session_state.py` | modify: `fix(` D9; companions `tests/test_session_state.py` and `tests/test_session_probe.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| B02 | `scripts/session_state.py` | modify: `fix(` D10; companion `tests/test_session_state.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| B03 | `scripts/session_state.py` | modify: `fix(` D11; companion `tests/test_session_state.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
-| B04 | `scripts/install_lock.py` | create (D12); companion `tests/test_install_lock.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| B05 | `scripts/session_start.py` | modify: `feat(` boot advisory; companion `tests/test_session_start.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
-| B06 | `commands/start.md` | modify (D11 both forms) | low | `orchestrator` | sonnet | medium | ⏳ |
-| B07 | `workflows/start_workflow.md` | modify (step 1 forms, pip_setup lock) | low | `orchestrator` | sonnet | medium | ⏳ |
-| B08 | `workflows/pipeline_workflow.md` | modify (Phase 3 open-sprint cell) | low | `orchestrator` | sonnet | medium | ⏳ |
-| C01 | `agents.md` | modify (§8 rows, RA-10 pointer) | medium | `rule_validator` | sonnet | medium | ⏳ |
-| C02 | `rules/code_craft.md` | modify (line 37 key spelling) | low | `rule_validator` | sonnet | medium | ⏳ |
-| C03 | `README.md` | modify (line 92 key spelling, matches C01) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| C04 | `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` | modify (regenerate via `scripts/map_workflows.py`, never hand-edited; after A09, A11, A12, B07, B08) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W01 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify (Sprint 054 intake section, RA-15 genericized) | low | `doc_orchestrator` | sonnet | medium | ✅ `225aaee` |
+| W02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify (route blocks D and E) | low | `doc_orchestrator` | sonnet | medium | ✅ `903b04e` |
+| A01 | `scripts/quality_audit.py` | modify: `fix(` D1; companion `tests/test_quality_audit.py` | medium | `implementer_agent` | sonnet | medium | ✅ `46d07cf` |
+| A02 | `hooks/on_commit.py` | modify: `feat(` D2 trailer; companion `tests/test_on_commit.py` | medium | `implementer_agent` | sonnet | medium | ✅ `8f13941` |
+| A03 | `scripts/check_fix_reproduces.py` | create: D2 gate half, D3, D4; companion `tests/test_check_fix_reproduces.py` | high | `implementer_agent` | sonnet | high | ✅ `0747911` |
+| A04 | `agents/qa_agent.md` | modify (Gate 1 first check) | low | `agent_orchestrator` | sonnet | medium | ✅ `cd225c4` |
+| A05 | `rules/qa_and_testing.md` | modify (§4 label, instructing finding) | medium | `rule_validator` | sonnet | medium | ✅ `12769c6` |
+| A06 | `rules/code_craft.md` | modify (§6 names enforcement) | low | `rule_validator` | sonnet | medium | ✅ `9d2c1ef` |
+| A07 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify (D6 columns) | low | `doc_orchestrator` | sonnet | medium | ✅ `7fb1572` |
+| A08 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify: `feat(` D6/D7; companion `tests/test_token_saver_auditor.py` | medium | `skill_architect` | sonnet | medium | ✅ `b6b554e` |
+| A09 | `workflows/pipeline_workflow.md` | modify (Phase 5 dry run, Phase 7 replay) | medium | `orchestrator` | sonnet | medium | ✅ `38548e4` |
+| A10 | `docs/standards/templates/NOTICE_TEMPLATE.md` | create (D8) | low | `doc_orchestrator` | sonnet | medium | ✅ `4ec95bd` |
+| A11 | `workflows/close_workflow.md` | modify (`repo_docs_check` conditional NOTICE) | low | `orchestrator` | sonnet | medium | ✅ `ff3a904` |
+| A12 | `workflows/standardization_workflow.md` | modify (census names NOTICE_TEMPLATE) | low | `orchestrator` | sonnet | medium | ✅ `737cea6` |
+| A13 | `config/template_gates.json` | modify (`exceptions` entry for `NOTICE_TEMPLATE.md`; lands right after A10) | low | `orchestrator` | sonnet | medium | ✅ `2f22aea` |
+| B01 | `scripts/session_state.py` | modify: `fix(` D9; companions `tests/test_session_state.py` and `tests/test_session_probe.py` | medium | `implementer_agent` | sonnet | medium | ✅ `23b8b48` |
+| B02 | `scripts/session_state.py` | modify: `fix(` D10; companion `tests/test_session_state.py` | medium | `implementer_agent` | sonnet | medium | ✅ `d86f521` |
+| B03 | `scripts/session_state.py` | modify: `fix(` D11; companion `tests/test_session_state.py` | low | `implementer_agent` | sonnet | medium | ✅ `09642e9` |
+| B04 | `scripts/install_lock.py` | create (D12); companion `tests/test_install_lock.py` | medium | `implementer_agent` | sonnet | medium | ✅ `3b012d4` |
+| B05 | `scripts/session_start.py` | modify: `feat(` boot advisory; companion `tests/test_session_start.py` | low | `implementer_agent` | sonnet | medium | ✅ `b2a42ef` |
+| B06 | `commands/start.md` | modify (D11 both forms) | low | `orchestrator` | sonnet | medium | ✅ `f16bdd4` |
+| B07 | `workflows/start_workflow.md` | modify (step 1 forms, pip_setup lock) | low | `orchestrator` | sonnet | medium | ✅ `cac68ec` |
+| B08 | `workflows/pipeline_workflow.md` | modify (Phase 3 open-sprint cell) | low | `orchestrator` | sonnet | medium | ✅ `590fb6a` |
+| C01 | `agents.md` | modify (§8 rows, RA-10 pointer) | medium | `rule_validator` | sonnet | medium | ✅ `d01045b` |
+| C02 | `rules/code_craft.md` | modify (line 37 key spelling) | low | `rule_validator` | sonnet | medium | ✅ `c9f9c79` |
+| C03 | `README.md` | modify (line 92 key spelling, matches C01) | low | `doc_orchestrator` | sonnet | medium | ✅ `f0e829d` |
+| C04 | `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` | modify (regenerate via `scripts/map_workflows.py`, never hand-edited; after A09, A11, A12, B07, B08) | low | `implementer_agent` | sonnet | medium | ✅ `dde2088` |
 | Z01 | `docs/sprints/054-core-pipeline/PHASE_REGISTER.md` | create | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 | Z02 | `CHANGELOG.md` | modify (`[Unreleased]` entry, SHA per commit) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 | Z03 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify (tick delivered entries) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
