@@ -99,18 +99,19 @@ subject in sequence, never at the same time (`no_interference`).
 | A10 | `docs/standards/templates/NOTICE_TEMPLATE.md` | create — D8; the nucleus's own `NOTICE.md` as the worked example | low | `doc_orchestrator` | ⏳ |
 | A11 | `workflows/close_workflow.md` | modify — `repo_docs_check`: `NOTICE.md` is required only when the host vendors third-party content; otherwise record `not applicable`; names `NOTICE_TEMPLATE.md` | low | `orchestrator` | ⏳ |
 | A12 | `workflows/standardization_workflow.md` | modify — the legacy census names `NOTICE_TEMPLATE.md` when it finds vendored content | low | `orchestrator` | ⏳ |
+| A13 | `config/template_gates.json` | modify — an `exceptions` entry for `NOTICE_TEMPLATE.md` (no gate renders it); without it `make verify` fails on a template in neither `render` nor `exceptions` (`config/template_gates.json:10-13`; Phase 4.3 finding 1). Lands right after A10 | low | `orchestrator` | ⏳ |
 
 ### Wave B — session and sprint state
 
 | # | File | Operation | Risk | Assignee (proposed) | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| B01 | `scripts/session_state.py` | `fix(` — D9: `SEALED_STATUSES` gains `DEPLOYED`. Paired test: `tests/test_session_state.py` (`open-sprint` over `DEPLOYED` → `0`; over `OPEN` → still `2`) | medium | `implementer_agent` | ⏳ |
+| B01 | `scripts/session_state.py` | `fix(` — D9: `SEALED_STATUSES` gains `DEPLOYED`. Paired tests: `tests/test_session_state.py` (`open-sprint` over `DEPLOYED` → `0`; over `OPEN` → still `2`) and `tests/test_session_probe.py` (the second consumer, `scripts/session_probe.py:250` `probe_anchor_hygiene`, flags a `DEPLOYED` anchor on a live session exactly as it flags `CLOSED_SUCCESSFULLY` — intended; Phase 4.3 finding 2) | medium | `implementer_agent` | ⏳ |
 | B02 | `scripts/session_state.py` | `fix(` — D10: `open-sprint --layer/--app/--name`; writes `path` and `branch`; drops a stale `name`. Paired test: `tests/test_session_state.py` (the exact base observation above now yields `path: docs/sprints/008-core-pipeline`, `branch: ai-sprint/008`, no `name`) | medium | `implementer_agent` | ⏳ |
 | B03 | `scripts/session_state.py` | `fix(` — D11: `retry_hint` is mode-aware. Paired test: `tests/test_session_state.py` (submodule mode → `.agents/scripts/session_start.py`; nucleus → `scripts/session_start.py`; the existing assertions at `tests/test_session_state.py:229`, `:249`, `:299` updated to the nucleus form) | low | `implementer_agent` | ⏳ |
 | B04 | `scripts/install_lock.py` | create — D12 (`check`, `write`); `invoked_by:` `workflows/start_workflow.md#pip_setup`, `scripts/session_start.py`. Paired test: `tests/test_install_lock.py` (absent lock → `2`; matching hash → `0`; an edited `-r` include → `2`; recursive includes followed; a cycle in includes does not hang) | medium | `implementer_agent` | ⏳ |
-| B05 | `scripts/session_start.py` | `feat(` — the boot readiness reports `install_lock.py check` as an advisory, without changing the exit code. Paired test: `tests/test_session_start.py` | low | `implementer_agent` | ⏳ |
+| B05 | `scripts/session_start.py` | `feat(` — the boot readiness reports `install_lock.py check` as an advisory, without changing the exit code; the module docstring's usage lines (`:25-26`) gain the host form (D11). Paired test: `tests/test_session_start.py` | low | `implementer_agent` | ⏳ |
 | B06 | `commands/start.md` | modify — D11, both forms. `tests/test_cursor_adapter.py` keeps passing: its rewrite targets `--tool claude-code`, which this unit leaves unchanged | low | `orchestrator` | ⏳ |
-| B07 | `workflows/start_workflow.md` | modify — step 1 in both forms; `pip_setup` runs `install_lock.py check` and reinstalls on exit `2`, then `install_lock.py write` | low | `orchestrator` | ⏳ |
+| B07 | `workflows/start_workflow.md` | modify — step 1 (`:13`) and the `--takeover` retry (`:28`) in both forms; `:29` lists the fields `open-sprint` now writes; `pip_setup` (`:25`) runs `install_lock.py check` and reinstalls on exit `2`, then `install_lock.py write` | low | `orchestrator` | ⏳ |
 | B08 | `workflows/pipeline_workflow.md` | modify — Phase 3's `open-sprint` cell: new flags; writes `path`/`branch`; `DEPLOYED` accepted as sealed | low | `orchestrator` | ⏳ |
 
 ### Wave C — supply chain
@@ -119,6 +120,8 @@ subject in sequence, never at the same time (`no_interference`).
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | C01 | `agents.md` | modify — D13: the three `§8` rows name `pnpm-workspace.yaml` keys and the `pnpm config get <key>` check; `RA-10` pointer text matches | medium | `rule_validator` | ⏳ |
 | C02 | `rules/code_craft.md` | modify — line 37 quotes the `§8` key names; updated to the `pnpm-workspace.yaml` spelling (`RA-14` propagation of C01) | low | `rule_validator` | ⏳ |
+| C03 | `README.md` | modify — line 92 states the `.npmrc` spellings; updated to match C01 (`RA-14`; Phase 4.3 finding 3) | low | `doc_orchestrator` | ⏳ |
+| C04 | `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` | regenerate with `scripts/map_workflows.py`, never hand-edited (`agents.md §0`), after A09, A11, A12, B07 and B08 have changed workflows (Phase 4.3 finding 9) | low | `orchestrator` | ⏳ |
 
 ### Wave Z — sprint records (Phase 8)
 
@@ -129,9 +132,21 @@ subject in sequence, never at the same time (`no_interference`).
 | Z03 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify — tick each delivered entry, citing the re-measurement and the closing commit | low | `doc_orchestrator` | ⏳ |
 | Z04 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify — mark Sprint 054 delivered | low | `doc_orchestrator` | ⏳ |
 
-Wave order: `0` → `A` → `B` → `C` → `Z`. Inside Wave A, A07 lands before A08, so the
-template already passes the check that consumes it (the Sprint 041 Filter 6
-precedent). A09 and B08 both take `workflows/pipeline_workflow.md`, in sequence.
+Wave order: `0` → `A` → `B` → `C` → `Z`. Ordering constraints:
+
+| Constraint | Why |
+| :--- | :--- |
+| A07 before A08 | The template must already pass the check that consumes it (the Sprint 041 Filter 6 precedent) |
+| A03 → A04 consecutive; B04 → B05 → B07 consecutive | A script's declared invoker lands immediately after it. `make verify` (`RA-16` check (d)) runs at the end of each wave, not between those commits |
+| A10 → A13 consecutive | `make verify` fails while a template sits in neither `render` nor `exceptions` |
+| Serial pairs on one subject: B01 → B02 → B03 (`scripts/session_state.py`); A09 → B08 (`workflows/pipeline_workflow.md`); A06 → C02 (`rules/code_craft.md`); W01 → Z03; W02 → Z04 | `no_interference`: one claim per subject at a time |
+| Every `fix(` commit after A02 carries a `Repro:` trailer (B01, B02, B03, and any remediation `fix(`) | A02 makes the trailer mandatory from its own commit onward; A01 lands before it |
+| C04 after B08 | The step map is generated from the final workflow text |
+
+**Rejected Phase 4.3 finding.** Finding 5 said `set-topology` (`scripts/session_state.py:458`)
+already derives a sprint path, so D10 duplicates it. It does not:
+`set-topology` derives `topology_version` (`X.Y.Z-NNN-status`), not `current_sprint.path`.
+D10 has no second writer to reconcile.
 
 ---
 
@@ -161,7 +176,7 @@ precedent). A09 and B08 both take `workflows/pipeline_workflow.md`, in sequence.
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 28 (Wave 0: 2 · A: 12 · B: 8 · C: 2 · Z: 4), one commit each | Count of rows in Work tables |
+| Work units | 31 (Wave 0: 2 · A: 13 · B: 8 · C: 4 · Z: 4), one commit each; A13, C03 and C04 added after the Phase 4.3 rule audit | Count of rows in Work tables |
 | Subagents dispatched | ≈ 10: Phase 4.1/4.2/4.3 (3), `implementer_agent` batches by wave (≈ 4), Gate 1 and Gate 2 (2, fresh context), Phase 8 `doc_orchestrator` (1) | Phase 4.1 `agent_assignment.md` |
 | Prior session ratio | n/a — Sprint 053 closed in a previous session; measure this one at close | `python3 scripts/session_cost.py --from-anchor --json` |
 
@@ -220,6 +235,9 @@ Exit codes are read with `$?` directly, **never through a pipe**.
 | `workflows/start_workflow.md`, `commands/start.md` | Host and nucleus forms of the start command; lock check (B06, B07) |
 | `docs/standards/templates/` | `IMPLEMENTATION_PLAN_TEMPLATE.md` columns; new `NOTICE_TEMPLATE.md` (A07, A10) |
 | `agents/qa_agent.md` | Gate 1's first check (A04) |
+| `config/template_gates.json` | `exceptions` entry for `NOTICE_TEMPLATE.md` (A13) |
+| `README.md` | Supply-chain key spelling (C03) |
+| `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` | Regenerated (C04) |
 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | Sprint 054 intake section; ticks at close (W01, Z03) |
 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | Routing of blocks D and E; Sprint 054 delivered (W02, Z04) |
 | `CHANGELOG.md` | `[Unreleased]` entry (Z02) |
