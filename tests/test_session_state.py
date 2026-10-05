@@ -30,6 +30,13 @@ def repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     return tmp_path
 
 
+@pytest.fixture(autouse=True)
+def nucleus_mode(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Pin the mode to the nucleus: operator hints are mode-aware (D11), so
+    assertions on their text must not depend on where the suite runs."""
+    monkeypatch.setattr(ss, "is_nucleus", lambda: True, raising=False)
+
+
 MULTI_SECTION_CHANGELOG = """# Changelog
 
 ## [Unreleased]
@@ -227,6 +234,30 @@ def _write_locked_anchor(root: Path) -> None:
 
 def test_retry_hint_for_boot_entry_point():
     assert ss.retry_hint("boot") == "python3 scripts/session_start.py --boot --takeover"
+
+
+def test_retry_hint_for_boot_entry_point_in_host_mode(monkeypatch: pytest.MonkeyPatch):
+    """At a host root `scripts/session_start.py` does not resolve (D11)."""
+    monkeypatch.setattr(ss, "is_nucleus", lambda: False)
+
+    assert ss.retry_hint("boot") == "python3 .agents/scripts/session_start.py --boot --takeover"
+
+
+def test_retry_hint_for_claim_entry_point_in_host_mode(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(ss, "is_nucleus", lambda: False)
+
+    assert ss.retry_hint("claim") == "python3 .agents/scripts/session_state.py claim --takeover"
+
+
+def test_open_sprint_refusal_names_release_with_host_path_in_host_mode(
+    repo: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
+):
+    monkeypatch.setattr(ss, "is_nucleus", lambda: False)
+    _write_anchor(repo, {"current_sprint": {"id": 51, "status": "OPEN"}})
+
+    assert ss.open_sprint(52) == 2
+
+    assert "`python3 .agents/scripts/session_state.py release`" in capsys.readouterr().err
 
 
 def test_retry_hint_for_claim_entry_point():

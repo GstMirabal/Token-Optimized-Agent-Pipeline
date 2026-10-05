@@ -89,6 +89,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _mode import is_nucleus
+
 from hooks.state_mirror import mirror_active_state
 
 ACTIVE_STATE = Path("docs/active_state.json")
@@ -208,6 +211,22 @@ def suspend() -> int:
     return 0
 
 
+def _operator_command(script: str, arguments: str) -> str:
+    """Spell a framework script invocation so it resolves from the cwd.
+
+    Args:
+        script: Script file name under the framework's `scripts/`.
+        arguments: Arguments following the script path.
+
+    Returns:
+        str: `python3 scripts/<script> ...` in the nucleus, where `scripts/`
+            is at the root, or `python3 .agents/scripts/<script> ...` from a
+            host root, where it is not (`F-114-N5`, Sprint 054 `D11`).
+    """
+    prefix = "scripts" if is_nucleus() else ".agents/scripts"
+    return f"python3 {prefix}/{script} {arguments}"
+
+
 def retry_hint(entry_point: str) -> str:
     """The re-run invocation valid for the entry point that issued a claim.
 
@@ -217,11 +236,12 @@ def retry_hint(entry_point: str) -> str:
             directly.
 
     Returns:
-        str: the exact command line to re-run with `--takeover`.
+        str: the exact command line to re-run with `--takeover`, spelled for
+            the current mode (nucleus or host root; see `_operator_command`).
     """
     if entry_point == "boot":
-        return "python3 scripts/session_start.py --boot --takeover"
-    return "python3 scripts/session_state.py claim --takeover"
+        return _operator_command("session_start.py", "--boot --takeover")
+    return _operator_command("session_state.py", "claim --takeover")
 
 
 def claim(
@@ -616,7 +636,7 @@ def open_sprint(
         print(
             f"Refusing open-sprint: sprint {current_id} is not sealed "
             f"(current_sprint.status={current_status!r}). Seal it with "
-            f"`python3 scripts/session_state.py release` before opening "
+            f"`{_operator_command('session_state.py', 'release')}` before opening "
             f"sprint {sprint_id}.",
             file=sys.stderr,
         )
