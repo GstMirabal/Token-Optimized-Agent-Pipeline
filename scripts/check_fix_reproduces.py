@@ -9,6 +9,12 @@ error on the parent (pytest exit 2/3/4/5) is not a reproduction.
 
 Verdicts: OK, MANUAL, MISSING_TRAILER, UNREPLAYED, PASSES_ON_PARENT,
 WRONG_FAILURE, FAILS_AT_COMMIT. Everything except OK and MANUAL is a violation.
+RUNNER_UNAVAILABLE is not a per-commit verdict: the runner interpreter cannot
+run pytest (checked with ``<python> -m pytest --version`` before any replay), so
+nothing is replayed and the script exits 2.
+
+Runner interpreter: ``--python <path>``, else ``<repo>/venv_skillopt/bin/python``
+when it exists, else the interpreter running this script.
 
 invoked_by: agents/qa_agent.md (QA Gate 1, first check),
 workflows/pipeline_workflow.md Phase 7.
@@ -16,16 +22,19 @@ workflows/pipeline_workflow.md Phase 7.
 Usage:
     python3 scripts/check_fix_reproduces.py --range <base>..<head>
     python3 scripts/check_fix_reproduces.py --range <base> --repo <path>
+    python3 scripts/check_fix_reproduces.py --range <base>..<head> --python <venv python>
 
 Exit codes:
     0 - no violation (including a range with zero ``fix(`` commits)
-    2 - at least one violation, a bad range, or no git repository (RA-11)
+    2 - at least one violation, a bad range, no git repository, or
+        RUNNER_UNAVAILABLE (RA-11)
 """
 
 from __future__ import annotations
 
 import argparse
 import contextlib
+import logging
 import os
 import re
 import subprocess
@@ -34,6 +43,8 @@ import tempfile
 from collections.abc import Iterator
 from pathlib import Path
 
+LOG = logging.getLogger(__name__)
+RUNNER_PYTHON: str = sys.executable
 STRIPPED_ENV = ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "DJANGO_SETTINGS_MODULE")
 NON_SOURCE_SUFFIXES = frozenset({".md", ".rst", ".txt", ".json", ".yml", ".yaml", ".toml"})
 _REPRO = re.compile(r"^Repro:\s*(.+?)\s+(?:—|--)\s+(.*?)\s*$", re.MULTILINE)
@@ -175,8 +186,10 @@ def worktree(repo: Path, rev: str) -> Iterator[Path]:
     finally:
         _git(repo, "worktree", "remove", "--force", str(path))
         _git(repo, "worktree", "prune")
-        with contextlib.suppress(OSError):
+        try:
             base.rmdir()
+        except OSError as exc:
+            LOG.debug("temporary directory %s not removed: %s", base, exc)
 
 
 def run_pytest(cwd: Path, test_ids: list[str]) -> int:
@@ -187,12 +200,49 @@ def run_pytest(cwd: Path, test_ids: list[str]) -> int:
         test_ids: Pytest node ids or file paths.
 
     Returns:
-        The pytest process exit code.
+        The pytest process exit code, run with the module-level ``RUNNER_PYTHON``.
     """
-    cmd = [sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", *test_ids]
+    cmd = [RUNNER_PYTHON, "-m", "pytest", "-q", "-p", "no:cacheprovider", *test_ids]
     return subprocess.run(
         cmd, cwd=cwd, env=_env(), capture_output=True, text=True, check=False, timeout=900
     ).returncode
+
+
+def resolve_python(repo: Path, override: str | None) -> str:
+    """Choose the interpreter that runs pytest.
+
+    Args:
+        repo: Repository directory searched for ``venv_skillopt/bin/python``.
+        override: Value of ``--python``, or None.
+
+    Returns:
+        ``override`` if given, else the repository venv interpreter if it exists,
+        else ``sys.executable``.
+    """
+    if override:
+        return override
+    venv_python = repo / "venv_skillopt" / "bin" / "python"
+    return str(venv_python) if venv_python.exists() else sys.executable
+
+
+def runner_can_run_pytest(interpreter: str) -> bool:
+    """Check that an interpreter can import and run pytest.
+
+    Args:
+        interpreter: Path of the interpreter used for replays.
+
+    Returns:
+        True when ``<interpreter> -m pytest --version`` exits 0.
+    """
+    try:
+        result = subprocess.run(
+            [interpreter, "-m", "pytest", "--version"],
+            env=_env(), capture_output=True, text=True, check=False, timeout=60,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        LOG.debug("runner preflight failed for %s: %s", interpreter, exc)
+        return False
+    return result.returncode == 0
 
 
 def _copy_tests(repo: Path, commit: str, wt: Path, test_ids: list[str]) -> None:
@@ -293,12 +343,26 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--range", dest="spec", required=True, help="<base>..<head>")
     parser.add_argument("--repo", default=".", help="repository path (default: cwd)")
+    parser.add_argument(
+        "--python",
+        default=None,
+        help="interpreter that runs pytest (default: <repo>/venv_skillopt/bin/python, else this one)",
+    )
     args = parser.parse_args(argv)
     repo = Path(args.repo).resolve()
+    global RUNNER_PYTHON
+    RUNNER_PYTHON = resolve_python(repo, args.python)
     try:
         fixes = select_fixes(repo, list_commits(repo, normalize_range(args.spec)))
     except ValueError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
+    if fixes and not runner_can_run_pytest(RUNNER_PYTHON):
+        print(
+            f"RUNNER_UNAVAILABLE: {RUNNER_PYTHON} cannot run pytest; nothing was replayed. "
+            "Re-run with --python <venv python> (for example venv_skillopt/bin/python).",
+            file=sys.stderr,
+        )
         return 2
     violations = 0
     for sha in fixes:

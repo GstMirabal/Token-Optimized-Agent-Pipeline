@@ -135,3 +135,33 @@ def test_worktree_removed_after_exception(repo, monkeypatch):
         cfr.main(["--range", f"{base}..HEAD", "--repo", str(repo)])
     listing = git(repo, "worktree", "list").splitlines()
     assert len(listing) == 1
+
+
+def test_runner_without_pytest_is_runner_unavailable(repo, tmp_path, capsys):
+    base = commit_fix(repo, {"calc.py": FIXED, "tests/test_calc.py": RED_TEST}, TRAILER)
+    stub = tmp_path / "nopytest.sh"
+    stub.write_text("#!/bin/sh\nexit 1\n")
+    stub.chmod(0o755)
+    code = cfr.main(["--range", f"{base}..HEAD", "--repo", str(repo), "--python", str(stub)])
+    captured = capsys.readouterr()
+    assert code == 2
+    assert "RUNNER_UNAVAILABLE" in captured.err + captured.out
+    assert str(stub) in captured.err + captured.out
+    assert "FAILS_AT_COMMIT" not in captured.out
+    assert "PASSES_ON_PARENT" not in captured.out
+    assert len(git(repo, "worktree", "list").splitlines()) == 1
+
+
+def test_default_interpreter_prefers_repo_venv(tmp_path):
+    venv_python = tmp_path / "venv_skillopt" / "bin" / "python"
+    venv_python.parent.mkdir(parents=True)
+    venv_python.write_text("")
+    assert cfr.resolve_python(tmp_path, None) == str(venv_python)
+
+
+def test_default_interpreter_falls_back_to_sys_executable(tmp_path):
+    assert cfr.resolve_python(tmp_path, None) == sys.executable
+
+
+def test_explicit_python_overrides_default(tmp_path):
+    assert cfr.resolve_python(tmp_path, "/x/python") == "/x/python"
