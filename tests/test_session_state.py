@@ -325,6 +325,7 @@ def test_open_sprint_writes_id_and_status_preserving_siblings(repo: Path):
     assert state["current_sprint"] == {
         "id": 52, "status": "OPEN",
         "layer": "core", "app": "pipeline", "last_audit_sprint": 49,
+        "path": "docs/sprints/052-core-pipeline", "branch": "ai-sprint/052",
     }
 
 
@@ -334,7 +335,10 @@ def test_open_sprint_creates_current_sprint_when_absent(repo: Path):
     assert ss.open_sprint(52) == 0
 
     state = json.loads((repo / "docs" / "active_state.json").read_text())
-    assert state["current_sprint"] == {"id": 52, "status": "OPEN"}
+    assert state["current_sprint"] == {
+        "id": 52, "status": "OPEN", "layer": "core", "app": "pipeline",
+        "path": "docs/sprints/052-core-pipeline", "branch": "ai-sprint/052",
+    }
 
 
 def test_open_sprint_refuses_in_progress_other_sprint(repo: Path, capsys: pytest.CaptureFixture):
@@ -385,6 +389,74 @@ def test_open_sprint_exits_0_and_prints_confirmation(repo: Path, capsys: pytest.
 
     assert ss.open_sprint(52) == 0
     assert "52" in capsys.readouterr().out
+
+
+def _read_sprint(repo: Path) -> dict:
+    return json.loads((repo / "docs" / "active_state.json").read_text())["current_sprint"]
+
+
+def test_open_sprint_rewrites_path_branch_and_drops_stale_name(repo: Path):
+    """F-114-N2/N3 base observation: a sealed sprint 7 carrying `name` and
+    `path`; opening 8 must not leave sprint 7's path or name behind."""
+    _write_anchor(repo, {"current_sprint": {
+        "id": 7, "status": "CLOSED_SUCCESSFULLY", "layer": "core",
+        "app": "pipeline", "name": "old-name",
+        "path": "docs/sprints/007-core-pipeline", "last_audit_sprint": 5,
+    }})
+
+    assert ss.open_sprint(8) == 0
+
+    sprint = _read_sprint(repo)
+    assert sprint["path"] == "docs/sprints/008-core-pipeline"
+    assert sprint["branch"] == "ai-sprint/008"
+    assert "name" not in sprint
+    assert sprint["last_audit_sprint"] == 5
+    assert sprint["id"] == 8 and sprint["status"] == "OPEN"
+
+
+def test_open_sprint_honours_layer_app_and_name(repo: Path):
+    _write_anchor(repo, {"current_sprint": {
+        "id": 7, "status": "CLOSED_SUCCESSFULLY", "layer": "core", "app": "pipeline",
+    }})
+
+    assert ss.open_sprint(8, layer="api", app="billing", name="invoices") == 0
+
+    sprint = _read_sprint(repo)
+    assert sprint["layer"] == "api" and sprint["app"] == "billing"
+    assert sprint["name"] == "invoices"
+    assert sprint["path"] == "docs/sprints/008-api-billing"
+    assert sprint["branch"] == "ai-sprint/008"
+
+
+def test_open_sprint_same_id_with_flags_refreshes_path_and_branch(repo: Path):
+    _write_anchor(repo, {"current_sprint": {
+        "id": 8, "status": "OPEN", "layer": "core", "app": "pipeline",
+        "name": "keep", "path": "stale",
+    }})
+
+    assert ss.open_sprint(8, layer="api") == 0
+
+    sprint = _read_sprint(repo)
+    assert sprint["path"] == "docs/sprints/008-api-pipeline"
+    assert sprint["branch"] == "ai-sprint/008"
+    assert sprint["status"] == "OPEN"
+    assert sprint["name"] == "keep"
+
+
+def test_main_open_sprint_parses_layer_app_name(
+    repo: Path, monkeypatch: pytest.MonkeyPatch
+):
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": "CLOSED_SUCCESSFULLY"}})
+    monkeypatch.setattr(sys, "argv", [
+        "session_state.py", "open-sprint", "--id", "8",
+        "--layer", "api", "--app", "billing", "--name", "invoices",
+    ])
+
+    assert ss.main() == 0
+
+    sprint = _read_sprint(repo)
+    assert sprint["path"] == "docs/sprints/008-api-billing"
+    assert sprint["name"] == "invoices"
 
 
 def test_main_dispatches_open_sprint(repo: Path, monkeypatch: pytest.MonkeyPatch):
