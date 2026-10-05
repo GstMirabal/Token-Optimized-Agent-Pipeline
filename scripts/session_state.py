@@ -42,7 +42,8 @@ Usage:
         # not a SESSION one, so the next session's `claim` (which resets
         # top-level status to IN_PROGRESS) does not un-seal it (S052 QA Gate 1
         # round 2). `open-sprint` also accepts the legacy `CLOSED` literal
-        # written before Sprint 050 (SEALED_STATUSES, KI-052-2).
+        # written before Sprint 050 (SEALED_STATUSES, KI-052-2) and a
+        # host-written `DEPLOYED` (F-114-N2, Sprint 054).
     python3 scripts/session_state.py suspend   # ends the SESSION only
     python3 scripts/session_state.py require-released [--branch <ref>]
         # deployment preflight: refuse SUSPENDED; tip must equal last_close_commit
@@ -63,8 +64,8 @@ Usage:
         # of path/branch/layer/app/name from the given flags otherwise;
         # refuses (exit 2) for a
         # different id while that sprint is not sealed — sealed means
-        # current_sprint.status is CLOSED_SUCCESSFULLY, or the legacy CLOSED
-        # literal (SEALED_STATUSES), the SPRINT fact `release()` writes,
+        # current_sprint.status is CLOSED_SUCCESSFULLY, the legacy CLOSED
+        # literal, or a host-written DEPLOYED (SEALED_STATUSES), the SPRINT fact `release()` writes,
         # never the top-level SESSION status (which
         # `claim` resets to IN_PROGRESS at the start of every session,
         # including the one that opens the next sprint) and never
@@ -221,7 +222,7 @@ def _operator_command(script: str, arguments: str) -> str:
     Returns:
         str: `python3 scripts/<script> ...` in the nucleus, where `scripts/`
             is at the root, or `python3 .agents/scripts/<script> ...` from a
-            host root, where it is not (`F-114-N5`, Sprint 054 `D11`).
+            host root, where it is not (`F-115-N3` / `F-114-N4`, Sprint 054 `D11`).
     """
     prefix = "scripts" if is_nucleus() else ".agents/scripts"
     return f"python3 {prefix}/{script} {arguments}"
