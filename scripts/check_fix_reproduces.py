@@ -189,7 +189,7 @@ def worktree(repo: Path, rev: str) -> Iterator[Path]:
         try:
             base.rmdir()
         except OSError as exc:
-            LOG.debug("temporary directory %s not removed: %s", base, exc)
+            LOG.warning("temporary directory %s not removed: %s", base, exc)
 
 
 def run_pytest(cwd: Path, test_ids: list[str]) -> int:
@@ -225,14 +225,17 @@ def resolve_python(repo: Path, override: str | None) -> str:
     return str(venv_python) if venv_python.exists() else sys.executable
 
 
-def runner_can_run_pytest(interpreter: str) -> bool:
-    """Check that an interpreter can import and run pytest.
+def runner_problem(interpreter: str) -> str | None:
+    """Explain why an interpreter cannot run pytest, or return None when it can.
 
     Args:
         interpreter: Path of the interpreter used for replays.
 
     Returns:
-        True when ``<interpreter> -m pytest --version`` exits 0.
+        None when ``<interpreter> -m pytest --version`` exits 0; otherwise the
+        reason, carried into the ``RUNNER_UNAVAILABLE`` message so the operator
+        sees it (QA Gate 1 round 2 ``R2-2``: a debug log without a handler
+        showed nothing).
     """
     try:
         result = subprocess.run(
@@ -240,9 +243,11 @@ def runner_can_run_pytest(interpreter: str) -> bool:
             env=_env(), capture_output=True, text=True, check=False, timeout=60,
         )
     except (OSError, subprocess.SubprocessError) as exc:
-        LOG.debug("runner preflight failed for %s: %s", interpreter, exc)
-        return False
-    return result.returncode == 0
+        return f"{type(exc).__name__}: {exc}"
+    if result.returncode == 0:
+        return None
+    detail = (result.stderr or result.stdout).strip().splitlines()
+    return f"exit {result.returncode}: {detail[-1] if detail else 'no output'}"
 
 
 def _copy_tests(repo: Path, commit: str, wt: Path, test_ids: list[str]) -> None:
@@ -357,9 +362,11 @@ def main(argv: list[str] | None = None) -> int:
     except ValueError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
-    if fixes and not runner_can_run_pytest(RUNNER_PYTHON):
+    problem = runner_problem(RUNNER_PYTHON) if fixes else None
+    if problem is not None:
         print(
-            f"RUNNER_UNAVAILABLE: {RUNNER_PYTHON} cannot run pytest; nothing was replayed. "
+            f"RUNNER_UNAVAILABLE: {RUNNER_PYTHON} cannot run pytest ({problem}); "
+            "nothing was replayed. "
             "Re-run with --python <venv python> (for example venv_skillopt/bin/python).",
             file=sys.stderr,
         )

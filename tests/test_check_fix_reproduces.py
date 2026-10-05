@@ -165,3 +165,25 @@ def test_default_interpreter_falls_back_to_sys_executable(tmp_path):
 
 def test_explicit_python_overrides_default(tmp_path):
     assert cfr.resolve_python(tmp_path, "/x/python") == "/x/python"
+
+
+def test_runner_unavailable_names_the_reason(repo, tmp_path, capsys):
+    """QA Gate 1 round 2 R2-2: the preflight's cause reaches the operator."""
+    base = commit_fix(repo, {"calc.py": FIXED, "tests/test_calc.py": RED_TEST}, TRAILER)
+    missing = tmp_path / "absent" / "python"
+    code = cfr.main(["--range", f"{base}..HEAD", "--repo", str(repo), "--python", str(missing)])
+    captured = capsys.readouterr()
+    assert code == 2
+    assert "RUNNER_UNAVAILABLE" in captured.err
+    assert "No such file" in captured.err
+
+
+def test_runner_unavailable_shows_the_pytest_exit(repo, tmp_path, capsys):
+    base = commit_fix(repo, {"calc.py": FIXED, "tests/test_calc.py": RED_TEST}, TRAILER)
+    stub = tmp_path / "nopytest.sh"
+    stub.write_text("#!/bin/sh\necho 'No module named pytest' >&2\nexit 1\n")
+    stub.chmod(0o755)
+    code = cfr.main(["--range", f"{base}..HEAD", "--repo", str(repo), "--python", str(stub)])
+    captured = capsys.readouterr()
+    assert code == 2
+    assert "No module named pytest" in captured.err
