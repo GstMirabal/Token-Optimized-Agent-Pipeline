@@ -34,6 +34,7 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | Small edit units staffed to Bash-less or doc profiles were executed by the parent session under that profile's ruleset: A04 (`agent_orchestrator`), A06, C01, C02 (`rule_validator`), A13, B06, B07, B08 (`orchestrator`), C03 (`doc_orchestrator`), C04 (`implementer_agent`: a script run); each a single-subject commit | Recorded here as `pipeline_workflow.md` Phase 4.1 requires when a writer is not dispatched | — |
 | A02 made six fixtures in `tests/test_code_craft_gates.py` fail (they committed `fix(` without a trailer) | Fixtures given a `Repro:` trailer in the same `feat(hooks)` commit (`8f13941`) | — |
 | A03 and B04 added framework scripts, so `check_readme_counts.py` (inside `make verify`) failed on the README script count | Count bumped in `bcdb4ac` (42) and `f0e829d` (43) | — |
+| **Approved-plan deviation** (QA Gate 1 round 1 `F2`): the Verification row `git grep -n "npmrc" -- agents.md rules workflows` expected `no output`, which contradicts C01's own `Location` row (an unsatisfiable row — the `F-114-N7` shape this sprint names) | Expectation restated as "every hit states that `.npmrc` does not carry the §8 keys"; C01 left intact. **Acknowledged by the human (GstMirabal) in chat on 2026-10-05** | — |
 | A host's handoff was checked against `v4.35.0` while the nucleus had already sealed `v4.36.0` | Every id re-measured against `d848302` before planning; all still open, `F-103-N1` already closed by `F-BOOT-2` | — |
 
 ---
