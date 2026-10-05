@@ -49,6 +49,7 @@ and a fabricated row would teach authors to invent verdicts
 
 | Gate | Round | Verdict | Class | Notes |
 | :--- | :--- | :--- | :--- | :--- |
+| QA Agent (Gate 1) | 1 | REJECTED | charter | Range `d848302..65bf38b`. F1 high: `check_fix_reproduces.py` reads a missing pytest (`python3 -m pytest` exit 1) as a red parent, so the documented command blames 4 sound fixes `FAILS_AT_COMMIT` (also instructing: `qa_agent.md`, `pipeline_workflow.md` Phase 7 name an interpreter without pytest). F2 medium: plan Verification row `git grep -n npmrc` expects no output and contradicts C01's own Location row. F3 medium: `install_lock.py`/`session_start.py` fix hint prints only the nucleus form. F4-F6, F8 testifying (footer version, docstrings omit DEPLOYED, wrong finding citation, `bcdb4ac` without task_scope row); F7 low charter (new helpers lack Google docstrings; silent `contextlib.suppress`). ruff 0, quality_audit 0, make verify 0. |
 
 ---
 
