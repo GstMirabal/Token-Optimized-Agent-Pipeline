@@ -35,6 +35,8 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | A02 made six fixtures in `tests/test_code_craft_gates.py` fail (they committed `fix(` without a trailer) | Fixtures given a `Repro:` trailer in the same `feat(hooks)` commit (`8f13941`) | — |
 | A03 and B04 added framework scripts, so `check_readme_counts.py` (inside `make verify`) failed on the README script count | Count bumped in `bcdb4ac` (42) and `f0e829d` (43) | — |
 | **Approved-plan deviation** (QA Gate 1 round 1 `F2`): the Verification row `git grep -n "npmrc" -- agents.md rules workflows` expected `no output`, which contradicts C01's own `Location` row (an unsatisfiable row — the `F-114-N7` shape this sprint names) | Expectation restated as "every hit states that `.npmrc` does not carry the §8 keys"; C01 left intact. **Acknowledged by the human (GstMirabal) in chat on 2026-10-05** | — |
+| QA Gate 1 round 2 `R2-3`: the host/nucleus reinstall command is spelled in both `scripts/install_lock.py` (`reinstall_command`) and `scripts/session_start.py` (`_install_lock_notes`) | **Accepted, not changed**: `session_start.py` runs `install_lock.py` as a subprocess and imports nothing from it; importing the helper to share one string would couple the boot to that module's import-time behaviour. Both spellings are pinned by mode tests in each file's paired test | — |
+| QA Gate 1 round 2 `R2-4`: every Phase 7 gate command is written in nucleus form only | Pre-existing, out of scope; opened as `KI-054-2` in the programme queue | `KI-054-2` |
 | A host's handoff was checked against `v4.35.0` while the nucleus had already sealed `v4.36.0` | Every id re-measured against `d848302` before planning; all still open, `F-103-N1` already closed by `F-BOOT-2` | — |
 
 ---
