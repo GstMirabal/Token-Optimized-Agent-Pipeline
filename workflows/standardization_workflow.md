@@ -1,6 +1,6 @@
 ---
 description: "Standardized Hierarchy Alignment Protocol (SHAP)"
-version: 5.0.0
+version: 5.1.0
 invoked_by: human:/agents:standardization, start_workflow.md#first_run_scaffold
 ---
 
@@ -24,7 +24,7 @@ Invoked by `start_workflow first_run_scaffold` when prior agent-generated docume
 
 | Step | Gate | Action / Constraint |
 | :--- | :--- | :--- |
-| **5.1 Census** | `inventory` | Enumerate every legacy artifact (tracked AND untracked): `task/`, `implementation_plan*`, `knowledge/`, `memory/<domain>/`, `docs/active_task.md`, `.agent_state/`, numbered roadmaps, other frameworks' rule files. Record the full list with file counts. |
+| **5.1 Census** | `inventory` | Enumerate every legacy artifact (tracked AND untracked): `task/`, `implementation_plan*`, `knowledge/`, `memory/<domain>/`, `docs/active_task.md`, `.agent_state/`, numbered roadmaps, other frameworks' rule files. Record the full list with file counts. **Vendored third-party content**: also search for content copied into the tree under a license other than the host's own (copied source files, vendored skills, assets, fonts, datasets) — package-manager lockfile dependencies (`pnpm-lock.yaml`, `requirements*.txt`, `poetry.lock`, `package-lock.json`) whose files are not copied into the tree are excluded. If it finds any, record each item (path, apparent upstream) in the reconciliation report and scaffold `NOTICE.md` at the host root from `docs/standards/templates/NOTICE_TEMPLATE.md`, leaving every attribution value (license, copyright holder, upstream URL) blank for a human to author — an agent MUST NOT generate or infer them. If it finds none, record `NOTICE.md: not applicable` in the reconciliation report, so `close_workflow.md` `repo_docs_check` has a recorded answer; do not create an empty `NOTICE.md`. When the workspace is the `.agents` nucleus, do not scaffold `NOTICE.md` (`agents.md §5 nucleus_neutrality`): record the finding only. |
 | **5.2 Secret Scan** | `shield_gate` | Run `env-shielding-auditor` + the `on_commit.py` secret patterns over ALL census material **before anything enters git**. Findings go to the reconciliation report for human redact/exclude decisions. Order is non-negotiable: scan → snapshot, never the reverse. |
 | **5.3 Snapshot** | `reversibility_gate` | Create branch `archive/pre-agents-onboarding-[date]` committing every census artifact (`git add -f` for ignored/untracked ones, minus human-excluded secrets). **No migration or purge may execute unless this snapshot exists** — undoing the entire onboarding must always be one checkout away. |
 | **5.4 Report** | `reconciliation_report` | Produce the migration manifest (source → destination → action, per the routing table below) + secret-scan findings + submodule identity check result. Present to the human. |
