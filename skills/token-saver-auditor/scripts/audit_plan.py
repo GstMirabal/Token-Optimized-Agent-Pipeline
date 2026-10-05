@@ -25,6 +25,7 @@ import sys
 from pathlib import Path
 
 COST_FROM_SPRINT = 30
+EMPTY = {"", "—", "-"}
 
 
 def sprint_id_from_path(path: Path) -> int | None:
@@ -65,6 +66,114 @@ def _mechanisms_has_invoker(text: str) -> bool:
     return "Invoker" in header
 
 
+def _section(text: str, title: str) -> str:
+    """Body of the ``## title`` section, or an empty string."""
+    match = re.search(rf"^##\s+{re.escape(title)}\b.*?(?=^##\s|\Z)", text, re.MULTILINE | re.DOTALL)
+    return match.group(0) if match else ""
+
+
+def _split_row(line: str) -> list[str]:
+    """Cells of one table row, splitting only on unescaped pipes outside backticks."""
+    cells: list[str] = []
+    current: list[str] = []
+    in_code = False
+    previous = ""
+    for char in line.strip():
+        if char == "`":
+            in_code = not in_code
+        if char == "|" and not in_code and previous != "\\":
+            cells.append("".join(current).strip())
+            current = []
+        else:
+            current.append(char)
+        previous = char
+    cells.append("".join(current).strip())
+    return cells[1:-1] if line.strip().endswith("|") else cells[1:]
+
+
+def _tables(section: str) -> list[tuple[list[str], list[list[str]]]]:
+    """Each table in a section as ``(header cells, body rows)``."""
+    tables: list[tuple[list[str], list[list[str]]]] = []
+    in_table = False
+    for line in section.splitlines():
+        if not line.lstrip().startswith("|"):
+            in_table = False
+            continue
+        cells = _split_row(line)
+        if cells and all(re.fullmatch(r":?-{3,}:?", cell) for cell in cells):
+            continue
+        if in_table:
+            tables[-1][1].append(cells)
+        else:
+            tables.append((cells, []))
+            in_table = True
+    return tables
+
+
+def _column(header: list[str], prefix: str) -> int | None:
+    """Index of the first header cell starting with ``prefix``."""
+    for index, cell in enumerate(header):
+        if cell.startswith(prefix):
+            return index
+    return None
+
+
+def _cell(row: list[str], index: int) -> str:
+    return row[index] if index < len(row) else ""
+
+
+def _pipe_findings(rows: list[list[str]], where: str) -> list[str]:
+    spans = (span for row in rows for cell in row for span in re.findall(r"`([^`]*)`", cell))
+    if any("\\|" in span and span.replace("\\|", "").strip() for span in spans):
+        return [f"{where}: escaped pipe inside a backticked command; use -e a -e b."]
+    return []
+
+
+def _is_absence_claim(expected: str, command: str) -> bool:
+    """True when ``Expected`` asserts silence or zero hits, not an exit code."""
+    plain = expected.replace("`", "").strip().lower()
+    if plain.startswith("no output") or plain in {"0 hits", "0 matches"}:
+        return True
+    return plain == "0" and "$?" not in command
+
+
+def _verification_row(header: list[str], row: list[str]) -> list[str]:
+    command = _cell(row, 0)
+    control = _column(header, "Positive control")
+    dry = _column(header, "Dry run")
+    found: list[str] = []
+    if control is not None and _is_absence_claim(_cell(row, 1), command) and _cell(row, control) in EMPTY:
+        found.append(f"Verification: no-output/zero expectation without a Positive control: {command}")
+    if dry is not None and not _cell(row, dry):
+        found.append(f"Verification: empty Dry run cell: {command}")
+    return found
+
+
+def _verification_findings(text: str) -> list[str]:
+    findings: list[str] = []
+    for header, rows in _tables(_section(text, "Verification")):
+        findings += _pipe_findings(rows, "Verification")
+        for row in rows:
+            findings += _verification_row(header, row)
+    return findings
+
+
+def _tests_row(observed: int | None, row: list[str]) -> list[str]:
+    if observed is not None and _cell(row, 1).startswith("**Yes**") and not _cell(row, observed):
+        return [f"Tests: **Yes** row with an empty Observed at base cell: {_cell(row, 0)}"]
+    return []
+
+
+def _tests_findings(text: str) -> list[str]:
+    findings: list[str] = []
+    for header, rows in _tables(_section(text, "Tests")):
+        findings += _pipe_findings(rows, "Tests")
+        observed = _column(header, "Observed at base")
+        for row in rows:
+            findings += _tests_row(observed, row)
+    return findings
+
+
 def collect_findings(text: str) -> list[str]:
     """Structural wastes in one plan. Empty means pass."""
     findings: list[str] = []
@@ -81,7 +190,7 @@ def collect_findings(text: str) -> list[str]:
         findings.append("Mechanisms table has no Invoker column (RA-16).")
     if not _has_heading(text, "Cost"):
         findings.append("Cost section is missing (required from Sprint 030).")
-    return findings
+    return findings + _verification_findings(text) + _tests_findings(text)
 
 
 def audit(path: Path) -> int:
