@@ -37,19 +37,19 @@ or a `gate` profile.
 | U06 | `scripts/session_start.py` | modify: `fix(` bridge advisory by mode; companion `tests/test_session_start.py` | low | `implementer_agent` | sonnet | medium | ✅ 6773f34 |
 | U07 | `claude/settings.hooks.json` | modify (`denyRead`/`allowRead` D4, wrapper in `excludedCommands` D2, forms from U01 per D7) | high | `implementer_agent` | sonnet | high | ✅ 3ad277f |
 | U08 | `Makefile` | modify: `fix(` D9 `-m graphify` in `graphify-update`, new `graphify-deep` via `with_env.py`; companion `tests/test_makefile_graphify.py` | low | `implementer_agent` | sonnet | medium | ✅ ddd5bc7 |
-| U09 | `rules/project_topology.md` | modify (sandbox table, D8) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U10 | `rules/qa_and_testing.md` | modify (browser verification under sandbox, branch A or B, D6) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U11 | `rules/graphify.md` | modify (key via `with_env.py`, `S-4`, measured 7-key list; carries the correction the omitted U12 would have made) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| U09 | `rules/project_topology.md` | modify (sandbox table, D8) | medium | `doc_orchestrator` | sonnet | medium | ✅ c716b7f |
+| U10 | `rules/qa_and_testing.md` | modify (browser verification under sandbox, branch A or B, D6) | medium | `doc_orchestrator` | sonnet | medium | ✅ d6b2649 |
+| U11 | `rules/graphify.md` | modify (key via `with_env.py`, `S-4`, measured 7-key list; carries the correction the omitted U12 would have made) | low | `doc_orchestrator` | sonnet | medium | ✅ f53b7fe |
 | U12 | `skills/graphify/SKILL.md` | OMITTED: judged vendored upstream material (`skill_assignment.md` §6; `rules/skills_and_integrations.md §3`); no file is touched, see note 1 below | low | `skill_architect` | sonnet | medium | ⏳ omitted |
-| U13 | `agents.md` | modify (`RA-09` and `§3 secret_sovereignty` name `with_env.py` as the sanctioned path, D2) | high | `rule_validator` | sonnet | high | ⏳ |
-| U14 | `workflows/pipeline_workflow.md` | modify (Phase 2 row: "export `.env`" -> `with_env.py`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U15 | `workflows/deployment_workflow.md` | modify (unsandboxed steps reference the U09 table, `S-5`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U16 | `workflows/repository_hardening_workflow.md` | modify (`gh` calls reference the U09 table, `S-5`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U17 | `rules/LEGACY_RULE_CONCORDANCE.md` | modify (`Rule 66` row follows new `RA-09` text, `RA-14`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| U13 | `agents.md` | modify (`RA-09` and `§3 secret_sovereignty` name `with_env.py` as the sanctioned path, D2) | high | `rule_validator` | sonnet | high | ✅ e589f19 |
+| U14 | `workflows/pipeline_workflow.md` | modify (Phase 2 row: "export `.env`" -> `with_env.py`) | low | `doc_orchestrator` | sonnet | medium | ✅ 024ecd1 |
+| U15 | `workflows/deployment_workflow.md` | modify (unsandboxed steps reference the U09 table, `S-5`) | low | `doc_orchestrator` | sonnet | medium | ✅ 664c931 |
+| U16 | `workflows/repository_hardening_workflow.md` | modify (`gh` calls reference the U09 table, `S-5`) | low | `doc_orchestrator` | sonnet | medium | ✅ 30d0a50 |
+| U17 | `rules/LEGACY_RULE_CONCORDANCE.md` | modify (`Rule 66` row follows new `RA-09` text, `RA-14`) | low | `doc_orchestrator` | sonnet | medium | ✅ no change needed (Rule 66 row stays accurate after U13) |
 | U18 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify (close `F-115-N2`, row -> SHA, reproduced in U01) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 | U19 | `CHANGELOG.md` | modify (`[Unreleased]` entry naming each commit by short SHA) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U20 | `agents/devops_agent.md` | modify (`secret_sovereignty` row and `.env` export wording point to `scripts/with_env.py`; RA-14 propagation of U13) | low | `agent_orchestrator` | sonnet | medium | ⏳ |
-| U21 | `README.md` | modify (At a Glance counts: 44 scripts, 9 config registries after U02/U03; README drift check in `make verify`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| U20 | `agents/devops_agent.md` | modify (`secret_sovereignty` row and `.env` export wording point to `scripts/with_env.py`; RA-14 propagation of U13) | low | `agent_orchestrator` | sonnet | medium | ✅ 056a5e3 |
+| U21 | `README.md` | modify (At a Glance counts: 44 scripts, 9 config registries after U02/U03; README drift check in `make verify`) | low | `doc_orchestrator` | sonnet | medium | ✅ e5532cc |
 
 Note 1 (U12): `check_task_scope.py` reads only `File`, `Operation`, `Risk`, `Assignee`,
 `Model`, `Effort`; it does not parse `Status`, so the row is kept with an Operation that

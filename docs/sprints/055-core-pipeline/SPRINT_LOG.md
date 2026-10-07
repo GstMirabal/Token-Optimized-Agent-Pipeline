@@ -29,7 +29,9 @@ Tracking of atomic goals achieved during the session.
     - `[x]` U21 added: new script and registry drifted the README At a Glance counts (`make verify` exit 2)
     - `[x]` U05 `f4986b5`, U06 `6773f34` (`check_fix_reproduces.py` OK), U07 `3ad277f`
     - `[x]` U04 omitted: D4 revised after a sandboxed measurement — keep `./.env.*` denied and add a narrower `allowRead` for `.env.example`/`.env.sample`/`.env.template`; no template value retires, so the merge-prune is unnecessary
-    - `[ ]` U09..U11, U13..U21
+    - `[x]` U13 `e589f19`, U20 `056a5e3`, U09 `c716b7f`, U10 `d6b2649`, U11 `f53b7fe`, U14 `024ecd1`, U15 `664c931`, U16 `30d0a50`, U21 `e5532cc`; `make verify` exit 0
+    - `[x]` U17 no change needed: the Rule 66 concordance row (`§3` points to `RA-09`) stays accurate after U13
+    - `[ ]` U18, U19
 
 ---
 
