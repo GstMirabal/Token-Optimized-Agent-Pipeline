@@ -30,13 +30,13 @@ or a `gate` profile.
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | U01 | `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` | create (transcribe human-reported matrix: command, exit, error signature per row; the human runs the commands in a `claude --settings claude/settings.hooks.json` session) | medium | `doc_orchestrator` | sonnet | medium | ✅ 27210b1 |
-| U02 | `scripts/with_env.py` | create: `feat(` D2/D3 wrapper; companion `tests/test_with_env.py` (allowlist, exit `2` off-allowlist, redaction, missing `.env` explicit error, `invoked_by:` docstring) | high | `implementer_agent` | sonnet | high | ⏳ |
-| U03 | `config/with_env_allowlist.json` | create (only `graphify`, D3) | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| U02 | `scripts/with_env.py` | create: `feat(` D2/D3 wrapper; companion `tests/test_with_env.py` (allowlist, exit `2` off-allowlist, redaction, missing `.env` explicit error, `invoked_by:` docstring) | high | `implementer_agent` | sonnet | high | ✅ 6a090a4 |
+| U03 | `config/with_env_allowlist.json` | create (only `graphify`, D3) | medium | `implementer_agent` | sonnet | medium | ✅ 25dda50 |
 | U04 | `scripts/merge_json.py` | modify: `fix(` D4 targeted prune of retired template values; companion `tests/test_merge_json.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
 | U05 | `scripts/install.py` | modify: `fix(` D5 write probe, no traceback, host-form human command; companion `tests/test_install_permission.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
 | U06 | `scripts/session_start.py` | modify: `fix(` bridge advisory by mode; companion `tests/test_session_start.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
 | U07 | `claude/settings.hooks.json` | modify (`denyRead`/`allowRead` D4, wrapper in `excludedCommands` D2, forms from U01 per D7) | high | `implementer_agent` | sonnet | high | ⏳ |
-| U08 | `Makefile` | modify: `fix(` D9 `-m graphify` in `graphify-update`, new `graphify-deep` via `with_env.py`; companion `tests/test_makefile_graphify.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
+| U08 | `Makefile` | modify: `fix(` D9 `-m graphify` in `graphify-update`, new `graphify-deep` via `with_env.py`; companion `tests/test_makefile_graphify.py` | low | `implementer_agent` | sonnet | medium | ✅ ddd5bc7 |
 | U09 | `rules/project_topology.md` | modify (sandbox table, D8) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
 | U10 | `rules/qa_and_testing.md` | modify (browser verification under sandbox, branch A or B, D6) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
 | U11 | `rules/graphify.md` | modify (key via `with_env.py`, `S-4`, measured 7-key list; carries the correction the omitted U12 would have made) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
@@ -49,6 +49,7 @@ or a `gate` profile.
 | U18 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify (close `F-115-N2`, row -> SHA, reproduced in U01) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 | U19 | `CHANGELOG.md` | modify (`[Unreleased]` entry naming each commit by short SHA) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 | U20 | `agents/devops_agent.md` | modify (`secret_sovereignty` row and `.env` export wording point to `scripts/with_env.py`; RA-14 propagation of U13) | low | `agent_orchestrator` | sonnet | medium | ⏳ |
+| U21 | `README.md` | modify (At a Glance counts: 44 scripts, 9 config registries after U02/U03; README drift check in `make verify`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 
 Note 1 (U12): `check_task_scope.py` reads only `File`, `Operation`, `Risk`, `Assignee`,
 `Model`, `Effort`; it does not parse `Status`, so the row is kept with an Operation that

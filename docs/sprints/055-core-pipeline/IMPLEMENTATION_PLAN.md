@@ -101,6 +101,7 @@ cada fila.
 | `U18` | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify — cerrar `F-115-N2` con fila→SHA, reproducido en `U01` | low | `doc_orchestrator` | ⏳ |
 | `U19` | `CHANGELOG.md` | modify — entrada en `[Unreleased]` con SHAs | low | `doc_orchestrator` | ⏳ |
 | `U20` | `agents/devops_agent.md` | modify — `secret_sovereignty` (línea 16) y el texto de "`.env` export" pasan a `scripts/with_env.py` (`RA-14`, hallazgo de la Fase 4.3) | low | `agent_orchestrator` | ⏳ |
+| `U21` | `README.md` | modify — recuento de *At a Glance* (44 scripts, 9 registros JSON) tras `U02`/`U03`; lo exige el check de deriva del README en `make verify` | low | `doc_orchestrator` | ⏳ |
 
 Orden: `U01` → (`U02`, `U03`) → `U04`..`U08` → `U09`..`U17` → `U18`, `U19`. Si `U01` refuta una
 fila del host, la unidad que la corrige se reduce a documentarla y la decisión queda en `SPRINT_LOG.md`.
@@ -129,7 +130,7 @@ comentarios); no se añade `python-dotenv`.
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 20 (19 activas: `U12` omitida por vendorizada) | Count of rows in Work tables |
+| Work units | 21 (20 activas: `U12` omitida por vendorizada) | Count of rows in Work tables |
 | Subagents dispatched | 19 units + 2 gates | `agent_assignment.md` |
 | Prior session ratio | **5.0 (umbral blando alcanzado)** — esta sesión de Planning: primer turno 23264, pico 116084 | `python3 scripts/session_cost.py --from-anchor --json` |
 
