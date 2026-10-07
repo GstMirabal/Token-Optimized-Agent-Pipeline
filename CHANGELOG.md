@@ -4,6 +4,8 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.37.0] - 2026-10-07
+
 ### Added
 - **Sprint 054 `host-intake-gates-and-sprint-state`** — intake of a host's framework-class findings (`F-114-*`, `F-115-*`), re-measured against `v4.36.0` (`225aaee`): close the gates that pass without measuring (block A), the sprint-state gaps (block B) and the `.npmrc` supply-chain gap (block C). The sandbox findings are routed to Sprint 055 and the nucleus's own instrument residue to Sprint 056 (`903b04e`). 67 commits; `make verify` green, 1024 tests pass. #054
   - **`fix(` replay** — `scripts/check_fix_reproduces.py` (new) replays each `fix(` commit's staged tests red on the parent and green at the commit, and reports `FAILS_AT_COMMIT`, `PASSES_ON_PARENT` or `UNREPLAYED` per commit (`0747911`). It is QA Gate 1's first check (`cd225c4`, `38548e4`) and `README.md` counts it among the framework scripts (`bcdb4ac`).
