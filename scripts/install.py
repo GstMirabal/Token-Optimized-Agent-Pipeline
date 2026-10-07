@@ -110,7 +110,11 @@ def install_command(target: str, nucleus: bool) -> str:
 
 
 def _report_write_denied(dest: Path) -> None:
-    """Print the one-line advisory for a denied bridge write to stderr."""
+    """Print the one-line advisory for a denied bridge write to stderr.
+
+    Args:
+        dest: Path whose write was refused; shown relative to the host directory when possible.
+    """
     try:
         shown = dest.relative_to(HOST_DIR)
     except ValueError:
