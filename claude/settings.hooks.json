@@ -8,7 +8,10 @@
       "Bash(git reset --hard origin:*)",
       "Bash(rm -rf /:*)",
       "Edit(/.agents/scripts/with_env.py)",
-      "Edit(/.agents/config/with_env_allowlist.json)"
+      "Edit(/.agents/config/with_env_allowlist.json)",
+      "Edit(/.agents/venv_skillopt/**)",
+      "Edit(/.env)",
+      "Read(/.env)"
     ],
     "allow": [
       "Bash(cd:*)",
@@ -53,7 +56,9 @@
       ],
       "denyWrite": [
         "./.agents/scripts/with_env.py",
-        "./.agents/config/with_env_allowlist.json"
+        "./.agents/config/with_env_allowlist.json",
+        "./.agents/venv_skillopt",
+        "./.env"
       ]
     },
     "credentials": {
@@ -65,18 +70,16 @@
       ]
     },
     "excludedCommands": [
-      "python3 .agents/scripts/with_env.py .agents/venv_skillopt/bin/python -m graphify *",
-      "gh api repos/*",
-      "gh api -X * repos/*",
-      "gh api graphql *",
+      "python3 -I .agents/scripts/with_env.py graphify-extract",
+      "python3 -I .agents/scripts/with_env.py graphify-extract-deep",
+      "python3 -I .agents/scripts/with_env.py graphify-label",
       "gh pr create *",
       "gh pr checks *",
-      "gh pr merge *",
       "gh pr list *",
       "gh repo view *",
-      "gh auth status*",
+      "gh release view *",
       "gh release create *",
-      "gh release view *"
+      "gh auth status"
     ]
   },
   "fileCheckpointingEnabled": true,
