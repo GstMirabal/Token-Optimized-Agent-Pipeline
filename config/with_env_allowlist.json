@@ -1,0 +1,9 @@
+{
+  "_comment": "Allowlist for scripts/with_env.py. The wrapper loads .env and runs the command, and it runs OUTSIDE the Claude Code sandbox (sandbox.excludedCommands), so every entry here executes unsandboxed with secrets in its environment. Only graphify is listed by default (pytest is not: it executes agent-written code). A host extends this list only by human decision. argv_prefix[0] is a path relative to the framework checkout (the directory holding scripts/ and config/).",
+  "commands": [
+    {
+      "argv_prefix": ["venv_skillopt/bin/python", "-m", "graphify"],
+      "reason": "graphify semantic extraction reads its provider key from the environment only (graphifyy 0.8.30 has no .env loader)"
+    }
+  ]
+}
