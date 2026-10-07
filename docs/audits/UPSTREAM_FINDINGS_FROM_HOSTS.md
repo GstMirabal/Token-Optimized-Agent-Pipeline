@@ -131,6 +131,17 @@ none was recorded here before this intake.
 | **Already recorded, not re-filed** | `F-051-R1`, `F-051-R3`, `ADR-0006`, `ADR-0007`, `#13`, `REVDOC-G1`, and the items the host listed as closed, were checked against this file and `CHANGELOG.md` and are already recorded as closed above. Nothing was filed twice |
 | **Ticked on what basis** | Re-measurement against `d848302`, never on the host's claim. The host's `F-114-N5` write-up said its mechanism was read from source and not replayed; the nucleus replay below confirms it |
 
+**Status at Sprint 054 close (2026-10-07, `ai-sprint/054`).** Tester Gate 2 round 1
+re-measured every intake finding at `9d8b7f6` (`RECORD`, `testifying`); each entry
+below is ticked on that re-measurement, not on the sprint record.
+
+| | |
+| :--- | :--- |
+| **Closed** | `F-115-N1`, `F-115-N3` (with `F-114-N4`), `F-114-N1` (Python replay only; JS/TS is `KI-054-1`), `F-114-N2`, `F-114-N3`, `F-114-N5`, `F-114-N7` (with `KI-053-4`), `F-114-N8` |
+| **Still open** | `F-115-N2` (absorbs `F-114-N6`) → Sprint 055, block D; first step is reproducing `S-1`..`S-8` in the nucleus's own sandbox |
+| **Basis** | Tester Gate 2 round 1 re-measurement at `9d8b7f6`: every Context-table defect measured at `HEAD` with the opposite result from `d848302`; full suite 1024 passed; `make verify` exit `0`. Post-gate `ac37f3e` changed tests only |
+| **New findings routed out** | `KI-054-1` (JS/TS replay runner), `KI-054-2` (Phase 7 commands in nucleus form only), `KI-054-3` (two escalation thresholds); see `docs/roadmaps/core/pipeline/021-030-program-queue.md` |
+
 ---
 
 ## Reported by a host — verified against `v4.4.0`
@@ -1551,7 +1562,7 @@ those of `d848302` and will drift; the function names are the stable handle.
 Routing source: `docs/sprints/054-core-pipeline/IMPLEMENTATION_PLAN.md` (unit ids
 `A01`..`C03`; design ids `D1`..`D13`).
 
-### - [ ] `F-115-N1` — `agents.md §8` names `.npmrc` for two supply-chain controls that pnpm 11.23.0 ignores there
+### - [x] `F-115-N1` — `agents.md §8` names `.npmrc` for two supply-chain controls that pnpm 11.23.0 ignores there
 
 **Defect.** `agents.md:174` (`ignore_scripts`) and the neighbouring `§8` rows
 require `ignore-scripts=true` and `minimum-release-age=1440` in `.npmrc`; `RA-10`
@@ -1574,6 +1585,17 @@ its own workspace file with a test asserting `1440`.
 
 **Routed:** Sprint 054 units `C01` (`agents.md §8`, `RA-10` pointer text), `C02`
 (`rules/code_craft.md`), `C03` (`README.md`); design `D13`. `RA-10` stays a pointer.
+
+**Closed — Sprint 054.** `agents.md §8` now names `pnpm-workspace.yaml` keys
+(`ignoreScripts`, `minimumReleaseAge`, `onlyBuiltDependencies`) and the `RA-10`
+pointer says pnpm 11+ does not read them from `.npmrc` (`d01045b`);
+`rules/code_craft.md §4` spells the keys as `pnpm-workspace.yaml` does (`c9f9c79`);
+`README.md` states the same and counts `install_lock.py` (`f0e829d`).
+Re-measured by Tester Gate 2 round 1 at `9d8b7f6`: the `d848302` defect (the rule
+names `.npmrc` as the location) is absent. Observed: `agents.md:159` (`RA-10`) says
+"all in `pnpm-workspace.yaml` — never `.npmrc`", and `README.md:92` says "pnpm 11+
+does not read them from `.npmrc`"; the only `npmrc` mentions left in `agents.md`,
+`README.md`, `rules/` and `workflows/` are those negations. `make verify` exit `0`.
 
 ### - [ ] `F-115-N2` — consolidated sandbox friction, eight failures `S-1`..`S-8` (absorbs `F-114-N6`)
 
@@ -1611,7 +1633,7 @@ be measured in the real sandbox first.
 **Routed:** Sprint 055 (block D, routed by Sprint 054 unit `W02`). Not taken by
 Sprint 054.
 
-### - [ ] `F-115-N3` — the start command names a path that does not exist at a host root (`F-114-N4` is the same defect)
+### - [x] `F-115-N3` — the start command names a path that does not exist at a host root (`F-114-N4` is the same defect)
 
 **Defect.** `commands/start.md:5` says to run `python3 scripts/session_start.py`.
 In a host the file is at `.agents/scripts/session_start.py` (`agents.md §3
@@ -1639,7 +1661,19 @@ rather than remove it (`D11`).
 (`session_start.py` docstring usage lines), `B06` (`commands/start.md`), `B07`
 (`workflows/start_workflow.md`); design `D11`.
 
-### - [ ] `F-114-N1` — "watch it fail" in `rules/code_craft.md §6` is enforced by nothing
+**Closed — Sprint 054 (`F-114-N4` closed with it).** `retry_hint` and the other
+operator commands in `scripts/session_state.py` name their host form outside the
+nucleus (`09642e9`); `commands/start.md` gives the start command in both forms
+(`f16bdd4`); `workflows/start_workflow.md` gives host and nucleus boot forms
+(`cac68ec`); the install and boot advisories name their commands in host form
+(`c56bc88`, `9c78f26`). Re-measured by Tester Gate 2 round 1 at `9d8b7f6`: the
+`d848302` result (3 host-blind `python3 scripts/session_start.py` hits) no longer
+holds. Observed: `commands/start.md:9-10` carries `python3
+.agents/scripts/session_start.py` (host) and `python3 scripts/session_start.py`
+(nucleus); `scripts/session_start.py:27-28` lists both. Not closed here: the Phase 7
+gate commands carry the same host-blind class and are routed as `KI-054-2`.
+
+### - [x] `F-114-N1` — "watch it fail" in `rules/code_craft.md §6` is enforced by nothing
 
 **Defect.** `§6` is headed "Regression test first (enforced)" and requires the
 order: failing test, watch it fail, then fix. The only mechanism is
@@ -1681,7 +1715,26 @@ the worktree (not needed for pytest-only `D3`), and always remove the worktree.
 (`workflows/pipeline_workflow.md` Phase 7); design `D2`..`D5`. A non-Python runner
 is routed out as `KI-054-1`.
 
-### - [ ] `F-114-N2` — `open-sprint` refuses a previous sprint whose status is `DEPLOYED`
+**Closed — Sprint 054, Python only.** `scripts/check_fix_reproduces.py` replays each
+`fix(` commit of a range in a temporary worktree, red on the parent and green at the
+commit (`0747911`); it refuses an interpreter without pytest instead of reading the
+missing runner as a red parent (`d64fb37`) and carries the preflight cause into
+`RUNNER_UNAVAILABLE` (`a5872e6`); `hooks/on_commit.py` requires a `Repro:` trailer
+on a `fix(` commit that stages source (`8f13941`); the replay is QA Gate 1's first
+check in `agents/qa_agent.md` (`cd225c4`) and `workflows/pipeline_workflow.md`
+Phase 7 (`38548e4`); `rules/qa_and_testing.md §4` labels remediation regressions
+(`12769c6`); `rules/code_craft.md §6` names both mechanisms (`9d2c1ef`); the
+replay verdict is stated as per-commit violation lines in all three places
+(`d3d1e10`, `242657f`, `f300a9f`). Re-measured by Tester
+Gate 2 round 1 at `9d8b7f6`: the `d848302` result (`audit_regression_test` passes
+a `fix(` commit with a staged test and no evidence it failed) no longer holds.
+Observed: the replay over `d848302..9d8b7f6` returned 8/8 `fix(` commits OK
+(exit `0`), and an independent negative control, a test that passes on the parent,
+returned `PASSES_ON_PARENT`. **JS/TS replay is not delivered**: a staged test file
+with no pytest runner is `UNREPLAYED` and a host uses `Repro: manual`; routed as
+`KI-054-1`.
+
+### - [x] `F-114-N2` — `open-sprint` refuses a previous sprint whose status is `DEPLOYED`
 
 **Defect.** `scripts/session_state.py:96` defines `SEALED_STATUSES =
 frozenset({CLOSED, "CLOSED"})` and `_sprint_is_sealed` (`:503`) reads it. A host's
@@ -1705,7 +1758,15 @@ consumer, `scripts/session_probe.py` `probe_anchor_hygiene`, treats a `DEPLOYED`
 anchor on a live session like `CLOSED_SUCCESSFULLY`, which is intended); design
 `D9`.
 
-### - [ ] `F-114-N3` — `open-sprint` writes two fields of `current_sprint` and leaves `name`, `path`, `layer`, `app` and `branch` stale
+**Closed — Sprint 054.** `SEALED_STATUSES` accepts a host-written `DEPLOYED`
+(`23b8b48`); the sealed-set comments and `probe_anchor_hygiene` name it
+(`d9035fe`, `44fa69b`). Re-measured by Tester Gate 2 round 1 at `9d8b7f6`: the
+`d848302` refusal (`open-sprint` exit `2` on a `DEPLOYED` predecessor) no longer
+holds. Observed: `scripts/session_state.py:109` reads `SEALED_STATUSES =
+frozenset({CLOSED, "CLOSED", "DEPLOYED"})`, so `open-sprint` over a `DEPLOYED`
+anchor proceeds; the sealed check itself is kept.
+
+### - [x] `F-114-N3` — `open-sprint` writes two fields of `current_sprint` and leaves `name`, `path`, `layer`, `app` and `branch` stale
 
 **Defect.** `open_sprint` (`scripts/session_state.py:529`) sets only `id` and
 `status` (`:569-570`); no command writes `path`, `layer`, `app`, `name` or `branch`.
@@ -1733,7 +1794,16 @@ writes `path` and `branch`, drops a stale `name`) and `B08`
 proposal (better error in `loop_guard.py`) is rejected there: with the writer fixed
 it is no longer needed.
 
-### - [ ] `F-114-N5` — `quality_audit.py` exits `0` and reports `[OK]` when it scanned nothing
+**Closed — Sprint 054.** `open-sprint` accepts `--layer`, `--app` and `--name` and
+always writes `path` and `branch` (`d86f521`); `workflows/pipeline_workflow.md`
+Phase 3 lists the fields it writes (`590fb6a`). Re-measured by Tester Gate 2
+round 1 at `9d8b7f6`: the `d848302` result (after `open-sprint --id 8`, `name` and
+`path` still point at sprint 7) no longer holds. Observed: `scripts/session_state.py`
+declares `--layer` (line 737) and documents `[--layer L] [--app A] [--name NAME]`
+(line 57); the opened sprint carries the new `path` and `branch` and no stale
+`name`.
+
+### - [x] `F-114-N5` — `quality_audit.py` exits `0` and reports `[OK]` when it scanned nothing
 
 **Defect.** `iter_source_files` (`scripts/quality_audit.py:641`) adds a given path
 if `is_file()`, walks it if `is_dir()`, and has no `else`: a path that is neither
@@ -1763,7 +1833,16 @@ JS/TS files as scanned.
 `tests/test_quality_audit.py`); design `D1`. `DEFAULT_EXCLUDE_DIRS` is applied only
 to components below each given root.
 
-### - [ ] `F-114-N7` — plan Tests and Verification commands are approved at Phase 5 without ever being run (`KI-053-4` is the nucleus's own instance)
+**Closed — Sprint 054.** `scripts/quality_audit.py` exits `2` when a scan measured
+no file, and for a given path that is neither file nor directory (`46d07cf`, with
+its paired test in `tests/test_quality_audit.py`). Re-measured by Tester Gate 2
+round 1 at `9d8b7f6`: the `d848302` result (`[OK] quality_audit: 0 unit(s)
+scanned`, exit `0` for a nonexistent path, an empty directory and a
+`node_modules` root) no longer holds; the gate recorded the opposite result for
+the Context-table defect (a scan of no file is no longer `[OK]`). Over the real
+tree `make verify` still exits `0`, because that scan measures a non-empty set.
+
+### - [x] `F-114-N7` — plan Tests and Verification commands are approved at Phase 5 without ever being run (`KI-053-4` is the nucleus's own instance)
 
 **Defect.** An Implementation Plan carries a Tests table and a Verification table.
 No pipeline step requires those commands to be run against the tree the plan was
@@ -1802,7 +1881,19 @@ destructive or slow rows.
 sealed plans keep passing), `A09` (`workflows/pipeline_workflow.md` Phase 5 dry
 run); design `D6`, `D7`. A07 lands before A08.
 
-### - [ ] `F-114-N8` — `NOTICE.md` is checked at every close and scaffolded by nothing
+**Closed — Sprint 054 (`KI-053-4` closed with it).** The plan template records
+base observations and dry runs (`7fb1572`, columns `Observed at base`, `Dry run`,
+`Positive control`); `skills/token-saver-auditor/scripts/audit_plan.py` checks
+recorded base runs, dry runs and controls in plan tables, header-gated so sealed
+plans keep passing (`b6b554e`, Google docstrings `e78ec2b`); `rules/qa_and_testing.md
+§4` labels unsatisfiable plan rows (`12769c6`); `workflows/pipeline_workflow.md`
+requires the recorded checks at Phase 5 (`38548e4`). Re-measured by Tester Gate 2
+round 1 at `9d8b7f6`: the `d848302` result (a plan row `rg "a\|b" x` expecting
+`no output` passes `audit_plan.py`, exit `0`) no longer holds; the gate recorded
+the opposite result for the Context-table defect. Verification rows 1-7 of the
+Sprint 054 plan were met, row 6 against its human-acknowledged restated text.
+
+### - [x] `F-114-N8` — `NOTICE.md` is checked at every close and scaffolded by nothing
 
 **Defect.** `workflows/close_workflow.md:22` (`repo_docs_check`) tells the closing
 session to confirm repository documents and says a new vendored dependency changes
@@ -1831,6 +1922,17 @@ generating attribution text (a legal statement a human owns).
 (`workflows/close_workflow.md`), `A12` (`workflows/standardization_workflow.md`),
 `A13` (`config/template_gates.json` `exceptions` entry, so `make verify` accepts
 the new template); design `D8`. Option (c)'s probe-tuple form is rejected there.
+
+**Closed — Sprint 054.** `docs/standards/templates/NOTICE_TEMPLATE.md` exists as a
+conditional template (`4ec95bd`); `config/template_gates.json` declares it a
+template with no gate (`2f22aea`); `workflows/close_workflow.md` `repo_docs_check`
+makes `NOTICE.md` conditional (`ff3a904`); `workflows/standardization_workflow.md`
+censuses vendored content and scaffolds `NOTICE.md` from the template (`737cea6`).
+Re-measured by Tester Gate 2 round 1 at `9d8b7f6`: the `d848302` result (0 hits for
+`NOTICE` in `scripts/` and `docs/standards/templates/`, a single hit in
+`close_workflow.md:22`) no longer holds. Observed: `config/template_gates.json:128`
+names `NOTICE_TEMPLATE.md`, and `make verify` exit `0` accepts the new template.
+The probe tuple is unchanged by design (`D8`).
 
 ### - [x] `F-103-N1` — `session_start.py` boot claimed the nucleus anchor instead of the host's — closed on re-measurement
 
