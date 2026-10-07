@@ -46,8 +46,8 @@ or a `gate` profile.
 | U15 | `workflows/deployment_workflow.md` | modify (unsandboxed steps reference the U09 table, `S-5`) | low | `doc_orchestrator` | sonnet | medium | ✅ 664c931 |
 | U16 | `workflows/repository_hardening_workflow.md` | modify (`gh` calls reference the U09 table, `S-5`) | low | `doc_orchestrator` | sonnet | medium | ✅ 30d0a50 |
 | U17 | `rules/LEGACY_RULE_CONCORDANCE.md` | modify (`Rule 66` row follows new `RA-09` text, `RA-14`) | low | `doc_orchestrator` | sonnet | medium | ✅ no change needed (Rule 66 row stays accurate after U13) |
-| U18 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify (close `F-115-N2`, row -> SHA, reproduced in U01) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U19 | `CHANGELOG.md` | modify (`[Unreleased]` entry naming each commit by short SHA) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| U18 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify (close `F-115-N2`, row -> SHA, reproduced in U01) | low | `doc_orchestrator` | sonnet | medium | ✅ c8a4f8b |
+| U19 | `CHANGELOG.md` | modify (`[Unreleased]` entry naming each commit by short SHA) | low | `doc_orchestrator` | sonnet | medium | ✅ 739a750 |
 | U20 | `agents/devops_agent.md` | modify (`secret_sovereignty` row and `.env` export wording point to `scripts/with_env.py`; RA-14 propagation of U13) | low | `agent_orchestrator` | sonnet | medium | ✅ 056a5e3 |
 | U21 | `README.md` | modify (At a Glance counts: 44 scripts, 9 config registries after U02/U03; README drift check in `make verify`) | low | `doc_orchestrator` | sonnet | medium | ✅ e5532cc |
 
