@@ -32,10 +32,10 @@ or a `gate` profile.
 | U01 | `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` | create (transcribe human-reported matrix: command, exit, error signature per row; the human runs the commands in a `claude --settings claude/settings.hooks.json` session) | medium | `doc_orchestrator` | sonnet | medium | ✅ 27210b1 |
 | U02 | `scripts/with_env.py` | create: `feat(` D2/D3 wrapper; companion `tests/test_with_env.py` (allowlist, exit `2` off-allowlist, redaction, missing `.env` explicit error, `invoked_by:` docstring) | high | `implementer_agent` | sonnet | high | ✅ 6a090a4 |
 | U03 | `config/with_env_allowlist.json` | create (only `graphify`, D3) | medium | `implementer_agent` | sonnet | medium | ✅ 25dda50 |
-| U04 | `scripts/merge_json.py` | modify: `fix(` D4 targeted prune of retired template values; companion `tests/test_merge_json.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U05 | `scripts/install.py` | modify: `fix(` D5 write probe, no traceback, host-form human command; companion `tests/test_install_permission.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U06 | `scripts/session_start.py` | modify: `fix(` bridge advisory by mode; companion `tests/test_session_start.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U07 | `claude/settings.hooks.json` | modify (`denyRead`/`allowRead` D4, wrapper in `excludedCommands` D2, forms from U01 per D7) | high | `implementer_agent` | sonnet | high | ⏳ |
+| U04 | `scripts/merge_json.py` | OMITTED: measured alternative made it unnecessary — keeping `./.env.*` in `denyRead` and adding a narrower `allowRead` for `.env.example`/`.env.sample`/`.env.template` was confirmed in a sandboxed session (`.env` and `.env.local` denied, `.env.example` readable), so no template value is retired and nothing needs pruning | medium | `implementer_agent` | sonnet | medium | ⏳ omitted |
+| U05 | `scripts/install.py` | modify: `fix(` D5 write probe, no traceback, host-form human command; companion `tests/test_install_permission.py` | medium | `implementer_agent` | sonnet | medium | ✅ f4986b5 |
+| U06 | `scripts/session_start.py` | modify: `fix(` bridge advisory by mode; companion `tests/test_session_start.py` | low | `implementer_agent` | sonnet | medium | ✅ 6773f34 |
+| U07 | `claude/settings.hooks.json` | modify (`denyRead`/`allowRead` D4, wrapper in `excludedCommands` D2, forms from U01 per D7) | high | `implementer_agent` | sonnet | high | ✅ 3ad277f |
 | U08 | `Makefile` | modify: `fix(` D9 `-m graphify` in `graphify-update`, new `graphify-deep` via `with_env.py`; companion `tests/test_makefile_graphify.py` | low | `implementer_agent` | sonnet | medium | ✅ ddd5bc7 |
 | U09 | `rules/project_topology.md` | modify (sandbox table, D8) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
 | U10 | `rules/qa_and_testing.md` | modify (browser verification under sandbox, branch A or B, D6) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |

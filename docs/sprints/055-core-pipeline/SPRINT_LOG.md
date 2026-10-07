@@ -27,7 +27,9 @@ Tracking of atomic goals achieved during the session.
     - `[x]` U01 measurement committed (`27210b1`)
     - `[x]` U03 `25dda50`, U02 `6a090a4`, U08 `ddd5bc7` (`check_fix_reproduces.py` OK)
     - `[x]` U21 added: new script and registry drifted the README At a Glance counts (`make verify` exit 2)
-    - `[ ]` U04..U07, U09..U11, U13..U21
+    - `[x]` U05 `f4986b5`, U06 `6773f34` (`check_fix_reproduces.py` OK), U07 `3ad277f`
+    - `[x]` U04 omitted: D4 revised after a sandboxed measurement — keep `./.env.*` denied and add a narrower `allowRead` for `.env.example`/`.env.sample`/`.env.template`; no template value retires, so the merge-prune is unnecessary
+    - `[ ]` U09..U11, U13..U21
 
 ---
 
@@ -40,6 +42,7 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | `./`-relative `denyRead` in a `--settings` file resolves against that file's directory, so the first sandboxed run left `.env` readable | Re-ran with absolute deny paths emulating the merged host settings; recorded as a framework-class finding in `SANDBOX_MEASUREMENT.md` | — |
 | `sandbox.network.allowMachLookup: true` on CLI 2.1.119 silently disabled the whole sandbox (fail-open) despite `allowUnsandboxedCommands: false`; list form keeps the sandbox but does not let Chromium register its Mach service | D6 resolved to Branch B (human-run browser verification); the template must never carry the boolean form | — |
 | D2 refinement: the documentation warns that an `excludedCommands` pattern covering a script in the working tree lets the agent rewrite that script and run it unsandboxed, so a wrapper-side allowlist alone is not a closed gate | U07 pins the exact allowed command lines in `sandbox.excludedCommands` (settings are a protected path) and write-denies `scripts/with_env.py` and `config/with_env_allowlist.json` via `sandbox.filesystem.denyWrite` and `permissions.deny` `Edit`; the wrapper allowlist stays as a second layer | — |
+| U07 `gh` excludedCommands derived from the framework's own calls include `gh api -X * repos/*`, which admits any HTTP method on repository endpoints with the user's token, unsandboxed | Flagged for Gate 1 review; excluded commands still pass through the permission flow (auto-mode classifier), not auto-allow | — |
 | Planning session reached session-cost ratio 5.0 (soft threshold) while reading the sandbox documentation | Execution dispatches every unit to a subagent; parent transcribes status only | — |
 
 ---
