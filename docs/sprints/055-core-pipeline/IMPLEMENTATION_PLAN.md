@@ -1,0 +1,228 @@
+# Implementation Plan: Sprint 055 — sandbox-restrictions-and-secret-path
+
+**Canonical path**: `docs/sprints/055-core-pipeline/IMPLEMENTATION_PLAN.md`
+**Branch**: `ai-sprint/055` · **Base**: `main` at `16c3cca`
+**Status**: `DRAFT`
+
+> Authored at Phase 1 (Planning) by `principal_agent`, extracted to this path at
+> Phase 3, and **committed before Phase 5 approves it**: `agents.md §2 triple_lock`
+> names the approved Implementation Plan as its first lock, and a lock cannot close
+> over an artifact that does not exist.
+>
+> Spanish is permitted in this document (`agents.md §1 user_chat`). Every other
+> pipeline artifact is English.
+
+---
+
+## Context
+
+Los hosts que corren dentro del sandbox que el nucleus envía (`claude/settings.hooks.json`)
+pierden tiempo en los mismos fallos. `F-115-N2` (`docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md:1600`)
+los consolida como `S-1`..`S-8`, **reportados por un host y sin medir en el nucleus**. El humano
+añade en la sesión de apertura de este sprint tres frentes:
+
+1. **Chromium no arranca bajo el sandbox** (`S-7`, observado también por el humano).
+2. **Revisión de todas las restricciones del sandbox**, no solo de las ocho reportadas.
+3. **graphify no lee la API key del LLM si el entorno no se exportó antes de lanzar la sesión.**
+
+Medido en `16c3cca`:
+
+| Hecho | Comando que lo reproduce | Resultado |
+| :--- | :--- | :--- |
+| La plantilla deniega `./.env.*`, que incluye el `.env.example` versionado (`S-2`) | `jq -e 'any(.sandbox.filesystem.denyRead[]; . == "./.env.*")' claude/settings.hooks.json` | exit `0` |
+| `merge_json.merge` solo añade a las listas: quitar `./.env.*` de la plantilla **no** lo quita de un host ya instalado | snippet de `T5` (Tests) | exit `1` |
+| `install.merge_into` hace traceback sobre un `settings.json` no escribible (`S-1`) | snippet de `T6` (Tests) | `PermissionError: [Errno 13]`, exit `1` |
+| El advisory del bridge nombra la ruta del nucleus en un host | `grep -n 'bash scripts/install.sh' scripts/session_start.py` | `489`, exit `0` |
+| El paquete `graphifyy 0.8.30` no carga `.env`: lee las keys solo de `os.environ` | `grep -rln load_dotenv venv_skillopt/lib/python3.13/site-packages/graphify` | sin salida |
+| El paquete lee 7 variables de key; `skills/graphify/SKILL.md:238` afirma que solo 2 | `grep -rhoE '[A-Z_]+_API_KEY' venv_skillopt/lib/python3.13/site-packages/graphify` | 7 nombres distintos: `ANTHROPIC`, `DEEPSEEK`, `GEMINI`, `GOOGLE`, `MOONSHOT`, `OLLAMA`, `OPENAI` |
+| `make graphify-update` usa el console-script que `rules/graphify.md` prohíbe (`bad interpreter`) | `grep -n 'venv_skillopt/bin/graphify$' Makefile` | `16`, exit `0` |
+| No existe ninguna tabla de fallos de sandbox en las rules (`S-8`) | `grep -c -i sandbox rules/project_topology.md` | `0` |
+| El nucleus no corre con la plantilla: no tiene `.claude/settings.json` | `ls .claude/` | solo `settings.local.json`, sin bloque `sandbox` |
+| CLI instalada | `claude --version` | `2.1.119` |
+
+**Causa raíz de graphify.** No es un defecto de graphify: la key vive en `.env`, la plantilla
+deniega leer `.env` dentro del sandbox, y `RA-09` prohíbe al agente cargarlo en su contexto.
+`RA-09` prescribe `Makefile`/`source .env` en un subshell, pero el subshell también está
+sandboxeado. **El mecanismo que prescribe la regla está bloqueado por la plantilla que envía
+el propio nucleus** (`S-3`). graphify es el primer consumidor que lo hace visible.
+
+**Restricciones que la plantilla no trata** (documentación oficial de Claude Code,
+`code.claude.com/docs/en/sandboxing`, sección Troubleshooting, leída el 2026-10-07):
+`network.allowMachLookup` (cita literal: Playwright/iOS Simulator), `filesystem.allowWrite`
+(store de pnpm, `S-6`), `excludedCommands` (`docker`, y CLIs en Go como `gh` con TLS roto bajo
+Seatbelt, `S-5`), `network.allowLocalBinding` (dev servers en localhost), `allowAppleEvents`
+(`open`/`osascript`, error `-600`; solo se honra desde user settings), `watchman` (`jest
+--no-watchman`) y `allowUnsandboxedCommands`.
+
+**Hecho cuando**: cada fallo de la matriz (`S-1`..`S-8`, Chromium, graphify y las restricciones
+de arriba) tiene una forma sancionada, medida dentro de una sesión sandboxeada con la plantilla.
+Esa forma está escrita en `rules/project_topology.md`, y `F-115-N2` está cerrado con el SHA de
+cada fila.
+
+---
+
+## Design
+
+| ID | Decisión | Elegida sobre | Razón |
+| :--- | :--- | :--- | :--- |
+| `D1` | **Medir antes de corregir.** `U01` reproduce la matriz completa en una sesión lanzada por el humano con `claude --settings claude/settings.hooks.json` desde el nucleus, y registra por fila: comando, exit, firma del error. Ninguna unidad de corrección empieza antes de que `U01` esté commiteada | Corregir según el reporte del host | Lo exige `F-115-N2` y varias filas son inferencias sobre la causa, no reproducciones. Además el nucleus no corre con su propia plantilla, así que sin `--settings` no hay sandbox que medir |
+| `D2` | **Vía sancionada para secretos (`S-3`, graphify): wrapper cerrado `scripts/with_env.py`** (decisión del humano, 2026-10-07). Lee `.env` en su propio proceso, nunca lo imprime, ejecuta **solo** comandos de una allowlist (`config/with_env_allowlist.json`), redacta con `***` cualquier valor del `.env` que aparezca en stdout/stderr del hijo, y sale con `2` ante un comando que no está en la allowlist. La plantilla lo declara en `sandbox.excludedCommands` | (b) siempre humano; (c) `credentials.envVars` en modo `mask` | (b) bloquea la autonomía en cada `graphify --mode deep`. (c) solo se honra desde user settings, exige `network.tlsTerminate` (experimental) y una versión de Claude Code que no está medida, así que la plantilla del nucleus no podría enviarlo |
+| `D3` | **Allowlist mínima por defecto**: solo `graphify` (`venv_skillopt/bin/python -m graphify`). `pytest` y el resto los añade el host en su propia allowlist (`--allowlist <path>`), con decisión explícita | Incluir `pytest` por defecto | Un comando excluido corre **sin sandbox**. `pytest` ejecuta código que escribió el agente, así que meterlo por defecto convierte el wrapper en una salida general del sandbox. graphify `update` solo parsea el AST, y `--mode deep` solo envía contenido al proveedor que elija el humano |
+| `D4` | **`S-2`**: sustituir `./.env.*` en `denyRead` por patrones de nombres con secretos y reabrir `./.env.example`/`./.env.sample` con `filesystem.allowRead` (la regla más estrecha gana, según la documentación). Más una **poda dirigida** en `merge_json.py` del valor retirado, con el mismo patrón que `prune_deprecated_hooks` | Dejar que el host lo sobrescriba | `merge` solo añade a las listas (`T5`) y `install.py` re-mergea en cada boot, así que la sobrescritura del host se pierde. La poda es una lista explícita de valores retirados: nunca elimina un `deny` que añadió el host |
+| `D5` | **`S-1`**: `merge_into` comprueba la escritura antes de intentarla. Ante un `PermissionError` imprime el comando humano exacto **en forma host** (`bash .agents/scripts/install.sh --target claude`) y sale con un código documentado, sin traceback. `session_start.py:489` pasa a usar la forma según el modo | Permitir la ruta en la plantilla | La documentación lo prohíbe por diseño: `.claude/settings.json` es una *protected path* que no admite excepción |
+| `D6` | **Chromium (`S-7`)**: la decisión depende de `U01`. **Rama A**: si `network.allowMachLookup` existe en la CLI medida y Chromium arranca con ella (registrando su forma real, booleano o lista de servicios), se documenta como **opt-in** en `rules/qa_and_testing.md` y no va en la plantilla, porque amplía la superficie del sandbox para todos los hosts. **Rama B**: si no basta, se usa el protocolo humano de `S-7`: el agente prepara el comando y el resultado esperado, el humano lo ejecuta y el agente registra la salida como evidencia | Activarlo por defecto en la plantilla | La documentación no dice qué servicios Mach expone ni si la CLI `2.1.119` lo soporta; activarlo sin medir sería afirmar algo que nadie comprobó |
+| `D7` | **`S-5`/`S-6` y el resto de la revisión**: cada fila de la matriz recibe una de cuatro formas, sin otras: `allowWrite`/`allowedDomains` (sigue sandboxeado), `excludedCommands` con patrón estrecho, opt-in del humano en user settings, o ejecución humana. Se prefiere siempre la que mantiene el comando sandboxeado | `excludedCommands` amplios (`git *`, `pnpm *`) | Un patrón amplio cubre todo lo que puede hacer la herramienta (advertencia de la documentación) |
+| `D8` | **`S-8`**: una sola tabla en `rules/project_topology.md` (que se carga al "ejecutar comandos locales") con: comando, firma en sandbox, forma sancionada y fila de `U01` que la prueba. Las demás rules y workflows **referencian** la tabla y no la repiten (`RA-14`) | Una nota en cada workflow | Si cada workflow repite su nota, se desalinean (precedente `RA-14`) |
+| `D9` | **Drift de graphify**: `Makefile:16` pasa a la forma `-m graphify`. Se añade el target `graphify-deep`, que invoca `with_env.py`. La lista de keys de `SKILL.md:238` se corrige a las 7 medidas **si** el fichero no está vendorizado (`U12` lo comprueba primero). Si lo está, la corrección va solo en `rules/graphify.md` | Dejarlo para otro sprint | Es la misma causa que el humano reportó |
+
+---
+
+## Work
+
+| # | File | Operation | Risk | Assignee (proposed) | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `U01` | `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` | create — matriz `S-1`..`S-8` + Chromium/Playwright + graphify (`update` y `--mode deep` con key) + `docker`, `gh`, `git push`, `pnpm install`, `jest` con watchman, dev server en localhost, `open`, `allowMachLookup`; medida en una sesión lanzada por el humano con `claude --settings claude/settings.hooks.json`, con comando, exit y firma por fila | medium | `doc_orchestrator` (lanza el humano) | ⏳ |
+| `U02` | `scripts/with_env.py` | create (`feat(`) + `tests/test_with_env.py`: allowlist, exit `2` fuera de la allowlist, redacción de valores, sin `.env` → error explícito, `invoked_by:` en el docstring | high | `implementer_agent` | ⏳ |
+| `U03` | `config/with_env_allowlist.json` | create — solo `graphify` (`D3`) | medium | `implementer_agent` | ⏳ |
+| `U04` | `scripts/merge_json.py` | modify (`fix(`) + `tests/test_merge_json.py`: poda dirigida de valores retirados de la plantilla (`D4`, `T5`) | medium | `implementer_agent` | ⏳ |
+| `U05` | `scripts/install.py` | modify (`fix(`) + `tests/test_install_permission.py`: sondeo de escritura, sin traceback, comando humano en forma host, exit documentado (`D5`, `T6`) | medium | `implementer_agent` | ⏳ |
+| `U06` | `scripts/session_start.py` | modify (`fix(`) + `tests/test_session_start.py`: advisory del bridge según el modo (`T7`) | low | `implementer_agent` | ⏳ |
+| `U07` | `claude/settings.hooks.json` | modify — `denyRead`/`allowRead` (`D4`), `excludedCommands` del wrapper (`D2`) y las formas que salgan de `U01` (`D7`) | high | `implementer_agent` | ⏳ |
+| `U08` | `Makefile` | modify (`fix(`) + `tests/test_makefile_graphify.py`: `-m graphify` en `graphify-update` y nuevo `graphify-deep` vía `with_env.py` (`D9`) | low | `implementer_agent` | ⏳ |
+| `U09` | `rules/project_topology.md` | modify — tabla de sandbox (`D8`) | medium | `doc_orchestrator` | ⏳ |
+| `U10` | `rules/qa_and_testing.md` | modify — verificación con navegador, rama A o B (`D6`) | medium | `doc_orchestrator` | ⏳ |
+| `U11` | `rules/graphify.md` | modify — key por `with_env.py`, `S-4` (walkers que fallan con `stat()`), lista de keys medida | low | `doc_orchestrator` | ⏳ |
+| `U12` | `skills/graphify/SKILL.md` | modify — corregir la línea 238 a las 7 keys; **se omite** si el fichero está vendorizado (`rules/skills_and_integrations.md §3`), dejando constancia en `SPRINT_LOG.md` | low | `skill_architect` | ⏳ |
+| `U13` | `agents.md` | modify — reescribir `RA-09` y `§3 secret_sovereignty` con `with_env.py` como vía sancionada (`D2`) | high | `rule_validator` | ⏳ |
+| `U14` | `workflows/pipeline_workflow.md` | modify — Phase 2: "export `.env`" pasa a `with_env.py` | low | `doc_orchestrator` | ⏳ |
+| `U15` | `workflows/deployment_workflow.md` | modify — los pasos no sandboxeados se refieren a la tabla de `U09` (`S-5`) | low | `doc_orchestrator` | ⏳ |
+| `U16` | `workflows/repository_hardening_workflow.md` | modify — lo mismo para las llamadas a `gh` (`S-5`) | low | `doc_orchestrator` | ⏳ |
+| `U17` | `rules/LEGACY_RULE_CONCORDANCE.md` | modify — la fila de `Rule 66` sigue el nuevo texto de `RA-09` (`RA-14`) | low | `doc_orchestrator` | ⏳ |
+| `U18` | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify — cerrar `F-115-N2` con fila→SHA, reproducido en `U01` | low | `doc_orchestrator` | ⏳ |
+| `U19` | `CHANGELOG.md` | modify — entrada en `[Unreleased]` con SHAs | low | `doc_orchestrator` | ⏳ |
+
+Orden: `U01` → (`U02`, `U03`) → `U04`..`U08` → `U09`..`U17` → `U18`, `U19`. Si `U01` refuta una
+fila del host, la unidad que la corrige se reduce a documentarla y la decisión queda en `SPRINT_LOG.md`.
+
+---
+
+## Dependencies
+
+None. `scripts/with_env.py` parsea `.env` con la librería estándar (`KEY=VALUE`, comillas y
+comentarios); no se añade `python-dotenv`.
+
+---
+
+## Mechanisms
+
+| Mechanism | Deterministic or agent judgment | Invoker (`RA-16`) |
+| :--- | :--- | :--- |
+| `scripts/with_env.py` (cada comando que necesita un secreto) | script | `Makefile` `graphify-deep`; `rules/project_topology.md` tabla de sandbox; `agents.md RA-09` |
+| Poda de valores retirados en `merge_json.py` (en cada `install.py`) | script | `scripts/install.py` → `merge_into` (ya invocado por `session_start.py --boot`) |
+| Sondeo de escritura en `install.py` (en cada boot) | script | `scripts/session_start.py` bridge step |
+
+---
+
+## Cost
+
+| Field | Value | Reproduce |
+| :--- | :--- | :--- |
+| Delegation | `native` | `docs/active_state.json` `delegation_mode` |
+| Work units | 19 | Count of rows in Work tables |
+| Subagents dispatched | 19 units + 2 gates | `agent_assignment.md` |
+| Prior session ratio | **5.0 (umbral blando alcanzado)** — esta sesión de Planning: primer turno 23264, pico 116084 | `python3 scripts/session_cost.py --from-anchor --json` |
+
+El ratio blando se alcanzó en Planning por la lectura de la documentación del sandbox. Para
+que la Execution no herede ese contexto, cada unidad se despacha a un subagente y el padre
+solo transcribe estados en `task_scope.md`.
+
+---
+
+## Tests
+
+| Check | Fails against the current tree? | Observed at base |
+| :--- | :--- | :--- |
+| `T1` `jq -e 'any(.sandbox.filesystem.denyRead[]; . == "./.env.*")' claude/settings.hooks.json` | **Yes** — `S-2` | exit `0` en `16c3cca` (patrón presente) |
+| `T2` `grep -q 'venv_skillopt/bin/graphify$' Makefile` | **Yes** — `D9` | exit `0` en `16c3cca` (línea 16) |
+| `T3` `test -f scripts/with_env.py` | **Yes** — `S-3`/graphify, no hay vía sancionada | exit `1` en `16c3cca` |
+| `T4` `grep -q -i sandbox rules/project_topology.md` | **Yes** — `S-8` | exit `1` en `16c3cca` |
+| `T5` `venv_skillopt/bin/python -c` que llama a `merge(dest con './.env.*', plantilla sin él)` y sale `0` si el valor desaparece | **Yes** — `D4` | exit `1` en `16c3cca` (el valor persiste) |
+| `T6` `venv_skillopt/bin/python -c` que llama a `install.merge_into` sobre un `settings.json` con `chmod 444` en el scratchpad | **Yes** — `S-1` | exit `1` en `16c3cca`, `PermissionError: [Errno 13]` con traceback |
+| `T7` `grep -n 'bash scripts/install.sh' scripts/session_start.py` | **Yes** — advisory que no funciona en un host | exit `0` en `16c3cca` (línea 489) |
+| `T8` `jq -e '.sandbox.network.allowMachLookup' claude/settings.hooks.json` | **Yes** — `S-7` sin tratar (rama A o B se decide en `U01`) | exit `1` en `16c3cca` |
+| `T9` `make verify` | **No** — regresión a proteger | exit `0` en `16c3cca` |
+| `T10` Matriz de `U01` en sesión sandboxeada | **Yes** — los fallos reportados | `unverified` — requiere que el humano lance una sesión con `claude --settings claude/settings.hooks.json`, lo que es en sí el entregable de `U01` |
+
+---
+
+## Verification
+
+| Command | Expected | Dry run | Positive control |
+| :--- | :--- | :--- | :--- |
+| `make verify` | exit `0` | exit `0` en `16c3cca` | n/a (no es "no output") |
+| `python3 skills/token-saver-auditor/scripts/audit_plan.py docs/sprints/055-core-pipeline/IMPLEMENTATION_PLAN.md` | exit `0` | `[OK]`, exit `0` sobre este borrador (2026-10-07) | n/a |
+| `jq -e 'any(.sandbox.filesystem.denyRead[]; . == "./.env.*")' claude/settings.hooks.json` | `false`, exit `1` | exit `0` en `16c3cca` (defecto presente) | n/a |
+| `jq -e 'any(.sandbox.excludedCommands[]?; test("with_env.py"))' claude/settings.hooks.json` | `true`, exit `0` | `false`, exit `1` en `16c3cca` | n/a |
+| `grep -n 'venv_skillopt/bin/graphify$' Makefile` | no output, exit `1` | `16:GRAPHIFY := …/bin/graphify`, exit `0` | el mismo comando en `16c3cca` imprime la línea 16: observado |
+| `grep -n 'bash scripts/install.sh' scripts/session_start.py` | no output, exit `1` | `489`, exit `0` | el mismo comando en `16c3cca` imprime la línea 489: observado |
+| `venv_skillopt/bin/python -m pytest tests/test_with_env.py tests/test_merge_json.py tests/test_install_permission.py tests/test_session_start.py tests/test_makefile_graphify.py -q` | exit `0` | run at close — `test_with_env.py`, `test_install_permission.py` y `test_makefile_graphify.py` no existen hasta `U02`/`U05`/`U08` | n/a |
+| `python3 scripts/with_env.py curl https://example.com` | exit `2`, `not in allowlist` | run at close — el script no existe hasta `U02` | n/a |
+| Re-ejecutar la matriz de `SANDBOX_MEASUREMENT.md` con la plantilla corregida | cada fila en su forma sancionada pasa | run at close — requiere una sesión sandboxeada lanzada por el humano tras `U07` | n/a |
+
+---
+
+## Documentary impact (T5)
+
+| Artefacto | Qué cambia |
+| :--- | :--- |
+| `agents.md` | `RA-09` y `§3 secret_sovereignty`: `with_env.py` como vía sancionada |
+| `rules/project_topology.md` | nueva tabla de sandbox (`S-8`) |
+| `rules/qa_and_testing.md` | verificación con navegador bajo el sandbox |
+| `rules/graphify.md` | keys vía `with_env.py`; `S-4`; lista de keys medida |
+| `rules/LEGACY_RULE_CONCORDANCE.md` | la fila de `Rule 66` sigue a `RA-09` |
+| `workflows/pipeline_workflow.md`, `deployment_workflow.md`, `repository_hardening_workflow.md` | se refieren a la tabla de sandbox |
+| `skills/graphify/SKILL.md` | línea 238 (condicional a `U12`) |
+| `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | `F-115-N2` cerrado |
+| `CHANGELOG.md` | entrada en `[Unreleased]` |
+| `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` | nuevo: la matriz medida |
+
+**Measured figures.** Cada cifra de Context y Tests lleva al lado su comando.
+
+---
+
+## Out of scope
+
+| Exclusion | Why, and where it goes instead |
+| :--- | :--- |
+| `credentials.envVars` en modo `mask` (opción c de `S-3`) | Solo funciona desde user settings y con `tlsTerminate` experimental. Se registra en `rules/project_topology.md` como opt-in del humano, sin plantilla |
+| `allowAppleEvents` | Solo se honra desde user/managed settings y quita el aislamiento de ejecución. Se documenta como opt-in humano en la tabla de `U09` |
+| Actualizar la CLI `claude` desde `2.1.119` | Decisión del humano. Si `U01` muestra que hace falta una versión más reciente, se registra en `SPRINT_LOG.md` como precondición |
+| Gate-commands host-blind (`KI-054-2`) | Sigue enrutado fuera; no es sandbox |
+
+---
+
+## Abort criterion
+
+Se para y se revierte el sprint si ocurre cualquiera de estas cosas:
+(1) `U01` no puede ejecutarse: el humano no puede lanzar una sesión con `--settings
+claude/settings.hooks.json`, o la sesión arranca sin sandbox. Sin medición, `D1` prohíbe
+corregir.
+(2) `with_env.py` no logra que el comando de la allowlist lea la key bajo `excludedCommands`
+en la sesión sandboxeada, o el valor del secreto aparece sin redactar en la salida del agente.
+Eso refutaría `D2`, y la decisión vuelve al humano.
+
+---
+
+## Approval — `triple_lock` lock 1
+
+| Field | Value |
+| :--- | :--- |
+| **Approved by** | {{HUMAN}} |
+| **Date** | {{ISO_DATE}} |
+| **Plan commit at approval** | `{{COMMIT_SHA}}` |
+| **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
+
+*Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an
+unattended `/loop` (`workflows/pipeline_workflow.md`, `rules/loop_governance.md`).
+Any `/loop` this sprint does run — Phases 6-8 only — is governed by
+`scripts/loop_guard.py start`, which fails closed.*
