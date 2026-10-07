@@ -58,10 +58,10 @@ or a `gate` profile.
 | C02 | `rules/code_craft.md` | modify (line 37 key spelling) | low | `rule_validator` | sonnet | medium | ✅ `c9f9c79` |
 | C03 | `README.md` | modify (line 92 key spelling, matches C01) | low | `doc_orchestrator` | sonnet | medium | ✅ `f0e829d` |
 | C04 | `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` | modify (regenerate via `scripts/map_workflows.py`, never hand-edited; after A09, A11, A12, B07, B08) | low | `implementer_agent` | sonnet | medium | ✅ `dde2088` |
-| Z01 | `docs/sprints/054-core-pipeline/PHASE_REGISTER.md` | create | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| Z02 | `CHANGELOG.md` | modify (`[Unreleased]` entry, SHA per commit) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| Z03 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify (tick delivered entries) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| Z04 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify (mark Sprint 054 delivered) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| Z01 | `docs/sprints/054-core-pipeline/PHASE_REGISTER.md` | create | low | `doc_orchestrator` | sonnet | medium | ✅ `38879bb` |
+| Z02 | `CHANGELOG.md` | modify (`[Unreleased]` entry, SHA per commit) | low | `doc_orchestrator` | sonnet | medium | ✅ `798fa31` |
+| Z03 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify (tick delivered entries) | low | `doc_orchestrator` | sonnet | medium | ✅ `c606577` |
+| Z04 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify (mark Sprint 054 delivered) | low | `doc_orchestrator` | sonnet | medium | ✅ `592a4eb` |
 
 ## Ordering constraints (transcribed from the plan's table)
 
