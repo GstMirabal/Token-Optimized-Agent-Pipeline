@@ -68,6 +68,13 @@ and a fabricated row would teach authors to invent verdicts
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: APPROVED — Execution on `ai-sprint/055`
-**Next Phase**: Phase 7 Quality Gate (QA Gate 1, then Tester Gate 2)
+**Next Phase**: Phase 7 remediation of QA Gate 1 round 1 (session suspended 2026-10-07 by the human; token budget)
+
+**Resume pointer** (Gate 1 round 1 remediation, partially landed):
+- Done: `e68ac72` with_env.py named commands + `-I` required + `PYTHON*` stripped (F1, F2, F5); `1fa9608` Makefile graphify-deep → `python3 -I … with_env.py graphify-extract-deep`; `cfe7950` template exact with_env patterns, gh narrowed, denyWrite/Edit deny venv + `.env`, `Read(/.env)` (F3, F6); `5ce803b` install.py Args (F9). `make verify` exit 0.
+- Pending docs (RA-14 to the new invocation form `python3 -I .agents/scripts/with_env.py <name>`): `agents.md` RA-09 (rule_validator), `agents/devops_agent.md`, `rules/project_topology.md` (incl. gh list and the 6 stale entries an installed host must remove by hand: `with_env.py … -m graphify *`, `gh api repos/*`, `gh api -X * repos/*`, `gh api graphql *`, `gh pr merge *`, `gh auth status*`), `rules/graphify.md`, `workflows/pipeline_workflow.md`, `docs/standards/templates/README_TEMPLATE.md:91` (F8), redaction-is-not-a-boundary wording (F4), `CHANGELOG.md`.
+- Pending plan amendment F7: `IMPLEMENTATION_PLAN.md` Verification row 3, T1 and D4 to the revised D4 (keep `./.env.*`, add `allowRead`; row 3 expects exit 0).
+- Pending record: `mcp_servers/github_mcp/scripts/check_health.sh:14` and `skills/skillopt/scripts/train_runner.py:23` load `.env` directly (pre-existing; out of scope, human-run).
+- Then: measure Abort criterion 2 in a headless sandboxed session against a host-shaped fixture; fresh QA Gate 1 round 2; Tester Gate 2; Phase 8.
 
 *Certified under conventional commit standard: feat(scope): message #055*
