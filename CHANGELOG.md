@@ -4,6 +4,31 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Added
+- **Sprint 055 `sandbox-restrictions-and-secret-path`** — closes the host-reported sandbox friction `F-115-N2` (`S-1`..`S-8`, absorbing `F-114-N6`): measure each restriction in the nucleus's own sandbox first, then give the secret path a sanctioned wrapper, fix the three defects the sandbox exposed in the nucleus, and document the rest as a table. Measured in headless `claude -p` sessions on Claude Code CLI 2.1.119 (plan deviation `D1`, `SPRINT_LOG.md`); `make verify` exit `0` at `e5532cc`. #055
+  - **Measurement** — `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` records command, exit and signature per case, with sandbox-active controls per run (`27210b1`).
+  - **`scripts/with_env.py`** (new) runs an allowlisted command with `.env` loaded outside the sandbox and the value redacted, exiting `2` off the allowlist; companion `tests/test_with_env.py` (`6a090a4`). `config/with_env_allowlist.json` (new) lists `graphify` only (`25dda50`).
+  - **`make graphify-deep`** (new) runs graphify through `with_env.py` (`ddd5bc7`).
+  - **Sandbox table** — `rules/project_topology.md` lists what fails in-sandbox, its signature and the sanctioned form for `S-1`..`S-7` (`c716b7f`).
+  - **Human-run browser verification** — `rules/qa_and_testing.md` states the procedure for cases a sandboxed agent cannot launch (`d6b2649`).
+
+### Changed
+- **`agents.md`** — `RA-09`, `§3 secret_sovereignty` and the `§6 devops_agent` row name `scripts/with_env.py` as the secret path (`e589f19`); `agents/devops_agent.md` follows (`056a5e3`).
+- **`claude/settings.hooks.json`** — `allowRead` for `.env.example`, `.env.sample` and `.env.template` beside the unchanged `./.env.*` deny; `excludedCommands` holds `with_env.py` and narrow `gh` patterns (`3ad277f`).
+- **Workflows** — `workflows/deployment_workflow.md` (`664c931`) and `workflows/repository_hardening_workflow.md` (`30d0a50`) point their `gh` steps at the sandbox table; `workflows/pipeline_workflow.md` Phase 2 secrets go through `with_env.py` (`024ecd1`).
+- **`rules/graphify.md`** states the key path and the 7 key variables (`f53b7fe`).
+- **`README.md`** counts `with_env.py` and its allowlist (`e5532cc`).
+- **`docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md`** — `F-115-N2` closed with a per-row verdict table and two new framework-class observations noted (`allowMachLookup` boolean fails open; `./` sandbox paths resolve against the declaring settings file) (`c8a4f8b`).
+
+### Fixed
+- **`scripts/install.py`** probes the write and, on a denied protected path, prints the host-form human command and exits `3` instead of a `PermissionError` traceback (`f4986b5`).
+- **`scripts/session_start.py`** reports the bridge advisory by mode (`6773f34`).
+- **`Makefile`** `graphify-update` invokes `-m graphify` instead of the console script, which fails `bad interpreter` under a relocated `.agents` (`ddd5bc7`).
+
+### Security
+- **Wrapper write-deny** — the template adds `denyWrite` and an `Edit` deny on `scripts/with_env.py` and `config/with_env_allowlist.json`, so a sandboxed agent cannot widen the allowlist (`3ad277f`).
+- **`allowMachLookup` prohibited** — measured on CLI 2.1.119, the boolean key fails open (sandbox not started, no warning); the sandbox table forbids setting it (`c716b7f`).
+
 ## [4.37.0] - 2026-10-07
 
 ### Added
