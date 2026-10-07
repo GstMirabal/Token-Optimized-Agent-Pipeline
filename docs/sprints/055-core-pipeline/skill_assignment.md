@@ -60,6 +60,7 @@ and a `README.md` around a single stdlib script with one caller path, which
 | `U19` | none. Cites SHAs by hand per `agents.md §0 Master Ledger` | N/A | P1 hit; P2-P4 not reached |
 | `U20` | none. Partial read of `agents/devops_agent.md` (under 200 lines) | N/A | P1 hit; P2-P4 not reached |
 | `U21` | none. Edit the counted At a Glance row as `make verify` prints it | N/A | P1 hit; P2-P4 not reached |
+| `U22` | `python-quality-auditor` (102-line file, full read) | N/A | P1 hit; P2-P4 not reached |
 
 Cross-cutting, not tied to a unit: `venv_skillopt/bin/python -m graphify update .`
 after the code units (`agents.md §2 graph_sync`), and `skills/topology-monitor`

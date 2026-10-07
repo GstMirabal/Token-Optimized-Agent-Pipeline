@@ -78,6 +78,7 @@ human-reported results into `SANDBOX_MEASUREMENT.md`. No correction unit
 | U19 | `CHANGELOG.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | U20 | `agents/devops_agent.md` | modify | sequential | `agent_orchestrator` | N/A | `agents/agent_orchestrator.md` |
 | U21 | `README.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| U22 | `scripts/merge_json.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 
 ## Disagreements with the plan
 

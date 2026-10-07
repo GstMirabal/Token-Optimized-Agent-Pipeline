@@ -102,6 +102,7 @@ cada fila.
 | `U19` | `CHANGELOG.md` | modify — entrada en `[Unreleased]` con SHAs | low | `doc_orchestrator` | ⏳ |
 | `U20` | `agents/devops_agent.md` | modify — `secret_sovereignty` (línea 16) y el texto de "`.env` export" pasan a `scripts/with_env.py` (`RA-14`, hallazgo de la Fase 4.3) | low | `agent_orchestrator` | ⏳ |
 | `U21` | `README.md` | modify — recuento de *At a Glance* (44 scripts, 9 registros JSON) tras `U02`/`U03`; lo exige el check de deriva del README en `make verify` | low | `doc_orchestrator` | ⏳ |
+| `U22` | `scripts/merge_json.py` | modify (`feat(`) + `tests/test_merge_json.py` — lista explícita de valores retirados (`RETIRED_VALUES`, vacía hoy) que `install.py` poda al fusionar: solo cadenas exactas que el framework publicó y retiró, nunca entradas del host; mismo patrón que `prune_deprecated_hooks`. Añadida por el humano el 2026-10-07 tras la omisión de `U04`: sin ella, una entrada peligrosa retirada de una plantilla publicada sobrevive para siempre en cada host | medium | `implementer_agent` | ⏳ |
 
 Orden: `U01` → (`U02`, `U03`) → `U04`..`U08` → `U09`..`U17` → `U18`, `U19`. Si `U01` refuta una
 fila del host, la unidad que la corrige se reduce a documentarla y la decisión queda en `SPRINT_LOG.md`.
@@ -130,7 +131,7 @@ comentarios); no se añade `python-dotenv`.
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 21 (20 activas: `U12` omitida por vendorizada) | Count of rows in Work tables |
+| Work units | 22 (`U04` y `U12` omitidas) | Count of rows in Work tables |
 | Subagents dispatched | 19 units + 2 gates | `agent_assignment.md` |
 | Prior session ratio | **5.0 (umbral blando alcanzado)** — esta sesión de Planning: primer turno 23264, pico 116084 | `python3 scripts/session_cost.py --from-anchor --json` |
 
