@@ -21,7 +21,7 @@ Tracking of atomic goals achieved during the session.
 - [x] **Wave A**: gates that pass without measuring (A01-A13) — `46d07cf`..`9d2c1ef`; `make verify` red only on the stale step map until C04 (expected); full suite 992 passed
 - [x] **Wave B**: session and sprint state (B01-B08) — `23b8b48`..`590fb6a`
 - [x] **Wave C**: supply chain and propagation (C01-C04) — `d01045b`..`dde2088`; `make verify` exit `0` at `dde2088`
-- [ ] **Wave Z**: sprint records (Z01-Z04)
+- [x] **Wave Z**: sprint records (Z01-Z04) — `38879bb`, `798fa31`, `c606577`, `592a4eb`; close record in `PHASE_REGISTER.md` Phase 8
 
 ---
 
@@ -68,6 +68,6 @@ and a fabricated row would teach authors to invent verdicts
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: OPEN
-**Next Phase**: Phase 8 (Sprint Closeout), then `close_workflow.md`
+**Next Phase**: `close_workflow.md` Phase 4 `release`, then `deployment_workflow.md` in the same turn
 
 *Certified under conventional commit standard: feat(scope): message #054*
