@@ -33,6 +33,7 @@ What it does:
      can detect a deliberate submodule update and re-link automatically.
 """
 import argparse
+import errno
 import os
 import re
 import shutil
@@ -47,7 +48,10 @@ HOST_DIR = AGENTS_DIR.parent
 sys.path.insert(0, str(SCRIPT_DIR))
 import json
 
+from _mode import is_nucleus
 from merge_json import merge
+
+BRIDGE_WRITE_DENIED = 3
 
 
 def _symlink_matches(dest: Path, target: str) -> bool:
@@ -90,12 +94,56 @@ def link_one(target: str, dest: Path) -> None:
         print(f"✅ Copied (no symlink support) {dest}")
 
 
+def install_command(target: str, nucleus: bool) -> str:
+    """The exact command a human runs outside the sandbox to install a target.
+
+    Args:
+        target: Bridge target (`claude`, `cursor` or `both`).
+        nucleus: True in nucleus mode, False in a host (submodule) checkout.
+
+    Returns:
+        str: `bash scripts/install.sh --target <t>` in the nucleus,
+        `bash .agents/scripts/install.sh --target <t>` in a host.
+    """
+    prefix = "" if nucleus else ".agents/"
+    return f"bash {prefix}scripts/install.sh --target {target}"
+
+
+def _report_write_denied(dest: Path) -> None:
+    """Print the one-line advisory for a denied bridge write to stderr."""
+    try:
+        shown = dest.relative_to(HOST_DIR)
+    except ValueError:
+        shown = dest
+    print(
+        f"⚠️  PermissionError: cannot write {shown} (agent sandbox protects it). "
+        f"Run `{install_command('claude', is_nucleus())}` outside the sandbox.",
+        file=sys.stderr,
+    )
+
+
 def merge_into(template: Path, dest: Path) -> None:
+    """Merge a JSON template into dest without clobbering existing keys.
+
+    Args:
+        template: Template JSON file shipped by the framework.
+        dest: Settings file to create or update.
+
+    Raises:
+        SystemExit: With BRIDGE_WRITE_DENIED when the write is refused by
+            permissions; any other OSError propagates unchanged.
+    """
     template_data = json.loads(template.read_text())
     dest_data = json.loads(dest.read_text()) if dest.exists() else {}
     merged = merge(dest_data, template_data)
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_text(json.dumps(merged, indent=2) + "\n")
+    try:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_text(json.dumps(merged, indent=2) + "\n")
+    except OSError as exc:
+        if not isinstance(exc, PermissionError) and exc.errno not in (errno.EPERM, errno.EACCES):
+            raise
+        _report_write_denied(dest)
+        raise SystemExit(BRIDGE_WRITE_DENIED) from exc
     print(f"✅ Merged {template} -> {dest}")
 
 
