@@ -26,6 +26,7 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 - `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` regenerated after the workflow edits (`dde2088`).
 - **KI routing** — `docs/roadmaps/core/pipeline/021-030-program-queue.md` opens `KI-054-2` (`15a005e`), `KI-054-3`, two escalation thresholds for one rejection count (`e169375`), and completes the `KI-054-3` statement list (`9d8b7f6`); `KI-054-1` is routed with the replay (`903b04e`).
 - `tests/test_install_lock.py` refusal tests assert `install_lock`'s own `[FAIL]` line rather than any exit `2` (`ac37f3e`).
+- Sprint 054 close (`close_workflow.md`): host findings ticked on re-measurement (`c606577`), `KI-053-1`/`KI-053-4` marked delivered (`592a4eb`), workflow footers aligned with their frontmatter (`3bd6103`, `ee86ded`), `graph_stats.json` (`51ec80f`), model ledger (`9fe2046`), `CONTRIBUTING.md` states the `Repro:` gate (`b1e6d94`), extract candidates routed as `KI-054-4`..`KI-054-6` (`3a68d8a`), `memory_index.json` stamped (`4104b7c`), phase register (`38879bb`).
 - Sprint record, `docs/sprints/054-core-pipeline/` — plan, log, assignments, task scope, Phase 5 approval, execution progress, human-acknowledged plan deviation (`F2`) and re-plan, and the QA Gate 1 rounds 1-4 and Tester Gate 2 round 1 transcriptions: `a796992` `139e693` `5d1b8da` `83caf76` `c2951eb` `ad61cf6` `dc9f740` `062b02f` `65bf38b` `097b4f3` `cfeada3` `1a79a2a` `e3f5483` `cf7e7b7` `a0bc8ca` `de13418` `12e0f9c` `0c7d9b1` `706031e` `48aaad2` `1d39380`.
 
 ## [4.36.0] - 2026-10-04
