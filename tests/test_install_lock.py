@@ -20,6 +20,23 @@ def _run(command: str, root: Path) -> int:
     return proc.returncode
 
 
+def _refused(command: str, root: Path) -> bool:
+    """Exit 2 with the script's own refusal line, not merely any exit 2.
+
+    Python also exits 2 when it cannot open the script or argparse rejects
+    the arguments, so a bare ``returncode == 2`` passed with the script
+    absent (Sprint 054 Tester Gate 2, ``T2-1``).
+    """
+    proc = subprocess.run(
+        [sys.executable, str(SCRIPT), command, "--root", str(root)],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    return proc.returncode == 2 and "[FAIL] install_lock:" in proc.stdout
+
+
 def _tree(root: Path, files: dict[str, str]) -> None:
     for name, text in files.items():
         (root / name).write_text(text, encoding="utf-8")
@@ -27,7 +44,7 @@ def _tree(root: Path, files: dict[str, str]) -> None:
 
 def test_absent_lock_exits_2(tmp_path: Path) -> None:
     _tree(tmp_path, {"requirements-core.txt": "pkg==1\n"})
-    assert _run("check", tmp_path) == 2
+    assert _refused("check", tmp_path)
 
 
 def test_write_then_check_exits_0(tmp_path: Path) -> None:
@@ -40,7 +57,7 @@ def test_edited_include_exits_2(tmp_path: Path) -> None:
     _tree(tmp_path, {"requirements-core.txt": "-r q.txt\n", "q.txt": "x==2\n"})
     _run("write", tmp_path)
     (tmp_path / "q.txt").write_text("x==3\n", encoding="utf-8")
-    assert _run("check", tmp_path) == 2
+    assert _refused("check", tmp_path)
 
 
 def test_recursive_include_followed(tmp_path: Path) -> None:
@@ -54,7 +71,7 @@ def test_recursive_include_followed(tmp_path: Path) -> None:
     )
     _run("write", tmp_path)
     (tmp_path / "c.txt").write_text("x==2\n", encoding="utf-8")
-    assert _run("check", tmp_path) == 2
+    assert _refused("check", tmp_path)
 
 
 def test_include_cycle_terminates(tmp_path: Path) -> None:
@@ -77,17 +94,17 @@ def test_legacy_free_text_lock_exits_2(tmp_path: Path) -> None:
             "installed.lock": "2026-01-01T00:00:00Z requirements-core.txt\n",
         },
     )
-    assert _run("check", tmp_path) == 2
+    assert _refused("check", tmp_path)
 
 
 def test_missing_included_file_exits_2(tmp_path: Path) -> None:
     _tree(tmp_path, {"requirements-core.txt": "-r gone.txt\n"})
-    assert _run("check", tmp_path) == 2
-    assert _run("write", tmp_path) == 2
+    assert _refused("check", tmp_path)
+    assert _refused("write", tmp_path)
 
 
 def test_missing_core_file_exits_2(tmp_path: Path) -> None:
-    assert _run("check", tmp_path) == 2
+    assert _refused("check", tmp_path)
 
 
 def _module():
