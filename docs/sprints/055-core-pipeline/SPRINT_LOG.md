@@ -23,7 +23,9 @@ Tracking of atomic goals achieved during the session.
     - `[x]` U12 omitted: `skills/graphify/SKILL.md` judged vendored (bulk import `cde6a71`, upstream sponsor line 747; `rules/skills_and_integrations.md §3`); the 7-key correction moves to U11
     - `[x]` U20 added: Phase 4.3 found `agents/devops_agent.md:16` still prescribing environment export commands (`RA-14`)
 - [x] **Phase 5 — Approval Gate**: Human OK 2026-10-07 on plan commit `abf2928`
-- [ ] **Phase 6 — Execution**: `U01` measurement first (human-launched sandboxed session)
+- [ ] **Phase 6 — Execution**
+    - `[x]` U01 measurement committed (`27210b1`)
+    - `[ ]` U02..U20
 
 ---
 
@@ -32,6 +34,9 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 
 | Friction Point | Resolution / Workaround | KI ID |
 | :--- | :--- | :--- |
+| D1 named a human-launched interactive session; an agent's Bash tool has no TTY and the human's attempt failed with `Input must be provided either through stdin or as a prompt argument when using --print` | U01 ran in headless `claude -p --settings <overlay>` sessions with `allowUnsandboxedCommands: false` and `network.allowedDomains` replacing interactive prompts; sandbox-active controls SBX0/SBX1 recorded per run | — |
+| `./`-relative `denyRead` in a `--settings` file resolves against that file's directory, so the first sandboxed run left `.env` readable | Re-ran with absolute deny paths emulating the merged host settings; recorded as a framework-class finding in `SANDBOX_MEASUREMENT.md` | — |
+| `sandbox.network.allowMachLookup: true` on CLI 2.1.119 silently disabled the whole sandbox (fail-open) despite `allowUnsandboxedCommands: false`; list form keeps the sandbox but does not let Chromium register its Mach service | D6 resolved to Branch B (human-run browser verification); the template must never carry the boolean form | — |
 | Planning session reached session-cost ratio 5.0 (soft threshold) while reading the sandbox documentation | Execution dispatches every unit to a subagent; parent transcribes status only | — |
 
 ---

@@ -29,7 +29,7 @@ or a `gate` profile.
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| U01 | `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` | create (transcribe human-reported matrix: command, exit, error signature per row; the human runs the commands in a `claude --settings claude/settings.hooks.json` session) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
+| U01 | `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` | create (transcribe human-reported matrix: command, exit, error signature per row; the human runs the commands in a `claude --settings claude/settings.hooks.json` session) | medium | `doc_orchestrator` | sonnet | medium | ✅ 27210b1 |
 | U02 | `scripts/with_env.py` | create: `feat(` D2/D3 wrapper; companion `tests/test_with_env.py` (allowlist, exit `2` off-allowlist, redaction, missing `.env` explicit error, `invoked_by:` docstring) | high | `implementer_agent` | sonnet | high | ⏳ |
 | U03 | `config/with_env_allowlist.json` | create (only `graphify`, D3) | medium | `implementer_agent` | sonnet | medium | ⏳ |
 | U04 | `scripts/merge_json.py` | modify: `fix(` D4 targeted prune of retired template values; companion `tests/test_merge_json.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
