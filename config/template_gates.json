@@ -125,6 +125,11 @@
       "note": "Scaffolded at onboarding into a host. Not JSON a framework check parses, and not a sprint artifact."
     },
     {
+      "template": "NOTICE_TEMPLATE.md",
+      "reason": "no-automated-gate",
+      "note": "Attribution is a legal statement a human authors; close_workflow.md repo_docs_check judges whether it applies (D8, Sprint 054). No script renders or checks it."
+    },
+    {
       "template": "README_TEMPLATE.md",
       "reason": "no-automated-gate",
       "note": "scripts/check_readme_counts.py judges the counted block of a real README, not this template, which carries no counted block."

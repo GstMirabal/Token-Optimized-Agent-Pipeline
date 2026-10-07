@@ -69,7 +69,7 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 1. Topographic Audit | `model_ledger_regen` | verify |
 | 2. Sprint Closeout | `history_sync` | write |
 | 2. Sprint Closeout | `readme_counts` | write |
-| 2. Sprint Closeout | `repo_docs_check` | verify |
+| 2. Sprint Closeout | `repo_docs_check` | write |
 | 2. Sprint Closeout | `extract_handoff` | write |
 | 2.5 Heuristic Pulse Gate | `heuristic_pulse_gate` | verify |
 | 2.6 Phase Completion Gate | `double_gate_evidence` | write |

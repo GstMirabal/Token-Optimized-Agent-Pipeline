@@ -199,6 +199,82 @@ def test_report_output_format(
 # --------------------------------------------------------------------------
 
 
+_BAD_SOURCE = "def many_statements():\n    " + "\n    ".join(f"x{i} = {i}" for i in range(55)) + "\n"
+
+
+def test_main_nonexistent_path_exits_2_naming_path_and_cwd(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    code = qa.main(["does/not/exist"])
+    err = capsys.readouterr().err
+
+    assert code == 2
+    assert "does/not/exist" in err
+    assert str(Path.cwd()) in err
+
+
+def test_main_missing_path_among_valid_paths_exits_2(tmp_path: Path) -> None:
+    good = tmp_path / "good.py"
+    good.write_text("def ok():\n    return 1\n", encoding="utf-8")
+
+    assert qa.main([str(good), str(tmp_path / "missing")]) == 2
+
+
+def test_main_empty_directory_exits_2(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    code = qa.main([str(tmp_path)])
+    err = capsys.readouterr().err
+
+    assert code == 2
+    assert str(tmp_path) in err
+    assert str(Path.cwd()) in err
+
+
+def test_main_report_with_zero_files_exits_2(tmp_path: Path) -> None:
+    assert qa.main(["--report", str(tmp_path)]) == 2
+
+
+def test_root_under_node_modules_is_scanned_clean(tmp_path: Path) -> None:
+    root = tmp_path / "node_modules" / "pkg"
+    root.mkdir(parents=True)
+    (root / "mod.py").write_text("def ok():\n    return 1\n", encoding="utf-8")
+
+    assert qa.iter_source_files([root]) == [root / "mod.py"]
+    assert qa.main([str(root)]) == 0
+
+
+def test_root_under_node_modules_violation_exits_2(tmp_path: Path) -> None:
+    root = tmp_path / "node_modules" / "pkg"
+    root.mkdir(parents=True)
+    (root / "bad.py").write_text(_BAD_SOURCE, encoding="utf-8")
+
+    assert qa.main([str(root)]) == 2
+
+
+def test_node_modules_below_the_root_is_still_excluded(tmp_path: Path) -> None:
+    (tmp_path / "node_modules").mkdir()
+    (tmp_path / "node_modules" / "bad.py").write_text(_BAD_SOURCE, encoding="utf-8")
+    (tmp_path / "ok.py").write_text("def ok():\n    return 1\n", encoding="utf-8")
+
+    assert qa.main([str(tmp_path)]) == 0
+
+
+def test_ok_line_includes_file_count(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    (tmp_path / "a.py").write_text("def a():\n    return 1\n", encoding="utf-8")
+    (tmp_path / "b.py").write_text("def b():\n    return 1\n", encoding="utf-8")
+
+    code = qa.main([str(tmp_path)])
+    out = capsys.readouterr().out
+
+    assert code == 0
+    assert "2 file(s)" in out
+
+
 def test_iter_source_files_excludes_default_dirs(tmp_path: Path) -> None:
     (tmp_path / "src").mkdir()
     (tmp_path / "src" / "mod.py").write_text("def f():\n    return 1\n", encoding="utf-8")

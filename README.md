@@ -65,7 +65,7 @@ The Token-Optimized Agent Pipeline is an AI agent governance framework designed 
 ### At a Glance
 
 <!-- COUNTED_START -->
-| **Infrastructure** | 41 Python scripts in [`scripts/`](scripts/) · 8 JSON registries in [`config/`](config/) |
+| **Infrastructure** | 43 Python scripts in [`scripts/`](scripts/) · 8 JSON registries in [`config/`](config/) |
 <!-- COUNTED_END -->
 
 | | |
@@ -89,7 +89,7 @@ The Token-Optimized Agent Pipeline is an AI agent governance framework designed 
 
 *   **Git**: Required for submodule management and architectural inheritance.
 *   **Python 3.10+**: Required for the Omni-Minimizer, hooks, and governance scripts, which run on the standard library. The quality instruments behind `make verify` (`ruff` 0.16.3 and `tree-sitter` with its JavaScript/TypeScript grammars) are pinned in `requirements-quality.txt`; the session bootstrap installs them into `venv_skillopt` through `requirements-core.txt` (which also pins `graphifyy`), and CI installs them directly (`.github/workflows/ci.yml`). CI runs 3.12.
-*   **pnpm 11+** *(optional)*: Only for hosts managing JS/TS skills. `npm`/`yarn` are prohibited for installation, and `ignore-scripts=true` + `minimum-release-age=1440` are mandatory (`agents.md §8`, `RA-10`).
+*   **pnpm 11+** *(optional)*: Only for hosts managing JS/TS skills. `npm`/`yarn` are prohibited for installation, and `ignoreScripts: true` + `minimumReleaseAge: 1440` are mandatory in `pnpm-workspace.yaml` — pnpm 11+ does not read them from `.npmrc` (`agents.md §8`, `RA-10`).
 
 ### Installation & Configuration
 

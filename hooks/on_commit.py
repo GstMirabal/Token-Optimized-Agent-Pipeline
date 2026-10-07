@@ -772,13 +772,43 @@ VENDORED = ("node_modules/", "-3rd/", "/3rd/", "venv_skillopt/")
 DEPENDENCY_LINE = re.compile(r"^Dependency:\s*\S+\s*[—-]\s*\S", re.MULTILINE)
 
 
-def audit_regression_test(message: str, staged: list[str]) -> str | None:
-    """A bug fix must ship the test that proves it (rules/code_craft.md §6).
+REPRO_TEST = re.compile(
+    r"^Repro:[ \t]+(?P<path>[^\s:]+)(?:::\S+)?[ \t]+(?:\u2014|--)[ \t]+fails at[ \t]+"
+    r"(?P<sha>[0-9a-fA-F]{7,40})[ \t]*$",
+    re.MULTILINE,
+)
+REPRO_MANUAL = re.compile(r"^Repro:[ \t]+manual[ \t]+(?:\u2014|--)[ \t]+\S", re.MULTILINE)
 
-    `RA-13 SEQUENTIAL_GATES` applied to tests: the failing test is observed
-    before the fix, so the change is known to address the cause rather than a
-    symptom. Coverage (`qa_and_testing.md §1`) measures quantity; this measures
-    ordering, and nothing else did.
+
+def _has_repro_trailer(message: str, staged: list[str]) -> bool:
+    """Tells whether the message carries one acceptable `Repro:` trailer.
+
+    The path of a test-id trailer must be among the staged files: the presence
+    check already requires a staged test, and an unstaged path would be a claim
+    about a file this commit does not touch. The short SHA is deliberately not
+    checked against the real parent, because a rebase rewrites it.
+
+    Args:
+        message: The commit message.
+        staged: Paths staged for this commit.
+
+    Returns:
+        bool: True when a `Repro: manual` or a staged test-id trailer is present.
+    """
+    if REPRO_MANUAL.search(message):
+        return True
+    return any(m.group("path") in staged for m in REPRO_TEST.finditer(message))
+
+
+def audit_regression_test(message: str, staged: list[str]) -> str | None:
+    """A bug fix must ship its test and record that it reproduced the bug.
+
+    Measured here: PRESENCE of a staged test file, and a recorded CLAIM, a
+    `Repro:` trailer naming the test and the short SHA at which it failed (or
+    `Repro: manual` naming a SPRINT_LOG section). Nothing here observes
+    ordering: whether the test failed before the fix is observed afterwards by
+    the replay `scripts/check_fix_reproduces.py --range <base>..HEAD` at QA
+    Gate 1 (`RA-13 SEQUENTIAL_GATES`; a per-commit replay is too slow for a hook).
 
     Exempt by design, following the PR #27 lesson that a gate must recognise
     the legitimate case instead of blocking everything that resembles the
@@ -796,12 +826,18 @@ def audit_regression_test(message: str, staged: list[str]) -> str | None:
         return None
     if not any(path.endswith(SOURCE_SUFFIXES) for path in staged):
         return None  # Documentation, workflow or config fix: no test to write.
-    if any(TEST_PATH.search(path) for path in staged):
+    if not any(TEST_PATH.search(path) for path in staged):
+        return ("A `fix(` commit must stage the test that proves the bug (rules/code_craft.md §6). "
+                "Write the failing test, record the failure in a `Repro:` trailer, then fix. If "
+                "this fix genuinely cannot be tested, that is information about the design — say "
+                "so and commit as `refactor(` or `chore(` instead of relabelling it.")
+    if _has_repro_trailer(message, staged):
         return None
-    return ("A `fix(` commit must stage the test that proves the bug (rules/code_craft.md §6). "
-            "Write the failing test, watch it fail, then fix. If this fix genuinely cannot be "
-            "tested, that is information about the design — say so and commit as `refactor(` "
-            "or `chore(` instead of relabelling it.")
+    return ("A `fix(` commit that stages source must carry a `Repro:` trailer, in one of two forms: "
+            "`Repro: <test id> \u2014 fails at <7-40 hex sha>` (`--` also "
+            "accepted as the separator), or `Repro: manual \u2014 <SPRINT_LOG section>`. "
+            "<test id> is a staged test path, optionally with ::node. The trailer is a claim; "
+            "`scripts/check_fix_reproduces.py --range <base>..HEAD` verifies it at QA Gate 1.")
 
 
 PACKAGE_NAME = re.compile(r'^[+-]\s*"?([A-Za-z0-9_.@/-]+)"?\s*[:=><~^"]')

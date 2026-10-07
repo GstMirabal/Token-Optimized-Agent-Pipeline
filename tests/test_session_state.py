@@ -30,6 +30,13 @@ def repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     return tmp_path
 
 
+@pytest.fixture(autouse=True)
+def nucleus_mode(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Pin the mode to the nucleus: operator hints are mode-aware (D11), so
+    assertions on their text must not depend on where the suite runs."""
+    monkeypatch.setattr(ss, "is_nucleus", lambda: True, raising=False)
+
+
 MULTI_SECTION_CHANGELOG = """# Changelog
 
 ## [Unreleased]
@@ -229,6 +236,30 @@ def test_retry_hint_for_boot_entry_point():
     assert ss.retry_hint("boot") == "python3 scripts/session_start.py --boot --takeover"
 
 
+def test_retry_hint_for_boot_entry_point_in_host_mode(monkeypatch: pytest.MonkeyPatch):
+    """At a host root `scripts/session_start.py` does not resolve (D11)."""
+    monkeypatch.setattr(ss, "is_nucleus", lambda: False)
+
+    assert ss.retry_hint("boot") == "python3 .agents/scripts/session_start.py --boot --takeover"
+
+
+def test_retry_hint_for_claim_entry_point_in_host_mode(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(ss, "is_nucleus", lambda: False)
+
+    assert ss.retry_hint("claim") == "python3 .agents/scripts/session_state.py claim --takeover"
+
+
+def test_open_sprint_refusal_names_release_with_host_path_in_host_mode(
+    repo: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
+):
+    monkeypatch.setattr(ss, "is_nucleus", lambda: False)
+    _write_anchor(repo, {"current_sprint": {"id": 51, "status": "OPEN"}})
+
+    assert ss.open_sprint(52) == 2
+
+    assert "`python3 .agents/scripts/session_state.py release`" in capsys.readouterr().err
+
+
 def test_retry_hint_for_claim_entry_point():
     assert ss.retry_hint("claim") == "python3 scripts/session_state.py claim --takeover"
 
@@ -325,6 +356,7 @@ def test_open_sprint_writes_id_and_status_preserving_siblings(repo: Path):
     assert state["current_sprint"] == {
         "id": 52, "status": "OPEN",
         "layer": "core", "app": "pipeline", "last_audit_sprint": 49,
+        "path": "docs/sprints/052-core-pipeline", "branch": "ai-sprint/052",
     }
 
 
@@ -334,7 +366,10 @@ def test_open_sprint_creates_current_sprint_when_absent(repo: Path):
     assert ss.open_sprint(52) == 0
 
     state = json.loads((repo / "docs" / "active_state.json").read_text())
-    assert state["current_sprint"] == {"id": 52, "status": "OPEN"}
+    assert state["current_sprint"] == {
+        "id": 52, "status": "OPEN", "layer": "core", "app": "pipeline",
+        "path": "docs/sprints/052-core-pipeline", "branch": "ai-sprint/052",
+    }
 
 
 def test_open_sprint_refuses_in_progress_other_sprint(repo: Path, capsys: pytest.CaptureFixture):
@@ -385,6 +420,74 @@ def test_open_sprint_exits_0_and_prints_confirmation(repo: Path, capsys: pytest.
 
     assert ss.open_sprint(52) == 0
     assert "52" in capsys.readouterr().out
+
+
+def _read_sprint(repo: Path) -> dict:
+    return json.loads((repo / "docs" / "active_state.json").read_text())["current_sprint"]
+
+
+def test_open_sprint_rewrites_path_branch_and_drops_stale_name(repo: Path):
+    """F-114-N2/N3 base observation: a sealed sprint 7 carrying `name` and
+    `path`; opening 8 must not leave sprint 7's path or name behind."""
+    _write_anchor(repo, {"current_sprint": {
+        "id": 7, "status": "CLOSED_SUCCESSFULLY", "layer": "core",
+        "app": "pipeline", "name": "old-name",
+        "path": "docs/sprints/007-core-pipeline", "last_audit_sprint": 5,
+    }})
+
+    assert ss.open_sprint(8) == 0
+
+    sprint = _read_sprint(repo)
+    assert sprint["path"] == "docs/sprints/008-core-pipeline"
+    assert sprint["branch"] == "ai-sprint/008"
+    assert "name" not in sprint
+    assert sprint["last_audit_sprint"] == 5
+    assert sprint["id"] == 8 and sprint["status"] == "OPEN"
+
+
+def test_open_sprint_honours_layer_app_and_name(repo: Path):
+    _write_anchor(repo, {"current_sprint": {
+        "id": 7, "status": "CLOSED_SUCCESSFULLY", "layer": "core", "app": "pipeline",
+    }})
+
+    assert ss.open_sprint(8, layer="api", app="billing", name="invoices") == 0
+
+    sprint = _read_sprint(repo)
+    assert sprint["layer"] == "api" and sprint["app"] == "billing"
+    assert sprint["name"] == "invoices"
+    assert sprint["path"] == "docs/sprints/008-api-billing"
+    assert sprint["branch"] == "ai-sprint/008"
+
+
+def test_open_sprint_same_id_with_flags_refreshes_path_and_branch(repo: Path):
+    _write_anchor(repo, {"current_sprint": {
+        "id": 8, "status": "OPEN", "layer": "core", "app": "pipeline",
+        "name": "keep", "path": "stale",
+    }})
+
+    assert ss.open_sprint(8, layer="api") == 0
+
+    sprint = _read_sprint(repo)
+    assert sprint["path"] == "docs/sprints/008-api-pipeline"
+    assert sprint["branch"] == "ai-sprint/008"
+    assert sprint["status"] == "OPEN"
+    assert sprint["name"] == "keep"
+
+
+def test_main_open_sprint_parses_layer_app_name(
+    repo: Path, monkeypatch: pytest.MonkeyPatch
+):
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": "CLOSED_SUCCESSFULLY"}})
+    monkeypatch.setattr(sys, "argv", [
+        "session_state.py", "open-sprint", "--id", "8",
+        "--layer", "api", "--app", "billing", "--name", "invoices",
+    ])
+
+    assert ss.main() == 0
+
+    sprint = _read_sprint(repo)
+    assert sprint["path"] == "docs/sprints/008-api-billing"
+    assert sprint["name"] == "invoices"
 
 
 def test_main_dispatches_open_sprint(repo: Path, monkeypatch: pytest.MonkeyPatch):
@@ -496,7 +599,37 @@ def test_open_sprint_refuses_after_claim_without_a_release_between(
 # --- open-sprint: legacy seal alias (KI-052-2, Sprint 053 A1) ---------------
 
 def test_sealed_statuses_contains_both_the_canonical_and_legacy_literal():
-    assert ss.SEALED_STATUSES == frozenset({"CLOSED_SUCCESSFULLY", "CLOSED"})
+    assert {"CLOSED_SUCCESSFULLY", "CLOSED"} <= ss.SEALED_STATUSES
+
+
+def test_sealed_statuses_contains_the_host_written_deployed_status():
+    """`DEPLOYED` is written by a host after merge and tag (F-114-N2, D9)."""
+    assert "DEPLOYED" in ss.SEALED_STATUSES
+
+
+def test_open_sprint_accepts_a_host_written_deployed_status(repo: Path):
+    """A host's deployment step moves `current_sprint.status` past
+    `CLOSED_SUCCESSFULLY` to `DEPLOYED`; refusing it blocks every later sprint."""
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": "DEPLOYED"}})
+
+    rc = ss.open_sprint(8)
+
+    assert rc == 0
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert state["current_sprint"]["id"] == 8
+    assert state["current_sprint"]["status"] == "OPEN"
+
+
+def test_open_sprint_still_refuses_an_open_sprint(
+    repo: Path, capsys: pytest.CaptureFixture
+):
+    """Regression guard: widening the sealed set must not admit `OPEN`."""
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": "OPEN"}})
+
+    rc = ss.open_sprint(8)
+
+    assert rc == 2
+    assert "7" in capsys.readouterr().err
 
 
 def test_open_sprint_accepts_a_legacy_closed_alias(repo: Path):

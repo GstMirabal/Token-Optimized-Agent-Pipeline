@@ -231,8 +231,8 @@ def probe_anchor_hygiene(state: dict) -> str | None:
     """Flag IN_PROGRESS sessions whose sprint looks already closed or resumed wrong.
 
     After deploy, a new claim on ``main`` often leaves ``current_sprint.status``
-    sealed (`session_state.SEALED_STATUSES` — ``CLOSED_SUCCESSFULLY`` or the
-    legacy ``CLOSED`` alias) and ``resume_pointer.branch`` at the prior
+    sealed (`session_state.SEALED_STATUSES` — ``CLOSED_SUCCESSFULLY``, the
+    legacy ``CLOSED`` alias, or a host-written ``DEPLOYED``) and ``resume_pointer.branch`` at the prior
     ``ai-sprint/[ID]`` while HEAD is not that branch — silent until Sprint 039
     P1.
 

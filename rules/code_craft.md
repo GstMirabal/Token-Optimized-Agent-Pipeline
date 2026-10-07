@@ -34,7 +34,7 @@ Write the minimum that solves the problem in front of you, not the minimum that 
 
 ## 4. Dependency admission
 
-`agents.md §8` governs **how** a dependency is installed (`pnpm 11+`, `ignore-scripts`, `minimum-release-age`). Nothing governed **whether it should enter at all**.
+`agents.md §8` governs **how** a dependency is installed (`pnpm 11+`, `ignoreScripts`, `minimumReleaseAge`, set in `pnpm-workspace.yaml`). Nothing governed **whether it should enter at all**.
 
 Every dependency is permanent code you do not control. Before adding one: check the standard library, then the dependencies already present. If it still earns its place, state why in the Implementation Plan and in the commit — see §7.
 
@@ -73,7 +73,12 @@ filesystem.
 
 For a bug fix: write the failing test, **watch it fail**, then fix. This is `RA-13 SEQUENTIAL_GATES` applied to tests — the verification and the action it guards are observed separately. `qa_and_testing.md §1` demands 100% coverage, which is quantity; this is the ordering that proves the fix addressed the cause and not a symptom.
 
-Enforced by `hooks/on_commit.py audit_regression_test`: a commit whose message starts with `fix(` must stage at least one test file.
+Enforced in two places, because staging a test proves only that a test exists (`F-114-N1`, Sprint 054):
+
+| Where | Mechanism | What it checks |
+| :--- | :--- | :--- |
+| Commit time | `hooks/on_commit.py audit_regression_test` | A `fix(` commit that stages source also stages a test file **and** carries a trailer `Repro: <test id> — fails at <parent sha>` naming a staged test, or `Repro: manual — <SPRINT_LOG section>` when no test can show the defect. The trailer is a claim. |
+| QA Gate 1, first check | `scripts/check_fix_reproduces.py --range <base>..HEAD` | Observes the claim: each `Repro:` test exits exactly `1` on the parent tree (an import or collection error is not a reproduction) and `0` at the commit. Pytest only; any other runner is `UNREPLAYED` unless the commit says `Repro: manual` (`KI-054-1`). |
 
 ## 7. Dependency justification (enforced)
 

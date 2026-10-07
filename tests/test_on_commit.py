@@ -728,3 +728,54 @@ def test_zero_padding_is_reconciled_between_branch_and_directory(
     reason = on_commit.audit_task_scope_precondition(
         "feat(hooks): add guard #052", ["hooks/on_commit.py"])
     assert reason is None
+
+
+# --- D2 commit half: the `Repro:` trailer on a `fix(` commit (Sprint 054 A02) ---
+
+FIX_SUBJECT = "fix(hooks): reject empty input #054"
+FIX_STAGED = ["hooks/on_commit.py", "tests/test_on_commit.py"]
+
+
+def _fix_message(*trailers: str) -> str:
+    return "\n\n".join([FIX_SUBJECT, *trailers]) if trailers else FIX_SUBJECT
+
+
+def test_fix_with_source_and_test_but_no_trailer_is_refused():
+    reason = on_commit.audit_regression_test(_fix_message(), FIX_STAGED)
+    assert reason is not None
+    assert "Repro: <test id>" in reason
+    assert "Repro: manual" in reason
+    assert "check_fix_reproduces.py --range" in reason
+
+
+@pytest.mark.parametrize("trailer", [
+    "Repro: tests/test_on_commit.py::test_x — fails at 46d07cf",
+    "Repro: tests/test_on_commit.py -- fails at 46d07cf0a1b2c3d4e5f60718293a4b5c6d7e8f90",
+    "Repro: tests/test_on_commit.py — fails at abc1234",
+    "Repro: manual — SPRINT_LOG section 3",
+    "Repro: manual -- SPRINT_LOG section 3",
+])
+def test_fix_with_a_well_formed_trailer_passes(trailer):
+    assert on_commit.audit_regression_test(_fix_message(trailer), FIX_STAGED) is None
+
+
+@pytest.mark.parametrize("trailer", [
+    "Repro: something",
+    "Repro: manual",
+    "Repro: manual — ",
+    "Repro: tests/test_on_commit.py — fails at xyz",
+    "Repro: tests/test_on_commit.py — fails at abc12",
+    "Repro: tests/test_other.py — fails at 46d07cf",
+])
+def test_fix_with_a_malformed_or_unstaged_trailer_is_refused(trailer):
+    assert on_commit.audit_regression_test(_fix_message(trailer), FIX_STAGED)
+
+
+def test_feat_without_a_trailer_is_unaffected():
+    assert on_commit.audit_regression_test(
+        "feat(hooks): add guard #054", FIX_STAGED) is None
+
+
+def test_fix_staging_only_docs_is_unaffected():
+    assert on_commit.audit_regression_test(
+        FIX_SUBJECT, ["docs/guide.md", "workflows/x.md"]) is None

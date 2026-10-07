@@ -42,7 +42,8 @@ Usage:
         # not a SESSION one, so the next session's `claim` (which resets
         # top-level status to IN_PROGRESS) does not un-seal it (S052 QA Gate 1
         # round 2). `open-sprint` also accepts the legacy `CLOSED` literal
-        # written before Sprint 050 (SEALED_STATUSES, KI-052-2).
+        # written before Sprint 050 (SEALED_STATUSES, KI-052-2) and a
+        # host-written `DEPLOYED` (F-114-N2, Sprint 054).
     python3 scripts/session_state.py suspend   # ends the SESSION only
     python3 scripts/session_state.py require-released [--branch <ref>]
         # deployment preflight: refuse SUSPENDED; tip must equal last_close_commit
@@ -53,12 +54,18 @@ Usage:
         # newest sealed `## [X.Y.Z]` section of CHANGELOG.md plus
         # current_sprint.id/current_sprint.status (Sprint 050 `D7`)
     python3 scripts/session_state.py open-sprint --id <N>
-        # writes current_sprint.{id: N, status: OPEN}, preserving layer/app/
-        # last_audit_sprint and any other current_sprint keys; idempotent
-        # when current_sprint.id already equals N; refuses (exit 2) for a
+        # [--layer L] [--app A] [--name NAME]
+        # writes current_sprint.{id: N, status: OPEN, layer, app, path:
+        # docs/sprints/NNN-L-A, branch: ai-sprint/NNN} (layer/app: flag, else
+        # the anchor's value, else core/pipeline), writes name only with
+        # --name and drops a stale one, preserving last_audit_sprint and any
+        # other current_sprint keys; idempotent (nothing changed) when
+        # current_sprint.id already equals N and no flag is given, a refresh
+        # of path/branch/layer/app/name from the given flags otherwise;
+        # refuses (exit 2) for a
         # different id while that sprint is not sealed — sealed means
-        # current_sprint.status is CLOSED_SUCCESSFULLY, or the legacy CLOSED
-        # literal (SEALED_STATUSES), the SPRINT fact `release()` writes,
+        # current_sprint.status is CLOSED_SUCCESSFULLY, the legacy CLOSED
+        # literal, or a host-written DEPLOYED (SEALED_STATUSES), the SPRINT fact `release()` writes,
         # never the top-level SESSION status (which
         # `claim` resets to IN_PROGRESS at the start of every session,
         # including the one that opens the next sprint) and never
@@ -83,6 +90,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _mode import is_nucleus
+
 from hooks.state_mirror import mirror_active_state
 
 ACTIVE_STATE = Path("docs/active_state.json")
@@ -93,7 +103,10 @@ SUSPENDED = "SUSPENDED"  # session ended, sprint still open (token_economy.md §
 # "CLOSED" is the legacy literal `release()` wrote before Sprint 050; anchors
 # sealed under that pin still carry it, so `_sprint_is_sealed` must accept
 # both (KI-052-2, Sprint 053 `D1`).
-SEALED_STATUSES = frozenset({CLOSED, "CLOSED"})
+# "DEPLOYED" is a host-written post-seal status: the nucleus never writes it;
+# a host's deployment step does after merge and tag. It is later in the
+# lifecycle than CLOSED_SUCCESSFULLY, so it is sealed too (F-114-N2, D9).
+SEALED_STATUSES = frozenset({CLOSED, "CLOSED", "DEPLOYED"})
 
 
 def now() -> str:
@@ -199,6 +212,22 @@ def suspend() -> int:
     return 0
 
 
+def _operator_command(script: str, arguments: str) -> str:
+    """Spell a framework script invocation so it resolves from the cwd.
+
+    Args:
+        script: Script file name under the framework's `scripts/`.
+        arguments: Arguments following the script path.
+
+    Returns:
+        str: `python3 scripts/<script> ...` in the nucleus, where `scripts/`
+            is at the root, or `python3 .agents/scripts/<script> ...` from a
+            host root, where it is not (`F-115-N3` / `F-114-N4`, Sprint 054 `D11`).
+    """
+    prefix = "scripts" if is_nucleus() else ".agents/scripts"
+    return f"python3 {prefix}/{script} {arguments}"
+
+
 def retry_hint(entry_point: str) -> str:
     """The re-run invocation valid for the entry point that issued a claim.
 
@@ -208,11 +237,12 @@ def retry_hint(entry_point: str) -> str:
             directly.
 
     Returns:
-        str: the exact command line to re-run with `--takeover`.
+        str: the exact command line to re-run with `--takeover`, spelled for
+            the current mode (nucleus or host root; see `_operator_command`).
     """
     if entry_point == "boot":
-        return "python3 scripts/session_start.py --boot --takeover"
-    return "python3 scripts/session_state.py claim --takeover"
+        return _operator_command("session_start.py", "--boot --takeover")
+    return _operator_command("session_state.py", "claim --takeover")
 
 
 def claim(
@@ -521,53 +551,106 @@ def _sprint_is_sealed(current_sprint_status: str | None) -> bool:
     Returns:
         bool: True when it is in `SEALED_STATUSES` — `CLOSED_SUCCESSFULLY`
             or the legacy `CLOSED` literal `release()` wrote before
-            Sprint 050 (`KI-052-2`, Sprint 053 `D1`).
+            Sprint 050 (`KI-052-2`, Sprint 053 `D1`), or `DEPLOYED`, a
+            post-seal status a host's deployment step writes after merge and
+            tag (the nucleus never writes it; `F-114-N2`, Sprint 054 `D9`).
     """
     return current_sprint_status in SEALED_STATUSES
 
 
-def open_sprint(sprint_id: int) -> int:
+def _open_fields(
+    sprint: dict, sprint_id: int, layer: str | None, app: str | None
+) -> dict:
+    """Derive the identity fields an open (or flagged refresh) writes.
+
+    Args:
+        sprint: The anchor's current `current_sprint` dict.
+        sprint_id: The sprint number being opened.
+        layer: `--layer` value, or None.
+        app: `--app` value, or None.
+
+    Returns:
+        dict: `layer`, `app`, `path` and `branch`. `layer`/`app` fall back to
+            the anchor's value, then `core`/`pipeline` (the defaults of
+            `scripts/check_role_artifact.py`); `path` never reads the cwd.
+    """
+    layer_value = layer or sprint.get("layer") or "core"
+    app_value = app or sprint.get("app") or "pipeline"
+    return {
+        "layer": layer_value,
+        "app": app_value,
+        "path": f"docs/sprints/{sprint_id:03d}-{layer_value}-{app_value}",
+        "branch": f"ai-sprint/{sprint_id:03d}",
+    }
+
+
+def open_sprint(
+    sprint_id: int,
+    layer: str | None = None,
+    app: str | None = None,
+    name: str | None = None,
+) -> int:
     """Open a sprint in `current_sprint`, or confirm it is already open.
 
-    Writes `current_sprint.id = sprint_id` and `current_sprint.status =
-    "OPEN"`, preserving every other key already present under
-    `current_sprint` (`layer`, `app`, `last_audit_sprint`, ...) — this
-    writes only the two fields the open act owns. Until this command
+    Writes `current_sprint.id = sprint_id`, `status = "OPEN"`, `layer`,
+    `app`, `path = docs/sprints/NNN-layer-app` and `branch =
+    ai-sprint/NNN` on every successful open (`F-114-N2`/`F-114-N3`, Sprint
+    054 `D10`), so the previous sprint's path never survives. `name` is
+    written only when given and a stale `name` is dropped otherwise. Every
+    other key (`last_audit_sprint`, ...) is preserved. Until this command
     (`S052-4`), nothing wrote `current_sprint`: the anchor was a hand edit
     with no gate.
 
+    Idempotent path: when `sprint_id` is already current and no flag is
+    given, nothing changes. When flags are given it refreshes
+    `layer`/`app`/`path`/`branch` (and `name` if given), keeping `status`
+    and any existing `name` otherwise.
+
     Args:
         sprint_id: The sprint number to open.
+        layer: Sprint layer; default the anchor's value, else `core`.
+        app: Sprint app; default the anchor's value, else `pipeline`.
+        name: Sprint name; written only when given.
 
     Returns:
         int: 0 when opened, when `sprint_id` already matches
-            `current_sprint.id` (idempotent — a repeat call changes
-            nothing), or when a different current sprint is sealed
-            (`_sprint_is_sealed`); 2 when a different current sprint is
-            not sealed (RA-11: only 2 blocks; F-3, S052 QA Gate 1).
+            `current_sprint.id` (idempotent), or when a different current
+            sprint is sealed (`_sprint_is_sealed`); 2 when a different
+            current sprint is not sealed (RA-11: only 2 blocks; F-3, S052
+            QA Gate 1).
     """
     state = load_state()
     sprint = state.get("current_sprint") or {}
     current_id = sprint.get("id")
     current_status = sprint.get("status")
+    flagged = any(v is not None for v in (layer, app, name))
 
-    if current_id == sprint_id:
+    if current_id == sprint_id and not flagged:
         print(f"✅ Sprint {sprint_id} already the current sprint — idempotent, nothing changed.")
         return 0
 
-    if current_id is not None and not _sprint_is_sealed(current_status):
+    if (
+        current_id is not None
+        and current_id != sprint_id
+        and not _sprint_is_sealed(current_status)
+    ):
         print(
             f"Refusing open-sprint: sprint {current_id} is not sealed "
             f"(current_sprint.status={current_status!r}). Seal it with "
-            f"`python3 scripts/session_state.py release` before opening "
+            f"`{_operator_command('session_state.py', 'release')}` before opening "
             f"sprint {sprint_id}.",
             file=sys.stderr,
         )
         return 2
 
     updated_sprint = dict(sprint)
-    updated_sprint["id"] = sprint_id
-    updated_sprint["status"] = "OPEN"
+    updated_sprint.update(_open_fields(sprint, sprint_id, layer, app))
+    if current_id != sprint_id:
+        updated_sprint["id"] = sprint_id
+        updated_sprint["status"] = "OPEN"
+        updated_sprint.pop("name", None)
+    if name is not None:
+        updated_sprint["name"] = name
     state["current_sprint"] = updated_sprint
     state["last_updated"] = now()
     save_state(state)
@@ -641,11 +724,26 @@ def _add_other_subparsers(sub: argparse._SubParsersAction) -> None:
     )
     open_sprint_parser = sub.add_parser(
         "open-sprint",
-        help="Write current_sprint.{id,status: OPEN}; refuse over an unsealed sprint.",
+        help=(
+            "Write current_sprint.{id, status: OPEN, layer, app, path, branch} "
+            "(name only with --name); refuse over an unsealed sprint."
+        ),
     )
     open_sprint_parser.add_argument(
         "--id", required=True, type=int, dest="sprint_id",
         help="Sprint number to open.",
+    )
+    open_sprint_parser.add_argument(
+        "--layer", default=None,
+        help="Sprint layer (default: the anchor's value, else core).",
+    )
+    open_sprint_parser.add_argument(
+        "--app", default=None,
+        help="Sprint app (default: the anchor's value, else pipeline).",
+    )
+    open_sprint_parser.add_argument(
+        "--name", default=None,
+        help="Sprint name; written only when given, a stale name is dropped.",
     )
 
 
@@ -687,7 +785,7 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.command == "set-topology":
         return set_topology()
     if args.command == "open-sprint":
-        return open_sprint(args.sprint_id)
+        return open_sprint(args.sprint_id, args.layer, args.app, args.name)
     return release()
 
 

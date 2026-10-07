@@ -1,0 +1,147 @@
+"""Tests for scripts/install_lock.py (Sprint 054, B04, D12 / KI-053-1)."""
+
+from __future__ import annotations
+
+import subprocess
+import sys
+from pathlib import Path
+
+SCRIPT = Path(__file__).resolve().parent.parent / "scripts" / "install_lock.py"
+
+
+def _run(command: str, root: Path) -> int:
+    proc = subprocess.run(
+        [sys.executable, str(SCRIPT), command, "--root", str(root)],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    return proc.returncode
+
+
+def _refused(command: str, root: Path) -> bool:
+    """Exit 2 with the script's own refusal line, not merely any exit 2.
+
+    Python also exits 2 when it cannot open the script or argparse rejects
+    the arguments, so a bare ``returncode == 2`` passed with the script
+    absent (Sprint 054 Tester Gate 2, ``T2-1``).
+    """
+    proc = subprocess.run(
+        [sys.executable, str(SCRIPT), command, "--root", str(root)],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    return proc.returncode == 2 and "[FAIL] install_lock:" in proc.stdout
+
+
+def _tree(root: Path, files: dict[str, str]) -> None:
+    for name, text in files.items():
+        (root / name).write_text(text, encoding="utf-8")
+
+
+def test_absent_lock_exits_2(tmp_path: Path) -> None:
+    _tree(tmp_path, {"requirements-core.txt": "pkg==1\n"})
+    assert _refused("check", tmp_path)
+
+
+def test_write_then_check_exits_0(tmp_path: Path) -> None:
+    _tree(tmp_path, {"requirements-core.txt": "pkg==1\n-r q.txt\n", "q.txt": "x==2\n"})
+    assert _run("write", tmp_path) == 0
+    assert _run("check", tmp_path) == 0
+
+
+def test_edited_include_exits_2(tmp_path: Path) -> None:
+    _tree(tmp_path, {"requirements-core.txt": "-r q.txt\n", "q.txt": "x==2\n"})
+    _run("write", tmp_path)
+    (tmp_path / "q.txt").write_text("x==3\n", encoding="utf-8")
+    assert _refused("check", tmp_path)
+
+
+def test_recursive_include_followed(tmp_path: Path) -> None:
+    _tree(
+        tmp_path,
+        {
+            "requirements-core.txt": "-r b.txt\n",
+            "b.txt": "--requirement c.txt\n",
+            "c.txt": "x==1\n",
+        },
+    )
+    _run("write", tmp_path)
+    (tmp_path / "c.txt").write_text("x==2\n", encoding="utf-8")
+    assert _refused("check", tmp_path)
+
+
+def test_include_cycle_terminates(tmp_path: Path) -> None:
+    _tree(
+        tmp_path,
+        {
+            "requirements-core.txt": "-r b.txt\n",
+            "b.txt": "-r requirements-core.txt\n",
+        },
+    )
+    assert _run("write", tmp_path) == 0
+    assert _run("check", tmp_path) == 0
+
+
+def test_legacy_free_text_lock_exits_2(tmp_path: Path) -> None:
+    _tree(
+        tmp_path,
+        {
+            "requirements-core.txt": "pkg==1\n",
+            "installed.lock": "2026-01-01T00:00:00Z requirements-core.txt\n",
+        },
+    )
+    assert _refused("check", tmp_path)
+
+
+def test_missing_included_file_exits_2(tmp_path: Path) -> None:
+    _tree(tmp_path, {"requirements-core.txt": "-r gone.txt\n"})
+    assert _refused("check", tmp_path)
+    assert _refused("write", tmp_path)
+
+
+def test_missing_core_file_exits_2(tmp_path: Path) -> None:
+    assert _refused("check", tmp_path)
+
+
+def _module():
+    sys.path.insert(0, str(SCRIPT.parent))
+    import install_lock
+
+    return install_lock
+
+
+def test_fix_hint_names_nucleus_forms_in_nucleus_mode(monkeypatch, tmp_path: Path, capsys) -> None:
+    """F3: nucleus root resolves the bare paths."""
+    mod = _module()
+    _tree(tmp_path, {"requirements-core.txt": "pkg==1\n"})
+    monkeypatch.setattr(mod, "is_nucleus", lambda: True)
+    assert mod.run_check(tmp_path) == 2
+    out = capsys.readouterr().out
+    assert "venv_skillopt/bin/python -m pip install -r requirements-core.txt" in out
+    assert "python3 scripts/install_lock.py write" in out
+    assert ".agents/" not in out
+
+
+def test_fix_hint_names_agents_prefixed_forms_in_submodule_mode(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    """F3: a host root resolves only the `.agents/` forms."""
+    mod = _module()
+    _tree(tmp_path, {"requirements-core.txt": "pkg==1\n"})
+    monkeypatch.setattr(mod, "is_nucleus", lambda: False)
+    assert mod.run_check(tmp_path) == 2
+    out = capsys.readouterr().out
+    assert ".agents/venv_skillopt/bin/python -m pip install -r .agents/requirements-core.txt" in out
+    assert "python3 .agents/scripts/install_lock.py write" in out
+
+
+def test_main_returns_int_exit_code(monkeypatch, tmp_path: Path) -> None:
+    """F7: main returns the exit code its Returns section documents."""
+    mod = _module()
+    _tree(tmp_path, {"requirements-core.txt": "pkg==1\n"})
+    monkeypatch.setattr(sys, "argv", ["install_lock.py", "write", "--root", str(tmp_path)])
+    assert mod.main() == 0

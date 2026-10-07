@@ -1,0 +1,9 @@
+{
+  "nodes": 12841,
+  "edges": 17475,
+  "communities": 1037,
+  "source": "graphify-out/graph.json",
+  "sprint": 54,
+  "built_at_commit": "ee86ded",
+  "note": "Counts from `make graphify-update` (AST, no LLM) at HEAD before the close-workflow closeout commits (this file, model_ledger_regen). Previous snapshot is Sprint 053's (12375/16638/994). The delta reflects two new framework scripts (check_fix_reproduces.py, install_lock.py), their tests, and the extended audit_plan.py / session_state.py / session_start.py."
+}
