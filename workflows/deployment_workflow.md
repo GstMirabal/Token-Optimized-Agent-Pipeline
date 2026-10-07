@@ -1,6 +1,6 @@
 ---
 description: "Deployment and Production Release Protocol (Keyword: deploy)"
-version: 3.4.0
+version: 3.4.1
 invoked_by: human:/agents:deployment | close_workflow.md#deployment_handoff
 ---
 
@@ -27,5 +27,8 @@ The terminal sequence for graduating verified pipeline code from the localized s
 | **4. Closure** | `topology_writeback` | **After** `baseline_refresh`, as a **separate invocation** (`RA-13` — never chain the two with `&&` in one line; each is independently observed). Run `python3 .agents/scripts/session_state.py set-topology` (nucleus: `python3 scripts/session_state.py set-topology`). Writes `docs/active_state.json` `topology_version` in the documented format `X.Y.Z-NNN-<status>`, derived from the newest sealed `## [X.Y.Z]` section of `CHANGELOG.md` plus `current_sprint.id`/`current_sprint.status` (Sprint 050 `D7`). This is the write-back that never existed before Sprint 050: `baseline_refresh` updates only `last_close_commit`, and nothing re-derived `topology_version` after a release sealed the version, which is why the field trailed a release. **Done-criterion**: exit `0` and `topology_version` reflects the version just sealed by `ledger_seal`. |
 | **4. Closure** | `bridge_lock_refresh` | **After** `baseline_refresh` (separate invocation, `RA-13`). **Both targets, not Cursor alone** — a deploy moves the tip and invalidates every lock, and this repository is worked from both harnesses. For each of `claude` and `cursor`: ask `python3 -c "import sys; sys.path.insert(0,'scripts'); from bridge_state import bridge_stale; print(bridge_stale(__import__('pathlib').Path('.'), '<target>', nucleus=True))"`. **False** → write `.bridge_<target>.lock` to `HEAD` only. **True** → `bash scripts/install.sh --target <target>`. **Never refresh a lock over a mirror that is stale**: that is exactly the Sprint 041 defect reintroduced from the deploy path — a lock matching `HEAD` makes the next `/start` see triage (a) and skip the install forever. **Done-criterion**: for each target, lock text equals `git rev-parse HEAD` **and** `bridge_stale` is false. Avoids the first post-deploy `/start` discovering a stale lock solely because the tip moved (Sprint 040). Until Sprint 041 this cell was conditioned on *"If `session_tool`/operators use Cursor"* and touched only `.bridge_cursor.lock`, so the Claude bridge had no maintenance path at any point in the lifecycle. |
 
+> [!NOTE]
+> **Sandbox behaviour of `gh`, `git push` and `scripts/publish_github_release.py`**: see the single table `rules/project_topology.md` section 4. In short, `git push` needs only the domain in `network.allowedDomains`; each `gh` call needs its excluded pattern in the template or a human run.
+
 ---
-*Optimized for Pipeline Production Integrity — PR-based merge with CI gate (v3.4.0); Hotfix H-003 wires `github_release` and post-merge `local_prune`; Sprint 029 adds `sprint_seal_gate`; Sprint 039 adds `baseline_refresh`; Sprint 040 adds `bridge_lock_refresh` after baseline.*
+*Optimized for Pipeline Production Integrity — PR-based merge with CI gate (v3.4.1); Hotfix H-003 wires `github_release` and post-merge `local_prune`; Sprint 029 adds `sprint_seal_gate`; Sprint 039 adds `baseline_refresh`; Sprint 040 adds `bridge_lock_refresh` after baseline.*
