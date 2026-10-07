@@ -60,4 +60,4 @@ Loaded only on a host's FIRST pipeline session (token economy: one-time routing 
 | **C. Mature project, no agents** | Substantial codebase, zero agentic traces. | `agents.md §5 legacy_onboarding`: Full Reverse Engineering (`sprint-architect` Legacy Onboarding Protocol) → Blueprints + Walkthroughs, generated directly in arc42-lite (`rules/documentation_standard.md §5`) since there is nothing pre-existing to migrate. Adopt an existing `CHANGELOG.md` as the Master Ledger untouched; if none, seed one whose first entry documents the audited inherited state. Same `code_containers` prompt as Scenario A — this is the scenario with the most code, and thus the most to gain from Level 3, yet the one previously *not* offering the prompt at all. |
 
 ---
-*Optimized for Pipeline Unique Naming, Symmetric Observability & Reversible Legacy Absorption (v5.0.0).*
+*Optimized for Pipeline Unique Naming, Symmetric Observability & Reversible Legacy Absorption (v5.1.0).*
