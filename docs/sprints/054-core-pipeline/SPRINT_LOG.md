@@ -9,7 +9,7 @@
 | :--- | :--- |
 | **Active Layer** | core / pipeline |
 | **Strategic Goal** | Intake of a host's framework-class findings (`F-114-*`, `F-115-*`) measured against `v4.36.0`; close the gates that pass without measuring (block A), the sprint-state gaps (block B) and the `.npmrc` supply-chain gap (block C). Block D (sandbox) routed to Sprint 055, block E (nucleus residue) to Sprint 056 |
-| **Intelligence State** | Phase 6 Execution complete (27 work units landed); Phase 7 Quality Gate next |
+| **Intelligence State** | Phase 7 complete: QA Gate 1 RECORD at round 4 (after a human-approved block re-plan), Tester Gate 2 RECORD at round 1 |
 | **Start Time** | 2026-10-04 |
 
 ---
@@ -40,6 +40,7 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | **Block re-plan after QA Gate 1 round 3** (second `remediation-regression` label; third consecutive REJECTED). `pipeline_workflow.md` Phase 7 escalates at the third REJECTED while `remediation_workflow.md` Phase 0 triggers at `>3`; with every change committed and the tree clean, that workflow's stash/restore/clean would sanitise nothing | **Human (GstMirabal) chose option A in chat on 2026-10-05**: re-plan instead of `TERMINAL_REMEDIATION_LOOP`. Plan: (1) one wording change states the replay's verdict as its per-commit violation lines, with an exit 2 that carries none (`RUNNER_UNAVAILABLE`, `ERROR:`) judging no commit, applied identically in `rules/qa_and_testing.md` §4, `agents/qa_agent.md` and `workflows/pipeline_workflow.md` Phase 7, and the label scope made consistent inside its own bullet (R3-1, R3-2); (2) a repository-wide RA-14 grep run by the author **before** re-gating, its output recorded here; (3) the third-vs-`>3` contradiction opened as `KI-054-3`; (4) QA Gate 1 round 4 in fresh context | `KI-054-3` |
 | Re-plan step 2: repository-wide RA-14 grep before re-gating (excluding `docs/sprints`, `docs/audits`, `docs/roadmaps`, `CHANGELOG.md`, `graphify-out`) for `remediation-regression`, `RUNNER_UNAVAILABLE`, `check_fix_reproduces`, `non-zero exit`, `charter` row | Statements of the replay verdict: `rules/qa_and_testing.md:69`, `agents/qa_agent.md:20`, `workflows/pipeline_workflow.md:23` (identical wording now), `scripts/check_fix_reproduces.py:10-31` docstring, `rules/code_craft.md:81`, `hooks/on_commit.py:810,840` — all consistent; label scope stated once at `rules/qa_and_testing.md:67`, no remaining `charter` row restriction; `non-zero exit` hits elsewhere are unrelated (`on_push.py`, `branch_sovereignty.py`, `detect_drift.py`, `sync_agents_pin.py`, two tests) | — |
 | QA Gate 1 round 4 `R4-2`: the gate subagent received the `qa_agent.md` definition as loaded at session start, not the committed `242657f` wording | A Claude Code session loads agent definitions once; a gate that must run under an edited profile is dispatched from a session started after that edit is committed. Recorded for `extract_workflow.md` | — |
+| Tester Gate 2 `T2-1` addressed after the gate verdict with a test-only commit (`test(install)`): refusal tests now require the `[FAIL] install_lock:` line; measured with `scripts/install_lock.py` moved away — 11 failed, restored — 11 passed. No source change, so no re-gate | — | — |
 | A host's handoff was checked against `v4.35.0` while the nucleus had already sealed `v4.36.0` | Every id re-measured against `d848302` before planning; all still open, `F-103-N1` already closed by `F-BOOT-2` | — |
 
 ---
@@ -67,6 +68,6 @@ and a fabricated row would teach authors to invent verdicts
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: OPEN
-**Next Phase**: Phase 7 (Quality Gate: QA Gate 1, Tester Gate 2)
+**Next Phase**: Phase 8 (Sprint Closeout), then `close_workflow.md`
 
 *Certified under conventional commit standard: feat(scope): message #054*
