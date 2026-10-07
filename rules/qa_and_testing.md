@@ -89,3 +89,27 @@ built to enforce it. A declared one is an audit trail. Precedent: the gate was
 rejected four consecutive times in Sprint 023 for blocking legitimate pointers,
 and the deciding argument each round was not the false positive but that **a
 host had no way to comply except to disable the hook**.
+
+The same pointer-versus-credential distinction governs how a command receives a
+`.env` value: it receives it through `scripts/with_env.py` (`rules/project_topology.md`
+section 4, row `Any command that needs a .env value`), never by the agent reading
+`.env` into context. This section waives a scan finding; it does not widen that path.
+
+## 6. Human-run browser verification
+
+Chromium, Playwright and Chrome for Testing cannot launch inside the Claude Code
+sandbox (`rules/project_topology.md` section 4, row `Chromium, Playwright, Chrome for Testing`;
+evidence `S-7a`, `S-7b`, measured on CLI 2.1.119). The sandbox-side switch that
+looks like a fix, `sandbox.network.allowMachLookup: true`, disables the whole sandbox
+without a warning and is **PROHIBITED**; the list form does not make the browser
+launch. Browser verification is therefore run by the human, and the agent never
+claims a browser case as passed without pasted output.
+
+| Step | Actor | Operation | Done-criterion |
+| :--- | :--- | :--- | :--- |
+| 1 | Agent | For each browser case, write into the sprint log the exact command, the working directory, and the expected result (exit code and the output line or screenshot path that proves it) | One row per case in `SPRINT_LOG.md`, each naming command and expected result |
+| 2 | Human | Run each command in their own unsandboxed shell and paste the output into the chat | Output pasted for every case |
+| 3 | Agent | Record the pasted output verbatim as evidence in the sprint log row of that case, then compare it with the expected result | Row marked matching or differing; a differing row is a failure routed to `workflows/remediation_workflow.md` |
+| 4 | Agent | Mark the unit blocked while any case has no pasted output | No browser case reported as passed without evidence |
+
+Redact any secret value in the pasted output before recording it (`RA-09`).
