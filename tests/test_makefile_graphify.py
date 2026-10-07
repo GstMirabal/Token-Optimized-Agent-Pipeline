@@ -33,4 +33,5 @@ def test_graphify_deep_runs_through_with_env() -> None:
         if not ln.startswith("\t"):
             break
         recipe.append(ln)
-    assert any("scripts/with_env.py" in ln for ln in recipe)
+    joined = "\n".join(recipe)
+    assert "python3 -I $(AGENTS_DIR)/scripts/with_env.py graphify-extract-deep" in joined

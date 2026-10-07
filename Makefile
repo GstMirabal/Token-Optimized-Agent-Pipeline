@@ -44,13 +44,17 @@ graphify-rebuild:
 	$(AGENTS_DIR)/venv_skillopt/bin/python -m graphify update . --force
 	python3 $(AGENTS_DIR)/scripts/graph_reconcile.py --root .
 
-# Semantic rebuild that needs a provider key from `.env`. It runs through
-# scripts/with_env.py, which loads `.env` and redacts values from the output.
+# Semantic rebuild that needs a provider key from `.env`. It runs the named
+# command `graphify-extract-deep` of config/with_env_allowlist.json through
+# scripts/with_env.py (`python3 -I`, mandatory), which loads `.env` and masks
+# exact copies of its values in the output (best effort, not a security
+# boundary). The earlier `graphify . --mode deep` form was not a valid
+# graphifyy 0.8.30 subcommand; the CLI is `graphify extract <path> --mode deep`.
 # Inside the Claude Code sandbox a make target is NOT matched by
 # `sandbox.excludedCommands`, so the agent invokes the with_env.py command
 # directly (rules/project_topology.md); this target is for an unsandboxed shell.
 graphify-deep:
-	python3 $(AGENTS_DIR)/scripts/with_env.py $(AGENTS_DIR)/venv_skillopt/bin/python -m graphify . --mode deep
+	python3 -I $(AGENTS_DIR)/scripts/with_env.py graphify-extract-deep
 
 # Framework self-check. THIS is the full set: `.github/workflows/ci.yml` invokes
 # this target rather than listing its own steps, so a green local run and a green
