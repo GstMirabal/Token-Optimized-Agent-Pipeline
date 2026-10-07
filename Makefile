@@ -13,7 +13,7 @@
 #     they keep the caller's CWD — that is the tree they are meant to inspect.
 
 AGENTS_DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
-GRAPHIFY := $(AGENTS_DIR)/venv_skillopt/bin/graphify
+GRAPHIFY := $(AGENTS_DIR)/venv_skillopt/bin/python -m graphify
 PY_EXCLUDES := -not -path "*/.git/*" -not -path "*/node_modules/*" -not -path "*/venv_skillopt/*"
 
 # Prefer the framework venv when it exists (a local checkout, where pytest lives
@@ -26,7 +26,7 @@ PY_EXCLUDES := -not -path "*/.git/*" -not -path "*/node_modules/*" -not -path "*
 VENV_PY := $(AGENTS_DIR)/venv_skillopt/bin/python3
 PY := $(if $(wildcard $(VENV_PY)),$(VENV_PY),python3)
 
-.PHONY: graphify-update graphify-rebuild verify docs-freshness-check session-start model-ledger cursor-tiers cursor-era-audit bridge-state role-artifacts quality-audit
+.PHONY: graphify-update graphify-rebuild graphify-deep verify docs-freshness-check session-start model-ledger cursor-tiers cursor-era-audit bridge-state role-artifacts quality-audit
 
 
 # Incremental AST sync after code changes (close_workflow Phase 1, no LLM cost).
@@ -39,10 +39,18 @@ graphify-update:
 # sprint closeout run with no network and no credentials, and `--mode deep`
 # (semantic, needs GEMINI_API_KEY) failed there every time (C5, Sprint 044).
 # Deep semantic rebuild stays available as a manual escalation:
-#   $(AGENTS_DIR)/venv_skillopt/bin/graphify . --mode deep   # needs GEMINI_API_KEY
+#   make graphify-deep   # needs a provider key in .env
 graphify-rebuild:
 	$(AGENTS_DIR)/venv_skillopt/bin/python -m graphify update . --force
 	python3 $(AGENTS_DIR)/scripts/graph_reconcile.py --root .
+
+# Semantic rebuild that needs a provider key from `.env`. It runs through
+# scripts/with_env.py, which loads `.env` and redacts values from the output.
+# Inside the Claude Code sandbox a make target is NOT matched by
+# `sandbox.excludedCommands`, so the agent invokes the with_env.py command
+# directly (rules/project_topology.md); this target is for an unsandboxed shell.
+graphify-deep:
+	python3 $(AGENTS_DIR)/scripts/with_env.py $(AGENTS_DIR)/venv_skillopt/bin/python -m graphify . --mode deep
 
 # Framework self-check. THIS is the full set: `.github/workflows/ci.yml` invokes
 # this target rather than listing its own steps, so a green local run and a green
