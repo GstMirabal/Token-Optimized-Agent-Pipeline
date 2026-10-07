@@ -18,8 +18,10 @@
 Tracking of atomic goals achieved during the session.
 
 - [x] **Phase 1 — Planning**: `IMPLEMENTATION_PLAN.md` drafted (19 units, `D1`..`D9`)
-- [ ] **Phase 3 — Roadmap Drafting**: branch `ai-sprint/055`, anchor opened, plan committed
-- [ ] **Phase 4 — Assignment and Rule Audit**: `agent_assignment.md`, `skill_assignment.md`, `task_scope.md`
+- [x] **Phase 3 — Roadmap Drafting**: branch `ai-sprint/055`, anchor opened, plan committed (`890c8e3`)
+- [x] **Phase 4 — Assignment and Rule Audit**: `agent_assignment.md`, `skill_assignment.md`, `task_scope.md`; `check_forge_ladder.py` and `check_task_scope.py` exit `0`
+    - `[x]` U12 omitted: `skills/graphify/SKILL.md` judged vendored (bulk import `cde6a71`, upstream sponsor line 747; `rules/skills_and_integrations.md §3`); the 7-key correction moves to U11
+    - `[x]` U20 added: Phase 4.3 found `agents/devops_agent.md:16` still prescribing environment export commands (`RA-14`)
 - [ ] **Phase 5 — Approval Gate**
 - [ ] **Phase 6 — Execution**: `U01` measurement first (human-launched sandboxed session)
 

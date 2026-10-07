@@ -92,7 +92,7 @@ cada fila.
 | `U09` | `rules/project_topology.md` | modify — tabla de sandbox (`D8`) | medium | `doc_orchestrator` | ⏳ |
 | `U10` | `rules/qa_and_testing.md` | modify — verificación con navegador, rama A o B (`D6`) | medium | `doc_orchestrator` | ⏳ |
 | `U11` | `rules/graphify.md` | modify — key por `with_env.py`, `S-4` (walkers que fallan con `stat()`), lista de keys medida | low | `doc_orchestrator` | ⏳ |
-| `U12` | `skills/graphify/SKILL.md` | modify — corregir la línea 238 a las 7 keys; **se omite** si el fichero está vendorizado (`rules/skills_and_integrations.md §3`), dejando constancia en `SPRINT_LOG.md` | low | `skill_architect` | ⏳ |
+| `U12` | `skills/graphify/SKILL.md` | **omitida** (Fase 4.2: vendorizado, import `cde6a71`, línea 747 del autor upstream) — corregir la línea 238 a las 7 keys; **se omite** si el fichero está vendorizado (`rules/skills_and_integrations.md §3`), dejando constancia en `SPRINT_LOG.md` | low | `skill_architect` | ⏳ |
 | `U13` | `agents.md` | modify — reescribir `RA-09` y `§3 secret_sovereignty` con `with_env.py` como vía sancionada (`D2`) | high | `rule_validator` | ⏳ |
 | `U14` | `workflows/pipeline_workflow.md` | modify — Phase 2: "export `.env`" pasa a `with_env.py` | low | `doc_orchestrator` | ⏳ |
 | `U15` | `workflows/deployment_workflow.md` | modify — los pasos no sandboxeados se refieren a la tabla de `U09` (`S-5`) | low | `doc_orchestrator` | ⏳ |
@@ -100,6 +100,7 @@ cada fila.
 | `U17` | `rules/LEGACY_RULE_CONCORDANCE.md` | modify — la fila de `Rule 66` sigue el nuevo texto de `RA-09` (`RA-14`) | low | `doc_orchestrator` | ⏳ |
 | `U18` | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify — cerrar `F-115-N2` con fila→SHA, reproducido en `U01` | low | `doc_orchestrator` | ⏳ |
 | `U19` | `CHANGELOG.md` | modify — entrada en `[Unreleased]` con SHAs | low | `doc_orchestrator` | ⏳ |
+| `U20` | `agents/devops_agent.md` | modify — `secret_sovereignty` (línea 16) y el texto de "`.env` export" pasan a `scripts/with_env.py` (`RA-14`, hallazgo de la Fase 4.3) | low | `agent_orchestrator` | ⏳ |
 
 Orden: `U01` → (`U02`, `U03`) → `U04`..`U08` → `U09`..`U17` → `U18`, `U19`. Si `U01` refuta una
 fila del host, la unidad que la corrige se reduce a documentarla y la decisión queda en `SPRINT_LOG.md`.
@@ -128,7 +129,7 @@ comentarios); no se añade `python-dotenv`.
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 19 | Count of rows in Work tables |
+| Work units | 20 (19 activas: `U12` omitida por vendorizada) | Count of rows in Work tables |
 | Subagents dispatched | 19 units + 2 gates | `agent_assignment.md` |
 | Prior session ratio | **5.0 (umbral blando alcanzado)** — esta sesión de Planning: primer turno 23264, pico 116084 | `python3 scripts/session_cost.py --from-anchor --json` |
 
@@ -181,7 +182,8 @@ solo transcribe estados en `task_scope.md`.
 | `rules/graphify.md` | keys vía `with_env.py`; `S-4`; lista de keys medida |
 | `rules/LEGACY_RULE_CONCORDANCE.md` | la fila de `Rule 66` sigue a `RA-09` |
 | `workflows/pipeline_workflow.md`, `deployment_workflow.md`, `repository_hardening_workflow.md` | se refieren a la tabla de sandbox |
-| `skills/graphify/SKILL.md` | línea 238 (condicional a `U12`) |
+| `skills/graphify/SKILL.md` | sin cambios: `U12` omitida (vendorizado) |
+| `agents/devops_agent.md` | `secret_sovereignty` apunta a `with_env.py` (`U20`) |
 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | `F-115-N2` cerrado |
 | `CHANGELOG.md` | entrada en `[Unreleased]` |
 | `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` | nuevo: la matriz medida |
