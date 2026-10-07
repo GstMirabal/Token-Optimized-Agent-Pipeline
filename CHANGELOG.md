@@ -4,6 +4,30 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Added
+- **Sprint 054 `host-intake-gates-and-sprint-state`** — intake of a host's framework-class findings (`F-114-*`, `F-115-*`), re-measured against `v4.36.0` (`225aaee`): close the gates that pass without measuring (block A), the sprint-state gaps (block B) and the `.npmrc` supply-chain gap (block C). The sandbox findings are routed to Sprint 055 and the nucleus's own instrument residue to Sprint 056 (`903b04e`). 67 commits; `make verify` green, 1024 tests pass. #054
+  - **`fix(` replay** — `scripts/check_fix_reproduces.py` (new) replays each `fix(` commit's staged tests red on the parent and green at the commit, and reports `FAILS_AT_COMMIT`, `PASSES_ON_PARENT` or `UNREPLAYED` per commit (`0747911`). It is QA Gate 1's first check (`cd225c4`, `38548e4`) and `README.md` counts it among the framework scripts (`bcdb4ac`).
+  - **`Repro:` trailer** — `hooks/on_commit.py` requires a `Repro:` trailer on a `fix(` commit that stages source, in one of two forms: a staged test id with the short SHA at which it failed, or `Repro: manual — <SPRINT_LOG section>`; the six fixtures it broke carry one (`8f13941`). A staged test file with no pytest runner stays `UNREPLAYED` until a JS/TS runner exists (`KI-054-1`).
+  - **`RUNNER_UNAVAILABLE`** — the replay refuses to run with an interpreter that cannot import pytest and exits `2` with that token instead of reading a missing pytest as a red parent (`d64fb37`), carrying the preflight's cause in the message (`a5872e6`). `agents/qa_agent.md` states the replay's interpreter and the token (`d93471a`).
+  - **Plan table checks** — `skills/token-saver-auditor/scripts/audit_plan.py` checks recorded base runs, dry runs and controls in the plan tables, only when the plan's header carries the new columns, so plans sealed earlier keep passing (`b6b554e`; Google docstrings for its table helpers `e78ec2b`). `IMPLEMENTATION_PLAN_TEMPLATE.md` gains the base-observation and dry-run columns (`7fb1572`), and `workflows/pipeline_workflow.md` requires them at Phase 5 (`38548e4`).
+  - **`NOTICE.md` template** — `docs/standards/templates/NOTICE_TEMPLATE.md` (new) (`4ec95bd`), declared in `config/template_gates.json` as a template with no gate (`2f22aea`); `workflows/standardization_workflow.md` censuses vendored content and scaffolds `NOTICE.md` from it (`737cea6`).
+  - **`scripts/install_lock.py`** (new) hashes the requirement set into `installed.lock` so a host venv reinstalls when a requirements file changes, closing `KI-053-1` (`3b012d4`); `scripts/session_start.py` reports a stale lock as a boot advisory (`b2a42ef`); `README.md` counts the script (`f0e829d`).
+
+### Fixed
+- **`scripts/quality_audit.py`** exits `2` when a scan measured no file, instead of exit `0` on an empty scan (`46d07cf`).
+- **`scripts/session_state.py` open-sprint** — a host-written `DEPLOYED` status is accepted as sealed (`23b8b48`), and the sealed-set comments and probe name it (`d9035fe`, `44fa69b`); `open-sprint` writes `path`, `branch`, `layer` and `app` into the anchor (`d86f521`), and `workflows/pipeline_workflow.md` Phase 3 lists those fields (`590fb6a`).
+- **Host and nucleus command forms** — operator commands are named in their host form outside the nucleus: `scripts/session_state.py` messages (`09642e9`), the `scripts/install_lock.py` reinstall command (`c56bc88`), the `scripts/session_start.py` install-lock advisory (`9c78f26`), `commands/start.md` (`f16bdd4`) and `workflows/start_workflow.md`, which also names the hashed lock (`cac68ec`). The same defect in the Phase 7 gate commands is open as `KI-054-2` (`15a005e`).
+
+### Changed
+- **`agents.md §8`** — the supply-chain keys (`ignore-scripts`, `minimum-release-age`, `onlyBuiltDependencies`) live in `pnpm-workspace.yaml` rather than `.npmrc`, and the `RA-10` pointer follows (`d01045b`); `rules/code_craft.md` §4 spells them as `pnpm-workspace.yaml` does (`c9f9c79`), as does `README.md` (`f0e829d`).
+- **QA label and verdict wording** — `rules/qa_and_testing.md` §4 labels remediation regressions and unsatisfiable plan rows (`12769c6`); `RUNNER_UNAVAILABLE` is not a verdict and the label covers `instructing` rows (`5a6488b`, `f6ebfb0`); only a per-commit replay violation is a `charter` `REJECTED` in `agents/qa_agent.md` (`240043f`); the verdict is the replay's per-commit violation lines, stated identically in `rules/qa_and_testing.md`, `agents/qa_agent.md` and `workflows/pipeline_workflow.md` Phase 7 after a human-approved block re-plan (`d3d1e10`, `242657f`, `f300a9f`).
+- **`rules/code_craft.md` §6** names both mechanisms that enforce watch-it-fail, the hook and the replay (`9d2c1ef`).
+- **`workflows/close_workflow.md`** `repo_docs_check` requires `NOTICE.md` only when the repository carries vendored content (`ff3a904`).
+- `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` regenerated after the workflow edits (`dde2088`).
+- **KI routing** — `docs/roadmaps/core/pipeline/021-030-program-queue.md` opens `KI-054-2` (`15a005e`), `KI-054-3`, two escalation thresholds for one rejection count (`e169375`), and completes the `KI-054-3` statement list (`9d8b7f6`); `KI-054-1` is routed with the replay (`903b04e`).
+- `tests/test_install_lock.py` refusal tests assert `install_lock`'s own `[FAIL]` line rather than any exit `2` (`ac37f3e`).
+- Sprint record, `docs/sprints/054-core-pipeline/` — plan, log, assignments, task scope, Phase 5 approval, execution progress, human-acknowledged plan deviation (`F2`) and re-plan, and the QA Gate 1 rounds 1-4 and Tester Gate 2 round 1 transcriptions: `a796992` `139e693` `5d1b8da` `83caf76` `c2951eb` `ad61cf6` `dc9f740` `062b02f` `65bf38b` `097b4f3` `cfeada3` `1a79a2a` `e3f5483` `cf7e7b7` `a0bc8ca` `de13418` `12e0f9c` `0c7d9b1` `706031e` `48aaad2` `1d39380`.
+
 ## [4.36.0] - 2026-10-04
 
 ### Added
