@@ -60,6 +60,7 @@ and a fabricated row would teach authors to invent verdicts
 
 | Gate | Round | Verdict | Class | Notes |
 | :--- | :--- | :--- | :--- | :--- |
+| QA Agent (Gate 1) | 1 | REJECTED | charter | check_fix_reproduces exit 0 (3 fix( OK); ruff 0; quality-audit 0; make verify 0. Blockers: F1 `python -m graphify` imports a cwd `graphify/` before the venv package (agent code runs unsandboxed with .env loaded); F2 a sibling module in `scripts/` shadows the wrapper's stdlib imports; F3 denyWrite omits `.agents/venv_skillopt/**` and `.env`; F4 redaction catches exact copies only and values under 4 chars; F5 `-m graphify *` admits config-writing subcommands (`claude install`, `hook install`); F6 gh patterns admit any HTTP method and `gh auth status --show-token`; F7 plan Verification row 3, T1, D4 not amended to the revised D4; F8 `docs/standards/templates/README_TEMPLATE.md:91` still prescribes env exports (RA-14); F9 record: `_report_write_denied` lacks Args, allowlist test checks membership not exclusivity. |
 
 ---
 
