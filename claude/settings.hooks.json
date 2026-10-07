@@ -6,7 +6,9 @@
       "Bash(git push --force:*)",
       "Bash(git push -f:*)",
       "Bash(git reset --hard origin:*)",
-      "Bash(rm -rf /:*)"
+      "Bash(rm -rf /:*)",
+      "Edit(/.agents/scripts/with_env.py)",
+      "Edit(/.agents/config/with_env_allowlist.json)"
     ],
     "allow": [
       "Bash(cd:*)",
@@ -43,6 +45,15 @@
       "denyRead": [
         "./.env",
         "./.env.*"
+      ],
+      "allowRead": [
+        "./.env.example",
+        "./.env.sample",
+        "./.env.template"
+      ],
+      "denyWrite": [
+        "./.agents/scripts/with_env.py",
+        "./.agents/config/with_env_allowlist.json"
       ]
     },
     "credentials": {
@@ -52,7 +63,21 @@
           "mode": "deny"
         }
       ]
-    }
+    },
+    "excludedCommands": [
+      "python3 .agents/scripts/with_env.py .agents/venv_skillopt/bin/python -m graphify *",
+      "gh api repos/*",
+      "gh api -X * repos/*",
+      "gh api graphql *",
+      "gh pr create *",
+      "gh pr checks *",
+      "gh pr merge *",
+      "gh pr list *",
+      "gh repo view *",
+      "gh auth status*",
+      "gh release create *",
+      "gh release view *"
+    ]
   },
   "fileCheckpointingEnabled": true,
   "hooks": {
