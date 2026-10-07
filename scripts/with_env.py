@@ -1,26 +1,37 @@
-"""Run an allowlisted command with the working directory's ``.env`` loaded.
+"""Run a NAMED, allowlisted command with the working directory's ``.env`` loaded.
 
 invoked_by: rules/project_topology.md sandbox table, agents.md RA-09, Makefile graphify-deep
 
-Usage (nucleus): ``python3 scripts/with_env.py <command> [args...]``
-Usage (host):    ``python3 .agents/scripts/with_env.py .agents/venv_skillopt/bin/python -m graphify ...``
+Usage (nucleus): ``python3 -I scripts/with_env.py <name>``
+Usage (host):    ``python3 -I .agents/scripts/with_env.py <name>``
+
+``<name>`` is a key of ``commands`` in ``config/with_env_allowlist.json``.
+Exactly one argument is accepted: the caller supplies a name, never an argv,
+so the set of programs that can run with secrets is the allowlist and nothing
+else. ``-I`` (isolated mode) is mandatory and checked first: without it the
+current directory and the script directory join ``sys.path`` and a sibling
+module could shadow this wrapper's standard-library imports.
 
 The env file is fixed to ``.env`` in the current working directory and the
-allowlist is fixed to ``config/with_env_allowlist.json`` of this framework
-checkout. There is deliberately no flag to change either: the wrapper runs
-unsandboxed, and a flag would let an agent point it at a file the agent wrote.
+allowlist is fixed to this framework checkout. There is deliberately no flag
+to change either: the wrapper runs unsandboxed, and a flag would let an agent
+point it at a file the agent wrote.
 
-Security model: this wrapper itself runs OUTSIDE the Claude Code sandbox,
-through ``sandbox.excludedCommands``. It is therefore safe only while the
-wrapper, its allowlist and the settings entry that excludes it are
-write-denied (``claude/settings.hooks.json``, Sprint 055 U07).
+Security model: this wrapper runs OUTSIDE the Claude Code sandbox, through
+``sandbox.excludedCommands``. The boundary is that only allowlisted code runs
+and that this wrapper, the allowlist, the interpreter tree they name and the
+settings entry that excludes them are write-denied (``claude/settings.hooks.json``).
+The child environment is ``os.environ`` without any ``PYTHON*`` variable, plus
+the ``.env`` pairs; allowlisted Python entries also run with ``-I``.
 
-Values read from ``.env`` are never printed. The child's stdout and stderr are
-captured and every value of length >= 4 is replaced by ``***`` before output.
+Output masking (``redact``) is NOT a security boundary: it only replaces exact
+copies of values of length >= 4 in the child's stdout and stderr. Encoded or
+split values, files the child writes and values shorter than 4 characters pass
+through unmasked.
 
-Exit codes: the child's code; ``2`` for a refusal (command off the allowlist,
-allowlist missing or malformed, ``.env`` missing); ``127`` when the child
-executable does not exist.
+Exit codes: the child's code; ``2`` for a refusal (not isolated, wrong
+argument count, unknown name, allowlist missing or malformed, ``.env``
+missing); ``127`` when the child executable does not exist.
 """
 
 from __future__ import annotations
@@ -45,17 +56,17 @@ def allowlist_path() -> Path:
     return FRAMEWORK_ROOT / "config" / "with_env_allowlist.json"
 
 
-def load_allowlist(path: Path) -> list[list[str]]:
-    """Read the allowlist and return its argv prefixes.
+def load_allowlist(path: Path) -> dict[str, list[str]]:
+    """Read the allowlist and return its named argv lists.
 
     Args:
         path: Location of the allowlist JSON file.
 
     Returns:
-        list[list[str]]: One argv prefix per entry.
+        dict[str, list[str]]: Command name to argv (``argv[0]`` relative to the checkout).
 
     Raises:
-        ValueError: The file is missing or unreadable.
+        ValueError: The file is missing, unreadable or has an entry without a valid ``argv``.
         TypeError: The file does not have the expected shape.
     """
     try:
@@ -63,15 +74,15 @@ def load_allowlist(path: Path) -> list[list[str]]:
     except (OSError, json.JSONDecodeError) as exc:
         raise ValueError(f"cannot read {path.name}: {exc.__class__.__name__}") from exc
     commands = data.get("commands") if isinstance(data, dict) else None
-    if not isinstance(commands, list):
-        raise TypeError(f"{path.name} has no 'commands' list")
-    prefixes: list[list[str]] = []
-    for entry in commands:
-        prefix = entry.get("argv_prefix") if isinstance(entry, dict) else None
-        if not (isinstance(prefix, list) and prefix and all(isinstance(t, str) for t in prefix)):
-            raise ValueError(f"{path.name} has an entry without a valid 'argv_prefix'")
-        prefixes.append(prefix)
-    return prefixes
+    if not isinstance(commands, dict):
+        raise TypeError(f"{path.name} has no 'commands' object")
+    named: dict[str, list[str]] = {}
+    for name, entry in commands.items():
+        argv = entry.get("argv") if isinstance(entry, dict) else None
+        if not (isinstance(argv, list) and argv and all(isinstance(t, str) for t in argv)):
+            raise ValueError(f"{path.name} entry '{name}' has no valid 'argv'")
+        named[name] = argv
+    return named
 
 
 def _parse_line(line: str) -> tuple[str, str] | None:
@@ -119,32 +130,11 @@ def parse_env(text: str) -> dict[str, str]:
     return pairs
 
 
-def is_allowed(argv: list[str], prefixes: list[list[str]]) -> bool:
-    """Tell whether ``argv`` starts with an allowlisted prefix.
-
-    ``argv[0]`` is compared with ``os.path.abspath``, never ``realpath``: the
-    framework venv interpreter is a symlink to the system interpreter, and
-    resolving it would let any python match. Remaining tokens are literal.
-
-    Args:
-        argv: The command to run.
-        prefixes: Allowlisted argv prefixes, ``prefix[0]`` relative to the checkout.
-
-    Returns:
-        bool: True when some prefix matches.
-    """
-    if not argv:
-        return False
-    head = os.path.abspath(argv[0])
-    for prefix in prefixes:
-        expected = os.path.abspath(os.path.join(FRAMEWORK_ROOT, prefix[0]))
-        if head == expected and argv[1:len(prefix)] == prefix[1:] and len(argv) >= len(prefix):
-            return True
-    return False
-
-
 def redact(text: str, values: list[str]) -> str:
-    """Replace secret values in ``text`` with ``***``.
+    """Mask exact copies of secret values in ``text`` with ``***``.
+
+    Best effort only, NOT a security boundary: encoded or split values, files
+    the child writes and values shorter than 4 characters are not masked.
 
     Args:
         text: Captured child output.
@@ -158,19 +148,40 @@ def redact(text: str, values: list[str]) -> str:
     return text
 
 
-def _run_child(argv: list[str], pairs: dict[str, str]) -> int:
-    """Run the child with the parsed variables and re-emit redacted output.
+def _isolated() -> bool:
+    """Tell whether the interpreter runs in isolated mode (``-I``).
+
+    Returns:
+        bool: True when ``sys.flags.isolated`` is set.
+    """
+    return bool(sys.flags.isolated)
+
+
+def _child_env(pairs: dict[str, str]) -> dict[str, str]:
+    """Build the child environment.
 
     Args:
-        argv: The allowlisted command.
+        pairs: Variables parsed from ``.env``.
+
+    Returns:
+        dict[str, str]: ``os.environ`` minus every ``PYTHON*`` variable, plus ``pairs``.
+    """
+    kept = {k: v for k, v in os.environ.items() if not k.startswith("PYTHON")}
+    return {**kept, **pairs}
+
+
+def _run_child(argv: list[str], pairs: dict[str, str]) -> int:
+    """Run the child with the parsed variables and re-emit masked output.
+
+    Args:
+        argv: The allowlisted command, ``argv[0]`` already absolute.
         pairs: Variables parsed from ``.env``.
 
     Returns:
         int: The child's return code, or 127 when the executable is missing.
     """
-    env = {**os.environ, **pairs}
     try:
-        done = subprocess.run(argv, env=env, capture_output=True, check=False)
+        done = subprocess.run(argv, env=_child_env(pairs), capture_output=True, check=False)
     except FileNotFoundError:
         print(f"with_env: command not found: '{argv[0]}'", file=sys.stderr)
         return 127
@@ -186,28 +197,33 @@ def main(argv: list[str]) -> int:
     """Entry point.
 
     Args:
-        argv: Arguments after the script name: the command and its arguments.
+        argv: Arguments after the script name: exactly one allowlist name.
 
     Returns:
         int: Process exit code.
     """
-    if not argv:
-        print("usage: with_env.py <command> [args...]", file=sys.stderr)
+    if not _isolated():
+        print("with_env: run as 'python3 -I …' (isolated mode)", file=sys.stderr)
+        return 2
+    if len(argv) != 1:
+        print("usage: python3 -I with_env.py <name>", file=sys.stderr)
         return 2
     try:
-        prefixes = load_allowlist(allowlist_path())
+        commands = load_allowlist(allowlist_path())
     except (ValueError, TypeError) as exc:
         print(f"with_env: {exc}", file=sys.stderr)
         return 2
-    if not is_allowed(argv, prefixes):
+    if argv[0] not in commands:
         print(f"with_env: '{argv[0]}' is not in config/with_env_allowlist.json", file=sys.stderr)
         return 2
+    entry = commands[argv[0]]
+    child = [str(FRAMEWORK_ROOT / entry[0]), *entry[1:]]
     try:
         text = Path(ENV_FILE).read_text(encoding="utf-8")
     except OSError:
         print(f"with_env: cannot read {ENV_FILE} in the current directory", file=sys.stderr)
         return 2
-    return _run_child(argv, parse_env(text))
+    return _run_child(child, parse_env(text))
 
 
 if __name__ == "__main__":

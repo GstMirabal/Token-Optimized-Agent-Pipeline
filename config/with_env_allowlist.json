@@ -1,9 +1,17 @@
 {
-  "_comment": "Allowlist for scripts/with_env.py. The wrapper loads .env and runs the command, and it runs OUTSIDE the Claude Code sandbox (sandbox.excludedCommands), so every entry here executes unsandboxed with secrets in its environment. Only graphify is listed by default (pytest is not: it executes agent-written code). A host extends this list only by human decision. argv_prefix[0] is a path relative to the framework checkout (the directory holding scripts/ and config/).",
-  "commands": [
-    {
-      "argv_prefix": ["venv_skillopt/bin/python", "-m", "graphify"],
+  "_comment": "Allowlist for scripts/with_env.py, invoked as `python3 -I scripts/with_env.py <name>`. The wrapper loads .env and runs the named command, and it runs OUTSIDE the Claude Code sandbox (sandbox.excludedCommands), so every entry executes unsandboxed with secrets in its environment. The caller supplies a name, never an argv. argv[0] is a path relative to the framework checkout (the directory holding scripts/ and config/); the remaining tokens are literal. `-I` keeps a graphify/ folder in the working directory from shadowing the package. A host extends this list only by human decision; pytest is not listed because it executes agent-written code.",
+  "commands": {
+    "graphify-extract": {
+      "argv": ["venv_skillopt/bin/python", "-I", "-m", "graphify", "extract", "."],
       "reason": "graphify semantic extraction reads its provider key from the environment only (graphifyy 0.8.30 has no .env loader)"
+    },
+    "graphify-extract-deep": {
+      "argv": ["venv_skillopt/bin/python", "-I", "-m", "graphify", "extract", ".", "--mode", "deep"],
+      "reason": "deep semantic extraction, same provider-key requirement"
+    },
+    "graphify-label": {
+      "argv": ["venv_skillopt/bin/python", "-I", "-m", "graphify", "label", "."],
+      "reason": "community labelling through the provider, same provider-key requirement"
     }
-  ]
+  }
 }
