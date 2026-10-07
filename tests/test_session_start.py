@@ -742,3 +742,49 @@ def test_install_lock_advisory_names_agents_forms_in_submodule_mode(
         "`.agents/venv_skillopt/bin/python -m pip install -r .agents/requirements-core.txt`" in note
     )
     assert "`python3 .agents/scripts/install_lock.py write`" in note
+
+
+def _denied_claude_boot(session_start, monkeypatch, tmp_path, nucleus: bool, output: str, rc: int):
+    """Run a claude boot whose bridge install is denied; return the notes text."""
+    root = _write_minimal_root(tmp_path / "repo")
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    monkeypatch.setattr(session_start, "is_nucleus", lambda: nucleus)
+    monkeypatch.setattr(session_start, "_commands_body_stale", lambda *a, **k: True)
+    monkeypatch.setattr(
+        session_start, "_run_bridge_install", lambda *a, **k: (rc, output)
+    )
+    code, notes = session_start._bridge_triage(root, "claude")
+    assert code == 0
+    return "\n".join(notes)
+
+
+def test_bridge_advisory_names_the_host_path_in_host_mode(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Sprint 055 U06: a host has no `scripts/install.sh`, only `.agents/scripts/`."""
+    text = _denied_claude_boot(
+        session_start, monkeypatch, tmp_path, False,
+        "PermissionError: '/host/.claude/settings.json'", 1,
+    )
+    assert "bash .agents/scripts/install.sh --target claude" in text
+
+
+def test_bridge_advisory_names_the_nucleus_path_in_nucleus_mode(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    text = _denied_claude_boot(
+        session_start, monkeypatch, tmp_path, True,
+        "PermissionError: '/x/.claude/settings.json'", 1,
+    )
+    assert "bash scripts/install.sh --target claude" in text
+    assert ".agents/scripts/install.sh" not in text
+
+
+def test_install_exit_3_alone_is_a_permission_denial(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """install.py exit 3 (BRIDGE_WRITE_DENIED) is advisory even without the token."""
+    text = _denied_claude_boot(
+        session_start, monkeypatch, tmp_path, False, "unrelated wording", 3,
+    )
+    assert "install.sh --target claude" in text

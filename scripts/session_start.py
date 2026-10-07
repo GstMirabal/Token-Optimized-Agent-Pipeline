@@ -50,6 +50,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _mode import is_nucleus
 from bridge_state import bridge_stale
 from bridge_state import lock_stale as _bridge_lock_stale
+from install import BRIDGE_WRITE_DENIED, install_command
 
 LINE_CAP = 80
 DRIFT_OUTPUT_LINES = 15
@@ -477,7 +478,10 @@ def _bridge_triage(root: Path, target: str | None) -> tuple[int, list[str]]:
         install_rc, install_out = _run_bridge_install(root, target)
         if install_rc == 0:
             return 0, []
-        if not _bridge_permission_denied(install_out, target):
+        denied = install_rc == BRIDGE_WRITE_DENIED or _bridge_permission_denied(
+            install_out, target
+        )
+        if not denied:
             print(
                 f"boot: bridge install --target {target} failed "
                 f"(exit {install_rc}).",
@@ -486,7 +490,7 @@ def _bridge_triage(root: Path, target: str | None) -> tuple[int, list[str]]:
             return 2, []
         note = (
             f"⚠️  Bridge: PermissionError on the `{target}` mirror "
-            f"(run `bash scripts/install.sh --target {target}` "
+            f"(run `{install_command(target, is_nucleus())}` "
             "outside the agent sandbox)."
         )
         print(note, file=sys.stderr)
