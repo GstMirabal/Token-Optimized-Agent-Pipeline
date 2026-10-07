@@ -1597,7 +1597,7 @@ names `.npmrc` as the location) is absent. Observed: `agents.md:159` (`RA-10`) s
 does not read them from `.npmrc`"; the only `npmrc` mentions left in `agents.md`,
 `README.md`, `rules/` and `workflows/` are those negations. `make verify` exit `0`.
 
-### - [ ] `F-115-N2` — consolidated sandbox friction, eight failures `S-1`..`S-8` (absorbs `F-114-N6`)
+### - [x] `F-115-N2` — consolidated sandbox friction, eight failures `S-1`..`S-8` (absorbs `F-114-N6`)
 
 **Host-reported, not re-measured in the nucleus sandbox.** The evidence below is
 the host's, quoted as observed there. Reproducing each row inside the nucleus's own
@@ -1632,6 +1632,39 @@ be measured in the real sandbox first.
 
 **Routed:** Sprint 055 (block D, routed by Sprint 054 unit `W02`). Not taken by
 Sprint 054.
+
+**Closed — Sprint 055.** The reproduction the entry required ran first: Sprint 055
+unit `U01` measured the template sandbox against `S-1`..`S-7` and recorded the result
+in `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` (`27210b1`). It ran in
+headless `claude -p --settings <overlay>` sessions on Claude Code CLI 2.1.119 (macOS),
+not in the human-launched interactive session plan `D1` named, because an agent's Bash
+tool has no TTY (deviation recorded in `SPRINT_LOG.md`; `SANDBOX_MEASUREMENT.md` §1.1).
+Each run was valid only with control `SBX0` = 0 and `SBX1` = 6. Case ids in the
+verdict column are those of `SANDBOX_MEASUREMENT.md` §2.
+
+| ID | Measured verdict | Resolution | SHA(s) |
+| :--- | :--- | :--- | :--- |
+| `S-1` | Reproduced (`S-1`: `PermissionError`, exit 1 on `.claude/settings.local.json`) | `scripts/install.py` probes the write and, on a denied path, prints the host-form human command and exits `3` with no traceback (`U05`); `scripts/session_start.py` reports the bridge advisory by mode (`U06`) | `f4986b5`, `6773f34` |
+| `S-2` | Reproduced for `.env.example` (`S-2a`); `git status` noise (`S-2b`) inconclusive | Template keeps `./.env.*` in `denyRead` and adds `allowRead` for `.env.example`, `.env.sample`, `.env.template` (`U07`); `U04` (merge prune) omitted as unnecessary after that measured `allowRead` | `3ad277f` |
+| `S-3` | Reproduced (`S-3a` `.env` open, `S-3b` the `RA-09` mechanism `. ./.env`) | Option (a)/(c) of the host proposal as `scripts/with_env.py`, an allowlist-gated wrapper (`U02`) with `config/with_env_allowlist.json` holding `graphify` only (`U03`), the wrapper in `excludedCommands` (`U07`), `RA-09` rewritten (`U13`) and `devops_agent` pointed at the wrapper (`U20`) | `6a090a4`, `25dda50`, `3ad277f`, `e589f19`, `056a5e3` |
+| `S-4` | Reproduced for `stat` (`S-4a`) and pytest (`S-4c`, signature `found no collectors`, not the host `PermissionError`); `graphify update .` (`S-4b`) not reproduced in the nucleus | Documented form in the sandbox table (`U09`) and `rules/graphify.md` (`U11`: key path, 7 variables); `Makefile` `graphify-update` uses `-m graphify` and `graphify-deep` runs through the wrapper (`U08`) | `c716b7f`, `f53b7fe`, `ddd5bc7` |
+| `S-5` | `git` (`S-5a`, `S-5b`) and `curl` (`S-5d`) refuted; Go-based `gh` reproduced (`S-5c`, `x509: OSStatus -26276`) | Narrow `excludedCommands` patterns for `gh` in the template (`U07`, never bare `gh *`); sandbox table (`U09`); `workflows/deployment_workflow.md` (`U15`) and `workflows/repository_hardening_workflow.md` (`U16`) point their `gh` steps at the table | `3ad277f`, `c716b7f`, `664c931`, `30d0a50` |
+| `S-6` | Inconclusive: the pnpm store relocates into the working tree (`S-6a`) and the relocated directory does not exist (`S-6b`); the host `ERR_PNPM_STORE_DIR_OPEN_OPERATION_LOCK` was not reproduced (no pnpm project in the nucleus) | Documented in the sandbox table (`U09`); no template change | `c716b7f` |
+| `S-7` | Reproduced (`S-7a` Mach port denied, exit -5; `S-7b` process died) | Plan `D6` Branch B: browser verification is human-run (`rules/qa_and_testing.md`, `U10`); `allowMachLookup` is prohibited and the prohibition is recorded in the sandbox table (`U09`) | `d6b2649`, `c716b7f` |
+| `S-8` | Not a measured case (documentation row) | The sandbox table in `rules/project_topology.md` covering `S-1`..`S-7` (`U09`) | `c716b7f` |
+
+`F-114-N6` closes with this entry. `S-6` stays closed as documented, not as fixed: a
+host that reproduces `ERR_PNPM_STORE_DIR_OPEN_OPERATION_LOCK` should reopen it with
+the measured store path.
+
+**Two new framework-class observations, noted in closure.** Both come from
+`SANDBOX_MEASUREMENT.md` and are not part of `S-1`..`S-8`; neither is fixed by this
+sprint.
+
+| Observation | Measured fact | Where recorded |
+| :--- | :--- | :--- |
+| `allowMachLookup: true` fails open | On CLI 2.1.119 the boolean key stopped the sandbox from starting (`SBX0` exit 1, `SBX1` HTTP 200); `.env` was readable and `docker info` succeeded, with `allowUnsandboxedCommands: false` and no warning. An unknown key did not do this; the list form kept the sandbox active but did not let Chromium launch | `SANDBOX_MEASUREMENT.md` §4; prohibition in the sandbox table (`c716b7f`) |
+| `./` sandbox paths resolve against the declaring settings file | With `--settings <file elsewhere>`, `./.env` did not protect the repository `.env` (opened with exit 0). The template protects only when merged into project settings | `SANDBOX_MEASUREMENT.md` §1.3 |
 
 ### - [x] `F-115-N3` — the start command names a path that does not exist at a host root (`F-114-N4` is the same defect)
 
