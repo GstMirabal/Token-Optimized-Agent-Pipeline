@@ -41,7 +41,7 @@ setting is given instead. `$R` is `owner/repo` as set at the top of Phase 1.
 | **7** | `history_rewrite` | Rewrite or squash history only after confirming explicit per-operation human authorization, stating what will be lost before each irreversible action | `git log --oneline origin/main..HEAD` |
 | **8** | `branch_protection` | Update branch protection on `main` from the status-check names observed on a real check-run listing, requiring exactly those checks with `enforce_admins:false` and `required_pull_request_reviews:null` | `gh api "repos/$R/commits/main/check-runs" --jq '.check_runs[] \| select(.conclusion=="success") \| .name'` |
 
-Sandbox behaviour of the `gh` calls above: see the single table `rules/project_topology.md` section 4. A `gh` call whose pattern is not in the template's `sandbox.excludedCommands` fails in the sandbox with `x509: OSStatus -26276`; the human runs it, or the host adds a narrow pattern by human decision.
+Sandbox behaviour of the `gh` calls above: see the single table `rules/project_topology.md` section 4. A `gh` call whose pattern is not in the template's `sandbox.excludedCommands` fails in the sandbox with `x509: OSStatus -26276`. Every `gh api` call in this workflow (the verify column and the code blocks below) is run by the human or through the GitHub MCP; the template excludes no `gh api` pattern.
 
 Phase 4 (`alert_triage`) precedes any Phase 7 (`history_rewrite`) decision — an alert must be triaged before the evidence it depends on can be rewritten or squashed away.
 
