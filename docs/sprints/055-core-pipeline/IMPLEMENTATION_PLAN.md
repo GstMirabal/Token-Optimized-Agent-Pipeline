@@ -131,7 +131,7 @@ comentarios); no se añade `python-dotenv`.
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 29 (`U04` y `U12` omitidas; `U23`..`U29` de la Enmienda) | Count of rows in Work tables |
+| Work units | 35 (`U04` y `U12` omitidas; `U23`..`U29` de la Enmienda; `U30`..`U35` de la Enmienda 2) | Count of rows in Work tables |
 | Subagents dispatched | 19 units + 2 gates | `agent_assignment.md` |
 | Prior session ratio | **5.0 (umbral blando alcanzado)** — esta sesión de Planning: primer turno 23264, pico 116084 | `python3 scripts/session_cost.py --from-anchor --json` |
 
@@ -165,7 +165,7 @@ solo transcribe estados en `task_scope.md`.
 | `make verify` | exit `0` | exit `0` en `16c3cca` | n/a (no es "no output") |
 | `python3 skills/token-saver-auditor/scripts/audit_plan.py docs/sprints/055-core-pipeline/IMPLEMENTATION_PLAN.md` | exit `0` | `[OK]`, exit `0` sobre este borrador (2026-10-07) | n/a |
 | `jq -e 'any(.sandbox.filesystem.denyRead[]; . == "./.env.*") and any(.sandbox.filesystem.allowRead[]?; . == "./.env.example")' claude/settings.hooks.json` (`D4` revisada) | `true`, exit `0` | `false`, exit `1` en `16c3cca` (`denyRead` presente, `allowRead` ausente) | n/a |
-| `jq -e 'any(.sandbox.excludedCommands[]?; test("with_env.py"))' claude/settings.hooks.json` | `true`, exit `0` | `false`, exit `1` en `16c3cca` | n/a |
+| `jq -e '(.sandbox.excludedCommands // []) == []' claude/settings.hooks.json` (sustituye a la fila original, que esperaba `with_env.py` en `excludedCommands`; ver *Enmienda 2*, `D12`) | `true`, exit `0` | `true`, exit `0` en `16c3cca` (la release no tenía `excludedCommands`) | n/a |
 | `grep -n 'venv_skillopt/bin/graphify$' Makefile` | no output, exit `1` | `16:GRAPHIFY := …/bin/graphify`, exit `0` | el mismo comando en `16c3cca` imprime la línea 16: observado |
 | `grep -n 'bash scripts/install.sh' scripts/session_start.py` | no output, exit `1` | `489`, exit `0` | el mismo comando en `16c3cca` imprime la línea 489: observado |
 | `venv_skillopt/bin/python -m pytest tests/test_with_env.py tests/test_merge_json.py tests/test_install_permission.py tests/test_session_start.py tests/test_makefile_graphify.py -q` | exit `0` | run at close — `test_with_env.py`, `test_install_permission.py` y `test_makefile_graphify.py` no existen hasta `U02`/`U05`/`U08` | n/a |
@@ -247,12 +247,45 @@ Orden: `U25` → `U24`, `U26`, `U27`, `U28` → `U23` → re-medición de `U25` 
 
 | Verification (enmienda) | Expected |
 | :--- | :--- |
-| `jq -e '[.sandbox.excludedCommands[] \| select(test("with_env\\.py") or test("^gh (pr\|release) create"))] \| length == 0' claude/settings.hooks.json` | `true`, exit `0` |
+| `jq -e 'any(.sandbox.excludedCommands[]?; test("with_env") or test("^gh pr create") or test("^gh release create")) == false' claude/settings.hooks.json` | `true`, exit `0` |
 | `venv_skillopt/bin/python -m pytest tests/test_install_with_env_render.py tests/test_template_sandbox.py tests/test_merge_json.py tests/test_makefile_graphify.py -q` | exit `0` |
 | Caso impostor de R2-1 en sesión sandboxeada con el render real (`U25` d) | el impostor no lee `.env` (exit distinto de `0` o `PermissionError`) |
 | `make verify` | exit `0` |
 
 **Abort criterion 3.** Si `U25` muestra que ni la línea absoluta en `settings.local.json` se honra (b, c) ni hay una ruta absoluta que `denyWrite` respete (a), o que en host el renombrado de `.agents` esquiva el `denyWrite` (e), se aplica la alternativa descartada en `D2-R`: `with_env.py` sale de `excludedCommands` en todos los modos y todo comando con secreto lo ejecuta el humano. La decisión queda en `SPRINT_LOG.md` y no se vuelve a preguntar.
+
+---
+
+## Enmienda 2 — QA Gate 1 ronda 3 (decisión del humano, 2026-10-10)
+
+Veredicto de origen: `SPRINT_LOG.md` Quality Gate, QA ronda 3 (`REJECTED`, `charter`): N1, N2, N3 bloqueantes (medidos), N4, N5; N6, N7 registro. N1 refuta `D2` en su forma con exclusión: el criterio de Abort 2 devuelve la decisión al humano, que elige la alternativa ya escrita en el criterio de Abort 3.
+
+| ID | Decisión | Elegida sobre | Razón |
+| :--- | :--- | :--- | :--- |
+| `D12` | **Ninguna entrada en `sandbox.excludedCommands`**, ni en la plantilla ni renderizada. `install.py` deja de renderizar (`D2-R` retirada) y poda de `.claude/settings.local.json` las líneas que renderizó (`RENDER_OWNED_RE`). Las cinco de `gh` (`gh pr checks *`, `gh pr list *`, `gh repo view *`, `gh release view *`, `gh auth status`) salen de la plantilla y entran en `RETIRED_VALUES`. Todo comando que necesita un secreto, y todo `gh`, lo ejecuta el humano; `scripts/with_env.py` queda como la vía del humano (`make graphify-deep`). Con esto `N2` desaparece | Mantener exclusiones y aceptar el riesgo; medir una CLI más reciente | En CLI 2.1.119 un comando compuesto cuya primera parte coincide con una entrada excluida corre entero fuera del sandbox (N1, medido): una exclusión estrecha es una salida general. `RA-09` y `D10` no reconocen el clasificador de permisos como frontera |
+| `D13` | **`N3`**: la plantilla protege contra escritura lo que los hooks ejecutan o fusionan fuera del sandbox: `denyWrite` `./.agents/hooks`, `./.agents/scripts`, `./.agents/config`, `./.agents/skills`, `./.agents/claude`, `./.agents/venv_skillopt`, más `permissions.deny` `Edit(/.agents/<dir>/**)` para cada uno. Los locks en la raíz de `.agents` siguen escribibles. Relativo `./` en *project settings* se resuelve contra la raíz del proyecto (sección 6, `A2-0`) | Proteger todo `.agents`; enrutar a Sprint 056 | Los hooks corren sin sandbox por diseño de Claude Code; un hook editado por el agente leyó `.env` (N3, medido). Proteger todo `.agents` rompe las escrituras de locks del boot |
+| `D2-N`, `D2-R`, `D10` | Retiradas por `D12`; `§1 path_type` deja de estar en juego (no se escriben rutas absolutas) | — | — |
+
+| # | File | Operation | Risk | Assignee (proposed) | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `U30` | `claude/settings.hooks.json` | modify — quitar `sandbox.excludedCommands` entero (`D12`); añadir los `denyWrite` y `Edit` de `D13` | high | `implementer_agent` | ⏳ |
+| `U31` | `scripts/install.py` | modify (`fix(`) + `tests/test_install_with_env_render.py` (reescrito): quitar el render; podar las líneas render-owned de `settings.local.json` en cada instalación de host | high | `implementer_agent` | ⏳ |
+| `U32` | `scripts/merge_json.py` | modify (`fix(`) + `tests/test_merge_json.py`: las cinco entradas de `gh` en `RETIRED_VALUES` | medium | `implementer_agent` | ⏳ |
+| `U33` | `tests/test_template_sandbox.py` | modify — `excludedCommands` ausente o vacío; los seis `denyWrite` y `Edit` de `D13` | low | `implementer_agent` | ⏳ |
+| `U34` | `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` | medir con el `install.py` real en fixture de host: (a) la cadena `gh auth status; <leer .env>` ya corre en sandbox; (b) editar `.agents/hooks/*.py`, `.agents/scripts/*`, `.agents/claude/*` se deniega; (c) renombrar `.agents` se deniega; (d) un lock en la raíz de `.agents` sigue escribible; (e) una reinstalación sobre un render previo poda sus líneas | medium | principal | ⏳ |
+| `U35` | `agents.md`, `agents/devops_agent.md`, `rules/project_topology.md`, `rules/graphify.md`, `workflows/pipeline_workflow.md`, `workflows/deployment_workflow.md`, `workflows/repository_hardening_workflow.md`, `docs/standards/templates/README_TEMPLATE.md`, `config/with_env_allowlist.json` (`_comment`), `scripts/with_env.py` (docstring), `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` (observación framework-class: N1 y N3), `CHANGELOG.md` | modify, un commit por fichero (`RA-14`): bajo el sandbox el agente no tiene vía de secretos ni `gh`; el humano ejecuta `with_env.py` y `gh`; la frontera es que no hay exclusiones y que lo que ejecutan los hooks está protegido; precedente N1/N3 | medium | `rule_validator`, `agent_orchestrator`, `implementer_agent`, `doc_orchestrator` (como `U29`) | ⏳ |
+
+Orden: `U30`, `U32`, `U33` → `U31` → `U34` → `U35` → QA Gate 1 ronda 4 (agente nuevo) → Tester Gate 2.
+
+| Verification (enmienda 2) | Expected |
+| :--- | :--- |
+| `jq -e '(.sandbox.excludedCommands // []) == []' claude/settings.hooks.json` | `true`, exit `0` |
+| `jq -e 'contains({sandbox:{filesystem:{denyWrite:["./.agents/hooks","./.agents/scripts","./.agents/config","./.agents/skills","./.agents/claude","./.agents/venv_skillopt"]}}})' claude/settings.hooks.json` | `true`, exit `0` |
+| `venv_skillopt/bin/python -m pytest tests/test_install_with_env_render.py tests/test_template_sandbox.py tests/test_merge_json.py -q` | exit `0` |
+| `U34` (a)..(e) en sesión sandboxeada | (a) `PermissionError` sobre `.env`; (b), (c) `Operation not permitted`; (d) exit `0`; (e) 0 líneas render-owned |
+| `make verify` | exit `0` |
+
+Las filas de Verification de la *Enmienda* que esperaban líneas renderizadas quedan sustituidas por estas.
 
 ---
 

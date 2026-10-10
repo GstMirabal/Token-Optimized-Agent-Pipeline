@@ -64,6 +64,9 @@ and a `README.md` around a single stdlib script with one caller path, which
 | `U23` | `omni-context-minimizer` skeleton of `scripts/install.py` (613 lines, >200: `§2 token_saver`), then `python-quality-auditor` | N/A | P1 hit |
 | `U26`, `U28` | `python-quality-auditor` | N/A | P1 hit |
 | `U24`, `U25`, `U27`, `U29` | none (JSON, measurement, test, prose) | N/A | P1 miss; no forge |
+| `U31` | `omni-context-minimizer` skeleton of `scripts/install.py`, then `python-quality-auditor` | N/A | P1 hit |
+| `U32` | `python-quality-auditor` | N/A | P1 hit |
+| `U30`, `U33`, `U34`, `U35` | none (JSON, test, measurement, prose) | N/A | P1 miss; no forge |
 
 Cross-cutting, not tied to a unit: `venv_skillopt/bin/python -m graphify update .`
 after the code units (`agents.md §2 graph_sync`), and `skills/topology-monitor`

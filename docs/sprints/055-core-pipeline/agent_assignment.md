@@ -86,6 +86,12 @@ human-reported results into `SANDBOX_MEASUREMENT.md`. No correction unit
 | U27 | `tests/test_template_sandbox.py` | create | after U24 | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | U28 | `Makefile` (+ `tests/test_makefile_graphify.py`) | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | U29 | twelve files, one per commit | modify | last | `rule_validator` (`agents.md`), `agent_orchestrator` (`agents/devops_agent.md`), `implementer_agent` (`config/`, `scripts/`), `doc_orchestrator` (rest) | N/A | `agents/*.md` |
+| U30 | `claude/settings.hooks.json` | modify | first | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| U31 | `scripts/install.py` (+ `tests/test_install_with_env_render.py`) | modify | after U30 | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| U32 | `scripts/merge_json.py` (+ `tests/test_merge_json.py`) | modify | parallel with U30 | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| U33 | `tests/test_template_sandbox.py` | modify | parallel with U30 | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| U34 | `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` | measure | after U31 | principal (headless `claude -p`) | N/A | — |
+| U35 | twelve files, one per commit | modify | last | as U29 | N/A | `agents/*.md` |
 
 ## Disagreements with the plan
 
