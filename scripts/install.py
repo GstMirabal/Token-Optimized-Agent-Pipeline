@@ -28,7 +28,12 @@ What it does:
      profiles/<name> inside the submodule (illustrative packs only). --profile-path
      accepts a host-controlled directory outside the submodule (RA-15 production
      profiles). The two flags are mutually exclusive.
-  6. Marks .agents/.bridge_claude.lock and/or .agents/.bridge_cursor.lock
+  6. Renders, per machine, absolute `sandbox.excludedCommands` entries for the
+     allowlisted `with_env.py` commands plus absolute write-denies on
+     `.agents/scripts`, `.agents/config` and `.agents/venv_skillopt` into the
+     host's untracked .claude/settings.local.json (host mode only). A
+     cwd-relative exclusion would let an impostor script run unsandboxed.
+  7. Marks .agents/.bridge_claude.lock and/or .agents/.bridge_cursor.lock
      (per --target) so hooks/on_init.py and start_workflow bridge_check
      can detect a deliberate submodule update and re-link automatically.
 """
@@ -48,10 +53,13 @@ HOST_DIR = AGENTS_DIR.parent
 sys.path.insert(0, str(SCRIPT_DIR))
 import json
 
+import with_env
 from _mode import is_nucleus
 from merge_json import merge
 
 BRIDGE_WRITE_DENIED = 3
+RENDER_OWNED_RE = re.compile(r"^\S+ -I \S+/scripts/with_env\.py \S+$")
+PROTECTED_SUBDIRS = ("scripts", "config", "venv_skillopt")
 
 
 def _symlink_matches(dest: Path, target: str) -> bool:
@@ -126,6 +134,27 @@ def _report_write_denied(dest: Path) -> None:
     )
 
 
+def _write_json(dest: Path, data: dict) -> None:
+    """Write data to dest as JSON, translating a refused write into an advisory.
+
+    Args:
+        dest: Settings file to create or overwrite.
+        data: JSON-serialisable mapping to store.
+
+    Raises:
+        SystemExit: With BRIDGE_WRITE_DENIED when the write is refused by
+            permissions; any other OSError propagates unchanged.
+    """
+    try:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_text(json.dumps(data, indent=2) + "\n")
+    except OSError as exc:
+        if not isinstance(exc, PermissionError) and exc.errno not in (errno.EPERM, errno.EACCES):
+            raise
+        _report_write_denied(dest)
+        raise SystemExit(BRIDGE_WRITE_DENIED) from exc
+
+
 def merge_into(template: Path, dest: Path) -> None:
     """Merge a JSON template into dest without clobbering existing keys.
 
@@ -139,16 +168,60 @@ def merge_into(template: Path, dest: Path) -> None:
     """
     template_data = json.loads(template.read_text())
     dest_data = json.loads(dest.read_text()) if dest.exists() else {}
-    merged = merge(dest_data, template_data)
-    try:
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        dest.write_text(json.dumps(merged, indent=2) + "\n")
-    except OSError as exc:
-        if not isinstance(exc, PermissionError) and exc.errno not in (errno.EPERM, errno.EACCES):
-            raise
-        _report_write_denied(dest)
-        raise SystemExit(BRIDGE_WRITE_DENIED) from exc
+    _write_json(dest, merge(dest_data, template_data))
     print(f"✅ Merged {template} -> {dest}")
+
+
+def _append_missing(items: list, wanted: list[str]) -> None:
+    """Append each wanted string to items unless already present.
+
+    Args:
+        items: List edited in place.
+        wanted: Strings to ensure are present, in order.
+    """
+    for value in wanted:
+        if value not in items:
+            items.append(value)
+
+
+def render_with_env_exclusions(host_dir: Path, agents_dir: Path, python: str | None) -> None:
+    """Render absolute with_env exclusions and write-denies into settings.local.json.
+
+    A cwd-relative excluded command lets an agent-written impostor run
+    unsandboxed after `cd`; absolute paths close that. Render-owned
+    excludedCommands lines are replaced on every run; other host entries stay.
+
+    Args:
+        host_dir: Host root holding `.claude/settings.local.json`.
+        agents_dir: Resolved `.agents` checkout (absolute).
+        python: Absolute path of `python3`, or None when none is on PATH.
+
+    Raises:
+        SystemExit: With BRIDGE_WRITE_DENIED when the write is refused.
+    """
+    if python is None:
+        print(
+            "⚠️  No python3 on PATH: with_env exclusions not rendered; the agent has "
+            "no secret path and commands needing secrets are run by the human.",
+            file=sys.stderr,
+        )
+        return
+    allowlist = agents_dir / "config" / "with_env_allowlist.json"
+    wrapper = agents_dir / "scripts" / "with_env.py"
+    lines = [f"{python} -I {wrapper} {name}" for name in sorted(with_env.load_allowlist(allowlist))]
+    protected = [str(agents_dir / sub) for sub in PROTECTED_SUBDIRS]
+    dest = host_dir / ".claude" / "settings.local.json"
+    data = json.loads(dest.read_text()) if dest.exists() else {}
+    sandbox = data.setdefault("sandbox", {})
+    kept = [c for c in sandbox.get("excludedCommands", []) if not RENDER_OWNED_RE.match(c)]
+    sandbox["excludedCommands"] = kept + lines
+    _append_missing(sandbox.setdefault("filesystem", {}).setdefault("denyWrite", []), protected)
+    _append_missing(
+        data.setdefault("permissions", {}).setdefault("deny", []),
+        [f"Edit(/{p}/**)" for p in protected],
+    )
+    _write_json(dest, data)
+    print(f"✅ Rendered {len(lines)} absolute with_env exclusion(s) -> {dest}")
 
 
 def add_claude_import(import_line: str) -> None:
@@ -520,6 +593,7 @@ def install_host_claude_bridge(profile_dir: Path | None) -> int:
     merge_into(AGENTS_DIR / "claude" / "settings.hooks.json",
                HOST_DIR / ".claude" / "settings.json")
     merge_into(AGENTS_DIR / "claude" / "mcp.json", HOST_DIR / ".mcp.json")
+    render_with_env_exclusions(HOST_DIR, AGENTS_DIR, shutil.which("python3"))
 
     add_claude_import("@.agents/agents.md")
     ensure_gitignore_entries()
