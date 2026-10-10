@@ -3,6 +3,7 @@ host users' .claude/settings.json and .mcp.json. A regression here corrupts
 real user configuration, hence the coverage."""
 import sys
 from pathlib import Path
+from typing import ClassVar
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 import merge_json
@@ -115,3 +116,37 @@ def test_merge_preserves_host_deny_and_adds_template_deny():
     assert "Bash(rm -rf /:*)" in deny
     assert result["permissions"]["defaultMode"] == "auto"
     assert result["autoMode"]["hard_deny"][0] == "$defaults"
+
+
+class TestRetiredValuePrune:
+    """Values the framework once shipped and retired leave host lists on merge."""
+
+    RETIRED: ClassVar[dict[str, frozenset[str]]] = {"sandbox.filesystem.denyRead": frozenset({"./old-secret"})}
+
+    def test_retired_value_absent_from_template_is_removed(self):
+        dest = {"sandbox": {"filesystem": {"denyRead": ["./old-secret", "./keep"]}}}
+        template = {"sandbox": {"filesystem": {"denyRead": ["./new"]}}}
+        result = merge(dest, template, retired=self.RETIRED)
+        assert "./old-secret" not in result["sandbox"]["filesystem"]["denyRead"]
+
+    def test_host_added_value_survives(self):
+        dest = {"sandbox": {"filesystem": {"denyRead": ["./old-secret", "./host-own"]}}}
+        template = {"sandbox": {"filesystem": {"denyRead": ["./new"]}}}
+        deny = merge(dest, template, retired=self.RETIRED)["sandbox"]["filesystem"]["denyRead"]
+        assert "./host-own" in deny and "./new" in deny
+
+    def test_retired_value_still_in_template_is_kept(self):
+        dest = {"sandbox": {"filesystem": {"denyRead": ["./old-secret"]}}}
+        template = {"sandbox": {"filesystem": {"denyRead": ["./old-secret"]}}}
+        deny = merge(dest, template, retired=self.RETIRED)["sandbox"]["filesystem"]["denyRead"]
+        assert deny == ["./old-secret"]
+
+    def test_empty_retired_mapping_changes_nothing(self):
+        assert merge_json.RETIRED_VALUES == {}
+        dest = {"a": {"b": ["x", "y"]}}
+        assert merge(dest, {"a": {"b": ["z"]}}, retired={}) == {"a": {"b": ["x", "y", "z"]}}
+
+    def test_missing_key_path_is_a_noop(self):
+        dest = {"other": ["./old-secret"]}
+        merge_json.prune_retired_values(dest, {}, self.RETIRED)
+        assert dest == {"other": ["./old-secret"]}

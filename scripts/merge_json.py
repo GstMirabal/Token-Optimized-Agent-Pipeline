@@ -9,6 +9,7 @@ invoked_by: scripts/install.py (import; non-destructive settings/mcp merge).
 """
 import json
 import sys
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
@@ -20,6 +21,15 @@ DEPRECATED_HOOK_COMMANDS = {
     "python3 .agents/hooks/on_commit.py",
     "python3 .agents/hooks/state_mirror.py",
 }
+
+# String values shipped by PREVIOUS template versions and since retired, keyed
+# by the dotted JSON path of the list that held them, e.g.
+# {"sandbox.filesystem.denyRead": frozenset({"./.env.example"})}. Empty today.
+# Pruned from the destination list on every merge (list-merge only appends, so
+# a dangerous entry retired from a published template would otherwise survive
+# on every host forever). Exact string match only; a value the current template
+# still ships is kept; entries the host added are never touched.
+RETIRED_VALUES: Mapping[str, frozenset[str]] = {}
 
 
 def _prune_matcher_hooks(matcher: dict) -> None:
@@ -48,6 +58,53 @@ def prune_deprecated_hooks(dest: dict) -> None:
             del dest["hooks"][event]
 
 
+def _get_path(data: Any, path: str) -> Any:
+    """Walks a dotted key path through nested dicts.
+
+    Args:
+        data: Root mapping to descend into.
+        path: Dotted key path such as "sandbox.filesystem.denyRead".
+
+    Returns:
+        The value at path, or None when any segment is missing or not a dict.
+    """
+    for part in path.split("."):
+        if not isinstance(data, dict) or part not in data:
+            return None
+        data = data[part]
+    return data
+
+
+def prune_retired_values(
+    dest: dict,
+    template: dict,
+    retired: Mapping[str, frozenset[str]] | None = None,
+) -> None:
+    """Removes retired template strings from the destination lists, in place.
+
+    A value is removed only when it is a string exactly equal to a member of
+    the retired set for that list path. The current template wins: a retired
+    value the template still ships at the same path is kept.
+
+    Args:
+        dest: Destination settings dict, mutated in place.
+        template: Template dict about to be merged; its values are never pruned.
+        retired: Mapping of dotted list path to retired strings. Defaults to
+            RETIRED_VALUES when None.
+    """
+    mapping = RETIRED_VALUES if retired is None else retired
+    for path, values in mapping.items():
+        target = _get_path(dest, path)
+        if not isinstance(target, list):
+            continue
+        shipped = _get_path(template, path)
+        keep = set(shipped) if isinstance(shipped, list) else set()
+        target[:] = [
+            item for item in target
+            if not (isinstance(item, str) and item in values and item not in keep)
+        ]
+
+
 def _merge_list_append(dest_list: list, value_list: list) -> None:
     """Appends template list items not already present, into dest_list in place.
 
@@ -72,18 +129,40 @@ def _merge_value(dest: dict, key: str, value: Any) -> None:
         dest[key] = value
         return
     if isinstance(dest[key], dict) and isinstance(value, dict):
-        merge(dest[key], value)
+        _merge_tree(dest[key], value)
         return
     if isinstance(dest[key], list) and isinstance(value, list):
         _merge_list_append(dest[key], value)
     # else: host already has a conflicting scalar value here -> leave it alone.
 
 
-def merge(dest: dict, template: dict) -> dict:
-    """Non-destructively merges template's keys into dest, recursing into dicts."""
+def _merge_tree(dest: dict, template: dict) -> dict:
+    """Recursive append-only merge of template into dest, in place."""
     for key, value in template.items():
         _merge_value(dest, key, value)
     return dest
+
+
+def merge(
+    dest: dict,
+    template: dict,
+    retired: Mapping[str, frozenset[str]] | None = None,
+) -> dict:
+    """Non-destructively merges template's keys into dest, recursing into dicts.
+
+    Retired template values are pruned from dest first (`prune_retired_values`),
+    so every caller, including `install.merge_into`, upgrades on re-install.
+
+    Args:
+        dest: Destination dict, mutated in place.
+        template: Template dict to merge in.
+        retired: Retired-value mapping; defaults to RETIRED_VALUES when None.
+
+    Returns:
+        The merged dest.
+    """
+    prune_retired_values(dest, template, retired)
+    return _merge_tree(dest, template)
 
 
 def main() -> None:
