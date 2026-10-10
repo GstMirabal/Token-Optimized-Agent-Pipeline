@@ -24,7 +24,8 @@ DEPRECATED_HOOK_COMMANDS = {
 
 # String values shipped by PREVIOUS template versions and since retired, keyed
 # by the dotted JSON path of the list that held them, e.g.
-# {"sandbox.filesystem.denyRead": frozenset({"./.env.example"})}. Empty today.
+# {"sandbox.excludedCommands": frozenset({"gh api *"})} (hypothetical: a
+# too-broad exclusion a template could retire). Empty today.
 # Pruned from the destination list on every merge (list-merge only appends, so
 # a dangerous entry retired from a published template would otherwise survive
 # on every host forever). Exact string match only; a value the current template
