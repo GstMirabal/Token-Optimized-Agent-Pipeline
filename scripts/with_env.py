@@ -5,6 +5,11 @@ invoked_by: rules/project_topology.md sandbox table, agents.md RA-09, Makefile g
 Usage (nucleus): ``python3 -I scripts/with_env.py <name>``
 Usage (host):    ``python3 -I .agents/scripts/with_env.py <name>``
 
+These are the wrapper's own syntax. The sandbox excludes only the absolute
+line that ``scripts/install.py`` renders per allowlist name into the host's
+``.claude/settings.local.json``; a cwd-relative spelling runs sandboxed and
+cannot read ``.env``. In the nucleus nothing is rendered and the human runs it.
+
 ``<name>`` is a key of ``commands`` in ``config/with_env_allowlist.json``.
 Exactly one argument is accepted: the caller supplies a name, never an argv,
 so the set of programs that can run with secrets is the allowlist and nothing
@@ -18,9 +23,10 @@ to change either: the wrapper runs unsandboxed, and a flag would let an agent
 point it at a file the agent wrote.
 
 Security model: this wrapper runs OUTSIDE the Claude Code sandbox, through
-``sandbox.excludedCommands``. The boundary is that only allowlisted code runs
-and that this wrapper, the allowlist, the interpreter tree they name and the
-settings entry that excludes them are write-denied (``claude/settings.hooks.json``).
+``sandbox.excludedCommands``. The boundary is that only the rendered absolute
+lines are excluded and that what they execute is write-denied:
+``.agents/scripts``, ``.agents/config`` and ``.agents/venv_skillopt`` by
+absolute rendered rules, plus the relative denies in ``claude/settings.hooks.json``.
 The child environment is ``os.environ`` without any ``PYTHON*`` variable, plus
 the ``.env`` pairs; allowlisted Python entries also run with ``-I``.
 
