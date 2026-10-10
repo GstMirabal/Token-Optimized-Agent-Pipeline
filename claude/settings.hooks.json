@@ -70,15 +70,10 @@
       ]
     },
     "excludedCommands": [
-      "python3 -I .agents/scripts/with_env.py graphify-extract",
-      "python3 -I .agents/scripts/with_env.py graphify-extract-deep",
-      "python3 -I .agents/scripts/with_env.py graphify-label",
-      "gh pr create *",
       "gh pr checks *",
       "gh pr list *",
       "gh repo view *",
       "gh release view *",
-      "gh release create *",
       "gh auth status"
     ]
   },
