@@ -88,7 +88,7 @@ Upon opening a session, the following command is required to synchronize the age
 ```
 
 ### 2. Secret Shielding
-This project strictly follows the **Secure Secret Sovereignty** law. Agents MUST NOT read `.env` files. A command that needs a secret runs only through the line `install.py` renders into `.claude/settings.local.json` (`RA-09`); the allowlist is framework-owned; anything else is run by the human.
+This project strictly follows the **Secure Secret Sovereignty** law. Agents MUST NOT read `.env` files. Under the sandbox agents have no secret path: a command that needs a secret is run by the human through `.agents/scripts/with_env.py` (`RA-09`); the allowlist is framework-owned.
 
 ### 3. Amnesia & Knowledge Purge
 After each sprint, tactical heuristics are distilled into the **Long-Term Memory (LTM)** located in `.agents/memory/` prior to the session context wipe.
