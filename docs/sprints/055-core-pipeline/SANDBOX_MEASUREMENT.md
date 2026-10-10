@@ -120,3 +120,27 @@ Status of every row: **proposal**, not a decision. Form numbers refer to plan `D
 | `DOCK` | (2) narrow `excludedCommands` | Add only the `docker` subcommands the host needs. | `DOCK`. |
 | `LOCAL` | (3) human opt-in | `allowLocalBinding` set by the human in user settings. | `LOCAL`. |
 | Template path resolution | Template guidance | State that the template is consumed only when merged into project settings (`<host>/.claude/settings.json`); `--settings <template file>` protects nothing. | Section 1.3. |
+
+## 6. Abort criterion 2 (Gate 1 remediation, 2026-10-10)
+
+Plan Abort criterion 2: stop if `with_env.py` cannot make an allowlisted command read the key under `excludedCommands` in a sandboxed session, or if the secret value appears unmasked in the agent output. Measured after `e68ac72`, `cfe7950` (named commands, `-I`, narrowed template).
+
+| Item | Fact |
+| :--- | :--- |
+| Fixture | Host-shaped scratch directory (removed afterwards): `git init`; `.agents/scripts/with_env.py` copied from the nucleus; `.agents/venv_skillopt` symlinked to the nucleus venv; `.agents/config/with_env_allowlist.json` = nucleus allowlist plus one entry `probe-key` (prints the key length, whether `HTTPS_PROXY` is set, and the raw key value); `.env` = `GEMINI_API_KEY=<18-character fixture, not a secret>`. |
+| Settings | Template `claude/settings.hooks.json` as **project settings** (`<fixture>/.claude/settings.json`), with `hooks` removed (they name files the copy lacks), `sandbox.allowUnsandboxedCommands: false` (as section 1), and `python3 -I .agents/scripts/with_env.py probe-key` appended to `excludedCommands`. No absolute deny paths: `./` resolves against the project root here (section 1.3). |
+| Session | Headless `claude -p --allowedTools Bash --output-format stream-json`, Claude Code CLI 2.1.119, launched by the principal agent from the fixture root; each case issued as its own Bash tool call. |
+| Why a probe entry | It tests key visibility and output masking without sending fixture content to an LLM provider, which the real `graphify-*` entries would do. |
+
+| ID | Command | Exit | Output | Reading |
+| :--- | :--- | :--- | :--- | :--- |
+| `SBX0` | `printenv HTTPS_PROXY` | 0 | `http://localhost:<port>` | Sandbox active. |
+| `SBX1` | `curl -s --noproxy '*' -o /dev/null -m 10 https://registry.npmjs.org` | 6 | none | Sandbox active (run valid). |
+| `A2-0` | `python3 -c "open('.env').close()"` | 1 | `PermissionError: [Errno 1] Operation not permitted: '.env'` | `./.env` deny resolves against the project root in project settings. |
+| `A2-1` | `python3 -I .agents/scripts/with_env.py probe-key` | 0 | `len 18` / `proxy 0` / `raw ***` | Ran outside the sandbox (`proxy 0`), read the key from `.env` (length 18), value masked. |
+| `A2-2` | `python3 .agents/scripts/with_env.py probe-key` (no `-I`) | 2 | `with_env: run as 'python3 -I …' (isolated mode)` | Not excluded, refused. |
+| `A2-3` | `python3 -I .agents/scripts/with_env.py not-a-name` | 2 | `with_env: 'not-a-name' is not in config/with_env_allowlist.json` | Off-allowlist name refused. |
+| `A2-4` | `python3 -I .agents/scripts/with_env.py graphify-label --help` | 2 | `usage: python3 -I with_env.py <name>` | An appended argv is refused. |
+| `A2-5` | `grep -c '<fixture value>'` over the full session transcripts (stream-json) | — | `0` | The raw value never reached the agent's context. |
+
+Verdict: **Abort criterion 2 not triggered.** `D2` stands. The masking result covers the exact-copy case only; per `agents.md RA-09`, masking is not the security boundary. `SBX1` cancelled the parallel batch of later cases on the first attempt; they were re-issued one at a time with identical commands. `A2-0` replaced a `head -c 0 .env` case that macOS `head` rejects as an illegal byte count.
