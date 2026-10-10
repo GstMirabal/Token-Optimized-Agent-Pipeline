@@ -176,3 +176,26 @@ Controls: `SBX0` exit 0 (proxy set) and `SBX1` exit 6 in every session.
 | — | — | `grep -c '<fixture value>'` over the three session transcripts | — | `0`, `0`, `0` | The raw value never reached the agent's context. |
 
 Verdict: **Abort criterion 3 not triggered.** `D2-R` holds in both modes. `D2-N` resolves to **nucleus receives the rendered exclusion**, because a file-level `denyWrite` blocks renaming the parent directory (`N-E1`, `N-F1`). Syntax for `U23`: `sandbox.filesystem.denyWrite` takes the plain absolute path (`/…`); `permissions.deny` takes `Edit(//<absolute path>/**)`. Run notes: the first `H-A4` attempt was void (the session stripped the trailing spaces of the replacement, so no edit was attempted) and was re-run with `import jsonx`; the first `H-D3` impostor used `os.path.lexists`, which the `.env` deny also refuses (section 3, `S-4`), so it printed nothing about `.env` and was re-run with a direct `open()`; two sessions issued two independent steps in one turn, recorded in the transcripts and without effect on any result.
+
+## 8. U25 re-measure (d), (e) with the real `install.py` render (after `55911a1`)
+
+| Item | Fact |
+| :--- | :--- |
+| Fixture | Scratch host (removed afterwards): `git init`; `.agents` = clone of the nucleus at `55911a1` converted to submodule shape (`.agents/.git` is a `gitdir:` file, so `scripts/_mode.py` reports host mode); `venv_skillopt` symlinked; one `probe-key` entry added to the clone's allowlist **before** install; `.env` = 18-character fixture. |
+| Install | `python3 .agents/scripts/install.py --target claude`, run outside the sandbox (the human step): exit 0; `Merged … settings.json`, `Merged … .mcp.json`, `Rendered 4 absolute with_env exclusion(s) -> …/.claude/settings.local.json`. |
+| Rendered | `excludedCommands`: `<python3 abs> -I <fx>/.agents/scripts/with_env.py <name>` for the four names; `denyWrite`: `<fx>/.agents/{scripts,config,venv_skillopt}`; `permissions.deny`: `Edit(//<fx>/.agents/{scripts,config,venv_skillopt}/**)`. Project `excludedCommands`: the five `gh` inspection patterns only. |
+| Only manual change | `sandbox.allowUnsandboxedCommands: false` added to `settings.local.json` (as sections 1, 6, 7). Hooks were left active. |
+
+| ID | Command | Exit | Output | Reading |
+| :--- | :--- | :--- | :--- | :--- |
+| `SBX0`, `SBX1` | controls | 0, 6 | proxy set; no resolve | Valid run. |
+| `R1` | rendered absolute line, `probe-key` | 0 | `len 18` / `proxy 0` / `raw ***` | Rendered exclusion honored; key read outside the sandbox; masked. |
+| `R3` | after `cd sub`, `python3 -I .agents/scripts/with_env.py probe-key` (impostor) | 0 | `IMPOSTOR_RAN proxy=1` / `IMPOSTOR_BLOCKED PermissionError … '../.env'` | R2-1 closed on the real render. |
+| `R5` | `mv .agents .agents_x` | 1 | `Operation not permitted` | Denying three subdirectories blocks renaming `.agents` itself. |
+| `R6` | `mv .agents/scripts .agents/scripts_x` | 1 | `Operation not permitted` | — |
+| `R7` | `touch .agents/config/x` | 1 | `Operation not permitted` | — |
+| `R8` | `touch .agents/.bridge_probe.lock` | 0 | none | Boot lock writes inside `.agents` still work (reason for not denying all of `.agents`). |
+| `R9` | Edit tool on the wrapper | tool error | `File is in a directory that is denied by your permission settings.` | File unchanged. |
+| — | `grep -c '<fixture value>'` over the transcript | — | `0` | — |
+
+Verdict: plan Verification (enmienda) row 3 met — the impostor cannot read `.env`.

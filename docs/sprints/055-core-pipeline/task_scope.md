@@ -52,11 +52,11 @@ or a `gate` profile.
 | U21 | `README.md` | modify (At a Glance counts: 44 scripts, 9 config registries after U02/U03; README drift check in `make verify`) | low | `doc_orchestrator` | sonnet | medium | ✅ e5532cc |
 | U22 | `scripts/merge_json.py` | modify (`feat(`: explicit `RETIRED_VALUES` table, empty today, pruned by the merge so a template entry the framework published and later retired leaves installed hosts; exact strings only, never host-added entries; pattern of `prune_deprecated_hooks`; paired `tests/test_merge_json.py`) | medium | `implementer_agent` | sonnet | medium | ✅ 90e4a16 |
 | U25 | `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` | measure before U23 (D1): absolute path syntax for `denyWrite`/`permissions.deny`, `settings.local.json` `excludedCommands` merge, absolute line reads the key, R2-1 impostor, parent-directory rename (plan Enmienda) | medium | principal | — | — | ✅ section 7 |
-| U23 | `scripts/install.py` | modify (`fix(`: render D2-R into `.claude/settings.local.json` by mode and U25 result; paired `tests/test_install_with_env_render.py`) | high | `implementer_agent` | sonnet | high | ⏳ |
-| U24 | `claude/settings.hooks.json` | modify (remove the three relative `with_env.py` lines and `gh pr create *`, `gh release create *`; D2-R, D10) | high | `implementer_agent` | sonnet | medium | ⏳ |
-| U26 | `scripts/merge_json.py` | modify (`fix(`: the five D11 values in `RETIRED_VALUES`, R2-8 in the comment; paired `tests/test_merge_json.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U27 | `tests/test_template_sandbox.py` | create (R2-9: template carries no relative `with_env.py` line and no `gh * create`; `denyWrite` covers wrapper, allowlist, venv, `.env`) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U28 | `Makefile` | modify (`fix(`: `-I` in `GRAPHIFY`, R2-4; paired `tests/test_makefile_graphify.py`) | low | `implementer_agent` | sonnet | low | ⏳ |
+| U23 | `scripts/install.py` | modify (`fix(`: render D2-R into `.claude/settings.local.json` by mode and U25 result; paired `tests/test_install_with_env_render.py`) | high | `implementer_agent` | sonnet | high | ✅ 55911a1 |
+| U24 | `claude/settings.hooks.json` | modify (remove the three relative `with_env.py` lines and `gh pr create *`, `gh release create *`; D2-R, D10) | high | `implementer_agent` | sonnet | medium | ✅ b5b3088 |
+| U26 | `scripts/merge_json.py` | modify (`fix(`: the five D11 values in `RETIRED_VALUES`, R2-8 in the comment; paired `tests/test_merge_json.py`) | medium | `implementer_agent` | sonnet | medium | ✅ e9dba4e |
+| U27 | `tests/test_template_sandbox.py` | create (R2-9: template carries no relative `with_env.py` line and no `gh * create`; `denyWrite` covers wrapper, allowlist, venv, `.env`) | low | `implementer_agent` | sonnet | medium | ✅ 17c67f8 |
+| U28 | `Makefile` | modify (`fix(`: `-I` in `GRAPHIFY`, R2-4; paired `tests/test_makefile_graphify.py`) | low | `implementer_agent` | sonnet | low | ✅ 88f5c90 |
 | U29 | twelve files (plan Enmienda U29), one commit per file | modify (RA-14 propagation of D2-R, D3-R, D10, R2-5, R2-7) | medium | `rule_validator` / `agent_orchestrator` / `implementer_agent` / `doc_orchestrator` | sonnet | medium | ⏳ |
 
 Note 1 (U12): `check_task_scope.py` reads only `File`, `Operation`, `Risk`, `Assignee`,
