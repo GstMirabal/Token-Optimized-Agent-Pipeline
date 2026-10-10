@@ -263,6 +263,7 @@ Orden: `U25` → `U24`, `U26`, `U27`, `U28` → `U23` → re-medición de `U25` 
 | **Approved by** | GstMirabal (chat, Phase 5) |
 | **Date** | 2026-10-07 |
 | **Plan commit at approval** | `abf2928` |
+| **Amendment (Gate 1 round 2)** | Section *Enmienda* approved by GstMirabal (chat, 2026-10-10), including the `§1 path_type` reading (absolute paths only in the untracked `.claude/settings.local.json`); amendment commit `80dac85` |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an
