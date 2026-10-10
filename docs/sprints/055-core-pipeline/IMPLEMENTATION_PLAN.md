@@ -297,6 +297,7 @@ Las filas de Verification de la *Enmienda* que esperaban líneas renderizadas qu
 | **Date** | 2026-10-07 |
 | **Plan commit at approval** | `abf2928` |
 | **Amendment (Gate 1 round 2)** | Section *Enmienda* approved by GstMirabal (chat, 2026-10-10), including the `§1 path_type` reading (absolute paths only in the untracked `.claude/settings.local.json`); amendment commit `80dac85` |
+| **Amendment 2 (Gate 1 round 3)** | Section *Enmienda 2* approved by GstMirabal (chat, 2026-10-10); amendment commit `409da6e` |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an
