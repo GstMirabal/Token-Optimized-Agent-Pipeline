@@ -11,6 +11,7 @@ import json
 import sys
 from collections.abc import Mapping
 from pathlib import Path
+from types import MappingProxyType
 from typing import Any
 
 # Hook command strings shipped by PREVIOUS template versions. Pruned from the
@@ -23,14 +24,27 @@ DEPRECATED_HOOK_COMMANDS = {
 }
 
 # String values shipped by PREVIOUS template versions and since retired, keyed
-# by the dotted JSON path of the list that held them, e.g.
-# {"sandbox.excludedCommands": frozenset({"gh api *"})} (hypothetical: a
-# too-broad exclusion a template could retire). Empty today.
+# by the dotted JSON path of the list that held them.
 # Pruned from the destination list on every merge (list-merge only appends, so
 # a dangerous entry retired from a published template would otherwise survive
 # on every host forever). Exact string match only; a value the current template
 # still ships is kept; entries the host added are never touched.
-RETIRED_VALUES: Mapping[str, frozenset[str]] = {}
+# Why these five retire:
+#   - the three `with_env.py graphify-*` entries: a cwd-relative exclusion runs
+#     an agent-written impostor script outside the sandbox.
+#   - `gh pr create *` / `gh release create *`: they can publish local files.
+# Caveat (R2-8): exact-match pruning cannot tell a host's deliberate re-add of
+# a retired string from a stale leftover, so a host that wants such an entry
+# loses it on each re-merge and must use a different string.
+RETIRED_VALUES: Mapping[str, frozenset[str]] = MappingProxyType({
+    "sandbox.excludedCommands": frozenset({
+        "python3 -I .agents/scripts/with_env.py graphify-extract",
+        "python3 -I .agents/scripts/with_env.py graphify-extract-deep",
+        "python3 -I .agents/scripts/with_env.py graphify-label",
+        "gh pr create *",
+        "gh release create *",
+    }),
+})
 
 
 def _prune_matcher_hooks(matcher: dict) -> None:

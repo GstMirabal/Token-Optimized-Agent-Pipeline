@@ -1,6 +1,7 @@
 """Tests for scripts/merge_json.py — the non-destructive merge that touches
 host users' .claude/settings.json and .mcp.json. A regression here corrupts
 real user configuration, hence the coverage."""
+import json
 import sys
 from pathlib import Path
 from typing import ClassVar
@@ -142,7 +143,6 @@ class TestRetiredValuePrune:
         assert deny == ["./old-secret"]
 
     def test_empty_retired_mapping_changes_nothing(self):
-        assert merge_json.RETIRED_VALUES == {}
         dest = {"a": {"b": ["x", "y"]}}
         assert merge(dest, {"a": {"b": ["z"]}}, retired={}) == {"a": {"b": ["x", "y", "z"]}}
 
@@ -150,3 +150,27 @@ class TestRetiredValuePrune:
         dest = {"other": ["./old-secret"]}
         merge_json.prune_retired_values(dest, {}, self.RETIRED)
         assert dest == {"other": ["./old-secret"]}
+
+
+RETIRED_EXCLUDED = frozenset({
+    "python3 -I .agents/scripts/with_env.py graphify-extract",
+    "python3 -I .agents/scripts/with_env.py graphify-extract-deep",
+    "python3 -I .agents/scripts/with_env.py graphify-label",
+    "gh pr create *",
+    "gh release create *",
+})
+
+
+class TestShippedRetiredValues:
+    """The real RETIRED_VALUES applied against the real shipped template."""
+
+    def test_retired_values_are_exactly_the_five_excluded_commands(self):
+        assert dict(merge_json.RETIRED_VALUES) == {"sandbox.excludedCommands": RETIRED_EXCLUDED}
+
+    def test_real_template_merge_drops_retired_and_keeps_host_entry(self):
+        template_path = Path(__file__).parent.parent / "claude" / "settings.hooks.json"
+        template = json.loads(template_path.read_text(encoding="utf-8"))
+        dest = {"sandbox": {"excludedCommands": [*sorted(RETIRED_EXCLUDED), "gh run list *"]}}
+        excluded = merge(dest, template)["sandbox"]["excludedCommands"]
+        assert not RETIRED_EXCLUDED & set(excluded)
+        assert "gh run list *" in excluded
