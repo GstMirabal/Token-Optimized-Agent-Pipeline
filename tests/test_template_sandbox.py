@@ -1,8 +1,12 @@
 """Guards the sandbox invariants of the template claude/settings.hooks.json
 (Sprint 055, R2-9). The template is merged into every host's Claude Code
-configuration by install.py, so a loosened sandbox entry ships to all hosts."""
+configuration by install.py, so a loosened sandbox entry ships to all hosts.
+
+Pinned invariants (Sprint 055, Amendment 2, D12/D13): no sandbox.excludedCommands
+entry at all; framework trees and the secret files are write-denied both in the
+sandbox filesystem and in permissions.deny; .env stays unreadable; no
+allowMachLookup."""
 import json
-import re
 from pathlib import Path
 from typing import Any
 
@@ -10,8 +14,6 @@ import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
 TEMPLATE = ROOT / "claude" / "settings.hooks.json"
-
-BROAD_EXCLUSIONS = {"gh *", "git *", "pnpm *"}
 
 
 @pytest.fixture(scope="module")
@@ -48,44 +50,44 @@ def _fs(template: dict[str, Any]) -> dict[str, list[str]]:
     return template["sandbox"]["filesystem"]
 
 
-def test_no_with_env_exclusion_in_template(template: dict[str, Any]) -> None:
-    """Absolute with_env.py exclusions are rendered per machine by install.py."""
-    offenders = [e for e in _excluded(template) if "with_env.py" in e]
-    assert offenders == []
+def test_excluded_commands_absent_or_empty(template: dict[str, Any]) -> None:
+    """sandbox.excludedCommands must be absent or empty.
 
-
-def test_no_gh_create_exclusion(template: dict[str, Any]) -> None:
-    """gh pr/release create read local files and must not run unsandboxed."""
-    offenders = [e for e in _excluded(template) if re.match(r"^gh (pr|release) create", e)]
-    assert offenders == []
-
-
-def test_no_broad_tool_exclusions(template: dict[str, Any]) -> None:
-    """No tool-wide exclusion and no bare wildcard after gh api (D7)."""
-    entries = _excluded(template)
-    broad = [e for e in entries if e.strip() in BROAD_EXCLUSIONS]
-    gh_api_wild = [e for e in entries if e.startswith("gh api") and e.endswith("*")]
-    assert broad == []
-    assert gh_api_wild == []
+    On CLI 2.1.119 a compound command whose first part matches any excluded
+    entry runs wholly unsandboxed, so one entry exempts everything chained
+    after it (QA Gate 1 round 3, N1). This single invariant replaces the
+    per-entry with_env / gh-create / broad-pattern checks.
+    """
+    assert _excluded(template) == []
 
 
 @pytest.mark.parametrize(
     "path",
     [
+        "./.agents/hooks",
+        "./.agents/scripts",
+        "./.agents/config",
+        "./.agents/skills",
+        "./.agents/claude",
+        "./.agents/venv_skillopt",
         "./.agents/scripts/with_env.py",
         "./.agents/config/with_env_allowlist.json",
-        "./.agents/venv_skillopt",
         "./.env",
     ],
 )
 def test_deny_write_paths(template: dict[str, Any], path: str) -> None:
-    """The wrapper, its allowlist, the venv and .env stay write-denied."""
+    """Framework trees, the wrapper, its allowlist, the venv and .env stay write-denied."""
     assert path in _fs(template)["denyWrite"]
 
 
 @pytest.mark.parametrize(
     "rule",
     [
+        "Edit(/.agents/hooks/**)",
+        "Edit(/.agents/scripts/**)",
+        "Edit(/.agents/config/**)",
+        "Edit(/.agents/skills/**)",
+        "Edit(/.agents/claude/**)",
         "Edit(/.agents/scripts/with_env.py)",
         "Edit(/.agents/config/with_env_allowlist.json)",
         "Edit(/.env)",
@@ -93,7 +95,11 @@ def test_deny_write_paths(template: dict[str, Any], path: str) -> None:
     ],
 )
 def test_permissions_deny_rules(template: dict[str, Any], rule: str) -> None:
-    """The permissions.deny rules guarding the wrapper and .env stay present."""
+    """The permissions.deny rules guarding framework trees and .env stay present.
+
+    Hooks run outside the sandbox and execute or merge these trees, so an
+    agent able to Edit them could run arbitrary code unsandboxed (N3).
+    """
     assert rule in template["permissions"]["deny"]
 
 
