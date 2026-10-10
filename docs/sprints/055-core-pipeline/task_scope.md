@@ -57,7 +57,7 @@ or a `gate` profile.
 | U26 | `scripts/merge_json.py` | modify (`fix(`: the five D11 values in `RETIRED_VALUES`, R2-8 in the comment; paired `tests/test_merge_json.py`) | medium | `implementer_agent` | sonnet | medium | ✅ e9dba4e |
 | U27 | `tests/test_template_sandbox.py` | create (R2-9: template carries no relative `with_env.py` line and no `gh * create`; `denyWrite` covers wrapper, allowlist, venv, `.env`) | low | `implementer_agent` | sonnet | medium | ✅ 17c67f8 |
 | U28 | `Makefile` | modify (`fix(`: `-I` in `GRAPHIFY`, R2-4; paired `tests/test_makefile_graphify.py`) | low | `implementer_agent` | sonnet | low | ✅ 88f5c90 |
-| U29 | twelve files (plan Enmienda U29), one commit per file | modify (RA-14 propagation of D2-R, D3-R, D10, R2-5, R2-7) | medium | `rule_validator` / `agent_orchestrator` / `implementer_agent` / `doc_orchestrator` | sonnet | medium | ⏳ |
+| U29 | twelve files (plan Enmienda U29), one commit per file | modify (RA-14 propagation of D2-R, D3-R, D10, R2-5, R2-7) | medium | `rule_validator` / `agent_orchestrator` / `implementer_agent` / `doc_orchestrator` | sonnet | medium | ✅ b68dbcc..032fcf6, CHANGELOG |
 
 Note 1 (U12): `check_task_scope.py` reads only `File`, `Operation`, `Risk`, `Assignee`,
 `Model`, `Effort`; it does not parse `Status`, so the row is kept with an Operation that

@@ -83,6 +83,7 @@ Closing the session state and certifying traceability.
 - Done amendment execution: approval `d1c0b49`; U25 `660d278` (SANDBOX_MEASUREMENT section 7, Abort criterion 3 not triggered); U24 `b5b3088`; U27 `17c67f8`; U28 `88f5c90`; U26 `e9dba4e`; U23 `55911a1`; U25 re-measure on the real render (section 8): impostor blocked, `.agents` rename blocked, boot locks still writable.
 - Deviations from the amendment, recorded: (1) D2-N is moot — `install_nucleus_bridge` merges no sandbox template (`nucleus_neutrality`), so U23 renders in host mode only; (2) D2-R denies `.agents/{scripts,config,venv_skillopt}` instead of all of `.agents`, because the boot writes `.agents/.bridge_*.lock` from inside the sandbox; section 8 `R5` shows the subdirectory denies still block renaming `.agents`.
 - Record: a host path containing spaces is not matched by `RENDER_OWNED_RE` (`\S+`) and the matching of such an `excludedCommands` string is unmeasured.
-- Then: U29 documentation; fresh QA Gate 1 round 3; Tester Gate 2; Phase 8.
+- Done U29: `b68dbcc` agents.md, `99ed16e` devops_agent.md, `a88b32d` allowlist comment, `2b8e3ef` with_env.py docstring, `797ff45` project_topology.md, `ffea472` graphify.md, `e6ddc7b` pipeline_workflow, `48b31c9` deployment_workflow, `dcff28e` repository_hardening_workflow, `81e71ea` README_TEMPLATE, `032fcf6` UPSTREAM_FINDINGS S-3 row, then CHANGELOG. `verify_references` 0; `make verify` 0 (1073 passed) before the CHANGELOG commit; no stale relative form, host-extension wording, gh create exclusion or `graphify . --mode deep` label left.
+- Then: fresh QA Gate 1 round 3; Tester Gate 2; Phase 8.
 
 *Certified under conventional commit standard: feat(scope): message #055*
