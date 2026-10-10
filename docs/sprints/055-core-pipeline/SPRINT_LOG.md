@@ -79,6 +79,7 @@ Closing the session state and certifying traceability.
 - Done record: the two direct `.env` loaders are in Rule Amendments & Heuristic Harvest as out of scope, human-run.
 - Done Abort criterion 2: not triggered — `SANDBOX_MEASUREMENT.md` section 6 (host-shaped fixture, project settings, probe read the key outside the sandbox with value masked; raw value 0 times in the transcript).
 - Done U22 (added by the human 2026-10-07): `90e4a16` `RETIRED_VALUES` (empty) pruned inside `merge()` before the append-only pass, so every `install.merge_into` call prunes without touching `install.py`; deviation from the `prune_deprecated_hooks` idiom (called separately from `main()`) recorded here. Template wins over a retired value; 14 tests pass, `make verify` exit 0.
-- Then: fresh QA Gate 1 round 2; Tester Gate 2; Phase 8.
+- Done QA Gate 1 round 2: REJECTED charter (R2-1..R2-3 blocking). Human decisions 2026-10-10: R2-1 absolute paths rendered by `install.py` into `.claude/settings.local.json` (D2-R, D2-N); R2-2 remove `gh pr create *` and `gh release create *` (D10); R2-3 allowlist is nucleus-only, hosts do not extend it (D3-R). Plan amended (section *Enmienda*, U23..U29, Abort criterion 3). R2-6 recorded: `1fa9608` trailer names `9823a56` as the failing parent; the real parent is `e68ac72`; history is not rewritten.
+- Then: human approval of the amendment; U25 measurement; U24, U26, U27, U28; U23; U25 re-measure (d, e); U29; fresh QA Gate 1 round 3; Tester Gate 2; Phase 8.
 
 *Certified under conventional commit standard: feat(scope): message #055*

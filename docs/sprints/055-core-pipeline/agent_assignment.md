@@ -79,6 +79,13 @@ human-reported results into `SANDBOX_MEASUREMENT.md`. No correction unit
 | U20 | `agents/devops_agent.md` | modify | sequential | `agent_orchestrator` | N/A | `agents/agent_orchestrator.md` |
 | U21 | `README.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | U22 | `scripts/merge_json.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| U25 | `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` | measure | sequential, first | principal (headless `claude -p`, as U01) | N/A | — |
+| U23 | `scripts/install.py` (+ `tests/test_install_with_env_render.py`) | modify | sequential, after U25 and U24 | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| U24 | `claude/settings.hooks.json` | modify | after U25 | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| U26 | `scripts/merge_json.py` (+ `tests/test_merge_json.py`) | modify | after U25 | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| U27 | `tests/test_template_sandbox.py` | create | after U24 | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| U28 | `Makefile` (+ `tests/test_makefile_graphify.py`) | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| U29 | twelve files, one per commit | modify | last | `rule_validator` (`agents.md`), `agent_orchestrator` (`agents/devops_agent.md`), `implementer_agent` (`config/`, `scripts/`), `doc_orchestrator` (rest) | N/A | `agents/*.md` |
 
 ## Disagreements with the plan
 

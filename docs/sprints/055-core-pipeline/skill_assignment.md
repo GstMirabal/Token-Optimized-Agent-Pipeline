@@ -61,6 +61,9 @@ and a `README.md` around a single stdlib script with one caller path, which
 | `U20` | none. Partial read of `agents/devops_agent.md` (under 200 lines) | N/A | P1 hit; P2-P4 not reached |
 | `U21` | none. Edit the counted At a Glance row as `make verify` prints it | N/A | P1 hit; P2-P4 not reached |
 | `U22` | `python-quality-auditor` (102-line file, full read) | N/A | P1 hit; P2-P4 not reached |
+| `U23` | `omni-context-minimizer` skeleton of `scripts/install.py` (613 lines, >200: `§2 token_saver`), then `python-quality-auditor` | N/A | P1 hit |
+| `U26`, `U28` | `python-quality-auditor` | N/A | P1 hit |
+| `U24`, `U25`, `U27`, `U29` | none (JSON, measurement, test, prose) | N/A | P1 miss; no forge |
 
 Cross-cutting, not tied to a unit: `venv_skillopt/bin/python -m graphify update .`
 after the code units (`agents.md §2 graph_sync`), and `skills/topology-monitor`
