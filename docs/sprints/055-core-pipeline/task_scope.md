@@ -63,7 +63,7 @@ or a `gate` profile.
 | U32 | `scripts/merge_json.py` | modify (`fix(`: the five gh inspection patterns in `RETIRED_VALUES`; paired `tests/test_merge_json.py`) | medium | `implementer_agent` | sonnet | medium | ✅ 7580443 |
 | U33 | `tests/test_template_sandbox.py` | modify (no `excludedCommands`; D13 denies) | low | `implementer_agent` | sonnet | medium | ✅ b1f246c |
 | U34 | `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` | measure (a)-(e) of plan *Enmienda 2* with the real installer | medium | principal | — | — | ✅ section 9 |
-| U35 | twelve files (plan *Enmienda 2* U35), one commit per file | modify (RA-14 propagation of D12, D13; N1/N3 precedent) | medium | `rule_validator` / `agent_orchestrator` / `implementer_agent` / `doc_orchestrator` | sonnet | medium | ⏳ |
+| U35 | twelve files (plan *Enmienda 2* U35), one commit per file | modify (RA-14 propagation of D12, D13; N1/N3 precedent) | medium | `rule_validator` / `agent_orchestrator` / `implementer_agent` / `doc_orchestrator` | sonnet | medium | ✅ 952e47e..918e45a, CHANGELOG |
 
 Note 1 (U12): `check_task_scope.py` reads only `File`, `Operation`, `Risk`, `Assignee`,
 `Model`, `Effort`; it does not parse `Status`, so the row is kept with an Operation that
