@@ -58,11 +58,11 @@ or a `gate` profile.
 | U27 | `tests/test_template_sandbox.py` | create (R2-9: template carries no relative `with_env.py` line and no `gh * create`; `denyWrite` covers wrapper, allowlist, venv, `.env`) | low | `implementer_agent` | sonnet | medium | ✅ 17c67f8 |
 | U28 | `Makefile` | modify (`fix(`: `-I` in `GRAPHIFY`, R2-4; paired `tests/test_makefile_graphify.py`) | low | `implementer_agent` | sonnet | low | ✅ 88f5c90 |
 | U29 | twelve files (plan Enmienda U29), one commit per file | modify (RA-14 propagation of D2-R, D3-R, D10, R2-5, R2-7) | medium | `rule_validator` / `agent_orchestrator` / `implementer_agent` / `doc_orchestrator` | sonnet | medium | ✅ b68dbcc..032fcf6, CHANGELOG |
-| U30 | `claude/settings.hooks.json` | modify (remove `sandbox.excludedCommands`; add D13 `denyWrite`/`Edit` for `.agents/{hooks,scripts,config,skills,claude,venv_skillopt}`) | high | `implementer_agent` | sonnet | medium | ⏳ |
-| U31 | `scripts/install.py` | modify (`fix(`: drop the render, prune render-owned lines from `.claude/settings.local.json`; paired `tests/test_install_with_env_render.py` rewritten) | high | `implementer_agent` | sonnet | high | ⏳ |
-| U32 | `scripts/merge_json.py` | modify (`fix(`: the five gh inspection patterns in `RETIRED_VALUES`; paired `tests/test_merge_json.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| U33 | `tests/test_template_sandbox.py` | modify (no `excludedCommands`; D13 denies) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| U34 | `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` | measure (a)-(e) of plan *Enmienda 2* with the real installer | medium | principal | — | — | ⏳ |
+| U30 | `claude/settings.hooks.json` | modify (remove `sandbox.excludedCommands`; add D13 `denyWrite`/`Edit` for `.agents/{hooks,scripts,config,skills,claude,venv_skillopt}`) | high | `implementer_agent` | sonnet | medium | ✅ fb23f31 |
+| U31 | `scripts/install.py` | modify (`fix(`: drop the render, prune render-owned lines from `.claude/settings.local.json`; paired `tests/test_install_with_env_render.py` rewritten) | high | `implementer_agent` | sonnet | high | ✅ 3fd788e |
+| U32 | `scripts/merge_json.py` | modify (`fix(`: the five gh inspection patterns in `RETIRED_VALUES`; paired `tests/test_merge_json.py`) | medium | `implementer_agent` | sonnet | medium | ✅ 7580443 |
+| U33 | `tests/test_template_sandbox.py` | modify (no `excludedCommands`; D13 denies) | low | `implementer_agent` | sonnet | medium | ✅ b1f246c |
+| U34 | `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` | measure (a)-(e) of plan *Enmienda 2* with the real installer | medium | principal | — | — | ✅ section 9 |
 | U35 | twelve files (plan *Enmienda 2* U35), one commit per file | modify (RA-14 propagation of D12, D13; N1/N3 precedent) | medium | `rule_validator` / `agent_orchestrator` / `implementer_agent` / `doc_orchestrator` | sonnet | medium | ⏳ |
 
 Note 1 (U12): `check_task_scope.py` reads only `File`, `Operation`, `Risk`, `Assignee`,
