@@ -158,13 +158,18 @@ RETIRED_EXCLUDED = frozenset({
     "python3 -I .agents/scripts/with_env.py graphify-label",
     "gh pr create *",
     "gh release create *",
+    "gh pr checks *",
+    "gh pr list *",
+    "gh repo view *",
+    "gh release view *",
+    "gh auth status",
 })
 
 
 class TestShippedRetiredValues:
     """The real RETIRED_VALUES applied against the real shipped template."""
 
-    def test_retired_values_are_exactly_the_five_excluded_commands(self):
+    def test_retired_values_are_exactly_the_ten_excluded_commands(self):
         assert dict(merge_json.RETIRED_VALUES) == {"sandbox.excludedCommands": RETIRED_EXCLUDED}
 
     def test_real_template_merge_drops_retired_and_keeps_host_entry(self):

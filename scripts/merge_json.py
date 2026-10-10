@@ -29,10 +29,13 @@ DEPRECATED_HOOK_COMMANDS = {
 # a dangerous entry retired from a published template would otherwise survive
 # on every host forever). Exact string match only; a value the current template
 # still ships is kept; entries the host added are never touched.
-# Why these five retire:
+# Why all ten retire: on CLI 2.1.119 any excluded entry lets a chained command
+# run unsandboxed (QA Gate 1 round 3 N1), so the framework ships no exclusions
+# and retires all ten it published on `ai-sprint/055`.
 #   - the three `with_env.py graphify-*` entries: a cwd-relative exclusion runs
 #     an agent-written impostor script outside the sandbox.
 #   - `gh pr create *` / `gh release create *`: they can publish local files.
+#   - the five gh inspection patterns: same chaining defect as any exclusion.
 # Caveat (R2-8): exact-match pruning cannot tell a host's deliberate re-add of
 # a retired string from a stale leftover, so a host that wants such an entry
 # loses it on each re-merge and must use a different string.
@@ -43,6 +46,11 @@ RETIRED_VALUES: Mapping[str, frozenset[str]] = MappingProxyType({
         "python3 -I .agents/scripts/with_env.py graphify-label",
         "gh pr create *",
         "gh release create *",
+        "gh pr checks *",
+        "gh pr list *",
+        "gh repo view *",
+        "gh release view *",
+        "gh auth status",
     }),
 })
 
