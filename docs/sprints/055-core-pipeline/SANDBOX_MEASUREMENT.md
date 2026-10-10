@@ -144,3 +144,35 @@ Plan Abort criterion 2: stop if `with_env.py` cannot make an allowlisted command
 | `A2-5` | `grep -c '<fixture value>'` over the full session transcripts (stream-json) | — | `0` | The raw value never reached the agent's context. |
 
 Verdict: **Abort criterion 2 not triggered.** `D2` stands. The masking result covers the exact-copy case only; per `agents.md RA-09`, masking is not the security boundary. `SBX1` cancelled the parallel batch of later cases on the first attempt; they were re-issued one at a time with identical commands. `A2-0` replaced a `head -c 0 .env` case that macOS `head` rejects as an illegal byte count.
+
+## 7. U25 — absolute rendered exclusions (plan *Enmienda*, before U23)
+
+Measured 2026-10-10 on Claude Code CLI 2.1.119, headless `claude -p --allowedTools Bash Edit`, launched by the principal agent, each step its own tool call. Two scratch fixtures, removed afterwards, each with `.env` = 18-character fixture value and `sandbox.allowUnsandboxedCommands: false`:
+
+| Fixture | Project settings (`.claude/settings.json`) | Local settings (`.claude/settings.local.json`) |
+| :--- | :--- | :--- |
+| Host (`<fx>/.agents/` = copied wrapper, allowlist with probes, symlinked venv) | Template minus `hooks`, minus the three relative `with_env.py` lines and the two `gh … create` (as `U24`), plus `<python3 abs> -I <fx>/.agents/scripts/with_env.py probe-key2` | `excludedCommands`: `<python3 abs> -I <fx>/.agents/scripts/with_env.py probe-key`; `denyWrite`: `["<fx>/.agents"]`; `permissions.deny`: `Edit(//<fx>/.agents/**)` |
+| Nucleus (`<fx>/scripts/`, `<fx>/config/`, `<fx>/venv_skillopt`) | Same, with `<fx>/scripts/with_env.py probe-key2` | `excludedCommands` with `probe-key`; `denyWrite`: the absolute wrapper, allowlist and venv paths; matching `Edit(//…/**)` |
+
+Controls: `SBX0` exit 0 (proxy set) and `SBX1` exit 6 in every session.
+
+| Plan item | ID | Command | Exit | Output | Reading |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| (b), (c) | `H-B1` | absolute line, `probe-key` (local list) | 0 | `len 18` / `proxy 0` / `raw ***` | Local `excludedCommands` honored; key read outside the sandbox; masked. |
+| (b) | `H-B2` | absolute line, `probe-key2` (project list) | 0 | same | Project and local lists are **combined**, not overridden. |
+| (a) | `H-A1` | `touch .agents/scripts/new_file` | 1 | `Operation not permitted` | Absolute `denyWrite` (`/…` form) honored. |
+| (e) | `H-A2` | `mv .agents .agents_x` | 1 | `rename … Operation not permitted` | Renaming the protected directory is denied. |
+| (e) | `H-A3` | `mv .agents/scripts .agents/scripts_x` | 1 | `rename … Operation not permitted` | Renaming inside it is denied. |
+| (a) | `H-A4` | Edit tool on the absolute wrapper path | tool error | `File is in a directory that is denied by your permission settings.` | `Edit(//<abs>/**)` honored; file unchanged. |
+| (d) | `H-D1` | relative `python3 -I .agents/scripts/with_env.py probe-key` at the root | 2 | `cannot read .env in the current directory` | The relative form is no longer excluded: runs sandboxed, `.env` denied. |
+| (d) | `H-D3` | after `cd sub`, the same relative line runs the impostor `sub/.agents/scripts/with_env.py` | 0 | `IMPOSTOR_RAN proxy=1` / `IMPOSTOR_BLOCKED PermissionError: … '../.env'` | R2-1 closed: the impostor runs **inside** the sandbox and cannot read `.env`. |
+| (d) | `H-D4` | after `cd sub`, the absolute line | 2 | `cannot read .env in the current directory` | The absolute line runs the real wrapper regardless of the working directory. |
+| (b), (c) | `N-B1`, `N-B2` | absolute lines, local and project lists | 0, 0 | `len 18` / `proxy 0` / `raw ***` | As host. |
+| (a) | `N-A1` | `touch scripts/with_env.py` | 1 | `Operation not permitted` | File-level absolute `denyWrite` honored. |
+| (e) | `N-E1` | `mv scripts scripts_x` | 1 | `rename scripts to scripts_x: Operation not permitted` | A file-level `denyWrite` also blocks renaming its parent directory. |
+| (e) | `N-E3` | `cp sub/scripts/with_env.py scripts/with_env.py` | 1 | `Operation not permitted` | Overwrite denied. |
+| (e) | `N-E4` | absolute line after E1-E3 | 0 | `len 18` / `proxy 0` / `raw ***` | Still the real wrapper. |
+| (e) | `N-F1` | `mv config config_x` | 1 | `Operation not permitted` | Allowlist parent rename denied. |
+| — | — | `grep -c '<fixture value>'` over the three session transcripts | — | `0`, `0`, `0` | The raw value never reached the agent's context. |
+
+Verdict: **Abort criterion 3 not triggered.** `D2-R` holds in both modes. `D2-N` resolves to **nucleus receives the rendered exclusion**, because a file-level `denyWrite` blocks renaming the parent directory (`N-E1`, `N-F1`). Syntax for `U23`: `sandbox.filesystem.denyWrite` takes the plain absolute path (`/…`); `permissions.deny` takes `Edit(//<absolute path>/**)`. Run notes: the first `H-A4` attempt was void (the session stripped the trailing spaces of the replacement, so no edit was attempted) and was re-run with `import jsonx`; the first `H-D3` impostor used `os.path.lexists`, which the `.env` deny also refuses (section 3, `S-4`), so it printed nothing about `.env` and was re-run with a direct `open()`; two sessions issued two independent steps in one turn, recorded in the transcripts and without effect on any result.
