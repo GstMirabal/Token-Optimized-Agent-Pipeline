@@ -5,10 +5,11 @@ invoked_by: rules/project_topology.md sandbox table, agents.md RA-09, Makefile g
 Usage (nucleus): ``python3 -I scripts/with_env.py <name>``
 Usage (host):    ``python3 -I .agents/scripts/with_env.py <name>``
 
-These are the wrapper's own syntax. The sandbox excludes only the absolute
-line that ``scripts/install.py`` renders per allowlist name into the host's
-``.claude/settings.local.json``; a cwd-relative spelling runs sandboxed and
-cannot read ``.env``. In the nucleus nothing is rendered and the human runs it.
+These are the wrapper's own syntax. The wrapper is the HUMAN's path, run
+directly or through ``make graphify-deep``. The sandbox excludes nothing, so a
+sandboxed agent cannot use it (it fails on the ``.env`` deny) and must not add
+a ``sandbox.excludedCommands`` entry: any excluded entry lets a chained command
+run unsandboxed (Sprint 055 QA Gate 1 round 3 N1). The allowlist is nucleus-only.
 
 ``<name>`` is a key of ``commands`` in ``config/with_env_allowlist.json``.
 Exactly one argument is accepted: the caller supplies a name, never an argv,
@@ -19,16 +20,18 @@ module could shadow this wrapper's standard-library imports.
 
 The env file is fixed to ``.env`` in the current working directory and the
 allowlist is fixed to this framework checkout. There is deliberately no flag
-to change either: the wrapper runs unsandboxed, and a flag would let an agent
-point it at a file the agent wrote.
+to change either: a flag would let a caller point the wrapper at a file the
+caller wrote.
 
-Security model: this wrapper runs OUTSIDE the Claude Code sandbox, through
-``sandbox.excludedCommands``. The boundary is that only the rendered absolute
-lines are excluded and that what they execute is write-denied:
-``.agents/scripts``, ``.agents/config`` and ``.agents/venv_skillopt`` by
-absolute rendered rules, plus the relative denies in ``claude/settings.hooks.json``.
-The child environment is ``os.environ`` without any ``PYTHON*`` variable, plus
-the ``.env`` pairs; allowlisted Python entries also run with ``-I``.
+Security model: the wrapper itself is NOT a sandbox boundary. It reduces what a
+human-run command receives: the child environment is ``os.environ`` without any
+``PYTHON*`` variable, plus the ``.env`` pairs, and allowlisted Python entries
+also run with ``-I``. The framework-level boundary is that nothing is excluded
+from the sandbox and that the trees hooks execute (``.agents/hooks``,
+``.agents/scripts``, ``.agents/config``) are write-denied
+(``claude/settings.hooks.json``; see the sandbox table in
+``rules/project_topology.md``). Every allowlist entry runs with secrets in its
+environment; ``pytest`` is not listed because it runs agent-written code.
 
 Output masking (``redact``) is NOT a security boundary: it only replaces exact
 copies of values of length >= 4 in the child's stdout and stderr. Encoded or
