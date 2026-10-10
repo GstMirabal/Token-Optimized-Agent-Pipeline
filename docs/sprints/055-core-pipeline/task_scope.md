@@ -50,7 +50,7 @@ or a `gate` profile.
 | U19 | `CHANGELOG.md` | modify (`[Unreleased]` entry naming each commit by short SHA) | low | `doc_orchestrator` | sonnet | medium | ✅ 739a750 |
 | U20 | `agents/devops_agent.md` | modify (`secret_sovereignty` row and `.env` export wording point to `scripts/with_env.py`; RA-14 propagation of U13) | low | `agent_orchestrator` | sonnet | medium | ✅ 056a5e3 |
 | U21 | `README.md` | modify (At a Glance counts: 44 scripts, 9 config registries after U02/U03; README drift check in `make verify`) | low | `doc_orchestrator` | sonnet | medium | ✅ e5532cc |
-| U22 | `scripts/merge_json.py` | modify (`feat(`: explicit `RETIRED_VALUES` table, empty today, pruned by the merge so a template entry the framework published and later retired leaves installed hosts; exact strings only, never host-added entries; pattern of `prune_deprecated_hooks`; paired `tests/test_merge_json.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| U22 | `scripts/merge_json.py` | modify (`feat(`: explicit `RETIRED_VALUES` table, empty today, pruned by the merge so a template entry the framework published and later retired leaves installed hosts; exact strings only, never host-added entries; pattern of `prune_deprecated_hooks`; paired `tests/test_merge_json.py`) | medium | `implementer_agent` | sonnet | medium | ✅ 90e4a16 |
 
 Note 1 (U12): `check_task_scope.py` reads only `File`, `Operation`, `Risk`, `Assignee`,
 `Model`, `Effort`; it does not parse `Status`, so the row is kept with an Operation that
