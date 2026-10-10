@@ -28,11 +28,11 @@ What it does:
      profiles/<name> inside the submodule (illustrative packs only). --profile-path
      accepts a host-controlled directory outside the submodule (RA-15 production
      profiles). The two flags are mutually exclusive.
-  6. Renders, per machine, absolute `sandbox.excludedCommands` entries for the
-     allowlisted `with_env.py` commands plus absolute write-denies on
-     `.agents/scripts`, `.agents/config` and `.agents/venv_skillopt` into the
-     host's untracked .claude/settings.local.json (host mode only). A
-     cwd-relative exclusion would let an impostor script run unsandboxed.
+  6. Prunes, per machine, any `sandbox.excludedCommands` line a previous
+     install rendered for `with_env.py` from the host's untracked
+     .claude/settings.local.json (host mode only). No exclusions are shipped:
+     a command chained after any excluded entry runs unsandboxed. Host-owned
+     entries and other keys are left untouched; no change means no write.
   7. Marks .agents/.bridge_claude.lock and/or .agents/.bridge_cursor.lock
      (per --target) so hooks/on_init.py and start_workflow bridge_check
      can detect a deliberate submodule update and re-link automatically.
@@ -53,13 +53,11 @@ HOST_DIR = AGENTS_DIR.parent
 sys.path.insert(0, str(SCRIPT_DIR))
 import json
 
-import with_env
 from _mode import is_nucleus
 from merge_json import merge
 
 BRIDGE_WRITE_DENIED = 3
 RENDER_OWNED_RE = re.compile(r"^\S+ -I \S+/scripts/with_env\.py \S+$")
-PROTECTED_SUBDIRS = ("scripts", "config", "venv_skillopt")
 
 
 def _symlink_matches(dest: Path, target: str) -> bool:
@@ -172,56 +170,40 @@ def merge_into(template: Path, dest: Path) -> None:
     print(f"✅ Merged {template} -> {dest}")
 
 
-def _append_missing(items: list, wanted: list[str]) -> None:
-    """Append each wanted string to items unless already present.
+def prune_rendered_exclusions(host_dir: Path) -> None:
+    """Remove render-owned with_env exclusions left by an earlier install.
 
-    Args:
-        items: List edited in place.
-        wanted: Strings to ensure are present, in order.
-    """
-    for value in wanted:
-        if value not in items:
-            items.append(value)
-
-
-def render_with_env_exclusions(host_dir: Path, agents_dir: Path, python: str | None) -> None:
-    """Render absolute with_env exclusions and write-denies into settings.local.json.
-
-    A cwd-relative excluded command lets an agent-written impostor run
-    unsandboxed after `cd`; absolute paths close that. Render-owned
-    excludedCommands lines are replaced on every run; other host entries stay.
+    The framework ships no `sandbox.excludedCommands`: a command chained
+    after any excluded entry runs unsandboxed. Lines rendered by a previous
+    install (matching RENDER_OWNED_RE) are therefore escapes and are removed;
+    every other key and entry, including host-owned exclusions and the
+    rendered write-denies, is left untouched. No file or nothing to prune
+    means no write.
 
     Args:
         host_dir: Host root holding `.claude/settings.local.json`.
-        agents_dir: Resolved `.agents` checkout (absolute).
-        python: Absolute path of `python3`, or None when none is on PATH.
 
     Raises:
         SystemExit: With BRIDGE_WRITE_DENIED when the write is refused.
     """
-    if python is None:
-        print(
-            "⚠️  No python3 on PATH: with_env exclusions not rendered; the agent has "
-            "no secret path and commands needing secrets are run by the human.",
-            file=sys.stderr,
-        )
-        return
-    allowlist = agents_dir / "config" / "with_env_allowlist.json"
-    wrapper = agents_dir / "scripts" / "with_env.py"
-    lines = [f"{python} -I {wrapper} {name}" for name in sorted(with_env.load_allowlist(allowlist))]
-    protected = [str(agents_dir / sub) for sub in PROTECTED_SUBDIRS]
     dest = host_dir / ".claude" / "settings.local.json"
-    data = json.loads(dest.read_text()) if dest.exists() else {}
-    sandbox = data.setdefault("sandbox", {})
-    kept = [c for c in sandbox.get("excludedCommands", []) if not RENDER_OWNED_RE.match(c)]
-    sandbox["excludedCommands"] = kept + lines
-    _append_missing(sandbox.setdefault("filesystem", {}).setdefault("denyWrite", []), protected)
-    _append_missing(
-        data.setdefault("permissions", {}).setdefault("deny", []),
-        [f"Edit(/{p}/**)" for p in protected],
-    )
+    if not dest.exists():
+        return
+    data = json.loads(dest.read_text())
+    sandbox = data.get("sandbox")
+    current = sandbox.get("excludedCommands") if isinstance(sandbox, dict) else None
+    if not isinstance(current, list):
+        return
+    kept = [c for c in current if not (isinstance(c, str) and RENDER_OWNED_RE.match(c))]
+    pruned = len(current) - len(kept)
+    if pruned == 0:
+        return
+    if kept:
+        sandbox["excludedCommands"] = kept
+    else:
+        del sandbox["excludedCommands"]
     _write_json(dest, data)
-    print(f"✅ Rendered {len(lines)} absolute with_env exclusion(s) -> {dest}")
+    print(f"✅ Pruned {pruned} rendered with_env exclusion(s) -> {dest}")
 
 
 def add_claude_import(import_line: str) -> None:
@@ -593,7 +575,7 @@ def install_host_claude_bridge(profile_dir: Path | None) -> int:
     merge_into(AGENTS_DIR / "claude" / "settings.hooks.json",
                HOST_DIR / ".claude" / "settings.json")
     merge_into(AGENTS_DIR / "claude" / "mcp.json", HOST_DIR / ".mcp.json")
-    render_with_env_exclusions(HOST_DIR, AGENTS_DIR, shutil.which("python3"))
+    prune_rendered_exclusions(HOST_DIR)
 
     add_claude_import("@.agents/agents.md")
     ensure_gitignore_entries()
