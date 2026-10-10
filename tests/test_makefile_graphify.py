@@ -35,3 +35,11 @@ def test_graphify_deep_runs_through_with_env() -> None:
         recipe.append(ln)
     joined = "\n".join(recipe)
     assert "python3 -I $(AGENTS_DIR)/scripts/with_env.py graphify-extract-deep" in joined
+
+
+def test_every_module_invocation_is_isolated() -> None:
+    """A `graphify/` folder in the cwd must not shadow the venv package (R2-4)."""
+    invocations = [ln for ln in _active_lines() if "-m graphify" in ln]
+    assert invocations, "no `-m graphify` invocation found"
+    offenders = [ln for ln in invocations if not re.search(r"\s-I\s+-m graphify\b", ln)]
+    assert offenders == []

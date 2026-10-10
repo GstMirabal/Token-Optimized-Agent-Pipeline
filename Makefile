@@ -13,7 +13,7 @@
 #     they keep the caller's CWD — that is the tree they are meant to inspect.
 
 AGENTS_DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
-GRAPHIFY := $(AGENTS_DIR)/venv_skillopt/bin/python -m graphify
+GRAPHIFY := $(AGENTS_DIR)/venv_skillopt/bin/python -I -m graphify
 PY_EXCLUDES := -not -path "*/.git/*" -not -path "*/node_modules/*" -not -path "*/venv_skillopt/*"
 
 # Prefer the framework venv when it exists (a local checkout, where pytest lives
@@ -41,7 +41,7 @@ graphify-update:
 # Deep semantic rebuild stays available as a manual escalation:
 #   make graphify-deep   # needs a provider key in .env
 graphify-rebuild:
-	$(AGENTS_DIR)/venv_skillopt/bin/python -m graphify update . --force
+	$(AGENTS_DIR)/venv_skillopt/bin/python -I -m graphify update . --force
 	python3 $(AGENTS_DIR)/scripts/graph_reconcile.py --root .
 
 # Semantic rebuild that needs a provider key from `.env`. It runs the named
