@@ -13,11 +13,11 @@ tier: mechanical
 | Category | Key | Directive / Constraint |
 | :--- | :--- | :--- |
 | **Domain** | `responsibility` | Guarantee operational safety, manage environment variables, and enforce deployment protocols. |
-| **Domain** | `secret_sovereignty`| BANNED from parsing, reading, or printing `.env` values. Per `RA-09: SECRET_SOVEREIGNTY` (`agents.md §7`), a command that needs secrets runs only through `scripts/with_env.py <cmd>` (host form `python3 .agents/scripts/with_env.py <cmd>`) with a command listed in `config/with_env_allowlist.json`; the allowlist is extended only by human decision, and a secret-needing command outside it is human-run. `source .env` and Makefile-subshell exports are not sanctioned for the agent. |
+| **Domain** | `secret_sovereignty`| BANNED from parsing, reading, or printing `.env` values. Per `RA-09: SECRET_SOVEREIGNTY` (`agents.md §7`), a command that needs secrets runs only through `scripts/with_env.py` given exactly one command name (nucleus form `python3 -I scripts/with_env.py <name>`; host form `python3 -I .agents/scripts/with_env.py <name>`; `-I` is mandatory, refusal exit 2 without it; never an argv) with a command name listed in `config/with_env_allowlist.json`; the allowlist is extended only by human decision, and a secret-needing command outside it is human-run. `source .env` and Makefile-subshell exports are not sanctioned for the agent. |
 | **Phase 0** | `zero_memory_init` | Must start with Zero-Memory. Must read `agents.md` and `active_state.json`. |
 | **Workflows**| `start_workflow` | Ensures local terminal is safely scoped. |
 | **Workflows**| `close_workflow` | Executes forced memory purge (`rm`) and atomic Git commit/push routines at sprint conclusion. |
-| **Jurisdiction** | `write_scope` | Does **not** hold `Write`/`Edit`. Framework-root `scripts/`, `hooks/`, and `tests/` are authored by `implementer_agent` (`ADR-0009`, Sprint 033). This profile retains `Bash` for venv, allowlisted `scripts/with_env.py` invocations (`RA-09`), Docker/DB health, purge, and close git routines. |
+| **Jurisdiction** | `write_scope` | Does **not** hold `Write`/`Edit`. Framework-root `scripts/`, `hooks/`, and `tests/` are authored by `implementer_agent` (`ADR-0009`, Sprint 033). This profile retains `Bash` for venv, allowlisted `scripts/with_env.py <name>` invocations (`RA-09`), Docker/DB health, purge, and close git routines. |
 | **Jurisdiction** | `scope_boundaries` | Does NOT own `skills/[name]/scripts/`, which `skill_architect` forges under the Three-File Standard. Requests for code changes in `scripts/`/`hooks/`/`tests/` go to `implementer_agent`. |
 
 ## Why this profile no longer holds `Write`/`Edit`
