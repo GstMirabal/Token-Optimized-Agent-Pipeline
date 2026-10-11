@@ -131,7 +131,7 @@ comentarios); no se añade `python-dotenv`.
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 41 (`U04` y `U12` omitidas; `U23`..`U29` de la Enmienda; `U30`..`U35` de la Enmienda 2; `U36`..`U41` de la Enmienda 3; `U42`, `U43` de la 3a; `U44`, `U45` de la 3b) | Count of rows in Work tables |
+| Work units | 45 (`U01`..`U45`; 43 live, `U04` y `U12` omitidas; `U22`..`U45` de las enmiendas) | `grep -o -E '^\| \`U[0-9]+\`' IMPLEMENTATION_PLAN.md` filas únicas (la fila de Verificación de `U34` se repite) |
 | Subagents dispatched | 19 units + 2 gates | `agent_assignment.md` |
 | Prior session ratio | **5.0 (umbral blando alcanzado)** — esta sesión de Planning: primer turno 23264, pico 116084 | `python3 scripts/session_cost.py --from-anchor --json` |
 
@@ -367,7 +367,7 @@ H1 fue la segunda etiqueta `remediation-regression` del sprint: el bloque "docum
 | **Plan commit at approval** | `abf2928` |
 | **Amendment (Gate 1 round 2)** | Section *Enmienda* approved by GstMirabal (chat, 2026-10-10), including the `§1 path_type` reading (absolute paths only in the untracked `.claude/settings.local.json`); amendment commit `80dac85` |
 | **Amendment 2 (Gate 1 round 3)** | Section *Enmienda 2* approved by GstMirabal (chat, 2026-10-10); amendment commit `409da6e` |
-| **Amendment 3 (scope cut)** | Option 1 chosen by GstMirabal in chat (2026-10-11) after the remediation lock; formalized in section *Enmienda 3*, commit `c47f450`; addendum *Enmienda 3a* (QA round 5) chosen in chat the same day, commit `dc8185b`, its Verification grep narrowed in `63b6c2b` (the original pattern also matched agent-run purity checks; the narrowed row was dry-run before the units ran); addendum *Enmienda 3b* (QA round 6 re-plan, `rules/qa_and_testing.md` §4) chosen in chat the same day |
+| **Amendment 3 (scope cut)** | Option 1 chosen by GstMirabal in chat (2026-10-11) after the remediation lock; formalized in section *Enmienda 3*, commit `c47f450`; addendum *Enmienda 3a* (QA round 5) chosen in chat the same day, commit `dc8185b`, its Verification grep narrowed in `63b6c2b` (the original pattern also matched agent-run purity checks; the narrowed row was dry-run before the units ran); addendum *Enmienda 3b* (QA round 6 re-plan, `rules/qa_and_testing.md` §4) chosen in chat the same day, commit `2f52524` |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an

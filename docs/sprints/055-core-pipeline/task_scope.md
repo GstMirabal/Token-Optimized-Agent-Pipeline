@@ -1,6 +1,6 @@
 # Task Scope — Sprint 055 (core-pipeline)
 
-Source: `docs/sprints/055-core-pipeline/IMPLEMENTATION_PLAN.md` (`## Work`, 19 units; amendments added `U22`..`U43`, see the plan) and
+Source: `docs/sprints/055-core-pipeline/IMPLEMENTATION_PLAN.md` (`## Work`, 19 units; amendments added `U22`..`U45`, see the plan) and
 `docs/sprints/055-core-pipeline/agent_assignment.md` (authoritative `Assignee`; it overrides
 nothing in the plan). Phase 4.3 of `workflows/pipeline_workflow.md`. Table shape mandated by
 `scripts/check_task_scope.py`.
@@ -23,7 +23,7 @@ or a `gate` profile.
 
 | Unit | Change | Basis |
 | :--- | :--- | :--- |
-| U02, U07, U13 | Effort `medium` -> `high` (model stays `sonnet`) | The three `high`-risk units: U02 is the secret-handling wrapper (Abort criterion 2 hangs on it), U07 changes the sandbox boundary every host inherits, U13 rewrites a constitutional rule. **Phase 4.3 proposal, not a `token_economy_agent` verdict** — `check_task_scope.py` enforces escalation only for mechanical profiles, so this is not script-required. Revert to `medium` if `token_economy_agent` declines. |
+| U02, U07, U13 | Effort `medium` -> `high` (model stays `sonnet`) | The three `high`-risk units: U02 is the secret-handling wrapper (Abort criterion 2 hangs on it), U07 changes the sandbox configuration every host inherits, U13 rewrites a constitutional rule. **Phase 4.3 proposal, not a `token_economy_agent` verdict** — `check_task_scope.py` enforces escalation only for mechanical profiles, so this is not script-required. Revert to `medium` if `token_economy_agent` declines. |
 
 ## Work
 
@@ -106,7 +106,7 @@ test files are mandatory companions of their `fix(`/`feat(` subject, not subject
 
 | # | Finding | Severity | Action |
 | :--- | :--- | :--- | :--- |
-| F1 | `jurisdictional_lock` / `no_interference`: no violation. One subject per row, no repeated file | none | None |
+| F1 | `jurisdictional_lock` / `no_interference`: no violation. The original rows have one subject each; amendment units revisit landed subjects only after the earlier unit landed (see the paragraph above) | none | None |
 | F2 | `code_craft.md §6`: the four `fix(` units (U04, U05, U06, U08) each name a paired test in Operation. `tests/test_install_permission.py` and `tests/test_makefile_graphify.py` are new files; `tests/test_merge_json.py` and `tests/test_session_start.py` are modified. U02 is `feat(` and its test is carried anyway | none | Each `fix(` commit must stage its test in the same commit; per Sprint 054 A02/A03, a `Repro:` trailer is mandatory on every `fix(` |
 | F3 | `RA-14`, U13 reach. The plan's cited targets: `agents.md §3 secret_sovereignty` covered by U13; `rules/LEGACY_RULE_CONCORDANCE.md` Rule 66 covered by U17; `workflows/pipeline_workflow.md` Phase 2 (line 16) covered by U14; **`rules/qa_and_testing.md:87` is covered by U10 only incidentally**: line 87 merely cites the name `RA-09 SECRET_SOVEREIGNTY` and needs no rewrite unless the name changes | low | U10 must re-read lines 85-87 and leave them if the name is unchanged; the `.env`/`.env.example` wording at line 85 must agree with the U07 `denyRead`/`allowRead` change (D4) |
 | F4 | **Gap: `agents/devops_agent.md:16` and `:20`** restate `RA-09` ("Must strictly use environment export commands", "`.env` export") and no unit touches them. After U13/U14 the profile still prescribes the export mechanism the sprint declares blocked (`S-3`). Same class as the `RA-14` precedent | medium | Add a unit (proposed `U20`, `agents/devops_agent.md`, `modify`, `agent_orchestrator`/`doc_orchestrator`, low) or record the exclusion in `SPRINT_LOG.md`. Not added here: the plan is the authority on Work rows and `agent_assignment.md` has no assignee for it |
