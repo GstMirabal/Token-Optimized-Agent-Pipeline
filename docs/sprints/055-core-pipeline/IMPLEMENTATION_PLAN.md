@@ -131,7 +131,7 @@ comentarios); no se añade `python-dotenv`.
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 41 (`U04` y `U12` omitidas; `U23`..`U29` de la Enmienda; `U30`..`U35` de la Enmienda 2; `U36`..`U41` de la Enmienda 3) | Count of rows in Work tables |
+| Work units | 41 (`U04` y `U12` omitidas; `U23`..`U29` de la Enmienda; `U30`..`U35` de la Enmienda 2; `U36`..`U41` de la Enmienda 3; `U42`, `U43` de la 3a) | Count of rows in Work tables |
 | Subagents dispatched | 19 units + 2 gates | `agent_assignment.md` |
 | Prior session ratio | **5.0 (umbral blando alcanzado)** — esta sesión de Planning: primer turno 23264, pico 116084 | `python3 scripts/session_cost.py --from-anchor --json` |
 
@@ -315,6 +315,26 @@ Orden: `U36`..`U40` en paralelo (ficheros distintos) → `U41` → QA Gate 1 ron
 | `grep -rn -i -e 'is the boundary' -e 'boundary is that' -e 'framework-level boundary' -e 'has no secret path' -e 'no autonomous secret path' agents.md agents rules workflows docs/standards config scripts/with_env.py Makefile` | sin salida, exit `1` |
 | `make verify` | exit `0` |
 
+
+### Enmienda 3a — QA Gate 1 ronda 5 (decisión del humano, 2026-10-11)
+
+Ronda 5 se trata como el primer gate sobre el alcance de *Enmienda 3*: el objeto rechazado (sus documentos nuevos y la mitigación de Q5) no existía en las rondas 1-4. No se vuelve a ejecutar `remediation_workflow.md`; decisión del humano.
+
+| ID | Decisión |
+| :--- | :--- |
+| `D17` | **G5-1**: ningún documento prescribe una comprobación previa con `git` antes de una receta de `.agents` con secretos. `git status`/`diff` ejecutan configuración del repositorio que el agente puede escribir (`core.fsmonitor` medido; filtros *clean* y drivers de diff sin medir). Se dice: la receta es escribible por el agente (Q5, abierto en `F-055-N1`) y no hay comprobación previa verificada hasta que Sprint 056 entregue la enumeración de `RA-19` |
+| `D18` | **G5-2**: `UPSTREAM_FINDINGS_FROM_HOSTS.md:1662` deja de decir que N1 y N3 están arreglados. **R5-1**: el MCP de GitHub no se presenta como ruta equivalente (`agents.md`, `CHANGELOG.md`, `workflows/deployment_workflow.md`). **R5-2**: la fila de hooks describe Q1 con la precisión de `F-055-N1`. **R5-4** se enruta a Sprint 056 en `SPRINT_LOG.md` |
+
+| # | File | Operation | Assignee | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| `U42` | `agents.md`, `agents/devops_agent.md`, `rules/project_topology.md`, `rules/graphify.md`, `Makefile` (comentario), `workflows/deployment_workflow.md`, `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify, un commit por fichero (`D17`, `D18`) | `rule_validator`, `agent_orchestrator`, `implementer_agent` (`Makefile`), `doc_orchestrator` (resto) | ⏳ |
+| `U43` | `CHANGELOG.md` | modify (`D17`, `D18`, SHAs) | `doc_orchestrator` | ⏳ |
+
+| Verification (enmienda 3a) | Expected |
+| :--- | :--- |
+| `grep -rn -e 'git -C .agents status' -e 'git -C .agents diff' agents.md agents rules workflows docs/standards Makefile` | sin salida, exit `1` |
+| `make verify` | exit `0` |
+
 ---
 
 ## Approval — `triple_lock` lock 1
@@ -326,7 +346,7 @@ Orden: `U36`..`U40` en paralelo (ficheros distintos) → `U41` → QA Gate 1 ron
 | **Plan commit at approval** | `abf2928` |
 | **Amendment (Gate 1 round 2)** | Section *Enmienda* approved by GstMirabal (chat, 2026-10-10), including the `§1 path_type` reading (absolute paths only in the untracked `.claude/settings.local.json`); amendment commit `80dac85` |
 | **Amendment 2 (Gate 1 round 3)** | Section *Enmienda 2* approved by GstMirabal (chat, 2026-10-10); amendment commit `409da6e` |
-| **Amendment 3 (scope cut)** | Option 1 chosen by GstMirabal in chat (2026-10-11) after the remediation lock; formalized in section *Enmienda 3* |
+| **Amendment 3 (scope cut)** | Option 1 chosen by GstMirabal in chat (2026-10-11) after the remediation lock; formalized in section *Enmienda 3*, commit `c47f450`; addendum *Enmienda 3a* (QA round 5) chosen in chat the same day |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an

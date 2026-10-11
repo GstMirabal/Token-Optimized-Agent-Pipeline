@@ -98,6 +98,8 @@ human-reported results into `SANDBOX_MEASUREMENT.md`. No correction unit
 | U39 | `Makefile` | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | U40 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | parallel | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | U41 | `CHANGELOG.md` | modify | last | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| U42 | seven files, one per commit | modify | parallel | `rule_validator` (`agents.md`), `agent_orchestrator` (`agents/devops_agent.md`), `implementer_agent` (`Makefile`), `doc_orchestrator` (rest) | N/A | `agents/*.md` |
+| U43 | `CHANGELOG.md` | modify | last | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 
 ## Disagreements with the plan
 
