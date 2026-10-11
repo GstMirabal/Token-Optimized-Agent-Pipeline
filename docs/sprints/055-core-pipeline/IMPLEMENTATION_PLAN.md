@@ -332,7 +332,7 @@ Ronda 5 se trata como el primer gate sobre el alcance de *Enmienda 3*: el objeto
 
 | Verification (enmienda 3a) | Expected |
 | :--- | :--- |
-| `grep -rn -e 'git -C .agents status' -e 'git -C .agents diff' agents.md agents rules workflows docs/standards Makefile` | sin salida, exit `1` |
+| `grep -rn -i -e 'human checks' -e 'after checking' -e 'no unexpected change' -e 'human inspects' agents.md agents rules workflows docs/standards Makefile` (las comprobaciones de pureza que ejecuta el agente con `git -C .agents status` dentro del sandbox no son la comprobación previa del humano y quedan fuera) | sin salida, exit `1` |
 | `make verify` | exit `0` |
 
 ---
