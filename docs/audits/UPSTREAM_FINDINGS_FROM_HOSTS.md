@@ -1659,7 +1659,7 @@ the measured store path.
 
 **Four new framework-class observations, noted in closure.** All come from
 `SANDBOX_MEASUREMENT.md` and are not part of `S-1`..`S-8`. The first two are not
-fixed by this sprint; `N1` and `N3` were found by QA Gate 1 and are fixed in it.
+fixed by this sprint; `N1` is closed for the template, the render and the published values; `N3` is only reduced by the `D13` denies, with residual vectors open in `F-055-N1`.
 
 | Observation | Measured fact | Where recorded |
 | :--- | :--- | :--- |
