@@ -6,10 +6,11 @@ Usage (nucleus): ``python3 -I scripts/with_env.py <name>``
 Usage (host):    ``python3 -I .agents/scripts/with_env.py <name>``
 
 These are the wrapper's own syntax. The wrapper is the HUMAN's path, run
-directly or through ``make graphify-deep``. The sandbox excludes nothing, so a
-sandboxed agent cannot use it (it fails on the ``.env`` deny) and must not add
-a ``sandbox.excludedCommands`` entry: any excluded entry lets a chained command
-run unsandboxed (Sprint 055 QA Gate 1 round 3 N1). The allowlist is nucleus-only.
+directly or through ``make graphify-deep``. There is no sanctioned agent path
+to it under the sandbox (it fails on the ``.env`` deny): the agent prepares the
+command and the human runs it. Nobody may add a ``sandbox.excludedCommands``
+entry: any excluded entry lets a chained command run unsandboxed (Sprint 055 QA
+Gate 1 round 3 N1). The allowlist is nucleus-only.
 
 ``<name>`` is a key of ``commands`` in ``config/with_env_allowlist.json``.
 Exactly one argument is accepted: the caller supplies a name, never an argv,
@@ -26,12 +27,14 @@ caller wrote.
 Security model: the wrapper itself is NOT a sandbox boundary. It reduces what a
 human-run command receives: the child environment is ``os.environ`` without any
 ``PYTHON*`` variable, plus the ``.env`` pairs, and allowlisted Python entries
-also run with ``-I``. The framework-level boundary is that nothing is excluded
-from the sandbox and that the trees hooks execute (``.agents/hooks``,
-``.agents/scripts``, ``.agents/config``) are write-denied
-(``claude/settings.hooks.json``; see the sandbox table in
-``rules/project_topology.md``). Every allowlist entry runs with secrets in its
-environment; ``pytest`` is not listed because it runs agent-written code.
+also run with ``-I``. The template's lack of sandbox exclusions and its
+write-denies on the trees hooks execute (``.agents/hooks``, ``.agents/scripts``,
+``.agents/config``; ``claude/settings.hooks.json``, sandbox table in
+``rules/project_topology.md``) reduce exposure but are NOT a boundary
+(``agents.md`` RA-19): known unsandboxed vectors remain open and are tracked in
+``docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md``. Every allowlist entry runs with
+secrets in its environment; ``pytest`` is not listed because it runs
+agent-written code.
 
 Output masking (``redact``) is NOT a security boundary: it only replaces exact
 copies of values of length >= 4 in the child's stdout and stderr. Encoded or
