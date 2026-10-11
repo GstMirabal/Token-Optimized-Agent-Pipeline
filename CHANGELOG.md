@@ -4,6 +4,8 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.38.0] - 2026-10-11
+
 ### Added
 - **Sprint 055 `sandbox-restrictions-and-secret-path`** — closes the host-reported sandbox friction `F-115-N2` (`S-1`..`S-8`, absorbing `F-114-N6`): measure each restriction in the nucleus's own sandbox, give the human a sanctioned secret wrapper, fix three defects the sandbox exposed, document the rest as a table. Measured in headless `claude -p` sessions on Claude Code CLI 2.1.119 (plan deviation `D1`, `SPRINT_LOG.md`). No sandbox exclusions are shipped and hook-executed trees are write-denied; this reduces exposure and is not a boundary (`agents.md` `RA-19`, `f8dc545`). Known unsandboxed entry points remain open as `F-055-N1`, routed to Sprint 056 (`f09e148`). #055
   - **Measurement** — `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` records command, exit and signature per case (`27210b1` sections 1-5, `43e4c5d` section 6); sections 7-8 measured the exclusion designs this sprint then retired (`660d278`, `2a1629d`); section 9 measured `N1` and `N3` (`422463c`). Plan amended in `80dac85` (approved `d1c0b49`) and `409da6e` (approved `dfaa81a`).
