@@ -50,9 +50,9 @@ graphify-rebuild:
 # exact copies of its values in the output (best effort, not a security
 # boundary). The earlier `graphify . --mode deep` form was not a valid
 # graphifyy 0.8.30 subcommand; the CLI is `graphify extract <path> --mode deep`.
-# Inside the Claude Code sandbox a make target is NOT matched by
-# `sandbox.excludedCommands`, so the agent invokes the with_env.py command
-# directly (rules/project_topology.md); this target is for an unsandboxed shell.
+# This target is the human's form. Under the sandbox the agent prepares the
+# command and the human runs it, after checking `git -C .agents status` because
+# the recipe is a file the agent can edit (Q5, docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md).
 graphify-deep:
 	python3 -I $(AGENTS_DIR)/scripts/with_env.py graphify-extract-deep
 
