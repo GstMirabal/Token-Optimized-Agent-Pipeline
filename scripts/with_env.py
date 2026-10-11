@@ -28,13 +28,17 @@ Security model: the wrapper itself is NOT a sandbox boundary. It reduces what a
 human-run command receives: the child environment is ``os.environ`` without any
 ``PYTHON*`` variable, plus the ``.env`` pairs, and allowlisted Python entries
 also run with ``-I``. The template's lack of sandbox exclusions and its
-write-denies on the trees hooks execute (``.agents/hooks``, ``.agents/scripts``,
-``.agents/config``; ``claude/settings.hooks.json``, sandbox table in
+write-denies on the six trees ``.agents/{hooks,scripts,config,skills,claude,
+venv_skillopt}`` (``claude/settings.hooks.json``, sandbox table in
 ``rules/project_topology.md``) reduce exposure but are NOT a boundary
 (``agents.md`` RA-19): known unsandboxed vectors remain open and are tracked in
-``docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md``. Every allowlist entry runs with
-secrets in its environment; ``pytest`` is not listed because it runs
-agent-written code.
+``docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md``. The wrapper covers ONLY its
+three allowlisted names (``graphify-extract``, ``graphify-extract-deep``,
+``graphify-label``); any other command that needs a secret is run by the human
+directly. Every allowlist entry runs with secrets in its environment;
+``pytest`` is not listed because it runs agent-written code. See the residual
+risk row ("After a sandboxed agent session") in ``rules/project_topology.md``
+section 4.
 
 Output masking (``redact``) is NOT a security boundary: it only replaces exact
 copies of values of length >= 4 in the child's stdout and stderr. Encoded or
