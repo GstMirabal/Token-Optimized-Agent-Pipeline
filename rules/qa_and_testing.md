@@ -112,4 +112,6 @@ claims a browser case as passed without pasted output.
 | 3 | Agent | Record the pasted output verbatim as evidence in the sprint log row of that case, then compare it with the expected result | Row marked matching or differing; a differing row is a failure routed to `workflows/remediation_workflow.md` |
 | 4 | Agent | Mark the unit blocked while any case has no pasted output | No browser case reported as passed without evidence |
 
+Step 2 runs agent-written commands in the human's shell with the human's full environment: see the "After a sandboxed agent session" row in `rules/project_topology.md` section 4.
+
 Redact any secret value in the pasted output before recording it (`RA-09`).
