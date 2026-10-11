@@ -100,6 +100,8 @@ human-reported results into `SANDBOX_MEASUREMENT.md`. No correction unit
 | U41 | `CHANGELOG.md` | modify | last | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | U42 | seven files, one per commit | modify | parallel | `rule_validator` (`agents.md`), `agent_orchestrator` (`agents/devops_agent.md`), `implementer_agent` (`Makefile`), `doc_orchestrator` (rest) | N/A | `agents/*.md` |
 | U43 | `CHANGELOG.md` | modify | last | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| U44 | docs set, one per commit | modify | parallel by file | `rule_validator` (`agents.md`), `implementer_agent` (`scripts/`), `doc_orchestrator` (rest) | N/A | `agents/*.md` |
+| U45 | `CHANGELOG.md` | modify | last | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 
 ## Disagreements with the plan
 

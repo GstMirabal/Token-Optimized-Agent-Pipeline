@@ -131,7 +131,7 @@ comentarios); no se añade `python-dotenv`.
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 41 (`U04` y `U12` omitidas; `U23`..`U29` de la Enmienda; `U30`..`U35` de la Enmienda 2; `U36`..`U41` de la Enmienda 3; `U42`, `U43` de la 3a) | Count of rows in Work tables |
+| Work units | 41 (`U04` y `U12` omitidas; `U23`..`U29` de la Enmienda; `U30`..`U35` de la Enmienda 2; `U36`..`U41` de la Enmienda 3; `U42`, `U43` de la 3a; `U44`, `U45` de la 3b) | Count of rows in Work tables |
 | Subagents dispatched | 19 units + 2 gates | `agent_assignment.md` |
 | Prior session ratio | **5.0 (umbral blando alcanzado)** — esta sesión de Planning: primer turno 23264, pico 116084 | `python3 scripts/session_cost.py --from-anchor --json` |
 
@@ -335,6 +335,27 @@ Ronda 5 se trata como el primer gate sobre el alcance de *Enmienda 3*: el objeto
 | `grep -rn -i -e 'human checks' -e 'after checking' -e 'no unexpected change' -e 'human inspects' agents.md agents rules workflows docs/standards Makefile` (las comprobaciones de pureza que ejecuta el agente con `git -C .agents status` dentro del sandbox no son la comprobación previa del humano y quedan fuera) | sin salida, exit `1` |
 | `make verify` | exit `0` |
 
+
+### Enmienda 3b — replanificación tras QA Gate 1 ronda 6 (decisión del humano, 2026-10-11)
+
+H1 fue la segunda etiqueta `remediation-regression` del sprint: el bloque "documentación de rutas de secretos" se detuvo y se replanificó con el humano (`rules/qa_and_testing.md` §4). Diagnóstico: tras una sesión del agente, toda operación sin sandbox en el checkout del host (un `git` del humano obedece un `core.fsmonitor` plantado, `gh` ejecuta `git status`, las recetas de `make`, el código escrito por el agente) puede ejecutar contenido que el agente pudo escribir; cualquier procedimiento recomendado hereda esos vectores.
+
+| ID | Decisión |
+| :--- | :--- |
+| `D19` | **Un único aviso canónico, cero procedimientos.** Una fila de la tabla de sandbox de `rules/project_topology.md` dice: después de una sesión del agente con sandbox, cualquier operación sin sandbox en el checkout del host (`git`, `gh`, recetas de `make`, ejecutar código escrito por el agente) puede ejecutar contenido que el agente pudo escribir (`F-055-N1`, incluido el `git` del humano vía `core.fsmonitor`); ningún procedimiento está verificado como seguro. `agents.md RA-09` la referencia; ningún otro documento la repite ni recomienda un procedimiento o ruta con etiqueta de seguridad ("hardened", "safe", comprobación previa, "equal route") |
+| `D20` | **H2 / R6-4**: `with_env.py` solo cubre sus tres nombres de graphify; cualquier otro comando con secreto lo ejecuta el humano directamente. `workflows/pipeline_workflow.md` y `README_TEMPLATE.md` dejan de afirmar que todo comando con secreto pasa por el wrapper |
+| `D21` | Registros de la ronda 6: R6-1 (fila S-5 de `UPSTREAM_FINDINGS_FROM_HOSTS.md`), R6-2 (Q2 de `F-055-N1` cubre también el `git` del humano en la raíz del host), R6-3 (`rules/qa_and_testing.md` §6 y la fila S-4 referencian el aviso), R6-8 (docstring de `with_env.py`). R6-5, R6-6 y R6-7 se corrigen en los artefactos del sprint con esta enmienda. `CHANGELOG.md:33` "`with_env.py` hardened" pasa a una formulación sin etiqueta |
+
+| # | File | Operation | Assignee | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| `U44` | `rules/project_topology.md`, `agents.md`, `rules/graphify.md`, `workflows/pipeline_workflow.md`, `docs/standards/templates/README_TEMPLATE.md`, `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md`, `rules/qa_and_testing.md`, `scripts/with_env.py` (docstring), y cualquier otro fichero que el barrido de `D19` encuentre | modify, un commit por fichero (`D19`..`D21`) | `doc_orchestrator`, `rule_validator` (`agents.md`), `implementer_agent` (`scripts/`) | ⏳ |
+| `U45` | `CHANGELOG.md` | modify (`D19`..`D21`, SHAs) | `doc_orchestrator` | ⏳ |
+
+| Verification (enmienda 3b) | Expected |
+| :--- | :--- |
+| `grep -rn -i -e 'hardened' -e 'equal route' -e 'safe route' -e 'verified safe' -e 'human checks' -e 'after checking' agents.md agents rules workflows docs/standards config scripts/with_env.py Makefile` (excluye `agents/devops_agent.md` "safely scoped", que describe el terminal) | solo la frase del aviso canónico "no procedure is verified safe" en `rules/project_topology.md`, o sin salida |
+| `make verify` | exit `0` |
+
 ---
 
 ## Approval — `triple_lock` lock 1
@@ -346,7 +367,7 @@ Ronda 5 se trata como el primer gate sobre el alcance de *Enmienda 3*: el objeto
 | **Plan commit at approval** | `abf2928` |
 | **Amendment (Gate 1 round 2)** | Section *Enmienda* approved by GstMirabal (chat, 2026-10-10), including the `§1 path_type` reading (absolute paths only in the untracked `.claude/settings.local.json`); amendment commit `80dac85` |
 | **Amendment 2 (Gate 1 round 3)** | Section *Enmienda 2* approved by GstMirabal (chat, 2026-10-10); amendment commit `409da6e` |
-| **Amendment 3 (scope cut)** | Option 1 chosen by GstMirabal in chat (2026-10-11) after the remediation lock; formalized in section *Enmienda 3*, commit `c47f450`; addendum *Enmienda 3a* (QA round 5) chosen in chat the same day |
+| **Amendment 3 (scope cut)** | Option 1 chosen by GstMirabal in chat (2026-10-11) after the remediation lock; formalized in section *Enmienda 3*, commit `c47f450`; addendum *Enmienda 3a* (QA round 5) chosen in chat the same day, commit `dc8185b`, its Verification grep narrowed in `63b6c2b` (the original pattern also matched agent-run purity checks; the narrowed row was dry-run before the units ran); addendum *Enmienda 3b* (QA round 6 re-plan, `rules/qa_and_testing.md` §4) chosen in chat the same day |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an

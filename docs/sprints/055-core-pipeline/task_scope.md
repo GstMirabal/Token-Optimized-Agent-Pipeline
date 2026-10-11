@@ -1,6 +1,6 @@
 # Task Scope — Sprint 055 (core-pipeline)
 
-Source: `docs/sprints/055-core-pipeline/IMPLEMENTATION_PLAN.md` (`## Work`, 19 units) and
+Source: `docs/sprints/055-core-pipeline/IMPLEMENTATION_PLAN.md` (`## Work`, 19 units; amendments added `U22`..`U43`, see the plan) and
 `docs/sprints/055-core-pipeline/agent_assignment.md` (authoritative `Assignee`; it overrides
 nothing in the plan). Phase 4.3 of `workflows/pipeline_workflow.md`. Table shape mandated by
 `scripts/check_task_scope.py`.
@@ -72,6 +72,8 @@ or a `gate` profile.
 | U41 | `CHANGELOG.md` | modify (headline and Security per D14) | low | `doc_orchestrator` | sonnet | low | ✅ 584e003 |
 | U42 | seven files (plan *Enmienda 3a* U42), one commit per file | modify (D17 no git pre-check; D18 G5-2, R5-1, R5-2) | low | `rule_validator` / `agent_orchestrator` / `implementer_agent` / `doc_orchestrator` | sonnet | low | ✅ caa546f..5af9fea, de35d1e |
 | U43 | `CHANGELOG.md` | modify (D17, D18) | low | `doc_orchestrator` | sonnet | low | ✅ b508948 |
+| U44 | docs set (plan *Enmienda 3b* U44), one commit per file | modify (D19 single warning, zero procedures; D20 with_env scope; D21 R6 records) | medium | `doc_orchestrator` / `rule_validator` / `implementer_agent` | sonnet | medium | ⏳ |
+| U45 | `CHANGELOG.md` | modify (D19-D21) | low | `doc_orchestrator` | sonnet | low | ⏳ |
 
 Note 1 (U12): `check_task_scope.py` reads only `File`, `Operation`, `Risk`, `Assignee`,
 `Model`, `Effort`; it does not parse `Status`, so the row is kept with an Operation that
@@ -92,8 +94,11 @@ If the human rules the file native, the row reverts to `modify` and the key list
 
 ## Same-subject check (`no_interference`)
 
-All 18 live rows name distinct structural subjects; no file appears twice, so no same-subject
-sequence exists and no two rows can collide. U12 is omitted and claims nothing. Companion
+The original 18 live rows name distinct structural subjects. The amendment units revisit
+subjects already landed (`scripts/install.py`, `scripts/merge_json.py`, `claude/settings.hooks.json`,
+`Makefile`, `agents.md` and the docs set); each ran only after the earlier unit on the same subject
+had landed, so no two in-progress rows collided (`jurisdictional_lock` caps concurrent claims, not
+lifetime touches). U04 and U12 are omitted and claim nothing. Companion
 test files are mandatory companions of their `fix(`/`feat(` subject, not subjects
 (`jurisdictional_lock`).
 
