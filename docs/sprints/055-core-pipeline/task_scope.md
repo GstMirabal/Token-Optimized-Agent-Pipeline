@@ -70,8 +70,8 @@ or a `gate` profile.
 | U39 | `Makefile` | modify (comment, D16 / Q6) | low | `implementer_agent` | sonnet | low | ✅ 52c6118 |
 | U40 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify (D15 open findings; N3 observation wording) | low | `doc_orchestrator` | sonnet | low | ✅ f09e148 |
 | U41 | `CHANGELOG.md` | modify (headline and Security per D14) | low | `doc_orchestrator` | sonnet | low | ✅ 584e003 |
-| U42 | seven files (plan *Enmienda 3a* U42), one commit per file | modify (D17 no git pre-check; D18 G5-2, R5-1, R5-2) | low | `rule_validator` / `agent_orchestrator` / `implementer_agent` / `doc_orchestrator` | sonnet | low | ⏳ |
-| U43 | `CHANGELOG.md` | modify (D17, D18) | low | `doc_orchestrator` | sonnet | low | ⏳ |
+| U42 | seven files (plan *Enmienda 3a* U42), one commit per file | modify (D17 no git pre-check; D18 G5-2, R5-1, R5-2) | low | `rule_validator` / `agent_orchestrator` / `implementer_agent` / `doc_orchestrator` | sonnet | low | ✅ caa546f..5af9fea, de35d1e |
+| U43 | `CHANGELOG.md` | modify (D17, D18) | low | `doc_orchestrator` | sonnet | low | ✅ b508948 |
 
 Note 1 (U12): `check_task_scope.py` reads only `File`, `Operation`, `Risk`, `Assignee`,
 `Model`, `Effort`; it does not parse `Status`, so the row is kept with an Operation that

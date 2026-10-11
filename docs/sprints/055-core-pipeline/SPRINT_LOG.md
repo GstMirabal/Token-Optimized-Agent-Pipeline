@@ -96,6 +96,7 @@ Closing the session state and certifying traceability.
 - Routed to Sprint 056 (D15, testifying records of round 4): Q8 host-added `excludedCommands` kept silently by `install.py`; Q9 (= N6) `RENDER_OWNED_RE` misses host paths with spaces; Q10 type hints/docstrings in `tests/test_install_with_env_render.py`, missing `Edit(/.agents/venv_skillopt/**)` pin in `tests/test_template_sandbox.py`, non-dict `settings.local.json` crash in `prune_rendered_exclusions`.
 - Done *Enmienda 3*: U36 `8fd097f`, U38 `485dc39`, U37 `e48c621`, U38 `1efc190`, `dc72d78`, `e40c3e0`, `6796e92`, U39 `52c6118`, U40 `f09e148` (F-055-N1 open, routed to Sprint 056), U41 `584e003`. Amendment 3 Verification: boundary-claim grep exit 1 (no match); `make verify` 0.
 - Done QA Gate 1 round 5: REJECTED (G5-1 instructing, G5-2 charter). Human decisions 2026-10-11: treat round 5 as the first gate on the Amendment 3 scope (remediation not re-run); no git pre-check is prescribed for Q5 (D17). Plan *Enmienda 3a* (D17, D18; U42, U43). R5-4 (`branch_sovereignty.py`, `ci_gate.py`, `session_probe.py` call `gh` from agent-driven steps) routed to Sprint 056. R5-5 fixed in the plan approval table.
-- Then: U42; U43; fresh QA Gate 1 round 6; Tester Gate 2; Phase 8.
+- Done *Enmienda 3a*: U42 `caa546f` agents.md, `99001b7` devops_agent, `a18bb53` project_topology, `a910f4c` graphify.md, `e386ff7` Makefile, `3db5ecb` deployment_workflow, `5af9fea` UPSTREAM_FINDINGS (G5-2), `de35d1e` repository_hardening_workflow (R5-1, found by the RA-14 sweep); U43 `b508948`. Verification 3a grep exit 1; `make verify` 0.
+- Then: fresh QA Gate 1 round 6; Tester Gate 2; Phase 8.
 
 *Certified under conventional commit standard: feat(scope): message #055*
