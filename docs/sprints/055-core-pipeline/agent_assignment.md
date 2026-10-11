@@ -92,6 +92,12 @@ human-reported results into `SANDBOX_MEASUREMENT.md`. No correction unit
 | U33 | `tests/test_template_sandbox.py` | modify | parallel with U30 | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | U34 | `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` | measure | after U31 | principal (headless `claude -p`) | N/A | — |
 | U35 | twelve files, one per commit | modify | last | `rule_validator` (`agents.md`), `agent_orchestrator` (`agents/devops_agent.md`), `implementer_agent` (`config/`, `scripts/`), `doc_orchestrator` (rest) | N/A | `agents/*.md` |
+| U36 | `agents.md` | modify | parallel | `rule_validator` | N/A | `agents/rule_validator.md` |
+| U37 | `rules/project_topology.md` | modify | parallel | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| U38 | five files, one per commit | modify | parallel | `doc_orchestrator` (`rules/graphify.md`, `README_TEMPLATE.md`), `agent_orchestrator` (`agents/devops_agent.md`), `implementer_agent` (`config/`, `scripts/`) | N/A | `agents/*.md` |
+| U39 | `Makefile` | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| U40 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | parallel | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| U41 | `CHANGELOG.md` | modify | last | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 
 ## Disagreements with the plan
 

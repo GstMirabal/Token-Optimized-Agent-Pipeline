@@ -131,7 +131,7 @@ comentarios); no se añade `python-dotenv`.
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 35 (`U04` y `U12` omitidas; `U23`..`U29` de la Enmienda; `U30`..`U35` de la Enmienda 2) | Count of rows in Work tables |
+| Work units | 41 (`U04` y `U12` omitidas; `U23`..`U29` de la Enmienda; `U30`..`U35` de la Enmienda 2; `U36`..`U41` de la Enmienda 3) | Count of rows in Work tables |
 | Subagents dispatched | 19 units + 2 gates | `agent_assignment.md` |
 | Prior session ratio | **5.0 (umbral blando alcanzado)** — esta sesión de Planning: primer turno 23264, pico 116084 | `python3 scripts/session_cost.py --from-anchor --json` |
 
@@ -289,6 +289,34 @@ Las filas de Verification de la *Enmienda* que esperaban líneas renderizadas qu
 
 ---
 
+## Enmienda 3 — recorte de alcance tras la remediación (decisión del humano, 2026-10-11)
+
+Origen: QA Gate 1 ronda 4 (`REJECTED`, `charter`; Q1-Q6) fue el cuarto rechazo consecutivo; `remediation_workflow.md` se ejecutó (Fases 1-3, `SPRINT_LOG.md`), produjo `RA-19` (`f8dc545`) y bloqueó la sesión. El humano elige la opción 1: recortar el alcance y cerrar.
+
+| ID | Decisión | Elegida sobre | Razón |
+| :--- | :--- | :--- | :--- |
+| `D14` | El sprint **no** afirma ninguna frontera de secretos para el agente con sandbox. Toda la documentación usa la redacción por defecto de `RA-19`: no hay exclusiones y los `denyWrite` de `D13` **reducen la exposición; no son una frontera**. Se dice "sin vía sancionada" para secretos y `gh`, nunca "sin vía" | Cerrar Q1-Q5 en este sprint; abortar | Q1-Q5 son vectores fuera del sandbox (hooks que importan desde la raíz escribible de `.agents`, `core.fsmonitor` en `.git/modules/.agents/config`, lanzadores MCP, `hooks:` en subagentes, la receta del `Makefile`); varios son anteriores al sprint y su cierre exige la enumeración completa de `RA-19`, que es trabajo de otro sprint |
+| `D15` | Q1-Q5, Q7 y Q11 se registran como hallazgos framework-class abiertos en `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md`, enrutados a Sprint 056, con la enumeración de `RA-19` como entregable. Q8, Q9 (= N6) y Q10 se registran en `SPRINT_LOG.md` como residuo enrutado a Sprint 056 | Dejarlos solo en el veredicto | El boot cuenta los hallazgos abiertos de ese fichero; así el siguiente sprint los ve al arrancar |
+| `D16` | Q6: el comentario de `Makefile:51-55` deja de decir que el agente invoca `with_env.py` | — | Contradice `RA-09` y `D12` |
+
+| # | File | Operation | Risk | Assignee (proposed) | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `U36` | `agents.md` | modify — `RA-09` con la redacción de `D14`; nombra Q1-Q5 como vectores conocidos abiertos y apunta a `UPSTREAM_FINDINGS_FROM_HOSTS.md` | medium | `rule_validator` | ⏳ |
+| `U37` | `rules/project_topology.md` | modify — filas de la tabla de sandbox con la redacción de `D14`; la fila de hooks (`N3`) enumera los vectores abiertos Q1-Q5 y su enrutado | medium | `doc_orchestrator` | ⏳ |
+| `U38` | `rules/graphify.md`, `agents/devops_agent.md`, `docs/standards/templates/README_TEMPLATE.md`, `config/with_env_allowlist.json` (`_comment`), `scripts/with_env.py` (docstring) | modify, un commit por fichero — redacción de `D14` | low | `doc_orchestrator`, `agent_orchestrator` (`agents/`), `implementer_agent` (`config/`, `scripts/`) | ⏳ |
+| `U39` | `Makefile` | modify — comentario de `D16` | low | `implementer_agent` | ⏳ |
+| `U40` | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify — `D15`; la observación `N3` deja de decir que el riesgo está cerrado | low | `doc_orchestrator` | ⏳ |
+| `U41` | `CHANGELOG.md` | modify — titular y `Security` con la redacción de `D14`; Q1-Q5 enrutados | low | `doc_orchestrator` | ⏳ |
+
+Orden: `U36`..`U40` en paralelo (ficheros distintos) → `U41` → QA Gate 1 ronda 5 (agente nuevo) → Tester Gate 2 → Fase 8.
+
+| Verification (enmienda 3) | Expected |
+| :--- | :--- |
+| `grep -rn -i -e 'is the boundary' -e 'boundary is that' -e 'framework-level boundary' -e 'has no secret path' -e 'no autonomous secret path' agents.md agents rules workflows docs/standards config scripts/with_env.py Makefile` | sin salida, exit `1` |
+| `make verify` | exit `0` |
+
+---
+
 ## Approval — `triple_lock` lock 1
 
 | Field | Value |
@@ -298,6 +326,7 @@ Las filas de Verification de la *Enmienda* que esperaban líneas renderizadas qu
 | **Plan commit at approval** | `abf2928` |
 | **Amendment (Gate 1 round 2)** | Section *Enmienda* approved by GstMirabal (chat, 2026-10-10), including the `§1 path_type` reading (absolute paths only in the untracked `.claude/settings.local.json`); amendment commit `80dac85` |
 | **Amendment 2 (Gate 1 round 3)** | Section *Enmienda 2* approved by GstMirabal (chat, 2026-10-10); amendment commit `409da6e` |
+| **Amendment 3 (scope cut)** | Option 1 chosen by GstMirabal in chat (2026-10-11) after the remediation lock; formalized in section *Enmienda 3* |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an
