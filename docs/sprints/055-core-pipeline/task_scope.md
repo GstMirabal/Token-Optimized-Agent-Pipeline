@@ -1,0 +1,121 @@
+# Task Scope — Sprint 055 (core-pipeline)
+
+Source: `docs/sprints/055-core-pipeline/IMPLEMENTATION_PLAN.md` (`## Work`, 19 units; amendments added `U22`..`U45`, see the plan) and
+`docs/sprints/055-core-pipeline/agent_assignment.md` (authoritative `Assignee`; it overrides
+nothing in the plan). Phase 4.3 of `workflows/pipeline_workflow.md`. Table shape mandated by
+`scripts/check_task_scope.py`.
+
+## Model/Effort derivation (transcribed, not invented)
+
+`session_tool` is `claude-code` (`docs/active_state.json`), so the `make cursor-tiers`
+obligation does not apply. Sprint id `55 >= 28` (`scripts/check_task_scope.py:38`
+`MODEL_FROM_SPRINT`), so Model/Effort are mandatory. Source: the `claude_code` column of
+`config/model_tiers.json`, matched by profile name against `tiers.*.profiles`.
+
+| Assignee (profile) | Tier bucket | Model | Effort |
+| :--- | :--- | :--- | :--- |
+| `implementer_agent`, `doc_orchestrator`, `rule_validator`, `skill_architect` | `author` | `sonnet` | `medium` |
+
+No assignee is a `mechanical` profile (`MECHANICAL_PROFILES` high-risk check not triggered)
+or a `gate` profile.
+
+## Declared escalations
+
+| Unit | Change | Basis |
+| :--- | :--- | :--- |
+| U02, U07, U13 | Effort `medium` -> `high` (model stays `sonnet`) | The three `high`-risk units: U02 is the secret-handling wrapper (Abort criterion 2 hangs on it), U07 changes the sandbox configuration every host inherits, U13 rewrites a constitutional rule. **Phase 4.3 proposal, not a `token_economy_agent` verdict** — `check_task_scope.py` enforces escalation only for mechanical profiles, so this is not script-required. Revert to `medium` if `token_economy_agent` declines. |
+
+## Work
+
+| # | File | Operation | Risk | Assignee | Model | Effort | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| U01 | `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` | create (transcribe human-reported matrix: command, exit, error signature per row; the human runs the commands in a `claude --settings claude/settings.hooks.json` session) | medium | `doc_orchestrator` | sonnet | medium | ✅ 27210b1 |
+| U02 | `scripts/with_env.py` | create: `feat(` D2/D3 wrapper; companion `tests/test_with_env.py` (allowlist, exit `2` off-allowlist, redaction, missing `.env` explicit error, `invoked_by:` docstring) | high | `implementer_agent` | sonnet | high | ✅ 6a090a4 |
+| U03 | `config/with_env_allowlist.json` | create (only `graphify`, D3) | medium | `implementer_agent` | sonnet | medium | ✅ 25dda50 |
+| U04 | `scripts/merge_json.py` | OMITTED: measured alternative made it unnecessary — keeping `./.env.*` in `denyRead` and adding a narrower `allowRead` for `.env.example`/`.env.sample`/`.env.template` was confirmed in a sandboxed session (`.env` and `.env.local` denied, `.env.example` readable), so no template value is retired and nothing needs pruning | medium | `implementer_agent` | sonnet | medium | ⏳ omitted |
+| U05 | `scripts/install.py` | modify: `fix(` D5 write probe, no traceback, host-form human command; companion `tests/test_install_permission.py` | medium | `implementer_agent` | sonnet | medium | ✅ f4986b5 |
+| U06 | `scripts/session_start.py` | modify: `fix(` bridge advisory by mode; companion `tests/test_session_start.py` | low | `implementer_agent` | sonnet | medium | ✅ 6773f34 |
+| U07 | `claude/settings.hooks.json` | modify (`denyRead`/`allowRead` D4, wrapper in `excludedCommands` D2, forms from U01 per D7) | high | `implementer_agent` | sonnet | high | ✅ 3ad277f |
+| U08 | `Makefile` | modify: `fix(` D9 `-m graphify` in `graphify-update`, new `graphify-deep` via `with_env.py`; companion `tests/test_makefile_graphify.py` | low | `implementer_agent` | sonnet | medium | ✅ ddd5bc7 |
+| U09 | `rules/project_topology.md` | modify (sandbox table, D8) | medium | `doc_orchestrator` | sonnet | medium | ✅ c716b7f |
+| U10 | `rules/qa_and_testing.md` | modify (browser verification under sandbox, branch A or B, D6) | medium | `doc_orchestrator` | sonnet | medium | ✅ d6b2649 |
+| U11 | `rules/graphify.md` | modify (key via `with_env.py`, `S-4`, measured 7-key list; carries the correction the omitted U12 would have made) | low | `doc_orchestrator` | sonnet | medium | ✅ f53b7fe |
+| U12 | `skills/graphify/SKILL.md` | OMITTED: judged vendored upstream material (`skill_assignment.md` §6; `rules/skills_and_integrations.md §3`); no file is touched, see note 1 below | low | `skill_architect` | sonnet | medium | ⏳ omitted |
+| U13 | `agents.md` | modify (`RA-09` and `§3 secret_sovereignty` name `with_env.py` as the sanctioned path, D2) | high | `rule_validator` | sonnet | high | ✅ e589f19 |
+| U14 | `workflows/pipeline_workflow.md` | modify (Phase 2 row: "export `.env`" -> `with_env.py`) | low | `doc_orchestrator` | sonnet | medium | ✅ 024ecd1 |
+| U15 | `workflows/deployment_workflow.md` | modify (unsandboxed steps reference the U09 table, `S-5`) | low | `doc_orchestrator` | sonnet | medium | ✅ 664c931 |
+| U16 | `workflows/repository_hardening_workflow.md` | modify (`gh` calls reference the U09 table, `S-5`) | low | `doc_orchestrator` | sonnet | medium | ✅ 30d0a50 |
+| U17 | `rules/LEGACY_RULE_CONCORDANCE.md` | modify (`Rule 66` row follows new `RA-09` text, `RA-14`) | low | `doc_orchestrator` | sonnet | medium | ✅ no change needed (Rule 66 row stays accurate after U13) |
+| U18 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify (close `F-115-N2`, row -> SHA, reproduced in U01) | low | `doc_orchestrator` | sonnet | medium | ✅ c8a4f8b |
+| U19 | `CHANGELOG.md` | modify (`[Unreleased]` entry naming each commit by short SHA) | low | `doc_orchestrator` | sonnet | medium | ✅ 739a750 |
+| U20 | `agents/devops_agent.md` | modify (`secret_sovereignty` row and `.env` export wording point to `scripts/with_env.py`; RA-14 propagation of U13) | low | `agent_orchestrator` | sonnet | medium | ✅ 056a5e3 |
+| U21 | `README.md` | modify (At a Glance counts: 44 scripts, 9 config registries after U02/U03; README drift check in `make verify`) | low | `doc_orchestrator` | sonnet | medium | ✅ e5532cc |
+| U22 | `scripts/merge_json.py` | modify (`feat(`: explicit `RETIRED_VALUES` table, empty today, pruned by the merge so a template entry the framework published and later retired leaves installed hosts; exact strings only, never host-added entries; pattern of `prune_deprecated_hooks`; paired `tests/test_merge_json.py`) | medium | `implementer_agent` | sonnet | medium | ✅ 90e4a16 |
+| U25 | `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` | measure before U23 (D1): absolute path syntax for `denyWrite`/`permissions.deny`, `settings.local.json` `excludedCommands` merge, absolute line reads the key, R2-1 impostor, parent-directory rename (plan Enmienda) | medium | principal | — | — | ✅ section 7 |
+| U23 | `scripts/install.py` | modify (`fix(`: render D2-R into `.claude/settings.local.json` by mode and U25 result; paired `tests/test_install_with_env_render.py`) | high | `implementer_agent` | sonnet | high | ✅ 55911a1 |
+| U24 | `claude/settings.hooks.json` | modify (remove the three relative `with_env.py` lines and `gh pr create *`, `gh release create *`; D2-R, D10) | high | `implementer_agent` | sonnet | medium | ✅ b5b3088 |
+| U26 | `scripts/merge_json.py` | modify (`fix(`: the five D11 values in `RETIRED_VALUES`, R2-8 in the comment; paired `tests/test_merge_json.py`) | medium | `implementer_agent` | sonnet | medium | ✅ e9dba4e |
+| U27 | `tests/test_template_sandbox.py` | create (R2-9: template carries no relative `with_env.py` line and no `gh * create`; `denyWrite` covers wrapper, allowlist, venv, `.env`) | low | `implementer_agent` | sonnet | medium | ✅ 17c67f8 |
+| U28 | `Makefile` | modify (`fix(`: `-I` in `GRAPHIFY`, R2-4; paired `tests/test_makefile_graphify.py`) | low | `implementer_agent` | sonnet | low | ✅ 88f5c90 |
+| U29 | twelve files (plan Enmienda U29), one commit per file | modify (RA-14 propagation of D2-R, D3-R, D10, R2-5, R2-7) | medium | `rule_validator` / `agent_orchestrator` / `implementer_agent` / `doc_orchestrator` | sonnet | medium | ✅ b68dbcc..032fcf6, CHANGELOG |
+| U30 | `claude/settings.hooks.json` | modify (remove `sandbox.excludedCommands`; add D13 `denyWrite`/`Edit` for `.agents/{hooks,scripts,config,skills,claude,venv_skillopt}`) | high | `implementer_agent` | sonnet | medium | ✅ fb23f31 |
+| U31 | `scripts/install.py` | modify (`fix(`: drop the render, prune render-owned lines from `.claude/settings.local.json`; paired `tests/test_install_with_env_render.py` rewritten) | high | `implementer_agent` | sonnet | high | ✅ 3fd788e |
+| U32 | `scripts/merge_json.py` | modify (`fix(`: the five gh inspection patterns in `RETIRED_VALUES`; paired `tests/test_merge_json.py`) | medium | `implementer_agent` | sonnet | medium | ✅ 7580443 |
+| U33 | `tests/test_template_sandbox.py` | modify (no `excludedCommands`; D13 denies) | low | `implementer_agent` | sonnet | medium | ✅ b1f246c |
+| U34 | `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` | measure (a)-(e) of plan *Enmienda 2* with the real installer | medium | principal | — | — | ✅ section 9 |
+| U35 | twelve files (plan *Enmienda 2* U35), one commit per file | modify (RA-14 propagation of D12, D13; N1/N3 precedent) | medium | `rule_validator` / `agent_orchestrator` / `implementer_agent` / `doc_orchestrator` | sonnet | medium | ✅ 952e47e..918e45a, CHANGELOG |
+| U36 | `agents.md` | modify (RA-09 per D14; name open vectors Q1-Q5) | medium | `rule_validator` | sonnet | medium | ✅ 8fd097f |
+| U37 | `rules/project_topology.md` | modify (sandbox table per D14; hooks row enumerates Q1-Q5 and routing) | medium | `doc_orchestrator` | sonnet | medium | ✅ e48c621 |
+| U38 | five files (plan *Enmienda 3* U38), one commit per file | modify (D14 wording) | low | `doc_orchestrator` / `agent_orchestrator` / `implementer_agent` | sonnet | low | ✅ 485dc39, 1efc190, dc72d78, e40c3e0, 6796e92 |
+| U39 | `Makefile` | modify (comment, D16 / Q6) | low | `implementer_agent` | sonnet | low | ✅ 52c6118 |
+| U40 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify (D15 open findings; N3 observation wording) | low | `doc_orchestrator` | sonnet | low | ✅ f09e148 |
+| U41 | `CHANGELOG.md` | modify (headline and Security per D14) | low | `doc_orchestrator` | sonnet | low | ✅ 584e003 |
+| U42 | seven files (plan *Enmienda 3a* U42), one commit per file | modify (D17 no git pre-check; D18 G5-2, R5-1, R5-2) | low | `rule_validator` / `agent_orchestrator` / `implementer_agent` / `doc_orchestrator` | sonnet | low | ✅ caa546f..5af9fea, de35d1e |
+| U43 | `CHANGELOG.md` | modify (D17, D18) | low | `doc_orchestrator` | sonnet | low | ✅ b508948 |
+| U44 | docs set (plan *Enmienda 3b* U44), one commit per file | modify (D19 single warning, zero procedures; D20 with_env scope; D21 R6 records) | medium | `doc_orchestrator` / `rule_validator` / `implementer_agent` | sonnet | medium | ✅ d077524..22e9670 |
+| U45 | `CHANGELOG.md` | modify (D19-D21) | low | `doc_orchestrator` | sonnet | low | ✅ 6a2b93c |
+
+Note 1 (U12): `check_task_scope.py` reads only `File`, `Operation`, `Risk`, `Assignee`,
+`Model`, `Effort`; it does not parse `Status`, so the row is kept with an Operation that
+carries no mutating verb. The omission must be recorded in `SPRINT_LOG.md` (plan row U12).
+If the human rules the file native, the row reverts to `modify` and the key list at
+`skills/graphify/SKILL.md:238` is corrected there as well.
+
+## Ordering constraints (transcribed from the plan, plus audit additions)
+
+| Constraint | Why |
+| :--- | :--- |
+| U01 committed before U02..U19 start | `D1`: no correction before measurement |
+| U02 -> U03 -> U08 consecutive (audit addition) | `RA-16`: the declared invoker of `with_env.py` (`Makefile` `graphify-deep`) lands right after the script and its allowlist |
+| U07 after U01, U02, U03 | Needs measured forms (`D7`) and the wrapper path it excludes |
+| U09 before U15, U16 | They reference the table U09 creates (`D8`) |
+| U13 before U14, U17 | `RA-14`: the rewritten `RA-09` text is the source the pointers follow |
+| U18, U19 last | Cite SHAs of the units they close |
+
+## Same-subject check (`no_interference`)
+
+The original 18 live rows name distinct structural subjects. The amendment units revisit
+subjects already landed (`scripts/install.py`, `scripts/merge_json.py`, `claude/settings.hooks.json`,
+`Makefile`, `agents.md` and the docs set); each ran only after the earlier unit on the same subject
+had landed, so no two in-progress rows collided (`jurisdictional_lock` caps concurrent claims, not
+lifetime touches). U04 and U12 are omitted and claim nothing. Companion
+test files are mandatory companions of their `fix(`/`feat(` subject, not subjects
+(`jurisdictional_lock`).
+
+## Rule-audit findings
+
+| # | Finding | Severity | Action |
+| :--- | :--- | :--- | :--- |
+| F1 | `jurisdictional_lock` / `no_interference`: no violation. The original rows have one subject each; amendment units revisit landed subjects only after the earlier unit landed (see the paragraph above) | none | None |
+| F2 | `code_craft.md §6`: the four `fix(` units (U04, U05, U06, U08) each name a paired test in Operation. `tests/test_install_permission.py` and `tests/test_makefile_graphify.py` are new files; `tests/test_merge_json.py` and `tests/test_session_start.py` are modified. U02 is `feat(` and its test is carried anyway | none | Each `fix(` commit must stage its test in the same commit; per Sprint 054 A02/A03, a `Repro:` trailer is mandatory on every `fix(` |
+| F3 | `RA-14`, U13 reach. The plan's cited targets: `agents.md §3 secret_sovereignty` covered by U13; `rules/LEGACY_RULE_CONCORDANCE.md` Rule 66 covered by U17; `workflows/pipeline_workflow.md` Phase 2 (line 16) covered by U14; **`rules/qa_and_testing.md:87` is covered by U10 only incidentally**: line 87 merely cites the name `RA-09 SECRET_SOVEREIGNTY` and needs no rewrite unless the name changes | low | U10 must re-read lines 85-87 and leave them if the name is unchanged; the `.env`/`.env.example` wording at line 85 must agree with the U07 `denyRead`/`allowRead` change (D4) |
+| F4 | **Gap: `agents/devops_agent.md:16` and `:20`** restate `RA-09` ("Must strictly use environment export commands", "`.env` export") and no unit touches them. After U13/U14 the profile still prescribes the export mechanism the sprint declares blocked (`S-3`). Same class as the `RA-14` precedent | medium | Add a unit (proposed `U20`, `agents/devops_agent.md`, `modify`, `agent_orchestrator`/`doc_orchestrator`, low) or record the exclusion in `SPRINT_LOG.md`. Not added here: the plan is the authority on Work rows and `agent_assignment.md` has no assignee for it |
+| F5 | **Stale text in U17's target**: Rule 66 says "`§3 secret_sovereignty` is a pointer to `RA-09` since Sprint 046", while `agents.md §3` currently calls `RA-09` "canonical" and says `secret_sovereignty` "adds the Makefile / subshell mechanism" in the pointer direction. U13 and U17 must agree on one direction | low | U13 and U17 are consecutive in effect; U17 copies whatever `§3` and `RA-09` finally say. Verify with `grep -n 'secret_sovereignty\|RA-09' agents.md rules/LEGACY_RULE_CONCORDANCE.md` after both land |
+| F6 | `§1 path_type` (relative only): `with_env.py --allowlist <path>` (D3) and the allowlist `command` entries must be stored and documented relative (`venv_skillopt/bin/python -m graphify`); no absolute host path in U03, U07 or U09 | low | Add as a QA check on U02/U03/U07/U09. Amended (Gate 1 round 2, D3-R): `--allowlist` no longer exists. D2-R writes absolute paths only into the untracked, machine-local `.claude/settings.local.json` at install time; no tracked file holds one (QA check on U23/U24/U29) |
+| F7 | `§1 ephemeral markers`: the plan contains no `TODO`/`FIXME`. Units that write code (U02, U04, U05, U06) and prose must not introduce them | none | QA grep at Gate 1 |
+| F8 | `§1 code_logic` language: the plan's Spanish is permitted only there (`user_chat`). U01, U09-U11, U13-U19 and all code, tests and commits MUST be English. Plan strings such as "a documentar" must not be copied into rules | low | Instruct `doc_orchestrator` and `rule_validator` at dispatch |
+| F9 | `RA-16`: `with_env.py` declares invokers in the plan's Mechanisms table, but the first live invoker (`Makefile graphify-deep`, U08) is three rows after the script. Without the ordering constraint above, a commit could land the script with no invoker | low | Ordering constraint U02 -> U03 -> U08 added above; `invoked_by:` docstring is required by U02 |
+| F10 | U07 `high` risk: the template change reaches every host through `install.py` re-merge. U04's prune only removes values on an explicit retired list | medium | U07 must not start before U04 lands (add to the QA checklist; the plan order `U04..U08` already implies it). Superseded by revised D4: U04 omitted, U07 retires no template value, and the retired-list mechanism moves to U22 (`RETIRED_VALUES`, empty) |
+| F11 | U03 has no companion test of its own | low | Acceptable: `tests/test_with_env.py` (U02) loads the real allowlist; U02's test must assert the shipped file parses and contains `graphify` only. Amended: the shipped names are exactly `graphify-extract`, `graphify-extract-deep`, `graphify-label` (`tests/test_with_env.py` asserts set equality) |
+| F12 | `tier_transcription`: no Cursor tiers apply (`session_tool: claude-code`). Effort `high` on U02/U07/U13 is a Phase 4.3 proposal, declared above, not a `token_economy_agent` verdict | none | Revert to `medium` if declined |
+| F13 | U01 is human-dependent (`T10 unverified`, Abort criterion 1). `doc_orchestrator` only transcribes; a row with no human-reported evidence must not be marked measured | medium | Phase 6 must not dispatch U02..U19 until the human has supplied the matrix |

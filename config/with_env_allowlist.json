@@ -1,0 +1,17 @@
+{
+  "_comment": "Allowlist for scripts/with_env.py (wrapper syntax: `python3 -I scripts/with_env.py <name>`). The wrapper is the HUMAN's path, run directly or through `make graphify-deep`: it loads .env and runs the named command with secrets in its environment, so every entry receives them. There is no sanctioned agent path to it under the sandbox (it fails on the .env deny): the agent prepares the command and the human runs it. Nobody may add a sandbox.excludedCommands entry: any excluded entry lets a chained command run unsandboxed (Sprint 055 QA Gate 1 round 3 N1). The template's lack of exclusions and its write-denies reduce exposure but are not a boundary (agents.md RA-19); known unsandboxed vectors remain open and are tracked in docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md. The caller supplies a name, never an argv. argv[0] is a path relative to the framework checkout (the directory holding scripts/ and config/); the remaining tokens are literal. `-I` keeps a graphify/ folder in the working directory from shadowing the package. This list is nucleus-only: a host does not extend it and proposes an addition upstream through agents.md section 4 feedback_upstream. pytest is not listed because it executes agent-written code. Output masking is not a security boundary.",
+  "commands": {
+    "graphify-extract": {
+      "argv": ["venv_skillopt/bin/python", "-I", "-m", "graphify", "extract", "."],
+      "reason": "graphify semantic extraction reads its provider key from the environment only (graphifyy 0.8.30 has no .env loader)"
+    },
+    "graphify-extract-deep": {
+      "argv": ["venv_skillopt/bin/python", "-I", "-m", "graphify", "extract", ".", "--mode", "deep"],
+      "reason": "deep semantic extraction, same provider-key requirement"
+    },
+    "graphify-label": {
+      "argv": ["venv_skillopt/bin/python", "-I", "-m", "graphify", "label", "."],
+      "reason": "community labelling through the provider, same provider-key requirement"
+    }
+  }
+}

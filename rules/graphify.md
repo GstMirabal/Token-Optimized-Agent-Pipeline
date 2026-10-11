@@ -9,6 +9,21 @@ This project has a graphify knowledge graph at graphify-out/.
 **Invocation form — always the module, never the console-script.** Run
 `<checkout>/venv_skillopt/bin/python -m graphify <cmd>` (host: `.agents/venv_skillopt/bin/python -m graphify …`). The `venv_skillopt/bin/graphify` console-script carries an absolute shebang to the venv's build path and fails with `bad interpreter` whenever `.agents` sits at a path other than where the venv was created (submodule checkout, copied tree, renamed nucleus). `venv_skillopt/bin/python` is a symlink to the system interpreter and resolves under any path, so the `-m graphify` form works where the bare `graphify` command does not. `scripts/check_venv_relocatable.py` (run by `start_workflow.md` `pip_setup`) exits `2` when the venv itself is stale and must be rebuilt.
 
+## Deep mode and the provider key (Sprint 055)
+
+`graphify update .` is AST-only and needs no key. `graphify extract . --mode deep` calls an LLM provider and needs a key in the process environment. Sandbox behaviour for every command below is in the single table `rules/project_topology.md` section 4; this section does not restate it.
+
+| Item | Fact |
+| :--- | :--- |
+| **Variables read** | graphifyy 0.8.30 reads 7 provider variables, from the environment only: `ANTHROPIC_API_KEY`, `DEEPSEEK_API_KEY`, `GEMINI_API_KEY`, `GOOGLE_API_KEY`, `MOONSHOT_API_KEY`, `OLLAMA_API_KEY`, `OPENAI_API_KEY`. |
+| **Reproduce the list** | `grep -rhoE '[A-Z_]+_API_KEY' <venv site-packages>/graphify` |
+| **`.env` loader** | None. graphify never opens `.env`; a key that lives only in `.env` is invisible to it (`GKEY` = 0 variables visible). |
+| **Vendored claim superseded** | `skills/graphify/SKILL.md:238` states that only `GEMINI_API_KEY` / `GOOGLE_API_KEY` are read. The measured list above supersedes it. That file is vendored and is not edited (`rules/skills_and_integrations.md` section 3). |
+| **Agent form (inside the sandbox)** | No sanctioned agent form. Under the sandbox the agent prepares the command and the human runs it (human form below); the agent records the output. Masking of exact `.env` values of length >= 4 in the child's output is NOT a security boundary (`rules/project_topology.md` section 4). |
+| **Human form (unsandboxed shell)** | Nucleus: `make graphify-deep` (the only form there). Host: `make -f .agents/Makefile graphify-deep`. The target runs `graphify extract . --mode deep` through `with_env.py`; the human runs it, not the agent. Residual risk: the "After a sandboxed agent session" row in `rules/project_topology.md` section 4. |
+| **Allowlist** | `config/with_env_allowlist.json` lists `graphify-extract`, `graphify-extract-deep` and `graphify-label`. `with_env.py` covers only these three names; any other command that needs a secret is run by the human directly. It is nucleus-only: a host does not extend it (`rules/project_topology.md` section 4). The write-denied set is in `rules/project_topology.md` section 4. |
+| **`.env` stat (`S-4`)** | The sandbox `.env` deny also refuses `stat()`. `graphify update .` succeeded in the nucleus because graphify skips names equal to `.env`; a host with other `.env*` names, or any full-tree walker, can fail. Sanctioned form: run the walker unsandboxed (human) or scope it. |
+
 Rules:
 - For codebase or architecture questions, when `graphify-out/graph.json` exists, first run `venv_skillopt/bin/python -m graphify query "<question>"` (CLI) or `query_graph` (MCP). Use `… -m graphify path "<A>" "<B>"` / `shortest_path` for relationships and `… -m graphify explain "<concept>"` / `get_node` for focused concepts. These return a scoped subgraph, usually much smaller than `GRAPH_REPORT.md` or raw grep output.
 - If graphify-out/wiki/index.md exists, navigate it instead of reading raw files

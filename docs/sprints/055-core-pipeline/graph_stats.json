@@ -1,0 +1,9 @@
+{
+  "nodes": 13240,
+  "edges": 18156,
+  "communities": 1059,
+  "source": "graphify-out/graph.json",
+  "sprint": 55,
+  "built_at_commit": "807be46",
+  "note": "Counts from `make graphify-update` (AST, no LLM) at HEAD before the close-workflow closeout commits (this file, model_ledger_regen). Previous snapshot is Sprint 054's (12841/17475/1037). The delta reflects the new scripts/with_env.py, its allowlist, five new test files (with_env, install permission and render-prune, Makefile graphify, template sandbox) and the extended install.py, merge_json.py and session_start.py."
+}

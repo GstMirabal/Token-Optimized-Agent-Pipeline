@@ -1,8 +1,10 @@
 """Tests for scripts/merge_json.py — the non-destructive merge that touches
 host users' .claude/settings.json and .mcp.json. A regression here corrupts
 real user configuration, hence the coverage."""
+import json
 import sys
 from pathlib import Path
+from typing import ClassVar
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 import merge_json
@@ -115,3 +117,65 @@ def test_merge_preserves_host_deny_and_adds_template_deny():
     assert "Bash(rm -rf /:*)" in deny
     assert result["permissions"]["defaultMode"] == "auto"
     assert result["autoMode"]["hard_deny"][0] == "$defaults"
+
+
+class TestRetiredValuePrune:
+    """Values the framework once shipped and retired leave host lists on merge."""
+
+    RETIRED: ClassVar[dict[str, frozenset[str]]] = {"sandbox.filesystem.denyRead": frozenset({"./old-secret"})}
+
+    def test_retired_value_absent_from_template_is_removed(self):
+        dest = {"sandbox": {"filesystem": {"denyRead": ["./old-secret", "./keep"]}}}
+        template = {"sandbox": {"filesystem": {"denyRead": ["./new"]}}}
+        result = merge(dest, template, retired=self.RETIRED)
+        assert "./old-secret" not in result["sandbox"]["filesystem"]["denyRead"]
+
+    def test_host_added_value_survives(self):
+        dest = {"sandbox": {"filesystem": {"denyRead": ["./old-secret", "./host-own"]}}}
+        template = {"sandbox": {"filesystem": {"denyRead": ["./new"]}}}
+        deny = merge(dest, template, retired=self.RETIRED)["sandbox"]["filesystem"]["denyRead"]
+        assert "./host-own" in deny and "./new" in deny
+
+    def test_retired_value_still_in_template_is_kept(self):
+        dest = {"sandbox": {"filesystem": {"denyRead": ["./old-secret"]}}}
+        template = {"sandbox": {"filesystem": {"denyRead": ["./old-secret"]}}}
+        deny = merge(dest, template, retired=self.RETIRED)["sandbox"]["filesystem"]["denyRead"]
+        assert deny == ["./old-secret"]
+
+    def test_empty_retired_mapping_changes_nothing(self):
+        dest = {"a": {"b": ["x", "y"]}}
+        assert merge(dest, {"a": {"b": ["z"]}}, retired={}) == {"a": {"b": ["x", "y", "z"]}}
+
+    def test_missing_key_path_is_a_noop(self):
+        dest = {"other": ["./old-secret"]}
+        merge_json.prune_retired_values(dest, {}, self.RETIRED)
+        assert dest == {"other": ["./old-secret"]}
+
+
+RETIRED_EXCLUDED = frozenset({
+    "python3 -I .agents/scripts/with_env.py graphify-extract",
+    "python3 -I .agents/scripts/with_env.py graphify-extract-deep",
+    "python3 -I .agents/scripts/with_env.py graphify-label",
+    "gh pr create *",
+    "gh release create *",
+    "gh pr checks *",
+    "gh pr list *",
+    "gh repo view *",
+    "gh release view *",
+    "gh auth status",
+})
+
+
+class TestShippedRetiredValues:
+    """The real RETIRED_VALUES applied against the real shipped template."""
+
+    def test_retired_values_are_exactly_the_ten_excluded_commands(self):
+        assert dict(merge_json.RETIRED_VALUES) == {"sandbox.excludedCommands": RETIRED_EXCLUDED}
+
+    def test_real_template_merge_drops_retired_and_keeps_host_entry(self):
+        template_path = Path(__file__).parent.parent / "claude" / "settings.hooks.json"
+        template = json.loads(template_path.read_text(encoding="utf-8"))
+        dest = {"sandbox": {"excludedCommands": [*sorted(RETIRED_EXCLUDED), "gh run list *"]}}
+        excluded = merge(dest, template)["sandbox"]["excludedCommands"]
+        assert not RETIRED_EXCLUDED & set(excluded)
+        assert "gh run list *" in excluded

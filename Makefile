@@ -13,7 +13,7 @@
 #     they keep the caller's CWD — that is the tree they are meant to inspect.
 
 AGENTS_DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
-GRAPHIFY := $(AGENTS_DIR)/venv_skillopt/bin/graphify
+GRAPHIFY := $(AGENTS_DIR)/venv_skillopt/bin/python -I -m graphify
 PY_EXCLUDES := -not -path "*/.git/*" -not -path "*/node_modules/*" -not -path "*/venv_skillopt/*"
 
 # Prefer the framework venv when it exists (a local checkout, where pytest lives
@@ -26,7 +26,7 @@ PY_EXCLUDES := -not -path "*/.git/*" -not -path "*/node_modules/*" -not -path "*
 VENV_PY := $(AGENTS_DIR)/venv_skillopt/bin/python3
 PY := $(if $(wildcard $(VENV_PY)),$(VENV_PY),python3)
 
-.PHONY: graphify-update graphify-rebuild verify docs-freshness-check session-start model-ledger cursor-tiers cursor-era-audit bridge-state role-artifacts quality-audit
+.PHONY: graphify-update graphify-rebuild graphify-deep verify docs-freshness-check session-start model-ledger cursor-tiers cursor-era-audit bridge-state role-artifacts quality-audit
 
 
 # Incremental AST sync after code changes (close_workflow Phase 1, no LLM cost).
@@ -39,10 +39,23 @@ graphify-update:
 # sprint closeout run with no network and no credentials, and `--mode deep`
 # (semantic, needs GEMINI_API_KEY) failed there every time (C5, Sprint 044).
 # Deep semantic rebuild stays available as a manual escalation:
-#   $(AGENTS_DIR)/venv_skillopt/bin/graphify . --mode deep   # needs GEMINI_API_KEY
+#   make graphify-deep   # needs a provider key in .env
 graphify-rebuild:
-	$(AGENTS_DIR)/venv_skillopt/bin/python -m graphify update . --force
+	$(AGENTS_DIR)/venv_skillopt/bin/python -I -m graphify update . --force
 	python3 $(AGENTS_DIR)/scripts/graph_reconcile.py --root .
+
+# Semantic rebuild that needs a provider key from `.env`. It runs the named
+# command `graphify-extract-deep` of config/with_env_allowlist.json through
+# scripts/with_env.py (`python3 -I`, mandatory), which loads `.env` and masks
+# exact copies of its values in the output (best effort, not a security
+# boundary). The earlier `graphify . --mode deep` form was not a valid
+# graphifyy 0.8.30 subcommand; the CLI is `graphify extract <path> --mode deep`.
+# This target is the human's form. Under the sandbox the agent prepares the
+# command and the human runs it. The recipe is agent-writable (Q5, open in
+# F-055-N1, docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md); see the residual risk
+# row in rules/project_topology.md section 4.
+graphify-deep:
+	python3 -I $(AGENTS_DIR)/scripts/with_env.py graphify-extract-deep
 
 # Framework self-check. THIS is the full set: `.github/workflows/ci.yml` invokes
 # this target rather than listing its own steps, so a green local run and a green

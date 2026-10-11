@@ -1,6 +1,6 @@
 {
-  "last_update": "2026-10-07",
-  "sprint_id": "054",
+  "last_update": "2026-10-11",
+  "sprint_id": "055",
   "_schema": "Entries are summary-only Knowledge Items. The 'file' field is omitted once the raw log has been purged (agents.md §4 definitive_amnesia) — the 1-line summary IS the retained knowledge.",
   "items": [
     {
@@ -182,6 +182,11 @@
     {
       "id": "F-20261004-S531",
       "summary": "Before planning a unit from a programme-queue row, read the unit's target file, because the row may describe work an earlier sprint already delivered (Sprint 053 C03, delivered by 10df9cd in Sprint 048).",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20261011-S551",
+      "summary": "Measure Claude Code sandbox behaviour with headless `claude -p --allowedTools Bash` from a submodule-shaped fixture (`.agents/.git` as a `gitdir:` file so `install.py` runs in host mode, template as project settings), validating each run with HTTPS_PROXY set and `curl --noproxy '*'` exit 6, because an interactive session cannot be launched without a TTY.",
       "routing_class": "host"
     }
   ]

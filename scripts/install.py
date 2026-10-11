@@ -28,11 +28,17 @@ What it does:
      profiles/<name> inside the submodule (illustrative packs only). --profile-path
      accepts a host-controlled directory outside the submodule (RA-15 production
      profiles). The two flags are mutually exclusive.
-  6. Marks .agents/.bridge_claude.lock and/or .agents/.bridge_cursor.lock
+  6. Prunes, per machine, any `sandbox.excludedCommands` line a previous
+     install rendered for `with_env.py` from the host's untracked
+     .claude/settings.local.json (host mode only). No exclusions are shipped:
+     a command chained after any excluded entry runs unsandboxed. Host-owned
+     entries and other keys are left untouched; no change means no write.
+  7. Marks .agents/.bridge_claude.lock and/or .agents/.bridge_cursor.lock
      (per --target) so hooks/on_init.py and start_workflow bridge_check
      can detect a deliberate submodule update and re-link automatically.
 """
 import argparse
+import errno
 import os
 import re
 import shutil
@@ -47,7 +53,11 @@ HOST_DIR = AGENTS_DIR.parent
 sys.path.insert(0, str(SCRIPT_DIR))
 import json
 
+from _mode import is_nucleus
 from merge_json import merge
+
+BRIDGE_WRITE_DENIED = 3
+RENDER_OWNED_RE = re.compile(r"^\S+ -I \S+/scripts/with_env\.py \S+$")
 
 
 def _symlink_matches(dest: Path, target: str) -> bool:
@@ -90,13 +100,110 @@ def link_one(target: str, dest: Path) -> None:
         print(f"✅ Copied (no symlink support) {dest}")
 
 
+def install_command(target: str, nucleus: bool) -> str:
+    """The exact command a human runs outside the sandbox to install a target.
+
+    Args:
+        target: Bridge target (`claude`, `cursor` or `both`).
+        nucleus: True in nucleus mode, False in a host (submodule) checkout.
+
+    Returns:
+        str: `bash scripts/install.sh --target <t>` in the nucleus,
+        `bash .agents/scripts/install.sh --target <t>` in a host.
+    """
+    prefix = "" if nucleus else ".agents/"
+    return f"bash {prefix}scripts/install.sh --target {target}"
+
+
+def _report_write_denied(dest: Path) -> None:
+    """Print the one-line advisory for a denied bridge write to stderr.
+
+    Args:
+        dest: Path whose write was refused; shown relative to the host directory when possible.
+    """
+    try:
+        shown = dest.relative_to(HOST_DIR)
+    except ValueError:
+        shown = dest
+    print(
+        f"⚠️  PermissionError: cannot write {shown} (agent sandbox protects it). "
+        f"Run `{install_command('claude', is_nucleus())}` outside the sandbox.",
+        file=sys.stderr,
+    )
+
+
+def _write_json(dest: Path, data: dict) -> None:
+    """Write data to dest as JSON, translating a refused write into an advisory.
+
+    Args:
+        dest: Settings file to create or overwrite.
+        data: JSON-serialisable mapping to store.
+
+    Raises:
+        SystemExit: With BRIDGE_WRITE_DENIED when the write is refused by
+            permissions; any other OSError propagates unchanged.
+    """
+    try:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_text(json.dumps(data, indent=2) + "\n")
+    except OSError as exc:
+        if not isinstance(exc, PermissionError) and exc.errno not in (errno.EPERM, errno.EACCES):
+            raise
+        _report_write_denied(dest)
+        raise SystemExit(BRIDGE_WRITE_DENIED) from exc
+
+
 def merge_into(template: Path, dest: Path) -> None:
+    """Merge a JSON template into dest without clobbering existing keys.
+
+    Args:
+        template: Template JSON file shipped by the framework.
+        dest: Settings file to create or update.
+
+    Raises:
+        SystemExit: With BRIDGE_WRITE_DENIED when the write is refused by
+            permissions; any other OSError propagates unchanged.
+    """
     template_data = json.loads(template.read_text())
     dest_data = json.loads(dest.read_text()) if dest.exists() else {}
-    merged = merge(dest_data, template_data)
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_text(json.dumps(merged, indent=2) + "\n")
+    _write_json(dest, merge(dest_data, template_data))
     print(f"✅ Merged {template} -> {dest}")
+
+
+def prune_rendered_exclusions(host_dir: Path) -> None:
+    """Remove render-owned with_env exclusions left by an earlier install.
+
+    The framework ships no `sandbox.excludedCommands`: a command chained
+    after any excluded entry runs unsandboxed. Lines rendered by a previous
+    install (matching RENDER_OWNED_RE) are therefore escapes and are removed;
+    every other key and entry, including host-owned exclusions and the
+    rendered write-denies, is left untouched. No file or nothing to prune
+    means no write.
+
+    Args:
+        host_dir: Host root holding `.claude/settings.local.json`.
+
+    Raises:
+        SystemExit: With BRIDGE_WRITE_DENIED when the write is refused.
+    """
+    dest = host_dir / ".claude" / "settings.local.json"
+    if not dest.exists():
+        return
+    data = json.loads(dest.read_text())
+    sandbox = data.get("sandbox")
+    current = sandbox.get("excludedCommands") if isinstance(sandbox, dict) else None
+    if not isinstance(current, list):
+        return
+    kept = [c for c in current if not (isinstance(c, str) and RENDER_OWNED_RE.match(c))]
+    pruned = len(current) - len(kept)
+    if pruned == 0:
+        return
+    if kept:
+        sandbox["excludedCommands"] = kept
+    else:
+        del sandbox["excludedCommands"]
+    _write_json(dest, data)
+    print(f"✅ Pruned {pruned} rendered with_env exclusion(s) -> {dest}")
 
 
 def add_claude_import(import_line: str) -> None:
@@ -468,6 +575,7 @@ def install_host_claude_bridge(profile_dir: Path | None) -> int:
     merge_into(AGENTS_DIR / "claude" / "settings.hooks.json",
                HOST_DIR / ".claude" / "settings.json")
     merge_into(AGENTS_DIR / "claude" / "mcp.json", HOST_DIR / ".mcp.json")
+    prune_rendered_exclusions(HOST_DIR)
 
     add_claude_import("@.agents/agents.md")
     ensure_gitignore_entries()

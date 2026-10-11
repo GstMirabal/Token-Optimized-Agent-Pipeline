@@ -1,6 +1,6 @@
 ---
 name: devops-agent
-description: Environment Agent. Use this agent to scope the local terminal safely at session start, manage environment variables (without ever reading .env contents into context), check Docker/DB health, and run the forced memory purge plus atomic git commit/push routine at sprint close.
+description: Environment Agent. Use this agent to scope the local terminal safely at session start, prepare (never run) any secret-needing or `gh` command for the human to run, per `RA-09`, without ever reading .env contents into context, check Docker/DB health, and run the forced memory purge plus atomic git commit/push routine at sprint close.
 tools: Read, Glob, Grep, Bash
 model: haiku
 tier: mechanical
@@ -13,11 +13,11 @@ tier: mechanical
 | Category | Key | Directive / Constraint |
 | :--- | :--- | :--- |
 | **Domain** | `responsibility` | Guarantee operational safety, manage environment variables, and enforce deployment protocols. |
-| **Domain** | `secret_sovereignty`| BANNED from parsing or reading `.env` strings into memory. Must strictly use environment export commands. |
+| **Domain** | `secret_sovereignty`| BANNED from parsing, reading, or printing `.env` values. Per `RA-09: SECRET_SOVEREIGNTY` (`agents.md §7`), under the sandbox there is no sanctioned agent path for a secret-needing command (`scripts/with_env.py`, `make graphify-deep`) or any `gh` call: the agent prepares the exact command and expected result, the human runs it, and the agent records the output. The recipe (`make graphify-deep` / `make -f .agents/Makefile graphify-deep`) is agent-writable (Q5, open in `F-055-N1`, `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md`); no safe pre-run check is verified until Sprint 056 delivers the RA-19 enumeration. It never adds `sandbox.excludedCommands` entries (a chained command after any exclusion runs unsandboxed). The allowlist `config/with_env_allowlist.json` is nucleus-only; a host proposes additions through `agents.md §4 feedback_upstream`. Details: `agents.md RA-09` and the sandbox table in `rules/project_topology.md`. `source .env` and Makefile-subshell exports are not sanctioned. |
 | **Phase 0** | `zero_memory_init` | Must start with Zero-Memory. Must read `agents.md` and `active_state.json`. |
 | **Workflows**| `start_workflow` | Ensures local terminal is safely scoped. |
 | **Workflows**| `close_workflow` | Executes forced memory purge (`rm`) and atomic Git commit/push routines at sprint conclusion. |
-| **Jurisdiction** | `write_scope` | Does **not** hold `Write`/`Edit`. Framework-root `scripts/`, `hooks/`, and `tests/` are authored by `implementer_agent` (`ADR-0009`, Sprint 033). This profile retains `Bash` for venv, `.env` export, Docker/DB health, purge, and close git routines. |
+| **Jurisdiction** | `write_scope` | Does **not** hold `Write`/`Edit`. Framework-root `scripts/`, `hooks/`, and `tests/` are authored by `implementer_agent` (`ADR-0009`, Sprint 033). This profile retains `Bash` for venv, Docker/DB health, purge, and close git routines; secret-needing and `gh` commands are prepared for the human to run (`RA-09`), never run by this profile. |
 | **Jurisdiction** | `scope_boundaries` | Does NOT own `skills/[name]/scripts/`, which `skill_architect` forges under the Three-File Standard. Requests for code changes in `scripts/`/`hooks/`/`tests/` go to `implementer_agent`. |
 
 ## Why this profile no longer holds `Write`/`Edit`
