@@ -64,12 +64,12 @@ or a `gate` profile.
 | U33 | `tests/test_template_sandbox.py` | modify (no `excludedCommands`; D13 denies) | low | `implementer_agent` | sonnet | medium | ✅ b1f246c |
 | U34 | `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` | measure (a)-(e) of plan *Enmienda 2* with the real installer | medium | principal | — | — | ✅ section 9 |
 | U35 | twelve files (plan *Enmienda 2* U35), one commit per file | modify (RA-14 propagation of D12, D13; N1/N3 precedent) | medium | `rule_validator` / `agent_orchestrator` / `implementer_agent` / `doc_orchestrator` | sonnet | medium | ✅ 952e47e..918e45a, CHANGELOG |
-| U36 | `agents.md` | modify (RA-09 per D14; name open vectors Q1-Q5) | medium | `rule_validator` | sonnet | medium | ⏳ |
-| U37 | `rules/project_topology.md` | modify (sandbox table per D14; hooks row enumerates Q1-Q5 and routing) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
-| U38 | five files (plan *Enmienda 3* U38), one commit per file | modify (D14 wording) | low | `doc_orchestrator` / `agent_orchestrator` / `implementer_agent` | sonnet | low | ⏳ |
-| U39 | `Makefile` | modify (comment, D16 / Q6) | low | `implementer_agent` | sonnet | low | ⏳ |
-| U40 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify (D15 open findings; N3 observation wording) | low | `doc_orchestrator` | sonnet | low | ⏳ |
-| U41 | `CHANGELOG.md` | modify (headline and Security per D14) | low | `doc_orchestrator` | sonnet | low | ⏳ |
+| U36 | `agents.md` | modify (RA-09 per D14; name open vectors Q1-Q5) | medium | `rule_validator` | sonnet | medium | ✅ 8fd097f |
+| U37 | `rules/project_topology.md` | modify (sandbox table per D14; hooks row enumerates Q1-Q5 and routing) | medium | `doc_orchestrator` | sonnet | medium | ✅ e48c621 |
+| U38 | five files (plan *Enmienda 3* U38), one commit per file | modify (D14 wording) | low | `doc_orchestrator` / `agent_orchestrator` / `implementer_agent` | sonnet | low | ✅ 485dc39, 1efc190, dc72d78, e40c3e0, 6796e92 |
+| U39 | `Makefile` | modify (comment, D16 / Q6) | low | `implementer_agent` | sonnet | low | ✅ 52c6118 |
+| U40 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify (D15 open findings; N3 observation wording) | low | `doc_orchestrator` | sonnet | low | ✅ f09e148 |
+| U41 | `CHANGELOG.md` | modify (headline and Security per D14) | low | `doc_orchestrator` | sonnet | low | ✅ 584e003 |
 
 Note 1 (U12): `check_task_scope.py` reads only `File`, `Operation`, `Risk`, `Assignee`,
 `Model`, `Effort`; it does not parse `Status`, so the row is kept with an Operation that

@@ -93,6 +93,7 @@ Closing the session state and certifying traceability.
 - Remediation (`workflows/remediation_workflow.md`, 2026-10-10): Phase 1 snapshot `git stash push -u` reported no local changes and `git restore . && git clean -fd` changed nothing (all sprint work committed; commits untouched); Phase 2 telemetry held only the U28 `Repro:` trailer rejection, the failure origin is the gate verdicts, negative KI `agents.md RA-19` (`f8dc545`); Phase 3 anchor tagged `blocked: BLOCKED: TERMINAL_REMEDIATION_LOOP` (anchor is git-ignored in the nucleus), SESSION LOCKED.
 - Human decision 2026-10-11: option 1 (scope cut and close). Anchor `blocked` tag removed; plan *Enmienda 3* (D14-D16, U36..U41).
 - Routed to Sprint 056 (D15, testifying records of round 4): Q8 host-added `excludedCommands` kept silently by `install.py`; Q9 (= N6) `RENDER_OWNED_RE` misses host paths with spaces; Q10 type hints/docstrings in `tests/test_install_with_env_render.py`, missing `Edit(/.agents/venv_skillopt/**)` pin in `tests/test_template_sandbox.py`, non-dict `settings.local.json` crash in `prune_rendered_exclusions`.
-- Then: U36..U40; U41; fresh QA Gate 1 round 5; Tester Gate 2; Phase 8.
+- Done *Enmienda 3*: U36 `8fd097f`, U38 `485dc39`, U37 `e48c621`, U38 `1efc190`, `dc72d78`, `e40c3e0`, `6796e92`, U39 `52c6118`, U40 `f09e148` (F-055-N1 open, routed to Sprint 056), U41 `584e003`. Amendment 3 Verification: boundary-claim grep exit 1 (no match); `make verify` 0.
+- Then: fresh QA Gate 1 round 5; Tester Gate 2; Phase 8.
 
 *Certified under conventional commit standard: feat(scope): message #055*
