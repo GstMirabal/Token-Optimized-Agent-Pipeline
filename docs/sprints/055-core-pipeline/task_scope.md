@@ -72,8 +72,8 @@ or a `gate` profile.
 | U41 | `CHANGELOG.md` | modify (headline and Security per D14) | low | `doc_orchestrator` | sonnet | low | ✅ 584e003 |
 | U42 | seven files (plan *Enmienda 3a* U42), one commit per file | modify (D17 no git pre-check; D18 G5-2, R5-1, R5-2) | low | `rule_validator` / `agent_orchestrator` / `implementer_agent` / `doc_orchestrator` | sonnet | low | ✅ caa546f..5af9fea, de35d1e |
 | U43 | `CHANGELOG.md` | modify (D17, D18) | low | `doc_orchestrator` | sonnet | low | ✅ b508948 |
-| U44 | docs set (plan *Enmienda 3b* U44), one commit per file | modify (D19 single warning, zero procedures; D20 with_env scope; D21 R6 records) | medium | `doc_orchestrator` / `rule_validator` / `implementer_agent` | sonnet | medium | ⏳ |
-| U45 | `CHANGELOG.md` | modify (D19-D21) | low | `doc_orchestrator` | sonnet | low | ⏳ |
+| U44 | docs set (plan *Enmienda 3b* U44), one commit per file | modify (D19 single warning, zero procedures; D20 with_env scope; D21 R6 records) | medium | `doc_orchestrator` / `rule_validator` / `implementer_agent` | sonnet | medium | ✅ d077524..22e9670 |
+| U45 | `CHANGELOG.md` | modify (D19-D21) | low | `doc_orchestrator` | sonnet | low | ✅ 6a2b93c |
 
 Note 1 (U12): `check_task_scope.py` reads only `File`, `Operation`, `Risk`, `Assignee`,
 `Model`, `Effort`; it does not parse `Status`, so the row is kept with an Operation that
