@@ -52,8 +52,8 @@ graphify-rebuild:
 # graphifyy 0.8.30 subcommand; the CLI is `graphify extract <path> --mode deep`.
 # This target is the human's form. Under the sandbox the agent prepares the
 # command and the human runs it. The recipe is agent-writable (Q5, open in
-# F-055-N1, docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md); no pre-run check of it
-# is verified yet.
+# F-055-N1, docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md); see the residual risk
+# row in rules/project_topology.md section 4.
 graphify-deep:
 	python3 -I $(AGENTS_DIR)/scripts/with_env.py graphify-extract-deep
 
