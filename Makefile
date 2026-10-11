@@ -51,8 +51,9 @@ graphify-rebuild:
 # boundary). The earlier `graphify . --mode deep` form was not a valid
 # graphifyy 0.8.30 subcommand; the CLI is `graphify extract <path> --mode deep`.
 # This target is the human's form. Under the sandbox the agent prepares the
-# command and the human runs it, after checking `git -C .agents status` because
-# the recipe is a file the agent can edit (Q5, docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md).
+# command and the human runs it. The recipe is agent-writable (Q5, open in
+# F-055-N1, docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md); no pre-run check of it
+# is verified yet.
 graphify-deep:
 	python3 -I $(AGENTS_DIR)/scripts/with_env.py graphify-extract-deep
 
