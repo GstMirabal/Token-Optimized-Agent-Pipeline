@@ -115,15 +115,15 @@ una regla sin la condición que la justifica.
 
 | # | File | Operation | Risk | Assignee (proposed) | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `B1` | `docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md` | create: enumeración medida en la base (`D11`, `KI-055-1`, `F4`) | high | `doc_orchestrator` (escritura; la medición `claude -p` la ejecuta la sesión padre, porque `principal_agent` no tiene `Bash` ni `Write`) | ⏳ |
-| `B2` | `claude/settings.hooks.json` (+ `tests/test_template_sandbox.py`, `fix(`) | modify: deny de escritura de `./.agents` completo y `Edit(/.agents/**)`; denies de `.git` solo si `B1` los justifica (`D12`) | high | `implementer_agent` | ⏳ |
-| `B3` | `claude/mcp.json` (+ `tests/test_mcp_template.py`, nuevo, `fix(`) | modify: `-I` en el lanzador `graphify` (`D12`, `Q3`) | medium | `implementer_agent` | ⏳ |
-| `B4` | `docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md` | modify: nueva medición de cada vector tras `B2`/`B3` (`D12`, `D13`) | high | `doc_orchestrator` (escritura; medición en la sesión padre) | ⏳ |
-| `B5` | `scripts/install.py` (+ `tests/test_install_with_env_render.py`, `fix(`) | modify: rechazo con exit `2` de un `excludedCommands` del host (`D8`, `KI-055-2`) | medium | `implementer_agent` | ⏳ |
-| `B6` | `rules/project_topology.md` | modify: filas `N3` y de riesgo residual según la enumeración; tres filas de scripts `gh` (`D13`, `D15`, `KI-055-4`) | medium | `rule_validator` | ⏳ |
-| `B7` | `agents.md` | modify: `RA-19` amplía la prohibición a procedimientos prescritos (`D14`, `KI-055-6`); lista de trees de `RA-09` según `B2` | high | `rule_validator` | ⏳ |
-| `B8` | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify: estado de `F-055-N1` según `D13` y correspondencia de `Q` (`D16`, `F2`) | low | `doc_orchestrator` | ⏳ |
-| `B9` | `scripts/session_start.py` (+ `tests/test_session_start.py`) | modify: aviso de readiness del boot cuando `claude --version` no coincide con la fila `Measuring CLI` de `rules/project_topology.md` §4; no bloquea (`D17`); commit `feat(` | medium | `implementer_agent` | ⏳ |
+| `B1` | `docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md` | create: enumeración medida en la base (`D11`, `KI-055-1`, `F4`) | high | `doc_orchestrator` (escritura; la medición `claude -p` la ejecuta la sesión padre, porque `principal_agent` no tiene `Bash` ni `Write`) | ✅ `c7c0701` |
+| `B2` | `claude/settings.hooks.json` (+ `tests/test_template_sandbox.py`, `fix(`) | modify: deny de escritura de `./.agents` completo y `Edit(/.agents/**)`; denies de `.git` solo si `B1` los justifica (`D12`) | high | `implementer_agent` | ✅ `d70d00c` |
+| `B3` | `claude/mcp.json` (+ `tests/test_mcp_template.py`, nuevo, `fix(`) | modify: `-I` en el lanzador `graphify` (`D12`, `Q3`) | medium | `implementer_agent` | ✅ `05c74a6` |
+| `B4` | `docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md` | modify: nueva medición de cada vector tras `B2`/`B3` (`D12`, `D13`) | high | `doc_orchestrator` (escritura; medición en la sesión padre) | ✅ `6fd75ec` |
+| `B5` | `scripts/install.py` (+ `tests/test_install_with_env_render.py`, `fix(`) | modify: rechazo con exit `2` de un `excludedCommands` del host (`D8`, `KI-055-2`) | medium | `implementer_agent` | ✅ `3bfa1d9` |
+| `B6` | `rules/project_topology.md` | modify: filas `N3` y de riesgo residual según la enumeración; tres filas de scripts `gh` (`D13`, `D15`, `KI-055-4`) | medium | `rule_validator` | ✅ `9171740` |
+| `B7` | `agents.md` | modify: `RA-19` amplía la prohibición a procedimientos prescritos (`D14`, `KI-055-6`); lista de trees de `RA-09` según `B2` | high | `rule_validator` | ✅ `5083e70` |
+| `B8` | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify: estado de `F-055-N1` según `D13` y correspondencia de `Q` (`D16`, `F2`) | low | `doc_orchestrator` | ✅ `50b5281` |
+| `B9` | `scripts/session_start.py` (+ `tests/test_session_start.py`) | modify: aviso de readiness del boot cuando `claude --version` no coincide con la fila `Measuring CLI` de `rules/project_topology.md` §4; no bloquea (`D17`); commit `feat(` | medium | `implementer_agent` | ✅ `8bb0d1a` |
 
 Los ficheros de cierre del directorio del sprint (`SPRINT_LOG.md`, `task_scope.md`,
 `agent_assignment.md`, `skill_assignment.md`) los producen las Fases 3 y 4. No son

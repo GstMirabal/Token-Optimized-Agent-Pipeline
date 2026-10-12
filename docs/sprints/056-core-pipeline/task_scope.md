@@ -51,15 +51,15 @@ Sequencing rule (`agents.md §2 no_interference`): rows that share a structural 
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `B1` | `docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md` | create: measured enumeration at base (`D11`, `KI-055-1`, `F4`); measurement handed over by `principal_agent`, which writes nothing | high | `doc_orchestrator` | sonnet | medium | ⏳ |
-| `B2` | `claude/settings.hooks.json` (companion: `tests/test_template_sandbox.py`, `fix(`) | modify: write-deny of all `./.agents` and `Edit(/.agents/**)`; `.git` denies only if `B1` justifies them (`D12`) | high | `implementer_agent` | opus | high | ⏳ |
-| `B3` | `claude/mcp.json` (companion: `tests/test_mcp_template.py` (new), `fix(`; named in the plan after finding F-4) | modify: `-I` on the `graphify` launcher (`D12`, `Q3`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| `B4` | `docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md` | modify: re-measurement of each vector after `B2`/`B3`, handed over by `principal_agent` (`D12`, `D13`) | high | `doc_orchestrator` | sonnet | medium | ⏳ |
-| `B5` | `scripts/install.py` (companion: `tests/test_install_with_env_render.py`, `fix(`) | modify: exit `2` refusal of a host `excludedCommands` entry (`D8`, `KI-055-2`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| `B6` | `rules/project_topology.md` | modify: `N3` and residual-risk rows per the enumeration; three `gh` script rows (`D13`, `D15`, `KI-055-4`) | medium | `rule_validator` | sonnet | medium | ⏳ |
-| `B7` | `agents.md` | modify: `RA-19` extends the prohibition to prescribed procedures (`D14`, `KI-055-6`); `RA-09` tree list per `B2` | high | `rule_validator` | sonnet | medium | ⏳ |
-| `B8` | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify: `F-055-N1` status per `D13` and `Q` correspondence (`D16`, `F2`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| `B9` | `scripts/session_start.py` (companion: `tests/test_session_start.py`) | modify: advisory readiness finding when `claude --version` differs from the `Measuring CLI` row of `rules/project_topology.md` §4 (`D17`); `feat(` | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| `B1` | `docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md` | create: measured enumeration at base (`D11`, `KI-055-1`, `F4`); measurement handed over by `principal_agent`, which writes nothing | high | `doc_orchestrator` | sonnet | medium | ✅ `c7c0701` |
+| `B2` | `claude/settings.hooks.json` (companion: `tests/test_template_sandbox.py`, `fix(`) | modify: write-deny of all `./.agents` and `Edit(/.agents/**)`; `.git` denies only if `B1` justifies them (`D12`) | high | `implementer_agent` | opus | high | ✅ `d70d00c` |
+| `B3` | `claude/mcp.json` (companion: `tests/test_mcp_template.py` (new), `fix(`; named in the plan after finding F-4) | modify: `-I` on the `graphify` launcher (`D12`, `Q3`) | medium | `implementer_agent` | sonnet | medium | ✅ `05c74a6` |
+| `B4` | `docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md` | modify: re-measurement of each vector after `B2`/`B3`, handed over by `principal_agent` (`D12`, `D13`) | high | `doc_orchestrator` | sonnet | medium | ✅ `6fd75ec` |
+| `B5` | `scripts/install.py` (companion: `tests/test_install_with_env_render.py`, `fix(`) | modify: exit `2` refusal of a host `excludedCommands` entry (`D8`, `KI-055-2`) | medium | `implementer_agent` | sonnet | medium | ✅ `3bfa1d9` |
+| `B6` | `rules/project_topology.md` | modify: `N3` and residual-risk rows per the enumeration; three `gh` script rows (`D13`, `D15`, `KI-055-4`) | medium | `rule_validator` | sonnet | medium | ✅ `9171740` |
+| `B7` | `agents.md` | modify: `RA-19` extends the prohibition to prescribed procedures (`D14`, `KI-055-6`); `RA-09` tree list per `B2` | high | `rule_validator` | sonnet | medium | ✅ `5083e70` |
+| `B8` | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify: `F-055-N1` status per `D13` and `Q` correspondence (`D16`, `F2`) | low | `doc_orchestrator` | sonnet | medium | ✅ `50b5281` |
+| `B9` | `scripts/session_start.py` (companion: `tests/test_session_start.py`) | modify: advisory readiness finding when `claude --version` differs from the `Measuring CLI` row of `rules/project_topology.md` §4 (`D17`); `feat(` | medium | `implementer_agent` | sonnet | medium | ✅ `8bb0d1a` |
 
 ## Locks (`jurisdictional_lock` / `no_interference`)
 

@@ -31,9 +31,9 @@ Tracking of atomic goals achieved during the session.
     - `[x]` Plan committed before Phase 5 (`agents.md §2 triple_lock`): `817ac26`, amended with the Phase 4.3 findings in the Phase 4 commit
 - [x] **Phase 4 - Assignment and Scope**: `agent_assignment.md` (A5 reassigned to `skill_architect`), `skill_assignment.md` (P1 hit, no forge; `check_forge_ladder.py` 0), `task_scope.md` (`check_task_scope.py` 0; findings F-1..F-9). The parent session (writer-less profiles hold no `Bash`, `KI-054-5`) ran the three checks and propagated F-1 (B1/B4 writer is `doc_orchestrator`), F-4 (B3 test `tests/test_mcp_template.py`), F-5 (A14/A17/A19 regenerate `WORKFLOWS_STEP_MAP_GUIDE.md`) and F-6 (D10 verification row) into the plan, `agent_assignment.md` and `task_scope.md` (`RA-14`)
 - [x] **Phase 5 - Approval Gate**: Human OK for Sprint 056 only, 2026-10-12, plan commit `2d5504e`
-- [ ] **Phase 6 - Execution**
     - `[x]` Wave A: 22 units (21 planned + discovered `A22`); `check_fix_reproduces.py --range 295fe44..076145c` 7 `fix(` OK, 0 violations; `make verify` 0, 1105 passed at `c025350`
-    - `[ ]` Wave B
+    - `[x]` Wave B: 9 units; 4 headless `claude -p` measurement sessions (budget ≤ 40); `SANDBOX_ENUMERATION.md` E1-E17; `F-055-N1` stays open (D13); boundary-claim grep exit 1; `make verify` 0, 1105 passed at `5083e70`
+- [x] **Phase 6 - Execution**: 31 units landed
 
 ### Roadmap: Wave A (deterministic, low risk)
 
@@ -66,15 +66,15 @@ Tracking of atomic goals achieved during the session.
 
 | # | File | Operation | Risk | Assignee (proposed) | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `B1` | `docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md` | create: measured enumeration on the base (`D11`, `KI-055-1`, `F4`) | high | `principal_agent` (measurement) / `doc_orchestrator` (writing) | ⏳ |
-| `B2` | `claude/settings.hooks.json` (+ `tests/test_template_sandbox.py`, `fix(`) | modify: write deny for the whole `./.agents` and `Edit(/.agents/**)`; `.git` denies only if `B1` justifies them (`D12`) | high | `implementer_agent` | ⏳ |
-| `B3` | `claude/mcp.json` (+ MCP template test, `fix(`) | modify: `-I` on the `graphify` launcher (`D12`, `Q3`) | medium | `implementer_agent` | ⏳ |
-| `B4` | `docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md` | modify: re-measure every vector after `B2`/`B3` (`D12`, `D13`) | high | `principal_agent` / `doc_orchestrator` | ⏳ |
-| `B5` | `scripts/install.py` (+ `tests/test_install_with_env_render.py`, `fix(`) | modify: reject with exit `2` a host `excludedCommands` entry (`D8`, `KI-055-2`) | medium | `implementer_agent` | ⏳ |
-| `B6` | `rules/project_topology.md` | modify: `N3` and residual-risk rows per the enumeration; three `gh` script rows (`D13`, `D15`, `KI-055-4`) | medium | `rule_validator` | ⏳ |
-| `B7` | `agents.md` | modify: `RA-19` extends the prohibition to prescribed procedures (`D14`, `KI-055-6`); `RA-09` tree list per `B2` | high | `rule_validator` | ⏳ |
-| `B8` | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify: status of `F-055-N1` per `D13` and `Q` correspondence (`D16`, `F2`) | low | `doc_orchestrator` | ⏳ |
-| `B9` | `scripts/session_start.py` | modify: advisory boot readiness finding on CLI version mismatch with the `Measuring CLI` row (`D17`) | medium | `implementer_agent` | ⏳ |
+| `B1` | `docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md` | create: measured enumeration on the base (`D11`, `KI-055-1`, `F4`) | high | `principal_agent` (measurement) / `doc_orchestrator` (writing) | ✅ `c7c0701` |
+| `B2` | `claude/settings.hooks.json` (+ `tests/test_template_sandbox.py`, `fix(`) | modify: write deny for the whole `./.agents` and `Edit(/.agents/**)`; `.git` denies only if `B1` justifies them (`D12`) | high | `implementer_agent` | ✅ `d70d00c` |
+| `B3` | `claude/mcp.json` (+ MCP template test, `fix(`) | modify: `-I` on the `graphify` launcher (`D12`, `Q3`) | medium | `implementer_agent` | ✅ `05c74a6` |
+| `B4` | `docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md` | modify: re-measure every vector after `B2`/`B3` (`D12`, `D13`) | high | `principal_agent` / `doc_orchestrator` | ✅ `6fd75ec` |
+| `B5` | `scripts/install.py` (+ `tests/test_install_with_env_render.py`, `fix(`) | modify: reject with exit `2` a host `excludedCommands` entry (`D8`, `KI-055-2`) | medium | `implementer_agent` | ✅ `3bfa1d9` |
+| `B6` | `rules/project_topology.md` | modify: `N3` and residual-risk rows per the enumeration; three `gh` script rows (`D13`, `D15`, `KI-055-4`) | medium | `rule_validator` | ✅ `9171740` |
+| `B7` | `agents.md` | modify: `RA-19` extends the prohibition to prescribed procedures (`D14`, `KI-055-6`); `RA-09` tree list per `B2` | high | `rule_validator` | ✅ `5083e70` |
+| `B8` | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify: status of `F-055-N1` per `D13` and `Q` correspondence (`D16`, `F2`) | low | `doc_orchestrator` | ✅ `50b5281` |
+| `B9` | `scripts/session_start.py` | modify: advisory boot readiness finding on CLI version mismatch with the `Measuring CLI` row (`D17`) | medium | `implementer_agent` | ✅ `8bb0d1a` |
 
 ---
 
@@ -87,6 +87,11 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | `A8` commit `d40f3da` also carries the `A16` `RA-09` hunk: the parent staged the whole `agents.md` while two units' edits were pending in it | Recorded, not rewritten: `A16` is attributed to `d40f3da`. Commit only by hunk (`git add -p` is unavailable non-interactively; stage a file only when one unit's edit is pending in it) | pending extract |
 | The `D10` propagation grep found an unconditional `gh` statement outside the planned units (`workflows/repository_hardening_workflow.md:44`) | Discovered unit `A22` (`3d8fe3f`), added to every sprint artifact (`RA-14`) | n/a |
 | The canonical `gh` row left a dangling verb after `A15` | Follow-up `c025350` | n/a |
+| D12 risk found before B2: Sprint 055 (`SANDBOX_MEASUREMENT.md` §8 `R8`, §9 `D1`) had rejected a whole-`.agents` deny because the boot writes the bridge lock | Measured instead of assumed (sessions 2-3): the unsandboxed `SessionStart` hook maintains the lock; boot and commit survive; `allowWrite` cannot carve inside `denyWrite`. Abort criterion 2 not triggered | n/a |
+| `scripts/check_fix_reproduces.py` treats `.json` as non-source, so the `Repro:` claims of `B2` (`d70d00c`) and `B3` (`05c74a6`) are not replayed (parent failures observed manually by the implementer) | Route at extract (instrument gap) | pending extract |
+| Hosts installed before `d70d00c` keep the old per-tree deny entries next to `./.agents` (harmless, never pruned: not in `RETIRED_VALUES`) | Route at extract | pending extract |
+| The `B5` refusal message suggests the deprecated `install.sh` shim via `install_command()` | Route at extract | pending extract |
+| `session_start._refresh_bridge_lock` would raise an uncaught `PermissionError` under the whole-`.agents` deny if reached in the sandbox (not reached in sessions 2-4: the hook refreshes the lock first) | Route at extract | pending extract |
 | Residue outside scope: `skills/env-shielding-auditor/README.md` badge says "Built With: Bash" for a Python script (found by `A5`); `agents/devops_agent.md` frontmatter and `write_scope` say `gh` is never run by that profile (a profile restriction, consistent with `D10`, left unchanged) | Route at `/agents:extract` | pending extract |
 
 ---
@@ -122,6 +127,6 @@ Example (do not uncomment — Phase 7 writes the real rows):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: APPROVED (Phase 5 passed 2026-10-12)
-**Next Phase**: Phase 6 (Execution), Wave A then Wave B
+**Next Phase**: Phase 7 (QA Gate 1, then Tester Gate 2)
 
 *Certified under conventional commit standard: feat(scope): message #056*
