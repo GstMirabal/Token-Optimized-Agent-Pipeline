@@ -544,7 +544,7 @@ def _skill_script_directly_resolved(path: Path, exceptions: dict[str, str]) -> b
     """
     if str(path) in exceptions:
         return True
-    if "invoked_by:" in path.read_text(encoding="utf-8"):
+    if _invoked_by_line(path.read_text(encoding="utf-8")) != "":
         return True
     if "skills/" not in str(path):
         return False
@@ -656,7 +656,7 @@ def check_test_files_invoked(exceptions: dict[str, str], modules: set[str]) -> l
             continue
         if path.stem in modules:
             continue
-        if "invoked_by:" in path.read_text(encoding="utf-8"):
+        if _invoked_by_line(path.read_text(encoding="utf-8")) != "":
             continue
         errors.append(
             f"(d) {key} matches no pytest collection pattern, is imported by "
@@ -695,7 +695,7 @@ def check_invocation_coverage(corpus: str) -> list[str]:
             continue
         if path.suffix == ".py" and path.stem in modules:
             continue
-        if "invoked_by:" not in path.read_text(encoding="utf-8"):
+        if _invoked_by_line(path.read_text(encoding="utf-8")) == "":
             errors.append(
                 f"(d) {key} declares no `invoked_by:` and has no exception — "
                 f"a mechanism nothing calls is a regression, not a pending feature."

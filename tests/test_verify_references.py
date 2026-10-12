@@ -526,3 +526,24 @@ def test_pytest_coverage_claim_is_derived_from_makefile_not_hardcoded(
     assert verify_mod._pytest_covers_tests_dir() is False
     errors = verify_mod.check_invocation_coverage("")
     assert any("tests/test_foo.py" in e for e in errors)
+
+
+@pytest.mark.parametrize(
+    "relative",
+    ["skills/x/scripts/orphan.py", "scripts/orphan.py", "tests/orphan_helper.py"],
+)
+def test_prose_mention_of_invoked_by_does_not_resolve_a_file(
+    verify_mod, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, relative: str
+) -> None:
+    """NF-2: a file whose only `invoked_by:` is prose is not a declaration."""
+    root = tmp_path
+    _base_tree(root)
+    target = root / relative
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(
+        '"""Explains the `invoked_by:` token in prose; declares nothing."""\nVALUE = 1\n',
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(root)
+    errors = verify_mod.check_invocation_coverage("")
+    assert any(relative in e for e in errors)
