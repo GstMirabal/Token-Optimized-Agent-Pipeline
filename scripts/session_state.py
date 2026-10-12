@@ -746,6 +746,22 @@ def _add_claim_subparser(sub: argparse._SubParsersAction) -> None:
     )
 
 
+def _add_mark_audited_subparser(sub: argparse._SubParsersAction) -> None:
+    """Register the `mark-audited` subcommand and its `--report` flag.
+
+    Args:
+        sub: Subparsers action of the top-level parser.
+    """
+    mark_parser = sub.add_parser(
+        "mark-audited",
+        help="Write current_sprint.last_audit_sprint from a PIPELINE_AUDIT_REPORT-<NNN>.md.",
+    )
+    mark_parser.add_argument(
+        "--report", required=True,
+        help="Path to an existing PIPELINE_AUDIT_REPORT-<NNN>.md with NNN <= current_sprint.id.",
+    )
+
+
 def _add_other_subparsers(sub: argparse._SubParsersAction) -> None:
     """Register every subcommand but `claim` (which `_add_claim_subparser` owns).
 
@@ -799,14 +815,7 @@ def _add_other_subparsers(sub: argparse._SubParsersAction) -> None:
         "--name", default=None,
         help="Sprint name; written only when given, a stale name is dropped.",
     )
-    mark_parser = sub.add_parser(
-        "mark-audited",
-        help="Write current_sprint.last_audit_sprint from a PIPELINE_AUDIT_REPORT-<NNN>.md.",
-    )
-    mark_parser.add_argument(
-        "--report", required=True,
-        help="Path to an existing PIPELINE_AUDIT_REPORT-<NNN>.md with NNN <= current_sprint.id.",
-    )
+    _add_mark_audited_subparser(sub)
 
 
 def _build_parser() -> argparse.ArgumentParser:
