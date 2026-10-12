@@ -88,6 +88,7 @@ def test_deny_write_paths(template: dict[str, Any], path: str) -> None:
         "Edit(/.agents/config/**)",
         "Edit(/.agents/skills/**)",
         "Edit(/.agents/claude/**)",
+        "Edit(/.agents/venv_skillopt/**)",
         "Edit(/.agents/scripts/with_env.py)",
         "Edit(/.agents/config/with_env_allowlist.json)",
         "Edit(/.env)",
