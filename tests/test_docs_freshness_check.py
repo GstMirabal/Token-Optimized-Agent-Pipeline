@@ -439,3 +439,26 @@ def test_node_delta_ignores_a_non_numeric_count_rather_than_raising():
     """This runs inside a close gate, so an older snapshot's field must not be
     able to stop a close over a value the function only counts."""
     assert dfc.node_delta({"nodes": "many"}, {"nodes": 4}) == 4
+
+
+def _write_bold_status_adr(repo: Path, adr_id: str, slug: str, status_line: str) -> Path:
+    """Write an ADR using the real `**Status**: ...` form the repository uses."""
+    adr_dir = repo / "docs" / "decisions"
+    adr_dir.mkdir(parents=True, exist_ok=True)
+    path = adr_dir / f"ADR-{adr_id}-{slug}.md"
+    path.write_text(f"# ADR-{adr_id}: {slug}\n\n**Status**: {status_line}\n", encoding="utf-8")
+    return path
+
+
+def test_c4_override_pointing_to_bold_form_superseded_adr_warns(tmp_path):
+    _write_bold_status_adr(tmp_path, "0015", "old", "`Superseded by ADR-0017` - kept intact")
+    report = dfc.FreshnessReport()
+    blueprint = tmp_path / "FOO_BLUEPRINT.md"
+    blueprint.write_text("**C4 Level Override**: 3 (justification: ADR-0015)\n", encoding="utf-8")
+    dfc.check_c4_override_pointers(report, [blueprint], tmp_path)
+    assert any("superseded" in f.message for f in report.findings)
+
+
+def test_bold_form_accepted_adr_that_supersedes_another_is_not_superseded(tmp_path):
+    path = _write_bold_status_adr(tmp_path, "0013", "new", "`Accepted` - supersedes `ADR-0012`")
+    assert dfc.is_adr_superseded(path) is False
