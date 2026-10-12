@@ -91,9 +91,9 @@ and the deciding argument each round was not the false positive but that **a
 host had no way to comply except to disable the hook**.
 
 The same pointer-versus-credential distinction governs how a command receives a
-`.env` value: it receives it through `scripts/with_env.py` (`rules/project_topology.md`
-section 4, row `Any command that needs a .env value`), never by the agent reading
-`.env` into context. This section waives a scan finding; it does not widen that path.
+`.env` value: the human runs the command through `scripts/with_env.py` (only its
+three allowlisted names; `rules/project_topology.md` section 4, row `S-3`), never
+by the agent reading `.env` into context. This section waives a scan finding; it does not widen that path.
 
 ## 6. Human-run browser verification
 
