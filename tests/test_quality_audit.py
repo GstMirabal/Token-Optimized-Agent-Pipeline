@@ -1066,3 +1066,69 @@ def test_js_sibling_arguments_of_a_call_still_count_beside_a_nested_function(
         "}\n"
     )
     assert _measure_js_function(tmp_path, source, "outer") == 5
+
+
+# --------------------------------------------------------------------------
+# Blank and comment-only rows inside a multi-row statement (Sprint 056 `D6` b)
+# --------------------------------------------------------------------------
+
+
+def test_python_comment_and_blank_rows_inside_a_multirow_statement_are_not_executable(
+    tmp_path: Path,
+) -> None:
+    """Hand derivation (`D6` b): the dict literal spans rows 2-7 but row 4
+    is comment-only and row 5 is blank; counted rows are 2, 3, 6, 7 plus
+    `return d` on row 8 -> 5. The defect counted the whole span (7)."""
+    source = (
+        "def f():\n"
+        "    d = {\n"
+        '        "a": 1,\n'
+        "        # note\n"
+        "\n"
+        '        "b": 2,\n'
+        "    }\n"
+        "    return d\n"
+    )
+    path = tmp_path / "multirow.py"
+    path.write_text(source, encoding="utf-8")
+
+    units = qa.scan_python_file(path)
+
+    assert units[0].executable_lines == 5
+
+
+def test_python_blank_row_inside_a_triple_quoted_string_still_counts(tmp_path: Path) -> None:
+    """A blank row inside a string token is part of the token, not a blank
+    separator between tokens: rows 2-4 (`x = '''`, blank, `'''`) -> 3."""
+    source = "def f():\n    x = '''\n\n    '''\n    return x\n"
+    path = tmp_path / "tq.py"
+    path.write_text(source, encoding="utf-8")
+
+    assert qa.scan_python_file(path)[0].executable_lines == 4
+
+
+def test_js_comment_and_blank_rows_inside_a_multirow_statement_are_not_executable(
+    tmp_path: Path,
+) -> None:
+    """JS analogue of the Python case: the object literal spans rows 2-7,
+    row 4 is a `//` comment and row 5 is blank; counted rows are 2, 3, 6, 7
+    plus `return d;` on row 8 -> 5."""
+    source = (
+        "function f() {\n"
+        "  const d = {\n"
+        "    a: 1,\n"
+        "    // note\n"
+        "\n"
+        "    b: 2,\n"
+        "  };\n"
+        "  return d;\n"
+        "}\n"
+    )
+    assert _measure_js_function(tmp_path, source, "f") == 5
+
+
+def test_js_blank_row_inside_a_template_literal_still_counts(tmp_path: Path) -> None:
+    """A blank row inside a template string token is part of the token:
+    rows 2-4 (`const x = ` + backtick, blank, closing backtick) -> 3 + return."""
+    source = "function f() {\n  const x = `\n\n`;\n  return x;\n}\n"
+    assert _measure_js_function(tmp_path, source, "f") == 4
