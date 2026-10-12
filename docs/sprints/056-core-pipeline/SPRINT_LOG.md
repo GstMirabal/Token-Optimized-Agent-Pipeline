@@ -31,32 +31,36 @@ Tracking of atomic goals achieved during the session.
     - `[x]` Plan committed before Phase 5 (`agents.md §2 triple_lock`): `817ac26`, amended with the Phase 4.3 findings in the Phase 4 commit
 - [x] **Phase 4 - Assignment and Scope**: `agent_assignment.md` (A5 reassigned to `skill_architect`), `skill_assignment.md` (P1 hit, no forge; `check_forge_ladder.py` 0), `task_scope.md` (`check_task_scope.py` 0; findings F-1..F-9). The parent session (writer-less profiles hold no `Bash`, `KI-054-5`) ran the three checks and propagated F-1 (B1/B4 writer is `doc_orchestrator`), F-4 (B3 test `tests/test_mcp_template.py`), F-5 (A14/A17/A19 regenerate `WORKFLOWS_STEP_MAP_GUIDE.md`) and F-6 (D10 verification row) into the plan, `agent_assignment.md` and `task_scope.md` (`RA-14`)
 - [x] **Phase 5 - Approval Gate**: Human OK for Sprint 056 only, 2026-10-12, plan commit `2d5504e`
+- [ ] **Phase 6 - Execution**
+    - `[x]` Wave A: 22 units (21 planned + discovered `A22`); `check_fix_reproduces.py --range 295fe44..076145c` 7 `fix(` OK, 0 violations; `make verify` 0, 1105 passed at `c025350`
+    - `[ ]` Wave B
 
 ### Roadmap: Wave A (deterministic, low risk)
 
 | # | File | Operation | Risk | Assignee (proposed) | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `A1` | `scripts/docs_freshness_check.py` (+ `tests/test_docs_freshness_check.py`, `fix(`) | modify: `ADR_STATUS_SUPERSEDED_RE` accepts `**Status**: \`Superseded` (`D2`, `KI-052-1`) | low | `implementer_agent` | ⏳ |
-| `A2` | `scripts/verify_references.py` (+ `tests/test_verify_references.py`, `fix(`) | modify: the three substring checks of `invoked_by:` use `_invoked_by_line` (`D3`, `NF-2`) | medium | `implementer_agent` | ⏳ |
-| `A3` | `scripts/verify_references.py` (+ `tests/test_verify_references.py`, `fix(`) | modify: path-token boundary in `_skill_doc_names_script` (`D3`, `NF-1`) | medium | `implementer_agent` | ⏳ |
-| `A4` | `tests/test_root_resolution.py` | modify: assertion per checkout shape, valid in worktrees (`D4`, `KI-052-4`); commit `test(` | low | `implementer_agent` | ⏳ |
-| `A5` | `skills/env-shielding-auditor/README.md` | modify: name `scripts/env_shielding_auditor.py` (`D5`, `KI-052-7`) | low | `doc_orchestrator` | ⏳ |
-| `A6` | `scripts/quality_audit.py` (+ `tests/test_quality_audit.py`, `fix(`) | modify: nested-function boundary in JS/TS (`D6` a) | medium | `implementer_agent` | ⏳ |
-| `A7` | `scripts/quality_audit.py` (+ `tests/test_quality_audit.py`, `fix(`) | modify: exclude blank and comment-only rows inside multi-row statements, in Python and JS/TS (`D6` b) | medium | `implementer_agent` | ⏳ |
-| `A8` | `agents.md` | modify: `§1` `max_lines_per_func` and the JS/TS `linter_command` row declare the two `D6` rules | low | `rule_validator` | ⏳ |
-| `A9` | `scripts/install.py` (+ `tests/test_install_with_env_render.py`, `fix(`) | modify: `RENDER_OWNED_RE` accepts paths with spaces and the docstring is aligned with `T2-1` (`D7`, `Q9`) | low | `implementer_agent` | ⏳ |
-| `A10` | `scripts/install.py` (+ `tests/test_install_with_env_render.py`, `fix(`) | modify: no crash when the JSON root is not a dict (`D7`, `Q10`) | low | `implementer_agent` | ⏳ |
-| `A11` | `tests/test_template_sandbox.py` | modify: pin `Edit(/.agents/venv_skillopt/**)` (`Q10`); commit `test(` | low | `implementer_agent` | ⏳ |
-| `A12` | `tests/test_install_with_env_render.py` | modify: return types and docstrings (`Q10`); commit `test(` | low | `implementer_agent` | ⏳ |
-| `A13` | `scripts/session_state.py` (+ `tests/test_session_state.py`) | modify: `mark-audited` subcommand (`D9`, `KI-055-7`); commit `feat(` | medium | `implementer_agent` | ⏳ |
-| `A14` | `workflows/audit_workflow.md` | modify: the last step invokes `session_state.py mark-audited` (`D9`, `RA-16`) | low | `doc_orchestrator` | ⏳ |
-| `A15` | `rules/project_topology.md` | modify: `gh` row of §4 carries the condition "under the sandbox" (`D10`, `KI-055-8`) | medium | `rule_validator` | ⏳ |
-| `A16` | `agents.md` | modify: `RA-09` references the condition of `A15` (`D10`) | medium | `rule_validator` | ⏳ |
-| `A17` | `workflows/deployment_workflow.md` | modify: `pr_flow`, `github_release` and the note at line 31 carry the condition (`D10`) | medium | `doc_orchestrator` | ⏳ |
-| `A18` | `rules/qa_and_testing.md` | modify: `§5`, the `with_env.py` sentence names the actor and points to `S-3` (`D16`, `F1`) | low | `rule_validator` | ⏳ |
-| `A19` | `workflows/pipeline_workflow.md` | modify: Phase 2 points to `S-3` and names the human (`D16`, `R7-4`) | low | `doc_orchestrator` | ⏳ |
-| `A20` | `docs/standards/templates/README_TEMPLATE.md` | modify: line 91 (`D16`, `R7-4`) | low | `doc_orchestrator` | ⏳ |
-| `A21` | `agents/devops_agent.md` | modify: line 16 cites the residual-risk row (`D16`, `R7-5`) | low | `doc_orchestrator` | ⏳ |
+| `A1` | `scripts/docs_freshness_check.py` (+ `tests/test_docs_freshness_check.py`, `fix(`) | modify: `ADR_STATUS_SUPERSEDED_RE` accepts `**Status**: \`Superseded` (`D2`, `KI-052-1`) | low | `implementer_agent` | ✅ `7f0f926` |
+| `A2` | `scripts/verify_references.py` (+ `tests/test_verify_references.py`, `fix(`) | modify: the three substring checks of `invoked_by:` use `_invoked_by_line` (`D3`, `NF-2`) | medium | `implementer_agent` | ✅ `a740f88` |
+| `A3` | `scripts/verify_references.py` (+ `tests/test_verify_references.py`, `fix(`) | modify: path-token boundary in `_skill_doc_names_script` (`D3`, `NF-1`) | medium | `implementer_agent` | ✅ `b083715` |
+| `A4` | `tests/test_root_resolution.py` | modify: assertion per checkout shape, valid in worktrees (`D4`, `KI-052-4`); commit `test(` | low | `implementer_agent` | ✅ `eccb6ea` |
+| `A5` | `skills/env-shielding-auditor/README.md` | modify: name `scripts/env_shielding_auditor.py` (`D5`, `KI-052-7`) | low | `doc_orchestrator` | ✅ `77eb3c4` |
+| `A6` | `scripts/quality_audit.py` (+ `tests/test_quality_audit.py`, `fix(`) | modify: nested-function boundary in JS/TS (`D6` a) | medium | `implementer_agent` | ✅ `2e4487c` |
+| `A7` | `scripts/quality_audit.py` (+ `tests/test_quality_audit.py`, `fix(`) | modify: exclude blank and comment-only rows inside multi-row statements, in Python and JS/TS (`D6` b) | medium | `implementer_agent` | ✅ `9f02419` |
+| `A8` | `agents.md` | modify: `§1` `max_lines_per_func` and the JS/TS `linter_command` row declare the two `D6` rules | low | `rule_validator` | ✅ `d40f3da` |
+| `A9` | `scripts/install.py` (+ `tests/test_install_with_env_render.py`, `fix(`) | modify: `RENDER_OWNED_RE` accepts paths with spaces and the docstring is aligned with `T2-1` (`D7`, `Q9`) | low | `implementer_agent` | ✅ `b2bf703` |
+| `A10` | `scripts/install.py` (+ `tests/test_install_with_env_render.py`, `fix(`) | modify: no crash when the JSON root is not a dict (`D7`, `Q10`) | low | `implementer_agent` | ✅ `8dba69b` |
+| `A11` | `tests/test_template_sandbox.py` | modify: pin `Edit(/.agents/venv_skillopt/**)` (`Q10`); commit `test(` | low | `implementer_agent` | ✅ `40b2ffc` |
+| `A12` | `tests/test_install_with_env_render.py` | modify: return types and docstrings (`Q10`); commit `test(` | low | `implementer_agent` | ✅ `2016dad` |
+| `A13` | `scripts/session_state.py` (+ `tests/test_session_state.py`) | modify: `mark-audited` subcommand (`D9`, `KI-055-7`); commit `feat(` | medium | `implementer_agent` | ✅ `46059d8, 076145c` |
+| `A14` | `workflows/audit_workflow.md` | modify: the last step invokes `session_state.py mark-audited` (`D9`, `RA-16`) | low | `doc_orchestrator` | ✅ `8035aea` |
+| `A15` | `rules/project_topology.md` | modify: `gh` row of §4 carries the condition "under the sandbox" (`D10`, `KI-055-8`) | medium | `rule_validator` | ✅ `45743dd, c025350` |
+| `A16` | `agents.md` | modify: `RA-09` references the condition of `A15` (`D10`) | medium | `rule_validator` | ✅ `d40f3da` |
+| `A17` | `workflows/deployment_workflow.md` | modify: `pr_flow`, `github_release` and the note at line 31 carry the condition (`D10`) | medium | `doc_orchestrator` | ✅ `d2c3aa4` |
+| `A18` | `rules/qa_and_testing.md` | modify: `§5`, the `with_env.py` sentence names the actor and points to `S-3` (`D16`, `F1`) | low | `rule_validator` | ✅ `a86570f` |
+| `A19` | `workflows/pipeline_workflow.md` | modify: Phase 2 points to `S-3` and names the human (`D16`, `R7-4`) | low | `doc_orchestrator` | ✅ `29781aa` |
+| `A20` | `docs/standards/templates/README_TEMPLATE.md` | modify: line 91 (`D16`, `R7-4`) | low | `doc_orchestrator` | ✅ `6f1cc0c` |
+| `A21` | `agents/devops_agent.md` | modify: line 16 cites the residual-risk row (`D16`, `R7-5`) | low | `doc_orchestrator` | ✅ `be7c041` |
+| `A22` | `workflows/repository_hardening_workflow.md` | modify: `gh` note conditioned on the template sandbox (`D10`); discovered in Phase 6 (`RA-14` propagation grep) | low | `doc_orchestrator` | ✅ `3d8fe3f` |
 
 ### Roadmap: Wave B (sandbox)
 
@@ -79,7 +83,11 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 
 | Friction Point | Resolution / Workaround | KI ID |
 | :--- | :--- | :--- |
-| None recorded at Phase 3 | n/a | n/a |
+| `A13` first commit `46059d8` left `make verify` exit 2 (`_add_other_subparsers` at 55 executable lines); the implementer could not amend | Follow-up `refactor(` `076145c` extracted `_add_mark_audited_subparser`; `make verify` 0. One red commit on the branch, folded by the closeout squash (`RA-08`) | pending extract |
+| `A8` commit `d40f3da` also carries the `A16` `RA-09` hunk: the parent staged the whole `agents.md` while two units' edits were pending in it | Recorded, not rewritten: `A16` is attributed to `d40f3da`. Commit only by hunk (`git add -p` is unavailable non-interactively; stage a file only when one unit's edit is pending in it) | pending extract |
+| The `D10` propagation grep found an unconditional `gh` statement outside the planned units (`workflows/repository_hardening_workflow.md:44`) | Discovered unit `A22` (`3d8fe3f`), added to every sprint artifact (`RA-14`) | n/a |
+| The canonical `gh` row left a dangling verb after `A15` | Follow-up `c025350` | n/a |
+| Residue outside scope: `skills/env-shielding-auditor/README.md` badge says "Built With: Bash" for a Python script (found by `A5`); `agents/devops_agent.md` frontmatter and `write_scope` say `gh` is never run by that profile (a profile restriction, consistent with `D10`, left unchanged) | Route at `/agents:extract` | pending extract |
 
 ---
 

@@ -88,27 +88,28 @@ una regla sin la condición que la justifica.
 
 | # | File | Operation | Risk | Assignee (proposed) | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `A1` | `scripts/docs_freshness_check.py` (+ `tests/test_docs_freshness_check.py`, `fix(`) | modify: `ADR_STATUS_SUPERSEDED_RE` acepta `**Status**: \`Superseded` (`D2`, `KI-052-1`) | low | `implementer_agent` | ⏳ |
-| `A2` | `scripts/verify_references.py` (+ `tests/test_verify_references.py`, `fix(`) | modify: las tres comprobaciones por subcadena de `invoked_by:` usan `_invoked_by_line` (`D3`, `NF-2`) | medium | `implementer_agent` | ⏳ |
-| `A3` | `scripts/verify_references.py` (+ `tests/test_verify_references.py`, `fix(`) | modify: frontera de token entre rutas en `_skill_doc_names_script` (`D3`, `NF-1`) | medium | `implementer_agent` | ⏳ |
-| `A4` | `tests/test_root_resolution.py` | modify: aserción por forma de checkout, válida en worktrees (`D4`, `KI-052-4`); commit `test(` | low | `implementer_agent` | ⏳ |
-| `A5` | `skills/env-shielding-auditor/README.md` | modify: nombrar `scripts/env_shielding_auditor.py` (`D5`, `KI-052-7`) | low | `doc_orchestrator` | ⏳ |
-| `A6` | `scripts/quality_audit.py` (+ `tests/test_quality_audit.py`, `fix(`) | modify: frontera de función anidada en JS/TS (`D6` a) | medium | `implementer_agent` | ⏳ |
-| `A7` | `scripts/quality_audit.py` (+ `tests/test_quality_audit.py`, `fix(`) | modify: excluir filas en blanco y de solo comentario dentro de sentencias de varias filas, en Python y en JS/TS (`D6` b) | medium | `implementer_agent` | ⏳ |
-| `A8` | `agents.md` | modify: `§1` `max_lines_per_func` y la fila JS/TS de `linter_command` declaran las dos reglas de `D6` | low | `rule_validator` | ⏳ |
-| `A9` | `scripts/install.py` (+ `tests/test_install_with_env_render.py`, `fix(`) | modify: `RENDER_OWNED_RE` con rutas con espacios y docstring alineado con `T2-1` (`D7`, `Q9`) | low | `implementer_agent` | ⏳ |
-| `A10` | `scripts/install.py` (+ `tests/test_install_with_env_render.py`, `fix(`) | modify: sin crash cuando la raíz no es un dict (`D7`, `Q10`) | low | `implementer_agent` | ⏳ |
-| `A11` | `tests/test_template_sandbox.py` | modify: fijar `Edit(/.agents/venv_skillopt/**)` (`Q10`); commit `test(` | low | `implementer_agent` | ⏳ |
-| `A12` | `tests/test_install_with_env_render.py` | modify: tipos de retorno y docstrings (`Q10`); commit `test(` | low | `implementer_agent` | ⏳ |
-| `A13` | `scripts/session_state.py` (+ `tests/test_session_state.py`) | modify: subcomando `mark-audited` (`D9`, `KI-055-7`); commit `feat(` | medium | `implementer_agent` | ⏳ |
-| `A14` | `workflows/audit_workflow.md` (+ `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` regenerada con `python3 scripts/map_workflows.py`, compañero generado que `make verify` exige) | modify: el último paso invoca `session_state.py mark-audited` (`D9`, `RA-16`) | low | `doc_orchestrator` | ⏳ |
-| `A15` | `rules/project_topology.md` | modify: fila `gh` de §4 con la condición "bajo el sandbox" (`D10`, `KI-055-8`) | medium | `rule_validator` | ⏳ |
-| `A16` | `agents.md` | modify: `RA-09` referencia la condición de `A15` (`D10`) | medium | `rule_validator` | ⏳ |
-| `A17` | `workflows/deployment_workflow.md` (+ `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` regenerada con `python3 scripts/map_workflows.py`, compañero generado que `make verify` exige) | modify: `pr_flow`, `github_release` y la nota de la línea 31 con la condición (`D10`) | medium | `doc_orchestrator` | ⏳ |
-| `A18` | `rules/qa_and_testing.md` | modify: `§5`, la frase de `with_env.py` nombra al actor y apunta a `S-3` (`D16`, `F1`) | low | `rule_validator` | ⏳ |
-| `A19` | `workflows/pipeline_workflow.md` (+ `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` regenerada con `python3 scripts/map_workflows.py`, compañero generado que `make verify` exige) | modify: Phase 2 apunta a `S-3` y nombra al humano (`D16`, `R7-4`) | low | `doc_orchestrator` | ⏳ |
-| `A20` | `docs/standards/templates/README_TEMPLATE.md` | modify: línea 91 (`D16`, `R7-4`) | low | `doc_orchestrator` | ⏳ |
-| `A21` | `agents/devops_agent.md` | modify: línea 16 cita la fila de riesgo residual (`D16`, `R7-5`) | low | `doc_orchestrator` | ⏳ |
+| `A1` | `scripts/docs_freshness_check.py` (+ `tests/test_docs_freshness_check.py`, `fix(`) | modify: `ADR_STATUS_SUPERSEDED_RE` acepta `**Status**: \`Superseded` (`D2`, `KI-052-1`) | low | `implementer_agent` | ✅ `7f0f926` |
+| `A2` | `scripts/verify_references.py` (+ `tests/test_verify_references.py`, `fix(`) | modify: las tres comprobaciones por subcadena de `invoked_by:` usan `_invoked_by_line` (`D3`, `NF-2`) | medium | `implementer_agent` | ✅ `a740f88` |
+| `A3` | `scripts/verify_references.py` (+ `tests/test_verify_references.py`, `fix(`) | modify: frontera de token entre rutas en `_skill_doc_names_script` (`D3`, `NF-1`) | medium | `implementer_agent` | ✅ `b083715` |
+| `A4` | `tests/test_root_resolution.py` | modify: aserción por forma de checkout, válida en worktrees (`D4`, `KI-052-4`); commit `test(` | low | `implementer_agent` | ✅ `eccb6ea` |
+| `A5` | `skills/env-shielding-auditor/README.md` | modify: nombrar `scripts/env_shielding_auditor.py` (`D5`, `KI-052-7`) | low | `doc_orchestrator` | ✅ `77eb3c4` |
+| `A6` | `scripts/quality_audit.py` (+ `tests/test_quality_audit.py`, `fix(`) | modify: frontera de función anidada en JS/TS (`D6` a) | medium | `implementer_agent` | ✅ `2e4487c` |
+| `A7` | `scripts/quality_audit.py` (+ `tests/test_quality_audit.py`, `fix(`) | modify: excluir filas en blanco y de solo comentario dentro de sentencias de varias filas, en Python y en JS/TS (`D6` b) | medium | `implementer_agent` | ✅ `9f02419` |
+| `A8` | `agents.md` | modify: `§1` `max_lines_per_func` y la fila JS/TS de `linter_command` declaran las dos reglas de `D6` | low | `rule_validator` | ✅ `d40f3da` |
+| `A9` | `scripts/install.py` (+ `tests/test_install_with_env_render.py`, `fix(`) | modify: `RENDER_OWNED_RE` con rutas con espacios y docstring alineado con `T2-1` (`D7`, `Q9`) | low | `implementer_agent` | ✅ `b2bf703` |
+| `A10` | `scripts/install.py` (+ `tests/test_install_with_env_render.py`, `fix(`) | modify: sin crash cuando la raíz no es un dict (`D7`, `Q10`) | low | `implementer_agent` | ✅ `8dba69b` |
+| `A11` | `tests/test_template_sandbox.py` | modify: fijar `Edit(/.agents/venv_skillopt/**)` (`Q10`); commit `test(` | low | `implementer_agent` | ✅ `40b2ffc` |
+| `A12` | `tests/test_install_with_env_render.py` | modify: tipos de retorno y docstrings (`Q10`); commit `test(` | low | `implementer_agent` | ✅ `2016dad` |
+| `A13` | `scripts/session_state.py` (+ `tests/test_session_state.py`) | modify: subcomando `mark-audited` (`D9`, `KI-055-7`); commit `feat(` | medium | `implementer_agent` | ✅ `46059d8, 076145c` |
+| `A14` | `workflows/audit_workflow.md` (+ `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` regenerada con `python3 scripts/map_workflows.py`, compañero generado que `make verify` exige) | modify: el último paso invoca `session_state.py mark-audited` (`D9`, `RA-16`) | low | `doc_orchestrator` | ✅ `8035aea` |
+| `A15` | `rules/project_topology.md` | modify: fila `gh` de §4 con la condición "bajo el sandbox" (`D10`, `KI-055-8`) | medium | `rule_validator` | ✅ `45743dd, c025350` |
+| `A16` | `agents.md` | modify: `RA-09` referencia la condición de `A15` (`D10`) | medium | `rule_validator` | ✅ `d40f3da` |
+| `A17` | `workflows/deployment_workflow.md` (+ `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` regenerada con `python3 scripts/map_workflows.py`, compañero generado que `make verify` exige) | modify: `pr_flow`, `github_release` y la nota de la línea 31 con la condición (`D10`) | medium | `doc_orchestrator` | ✅ `d2c3aa4` |
+| `A18` | `rules/qa_and_testing.md` | modify: `§5`, la frase de `with_env.py` nombra al actor y apunta a `S-3` (`D16`, `F1`) | low | `rule_validator` | ✅ `a86570f` |
+| `A19` | `workflows/pipeline_workflow.md` (+ `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` regenerada con `python3 scripts/map_workflows.py`, compañero generado que `make verify` exige) | modify: Phase 2 apunta a `S-3` y nombra al humano (`D16`, `R7-4`) | low | `doc_orchestrator` | ✅ `29781aa` |
+| `A20` | `docs/standards/templates/README_TEMPLATE.md` | modify: línea 91 (`D16`, `R7-4`) | low | `doc_orchestrator` | ✅ `6f1cc0c` |
+| `A21` | `agents/devops_agent.md` | modify: línea 16 cita la fila de riesgo residual (`D16`, `R7-5`) | low | `doc_orchestrator` | ✅ `be7c041` |
+| `A22` | `workflows/repository_hardening_workflow.md` | modify: la nota de `gh` (línea 44) apunta a la fila `gh` de §4 con la condición de sandbox (`D10`). **Unidad descubierta en la Fase 6** por el grep de propagación `RA-14` de `D10`; no estaba en el plan aprobado | low | `doc_orchestrator` | ✅ `3d8fe3f` |
 
 **Ola B**: sandbox.
 
@@ -151,7 +152,7 @@ None.
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 30 | Count of rows in Work tables (21 + 9) |
+| Work units | 31 | Count of rows in Work tables (22 + 9; `A22` discovered in Phase 6) |
 | Subagents dispatched | Estimación, no medida: 30 unidades en lotes por perfil (≈ 8 despachos de autor: `implementer_agent` ×3 lotes, `rule_validator` ×2, `doc_orchestrator` ×2, `skill_architect` ×1) + Gate 1 + Gate 2 + 4 ya despachados en Fases 3-5 (`orchestrator`, `agent_orchestrator`, `skill_architect`, `rule_validator`, `token_economy_agent`) | Conteo de despachos en `SPRINT_LOG.md` al cierre |
 | Prior session ratio | 4.4 (sesión de esta planificación, `ea40fe66-042d-489e-b92d-80131c56f749`, medido 2026-10-12 durante la Fase 1: pico 115942 / primer turno 26278). No es un sprint anterior: la sesión del 055 no está en el ancla | `python3 scripts/session_cost.py --from-anchor --json` |
 | Mediciones `claude -p` de la Ola B | Presupuesto: ≤ 40 llamadas headless entre `B1` y `B4` (≈ 15 entradas de la enumeración × 2 rondas + controles). Si se supera, el exceso se registra en `SPRINT_LOG.md` y se vuelve a este Cost antes de seguir | Conteo de ejecuciones en `SANDBOX_ENUMERATION.md` §Method |

@@ -56,6 +56,7 @@ Rows that share a structural subject (`agents.md`: A8, A16, B7; `scripts/quality
 
 | # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| A22 | `workflows/repository_hardening_workflow.md` | modify | after A15 | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` (discovered in Phase 6, `RA-14` propagation of D10) |
 | B1 | `docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md` | create | sequential | `doc_orchestrator` (writes the document; the `claude -p` measurement is run by the parent session, since `principal_agent` holds no `Bash`/`Write` — `task_scope.md` F-1) | N/A | `agents/principal_agent.md`; `agents/doc_orchestrator.md` |
 | B2 | `claude/settings.hooks.json` (+ `tests/test_template_sandbox.py`) | modify | sequential (after B1) | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | B3 | `claude/mcp.json` (+ MCP template test) | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |

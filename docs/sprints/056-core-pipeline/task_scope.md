@@ -1,6 +1,6 @@
 # Task Scope — Sprint 056 (core-pipeline)
 
-Source: `docs/sprints/056-core-pipeline/IMPLEMENTATION_PLAN.md` (`## Work`, units `A1`-`A21`, `B1`-`B9`) and `docs/sprints/056-core-pipeline/agent_assignment.md` (Phase 4.1, the assignee authority).
+Source: `docs/sprints/056-core-pipeline/IMPLEMENTATION_PLAN.md` (`## Work`, units `A1`-`A22`, `B1`-`B9`) and `docs/sprints/056-core-pipeline/agent_assignment.md` (Phase 4.1, the assignee authority).
 Phase 4.3 (Rule Audit), author `rule_validator`. Check: `python3 scripts/check_task_scope.py --sprint-dir docs/sprints/056-core-pipeline`.
 
 Mode: `claude_code`, `delegation_mode: native`. Not a Cursor sprint, so `make cursor-tiers` does not apply.
@@ -24,27 +24,28 @@ Sequencing rule (`agents.md §2 no_interference`): rows that share a structural 
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `A1` | `scripts/docs_freshness_check.py` (companion: `tests/test_docs_freshness_check.py`, `fix(`) | modify: `ADR_STATUS_SUPERSEDED_RE` accepts ``**Status**: `Superseded`` (`D2`, `KI-052-1`) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| `A2` | `scripts/verify_references.py` (companion: `tests/test_verify_references.py`, `fix(`) | modify: the three `invoked_by:` substring checks use `_invoked_by_line` (`D3`, `NF-2`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| `A3` | `scripts/verify_references.py` (companion: `tests/test_verify_references.py`, `fix(`) | modify: token boundary between paths in `_skill_doc_names_script` (`D3`, `NF-1`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| `A4` | `tests/test_root_resolution.py` | modify: assertion by checkout shape, valid in linked worktrees (`D4`, `KI-052-4`); commit `test(` | low | `implementer_agent` | sonnet | medium | ⏳ |
-| `A5` | `skills/env-shielding-auditor/README.md` | modify: name `scripts/env_shielding_auditor.py` (`D5`, `KI-052-7`) | low | `skill_architect` | sonnet | medium | ⏳ |
-| `A6` | `scripts/quality_audit.py` (companion: `tests/test_quality_audit.py`, `fix(`) | modify: nested-function boundary in JS/TS (`D6` a) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| `A7` | `scripts/quality_audit.py` (companion: `tests/test_quality_audit.py`, `fix(`) | modify: exclude blank and comment-only rows inside multi-row statements, Python and JS/TS (`D6` b) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| `A8` | `agents.md` | modify: `§1` `max_lines_per_func` and the JS/TS `linter_command` row declare the two `D6` rules | low | `rule_validator` | sonnet | medium | ⏳ |
-| `A9` | `scripts/install.py` (companion: `tests/test_install_with_env_render.py`, `fix(`) | modify: `RENDER_OWNED_RE` accepts paths with spaces; docstring aligned with `T2-1` (`D7`, `Q9`) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| `A10` | `scripts/install.py` (companion: `tests/test_install_with_env_render.py`, `fix(`) | modify: no crash when the JSON root is not a dict (`D7`, `Q10`) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| `A11` | `tests/test_template_sandbox.py` | modify: pin `Edit(/.agents/venv_skillopt/**)` (`Q10`); commit `test(` | low | `implementer_agent` | sonnet | medium | ⏳ |
-| `A12` | `tests/test_install_with_env_render.py` | modify: return types and docstrings (`Q10`); commit `test(` | low | `implementer_agent` | sonnet | medium | ⏳ |
-| `A13` | `scripts/session_state.py` (companion: `tests/test_session_state.py`) | modify: subcommand `mark-audited` (`D9`, `KI-055-7`); commit `feat(` | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| `A14` | `workflows/audit_workflow.md` | modify: last step invokes `session_state.py mark-audited` (`D9`, `RA-16`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| `A15` | `rules/project_topology.md` | modify: `gh` row of §4 with the "under the sandbox" condition (`D10`, `KI-055-8`) | medium | `rule_validator` | sonnet | medium | ⏳ |
-| `A16` | `agents.md` | modify: `RA-09` references the `A15` condition (`D10`) | medium | `rule_validator` | sonnet | medium | ⏳ |
-| `A17` | `workflows/deployment_workflow.md` | modify: `pr_flow`, `github_release` and the line-31 note carry the condition (`D10`) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
-| `A18` | `rules/qa_and_testing.md` | modify: `§5` `with_env.py` sentence names the actor and points to `S-3` (`D16`, `F1`) | low | `rule_validator` | sonnet | medium | ⏳ |
-| `A19` | `workflows/pipeline_workflow.md` | modify: Phase 2 points to `S-3` and names the human (`D16`, `R7-4`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| `A20` | `docs/standards/templates/README_TEMPLATE.md` | modify: line 91 (`D16`, `R7-4`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| `A21` | `agents/devops_agent.md` | modify: line 16 cites the residual-risk row (`D16`, `R7-5`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| `A1` | `scripts/docs_freshness_check.py` (companion: `tests/test_docs_freshness_check.py`, `fix(`) | modify: `ADR_STATUS_SUPERSEDED_RE` accepts ``**Status**: `Superseded`` (`D2`, `KI-052-1`) | low | `implementer_agent` | sonnet | medium | ✅ `7f0f926` |
+| `A2` | `scripts/verify_references.py` (companion: `tests/test_verify_references.py`, `fix(`) | modify: the three `invoked_by:` substring checks use `_invoked_by_line` (`D3`, `NF-2`) | medium | `implementer_agent` | sonnet | medium | ✅ `a740f88` |
+| `A3` | `scripts/verify_references.py` (companion: `tests/test_verify_references.py`, `fix(`) | modify: token boundary between paths in `_skill_doc_names_script` (`D3`, `NF-1`) | medium | `implementer_agent` | sonnet | medium | ✅ `b083715` |
+| `A4` | `tests/test_root_resolution.py` | modify: assertion by checkout shape, valid in linked worktrees (`D4`, `KI-052-4`); commit `test(` | low | `implementer_agent` | sonnet | medium | ✅ `eccb6ea` |
+| `A5` | `skills/env-shielding-auditor/README.md` | modify: name `scripts/env_shielding_auditor.py` (`D5`, `KI-052-7`) | low | `skill_architect` | sonnet | medium | ✅ `77eb3c4` |
+| `A6` | `scripts/quality_audit.py` (companion: `tests/test_quality_audit.py`, `fix(`) | modify: nested-function boundary in JS/TS (`D6` a) | medium | `implementer_agent` | sonnet | medium | ✅ `2e4487c` |
+| `A7` | `scripts/quality_audit.py` (companion: `tests/test_quality_audit.py`, `fix(`) | modify: exclude blank and comment-only rows inside multi-row statements, Python and JS/TS (`D6` b) | medium | `implementer_agent` | sonnet | medium | ✅ `9f02419` |
+| `A8` | `agents.md` | modify: `§1` `max_lines_per_func` and the JS/TS `linter_command` row declare the two `D6` rules | low | `rule_validator` | sonnet | medium | ✅ `d40f3da` |
+| `A9` | `scripts/install.py` (companion: `tests/test_install_with_env_render.py`, `fix(`) | modify: `RENDER_OWNED_RE` accepts paths with spaces; docstring aligned with `T2-1` (`D7`, `Q9`) | low | `implementer_agent` | sonnet | medium | ✅ `b2bf703` |
+| `A10` | `scripts/install.py` (companion: `tests/test_install_with_env_render.py`, `fix(`) | modify: no crash when the JSON root is not a dict (`D7`, `Q10`) | low | `implementer_agent` | sonnet | medium | ✅ `8dba69b` |
+| `A11` | `tests/test_template_sandbox.py` | modify: pin `Edit(/.agents/venv_skillopt/**)` (`Q10`); commit `test(` | low | `implementer_agent` | sonnet | medium | ✅ `40b2ffc` |
+| `A12` | `tests/test_install_with_env_render.py` | modify: return types and docstrings (`Q10`); commit `test(` | low | `implementer_agent` | sonnet | medium | ✅ `2016dad` |
+| `A13` | `scripts/session_state.py` (companion: `tests/test_session_state.py`) | modify: subcommand `mark-audited` (`D9`, `KI-055-7`); commit `feat(` | medium | `implementer_agent` | sonnet | medium | ✅ `46059d8, 076145c` |
+| `A14` | `workflows/audit_workflow.md` | modify: last step invokes `session_state.py mark-audited` (`D9`, `RA-16`) | low | `doc_orchestrator` | sonnet | medium | ✅ `8035aea` |
+| `A15` | `rules/project_topology.md` | modify: `gh` row of §4 with the "under the sandbox" condition (`D10`, `KI-055-8`) | medium | `rule_validator` | sonnet | medium | ✅ `45743dd, c025350` |
+| `A16` | `agents.md` | modify: `RA-09` references the `A15` condition (`D10`) | medium | `rule_validator` | sonnet | medium | ✅ `d40f3da` |
+| `A17` | `workflows/deployment_workflow.md` | modify: `pr_flow`, `github_release` and the line-31 note carry the condition (`D10`) | medium | `doc_orchestrator` | sonnet | medium | ✅ `d2c3aa4` |
+| `A18` | `rules/qa_and_testing.md` | modify: `§5` `with_env.py` sentence names the actor and points to `S-3` (`D16`, `F1`) | low | `rule_validator` | sonnet | medium | ✅ `a86570f` |
+| `A19` | `workflows/pipeline_workflow.md` | modify: Phase 2 points to `S-3` and names the human (`D16`, `R7-4`) | low | `doc_orchestrator` | sonnet | medium | ✅ `29781aa` |
+| `A20` | `docs/standards/templates/README_TEMPLATE.md` | modify: line 91 (`D16`, `R7-4`) | low | `doc_orchestrator` | sonnet | medium | ✅ `6f1cc0c` |
+| `A21` | `agents/devops_agent.md` | modify: line 16 cites the residual-risk row (`D16`, `R7-5`) | low | `doc_orchestrator` | sonnet | medium | ✅ `be7c041` |
+| `A22` | `workflows/repository_hardening_workflow.md` | modify: `gh` note (line 44) points at the §4 `gh` row with the sandbox condition (`D10`); discovered in Phase 6 by the `RA-14` propagation grep | low | `doc_orchestrator` | sonnet | medium | ✅ `3d8fe3f` |
 
 ### Wave B
 
@@ -95,4 +96,4 @@ Every other row has a subject no other row claims (`A1`, `A4`, `A5`, `A18`, `A19
 | F-8 | `B2`, `B7` | `B2` replaces six subtree denies with one whole-submodule deny and `B7` rewrites the `RA-09` tree list and `RA-19`. `RA-19` forbids stating a boundary without a measured enumeration of every entry point. `D13` already keeps the "reduces exposure, not a boundary" wording; `B7` must not weaken it. | `agents.md §7 RA-19`, `RA-09` | No change to rows. Gate 1 checks the `B7` diff against `RA-19`. |
 | F-9 | `A9`, `A10`, `B5`, `A13` | `fix(` commits (`A1`-`A3`, `A6`, `A7`, `A9`, `A10`, `B2`, `B3`, `B5`) each need a `Repro:` test that fails on the parent (exit exactly 1). `A13` is `feat(` and `A4`, `A11`, `A12` are `test(`, so they are exempt. `A12` changes only types and docstrings and cannot fail on the parent; it must stay `test(` and must not be relabelled `fix(`. | `workflows/pipeline_workflow.md` Phase 7 Gate 1 first check; `rules/code_craft.md §6` | Commit type is recorded in the Operation cell of each affected row. |
 
-No row violates `jurisdictional_lock`: each of the 30 rows has one structural subject, and every paired test is a companion. No row requires a Cursor model, so the `haiku`/`sonnet`/`opus` prohibition for Cursor sprints does not apply.
+No row violates `jurisdictional_lock`: each of the 31 rows has one structural subject, and every paired test is a companion. No row requires a Cursor model, so the `haiku`/`sonnet`/`opus` prohibition for Cursor sprints does not apply.

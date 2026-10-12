@@ -15,7 +15,7 @@ After writing this file, run:
 
 `rules/skills_and_integrations.md §1`:
 
-The ladder terminates at P1. Every computational need of the 30 units (`A1`-`A21`,
+The ladder terminates at P1. Every computational need of the 31 units (`A1`-`A22`,
 `B1`-`B9`) is covered by a script or skill that already exists in `skills/`, by a
 `scripts/` tool, or by a deliverable the plan itself assigns to `implementer_agent`
 (`A13`, `mark-audited`). The remaining rungs are `not reached`.
@@ -69,6 +69,7 @@ with `wc -l` at base `817ac26`.
 | `A19` | none (42-line workflow, read in full). `scripts/map_workflows.py` regenerates the step-map guide afterwards | N/A | P1 hit; P2-P4 not reached |
 | `A20` | none (134-line template; read around line 91). `skills/readme-standardizer` is not applicable (see §4) | N/A | P1 hit; P2-P4 not reached |
 | `A21` | none (37-line agent file, read in full) | N/A | P1 hit; P2-P4 not reached |
+| `A22` | None needed: a one-line Markdown edit; `grep` propagation check run by the parent | discovered in Phase 6 |
 | `B1` | none for the measurement: `claude -p` headless (CLI 2.1.119) and `jq`, agent judgment per the plan's Mechanisms table. `skills/env-shielding-auditor` is not run against the fixture host (see §4). Skeleton reads of `claude/settings.hooks.json` and the seven hook scripts use `skills/omni-context-minimizer` where a hook exceeds 200 lines | N/A | P1 hit; P2-P4 not reached |
 | `B2` | none for the edit (`claude/settings.hooks.json`, 158 lines, read in full). Gate: `venv_skillopt/bin/python -m pytest -q tests/test_template_sandbox.py` plus `jq -e` parse checks from the plan's Verification table | N/A | P1 hit; P2-P4 not reached |
 | `B3` | none (`claude/mcp.json`, 21 lines). `jq -e` parse check plus the MCP template test | N/A | P1 hit; P2-P4 not reached |
@@ -120,7 +121,7 @@ the plan's Work tables.
 
 ## 5. Gaps
 
-None. Every unit `A1`-`A21` and `B1`-`B9` has its tools resolved above. Four rows
+None. Every unit `A1`-`A22` and `B1`-`B9` has its tools resolved above. Four rows
 (`B1`, `B4`, and the measurement half of `B2`) rely on a human-attended sandboxed
 Claude Code session, with no skill behind them, as the plan's Mechanisms table
 already states.
