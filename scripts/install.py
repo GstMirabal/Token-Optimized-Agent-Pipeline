@@ -181,8 +181,8 @@ def prune_rendered_exclusions(host_dir: Path) -> None:
     host-written `python3 -I .agents/scripts/with_env.py <name>` line; the
     pruning of the latter is the safe direction, since it is the same escape.
     Every other key and entry, including other host exclusions and the
-    rendered write-denies, is left untouched. No file or nothing to prune
-    means no write.
+    rendered write-denies, is left untouched. No file, a root JSON value
+    that is not an object, or nothing to prune means no write.
 
     Args:
         host_dir: Host root holding `.claude/settings.local.json`.
@@ -194,6 +194,8 @@ def prune_rendered_exclusions(host_dir: Path) -> None:
     if not dest.exists():
         return
     data = json.loads(dest.read_text())
+    if not isinstance(data, dict):
+        return
     sandbox = data.get("sandbox")
     current = sandbox.get("excludedCommands") if isinstance(sandbox, dict) else None
     if not isinstance(current, list):

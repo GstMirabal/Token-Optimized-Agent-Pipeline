@@ -112,3 +112,12 @@ def test_host_written_with_env_line_is_pruned_and_near_miss_kept(install, tmp_pa
     install.prune_rendered_exclusions(tmp_path)
     data = json.loads(dest.read_text(encoding="utf-8"))
     assert data["sandbox"]["excludedCommands"] == [NEAR_MISS]
+
+
+def test_non_dict_root_json_is_left_untouched(install, tmp_path: Path) -> None:
+    dest = _settings(tmp_path, None)
+    dest.write_text("[1, 2]\n", encoding="utf-8")
+    os.utime(dest, (1_000_000, 1_000_000))
+    install.prune_rendered_exclusions(tmp_path)
+    assert dest.read_text(encoding="utf-8") == "[1, 2]\n"
+    assert dest.stat().st_mtime == 1_000_000
