@@ -6,7 +6,7 @@
 | Finding | `F-055-N1` (`docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md:1990-2020`) |
 | Method precedent | `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` sections 8-9 |
 | Date | 2026-10-12 |
-| Status | Measured at base template. Re-measurement after B2/B3 is pending (section 5). |
+| Status | Measured at base template. Re-measured after B2/B3/B5/B9 in section 5 (unit B4). |
 
 ## 1. Method
 
@@ -137,6 +137,77 @@ Two conclusions:
 
 Therefore the default wording of `RA-19` stands: write-denies and the absence of exclusions reduce exposure; they are not a boundary.
 
-## 5. Re-measurement after B2/B3 - Pending unit B4
+## 5. Re-measurement after B2, B3, B5, B9 (unit B4)
 
-Pending unit B4. Not measured in this document. Unit `B4` re-runs the enumeration after `B2` and `B3` land and records the result here.
+### 5.1 Method
+
+| Item | Value |
+| :--- | :--- |
+| Units under test | `B2` `d70d00c` (template `denyWrite` = `["./.agents", "./.env"]`; `permissions.deny` `Edit(/.agents/**)`, `Edit(/.env)`, `Read(/.env)`), `B3` `05c74a6` (`graphify` MCP args `-I -m graphify.serve ...`), `B5` `3bfa1d9` (install refuses a host `excludedCommands`), `B9` `8bb0d1a` (boot advisory on CLI version mismatch) |
+| Fixture `<fx2>` | Built as in section 1, with `.agents` at `8bb0d1a` (branch `ai-sprint/056`) |
+| Install | `install.py --target claude`, outside the sandbox, exit 0. The merged `.claude/settings.json` showed exactly the new `denyWrite` and `deny` rules; `.mcp.json` `graphify` args start with `-I` |
+| Session 4 | One headless `claude -p` call (4th of the budget <= 40) |
+| Controls | `SBX0` exit 0 with a proxy; `SBX1` exit 6 (sandbox active). `.env` value never recorded |
+
+### 5.2 Session 4 register
+
+| Case | Target | Result | Layer |
+| :--- | :--- | :--- | :--- |
+| `R01` | `.agents/_mode.py` | refused | permission (`Edit(/.agents/**)`); sandbox `denyWrite ./.agents` also covers it (`D01`-`D09`) |
+| `R02` | `.agents/mcp_servers/` | refused | same |
+| `R03` | `.agents/agents/` | refused | same |
+| `R04` | `.agents/Makefile` | refused | same |
+| `R05` | `.agents/agents.md` | refused | same |
+| `R06` | `.agents/rules/` | refused | same |
+| `R07` | `.agents/workflows/` | refused | same |
+| `R08` | `.agents/config/` | refused | same |
+| `R09` | `.agents/hooks/` | refused | same |
+| `R10` | host-root `graphify/__init__.py` | exit 0 (creatable) | none. Parent check, unsandboxed from `<fx2>`: `.agents/venv_skillopt/bin/python -I -c "import graphify; print(graphify.__file__)"` printed the venv site-packages copy; without `-I` it printed `<fx2>/graphify/__init__.py` (the shadow). `B3` closes `E10` |
+| `R11` | project `venv/bin/zz_probe` | exit 0 (writable) | none. `E15` stays open |
+| `R12` | `session_start.py --boot --tool claude-code` | exit 0, advisories only | n/a |
+| `R13` | agent `git commit -m "chore(probe): measure #056"` | exit 0; hooks ran and passed | n/a |
+| `R14` | `open('.env')` | `PermissionError` (control) | sandbox |
+
+### 5.3 `B5` and `B9`, measured unsandboxed
+
+| Unit | Setup | Result |
+| :--- | :--- | :--- |
+| `B5` | `.claude/settings.local.json` holding `excludedCommands: ["gh run list *"]`, then `install.py --target claude` (the human install step) | Exit 2; `Install refused: the host's Claude Code settings carry sandbox.excludedCommands entries.` and the output names the entry |
+| `B9` | Fixture `rules/project_topology.md` `Measuring CLI` row edited to `2.0.1`, then boot with CLI 2.1.119 | `Readiness finding (advisory): Claude Code 2.1.119 is not the measuring CLI 2.0.1 ...` naming both matrices. Row restored afterwards |
+
+### 5.4 Verdict per enumeration row
+
+| ID | Verdict after Sprint 056 | By / owner |
+| :--- | :--- | :--- |
+| `E1` | closed | `B2`: `./.agents` `denyWrite` plus `Edit(/.agents/**)` (`R01`, `R09`; lock maintained by the unsandboxed hook, `L02`) |
+| `E2` | closed for `.agents` imports and trees | `B2` (`R01`, `R09`) |
+| `E3` | closed | `B2` (`R09`) |
+| `E4` | closed | `B2` (`R01`) |
+| `E5` | not applicable | executes no file |
+| `E6` | closed | `B2` |
+| `E7` | closed | `B2` |
+| `E8` | import shadowing closed; hook files stay approval-gated | `B2` (`R13`: hooks ran and passed); approval gate is the human (see `E13`) |
+| `E9` | closed | `B2` (`R02`) |
+| `E10` | closed | `B3`: `-I` (`R10` parent check); `venv_skillopt` was already denied |
+| `E11` | closed inside `.agents/agents/`; `.claude/agents/` stays approval-gated | `B2` (`R03`); human approval for `.claude/` |
+| `E12` | closed | `B2` (`R04`) |
+| `E13` | open, approval-gated | a human approving a Claude Code protected-path prompt |
+| `E14` | open, approval-gated | a human approving a prompt. `B5` additionally refuses a host `excludedCommands` at install (exit 2) |
+| `E15` | open | host environment (`R11`, `Q7`): the project venv is agent-writable |
+| `E16` | `.agents/` files closed (`R05`-`R07`); host `CLAUDE.md` open | host-owned instructions |
+| `E17` | closed | `B2` (`R08`); previously closed by per-tree rules |
+
+### 5.5 Residue
+
+| Item | State |
+| :--- | :--- |
+| Existing hosts keep the old per-tree deny entries next to `./.agents` | Harmless and never pruned: `RETIRED_VALUES` in `scripts/merge_json.py` does not list them |
+| `B9` boot advisory | Informs a human to re-measure on a CLI version change; it blocks nothing |
+
+### 5.6 Conclusion
+
+Not every row is "not writable by the agent": `E13` and `E14` depend on a human approving a prompt, `E15` (`Q7`) is a host environment concern, and `E16` host `CLAUDE.md` is host-owned. Per `D13`, `F-055-N1` stays open and the `RA-19` wording stands: write-denies reduce exposure; they are not a boundary.
+
+### 5.7 Supersession note
+
+The Sprint 055 `SANDBOX_MEASUREMENT.md` section 8 `R8` / section 9 `D1` rationale for not denying the whole `.agents` (boot lock writes) is superseded by sessions 2-3 (`D02`, `L01`, `L02`): lock maintenance runs in the unsandboxed `SessionStart` hook, so the whole-`./.agents` deny costs nothing.
