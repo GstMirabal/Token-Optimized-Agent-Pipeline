@@ -547,3 +547,42 @@ def test_prose_mention_of_invoked_by_does_not_resolve_a_file(
     monkeypatch.chdir(root)
     errors = verify_mod.check_invocation_coverage("")
     assert any(relative in e for e in errors)
+
+
+def _skill_x_with_doc(root: Path, doc_body: str) -> None:
+    """Create skills/x/scripts/helper.py and a SKILL.md carrying `doc_body`."""
+    _base_tree(root)
+    (root / "skills" / "x" / "scripts").mkdir(parents=True)
+    (root / "skills" / "x" / "scripts" / "helper.py").write_text("VALUE = 1\n", encoding="utf-8")
+    (root / "skills" / "x" / "SKILL.md").write_text(
+        f"---\nname: x\ndescription: stub\n---\n{doc_body}\n", encoding="utf-8"
+    )
+
+
+def test_other_skills_script_path_does_not_resolve_this_skills_script(
+    verify_mod, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """NF-1: `y/scripts/helper.py` in skill x's docs does not name x's helper.py."""
+    _skill_x_with_doc(tmp_path, "See `y/scripts/helper.py` and `.agents/skills/y/scripts/helper.py`.")
+    monkeypatch.chdir(tmp_path)
+    errors = verify_mod.check_invocation_coverage("")
+    assert any("skills/x/scripts/helper.py" in e for e in errors)
+
+
+@pytest.mark.parametrize(
+    "mention",
+    [
+        ".agents/skills/x/scripts/helper.py",
+        "skills/x/scripts/helper.py",
+        "./scripts/helper.py",
+        "scripts/helper.py",
+    ],
+)
+def test_own_skill_path_forms_still_resolve_the_script(
+    verify_mod, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mention: str
+) -> None:
+    """NF-1: the skill's own directory as the preceding segment still counts."""
+    _skill_x_with_doc(tmp_path, f"Run `{mention}`.")
+    monkeypatch.chdir(tmp_path)
+    errors = verify_mod.check_invocation_coverage("")
+    assert not any("skills/x/scripts/helper.py" in e for e in errors)

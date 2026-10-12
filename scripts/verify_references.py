@@ -432,8 +432,61 @@ def _skill_doc_names_script(script: Path) -> bool:
     doc_text = _skill_doc_text(script.parent.parent)
     if not doc_text:
         return False
-    tokens = (script.name, f"scripts/{script.name}", f"scripts.{script.stem}")
-    return any(_token_present(doc_text, token) for token in tokens)
+    skill = script.parent.parent.name
+    tokens = (
+        (script.name, True),
+        (f"scripts/{script.name}", False),
+        (f"scripts.{script.stem}", False),
+    )
+    return any(_token_names_own_script(doc_text, tok, skill, bare) for tok, bare in tokens)
+
+
+def _token_names_own_script(text: str, token: str, skill: str, bare: bool) -> bool:
+    """True when some whole-token occurrence is not rooted in another directory.
+
+    An occurrence preceded by `/` counts only when the path segment before it
+    is this skill's own directory (NF-1): `y/scripts/env.py` does not name
+    skill `x`'s `scripts/env.py`, while `.agents/skills/x/scripts/env.py` does.
+
+    Args:
+        text: Skill documentation text.
+        token: Literal token to find.
+        skill: Name of the skill directory owning the script.
+        bare: True when `token` is a bare filename (its own parent segment
+            is `scripts`), False for a `scripts/`-rooted or dotted token.
+
+    Returns:
+        bool: True when at least one occurrence is accepted.
+    """
+    pattern = re.compile(r"(?<![\w.-])" + re.escape(token) + r"(?![\w.-])")
+    for match in pattern.finditer(text):
+        start = match.start()
+        if start == 0 or text[start - 1] != "/":
+            return True
+        run = re.search(r"[\w./-]*$", text[: start - 1])
+        segments = run.group(0).split("/") if run else [""]
+        if _segments_are_own_skill(segments, skill, bare):
+            return True
+    return False
+
+
+def _segments_are_own_skill(segments: list[str], skill: str, bare: bool) -> bool:
+    """True when the path segments before a token end in the skill's own directory.
+
+    Args:
+        segments: Path segments preceding the token, nearest last.
+        skill: Name of the skill directory owning the script.
+        bare: True when the token is a bare filename (expects `scripts` last).
+
+    Returns:
+        bool: True when the segments are rooted in `skill` (or `.`).
+    """
+    own = (skill, ".")
+    if not bare:
+        return segments[-1] in own
+    if segments[-1] == skill:
+        return True
+    return segments[-1] == "scripts" and (len(segments) == 1 or segments[-2] in own)
 
 
 def _import_candidate_paths(importer: Path, node: ast.AST) -> set[Path]:
