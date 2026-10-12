@@ -1998,13 +1998,13 @@ from claiming otherwise until the enumeration below is complete.
 
 | ID | Vector | Evidence | Status |
 | :--- | :--- | :--- | :--- |
-| `Q1` | Hooks put the writable `.agents` root on `sys.path` and import `_mode`; an agent-written `.agents/_mode.py` runs unsandboxed on every Bash call | `hooks/on_commit.py:30-32`; same pattern in `hooks/on_init.py`, `hooks/on_commit_msg.py`, `scripts/persist_session_context.py` | measured |
-| `Q2` | `scripts/submodule_purity.py`, run by `on_commit.py`, calls `git -C .agents status`, which honours a `core.fsmonitor` the agent can set in `.git/modules/.agents/config`. The same holds for any unsandboxed `git` at the host root, including the human's own: it runs the submodule's `core.fsmonitor` (measured QA Gate 1 round 6, git 2.54.0) | `scripts/submodule_purity.py`, `hooks/on_commit.py` | measured |
-| `Q3` | MCP servers of `claude/mcp.json` start unsandboxed from writable `.agents/mcp_servers/` and a host-root `graphify/` package (`-m graphify.serve` without `-I`); the launcher of the GitHub MCP is agent-writable | `claude/mcp.json` | measured |
-| `Q4` | Subagent definitions in writable `.agents/agents/` (symlinked into `.claude/agents/`) can carry `hooks:` that run unsandboxed | `agents/*.md` | measured |
-| `Q5` | The human route `make -f .agents/Makefile graphify-deep` runs a recipe the agent can edit | `Makefile` `graphify-deep` | derived, not run |
-| `Q7` | Hooks run bare `python3` from `PATH`; an active host venv makes the interpreter and its `.pth` files agent-writable | `hooks/*.py` command lines in `claude/settings.hooks.json` | record, pre-existing |
-| `Q11` | `.agents/agents.md`, `rules/`, `workflows/` are writable: instruction tampering, not execution | `agents.md`, `rules/`, `workflows/` | record, pre-existing |
+| `Q1` | Hooks put the writable `.agents` root on `sys.path` and import `_mode`; an agent-written `.agents/_mode.py` runs unsandboxed on every Bash call | `hooks/on_commit.py:30-32`; same pattern in `hooks/on_init.py`, `hooks/on_commit_msg.py`, `scripts/persist_session_context.py` | measured. Sprint 056: closed by the whole-`./.agents` deny (`d70d00c`; refused in `SANDBOX_ENUMERATION.md` §5 `R01`) |
+| `Q2` | `scripts/submodule_purity.py`, run by `on_commit.py`, calls `git -C .agents status`, which honours a `core.fsmonitor` the agent can set in `.git/modules/.agents/config`. The same holds for any unsandboxed `git` at the host root, including the human's own: it runs the submodule's `core.fsmonitor` (measured QA Gate 1 round 6, git 2.54.0) | `scripts/submodule_purity.py`, `hooks/on_commit.py` | measured. Sprint 056: approval-gated, still open: `.git/config` and `.git/modules/` are Claude Code protected paths, so a human approving a prompt lets the write proceed (`E13`); not closed by `d70d00c` |
+| `Q3` | MCP servers of `claude/mcp.json` start unsandboxed from writable `.agents/mcp_servers/` and a host-root `graphify/` package (`-m graphify.serve` without `-I`); the launcher of the GitHub MCP is agent-writable | `claude/mcp.json` | measured. Sprint 056: `mcp_servers/` closed by the whole-`./.agents` deny (`d70d00c`); host-root `graphify/` shadow closed by `-I` in the `graphify` MCP args (`05c74a6`; `import graphify` with `-I` resolves to the venv copy, without `-I` to the shadow) |
+| `Q4` | Subagent definitions in writable `.agents/agents/` (symlinked into `.claude/agents/`) can carry `hooks:` that run unsandboxed | `agents/*.md` | measured. Sprint 056: closed by the whole-`./.agents` deny (`d70d00c`; `R03` refused) |
+| `Q5` | The human route `make -f .agents/Makefile graphify-deep` runs a recipe the agent can edit | `Makefile` `graphify-deep` | derived, not run. Sprint 056: closed by the whole-`./.agents` deny (`d70d00c`; `R04` refused) |
+| `Q7` | Hooks run bare `python3` from `PATH`; an active host venv makes the interpreter and its `.pth` files agent-writable | `hooks/*.py` command lines in `claude/settings.hooks.json` | record, pre-existing. Sprint 056: open, owner is the host environment (`E15`; project `venv/` writable, `R11`) |
+| `Q11` | `.agents/agents.md`, `rules/`, `workflows/` are writable: instruction tampering, not execution | `agents.md`, `rules/`, `workflows/` | record, pre-existing. Sprint 056: inside `.agents` closed by the whole-`./.agents` deny (`d70d00c`; `R05`-`R07` refused); host `CLAUDE.md` stays open (`E16`, host-owned instructions) |
 
 **Required deliverable.** The `RA-19` enumeration: a measured list of every
 unsandboxed entry point (hooks, MCP servers, subagent `hooks:`, `make` recipes, helper
@@ -2018,6 +2018,36 @@ trigger the named invoker, observe a read of `.env` from outside the sandbox. `Q
 
 **Routed:** Sprint 056. Not taken by Sprint 055 (scope cut after Gate 1 round 4;
 doc wording reworded in Sprint 055 units `U37`, `U38`, `U40`).
+
+**Sprint 056 status (2026-10-12). Box stays unticked (`D13`).** The `RA-19`
+enumeration now exists: `docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md`
+(`c7c0701`, re-measurement in section 5 by unit `B4`). Per row:
+
+| Row | Sprint 056 status | Closed by |
+| :--- | :--- | :--- |
+| `Q1`, `Q3` (`mcp_servers/`), `Q4`, `Q5`, `Q11` inside `.agents` | closed | whole-`./.agents` deny (`d70d00c`) |
+| `Q3` host-root `graphify/` shadow | closed | `-I` in the `graphify` MCP args (`05c74a6`) |
+| `Q2` | approval-gated, open: Claude Code protected paths | a human approving a prompt |
+| `Q7` | open | host environment (project venv) |
+| `Q11` host `CLAUDE.md` | open | host-owned instructions |
+| `E8` (new vector) | import shadowing closed | same deny (`d70d00c`) |
+
+`E8`: the host `.git/hooks/pre-commit`, `commit-msg` and `pre-push` that
+`install.py` installs execute `.agents` code on any `git commit` or push, including the
+human's. Its import shadowing (`W26`) is closed by the same deny; the hook files
+themselves are approval-gated. Not every row is "not writable by the agent", so this
+finding stays open and `RA-19` wording stands: write-denies reduce exposure; they are
+not a boundary.
+
+**`Q` identifier correspondence** (requested by `PIPELINE_AUDIT_REPORT-055.md` `F2`).
+`Q6`, `Q8`, `Q9`, `Q10` are ids of the Sprint 055 `SPRINT_LOG` register, not rows of the
+table above:
+
+| Id | Meaning | Resolution |
+| :--- | :--- | :--- |
+| `Q6` | `Makefile` comment (Sprint 055 `task_scope.md:70`) | not a row of this finding |
+| `Q8` | `KI-055-2` | closed `3bfa1d9` |
+| `Q9`, `Q10` | `KI-055-3` | closed `b2bf703`, `8dba69b`, `40b2ffc`, `2016dad` |
 
 ---
 
