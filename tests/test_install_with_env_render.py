@@ -93,3 +93,22 @@ def test_write_denied_exits_only_when_pruning(install, tmp_path: Path) -> None:
         install.prune_rendered_exclusions(tmp_path)
     finally:
         dest.chmod(0o644)
+
+
+SPACED = "/Users/Jane Doe/venv/bin/python3 -I /Users/Jane Doe/My Host/.agents/scripts/with_env.py gh_run"
+HOST_WRITTEN = "python3 -I .agents/scripts/with_env.py gh_run"
+NEAR_MISS = "echo with_env.py gh_run"
+
+
+def test_spaced_interpreter_and_host_paths_are_pruned(install, tmp_path: Path) -> None:
+    dest = _settings(tmp_path, {"sandbox": {"excludedCommands": [SPACED, HOST_ENTRY]}})
+    install.prune_rendered_exclusions(tmp_path)
+    data = json.loads(dest.read_text(encoding="utf-8"))
+    assert data["sandbox"]["excludedCommands"] == [HOST_ENTRY]
+
+
+def test_host_written_with_env_line_is_pruned_and_near_miss_kept(install, tmp_path: Path) -> None:
+    dest = _settings(tmp_path, {"sandbox": {"excludedCommands": [HOST_WRITTEN, NEAR_MISS]}})
+    install.prune_rendered_exclusions(tmp_path)
+    data = json.loads(dest.read_text(encoding="utf-8"))
+    assert data["sandbox"]["excludedCommands"] == [NEAR_MISS]

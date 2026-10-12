@@ -57,7 +57,7 @@ from _mode import is_nucleus
 from merge_json import merge
 
 BRIDGE_WRITE_DENIED = 3
-RENDER_OWNED_RE = re.compile(r"^\S+ -I \S+/scripts/with_env\.py \S+$")
+RENDER_OWNED_RE = re.compile(r"^.+ -I .+/scripts/with_env\.py \S+$")
 
 
 def _symlink_matches(dest: Path, target: str) -> bool:
@@ -171,12 +171,16 @@ def merge_into(template: Path, dest: Path) -> None:
 
 
 def prune_rendered_exclusions(host_dir: Path) -> None:
-    """Remove render-owned with_env exclusions left by an earlier install.
+    """Remove with_env exclusion lines of the rendered shape from settings.
 
     The framework ships no `sandbox.excludedCommands`: a command chained
-    after any excluded entry runs unsandboxed. Lines rendered by a previous
-    install (matching RENDER_OWNED_RE) are therefore escapes and are removed;
-    every other key and entry, including host-owned exclusions and the
+    after any excluded entry runs unsandboxed. Every string entry shaped
+    `<interpreter> -I <path>/scripts/with_env.py <name>` (RENDER_OWNED_RE,
+    anchored on that suffix; interpreter and path may contain spaces) is
+    removed. That covers lines rendered by an earlier install and also a
+    host-written `python3 -I .agents/scripts/with_env.py <name>` line; the
+    pruning of the latter is the safe direction, since it is the same escape.
+    Every other key and entry, including other host exclusions and the
     rendered write-denies, is left untouched. No file or nothing to prune
     means no write.
 
