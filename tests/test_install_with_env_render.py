@@ -147,3 +147,69 @@ def test_non_dict_root_json_is_left_untouched(install: ModuleType, tmp_path: Pat
     install.prune_rendered_exclusions(tmp_path)
     assert dest.read_text(encoding="utf-8") == "[1, 2]\n"
     assert dest.stat().st_mtime == 1_000_000
+
+
+def _bridge(install: ModuleType, monkeypatch: pytest.MonkeyPatch) -> int:
+    """Run the host Claude bridge against the temporary host, git hooks stubbed.
+
+    Args:
+        install: Install module with HOST_DIR redirected.
+        monkeypatch: Pytest fixture used to stub the git-hook installation.
+
+    Returns:
+        int: The bridge return code.
+    """
+    monkeypatch.setattr(install, "install_host_git_hooks", lambda: None)
+    return install.install_host_claude_bridge(None)
+
+
+def _snapshot(host: Path) -> dict[str, str]:
+    """Map every file under host to its text, to prove a refusal wrote nothing.
+
+    Args:
+        host: Host root directory.
+
+    Returns:
+        dict[str, str]: Relative path to file contents.
+    """
+    return {str(p.relative_to(host)): p.read_text(encoding="utf-8")
+            for p in sorted(host.rglob("*")) if p.is_file()}
+
+
+@pytest.mark.parametrize("name", ["settings.json", "settings.local.json"])
+def test_host_exclusion_refuses_install(
+    install: ModuleType, monkeypatch: pytest.MonkeyPatch, tmp_path: Path,
+    capsys: pytest.CaptureFixture[str], name: str,
+) -> None:
+    """A host excludedCommands entry in either settings file refuses with exit 2 and writes nothing."""
+    dest = tmp_path / ".claude" / name
+    dest.parent.mkdir(parents=True)
+    dest.write_text(json.dumps({"sandbox": {"excludedCommands": [RENDERED, HOST_ENTRY]}}), encoding="utf-8")
+    before = _snapshot(tmp_path)
+    assert _bridge(install, monkeypatch) == 2
+    assert _snapshot(tmp_path) == before
+    err = capsys.readouterr().err
+    assert f".claude/{name}: {json.dumps(HOST_ENTRY)}" in err
+    assert "N1" in err and "re-run" in err
+
+
+def test_only_render_owned_lines_are_pruned_and_install_proceeds(
+    install: ModuleType, monkeypatch: pytest.MonkeyPatch, tmp_path: Path,
+) -> None:
+    """Render-owned lines in settings.local.json and retired template values do not refuse."""
+    dest = _settings(tmp_path, {"sandbox": {"excludedCommands": [RENDERED, SPACED]}})
+    shared = tmp_path / ".claude" / "settings.json"
+    shared.write_text(json.dumps({"sandbox": {"excludedCommands": ["gh pr list *"]}}), encoding="utf-8")
+    assert _bridge(install, monkeypatch) == 0
+    assert "excludedCommands" not in json.loads(dest.read_text(encoding="utf-8"))["sandbox"]
+    assert json.loads(shared.read_text(encoding="utf-8"))["sandbox"].get("excludedCommands", []) == []
+
+
+@pytest.mark.parametrize("data", [None, {"model": "x"}, {"sandbox": {"excludedCommands": []}}])
+def test_no_exclusions_install_proceeds(
+    install: ModuleType, monkeypatch: pytest.MonkeyPatch, tmp_path: Path, data: dict | None,
+) -> None:
+    """No settings file, no sandbox key, or an empty list lets the install proceed."""
+    _settings(tmp_path, data)
+    assert _bridge(install, monkeypatch) == 0
+    assert (tmp_path / ".claude" / "settings.json").exists()
