@@ -100,12 +100,12 @@ una regla sin la condición que la justifica.
 | `A11` | `tests/test_template_sandbox.py` | modify: fijar `Edit(/.agents/venv_skillopt/**)` (`Q10`); commit `test(` | low | `implementer_agent` | ⏳ |
 | `A12` | `tests/test_install_with_env_render.py` | modify: tipos de retorno y docstrings (`Q10`); commit `test(` | low | `implementer_agent` | ⏳ |
 | `A13` | `scripts/session_state.py` (+ `tests/test_session_state.py`) | modify: subcomando `mark-audited` (`D9`, `KI-055-7`); commit `feat(` | medium | `implementer_agent` | ⏳ |
-| `A14` | `workflows/audit_workflow.md` | modify: el último paso invoca `session_state.py mark-audited` (`D9`, `RA-16`) | low | `doc_orchestrator` | ⏳ |
+| `A14` | `workflows/audit_workflow.md` (+ `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` regenerada con `python3 scripts/map_workflows.py`, compañero generado que `make verify` exige) | modify: el último paso invoca `session_state.py mark-audited` (`D9`, `RA-16`) | low | `doc_orchestrator` | ⏳ |
 | `A15` | `rules/project_topology.md` | modify: fila `gh` de §4 con la condición "bajo el sandbox" (`D10`, `KI-055-8`) | medium | `rule_validator` | ⏳ |
 | `A16` | `agents.md` | modify: `RA-09` referencia la condición de `A15` (`D10`) | medium | `rule_validator` | ⏳ |
-| `A17` | `workflows/deployment_workflow.md` | modify: `pr_flow`, `github_release` y la nota de la línea 31 con la condición (`D10`) | medium | `doc_orchestrator` | ⏳ |
+| `A17` | `workflows/deployment_workflow.md` (+ `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` regenerada con `python3 scripts/map_workflows.py`, compañero generado que `make verify` exige) | modify: `pr_flow`, `github_release` y la nota de la línea 31 con la condición (`D10`) | medium | `doc_orchestrator` | ⏳ |
 | `A18` | `rules/qa_and_testing.md` | modify: `§5`, la frase de `with_env.py` nombra al actor y apunta a `S-3` (`D16`, `F1`) | low | `rule_validator` | ⏳ |
-| `A19` | `workflows/pipeline_workflow.md` | modify: Phase 2 apunta a `S-3` y nombra al humano (`D16`, `R7-4`) | low | `doc_orchestrator` | ⏳ |
+| `A19` | `workflows/pipeline_workflow.md` (+ `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` regenerada con `python3 scripts/map_workflows.py`, compañero generado que `make verify` exige) | modify: Phase 2 apunta a `S-3` y nombra al humano (`D16`, `R7-4`) | low | `doc_orchestrator` | ⏳ |
 | `A20` | `docs/standards/templates/README_TEMPLATE.md` | modify: línea 91 (`D16`, `R7-4`) | low | `doc_orchestrator` | ⏳ |
 | `A21` | `agents/devops_agent.md` | modify: línea 16 cita la fila de riesgo residual (`D16`, `R7-5`) | low | `doc_orchestrator` | ⏳ |
 
@@ -113,10 +113,10 @@ una regla sin la condición que la justifica.
 
 | # | File | Operation | Risk | Assignee (proposed) | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `B1` | `docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md` | create: enumeración medida en la base (`D11`, `KI-055-1`, `F4`) | high | `principal_agent` (medición) / `doc_orchestrator` (escritura) | ⏳ |
+| `B1` | `docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md` | create: enumeración medida en la base (`D11`, `KI-055-1`, `F4`) | high | `doc_orchestrator` (escritura; la medición `claude -p` la ejecuta la sesión padre, porque `principal_agent` no tiene `Bash` ni `Write`) | ⏳ |
 | `B2` | `claude/settings.hooks.json` (+ `tests/test_template_sandbox.py`, `fix(`) | modify: deny de escritura de `./.agents` completo y `Edit(/.agents/**)`; denies de `.git` solo si `B1` los justifica (`D12`) | high | `implementer_agent` | ⏳ |
-| `B3` | `claude/mcp.json` (+ test de plantilla MCP, `fix(`) | modify: `-I` en el lanzador `graphify` (`D12`, `Q3`) | medium | `implementer_agent` | ⏳ |
-| `B4` | `docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md` | modify: nueva medición de cada vector tras `B2`/`B3` (`D12`, `D13`) | high | `principal_agent` / `doc_orchestrator` | ⏳ |
+| `B3` | `claude/mcp.json` (+ `tests/test_mcp_template.py`, nuevo, `fix(`) | modify: `-I` en el lanzador `graphify` (`D12`, `Q3`) | medium | `implementer_agent` | ⏳ |
+| `B4` | `docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md` | modify: nueva medición de cada vector tras `B2`/`B3` (`D12`, `D13`) | high | `doc_orchestrator` (escritura; medición en la sesión padre) | ⏳ |
 | `B5` | `scripts/install.py` (+ `tests/test_install_with_env_render.py`, `fix(`) | modify: rechazo con exit `2` de un `excludedCommands` del host (`D8`, `KI-055-2`) | medium | `implementer_agent` | ⏳ |
 | `B6` | `rules/project_topology.md` | modify: filas `N3` y de riesgo residual según la enumeración; tres filas de scripts `gh` (`D13`, `D15`, `KI-055-4`) | medium | `rule_validator` | ⏳ |
 | `B7` | `agents.md` | modify: `RA-19` amplía la prohibición a procedimientos prescritos (`D14`, `KI-055-6`); lista de trees de `RA-09` según `B2` | high | `rule_validator` | ⏳ |
@@ -183,6 +183,7 @@ None.
 | `make verify` | exit `0` | exit `0`, `1081 passed` | n/a (expected is not "no output") |
 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider tests/test_docs_freshness_check.py tests/test_verify_references.py tests/test_quality_audit.py tests/test_install_with_env_render.py tests/test_template_sandbox.py tests/test_session_state.py tests/test_root_resolution.py` | exit `0` | exit `0`, `204 passed` | n/a |
 | `python3 skills/token-saver-auditor/scripts/audit_plan.py docs/sprints/056-core-pipeline/IMPLEMENTATION_PLAN.md` | exit `0` | exit `0` (`[OK]`) tras corregir una tubería escapada en Tests (primera ejecución: exit `2`) | n/a |
+| `grep -c -i 'unsandboxed session' rules/project_topology.md` (fila canónica de `D10`); `RA-09` y `deployment_workflow.md` la citan en lugar de reformularla (`RA-14`, hallazgo 6 de Phase 4.3) | `≥ 1` | `0`, exit `1`: el defecto está presente | n/a |
 | `python3 scripts/check_fix_reproduces.py` | exit `0` | run at close: necesita los commits `fix(` del sprint en `ai-sprint/056`, que todavía no existen | n/a |
 | `grep -rn -i -e 'is the boundary' -e 'boundary is that' -e 'framework-level boundary' -e 'has no secret path' -e 'no autonomous secret path' agents.md agents rules workflows docs/standards config scripts/with_env.py Makefile` | sin salida, exit `1` | sin salida, exit `1` | `grep -rn -i -e 'is the boundary' <scratch>/pc.md` sobre un fichero con `the write-deny is the boundary` → 1 hit, exit `0` |
 | `grep -n shield_audit.sh skills/env-shielding-auditor/README.md` | sin salida, exit `1` | 1 hit, exit `0`: el defecto está presente, y la misma ejecución sirve de control positivo | El dry run de esta misma fila (1 hit) |
