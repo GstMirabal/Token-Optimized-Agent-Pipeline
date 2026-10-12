@@ -788,3 +788,111 @@ def test_install_exit_3_alone_is_a_permission_denial(
         session_start, monkeypatch, tmp_path, False, "unrelated wording", 3,
     )
     assert "install.sh --target claude" in text
+
+
+MEASURING_ROW = "| **Measuring CLI** | Claude Code 2.1.119, macOS (Seatbelt). |\n"
+
+
+def _boot_with_cli(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path,
+    rules_text: str | None, run,
+) -> int:
+    """Boot against a minimal root whose rules file and `claude` subprocess are stubbed.
+
+    Args:
+        session_start: The imported module.
+        monkeypatch: Pytest fixture used for the stubs.
+        tmp_path: Temporary directory holding the root.
+        rules_text: Content of rules/project_topology.md, or None to omit the file.
+        run: Replacement for subprocess.run.
+
+    Returns:
+        int: The boot exit code.
+    """
+    root = _write_minimal_root(tmp_path / "repo")
+    if rules_text is not None:
+        (root / "rules").mkdir(exist_ok=True)
+        (root / "rules" / "project_topology.md").write_text(rules_text, encoding="utf-8")
+    monkeypatch.setattr(session_start, "repo_root", lambda: root)
+    monkeypatch.setattr(session_start, "_run_script", lambda *a, **k: 0)
+    monkeypatch.setattr(session_start, "_run_install_lock", lambda r: 0)
+    monkeypatch.setattr(session_start.subprocess, "run", run)
+    return session_start.main(["--boot", "--tool", "terminal"])
+
+
+def _claude_prints(version_line: str, calls: list[list[str]] | None = None):
+    """Build a subprocess.run stub that answers `claude --version`.
+
+    Args:
+        version_line: Stdout the stub returns.
+        calls: Optional list collecting (argv, kwargs) of each call.
+
+    Returns:
+        A callable standing in for subprocess.run.
+    """
+    def run(argv, **kwargs):
+        if calls is not None:
+            calls.append([argv, kwargs])
+        return subprocess.CompletedProcess(argv, 0, stdout=version_line, stderr="")
+    return run
+
+
+def test_boot_matching_cli_version_adds_no_advisory(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys
+) -> None:
+    """D17: the measuring CLI and the installed one agree, so nothing is said."""
+    calls: list[list[str]] = []
+    rc = _boot_with_cli(session_start, monkeypatch, tmp_path, MEASURING_ROW,
+                        _claude_prints("2.1.119 (Claude Code)\n", calls))
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "re-measure" not in out and "Measuring CLI" not in out
+    assert calls[0][0] == ["claude", "--version"]
+    assert calls[0][1].get("timeout") and not calls[0][1].get("shell")
+
+
+def test_boot_mismatched_cli_version_names_both_matrices(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys
+) -> None:
+    """D17: a different CLI version is advisory, names both versions and both matrices."""
+    rc = _boot_with_cli(session_start, monkeypatch, tmp_path, MEASURING_ROW,
+                        _claude_prints("2.2.0 (Claude Code)\n"))
+    out = capsys.readouterr().out
+    assert rc == 0
+    note = [line for line in out.splitlines() if "re-measure" in line]
+    assert len(note) == 1
+    assert "2.2.0" in note[0] and "2.1.119" in note[0]
+    assert "docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md" in note[0]
+    assert "docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md" in note[0]
+
+
+def test_boot_missing_claude_binary_says_so_once(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys
+) -> None:
+    """D17: no `claude` on PATH yields one advisory line and the exit code is unchanged."""
+    def run(argv, **kwargs):
+        raise FileNotFoundError(2, "No such file or directory", "claude")
+
+    rc = _boot_with_cli(session_start, monkeypatch, tmp_path, MEASURING_ROW, run)
+    captured = capsys.readouterr()
+    assert rc == 0
+    lines = [line for line in captured.out.splitlines() if "claude --version" in line]
+    assert len(lines) == 1 and "unavailable" in lines[0]
+    assert "SANDBOX_ENUMERATION" not in captured.out
+    assert "claude" not in captured.err
+
+
+@pytest.mark.parametrize("rules_text", [None, "| **Measuring CLI** | unknown |\n"])
+def test_boot_unreadable_measuring_row_says_so_once(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys,
+    rules_text: str | None,
+) -> None:
+    """D17: an absent file or row yields one advisory line and `claude` is never run."""
+    calls: list[list[str]] = []
+    rc = _boot_with_cli(session_start, monkeypatch, tmp_path, rules_text,
+                        _claude_prints("2.2.0\n", calls))
+    out = capsys.readouterr().out
+    assert rc == 0
+    lines = [line for line in out.splitlines() if "Measuring CLI" in line]
+    assert len(lines) == 1 and "skipped" in lines[0]
+    assert not calls
