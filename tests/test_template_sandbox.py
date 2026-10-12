@@ -2,10 +2,11 @@
 (Sprint 055, R2-9). The template is merged into every host's Claude Code
 configuration by install.py, so a loosened sandbox entry ships to all hosts.
 
-Pinned invariants (Sprint 055, Amendment 2, D12/D13): no sandbox.excludedCommands
-entry at all; framework trees and the secret files are write-denied both in the
-sandbox filesystem and in permissions.deny; .env stays unreadable; no
-allowMachLookup."""
+Pinned invariants (Sprint 055, Amendment 2, D12/D13; Sprint 056, D12): no
+sandbox.excludedCommands entry at all; the whole .agents submodule and .env are
+write-denied both in the sandbox filesystem and in permissions.deny, by one
+whole-tree entry each rather than per-subtree entries; .env stays unreadable;
+no allowMachLookup."""
 import json
 from pathlib import Path
 from typing import Any
@@ -61,47 +62,37 @@ def test_excluded_commands_absent_or_empty(template: dict[str, Any]) -> None:
     assert _excluded(template) == []
 
 
-@pytest.mark.parametrize(
-    "path",
-    [
-        "./.agents/hooks",
-        "./.agents/scripts",
-        "./.agents/config",
-        "./.agents/skills",
-        "./.agents/claude",
-        "./.agents/venv_skillopt",
-        "./.agents/scripts/with_env.py",
-        "./.agents/config/with_env_allowlist.json",
-        "./.env",
-    ],
-)
-def test_deny_write_paths(template: dict[str, Any], path: str) -> None:
-    """Framework trees, the wrapper, its allowlist, the venv and .env stay write-denied."""
-    assert path in _fs(template)["denyWrite"]
+def test_deny_write_is_whole_submodule_and_env(template: dict[str, Any]) -> None:
+    """denyWrite is exactly the whole submodule plus .env (Sprint 056, D12).
+
+    The per-subtree list left `.agents/_mode.py`, `mcp_servers/`, `agents/` and
+    the `Makefile` writable although hooks and MCP launchers load them outside
+    the sandbox (SANDBOX_ENUMERATION.md Q1, Q3, Q4, Q5); one `./.agents` entry
+    closes the class instead of one vector.
+    """
+    assert _fs(template)["denyWrite"] == ["./.agents", "./.env"]
 
 
-@pytest.mark.parametrize(
-    "rule",
-    [
-        "Edit(/.agents/hooks/**)",
-        "Edit(/.agents/scripts/**)",
-        "Edit(/.agents/config/**)",
-        "Edit(/.agents/skills/**)",
-        "Edit(/.agents/claude/**)",
-        "Edit(/.agents/venv_skillopt/**)",
-        "Edit(/.agents/scripts/with_env.py)",
-        "Edit(/.agents/config/with_env_allowlist.json)",
-        "Edit(/.env)",
-        "Read(/.env)",
-    ],
-)
+def test_no_narrower_agents_deny_write(template: dict[str, Any]) -> None:
+    """No `./.agents/...` subtree entry remains: `./.agents` subsumes it, so it is dead and misleading."""
+    narrower = [p for p in _fs(template)["denyWrite"] if p.startswith("./.agents/")]
+    assert narrower == []
+
+
+@pytest.mark.parametrize("rule", ["Edit(/.agents/**)", "Edit(/.env)", "Read(/.env)"])
 def test_permissions_deny_rules(template: dict[str, Any], rule: str) -> None:
-    """The permissions.deny rules guarding framework trees and .env stay present.
+    """The permissions.deny rules guarding the submodule and .env stay present.
 
-    Hooks run outside the sandbox and execute or merge these trees, so an
-    agent able to Edit them could run arbitrary code unsandboxed (N3).
+    Hooks run outside the sandbox and execute or merge files of the submodule,
+    so an agent able to Edit them could run arbitrary code unsandboxed (N3).
     """
     assert rule in template["permissions"]["deny"]
+
+
+def test_no_narrower_agents_edit_deny(template: dict[str, Any]) -> None:
+    """Only `Edit(/.agents/**)` names the submodule; per-subtree Edit rules are subsumed and dead."""
+    edits = [r for r in template["permissions"]["deny"] if r.startswith("Edit(/.agents/")]
+    assert edits == ["Edit(/.agents/**)"]
 
 
 @pytest.mark.parametrize("path", ["./.env", "./.env.*"])
