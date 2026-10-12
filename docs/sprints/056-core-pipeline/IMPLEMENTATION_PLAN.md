@@ -78,6 +78,7 @@ una regla sin la condición que la justifica.
 | `D14` | `KI-055-6`: `RA-19` añade una prohibición: ningún documento prescribe un procedimiento de seguridad (una comprobación previa, una ruta "endurecida", una secuencia "segura") que ejecute algo que el agente puede escribir, salvo que la enumeración de `D11` cubra esa ejecución. La enmienda la redacta `rule_validator`. | Prohibición aparte, `RA-20` | Es el mismo defecto que `RA-19` en otra forma, y `RA-05`..`RA-19` no se renumeran. |
 | `D15` | `KI-055-4`: tres filas en la tabla de §4 de `rules/project_topology.md`, una por script (`scripts/branch_sovereignty.py`, `scripts/ci_gate.py`, `scripts/session_probe.py`). Cada una indica el `gh` que lanza, su firma bajo el sandbox (heredada de `S-5`: `x509`) y quién lo ejecuta según `D10`. | Medir de nuevo cada script bajo el sandbox | Los tres lanzan `gh` como subproceso, con el mismo binario y la misma pila TLS que `S-5`. La fila cita `S-5` como evidencia y dice que es una derivación, no una medición nueva. |
 | `D16` | `KI-055-5`: `R7-4`/`R7-5`/`F1`: las tres frases dejan de reformular la regla. Pasan a ser un puntero a la fila `S-3` de §4 que nombra al actor (el humano). Así se reduce también `F3`. `F2`: el registro `F-055-N1` añade una línea de correspondencia (`Q6`, `Q8`-`Q10` del `SPRINT_LOG.md` del 055 → `KI-055-2`/`KI-055-3`). No se editan los registros sellados del 055. `F4`: queda cubierto por `D11`. | Renombrar los `Q` del `SPRINT_LOG.md` sellado del 055 | Un registro sellado no se reescribe. |
+| `D17` | **Disparador de la nueva medición** (rechazo de Filter 5 de `token_economy_agent`, decidido por el humano el 2026-10-12): `scripts/session_start.py --boot` lee la versión de la fila `Measuring CLI` de `rules/project_topology.md` §4 y la compara con `claude --version`. Si no coinciden, emite un hallazgo de readiness *advisory* que nombra la matriz que hay que volver a medir. Si no hay binario `claude` (CI, Cursor), lo dice y no emite nada más. | Texto en *Re-measure trigger* sin detector, o exit `2` en el boot | Un disparador en prosa no tiene invocador (`RA-16`). Bloquear el boot tras cada actualización del CLI pararía toda sesión, incluso las que no tocan el sandbox; el aviso sigue el mismo patrón que el de higiene del ancla. |
 
 ---
 
@@ -121,6 +122,7 @@ una regla sin la condición que la justifica.
 | `B6` | `rules/project_topology.md` | modify: filas `N3` y de riesgo residual según la enumeración; tres filas de scripts `gh` (`D13`, `D15`, `KI-055-4`) | medium | `rule_validator` | ⏳ |
 | `B7` | `agents.md` | modify: `RA-19` amplía la prohibición a procedimientos prescritos (`D14`, `KI-055-6`); lista de trees de `RA-09` según `B2` | high | `rule_validator` | ⏳ |
 | `B8` | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify: estado de `F-055-N1` según `D13` y correspondencia de `Q` (`D16`, `F2`) | low | `doc_orchestrator` | ⏳ |
+| `B9` | `scripts/session_start.py` (+ `tests/test_session_start.py`) | modify: aviso de readiness del boot cuando `claude --version` no coincide con la fila `Measuring CLI` de `rules/project_topology.md` §4; no bloquea (`D17`); commit `feat(` | medium | `implementer_agent` | ⏳ |
 
 Los ficheros de cierre del directorio del sprint (`SPRINT_LOG.md`, `task_scope.md`,
 `agent_assignment.md`, `skill_assignment.md`) los producen las Fases 3 y 4. No son
@@ -139,8 +141,8 @@ None.
 | Mechanism | Deterministic or agent judgment | Invoker (`RA-16`) |
 | :--- | :--- | :--- |
 | `session_state.py mark-audited` (por sprint auditado) | script | `workflows/audit_workflow.md`, último paso (`A14`) |
-| Rechazo de `excludedCommands` del host en la instalación | script | `scripts/install.py` `main` (existente, invocado por `install.sh` y por el humano) |
-| Enumeración de `RA-19` (se repite cuando cambia la versión del CLI) | agent judgment, medición con `claude -p` headless | `rules/project_topology.md` §4, fila *Re-measure trigger* (existente). No hay alternativa determinista: la medición necesita una sesión de Claude Code con sandbox. |
+| Rechazo de `excludedCommands` del host en la instalación | script | `scripts/install.py` `main` (existente, invocado por `scripts/install.sh` y por el humano) |
+| Enumeración de `RA-19` (se repite cuando cambia la versión del CLI) | agent judgment, medición con `claude -p` headless: no hay alternativa determinista, porque la medición necesita una sesión de Claude Code con sandbox | El disparador es determinista: `scripts/session_start.py --boot` avisa cuando `claude --version` no coincide con la fila `Measuring CLI` (`B9`, `D17`) |
 
 ---
 
@@ -149,9 +151,10 @@ None.
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 29 | Count of rows in Work tables (21 + 8) |
-| Subagents dispatched | ~12 (implementer por lotes de la Ola A y B, doc/rule writers, QA Gate 1, Tester Gate 2, `token_economy_agent` en Phase 5) | Planned, not measured |
-| Prior session ratio | 4.4 (esta sesión, ciclo 1, pico 115942 / primer turno 26278) | `python3 scripts/session_cost.py --from-anchor --json` |
+| Work units | 30 | Count of rows in Work tables (21 + 9) |
+| Subagents dispatched | Estimación, no medida: 30 unidades en lotes por perfil (≈ 8 despachos de autor: `implementer_agent` ×3 lotes, `rule_validator` ×2, `doc_orchestrator` ×2, `skill_architect` ×1) + Gate 1 + Gate 2 + 4 ya despachados en Fases 3-5 (`orchestrator`, `agent_orchestrator`, `skill_architect`, `rule_validator`, `token_economy_agent`) | Conteo de despachos en `SPRINT_LOG.md` al cierre |
+| Prior session ratio | 4.4 (sesión de esta planificación, `ea40fe66-042d-489e-b92d-80131c56f749`, medido 2026-10-12 durante la Fase 1: pico 115942 / primer turno 26278). No es un sprint anterior: la sesión del 055 no está en el ancla | `python3 scripts/session_cost.py --from-anchor --json` |
+| Mediciones `claude -p` de la Ola B | Presupuesto: ≤ 40 llamadas headless entre `B1` y `B4` (≈ 15 entradas de la enumeración × 2 rondas + controles). Si se supera, el exceso se registra en `SPRINT_LOG.md` y se vuelve a este Cost antes de seguir | Conteo de ejecuciones en `SANDBOX_ENUMERATION.md` §Method |
 
 ---
 
@@ -170,6 +173,7 @@ None.
 | `tests/test_template_sandbox.py` fija `Edit(/.agents/venv_skillopt/**)` (`A11`) | **Yes**: this is the defect | `grep -c 'venv_skillopt/\*\*' tests/test_template_sandbox.py` → `0`, exit `1` |
 | `session_state.py mark-audited` escribe `last_audit_sprint` y rechaza un informe inexistente (`A13`) | **Yes**: this is the defect | `python3 scripts/session_state.py --help` lista `claim`..`open-sprint` y ningún `mark-audited` (0 hits), exit `0` |
 | `install.py` rechaza con exit `2` un `excludedCommands` del host (`B5`) | **Yes**: this is the defect | unverified: la llamada se conserva en `scripts/install.py:197`. La firma del exit la mide el test de `B5` contra la base antes del arreglo (`KI-053-4`) |
+| El boot avisa cuando la versión del CLI no coincide con la fila `Measuring CLI` (`B9`) | **Yes**: this is the defect | `grep -c 'Measuring CLI' scripts/session_start.py` → `0`, exit `1` |
 | La plantilla deniega escritura en `./.agents` (`B2`) | **Yes**: this is the defect | `grep -c '"./.agents"' claude/settings.hooks.json` → `0` (solo subárboles, líneas 62-72) |
 | Suite completa y gates (`make verify`) | **No**: this is a regression to protect | `make verify` → exit `0`, `1081 passed`, ruff `All checks passed!` |
 | Los siete ficheros de test que toca el sprint | **No**: this is a regression to protect | `pytest -q` sobre esos siete ficheros → `204 passed`, exit `0` |
@@ -211,6 +215,7 @@ None.
 | `claude/settings.hooks.json`, `claude/mcp.json` | Denies y lanzador MCP (`B2`, `B3`) |
 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | `F-055-N1` (`B8`) |
 | `docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md` | Nuevo (`B1`, `B4`) |
+| `scripts/session_start.py` | Aviso de readiness por versión del CLI (`B9`) |
 | `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` | Se regenera con `scripts/map_workflows.py` si cambian `audit_workflow.md`/`deployment_workflow.md`/`pipeline_workflow.md`. No se edita a mano. |
 | `CHANGELOG.md`, `docs/roadmaps/core/pipeline/021-030-program-queue.md` | Entrada del sprint y estado de los 13 ítems (cierre, `RA-05`) |
 

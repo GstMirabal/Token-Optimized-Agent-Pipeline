@@ -15,8 +15,8 @@ After writing this file, run:
 
 `rules/skills_and_integrations.md §1`:
 
-The ladder terminates at P1. Every computational need of the 29 units (`A1`-`A21`,
-`B1`-`B8`) is covered by a script or skill that already exists in `skills/`, by a
+The ladder terminates at P1. Every computational need of the 30 units (`A1`-`A21`,
+`B1`-`B9`) is covered by a script or skill that already exists in `skills/`, by a
 `scripts/` tool, or by a deliverable the plan itself assigns to `implementer_agent`
 (`A13`, `mark-audited`). The remaining rungs are `not reached`.
 
@@ -77,6 +77,7 @@ with `wc -l` at base `817ac26`.
 | `B6` | none (`rules/project_topology.md`, 49 lines, read in full) | N/A | P1 hit; P2-P4 not reached |
 | `B7` | none. Partial read of the `RA-09` and `RA-19` rows of `agents.md` only (`§2 token_saver`) | N/A | P1 hit; P2-P4 not reached |
 | `B8` | `skills/omni-context-minimizer` is not applicable to Markdown prose; read `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` (2036 lines) with offset/limit at lines `1990-2020` for `F-055-N1` | N/A | P1 hit; P2-P4 not reached |
+| `B9` | `skills/omni-context-minimizer` for the skeleton of `scripts/session_start.py` (>200 lines) before a targeted read; `python-quality-auditor` on the edited file | P1 hit; added after the Phase 5 pre-approval audit (`D17`) |
 
 Plan-level and close-level tools, outside the unit rows:
 
@@ -119,7 +120,7 @@ the plan's Work tables.
 
 ## 5. Gaps
 
-None. Every unit `A1`-`A21` and `B1`-`B8` has its tools resolved above. Four rows
+None. Every unit `A1`-`A21` and `B1`-`B9` has its tools resolved above. Four rows
 (`B1`, `B4`, and the measurement half of `B2`) rely on a human-attended sandboxed
 Claude Code session, with no skill behind them, as the plan's Mechanisms table
 already states.

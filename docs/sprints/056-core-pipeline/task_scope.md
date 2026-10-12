@@ -1,6 +1,6 @@
 # Task Scope — Sprint 056 (core-pipeline)
 
-Source: `docs/sprints/056-core-pipeline/IMPLEMENTATION_PLAN.md` (`## Work`, units `A1`-`A21`, `B1`-`B8`) and `docs/sprints/056-core-pipeline/agent_assignment.md` (Phase 4.1, the assignee authority).
+Source: `docs/sprints/056-core-pipeline/IMPLEMENTATION_PLAN.md` (`## Work`, units `A1`-`A21`, `B1`-`B9`) and `docs/sprints/056-core-pipeline/agent_assignment.md` (Phase 4.1, the assignee authority).
 Phase 4.3 (Rule Audit), author `rule_validator`. Check: `python3 scripts/check_task_scope.py --sprint-dir docs/sprints/056-core-pipeline`.
 
 Mode: `claude_code`, `delegation_mode: native`. Not a Cursor sprint, so `make cursor-tiers` does not apply.
@@ -14,7 +14,7 @@ Mode: `claude_code`, `delegation_mode: native`. Not a Cursor sprint, so `make cu
 | `implementer_agent`, `rule_validator`, `skill_architect`, `doc_orchestrator` | `author` | sonnet | medium |
 | `principal_agent` (measurement half of `B1`, `B4`) | `gate` | opus | high |
 
-Declared escalations: none. Proposal for `token_economy_agent` (not a declaration): `B2` and `B7` are `high` risk rows at the `author` tier.
+Declared escalations: `B2` -> `opus`/`high` (`token_economy_agent` pre-approval audit, 2026-10-12: a security deny-set where a plausible-looking glob was itself the defect in Sprint 055 `RA-19` rounds 1-4). Keep: `B7` stays `sonnet`/`medium` (prose against the stated rule `D14`; Gate 1 reads its diff against `D13`, finding F-8).
 
 ## Work
 
@@ -51,13 +51,14 @@ Sequencing rule (`agents.md §2 no_interference`): rows that share a structural 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | `B1` | `docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md` | create: measured enumeration at base (`D11`, `KI-055-1`, `F4`); measurement handed over by `principal_agent`, which writes nothing | high | `doc_orchestrator` | sonnet | medium | ⏳ |
-| `B2` | `claude/settings.hooks.json` (companion: `tests/test_template_sandbox.py`, `fix(`) | modify: write-deny of all `./.agents` and `Edit(/.agents/**)`; `.git` denies only if `B1` justifies them (`D12`) | high | `implementer_agent` | sonnet | medium | ⏳ |
+| `B2` | `claude/settings.hooks.json` (companion: `tests/test_template_sandbox.py`, `fix(`) | modify: write-deny of all `./.agents` and `Edit(/.agents/**)`; `.git` denies only if `B1` justifies them (`D12`) | high | `implementer_agent` | opus | high | ⏳ |
 | `B3` | `claude/mcp.json` (companion: `tests/test_mcp_template.py` (new), `fix(`; named in the plan after finding F-4) | modify: `-I` on the `graphify` launcher (`D12`, `Q3`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
 | `B4` | `docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md` | modify: re-measurement of each vector after `B2`/`B3`, handed over by `principal_agent` (`D12`, `D13`) | high | `doc_orchestrator` | sonnet | medium | ⏳ |
 | `B5` | `scripts/install.py` (companion: `tests/test_install_with_env_render.py`, `fix(`) | modify: exit `2` refusal of a host `excludedCommands` entry (`D8`, `KI-055-2`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
 | `B6` | `rules/project_topology.md` | modify: `N3` and residual-risk rows per the enumeration; three `gh` script rows (`D13`, `D15`, `KI-055-4`) | medium | `rule_validator` | sonnet | medium | ⏳ |
 | `B7` | `agents.md` | modify: `RA-19` extends the prohibition to prescribed procedures (`D14`, `KI-055-6`); `RA-09` tree list per `B2` | high | `rule_validator` | sonnet | medium | ⏳ |
 | `B8` | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify: `F-055-N1` status per `D13` and `Q` correspondence (`D16`, `F2`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| `B9` | `scripts/session_start.py` (companion: `tests/test_session_start.py`) | modify: advisory readiness finding when `claude --version` differs from the `Measuring CLI` row of `rules/project_topology.md` §4 (`D17`); `feat(` | medium | `implementer_agent` | sonnet | medium | ⏳ |
 
 ## Locks (`jurisdictional_lock` / `no_interference`)
 
@@ -94,4 +95,4 @@ Every other row has a subject no other row claims (`A1`, `A4`, `A5`, `A18`, `A19
 | F-8 | `B2`, `B7` | `B2` replaces six subtree denies with one whole-submodule deny and `B7` rewrites the `RA-09` tree list and `RA-19`. `RA-19` forbids stating a boundary without a measured enumeration of every entry point. `D13` already keeps the "reduces exposure, not a boundary" wording; `B7` must not weaken it. | `agents.md §7 RA-19`, `RA-09` | No change to rows. Gate 1 checks the `B7` diff against `RA-19`. |
 | F-9 | `A9`, `A10`, `B5`, `A13` | `fix(` commits (`A1`-`A3`, `A6`, `A7`, `A9`, `A10`, `B2`, `B3`, `B5`) each need a `Repro:` test that fails on the parent (exit exactly 1). `A13` is `feat(` and `A4`, `A11`, `A12` are `test(`, so they are exempt. `A12` changes only types and docstrings and cannot fail on the parent; it must stay `test(` and must not be relabelled `fix(`. | `workflows/pipeline_workflow.md` Phase 7 Gate 1 first check; `rules/code_craft.md §6` | Commit type is recorded in the Operation cell of each affected row. |
 
-No row violates `jurisdictional_lock`: each of the 29 rows has one structural subject, and every paired test is a companion. No row requires a Cursor model, so the `haiku`/`sonnet`/`opus` prohibition for Cursor sprints does not apply.
+No row violates `jurisdictional_lock`: each of the 30 rows has one structural subject, and every paired test is a companion. No row requires a Cursor model, so the `haiku`/`sonnet`/`opus` prohibition for Cursor sprints does not apply.

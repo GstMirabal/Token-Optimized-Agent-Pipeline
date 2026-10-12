@@ -64,6 +64,7 @@ Rows that share a structural subject (`agents.md`: A8, A16, B7; `scripts/quality
 | B6 | `rules/project_topology.md` | modify | sequential (after A15, B4) | `rule_validator` | N/A | `agents/rule_validator.md` |
 | B7 | `agents.md` | modify | sequential (after A16, B2, B4) | `rule_validator` | N/A | `agents/rule_validator.md` |
 | B8 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | sequential (after B4) | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| B9 | `scripts/session_start.py` (+ `tests/test_session_start.py`) | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 
 ## Disagreements with the plan
 

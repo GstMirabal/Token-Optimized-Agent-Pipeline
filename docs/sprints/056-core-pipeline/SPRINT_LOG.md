@@ -70,6 +70,7 @@ Tracking of atomic goals achieved during the session.
 | `B6` | `rules/project_topology.md` | modify: `N3` and residual-risk rows per the enumeration; three `gh` script rows (`D13`, `D15`, `KI-055-4`) | medium | `rule_validator` | ⏳ |
 | `B7` | `agents.md` | modify: `RA-19` extends the prohibition to prescribed procedures (`D14`, `KI-055-6`); `RA-09` tree list per `B2` | high | `rule_validator` | ⏳ |
 | `B8` | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify: status of `F-055-N1` per `D13` and `Q` correspondence (`D16`, `F2`) | low | `doc_orchestrator` | ⏳ |
+| `B9` | `scripts/session_start.py` | modify: advisory boot readiness finding on CLI version mismatch with the `Measuring CLI` row (`D17`) | medium | `implementer_agent` | ⏳ |
 
 ---
 
