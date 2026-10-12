@@ -12,7 +12,7 @@ protocols that should mirror each other shows up there first.
 
 | Workflow | IMPLEMENTATION_PLAN.md | SPRINT_LOG.md | agent_assignment.md | skill_assignment.md | task_scope.md | graph_stats.json | PHASE_REGISTER.md | active_state.json | CHANGELOG.md | memory_index.json | graph.json | mirror.json | AGENTS_SLASH_COMMANDS_GUIDE.md |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `audit_workflow` | — | — | — | — | — | — | — | — | — | — | — | — | verify |
+| `audit_workflow` | — | — | — | — | — | — | — | write | — | — | — | — | verify |
 | `close_workflow` | write | write | write | write | write | write | write | write | write | verify/write | write | — | — |
 | `deployment_workflow` | — | — | — | — | — | — | — | write | write | — | — | — | — |
 | `extract_workflow` | — | — | — | — | — | — | — | — | — | ?/verify/write | — | — | — |
@@ -57,6 +57,7 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 2. Doc Purity | `precision_audit` | write |
 | 2. Doc Purity | `link_audit` | verify |
 | 3. Verdict | `report` | write |
+| 3. Verdict | `record_audit` | write |
 
 ### `close_workflow.md`
 
