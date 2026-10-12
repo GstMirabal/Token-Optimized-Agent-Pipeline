@@ -543,6 +543,32 @@ def _scan_block_header(
             _scan_node(body_child, depth + 1, path, out, acc)
 
 
+def _own_rows(node: Node) -> set[int]:
+    """1-based rows `node` contributes to its enclosing unit, treating every
+    nested function/class as a boundary (`D6` a).
+
+    A nested unit inside an expression (a callback argument, an object-literal
+    method, ...) is measured as its own unit, so only its first row counts
+    here -- never its remaining body rows -- exactly as a nested Python `def`
+    contributes only its header line.
+
+    Args:
+        node: A non-boundary, non-block node of the enclosing unit's body.
+
+    Returns:
+        set[int]: Rows of `node` outside the interior of any nested unit.
+    """
+    rows = set(range(node.start_point.row + 1, node.end_point.row + 2))
+    stack = list(node.named_children)
+    while stack:
+        child = stack.pop()
+        if child.type in FUNCTION_UNIT_TYPES or child.type in CLASS_TYPES:
+            rows -= set(range(child.start_point.row + 2, child.end_point.row + 2))
+            continue
+        stack.extend(child.named_children)
+    return rows
+
+
 def _scan_node(node: Node, depth: int, path: Path, out: list[Unit], acc: Acc | None) -> None:
     """Record `node` into the enclosing unit's `(lines, depth_box)`
     accumulator `acc` (or perform pure discovery when `acc` is None, e.g.
@@ -579,7 +605,7 @@ def _scan_node(node: Node, depth: int, path: Path, out: list[Unit], acc: Acc | N
             _scan_node(child, depth, path, out, acc)
         return
     if acc is not None:
-        acc[0].update(range(node.start_point.row + 1, node.end_point.row + 2))
+        acc[0].update(_own_rows(node))
     for child in node.named_children:
         _scan_node(child, depth, path, out, acc)
 

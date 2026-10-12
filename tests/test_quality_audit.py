@@ -1015,3 +1015,54 @@ def test_report_lists_excluded_files_separately(
     assert "vendored.py" in out
     assert "vendored.py" not in out.split("Excluded files:")[0]  # not in the unit register
     assert "1/1 (100.0%)" in out  # only good.py counts toward compliant
+
+
+# --------------------------------------------------------------------------
+# JS/TS nested function inside an expression is a boundary (Sprint 056 `D6` a)
+# --------------------------------------------------------------------------
+
+
+def test_js_nested_function_expression_is_a_boundary_for_its_enclosing_unit(
+    tmp_path: Path,
+) -> None:
+    """Hand derivation (`D6` a): `outer`'s only statement is the `forEach`
+    call on row 2; the callback body (rows 3-5) and the closing `});` row 6
+    belong to the nested function, which is measured as its own unit (3
+    executable rows). `outer` counts 1, symmetric with a nested Python `def`."""
+    source = (
+        "function outer() {\n"
+        "  items.forEach(function (x) {\n"
+        "    a(x);\n"
+        "    b(x);\n"
+        "    c(x);\n"
+        "  });\n"
+        "}\n"
+    )
+    path = tmp_path / "nested.js"
+    path.write_text(source, encoding="utf-8")
+
+    units = {u.name: u for u in qa.scan_js_file(path, qa._load_grammars())}
+
+    assert units["outer"].executable_lines == 1
+    assert units["<anonymous>:2"].executable_lines == 3
+
+
+def test_js_sibling_arguments_of_a_call_still_count_beside_a_nested_function(
+    tmp_path: Path,
+) -> None:
+    """Rows of the containing statement outside the nested function stay
+    counted: row 2 (`foo(`), row 3 (`first,`), row 4 (the callback's own
+    header row), row 7 (`last`) and row 8 (`);`); rows 5-6 are the callback's
+    body and closing row -> 5 rows."""
+    source = (
+        "function outer() {\n"
+        "  foo(\n"
+        "    first,\n"
+        "    function () {\n"
+        "      inner();\n"
+        "    },\n"
+        "    last\n"
+        "  );\n"
+        "}\n"
+    )
+    assert _measure_js_function(tmp_path, source, "outer") == 5
