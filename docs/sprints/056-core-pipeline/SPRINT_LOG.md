@@ -92,6 +92,7 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | Hosts installed before `d70d00c` keep the old per-tree deny entries next to `./.agents` (harmless, never pruned: not in `RETIRED_VALUES`) | Route at extract | pending extract |
 | The `B5` refusal message suggests the deprecated `install.sh` shim via `install_command()` | Route at extract | pending extract |
 | `session_start._refresh_bridge_lock` would raise an uncaught `PermissionError` under the whole-`.agents` deny if reached in the sandbox (not reached in sessions 2-4: the hook refreshes the lock first) | Route at extract | pending extract |
+| **Measurement correction found while preparing the QA1-1 remediation (session 5, 2026-10-13, fixture at `8bb0d1a`)**: `G01` sandboxed `git -C .agents config core.fsmonitor '<cmd>'` exit 0 and the value persisted in `.git/modules/.agents/config` (read back unsandboxed); `G02` the same at host root `.git/config` exit 4 `could not write config file .git/config: Operation not permitted`. So `E13` is NOT approval-gated for the submodule config: the permission layer only gates commands that name the path; `git config` does not. `SANDBOX_ENUMERATION.md` (W12 row, §4, §5 E13), `rules/project_topology.md` N3 row (`9171740`) and `UPSTREAM_FINDINGS_FROM_HOSTS.md` Q2 status (`50b5281`) state it as approval-gated and must be corrected in the QA1 remediation (`RA-19`: re-run the enumeration for `git`-mediated writes to `.git/modules/.agents/{config,hooks}`; D12's conditional `.git` deny is now justified for `./.git/modules/.agents/config`, to be measured against agent `git commit` first). Fixture value never in transcript (`grep -c` = 0); probe value unset afterwards | Resume here: Phase 7 QA1 remediation, round 2 | pending |
 | Residue outside scope: `skills/env-shielding-auditor/README.md` badge says "Built With: Bash" for a Python script (found by `A5`); `agents/devops_agent.md` frontmatter and `write_scope` say `gh` is never run by that profile (a profile restriction, consistent with `D10`, left unchanged) | Route at `/agents:extract` | pending extract |
 
 ---
@@ -120,6 +121,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 
 | Gate | Round | Verdict | Class | Notes |
 | :--- | :--- | :--- | :--- | :--- |
+| QA Agent (Gate 1) | 1 | REJECTED | instructing | Range `d88593c..c14749e`; check_fix_reproduces exit 0 (8 fix( OK); B2 `d70d00c` and B3 `05c74a6` replayed manually (parent exit 1, commit exit 0); make verify 0 (1105 passed); ruff 0; quality-audit 0; verify_references 0; Verification rows met; boundary grep exit 1. Bounce: QA1-1 `rules/project_topology.md:29` residual-risk row stale (Q5 closed, F-055-N1 routing), QA1-2 `:39` gh row says the GitHub MCP launcher is agent-writable (E9 closed), QA1-3 `agents/devops_agent.md:16` stale Q5/'until Sprint 056' wording. Records: QA1-4 `Makefile:54` comment, QA1-5 A5 assignee in plan/log vs `agent_assignment.md`, QA1-6 Cost row '30 unidades', QA1-7 Phase 1/3 boxes unticked, QA1-8 silent `tokenize` fallback in `scripts/quality_audit.py`, QA1-9 uncaught `json.loads` in `install.py` `_excluded_commands`. |
 
 ---
 
@@ -127,6 +129,6 @@ Example (do not uncomment — Phase 7 writes the real rows):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: APPROVED (Phase 5 passed 2026-10-12)
-**Next Phase**: Phase 7 (QA Gate 1, then Tester Gate 2)
+**Next Phase**: Phase 7 — QA Gate 1 round 1 REJECTED/instructing; remediate QA1-1..QA1-3 plus the session-5 E13 correction, then fresh QA Gate 1 round 2, then Tester Gate 2. Session suspended 2026-10-14 by the human
 
 *Certified under conventional commit standard: feat(scope): message #056*
