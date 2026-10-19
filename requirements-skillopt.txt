@@ -3,4 +3,4 @@
 # session start. See skills/skillopt/SKILL.md.
 skillopt[webui,claude]==0.1.0
 google-generativeai==0.8.6
-claude-agent-sdk==0.2.88
+claude-agent-sdk==0.2.121
