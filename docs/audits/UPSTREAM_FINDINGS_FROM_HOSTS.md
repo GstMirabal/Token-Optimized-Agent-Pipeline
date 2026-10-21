@@ -2049,10 +2049,19 @@ names the path. Remediation R1 (template; SHA in the sprint log) adds
 boot working. Measured at the sandbox layer only. Host `.git/config` and `.git/hooks` are
 refused by the sandbox itself (M04, M05).
 
-The finding stays open and the box stays unticked: `E14` (`.mcp.json`, `.claude/`) is
-approval-gated, `Q7` and host `CLAUDE.md` remain open. Not every row is "not writable by
-the agent", so `RA-19` wording stands: write-denies reduce exposure; they are not a
-boundary.
+`E14` correction (measured 2026-10-21 by operation, `SANDBOX_ENUMERATION.md` section 6.8,
+sessions 8-9): `.mcp.json`, `.claude/settings*.json`, `.claude/agents/`,
+`.claude/commands/`, `.claude/skills/` and `~/.claude/` are sandbox-denied, measured by
+operation (section 6.8), not approval-gated. Writable by the sandboxed agent: host
+`CLAUDE.md` and `.claude/rules/` (instruction tampering), and `.claude/hooks/` (its
+files run only if a sandbox-denied settings file names them). No vector in this finding
+is now classed approval-gated.
+
+The finding stays open and the box stays unticked, for two reasons: `Q7` (the project
+`venv/` is writable, so a hook that runs bare `python3` from an active venv executes
+agent-writable code) and host `CLAUDE.md` plus `.claude/rules/` (instruction tampering,
+host-owned instructions). Not every row is "not writable by the agent", so `RA-19`
+wording stands: write-denies reduce exposure; they are not a boundary.
 
 **`Q` identifier correspondence** (requested by `PIPELINE_AUDIT_REPORT-055.md` `F2`).
 `Q6`, `Q8`, `Q9`, `Q10` are ids of the Sprint 055 `SPRINT_LOG` register, not rows of the
