@@ -8,6 +8,7 @@
       "Bash(git reset --hard origin:*)",
       "Bash(rm -rf /:*)",
       "Edit(/.agents/**)",
+      "Edit(/.git/modules/.agents/**)",
       "Edit(/.env)",
       "Read(/.env)"
     ],
@@ -54,6 +55,7 @@
       ],
       "denyWrite": [
         "./.agents",
+        "./.git/modules/.agents",
         "./.env"
       ]
     },

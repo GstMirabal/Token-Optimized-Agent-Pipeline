@@ -3,9 +3,10 @@
 configuration by install.py, so a loosened sandbox entry ships to all hosts.
 
 Pinned invariants (Sprint 055, Amendment 2, D12/D13; Sprint 056, D12): no
-sandbox.excludedCommands entry at all; the whole .agents submodule and .env are
-write-denied both in the sandbox filesystem and in permissions.deny, by one
-whole-tree entry each rather than per-subtree entries; .env stays unreadable;
+sandbox.excludedCommands entry at all; the whole .agents submodule, its gitdir
+.git/modules/.agents and .env are write-denied both in the sandbox filesystem
+and in permissions.deny, by one whole-tree entry each rather than per-subtree
+entries; .env stays unreadable;
 no allowMachLookup."""
 import json
 from pathlib import Path
@@ -62,15 +63,19 @@ def test_excluded_commands_absent_or_empty(template: dict[str, Any]) -> None:
     assert _excluded(template) == []
 
 
-def test_deny_write_is_whole_submodule_and_env(template: dict[str, Any]) -> None:
-    """denyWrite is exactly the whole submodule plus .env (Sprint 056, D12).
+def test_deny_write_is_whole_submodule_gitdir_and_env(template: dict[str, Any]) -> None:
+    """denyWrite is exactly the whole submodule, its gitdir and .env (Sprint 056, D12).
 
     The per-subtree list left `.agents/_mode.py`, `mcp_servers/`, `agents/` and
     the `Makefile` writable although hooks and MCP launchers load them outside
     the sandbox (SANDBOX_ENUMERATION.md Q1, Q3, Q4, Q5); one `./.agents` entry
-    closes the class instead of one vector.
+    closes the class instead of one vector. The submodule's gitdir lives outside
+    `./.agents`: an agent-set `core.fsmonitor` in `.git/modules/.agents/config`
+    ran unsandboxed through the commit hook's `git -C .agents status`
+    (SANDBOX_ENUMERATION.md E13), and a `commondir` file written there redirects
+    git to any config, so the whole gitdir is denied rather than `config`/`hooks`.
     """
-    assert _fs(template)["denyWrite"] == ["./.agents", "./.env"]
+    assert _fs(template)["denyWrite"] == ["./.agents", "./.git/modules/.agents", "./.env"]
 
 
 def test_no_narrower_agents_deny_write(template: dict[str, Any]) -> None:
@@ -79,7 +84,10 @@ def test_no_narrower_agents_deny_write(template: dict[str, Any]) -> None:
     assert narrower == []
 
 
-@pytest.mark.parametrize("rule", ["Edit(/.agents/**)", "Edit(/.env)", "Read(/.env)"])
+@pytest.mark.parametrize(
+    "rule",
+    ["Edit(/.agents/**)", "Edit(/.git/modules/.agents/**)", "Edit(/.env)", "Read(/.env)"],
+)
 def test_permissions_deny_rules(template: dict[str, Any], rule: str) -> None:
     """The permissions.deny rules guarding the submodule and .env stay present.
 
