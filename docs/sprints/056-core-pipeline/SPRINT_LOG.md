@@ -20,11 +20,11 @@
 ## 🏁 Sprint Progression
 Tracking of atomic goals achieved during the session.
 
-- [ ] **Phase 1 - Planning**: Implementation Plan drafted by `principal_agent`
+- [x] **Phase 1 - Planning**: Implementation Plan drafted by `principal_agent`
     - `[x]` `IMPLEMENTATION_PLAN.md` at `docs/sprints/056-core-pipeline/IMPLEMENTATION_PLAN.md`
     - `[x]` `audit_plan.py` exit 0
     - `[x]` Human confirmed decisions `D6`, `D8`, `D10`, `D12` on 2026-10-12
-- [ ] **Phase 3 - Roadmap Drafting / Sprint Opening**
+- [x] **Phase 3 - Roadmap Drafting / Sprint Opening**
     - `[x]` Branch `ai-sprint/056` created from `main` at `d88593c`
     - `[x]` `session_state.py open-sprint --id 56` ran, exit 0
     - `[x]` `SPRINT_LOG.md` created from `docs/standards/templates/SPRINT_LOG_TEMPLATE.md`
@@ -43,7 +43,7 @@ Tracking of atomic goals achieved during the session.
 | `A2` | `scripts/verify_references.py` (+ `tests/test_verify_references.py`, `fix(`) | modify: the three substring checks of `invoked_by:` use `_invoked_by_line` (`D3`, `NF-2`) | medium | `implementer_agent` | ✅ `a740f88` |
 | `A3` | `scripts/verify_references.py` (+ `tests/test_verify_references.py`, `fix(`) | modify: path-token boundary in `_skill_doc_names_script` (`D3`, `NF-1`) | medium | `implementer_agent` | ✅ `b083715` |
 | `A4` | `tests/test_root_resolution.py` | modify: assertion per checkout shape, valid in worktrees (`D4`, `KI-052-4`); commit `test(` | low | `implementer_agent` | ✅ `eccb6ea` |
-| `A5` | `skills/env-shielding-auditor/README.md` | modify: name `scripts/env_shielding_auditor.py` (`D5`, `KI-052-7`) | low | `doc_orchestrator` | ✅ `77eb3c4` |
+| `A5` | `skills/env-shielding-auditor/README.md` | modify: name `scripts/env_shielding_auditor.py` (`D5`, `KI-052-7`) | low | `skill_architect` | ✅ `77eb3c4` |
 | `A6` | `scripts/quality_audit.py` (+ `tests/test_quality_audit.py`, `fix(`) | modify: nested-function boundary in JS/TS (`D6` a) | medium | `implementer_agent` | ✅ `2e4487c` |
 | `A7` | `scripts/quality_audit.py` (+ `tests/test_quality_audit.py`, `fix(`) | modify: exclude blank and comment-only rows inside multi-row statements, in Python and JS/TS (`D6` b) | medium | `implementer_agent` | ✅ `9f02419` |
 | `A8` | `agents.md` | modify: `§1` `max_lines_per_func` and the JS/TS `linter_command` row declare the two `D6` rules | low | `rule_validator` | ✅ `d40f3da` |
@@ -76,6 +76,17 @@ Tracking of atomic goals achieved during the session.
 | `B8` | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify: status of `F-055-N1` per `D13` and `Q` correspondence (`D16`, `F2`) | low | `doc_orchestrator` | ✅ `50b5281` |
 | `B9` | `scripts/session_start.py` | modify: advisory boot readiness finding on CLI version mismatch with the `Measuring CLI` row (`D17`) | medium | `implementer_agent` | ✅ `8bb0d1a` |
 
+### Roadmap: QA Gate 1 round 1 remediation
+
+| # | File | Operation | Risk | Assignee | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `R1` | `claude/settings.hooks.json` (+ `tests/test_template_sandbox.py`, `fix(`) | modify: `denyWrite` adds `./.git/modules/.agents`; `permissions.deny` adds `Edit(/.git/modules/.agents/**)` (`D12` conditional `.git` deny, E13 correction) | high | `implementer_agent` (opus/high) | ✅ `1671fa1` |
+| `R2` | `docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md` | modify: section 6, sessions 6-7, E8/E13/W11-W13 corrected | high | `principal_agent` (measurement) / `doc_orchestrator` | ✅ `ba1f204` |
+| `R3` | `rules/project_topology.md` | modify: rows residual-risk (QA1-1), `gh` (QA1-2), `N3` (E13) | medium | `rule_validator` | ✅ `2a5c84b` |
+| `R4` | `agents/devops_agent.md` | modify: line 16 stale Q5 wording (QA1-3) | low | `doc_orchestrator` | ✅ `dc345c9` |
+| `R5` | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify: Q2 register cell, status table, E8 paragraph | low | `doc_orchestrator` | ✅ `61bac44` |
+| `R6` | `agents.md` | modify: `RA-09` deny list names the gitdir | medium | `rule_validator` | ✅ `83dde23` |
+
 ---
 
 ## 🧠 Rule Amendments & Heuristic Harvest
@@ -92,7 +103,9 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | Hosts installed before `d70d00c` keep the old per-tree deny entries next to `./.agents` (harmless, never pruned: not in `RETIRED_VALUES`) | Route at extract | pending extract |
 | The `B5` refusal message suggests the deprecated `install.sh` shim via `install_command()` | Route at extract | pending extract |
 | `session_start._refresh_bridge_lock` would raise an uncaught `PermissionError` under the whole-`.agents` deny if reached in the sandbox (not reached in sessions 2-4: the hook refreshes the lock first) | Route at extract | pending extract |
-| **Measurement correction found while preparing the QA1-1 remediation (session 5, 2026-10-13, fixture at `8bb0d1a`)**: `G01` sandboxed `git -C .agents config core.fsmonitor '<cmd>'` exit 0 and the value persisted in `.git/modules/.agents/config` (read back unsandboxed); `G02` the same at host root `.git/config` exit 4 `could not write config file .git/config: Operation not permitted`. So `E13` is NOT approval-gated for the submodule config: the permission layer only gates commands that name the path; `git config` does not. `SANDBOX_ENUMERATION.md` (W12 row, §4, §5 E13), `rules/project_topology.md` N3 row (`9171740`) and `UPSTREAM_FINDINGS_FROM_HOSTS.md` Q2 status (`50b5281`) state it as approval-gated and must be corrected in the QA1 remediation (`RA-19`: re-run the enumeration for `git`-mediated writes to `.git/modules/.agents/{config,hooks}`; D12's conditional `.git` deny is now justified for `./.git/modules/.agents/config`, to be measured against agent `git commit` first). Fixture value never in transcript (`grep -c` = 0); probe value unset afterwards | Resume here: Phase 7 QA1 remediation, round 2 | pending |
+| **Measurement correction found while preparing the QA1-1 remediation (session 5, 2026-10-13, fixture at `8bb0d1a`)**: `G01` sandboxed `git -C .agents config core.fsmonitor '<cmd>'` exit 0 and the value persisted in `.git/modules/.agents/config` (read back unsandboxed); `G02` the same at host root `.git/config` exit 4 `could not write config file .git/config: Operation not permitted`. So `E13` is NOT approval-gated for the submodule config: the permission layer only gates commands that name the path; `git config` does not. `SANDBOX_ENUMERATION.md` (W12 row, §4, §5 E13), `rules/project_topology.md` N3 row (`9171740`) and `UPSTREAM_FINDINGS_FROM_HOSTS.md` Q2 status (`50b5281`) state it as approval-gated and must be corrected in the QA1 remediation (`RA-19`: re-run the enumeration for `git`-mediated writes to `.git/modules/.agents/{config,hooks}`; D12's conditional `.git` deny is now justified for `./.git/modules/.agents/config`, to be measured against agent `git commit` first). Fixture value never in transcript (`grep -c` = 0); probe value unset afterwards | Resolved by `R1`-`R6` (sessions 6-7: `M01`-`M09`, `N01`-`N12`; budget now 7 of <= 40 `claude -p` calls). Instrument lesson: probes that name a protected path in the command text measure the permission layer, not the sandbox | pending extract |
+| Deviation from `D12` text: `D12` named `./.git/modules/.agents/config`, `./.git/config`, `./.git/hooks`; `R1` denies the whole submodule gitdir instead, because a `commondir` file in that gitdir redirects git to another config (verified unsandboxed), so a config-only deny closes one vector, which `RA-19` forbids; host `.git/config` and `.git/hooks` need no deny (sandbox-denied, `M04`/`M05`). Cost: sandboxed `git -C .agents fetch` fails (`N11`) | pending extract |
+| Human direction 2026-10-21: the human judges the `RA-09`/`gh`/sandbox regime too restrictive (the restructuring meant to reduce permission prompts increased them); review it after this sprint closes | Route at `/agents:extract` to Sprint 057 planning | pending extract |
 | Residue outside scope: `skills/env-shielding-auditor/README.md` badge says "Built With: Bash" for a Python script (found by `A5`); `agents/devops_agent.md` frontmatter and `write_scope` say `gh` is never run by that profile (a profile restriction, consistent with `D10`, left unchanged) | Route at `/agents:extract` | pending extract |
 
 ---
@@ -129,6 +142,6 @@ Example (do not uncomment — Phase 7 writes the real rows):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: APPROVED (Phase 5 passed 2026-10-12)
-**Next Phase**: Phase 7 — QA Gate 1 round 1 REJECTED/instructing; remediate QA1-1..QA1-3 plus the session-5 E13 correction, then fresh QA Gate 1 round 2, then Tester Gate 2. Session suspended 2026-10-14 by the human
+**Next Phase**: Phase 7 — QA Gate 1 round 2 (fresh agent) over the remediation range `0bfb015..HEAD` plus the full sprint range, then Tester Gate 2.
 
 *Certified under conventional commit standard: feat(scope): message #056*
