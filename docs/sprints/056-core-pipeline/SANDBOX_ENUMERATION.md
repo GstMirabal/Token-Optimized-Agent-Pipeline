@@ -6,7 +6,7 @@
 | Finding | `F-055-N1` (`docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md:1990-2020`) |
 | Method precedent | `docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md` sections 8-9 |
 | Date | 2026-10-12 |
-| Status | Measured at base template. Re-measured after B2/B3/B5/B9 in section 5 (unit B4). Corrected in section 6 (unit R2, QA Gate 1 round 1): the session 1 results for `E8`, `E13`, `W11`-`W13` classified git-mediated paths as `approval-gated`; sessions 5-7 measured them as writable at base (submodule gitdir) or sandbox-denied (host `.git/config`, `.git/hooks`). |
+| Status | Measured at base template. Re-measured after B2/B3/B5/B9 in section 5 (unit B4). Corrected in section 6 (unit R2, QA Gate 1 round 1): the session 1 results for `E8`, `E13`, `W11`-`W13` classified git-mediated paths as `approval-gated`; sessions 5-7 measured them as writable at base (submodule gitdir) or sandbox-denied (host `.git/config`, `.git/hooks`). Corrected again in section 6.8 (unit R7, QA Gate 1 round 2, bounce `QA2-1`): the remaining `approval-gated` rows (`E11` `.claude/agents/`, `E14` `.mcp.json` and `.claude/settings*.json`, `W21` `~/.claude/`) were re-measured by operation and are sandbox-denied; no row is classed `approval-gated` any more. |
 
 ## 1. Method
 
@@ -33,15 +33,15 @@ A case is refused by one of two different layers. They are not equivalent.
 | Layer | Observed signature | Meaning |
 | :--- | :--- | :--- |
 | Sandbox | `Operation not permitted`, exit 1 | The write is blocked for the sandboxed process. |
-| Claude Code permission layer | In a headless session, "requires approval" becomes a refusal. `Permission to use Bash ... has been denied` for paths matched by `permissions.deny` `Edit(...)` rules; `The following parts require approval` for Claude Code protected paths: `.claude/`, `.git/config`, `.git/hooks/`, `.git/modules/`, `.mcp.json`, `~/.claude/`. | The second signature is NOT "unwritable": in an interactive session a human approving the prompt lets the write proceed. It is recorded as `approval-gated`. |
+| Claude Code permission layer | In a headless session, "requires approval" becomes a refusal. `Permission to use Bash ... has been denied` for paths matched by `permissions.deny` `Edit(...)` rules; `The following parts require approval` for Claude Code protected paths: `.claude/`, `.git/config`, `.git/hooks/`, `.git/modules/`, `.mcp.json`, `~/.claude/`. | Session-1 reading, corrected in sections 6 and 6.8: the second signature was recorded as `approval-gated` ("a human approving the prompt lets the write proceed"). It measures only the permission layer, not the sandbox layer that decides. |
 
-Correction (section 6): the permission-layer signature appears only when the command text names the protected path. A command that writes the path without naming it (`git config` writing `.git/modules/.agents/config`; a path built at runtime inside a script) never meets the permission layer and reaches the sandbox layer, which is the one that decides. `approval-gated` is therefore a property of how a probe named its target, not a property of the path.
+Correction (sections 6 and 6.8): the permission-layer signature appears only when the command text names the protected path. A command that writes the path without naming it (`git config` writing `.git/modules/.agents/config`; a path built at runtime inside a script) never meets the permission layer and reaches the sandbox layer, which is the one that decides. The session-1 label `approval-gated` was therefore a property of how a probe named its target, not a property of the path. Section 6 re-measured the git-mediated rows and section 6.8 re-measured every remaining row by operation: no row is `approval-gated` after section 6.8.
 
 Column value `denied (rule)` below marks the first signature (a `permissions.deny` `Edit` rule matched); it is a closed path at base only for as long as that rule exists.
 
 ## 3. Enumeration (the `RA-19` deliverable)
 
-Writable column values: `yes`, `no (sandbox)`, `approval-gated`, `denied (rule)`.
+Writable column values: `yes`, `no (sandbox)`, `denied (rule)`, and the session-1 value `approval-gated`, which appears below only as a quoted session-1 label followed by its correction (section 6.8 leaves no row with that value).
 
 | ID | Entry point | What it executes outside the sandbox | Writable by the sandboxed agent at base | Evidence case | Maps to `F-055-N1` |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -55,12 +55,12 @@ Writable column values: `yes`, `no (sandbox)`, `approval-gated`, `denied (rule)`
 | `E8` | Host `.git/hooks/pre-commit`, `commit-msg`, `pre-push` installed by `install.py` | `python3 .agents/hooks/on_commit.py`, `on_commit_msg.py` and the pre-push equivalent, run by ANY `git commit` or push, including the human's | Session 1: hook files `approval-gated`. Imported `.agents/` root modules: `yes`. **Corrected in section 6**: host `.git/hooks/`: `no (sandbox)` (`M04`); hook files sandbox-denied | W13, W26, D08; M04 | New vector, not in `F-055-N1` |
 | `E9` | MCP server `git-sync-agent` | `/bin/bash .agents/mcp_servers/github_mcp/scripts/start_mcp.sh` | `yes` | W06 | `Q3` |
 | `E10` | MCP server `graphify` | `.agents/venv_skillopt/bin/python -m graphify.serve`, cwd = host root, no `-I`: a host-root `graphify/` package shadows the installed one | Host-root `graphify/`: `yes`. `venv_skillopt`: `denied (rule)` | W07, W05 | `Q3` |
-| `E11` | Subagent definitions `.claude/agents/*.md` (symlinks into `.agents/agents/`) whose `hooks:` frontmatter runs unsandboxed | The frontmatter `hooks:` commands | `.agents/agents/`: `yes`. `.claude/agents/`: `approval-gated` | W08, W09 | `Q4` |
+| `E11` | Subagent definitions `.claude/agents/*.md` (symlinks into `.agents/agents/`) whose `hooks:` frontmatter runs unsandboxed | The frontmatter `hooks:` commands | `.agents/agents/`: `yes`. `.claude/agents/`: session 1 `approval-gated`; **corrected in section 6.8**: `no (sandbox)` (create and append-open of an existing symlinked definition both refused, `P04`, `P05`) | W08, W09; P04, P05 | `Q4` |
 | `E12` | Human `make -f .agents/Makefile <target>` recipes | The recipe lines of the invoked target | `yes` | W10 | `Q5` (now measured as writable) |
 | `E13` | Human or hook `git` honouring `core.fsmonitor` and hooks in `.git/config`, `.git/modules/.agents/config`, `.git/hooks/` | The configured fsmonitor command or hook | Session 1: `approval-gated`. **Corrected in section 6**: submodule gitdir `.git/modules/.agents/` (config, hooks, `commondir`): `yes` at base, executed unsandboxed (`M01`-`M03`, `M07`, `M08`); host `.git/config`: `no (sandbox)` (`M05`); host `.git/hooks/`: `no (sandbox)` (`M04`) | W11, W12, W13; M01-M08 | `Q2` |
-| `E14` | `.mcp.json` and `.claude/settings*.json` (a server or hook added there runs unsandboxed next session) | Any added server command or hook command | `approval-gated` | W14, W15, W16 | not listed (extends `Q3`) |
+| `E14` | `.mcp.json` and `.claude/settings*.json` (a server or hook added there runs unsandboxed next session) | Any added server command or hook command | Session 1: `approval-gated`. **Corrected in section 6.8**: `no (sandbox)` for `.mcp.json`, `.claude/settings.json` and `.claude/settings.local.json` (`P01`-`P03`) | W14, W15, W16; P01-P03 | not listed (extends `Q3`) |
 | `E15` | Hook interpreter | Bare `python3` from `PATH`; with an activated project venv inside the host checkout, that interpreter is agent-writable | Project venv: `yes` | W22 | `Q7` |
-| `E16` | Governance text `.agents/agents.md`, `rules/`, `workflows/` and host `CLAUDE.md` | Nothing executed: instruction tampering | `.agents/` files: `yes`. `CLAUDE.md`: `yes` | W17, W18, W19, W25 | `Q11` |
+| `E16` | Governance text `.agents/agents.md`, `rules/`, `workflows/` and host `CLAUDE.md` | Nothing executed: instruction tampering | `.agents/` files: `yes`. Host `CLAUDE.md`: `yes` (`W25`; confirmed by operation in section 6.8, `Q06`). Host `.claude/rules/*.md`, loaded by Claude Code as instructions (same class as `CLAUDE.md`): `yes` (`Q04`, added in section 6.8) | W17, W18, W19, W25; Q04, Q06 | `Q11` |
 | `E17` | `.agents/config`, `.agents/venv_skillopt`, `.agents/claude` | Read by hooks, scripts and MCP launch | `denied (rule)` | W04, W05, W23, W24 | none (finding `F4`: never measured before; now measured) |
 
 Control: W27 `python3 -c "open('.env').close()"` gave `PermissionError` exit 1, so `.env` is unreadable from the sandboxed shell itself.
@@ -77,19 +77,19 @@ Control: W27 `python3 -c "open('.env').close()"` gave `PermissionError` exit 1, 
 | `W06` | `.agents/mcp_servers/` | exit 0 (yes) |
 | `W07` | `mkdir graphify && touch graphify/__init__.py` at host root | exit 0 (yes) |
 | `W08` | `.agents/agents/` | exit 0 (yes) |
-| `W09` | `.claude/agents/` | approval-gated |
+| `W09` | `.claude/agents/` | approval-gated (session 1; corrected in section 6.8: no (sandbox), `P04`, `P05`) |
 | `W10` | append to `.agents/Makefile` | exit 0 (yes) |
 | `W11` | `.git/config` | approval-gated (session 1; corrected in section 6: no (sandbox), `M05`) |
 | `W12` | `.git/modules/.agents/config` | approval-gated (session 1; corrected in section 6: yes at base, `M01`, `M02`) |
 | `W13` | `.git/hooks/pre-commit` | approval-gated (session 1; corrected in section 6: no (sandbox), `M04`) |
-| `W14` | `.mcp.json` | approval-gated |
-| `W15` | `.claude/settings.json` | approval-gated |
-| `W16` | `.claude/settings.local.json` | approval-gated |
+| `W14` | `.mcp.json` | approval-gated (session 1; corrected in section 6.8: no (sandbox), `P01`) |
+| `W15` | `.claude/settings.json` | approval-gated (session 1; corrected in section 6.8: no (sandbox), `P02`) |
+| `W16` | `.claude/settings.local.json` | approval-gated (session 1; corrected in section 6.8: no (sandbox), `P03`) |
 | `W17` | `.agents/agents.md` | exit 0 (yes) |
 | `W18` | `.agents/rules/` | exit 0 (yes) |
 | `W19` | `.agents/workflows/` | exit 0 (yes) |
 | `W20` | `.agents/.bridge_claude.lock` | exit 0 (yes) |
-| `W21` | `~/.claude/` | approval-gated |
+| `W21` | `~/.claude/` | approval-gated (session 1; corrected in section 6.8: no (sandbox), `P06`, `P07`) |
 | `W22` | `mkdir -p venv/bin && touch venv/bin/zz_probe` | exit 0 (yes, project venv) |
 | `W23`, `W24` | `.agents/claude` | permission denied (rule) |
 | `W25` | `CLAUDE.md` | exit 0 (yes) |
@@ -134,10 +134,10 @@ Two conclusions:
 | Writable at base and executed unsandboxed | `Q1` (`W01`, `W26`), `Q3` (`W06`, `W07`), `Q4` (`W08`), `Q5` (`W10`), `Q7` (`W22`), `Q11` (`W17`-`W19`, `W25`), and new `E8` (host git hooks run `.agents` code whose imports the agent can shadow) | Session 1 |
 | Writable at base and executed unsandboxed (corrected in section 6) | `Q2` / `E13` for the submodule gitdir `.git/modules/.agents/` (config, hooks, `commondir`): a git-mediated write the agent makes without naming the path, executed by the unsandboxed hook's `git` | Sessions 5-6 (`M01`-`M03`, `M07`, `M08`), section 6 |
 | Sandbox-denied (corrected in section 6) | `Q2` / `E13` for host `.git/config` and host `.git/hooks/`; `E8` hook files | Session 6 (`M04`, `M05`) |
-| Approval-gated (a human approving a prompt lets the write proceed) | `E14` only. `Q2` (`W11`-`W13`) was listed here in session 1 and is corrected above | Session 1 |
+| Sandbox-denied (corrected in section 6.8) | `E11` for `.claude/agents/`; `E14` (`.mcp.json`, `.claude/settings.json`, `.claude/settings.local.json`); `~/.claude/` (`W21`). Session 1 listed `E14` as `approval-gated` ("a human approving a prompt lets the write proceed"), as it had `Q2` (`W11`-`W13`, corrected in section 6); both labels are withdrawn. No row is classed `approval-gated` | Sessions 8-9 (`P01`-`P07`, `Q01`, `Q02`), section 6.8 |
 | Closed at base by `permissions.deny` rules | `hooks/`, `scripts/`, `config/`, `skills/`, `claude/`, `venv_skillopt/` trees | Session 1 (`W02`-`W05`, `W23`, `W24`) |
 | Closed by a whole-`./.agents` `denyWrite` | `Q1`, `Q3` (`mcp_servers`), `Q4`, `Q5`, `Q11` inside `.agents`, and the import shadowing of `E8`. Boot and commit still work. | Session 2 (`D01`-`D09`), `D07`, `D08`, `L01`, `L02` |
-| Not closed by it | Host-root `graphify/` (`E10`, addressed by unit `B3` `-I`); project venv (`E15`, `Q7`); host `CLAUDE.md` (`E16`); approval-gated paths | `W07`, `W22`, `W25`, session 1 |
+| Not closed by it | Host-root `graphify/` (`E10`, addressed by unit `B3` `-I`); project venv (`E15`, `Q7`); host `CLAUDE.md` and `.claude/rules/` (`E16`) | `W07`, `W22`, `W25`, session 1; `Q04`, `Q06`, section 6.8 |
 
 Therefore the default wording of `RA-19` stands: write-denies and the absence of exclusions reduce exposure; they are not a boundary.
 
@@ -193,12 +193,12 @@ Therefore the default wording of `RA-19` stands: write-denies and the absence of
 | `E8` | import shadowing closed; hook files sandbox-denied (corrected in section 6; previously recorded as approval-gated) | `B2` (`R13`: hooks ran and passed); sandbox on host `.git/hooks/` (`M04`) |
 | `E9` | closed | `B2` (`R02`) |
 | `E10` | closed | `B3`: `-I` (`R10` parent check); `venv_skillopt` was already denied |
-| `E11` | closed inside `.agents/agents/`; `.claude/agents/` stays approval-gated | `B2` (`R03`); human approval for `.claude/` |
+| `E11` | closed inside `.agents/agents/` (`B2`); `.claude/agents/` closed by the sandbox (section 6.8; the earlier "stays approval-gated" is corrected) | `B2` (`R03`); sandbox (`P04`, `P05`) |
 | `E12` | closed | `B2` (`R04`) |
 | `E13` | session 1 verdict "open, approval-gated" is withdrawn (section 6). Submodule gitdir: closed by `R1` (`denyWrite ./.git/modules/.agents`; `N01`-`N04`). Host `.git/config` and `.git/hooks/`: closed by the sandbox (`M04`, `M05`) | `R1` (sandbox layer measured in session 7; the `Edit(/.git/modules/.agents/**)` rule was not exercised); sandbox |
-| `E14` | open, approval-gated | a human approving a prompt. `B5` additionally refuses a host `excludedCommands` at install (exit 2) |
+| `E14` | closed by the sandbox (section 6.8; the earlier "open, approval-gated" is corrected) | sandbox (`P01`-`P03`). `B5` additionally refuses a host `excludedCommands` at install (exit 2) |
 | `E15` | open | host environment (`R11`, `Q7`): the project venv is agent-writable |
-| `E16` | `.agents/` files closed (`R05`-`R07`); host `CLAUDE.md` open | host-owned instructions |
+| `E16` | `.agents/` files closed (`R05`-`R07`); host `CLAUDE.md` and `.claude/rules/*.md` open (section 6.8, `Q06`, `Q04`) | host-owned instructions |
 | `E17` | closed | `B2` (`R08`); previously closed by per-tree rules |
 
 ### 5.5 Residue
@@ -210,7 +210,7 @@ Therefore the default wording of `RA-19` stands: write-denies and the absence of
 
 ### 5.6 Conclusion
 
-Not every row is "not writable by the agent": `E14` depends on a human approving a prompt, `E15` (`Q7`) is a host environment concern, and `E16` host `CLAUDE.md` is host-owned. `E13` was listed here as approval-gated; section 6 withdraws that (submodule gitdir closed by `R1`, host `.git/config` and `.git/hooks/` sandbox-denied). Per `D13`, `F-055-N1` stays open (`E14`, `E15`, `E16` host `CLAUDE.md`) and the `RA-19` wording stands: write-denies reduce exposure; they are not a boundary.
+Not every row is "not writable by the agent": `E15` (`Q7`) is a host environment concern (the project venv is agent-writable), and `E16` host `CLAUDE.md` and `.claude/rules/*.md` are host-owned instructions the agent can write. The earlier version of this paragraph listed `E14` as depending on a human approving a prompt and `E13` as approval-gated; section 6 withdraws the `E13` label (submodule gitdir closed by `R1`, host `.git/config` and `.git/hooks/` sandbox-denied) and section 6.8 withdraws the `E14` and `E11` `.claude/agents/` labels (sandbox-denied by operation). Nothing in the enumeration is classed `approval-gated`. Per `D13`, `F-055-N1` stays open because `E15` (project venv, `Q7`) and `E16` (host `CLAUDE.md`, `.claude/rules/`) remain writable, and the `RA-19` wording stands: write-denies reduce exposure; they are not a boundary.
 
 ### 5.7 Supersession note
 
@@ -284,8 +284,8 @@ The Sprint 055 `SANDBOX_MEASUREMENT.md` section 8 `R8` / section 9 `D1` rational
 | `E13` host `.git/config`, `.git/hooks/` | Closed by the sandbox at base | `M04`, `M05` |
 | `E8` hook files | Sandbox-denied (host `.git/hooks/`) | `M04` |
 | `R1` template change | `denyWrite` = `["./.agents", "./.git/modules/.agents", "./.env"]` and `permissions.deny` adds `Edit(/.git/modules/.agents/**)`. Only the sandbox layer was measured for the gitdir; the `Edit` rule was not exercised | Session 7 |
-| `E14`, `E15`, `E16` host `CLAUDE.md` | Unchanged: open | section 5.4 |
-| `F-055-N1` | Stays open | `E14`, `E15`, `E16` host `CLAUDE.md` |
+| `E14`, `E15`, `E16` host `CLAUDE.md` | Unchanged at section 6; `E14` corrected in section 6.8 (sandbox-denied, closed) | section 5.4, section 6.8 |
+| `F-055-N1` | Stays open (at section 6: `E14`, `E15`, `E16` host `CLAUDE.md`; after section 6.8: `E15`, `E16`) | section 6.8 |
 | `RA-19` wording | Stands: write-denies reduce exposure; they are not a boundary. This measurement covers Claude Code CLI 2.1.119 and the probes above only | `agents.md` `RA-19` |
 
 ### 6.7 Cost
@@ -294,3 +294,75 @@ The Sprint 055 `SANDBOX_MEASUREMENT.md` section 8 `R8` / section 9 `D1` rational
 | :--- | :--- | :--- |
 | `git -C .agents fetch origin` fails inside the sandbox (cannot write `FETCH_HEAD`) | `N11` | Accepted: a host session leaves the submodule untouched (`agents.md` `§3 jurisdiction`). Pin bumps already could not check out under the `./.agents` deny |
 | Commit, push, boot, `git status`, `git submodule status` keep working | `N05`-`N10` | No cost |
+
+### 6.8 By-operation re-measurement of the remaining approval-gated rows (sessions 8-9)
+
+#### 6.8.1 Why
+
+| Item | Value |
+| :--- | :--- |
+| Trigger | Bounce `QA2-1` (QA Gate 1 round 2), recorded in `SPRINT_LOG.md` |
+| Defect after section 6 | Section 6 re-measured only the git-mediated rows. `E11` (`.claude/agents/`), `E14` (`.mcp.json`, `.claude/settings*.json`) and `W09`, `W14`, `W15`, `W16`, `W21` (`~/.claude/`) kept the session-1 label `approval-gated`, taken from probes that named the path. Section 2 states that such a probe measures only the permission layer, so the label contradicted the method the document itself prescribes |
+| Consequence | `E14` was carried as an open row and as a reason `F-055-N1` stays open; both rested on an unmeasured label |
+
+#### 6.8.2 Method
+
+| Item | Value |
+| :--- | :--- |
+| Date / tool / sandbox | 2026-10-21, Claude Code CLI 2.1.119, macOS Seatbelt |
+| Fixture `<fx3>` | As in section 6.2, at base template plus `R1` (`.claude/settings.local.json` adds `denyWrite: ["./.git/modules/.agents"]`) |
+| Sessions | Headless `claude -p` sessions 8 and 9: the 8th and 9th calls of the budget <= 40 |
+| Controls (each session) | `SBX0` exit 0 with a proxy, `SBX1` exit 6 (sandbox active). Both held in both sessions |
+| Method rule | Probe by the operation: every path is built at runtime inside a python script, so the command text never names the protected path and the permission layer is not met (section 2 correction). Probes that created a file removed it afterwards |
+
+#### 6.8.3 Session 8 register
+
+| Case | Action | Result |
+| :--- | :--- | :--- |
+| `P01` | append-open `.mcp.json` | `PermissionError: Operation not permitted` |
+| `P02` | append-open `.claude/settings.json` | `PermissionError` |
+| `P03` | append-open `.claude/settings.local.json` | `PermissionError` |
+| `P04` | create `.claude/agents/zz_probe.md` | `PermissionError` |
+| `P05` | append-open an existing `.claude/agents/*.md` (symlink into `.agents/agents/`) | `PermissionError` |
+| `P06` | create `~/.claude/zz_probe_056` | `PermissionError` |
+| `P07` | append-open `~/.claude/settings.json` | `PermissionError` |
+| `P08` | create `.claude/zz_new_probe` | created, exit 0 (removed afterwards) |
+| `P09` | open `.env` | `PermissionError` (control) |
+
+#### 6.8.4 Session 9 register
+
+| Case | Action | Result |
+| :--- | :--- | :--- |
+| `Q01` | create `.claude/commands/zz.md` | `PermissionError` |
+| `Q02` | create `.claude/skills/zz/SKILL.md` | `PermissionError` |
+| `Q03` | create `.claude/hooks/zz.py` | created, exit 0 (removed afterwards) |
+| `Q04` | create `.claude/rules/zz.md` | created, exit 0 (removed afterwards) |
+| `Q05` | create `.claude/settings.zz.json` | created, exit 0 (removed afterwards) |
+| `Q06` | append-open host `CLAUDE.md` | opened, exit 0 (not modified) |
+
+The `Q` prefix of these session-9 cases is a case id and is unrelated to the `Q1`-`Q11` findings of `F-055-N1` (`Q03` is not `Q3`).
+
+#### 6.8.5 Verdict
+
+| Row | Session-1 label | Verdict after section 6.8 | Evidence |
+| :--- | :--- | :--- | :--- |
+| `E11` / `W09` `.claude/agents/` | `approval-gated` | `no (sandbox)`: neither a new definition nor an existing symlinked one can be written | `P04`, `P05` |
+| `E14` / `W14` `.mcp.json` | `approval-gated` | `no (sandbox)` | `P01` |
+| `E14` / `W15`, `W16` `.claude/settings.json`, `.claude/settings.local.json` | `approval-gated` | `no (sandbox)` | `P02`, `P03` |
+| `W21` `~/.claude/` | `approval-gated` | `no (sandbox)`: a new file and the user `settings.json` are both refused | `P06`, `P07` |
+| `.claude/commands/`, `.claude/skills/` (not enumerated before) | not probed | `no (sandbox)` | `Q01`, `Q02` |
+| `.claude/` directory itself | not probed | Not denied wholesale: a new file directly under `.claude/` is created. The denies are per path, not per directory | `P08` |
+| `.claude/settings.zz.json` | not probed | Writable, but not loaded: Claude Code reads `settings.json` and `settings.local.json`, not an arbitrary `settings.*.json` | `Q05` |
+| `.claude/hooks/` | not probed | Writable. It executes only if a host settings file names a script there. The template's hooks run `.agents/hooks/*` (0 references to `.claude/hooks/` in `claude/settings.hooks.json`), and the host settings files are sandbox-denied (`P02`, `P03`). Classed host-configuration-dependent | `Q03` |
+| `.claude/rules/*.md` (`E16`) | not probed | Writable. Claude Code loads it as instructions: same class as host `CLAUDE.md`, instruction tampering, nothing executed | `Q04` |
+| Host `CLAUDE.md` (`E16`, `W25`) | `yes` | `yes`, confirmed by operation | `Q06` |
+
+#### 6.8.6 Consequence for the enumeration
+
+| Item | State |
+| :--- | :--- |
+| Rows classed `approval-gated` | 0. `E11`, `E14`, `W09`, `W14`-`W16`, `W21` are `no (sandbox)`; the label was a product of probes that named the path, not a property of the path |
+| `E14` | Closed by the sandbox. Writing a server or hook into `.mcp.json` or `.claude/settings*.json` needs a path the sandbox denies. This holds for the base template plus `R1` on Claude Code CLI 2.1.119 and for the operations above only |
+| `F-055-N1` | Stays open because `E15` (project venv, `Q7`, `W22`, `R11`) and `E16` (host `CLAUDE.md`, `.claude/rules/*.md`) remain writable. `E14` is no longer among the reasons |
+| `RA-19` wording | Stands: write-denies reduce exposure; they are not a boundary. This measurement covers Claude Code CLI 2.1.119 and the probes above only |
+| Cost | Sessions 8 and 9 are the 8th and 9th `claude -p` calls (budget <= 40) |
