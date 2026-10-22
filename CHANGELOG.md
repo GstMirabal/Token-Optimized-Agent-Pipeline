@@ -4,6 +4,8 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.39.0] - 2026-10-22
+
 ### Added
 - **Sprint 056 `sandbox-enumeration-and-instrument-residue`** — closes the Block E instrument residues (`KI-052-1`, `KI-052-3`, `KI-052-4`, `KI-052-7`, `KI-053-2`) and `KI-055-1`..`KI-055-8`: a measured `RA-19` enumeration of the entry points that run outside the sandbox, template denies for the vectors that could be closed, and no document prescribing a rule without the condition that justifies it. 55 commits on `ai-sprint/056`; `make verify` green, 1106 tests pass; QA Gate 1 closed `RECORD` at round 3 after two `REJECTED` rounds, Tester Gate 2 `RECORD` at round 1. `F-055-N1` stays open. #056
   - **`docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md`** (new) is the measured list of unsandboxed entry points for Claude Code CLI 2.1.119 (entries `E1`-`E17`): created in `c7c0701`, re-measured after the template changes in `6fd75ec`, corrected for the submodule gitdir in `ba1f204` and re-measured by operation in `05369fb`. It is per CLI version and does not carry to another version without a re-run.
@@ -34,7 +36,9 @@ All entries below reduce exposure; write-denies are NOT a boundary (`agents.md` 
 - **Submodule gitdir write deny** — `claude/settings.hooks.json` also denies `./.git/modules/.agents` and `Edit(/.git/modules/.agents/**)` (`1671fa1`). Measured: a sandboxed `git -C .agents config core.fsmonitor '<cmd>'` persisted in `.git/modules/.agents/config`, and the commit hook then ran that command unsandboxed; a `commondir` file in that gitdir redirects git to another config, so a config-only deny closes one vector and `RA-19` forbids that remediation. The whole gitdir is denied instead. Cost: a sandboxed `git -C .agents fetch` fails, so the human runs it. The host `.git/config` and `.git/hooks` are sandbox-denied and need no entry.
 - **Graphify MCP launcher** — `claude/mcp.json` starts the `graphify` server with `-I`, so Python ignores `PYTHON*` variables and the working directory when importing it, which reduces exposure to shadowing (`05c74a6`).
 - **`scripts/install.py` refuses a host `sandbox.excludedCommands` entry** with exit `2` (`KI-055-2`, `3bfa1d9`).
-- **`RA-19` covers prescribed safety procedures (`KI-055-6`)** — no rule, workflow or document may prescribe a pre-check or a "safe" sequence that executes content the sandboxed session can write, unless the enumeration covers that execution (`5083e70`). The `RA-09` deny list names the submodule gitdir (`83dde23`). - 2026-10-11
+- **`RA-19` covers prescribed safety procedures (`KI-055-6`)** — no rule, workflow or document may prescribe a pre-check or a "safe" sequence that executes content the sandboxed session can write, unless the enumeration covers that execution (`5083e70`). The `RA-09` deny list names the submodule gitdir (`83dde23`).
+
+## [4.38.0] - 2026-10-11
 
 ### Added
 - **Sprint 055 `sandbox-restrictions-and-secret-path`** — closes the host-reported sandbox friction `F-115-N2` (`S-1`..`S-8`, absorbing `F-114-N6`): measure each restriction in the nucleus's own sandbox, give the human a sanctioned secret wrapper, fix three defects the sandbox exposed, document the rest as a table. Measured in headless `claude -p` sessions on Claude Code CLI 2.1.119 (plan deviation `D1`, `SPRINT_LOG.md`). No sandbox exclusions are shipped and hook-executed trees are write-denied; this reduces exposure and is not a boundary (`agents.md` `RA-19`, `f8dc545`). Known unsandboxed entry points remain open as `F-055-N1`, routed to Sprint 056 (`f09e148`). #055
