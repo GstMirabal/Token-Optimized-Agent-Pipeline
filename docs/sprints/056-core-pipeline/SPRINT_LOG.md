@@ -12,7 +12,7 @@
 | **Branch** | `ai-sprint/056` |
 | **Base** | `main` at `d88593c` |
 | **Strategic Goal** | Close the Block E instrument residues (`KI-052-1`, `KI-052-3`, `KI-052-4`, `KI-052-7`, `KI-053-2`) and the eight items routed from Sprint 055 (`KI-055-1`..`KI-055-8`): measured `RA-19` sandbox enumeration, template denies for the vectors that can be closed, and no document prescribing a rule without the condition that justifies it. |
-| **Intelligence State** | Phase 7 — QA Gate 1 passed at round 3 (RECORD/testifying); Tester Gate 2 pending |
+| **Intelligence State** | Phase 7 complete — QA Gate 1 RECORD at round 3, Tester Gate 2 RECORD at round 1; Phase 8 (Sprint Closeout) pending |
 | **Start Time** | 2026-10-12 |
 
 ---
@@ -102,7 +102,7 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | The `D10` propagation grep found an unconditional `gh` statement outside the planned units (`workflows/repository_hardening_workflow.md:44`) | Discovered unit `A22` (`3d8fe3f`), added to every sprint artifact (`RA-14`) | n/a |
 | The canonical `gh` row left a dangling verb after `A15` | Follow-up `c025350` | n/a |
 | D12 risk found before B2: Sprint 055 (`SANDBOX_MEASUREMENT.md` §8 `R8`, §9 `D1`) had rejected a whole-`.agents` deny because the boot writes the bridge lock | Measured instead of assumed (sessions 2-3): the unsandboxed `SessionStart` hook maintains the lock; boot and commit survive; `allowWrite` cannot carve inside `denyWrite`. Abort criterion 2 not triggered | n/a |
-| `scripts/check_fix_reproduces.py` treats `.json` as non-source, so the `Repro:` claims of `B2` (`d70d00c`) and `B3` (`05c74a6`) are not replayed (parent failures observed manually by the implementer) | Route at extract (instrument gap) | pending extract |
+| `scripts/check_fix_reproduces.py` treats `.json` as non-source, so the `Repro:` claims of `B2` (`d70d00c`) and `B3` (`05c74a6`) are not replayed (parent failures observed manually by the implementer) | Route at extract (instrument gap). Confirmed by Tester Gate 2 RG2-2: three commits skipped (`1671fa1`, `d70d00c`, `05c74a6`), the summary count omits them | pending extract |
 | Hosts installed before `d70d00c` keep the old per-tree deny entries next to `./.agents` (harmless, never pruned: not in `RETIRED_VALUES`) | Route at extract | pending extract |
 | The `B5` refusal message suggests the deprecated `install.sh` shim via `install_command()` | Route at extract | pending extract |
 | `session_start._refresh_bridge_lock` would raise an uncaught `PermissionError` under the whole-`.agents` deny if reached in the sandbox (not reached in sessions 2-4: the hook refreshes the lock first) | Route at extract | pending extract |
@@ -112,6 +112,8 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | Human direction 2026-10-21: the human judges the `RA-09`/`gh`/sandbox regime too restrictive (the restructuring meant to reduce permission prompts increased them); review it after this sprint closes | Route at `/agents:extract` to Sprint 057 planning | pending extract |
 | Residue outside scope: `skills/env-shielding-auditor/README.md` badge says "Built With: Bash" for a Python script (found by `A5`); `agents/devops_agent.md` frontmatter and `write_scope` say `gh` is never run by that profile (a profile restriction, consistent with `D10`, left unchanged) | Route at `/agents:extract` | pending extract |
 | QA3-2, QA3-4: unprobed E16 members and `.agents` subtrees refused by containment inference only | Probe by operation at the next CLI re-measurement (`Measuring CLI` row) | pending extract |
+| Host session (2026-10-22): `make -f .agents/Makefile verify` cannot run under the template sandbox — `scripts/py_compile_tree.py` (`py_compile.compile`, writes `.pyc`) and `skills/mass-standardizer/scripts/generate_manifest.py` (rewrites `skills/manifest_skills.json`) write inside the write-denied `./.agents`. Not prescribed to hosts (nucleus gate) and not new (v4.38.0 per-tree denies already covered `scripts/`, `hooks/`, `skills/`) | Candidate: compile without writing to disk; route with the permission-prompt review | pending extract |
+| Human direction 2026-10-22: the session asks for too many permissions; automate more. No Sprint 057 is assigned in `docs/roadmaps/core/pipeline/021-030-program-queue.md` | Proposed Sprint 057 theme: measure permission prompts in nucleus and host sessions, review RA-09/gh/template denies against the fewer-prompts goal, `KI-054-5`, the verify friction above; decided at 057 Phase 1 | pending extract |
 
 ---
 
@@ -142,6 +144,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 | QA Agent (Gate 1) | 1 | REJECTED | instructing | Range `d88593c..c14749e`; check_fix_reproduces exit 0 (8 fix( OK); B2 `d70d00c` and B3 `05c74a6` replayed manually (parent exit 1, commit exit 0); make verify 0 (1105 passed); ruff 0; quality-audit 0; verify_references 0; Verification rows met; boundary grep exit 1. Bounce: QA1-1 `rules/project_topology.md:29` residual-risk row stale (Q5 closed, F-055-N1 routing), QA1-2 `:39` gh row says the GitHub MCP launcher is agent-writable (E9 closed), QA1-3 `agents/devops_agent.md:16` stale Q5/'until Sprint 056' wording. Records: QA1-4 `Makefile:54` comment, QA1-5 A5 assignee in plan/log vs `agent_assignment.md`, QA1-6 Cost row '30 unidades', QA1-7 Phase 1/3 boxes unticked, QA1-8 silent `tokenize` fallback in `scripts/quality_audit.py`, QA1-9 uncaught `json.loads` in `install.py` `_excluded_commands`. |
 | QA Agent (Gate 1) | 2 | REJECTED | instructing | Range `d88593c..HEAD` (remediation `0bfb015..bcfb268`). check_fix_reproduces exit 0 (8 `fix(` OK); R1 `1671fa1` replayed manually (parent 2 failed, commit 14 passed); make verify 0 (1106 passed); pinned ruff 0; quality-audit 0; verify_references 0; check_gate_log 0; boundary grep exit 1. QA1-1..QA1-3 and the E13 correction resolved; D12 deviation in scope. Bounce: QA2-1 E11/E14/W09/W14-W16/W21 still labelled approval-gated from session-1 path-naming probes (RA-19 re-run, RA-14). Records: QA2-2 row 52 cites only `d70d00c`; QA2-3 surface the `git -C .agents fetch` cost (N11) to the human at close; QA2-4 `Edit(/.git/modules/.agents/**)` not exercised; QA2-5 bare `ruff` not on PATH, pinned module used. |
 | QA Agent (Gate 1) | 3 | RECORD | testifying | Range `d88593c..HEAD` (remediation `bcfb268..a0f25a7`, R7-R9). check_fix_reproduces exit 0 (8 `fix(` OK); R1 `1671fa1` replayed manually (parent exit 1, commit 14 passed); make verify 0 (1106 passed); pinned ruff 0; quality-audit 0; verify_references 0; check_gate_log 0. QA2-1 resolved (E11/E14/W09/W14-W16/W21 `no (sandbox)`, matching 6.8 P01-P07, Q01-Q02); QA2-2 resolved; RA-19 grep clean; no enumeration row closes on a path-naming probe alone. Records: QA3-1 `Q11` register cell omits `.claude/rules/`; QA3-2 unprobed E16 members (`.claude/CLAUDE.md`, `CLAUDE.local.md`, nested `CLAUDE.md`, `.claude/output-styles/`); QA3-3 D12-deviation harvest row has 2 cells; QA3-4 `.agents` subtree sandbox refusal inferred from D01-D09, not probed by operation; QA2-3, QA2-4 carried. |
+| Tester Agent (Gate 2) | 1 | RECORD | testifying | `make verify` 0 at `ec14f5b` (1106 passed, ruff clean, quality_audit 0 over 1944 units, installer sandbox tests passed). Base `d88593c` in a linked worktree: 1080 passed, 1 failed (`KI-052-4` itself). 1063 of 1080 base-passing IDs still pass; the other 17 are the retired per-subtree deny parametrizations of `test_template_sandbox.py` (`d70d00c`, `1671fa1`), replaced by stricter tests; 43 new IDs. Nine touched test files pass alone. check_fix_reproduces `--range d88593c..HEAD` exit 0 (8 OK); `.json`-subject `fix(` commits replayed by hand: `1671fa1`, `d70d00c`, `05c74a6`, each exit 1 on parent and pass at commit. Verification rows 1-4, 6-11 met; row 5 met in `--range` form (RG2-1); row 12 deferred to close. No DB engaged. Records: RG2-1 plan row 5 lacks `--range`; RG2-2 `check_fix_reproduces.py` skips `.json` subjects silently and its count omits them. |
 
 ---
 
@@ -149,6 +152,6 @@ Example (do not uncomment — Phase 7 writes the real rows):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: APPROVED (Phase 5 passed 2026-10-12)
-**Next Phase**: Phase 7 — Tester Gate 2 (fresh agent). At close, surface QA2-3 (`git -C .agents fetch` fails under the template sandbox) to the human.
+**Next Phase**: Phase 8 — Sprint Closeout (`/agents:close`). Surface QA2-3 (`git -C .agents fetch` fails under the template sandbox) to the human.
 
 *Certified under conventional commit standard: feat(scope): message #056*
