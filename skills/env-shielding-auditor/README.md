@@ -38,5 +38,6 @@ Invoked manually or by the **DevOps Agent** before every atomic commit:
 
 ```bash
 # Example: preventive secret scan of the current directory
-bash .agents/skills/env-shielding-auditor/scripts/shield_audit.sh
+# (takes no arguments; scans the working directory and its ./.gitignore)
+python3 .agents/skills/env-shielding-auditor/scripts/env_shielding_auditor.py
 ```

@@ -671,3 +671,56 @@ def test_main_dispatches_set_topology(repo: Path, monkeypatch: pytest.MonkeyPatc
 
     state = json.loads((repo / "docs" / "active_state.json").read_text())
     assert state["topology_version"] == "4.32.0-050-in_progress"
+
+
+# --- mark-audited ----------------------------------------------------------
+
+def _audit_anchor(root: Path) -> None:
+    _write_anchor(root, {
+        "current_sprint": {"id": 56, "status": "OPEN", "last_audit_sprint": 55, "layer": "core"},
+    })
+
+
+def _report(root: Path, name: str) -> Path:
+    path = root / name
+    path.write_text("# report\n", encoding="utf-8")
+    return path
+
+
+def test_mark_audited_refuses_missing_report(repo: Path, capsys: pytest.CaptureFixture):
+    _audit_anchor(repo)
+
+    assert ss.mark_audited(str(repo / "PIPELINE_AUDIT_REPORT-056.md")) == 2
+    assert "does not exist" in capsys.readouterr().err
+
+
+def test_mark_audited_refuses_number_above_current_sprint(repo: Path, capsys: pytest.CaptureFixture):
+    _audit_anchor(repo)
+    report = _report(repo, "PIPELINE_AUDIT_REPORT-057.md")
+
+    assert ss.mark_audited(str(report)) == 2
+    assert "057" in capsys.readouterr().err
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert state["current_sprint"]["last_audit_sprint"] == 55
+
+
+def test_mark_audited_refuses_malformed_name(repo: Path, capsys: pytest.CaptureFixture):
+    _audit_anchor(repo)
+    report = _report(repo, "AUDIT-056.md")
+
+    assert ss.mark_audited(str(report)) == 2
+    assert "PIPELINE_AUDIT_REPORT-" in capsys.readouterr().err
+
+
+def test_mark_audited_writes_field_and_keeps_other_keys(repo: Path):
+    _audit_anchor(repo)
+    report = _report(repo, "PIPELINE_AUDIT_REPORT-056.md")
+
+    assert ss.mark_audited(str(report)) == 0
+
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert state["current_sprint"] == {
+        "id": 56, "status": "OPEN", "last_audit_sprint": 56, "layer": "core",
+    }
+    assert state["session_id"] == "keep-me"
+    assert state["active_layer"] == "core"

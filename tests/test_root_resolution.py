@@ -62,11 +62,28 @@ def test_the_root_is_absolute_and_symlink_resolved():
     assert root == root.resolve()
 
 
+def _expected_is_nucleus_for_checkout_shape() -> bool:
+    """Expected `is_nucleus()` for the checkout this test runs in.
+
+    A real `.git` directory is a framework clone. A `.git` file is a linked
+    worktree of the nucleus when its `gitdir:` points into `.git/worktrees/`,
+    and a submodule (a host) when it points into `.git/modules/`.
+
+    Returns:
+        bool: The value `_mode.is_nucleus()` must return for this checkout.
+    """
+    git_path = agents_root() / ".git"
+    if git_path.is_dir():
+        return True
+    pointer = git_path.read_text(encoding="utf-8").strip()
+    return pointer.startswith("gitdir:") and "/.git/worktrees/" in pointer
+
+
 def test_mode_detection_still_answers_through_the_shared_root():
     """`_mode.agents_dir` was the same function under another name. The merge
     must not have left `is_nucleus` reading a different root than everything
     else."""
-    assert _mode.is_nucleus() is (agents_root() / ".git").is_dir()
+    assert _mode.is_nucleus() is _expected_is_nucleus_for_checkout_shape()
     assert not hasattr(_mode, "agents_dir"), "the renamed duplicate is still exported"
 
 

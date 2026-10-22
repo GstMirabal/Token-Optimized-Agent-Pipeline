@@ -18,7 +18,9 @@ invoked_by: start_workflow.md#state_claim (claim), close_workflow.md#state_sync
 (release, set-topology), rules/token_economy.md#3.1 (suspend, at the hard
 threshold), deployment_workflow.md#sprint_seal_gate (require-released),
 deployment_workflow.md#baseline_refresh (refresh-baseline),
-deployment_workflow.md#topology_writeback (set-topology).
+deployment_workflow.md#topology_writeback (set-topology),
+workflows/audit_workflow.md, final step (mark-audited; that step is added by a
+separate Sprint 056 unit).
 
 `set-topology` (Sprint 050 `D7`) is wired into both workflows as its own
 `RA-13` invocation, never chained with the step before it: `close_workflow.md`
@@ -71,13 +73,19 @@ Usage:
         # including the one that opens the next sprint) and never
         # current_sprint.status == IN_PROGRESS, which no writer ever
         # produces (F-3, S052 QA Gate 1, both remediation rounds)
+    python3 scripts/session_state.py mark-audited --report <path>
+        # writes current_sprint.last_audit_sprint = NNN, preserving every
+        # other key. <path> must exist and be named
+        # PIPELINE_AUDIT_REPORT-<NNN>.md with NNN <= current_sprint.id;
+        # otherwise exit 2 (Sprint 056 `D9`)
 
 Exit codes:
     0 — lock claimed or released, deploy preflight passed, baseline refreshed,
         topology_version written, or a sprint opened (or already open)
     2 — a different session holds the lock, deploy refused, set-topology
-        cannot derive a value, or open-sprint would overwrite a sprint that
-        has not been sealed by `release()` (RA-11: only 2 blocks)
+        cannot derive a value, open-sprint would overwrite a sprint that
+        has not been sealed by `release()`, or mark-audited got a missing,
+        misnamed or future-numbered report (RA-11: only 2 blocks)
 """
 
 import argparse
@@ -658,6 +666,52 @@ def open_sprint(
     return 0
 
 
+AUDIT_REPORT_RE = re.compile(r"^PIPELINE_AUDIT_REPORT-(\d+)\.md$")
+
+
+def mark_audited(report: str) -> int:
+    """Record that the pipeline audit for a sprint was completed.
+
+    Writes `current_sprint.last_audit_sprint = NNN`, where NNN comes from the
+    report's file name, preserving every other key of the anchor.
+
+    Args:
+        report: Path to `PIPELINE_AUDIT_REPORT-<NNN>.md`; the file must
+            exist and NNN must not exceed `current_sprint.id`.
+
+    Returns:
+        int: 0 when the field was written; 2 when the report is missing,
+            misnamed, or numbered above the current sprint (RA-11).
+    """
+    path = Path(report)
+    match = AUDIT_REPORT_RE.match(path.name)
+    if not path.is_file():
+        print(f"Refusing mark-audited: report {report} does not exist.", file=sys.stderr)
+        return 2
+    if match is None:
+        print(
+            f"Refusing mark-audited: {path.name} is not named PIPELINE_AUDIT_REPORT-<NNN>.md.",
+            file=sys.stderr,
+        )
+        return 2
+    audited = int(match.group(1))
+    state = load_state()
+    sprint = state.get("current_sprint") or {}
+    current_id = sprint.get("id")
+    if not isinstance(current_id, int) or audited > current_id:
+        print(
+            f"Refusing mark-audited: report number {match.group(1)} exceeds "
+            f"current_sprint.id ({current_id!r}).",
+            file=sys.stderr,
+        )
+        return 2
+    state["current_sprint"] = {**sprint, "last_audit_sprint": audited}
+    state["last_updated"] = now()
+    save_state(state)
+    print(f"✅ last_audit_sprint set to {audited}.")
+    return 0
+
+
 def _add_claim_subparser(sub: argparse._SubParsersAction) -> None:
     """Register the `claim` subcommand and its flags on `sub`.
 
@@ -689,6 +743,22 @@ def _add_claim_subparser(sub: argparse._SubParsersAction) -> None:
              "message's retry hint (S052-2): `boot` for "
              "`session_start.py --boot`, `claim` (default) for a direct "
              "invocation of this command.",
+    )
+
+
+def _add_mark_audited_subparser(sub: argparse._SubParsersAction) -> None:
+    """Register the `mark-audited` subcommand and its `--report` flag.
+
+    Args:
+        sub: Subparsers action of the top-level parser.
+    """
+    mark_parser = sub.add_parser(
+        "mark-audited",
+        help="Write current_sprint.last_audit_sprint from a PIPELINE_AUDIT_REPORT-<NNN>.md.",
+    )
+    mark_parser.add_argument(
+        "--report", required=True,
+        help="Path to an existing PIPELINE_AUDIT_REPORT-<NNN>.md with NNN <= current_sprint.id.",
     )
 
 
@@ -745,6 +815,7 @@ def _add_other_subparsers(sub: argparse._SubParsersAction) -> None:
         "--name", default=None,
         help="Sprint name; written only when given, a stale name is dropped.",
     )
+    _add_mark_audited_subparser(sub)
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -753,7 +824,7 @@ def _build_parser() -> argparse.ArgumentParser:
     Returns:
         argparse.ArgumentParser: Parser with every subcommand (`claim`,
             `release`, `suspend`, `require-released`, `refresh-baseline`,
-            `set-topology`, `open-sprint`) and their flags registered.
+            `set-topology`, `open-sprint`, `mark-audited`) and their flags registered.
     """
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -786,6 +857,8 @@ def _dispatch(args: argparse.Namespace) -> int:
         return set_topology()
     if args.command == "open-sprint":
         return open_sprint(args.sprint_id, args.layer, args.app, args.name)
+    if args.command == "mark-audited":
+        return mark_audited(args.report)
     return release()
 
 

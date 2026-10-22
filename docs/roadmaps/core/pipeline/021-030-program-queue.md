@@ -370,6 +370,20 @@ Seven routing entries decided at the Sprint 055 close extract (2026-10-11, human
 | `KI-055-7` | `PIPELINE_AUDIT_REPORT-055.md` F5: `current_sprint.last_audit_sprint` is written by no script; it is advanced by hand in the gitignored anchor | **Sprint 056** (instrument) |
 | `KI-055-8` | `agents.md` `RA-09`, `workflows/deployment_workflow.md` (`pr_flow`, `github_release`, the sandbox note) and `rules/project_topology.md` §4 state that every `gh` call is human-run without the condition that justifies it (under the template sandbox `gh` fails `x509` and no exclusion may exist, `N1`); in an unsandboxed session the rule blocks a safe agent-run deploy. Scope the wording to "under the sandbox" (Sprint 055 deployment deviation) | **Sprint 056** |
 
+### Still open for a later program — routed out of Sprint 056 (`docs/sprints/056-core-pipeline/`)
+
+Seven routing entries decided at the Sprint 056 close extract (2026-10-22, human-confirmed at Phase 2.5), all `routing_class: nucleus`.
+
+| # | Finding | Proposed destination |
+| :--- | :--- | :--- |
+| `KI-056-1` | Permission-prompt load (human direction 2026-10-21 and 2026-10-22): sessions ask for too many permissions and the Sprint 055/056 sandbox restructuring, meant to reduce prompts, increased them. Measure the prompts of a real nucleus and host session; review `agents.md` `RA-09`, the `gh` row of `rules/project_topology.md` §4 and the template denies against the fewer-prompts goal (keeping `RA-19`); make the nucleus `make verify` runnable from a sandboxed host (`scripts/py_compile_tree.py` writes `.pyc` and `skills/mass-standardizer/scripts/generate_manifest.py` rewrites `skills/manifest_skills.json` inside the write-denied `./.agents`); state the `git -C .agents fetch` cost of `1671fa1` (QA2-3); absorbs `KI-054-5` | **Sprint 057** (proposed theme; decided at its Phase 1) |
+| `KI-056-2` | `scripts/check_fix_reproduces.py` lists `.json` in `NON_SOURCE_SUFFIXES`, so a `fix(` commit whose only non-test file is `.json` is skipped silently and the summary count omits it (Tester Gate 2 `RG2-2`: `1671fa1`, `d70d00c`, `05c74a6` replayed by hand) | A later core-pipeline sprint (instrument) |
+| `KI-056-3` | Hosts installed before `d70d00c` keep the retired per-subtree deny entries next to `./.agents`: harmless but never pruned, because `RETIRED_VALUES` in `scripts/merge_json.py` does not list them | A later core-pipeline sprint |
+| `KI-056-4` | `scripts/session_start.py` `_refresh_bridge_lock` would raise an uncaught `PermissionError` under the whole-`./.agents` deny if reached in the sandbox (not reached in sessions 2-4: the unsandboxed `SessionStart` hook refreshes the lock first) | A later core-pipeline sprint |
+| `KI-056-5` | The `B5` refusal message of `scripts/install.py` (`3bfa1d9`) suggests the deprecated `install.sh` shim through `install_command()` | A later core-pipeline sprint |
+| `KI-056-6` | Next CLI re-measurement (`Measuring CLI` row): probe by operation the unprobed `E16` members (`.claude/CLAUDE.md`, `CLAUDE.local.md`, nested `CLAUDE.md`, `.claude/output-styles/`), the `.agents` subtrees whose sandbox refusal is inferred by containment from `D01`-`D09`, and the unexercised `Edit(/.git/modules/.agents/**)` rule (QA3-2, QA3-4, QA2-4; `SANDBOX_ENUMERATION.md`) | The next sandbox re-measurement |
+| `KI-056-7` | `skills/env-shielding-auditor/README.md` badge says "Built With: Bash" for a Python script | A later core-pipeline sprint (documentation residue) |
+
 ---
 
 ### Queued for **037** — rider **S** (Cursor agent sandbox false reds)

@@ -33,7 +33,9 @@ METADATA_FIELD_RE = re.compile(r"^\*\*([^*]+)\*\*:\s*(.+)$", re.MULTILINE)
 C4_OVERRIDE_RE = re.compile(r"C4 Level Override.*?justification:\s*(ADR-\d{4})")
 SUPERSEDED_RE = re.compile(r"Superseded by\s+(ADR-\d{4})")
 ADR_ID_RE = re.compile(r"^ADR-(\d{4})-")
-ADR_STATUS_SUPERSEDED_RE = re.compile(r"^\s*Status:\s*Superseded", re.MULTILINE)
+ADR_STATUS_SUPERSEDED_RE = re.compile(
+    r"^\s*(?:Status:|\*\*Status\*\*:)\s*`?Superseded", re.MULTILINE
+)
 
 ADR_DIR = Path("docs/decisions")
 BLUEPRINT_GLOB = "docs/**/*_BLUEPRINT.md"

@@ -1015,3 +1015,120 @@ def test_report_lists_excluded_files_separately(
     assert "vendored.py" in out
     assert "vendored.py" not in out.split("Excluded files:")[0]  # not in the unit register
     assert "1/1 (100.0%)" in out  # only good.py counts toward compliant
+
+
+# --------------------------------------------------------------------------
+# JS/TS nested function inside an expression is a boundary (Sprint 056 `D6` a)
+# --------------------------------------------------------------------------
+
+
+def test_js_nested_function_expression_is_a_boundary_for_its_enclosing_unit(
+    tmp_path: Path,
+) -> None:
+    """Hand derivation (`D6` a): `outer`'s only statement is the `forEach`
+    call on row 2; the callback body (rows 3-5) and the closing `});` row 6
+    belong to the nested function, which is measured as its own unit (3
+    executable rows). `outer` counts 1, symmetric with a nested Python `def`."""
+    source = (
+        "function outer() {\n"
+        "  items.forEach(function (x) {\n"
+        "    a(x);\n"
+        "    b(x);\n"
+        "    c(x);\n"
+        "  });\n"
+        "}\n"
+    )
+    path = tmp_path / "nested.js"
+    path.write_text(source, encoding="utf-8")
+
+    units = {u.name: u for u in qa.scan_js_file(path, qa._load_grammars())}
+
+    assert units["outer"].executable_lines == 1
+    assert units["<anonymous>:2"].executable_lines == 3
+
+
+def test_js_sibling_arguments_of_a_call_still_count_beside_a_nested_function(
+    tmp_path: Path,
+) -> None:
+    """Rows of the containing statement outside the nested function stay
+    counted: row 2 (`foo(`), row 3 (`first,`), row 4 (the callback's own
+    header row), row 7 (`last`) and row 8 (`);`); rows 5-6 are the callback's
+    body and closing row -> 5 rows."""
+    source = (
+        "function outer() {\n"
+        "  foo(\n"
+        "    first,\n"
+        "    function () {\n"
+        "      inner();\n"
+        "    },\n"
+        "    last\n"
+        "  );\n"
+        "}\n"
+    )
+    assert _measure_js_function(tmp_path, source, "outer") == 5
+
+
+# --------------------------------------------------------------------------
+# Blank and comment-only rows inside a multi-row statement (Sprint 056 `D6` b)
+# --------------------------------------------------------------------------
+
+
+def test_python_comment_and_blank_rows_inside_a_multirow_statement_are_not_executable(
+    tmp_path: Path,
+) -> None:
+    """Hand derivation (`D6` b): the dict literal spans rows 2-7 but row 4
+    is comment-only and row 5 is blank; counted rows are 2, 3, 6, 7 plus
+    `return d` on row 8 -> 5. The defect counted the whole span (7)."""
+    source = (
+        "def f():\n"
+        "    d = {\n"
+        '        "a": 1,\n'
+        "        # note\n"
+        "\n"
+        '        "b": 2,\n'
+        "    }\n"
+        "    return d\n"
+    )
+    path = tmp_path / "multirow.py"
+    path.write_text(source, encoding="utf-8")
+
+    units = qa.scan_python_file(path)
+
+    assert units[0].executable_lines == 5
+
+
+def test_python_blank_row_inside_a_triple_quoted_string_still_counts(tmp_path: Path) -> None:
+    """A blank row inside a string token is part of the token, not a blank
+    separator between tokens: rows 2-4 (`x = '''`, blank, `'''`) -> 3."""
+    source = "def f():\n    x = '''\n\n    '''\n    return x\n"
+    path = tmp_path / "tq.py"
+    path.write_text(source, encoding="utf-8")
+
+    assert qa.scan_python_file(path)[0].executable_lines == 4
+
+
+def test_js_comment_and_blank_rows_inside_a_multirow_statement_are_not_executable(
+    tmp_path: Path,
+) -> None:
+    """JS analogue of the Python case: the object literal spans rows 2-7,
+    row 4 is a `//` comment and row 5 is blank; counted rows are 2, 3, 6, 7
+    plus `return d;` on row 8 -> 5."""
+    source = (
+        "function f() {\n"
+        "  const d = {\n"
+        "    a: 1,\n"
+        "    // note\n"
+        "\n"
+        "    b: 2,\n"
+        "  };\n"
+        "  return d;\n"
+        "}\n"
+    )
+    assert _measure_js_function(tmp_path, source, "f") == 5
+
+
+def test_js_blank_row_inside_a_template_literal_still_counts(tmp_path: Path) -> None:
+    """A blank row inside a template string token is part of the token:
+    rows 2-4 (`const x = ` + backtick, blank, closing backtick) -> 3 + return."""
+    source = "function f() {\n  const x = `\n\n`;\n  return x;\n}\n"
+    assert _measure_js_function(tmp_path, source, "f") == 4

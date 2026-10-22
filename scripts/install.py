@@ -31,8 +31,11 @@ What it does:
   6. Prunes, per machine, any `sandbox.excludedCommands` line a previous
      install rendered for `with_env.py` from the host's untracked
      .claude/settings.local.json (host mode only). No exclusions are shipped:
-     a command chained after any excluded entry runs unsandboxed. Host-owned
-     entries and other keys are left untouched; no change means no write.
+     a command chained after any excluded entry runs unsandboxed. Other keys
+     are left untouched; no change means no write. Before any write, the
+     Claude bridge refuses with exit 2 when an excluded entry would survive
+     the install in .claude/settings.json or .claude/settings.local.json
+     (Sprint 056, D8): it names each entry and its file, and writes nothing.
   7. Marks .agents/.bridge_claude.lock and/or .agents/.bridge_cursor.lock
      (per --target) so hooks/on_init.py and start_workflow bridge_check
      can detect a deliberate submodule update and re-link automatically.
@@ -54,10 +57,11 @@ sys.path.insert(0, str(SCRIPT_DIR))
 import json
 
 from _mode import is_nucleus
-from merge_json import merge
+from merge_json import RETIRED_VALUES, merge
 
 BRIDGE_WRITE_DENIED = 3
-RENDER_OWNED_RE = re.compile(r"^\S+ -I \S+/scripts/with_env\.py \S+$")
+EXCLUSION_REFUSED = 2
+RENDER_OWNED_RE = re.compile(r"^.+ -I .+/scripts/with_env\.py \S+$")
 
 
 def _symlink_matches(dest: Path, target: str) -> bool:
@@ -171,14 +175,18 @@ def merge_into(template: Path, dest: Path) -> None:
 
 
 def prune_rendered_exclusions(host_dir: Path) -> None:
-    """Remove render-owned with_env exclusions left by an earlier install.
+    """Remove with_env exclusion lines of the rendered shape from settings.
 
     The framework ships no `sandbox.excludedCommands`: a command chained
-    after any excluded entry runs unsandboxed. Lines rendered by a previous
-    install (matching RENDER_OWNED_RE) are therefore escapes and are removed;
-    every other key and entry, including host-owned exclusions and the
-    rendered write-denies, is left untouched. No file or nothing to prune
-    means no write.
+    after any excluded entry runs unsandboxed. Every string entry shaped
+    `<interpreter> -I <path>/scripts/with_env.py <name>` (RENDER_OWNED_RE,
+    anchored on that suffix; interpreter and path may contain spaces) is
+    removed. That covers lines rendered by an earlier install and also a
+    host-written `python3 -I .agents/scripts/with_env.py <name>` line; the
+    pruning of the latter is the safe direction, since it is the same escape.
+    Every other key and entry, including other host exclusions and the
+    rendered write-denies, is left untouched. No file, a root JSON value
+    that is not an object, or nothing to prune means no write.
 
     Args:
         host_dir: Host root holding `.claude/settings.local.json`.
@@ -190,6 +198,8 @@ def prune_rendered_exclusions(host_dir: Path) -> None:
     if not dest.exists():
         return
     data = json.loads(dest.read_text())
+    if not isinstance(data, dict):
+        return
     sandbox = data.get("sandbox")
     current = sandbox.get("excludedCommands") if isinstance(sandbox, dict) else None
     if not isinstance(current, list):
@@ -204,6 +214,69 @@ def prune_rendered_exclusions(host_dir: Path) -> None:
         del sandbox["excludedCommands"]
     _write_json(dest, data)
     print(f"✅ Pruned {pruned} rendered with_env exclusion(s) -> {dest}")
+
+
+def _excluded_commands(dest: Path) -> list:
+    """Return the sandbox.excludedCommands list of a settings file.
+
+    Args:
+        dest: Settings JSON file to read.
+
+    Returns:
+        list: The entries, or an empty list when the file, the `sandbox`
+            object or the list is absent, or the root is not an object.
+    """
+    if not dest.exists():
+        return []
+    data = json.loads(dest.read_text())
+    sandbox = data.get("sandbox") if isinstance(data, dict) else None
+    current = sandbox.get("excludedCommands") if isinstance(sandbox, dict) else None
+    return current if isinstance(current, list) else []
+
+
+def surviving_exclusions(host_dir: Path) -> list[tuple[str, object]]:
+    """List the excludedCommands entries the install would leave in place.
+
+    In `.claude/settings.json` the merge prunes only the values retired from
+    earlier templates (`merge_json.RETIRED_VALUES`); in
+    `.claude/settings.local.json` `prune_rendered_exclusions` removes only
+    render-owned lines (RENDER_OWNED_RE). Every other entry survives, and any
+    surviving entry is an escape: a command chained after it runs unsandboxed
+    (`N1`). Reads only; writes nothing.
+
+    Args:
+        host_dir: Host root holding the `.claude/` settings files.
+
+    Returns:
+        list[tuple[str, object]]: (relative file path, entry) pairs, in file order.
+    """
+    retired = RETIRED_VALUES["sandbox.excludedCommands"]
+    found: list[tuple[str, object]] = []
+    for entry in _excluded_commands(host_dir / ".claude" / "settings.json"):
+        if not (isinstance(entry, str) and entry in retired):
+            found.append((".claude/settings.json", entry))
+    for entry in _excluded_commands(host_dir / ".claude" / "settings.local.json"):
+        if not (isinstance(entry, str) and RENDER_OWNED_RE.match(entry)):
+            found.append((".claude/settings.local.json", entry))
+    return found
+
+
+def report_surviving_exclusions(found: list[tuple[str, object]]) -> None:
+    """Print the refusal for host-owned excludedCommands entries to stderr.
+
+    Args:
+        found: (relative file path, entry) pairs from surviving_exclusions.
+    """
+    print("🛑 Install refused: the host's Claude Code settings carry "
+          "sandbox.excludedCommands entries.", file=sys.stderr)
+    for rel, entry in found:
+        print(f"   - {rel}: {json.dumps(entry)}", file=sys.stderr)
+    print("   Reason: any excluded entry is an escape. A command chained after it runs "
+          "wholly unsandboxed (N1; rules/project_topology.md section 4, "
+          "\"Excluded commands\" row). No entry may be added, by the framework or by a host.",
+          file=sys.stderr)
+    print(f"   Fix: remove each entry listed above from the file named, then re-run "
+          f"`{install_command('claude', False)}`. Nothing was written.", file=sys.stderr)
 
 
 def add_claude_import(import_line: str) -> None:
@@ -558,7 +631,21 @@ def resolve_profile_dir(profile: str | None, profile_path: str | None) -> Path |
 
 
 def install_host_claude_bridge(profile_dir: Path | None) -> int:
-    """Install the full Claude Code bridge into a host checkout."""
+    """Install the full Claude Code bridge into a host checkout.
+
+    Refuses before any write when an excludedCommands entry would survive the
+    install (surviving_exclusions; Sprint 056, D8).
+
+    Args:
+        profile_dir: Profile pack to link after the bridge, or None.
+
+    Returns:
+        int: 0 on success, EXCLUSION_REFUSED when a host exclusion is found.
+    """
+    found = surviving_exclusions(HOST_DIR)
+    if found:
+        report_surviving_exclusions(found)
+        return EXCLUSION_REFUSED
     print(f"🌉 Installing Claude Code bridge for .agents into {HOST_DIR} ...")
 
     for f in sorted((AGENTS_DIR / "agents").glob("*.md")):

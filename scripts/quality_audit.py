@@ -12,7 +12,16 @@ level 4) -- for Python (stdlib `ast`) and, since Sprint 053, for JS/TS
 
 - **Executable lines**: rows covered by statement nodes in the unit's body,
   excluding blank rows, comment-only rows and (Python) the docstring -- not
-  raw span. An expression-bodied JS/TS arrow counts as 1 (`D3`).
+  raw span. An expression-bodied JS/TS arrow counts as 1 (`D3`). Two rules
+  from Sprint 056 `D6`:
+  (a) a function nested inside an expression is a boundary for its
+  enclosing unit, in JS/TS as a nested `def` already is in Python: only the
+  row where it starts counts for the enclosing unit, never its body, which is
+  measured as its own unit;
+  (b) blank rows and comment-only rows are excluded also inside a multi-row
+  statement -- Python reads them with stdlib `tokenize` (a row holding only
+  `COMMENT`/`NL` tokens), JS/TS with tree-sitter `comment` nodes and rows
+  holding no token. A row inside a multi-row string token still counts.
 - **Nesting depth**: block-nesting ancestor count from the root, never
   character columns. A module-level function/arrow's body is level 1; the
   limit of 3 is exceeded at level 4. Python ancestors: `FunctionDef`,
@@ -99,8 +108,10 @@ from __future__ import annotations
 
 import argparse
 import ast
+import io
 import json
 import sys
+import tokenize
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -206,7 +217,9 @@ def _is_docstring_stmt(stmt: ast.stmt) -> bool:
     )
 
 
-def _scan_stmt(stmt: ast.stmt, depth: int, lines: set[int], depth_box: list[int]) -> None:
+def _scan_stmt(
+    stmt: ast.stmt, depth: int, lines: set[int], depth_box: list[int], code_rows: frozenset[int] | None
+) -> None:
     """Record one statement's own line(s)/depth into `lines`/`depth_box`.
 
     Every statement's own depth counts (`D2` applies to any statement, not
@@ -221,6 +234,8 @@ def _scan_stmt(stmt: ast.stmt, depth: int, lines: set[int], depth_box: list[int]
         depth: `stmt`'s own ancestor-count level (`D2`).
         lines: Executable-line accumulator, mutated in place.
         depth_box: Single-element max-depth accumulator, mutated in place.
+        code_rows: Rows carrying a significant token (`_python_code_rows`), or
+            None to count every row of a multi-row statement.
     """
     depth_box[0] = max(depth_box[0], depth)
     if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
@@ -229,13 +244,20 @@ def _scan_stmt(stmt: ast.stmt, depth: int, lines: set[int], depth_box: list[int]
     if isinstance(stmt, _BLOCK_STMT_TYPES):
         lines.add(stmt.lineno)
         for child_list in _child_stmt_lists(stmt):
-            _scan_stmts(child_list, depth + 1, lines, depth_box)
+            _scan_stmts(child_list, depth + 1, lines, depth_box, code_rows)
         return
     end = getattr(stmt, "end_lineno", stmt.lineno) or stmt.lineno
-    lines.update(range(stmt.lineno, end + 1))
+    rows = range(stmt.lineno, end + 1)
+    lines.update(rows if code_rows is None else (r for r in rows if r in code_rows))
 
 
-def _scan_stmts(stmts: list[ast.stmt], depth: int, lines: set[int], depth_box: list[int]) -> None:
+def _scan_stmts(
+    stmts: list[ast.stmt],
+    depth: int,
+    lines: set[int],
+    depth_box: list[int],
+    code_rows: frozenset[int] | None,
+) -> None:
     """Record every statement in `stmts` (all at ancestor level `depth`).
 
     Args:
@@ -243,12 +265,15 @@ def _scan_stmts(stmts: list[ast.stmt], depth: int, lines: set[int], depth_box: l
         depth: Ancestor-count level shared by every statement in `stmts`.
         lines: Executable-line accumulator, mutated in place.
         depth_box: Single-element max-depth accumulator, mutated in place.
+        code_rows: Significant-token rows, or None (see `_scan_stmt`).
     """
     for stmt in stmts:
-        _scan_stmt(stmt, depth, lines, depth_box)
+        _scan_stmt(stmt, depth, lines, depth_box, code_rows)
 
 
-def _measure_python_unit(func: ast.FunctionDef | ast.AsyncFunctionDef, body_depth: int) -> tuple[int, int]:
+def _measure_python_unit(
+    func: ast.FunctionDef | ast.AsyncFunctionDef, body_depth: int, code_rows: frozenset[int] | None
+) -> tuple[int, int]:
     """Executable-line count and max nesting depth for one function's own body.
 
     `body_depth` is the ancestor-count level of statements directly in
@@ -262,12 +287,16 @@ def _measure_python_unit(func: ast.FunctionDef | ast.AsyncFunctionDef, body_dept
 
     lines: set[int] = set()
     depth_box = [body_depth]
-    _scan_stmts(body, body_depth, lines, depth_box)
+    _scan_stmts(body, body_depth, lines, depth_box, code_rows)
     return len(lines), depth_box[0]
 
 
 def _record_python_unit(
-    stmt: ast.FunctionDef | ast.AsyncFunctionDef, depth: int, path: Path, out: list[Unit]
+    stmt: ast.FunctionDef | ast.AsyncFunctionDef,
+    depth: int,
+    path: Path,
+    out: list[Unit],
+    code_rows: frozenset[int] | None,
 ) -> None:
     """Measure one function/method `stmt`, append its `Unit` to `out`, and
     recurse into its body (at `depth + 1`) for nested units.
@@ -277,9 +306,10 @@ def _record_python_unit(
         depth: `stmt`'s own ancestor-count level (`D2`).
         path: Source file `stmt` was found in.
         out: Unit register, appended to in place.
+        code_rows: Significant-token rows, or None (see `_scan_stmt`).
     """
     body_depth = depth + 1
-    executable_lines, max_depth = _measure_python_unit(stmt, body_depth)
+    executable_lines, max_depth = _measure_python_unit(stmt, body_depth, code_rows)
     out.append(
         Unit(
             path=path,
@@ -291,10 +321,12 @@ def _record_python_unit(
             status=_status(executable_lines, max_depth),
         )
     )
-    _discover_python_units(stmt.body, body_depth, path, out)
+    _discover_python_units(stmt.body, body_depth, path, out, code_rows)
 
 
-def _discover_block_children(stmt: ast.stmt, depth: int, path: Path, out: list[Unit]) -> None:
+def _discover_block_children(
+    stmt: ast.stmt, depth: int, path: Path, out: list[Unit], code_rows: frozenset[int] | None
+) -> None:
     """Recurse into every child statement list of a non-def compound `stmt`.
 
     Args:
@@ -304,21 +336,58 @@ def _discover_block_children(stmt: ast.stmt, depth: int, path: Path, out: list[U
             level deeper.
         path: Source file `stmt` was found in.
         out: Unit register, appended to in place.
+        code_rows: Significant-token rows, or None (see `_scan_stmt`).
     """
     for child_list in _child_stmt_lists(stmt):
-        _discover_python_units(child_list, depth + 1, path, out)
+        _discover_python_units(child_list, depth + 1, path, out, code_rows)
 
 
 def _discover_python_units(
-    stmts: list[ast.stmt], depth: int, path: Path, out: list[Unit]
+    stmts: list[ast.stmt],
+    depth: int,
+    path: Path,
+    out: list[Unit],
+    code_rows: frozenset[int] | None,
 ) -> None:
     """Recursively find every function/method unit in `stmts` (`depth` ancestors deep)."""
     for stmt in stmts:
         if isinstance(stmt, _DEF_TYPES):
-            _record_python_unit(stmt, depth, path, out)
+            _record_python_unit(stmt, depth, path, out, code_rows)
             continue
         if isinstance(stmt, _BLOCK_STMT_TYPES):
-            _discover_block_children(stmt, depth, path, out)
+            _discover_block_children(stmt, depth, path, out, code_rows)
+
+
+def _python_code_rows(text: str) -> frozenset[int] | None:
+    """Rows that carry at least one significant token (`D6` b).
+
+    Uses stdlib `tokenize`: a row with only `COMMENT`/`NL` tokens (a comment
+    line or a blank line between tokens of a multi-row statement) is absent.
+    A multi-row token (a triple-quoted string) covers every row it spans, so
+    a blank row inside a string literal stays counted.
+
+    Args:
+        text: Python source that `ast.parse` already accepted.
+
+    Returns:
+        frozenset[int] | None: Significant rows, or None when `tokenize`
+            cannot read the source (the caller then counts every row, which
+            can only over-count, never hide a violation).
+    """
+    ignored = {
+        tokenize.COMMENT, tokenize.NL, tokenize.NEWLINE, tokenize.INDENT,
+        tokenize.DEDENT, tokenize.ENDMARKER,
+    }
+    try:
+        tokens = list(tokenize.generate_tokens(io.StringIO(text).readline))
+    except (tokenize.TokenError, SyntaxError):
+        return None
+    return frozenset(
+        row
+        for tok in tokens
+        if tok.type not in ignored
+        for row in range(tok.start[0], tok.end[0] + 1)
+    )
 
 
 def scan_python_file(path: Path) -> list[Unit]:
@@ -334,7 +403,7 @@ def scan_python_file(path: Path) -> list[Unit]:
     except SyntaxError as exc:
         return [Unit(path, "<file>", 1, 0, 0, "python", "unparsed", f"SyntaxError: {exc}")]
     units: list[Unit] = []
-    _discover_python_units(tree.body, 0, path, units)
+    _discover_python_units(tree.body, 0, path, units, _python_code_rows(text))
     return units
 
 
@@ -543,6 +612,41 @@ def _scan_block_header(
             _scan_node(body_child, depth + 1, path, out, acc)
 
 
+def _own_rows(node: Node) -> set[int]:
+    """1-based rows `node` contributes to its enclosing unit (`D6`).
+
+    Nested function/class nodes are boundaries (`D6` a): only their first
+    row counts, as with a nested Python `def` header. Comment nodes and rows
+    with no token are skipped (`D6` b); a multi-row token (a template string)
+    covers every row it spans, so a blank row inside it stays counted.
+
+    Args:
+        node: A non-boundary, non-block node of the enclosing unit's body.
+
+    Returns:
+        set[int]: Rows of `node` carrying a significant token outside the
+            interior of any nested unit.
+    """
+    rows: set[int] = set()
+    interior: set[int] = set()
+    stack = [node]
+    while stack:
+        current = stack.pop()
+        if current.type == "comment":
+            continue
+        if current is not node and (
+            current.type in FUNCTION_UNIT_TYPES or current.type in CLASS_TYPES
+        ):
+            interior.update(range(current.start_point.row + 2, current.end_point.row + 2))
+            rows.add(current.start_point.row + 1)
+            continue
+        if current.child_count == 0:
+            rows.update(range(current.start_point.row + 1, current.end_point.row + 2))
+            continue
+        stack.extend(current.children)
+    return rows - interior
+
+
 def _scan_node(node: Node, depth: int, path: Path, out: list[Unit], acc: Acc | None) -> None:
     """Record `node` into the enclosing unit's `(lines, depth_box)`
     accumulator `acc` (or perform pure discovery when `acc` is None, e.g.
@@ -579,7 +683,7 @@ def _scan_node(node: Node, depth: int, path: Path, out: list[Unit], acc: Acc | N
             _scan_node(child, depth, path, out, acc)
         return
     if acc is not None:
-        acc[0].update(range(node.start_point.row + 1, node.end_point.row + 2))
+        acc[0].update(_own_rows(node))
     for child in node.named_children:
         _scan_node(child, depth, path, out, acc)
 

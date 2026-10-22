@@ -1,6 +1,6 @@
 {
-  "last_update": "2026-10-11",
-  "sprint_id": "055",
+  "last_update": "2026-10-22",
+  "sprint_id": "056",
   "_schema": "Entries are summary-only Knowledge Items. The 'file' field is omitted once the raw log has been purged (agents.md §4 definitive_amnesia) — the 1-line summary IS the retained knowledge.",
   "items": [
     {
@@ -187,6 +187,16 @@
     {
       "id": "F-20261011-S551",
       "summary": "Measure Claude Code sandbox behaviour with headless `claude -p --allowedTools Bash` from a submodule-shaped fixture (`.agents/.git` as a `gitdir:` file so `install.py` runs in host mode, template as project settings), validating each run with HTTPS_PROXY set and `curl --noproxy '*'` exit 6, because an interactive session cannot be launched without a TTY.",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20261022-S561",
+      "summary": "A Claude Code sandbox probe that names a protected path in its command text is answered by the permission layer, not the sandbox, so build the path at runtime (or write through the tool itself, e.g. `git config`) — Sprint 056 sessions 1 and 4 mislabelled E13 and E14 approval-gated that way, and by-operation probes found the submodule gitdir writable and the rest sandbox-denied.",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20261022-S562",
+      "summary": "Stage a file by name only when exactly one unit's edit is pending in it, because `git add -p` is unavailable non-interactively — Sprint 056 commit `d40f3da` carried two units' `agents.md` hunks (A8 and A16) after the parent staged the whole file.",
       "routing_class": "host"
     }
   ]

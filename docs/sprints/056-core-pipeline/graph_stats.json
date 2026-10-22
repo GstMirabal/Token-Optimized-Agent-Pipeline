@@ -1,0 +1,9 @@
+{
+  "nodes": 13677,
+  "edges": 18834,
+  "communities": 1062,
+  "source": "graphify-out/graph.json",
+  "sprint": 56,
+  "built_at_commit": "b422677",
+  "note": "Counts from `make graphify-update` (AST, no LLM) at HEAD before the close-workflow closeout commits (this file, model_ledger_regen). Previous snapshot is Sprint 055's (13240/18156/1059). The delta reflects the new tests/test_mcp_template.py, the mark-audited subcommand in scripts/session_state.py, the quality_audit.py measurement rules, the install.py excludedCommands refusal and the session_start.py CLI-version advisory."
+}

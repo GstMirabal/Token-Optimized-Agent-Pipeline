@@ -7,7 +7,11 @@ Orchestrates existing local tools into a short English briefing for
 With ``--boot``: run drift → claim → probe → sync → bridge, then print the
 briefing. A final advisory step runs ``install_lock.py check`` and, when the
 venv's recorded requirement set is stale, adds a finding naming the reinstall
-command; it never changes the exit code (``KI-053-1``, Sprint 054 ``D12``). Drift exit ``2`` propagates and skips claim (Sprint 039 B1). In
+command; it never changes the exit code (``KI-053-1``, Sprint 054 ``D12``). A
+second advisory step compares ``claude --version`` with the ``Measuring CLI``
+row of ``rules/project_topology.md`` section 4 and, on mismatch, names the
+sandbox matrices to re-measure; it never changes the exit code either (Sprint
+056 ``D17``). Drift exit ``2`` propagates and skips claim (Sprint 039 B1). In
 submodule mode the host-scoped sub-scripts (drift, claim, probe) run with cwd at
 the host root, not the ``.agents`` checkout, so drift is measured against the
 host's git history and the host anchor is the one claimed (``F-BOOT-2`` for
@@ -55,6 +59,14 @@ from install import BRIDGE_WRITE_DENIED, install_command
 LINE_CAP = 80
 DRIFT_OUTPUT_LINES = 15
 TRUNCATION_MARK = "… truncated (session_start line cap)"
+CLI_VERSION_TIMEOUT_SECONDS = 10
+MEASURING_CLI_RE = re.compile(
+    r"^\|\s*\*\*Measuring CLI\*\*\s*\|\s*Claude Code (\d+(?:\.\d+)+)\b", re.MULTILINE
+)
+SANDBOX_MATRICES = (
+    "docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md",
+    "docs/sprints/055-core-pipeline/SANDBOX_MEASUREMENT.md",
+)
 
 
 def repo_root() -> Path:
@@ -323,6 +335,83 @@ def _install_lock_notes(root: Path) -> list[str]:
     return [note]
 
 
+def _measured_cli_version(root: Path) -> tuple[str | None, str]:
+    """Version in the ``Measuring CLI`` row of ``rules/project_topology.md`` section 4.
+
+    Args:
+        root: The ``.agents`` checkout (framework root).
+
+    Returns:
+        tuple[str | None, str]: The version (e.g. ``2.1.119``) and an empty
+        reason, or None and the reason the file or the row is unreadable.
+    """
+    try:
+        text = (root / "rules" / "project_topology.md").read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        return None, f"read failed: {exc}"
+    match = MEASURING_CLI_RE.search(text)
+    return (match.group(1), "") if match else (None, "row not found")
+
+
+def _installed_cli_version() -> tuple[str | None, str]:
+    """First token of ``claude --version``, run without a shell and with a timeout.
+
+    Returns:
+        tuple[str | None, str]: The version (e.g. ``2.1.119``) and an empty
+        reason, or None and the reason when the binary is absent, times out,
+        exits non-zero or prints nothing.
+    """
+    try:
+        proc = subprocess.run(
+            ["claude", "--version"],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=CLI_VERSION_TIMEOUT_SECONDS,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return None, str(exc)
+    tokens = proc.stdout.split()
+    if proc.returncode != 0 or not tokens:
+        return None, f"exit {proc.returncode}, no version printed"
+    return tokens[0], ""
+
+
+def _cli_version_notes(root: Path) -> list[str]:
+    """Advisory finding when the installed Claude Code is not the measuring CLI.
+
+    The sandbox claims of ``rules/project_topology.md`` section 4 hold for the
+    CLI version they were measured on (Sprint 056 ``D17``).
+
+    Args:
+        root: The ``.agents`` checkout (framework root).
+
+    Returns:
+        list[str]: One advisory line on mismatch or when the check cannot
+        run; empty when the versions match.
+    """
+    prefix = "" if is_nucleus() else ".agents/"
+    measured, reason = _measured_cli_version(root)
+    if measured is None:
+        return [(
+            "Readiness finding (advisory): CLI re-measure check skipped — no readable "
+            f"`Measuring CLI` row in `{prefix}rules/project_topology.md` section 4 ({reason})."
+        )]
+    installed, reason = _installed_cli_version()
+    if installed is None:
+        return [(
+            "Readiness finding (advisory): CLI re-measure check skipped — "
+            f"`claude --version` is unavailable ({reason})."
+        )]
+    if installed == measured:
+        return []
+    matrices = " and ".join(f"`{prefix}{m}`" for m in SANDBOX_MATRICES)
+    return [(
+        f"Readiness finding (advisory): Claude Code {installed} is not the measuring CLI "
+        f"{measured} (`{prefix}rules/project_topology.md` section 4) — re-measure {matrices}."
+    )]
+
+
 def _anchor_cwd(root: Path) -> Path:
     """Directory the host-scoped boot sub-scripts must resolve their paths against.
 
@@ -576,7 +665,7 @@ def run_boot(
     bridge_rc, bridge_notes = _bridge_triage(root, target)
     if bridge_rc != 0:
         return bridge_rc
-    bridge_notes = [*bridge_notes, *_install_lock_notes(root)]
+    bridge_notes = [*bridge_notes, *_install_lock_notes(root), *_cli_version_notes(root)]
 
     briefing = apply_line_cap(build_briefing(root, tool))
     if bridge_notes:

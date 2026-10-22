@@ -7,16 +7,10 @@
       "Bash(git push -f:*)",
       "Bash(git reset --hard origin:*)",
       "Bash(rm -rf /:*)",
-      "Edit(/.agents/scripts/with_env.py)",
-      "Edit(/.agents/config/with_env_allowlist.json)",
-      "Edit(/.agents/venv_skillopt/**)",
+      "Edit(/.agents/**)",
+      "Edit(/.git/modules/.agents/**)",
       "Edit(/.env)",
-      "Read(/.env)",
-      "Edit(/.agents/hooks/**)",
-      "Edit(/.agents/scripts/**)",
-      "Edit(/.agents/config/**)",
-      "Edit(/.agents/skills/**)",
-      "Edit(/.agents/claude/**)"
+      "Read(/.env)"
     ],
     "allow": [
       "Bash(cd:*)",
@@ -60,15 +54,9 @@
         "./.env.template"
       ],
       "denyWrite": [
-        "./.agents/scripts/with_env.py",
-        "./.agents/config/with_env_allowlist.json",
-        "./.agents/venv_skillopt",
-        "./.env",
-        "./.agents/hooks",
-        "./.agents/scripts",
-        "./.agents/config",
-        "./.agents/skills",
-        "./.agents/claude"
+        "./.agents",
+        "./.git/modules/.agents",
+        "./.env"
       ]
     },
     "credentials": {

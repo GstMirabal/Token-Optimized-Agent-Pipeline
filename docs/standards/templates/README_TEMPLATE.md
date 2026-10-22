@@ -88,7 +88,7 @@ Upon opening a session, the following command is required to synchronize the age
 ```
 
 ### 2. Secret Shielding
-This project strictly follows the **Secure Secret Sovereignty** law. Agents MUST NOT read `.env` files. Under the sandbox agents have no sanctioned secret path: `.agents/scripts/with_env.py` runs only its three allowlisted graphify names (framework-owned allowlist); any other command that needs a secret is run by the human directly (`RA-09`).
+This project strictly follows the **Secure Secret Sovereignty** law. Agents MUST NOT read `.env` files. Under the sandbox agents have no sanctioned secret path: the human runs `.agents/scripts/with_env.py` for its three allowlisted names and runs any other secret-needing command directly (`RA-09`; the `S-3` row of `.agents/rules/project_topology.md` section 4).
 
 ### 3. Amnesia & Knowledge Purge
 After each sprint, tactical heuristics are distilled into the **Long-Term Memory (LTM)** located in `.agents/memory/` prior to the session context wipe.

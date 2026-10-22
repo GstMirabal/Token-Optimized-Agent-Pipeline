@@ -7,6 +7,7 @@ import json
 import os
 import sys
 from pathlib import Path
+from types import ModuleType
 
 import pytest
 
@@ -17,8 +18,16 @@ HOST_ENTRY = "gh run list *"
 
 
 @pytest.fixture()
-def install(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
-    """Import install with HOST_DIR redirected to a temporary host root."""
+def install(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> ModuleType:
+    """Import install with HOST_DIR redirected to a temporary host root.
+
+    Args:
+        monkeypatch: Pytest fixture used to redirect the module attribute.
+        tmp_path: Temporary directory standing in for the host root.
+
+    Returns:
+        ModuleType: The freshly imported install module.
+    """
     monkeypatch.syspath_prepend(str(SCRIPTS))
     sys.modules.pop("install", None)
     module = importlib.import_module("install")
@@ -27,7 +36,15 @@ def install(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
 
 
 def _settings(host: Path, data: dict | None) -> Path:
-    """Write data to the host's settings.local.json and return its path."""
+    """Write data to the host's settings.local.json and return its path.
+
+    Args:
+        host: Host root directory.
+        data: Mapping to serialise, or None to create only the parent directory.
+
+    Returns:
+        Path: Location of settings.local.json.
+    """
     dest = host / ".claude" / "settings.local.json"
     dest.parent.mkdir(parents=True, exist_ok=True)
     if data is not None:
@@ -35,21 +52,24 @@ def _settings(host: Path, data: dict | None) -> Path:
     return dest
 
 
-def test_rendered_lines_removed_host_entry_kept(install, tmp_path: Path) -> None:
+def test_rendered_lines_removed_host_entry_kept(install: ModuleType, tmp_path: Path) -> None:
+    """A rendered line is pruned and an unrelated host entry is kept."""
     dest = _settings(tmp_path, {"sandbox": {"excludedCommands": [RENDERED, HOST_ENTRY]}})
     install.prune_rendered_exclusions(tmp_path)
     data = json.loads(dest.read_text(encoding="utf-8"))
     assert data["sandbox"]["excludedCommands"] == [HOST_ENTRY]
 
 
-def test_empty_list_removes_key(install, tmp_path: Path) -> None:
+def test_empty_list_removes_key(install: ModuleType, tmp_path: Path) -> None:
+    """Pruning the last entry removes the excludedCommands key."""
     dest = _settings(tmp_path, {"sandbox": {"excludedCommands": [RENDERED]}})
     install.prune_rendered_exclusions(tmp_path)
     data = json.loads(dest.read_text(encoding="utf-8"))
     assert "excludedCommands" not in data["sandbox"]
 
 
-def test_unrelated_keys_and_denies_untouched(install, tmp_path: Path) -> None:
+def test_unrelated_keys_and_denies_untouched(install: ModuleType, tmp_path: Path) -> None:
+    """Keys other than excludedCommands survive the prune unchanged."""
     other = {
         "sandbox": {"excludedCommands": [RENDERED], "filesystem": {"denyWrite": ["/h/.agents/scripts"]}},
         "permissions": {"deny": ["Edit(//h/.agents/scripts/**)"]},
@@ -62,12 +82,14 @@ def test_unrelated_keys_and_denies_untouched(install, tmp_path: Path) -> None:
     assert data == other
 
 
-def test_no_file_is_not_created(install, tmp_path: Path) -> None:
+def test_no_file_is_not_created(install: ModuleType, tmp_path: Path) -> None:
+    """A missing settings file is not created."""
     install.prune_rendered_exclusions(tmp_path)
     assert not (tmp_path / ".claude").exists()
 
 
-def test_nothing_to_prune_does_not_write(install, tmp_path: Path) -> None:
+def test_nothing_to_prune_does_not_write(install: ModuleType, tmp_path: Path) -> None:
+    """With nothing to prune the file is not rewritten."""
     dest = _settings(tmp_path, {"sandbox": {"excludedCommands": [HOST_ENTRY]}})
     os.utime(dest, (1_000_000, 1_000_000))
     before = dest.read_text(encoding="utf-8")
@@ -76,7 +98,8 @@ def test_nothing_to_prune_does_not_write(install, tmp_path: Path) -> None:
     assert dest.stat().st_mtime == 1_000_000
 
 
-def test_write_denied_exits_only_when_pruning(install, tmp_path: Path) -> None:
+def test_write_denied_exits_only_when_pruning(install: ModuleType, tmp_path: Path) -> None:
+    """A refused write exits with BRIDGE_WRITE_DENIED only when pruning."""
     dest = _settings(tmp_path, {"sandbox": {"excludedCommands": [RENDERED]}})
     dest.chmod(0o444)
     if os.access(dest, os.W_OK):
@@ -93,3 +116,100 @@ def test_write_denied_exits_only_when_pruning(install, tmp_path: Path) -> None:
         install.prune_rendered_exclusions(tmp_path)
     finally:
         dest.chmod(0o644)
+
+
+SPACED = "/Users/Jane Doe/venv/bin/python3 -I /Users/Jane Doe/My Host/.agents/scripts/with_env.py gh_run"
+HOST_WRITTEN = "python3 -I .agents/scripts/with_env.py gh_run"
+NEAR_MISS = "echo with_env.py gh_run"
+
+
+def test_spaced_interpreter_and_host_paths_are_pruned(install: ModuleType, tmp_path: Path) -> None:
+    """Rendered lines with spaces in interpreter and host paths are pruned."""
+    dest = _settings(tmp_path, {"sandbox": {"excludedCommands": [SPACED, HOST_ENTRY]}})
+    install.prune_rendered_exclusions(tmp_path)
+    data = json.loads(dest.read_text(encoding="utf-8"))
+    assert data["sandbox"]["excludedCommands"] == [HOST_ENTRY]
+
+
+def test_host_written_with_env_line_is_pruned_and_near_miss_kept(install: ModuleType, tmp_path: Path) -> None:
+    """A host-written with_env line is pruned; a near miss is kept."""
+    dest = _settings(tmp_path, {"sandbox": {"excludedCommands": [HOST_WRITTEN, NEAR_MISS]}})
+    install.prune_rendered_exclusions(tmp_path)
+    data = json.loads(dest.read_text(encoding="utf-8"))
+    assert data["sandbox"]["excludedCommands"] == [NEAR_MISS]
+
+
+def test_non_dict_root_json_is_left_untouched(install: ModuleType, tmp_path: Path) -> None:
+    """A non-object JSON root returns without writing."""
+    dest = _settings(tmp_path, None)
+    dest.write_text("[1, 2]\n", encoding="utf-8")
+    os.utime(dest, (1_000_000, 1_000_000))
+    install.prune_rendered_exclusions(tmp_path)
+    assert dest.read_text(encoding="utf-8") == "[1, 2]\n"
+    assert dest.stat().st_mtime == 1_000_000
+
+
+def _bridge(install: ModuleType, monkeypatch: pytest.MonkeyPatch) -> int:
+    """Run the host Claude bridge against the temporary host, git hooks stubbed.
+
+    Args:
+        install: Install module with HOST_DIR redirected.
+        monkeypatch: Pytest fixture used to stub the git-hook installation.
+
+    Returns:
+        int: The bridge return code.
+    """
+    monkeypatch.setattr(install, "install_host_git_hooks", lambda: None)
+    return install.install_host_claude_bridge(None)
+
+
+def _snapshot(host: Path) -> dict[str, str]:
+    """Map every file under host to its text, to prove a refusal wrote nothing.
+
+    Args:
+        host: Host root directory.
+
+    Returns:
+        dict[str, str]: Relative path to file contents.
+    """
+    return {str(p.relative_to(host)): p.read_text(encoding="utf-8")
+            for p in sorted(host.rglob("*")) if p.is_file()}
+
+
+@pytest.mark.parametrize("name", ["settings.json", "settings.local.json"])
+def test_host_exclusion_refuses_install(
+    install: ModuleType, monkeypatch: pytest.MonkeyPatch, tmp_path: Path,
+    capsys: pytest.CaptureFixture[str], name: str,
+) -> None:
+    """A host excludedCommands entry in either settings file refuses with exit 2 and writes nothing."""
+    dest = tmp_path / ".claude" / name
+    dest.parent.mkdir(parents=True)
+    dest.write_text(json.dumps({"sandbox": {"excludedCommands": [RENDERED, HOST_ENTRY]}}), encoding="utf-8")
+    before = _snapshot(tmp_path)
+    assert _bridge(install, monkeypatch) == 2
+    assert _snapshot(tmp_path) == before
+    err = capsys.readouterr().err
+    assert f".claude/{name}: {json.dumps(HOST_ENTRY)}" in err
+    assert "N1" in err and "re-run" in err
+
+
+def test_only_render_owned_lines_are_pruned_and_install_proceeds(
+    install: ModuleType, monkeypatch: pytest.MonkeyPatch, tmp_path: Path,
+) -> None:
+    """Render-owned lines in settings.local.json and retired template values do not refuse."""
+    dest = _settings(tmp_path, {"sandbox": {"excludedCommands": [RENDERED, SPACED]}})
+    shared = tmp_path / ".claude" / "settings.json"
+    shared.write_text(json.dumps({"sandbox": {"excludedCommands": ["gh pr list *"]}}), encoding="utf-8")
+    assert _bridge(install, monkeypatch) == 0
+    assert "excludedCommands" not in json.loads(dest.read_text(encoding="utf-8"))["sandbox"]
+    assert json.loads(shared.read_text(encoding="utf-8"))["sandbox"].get("excludedCommands", []) == []
+
+
+@pytest.mark.parametrize("data", [None, {"model": "x"}, {"sandbox": {"excludedCommands": []}}])
+def test_no_exclusions_install_proceeds(
+    install: ModuleType, monkeypatch: pytest.MonkeyPatch, tmp_path: Path, data: dict | None,
+) -> None:
+    """No settings file, no sandbox key, or an empty list lets the install proceed."""
+    _settings(tmp_path, data)
+    assert _bridge(install, monkeypatch) == 0
+    assert (tmp_path / ".claude" / "settings.json").exists()
