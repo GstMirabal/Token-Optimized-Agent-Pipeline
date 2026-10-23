@@ -37,7 +37,7 @@ strings, not mapping keys.
 | `scripts/merge_json.py` | In `mcpServers`, every server the template defines replaces the host entry of that name as a whole. A host entry that differed is reported. A retired server is removed when its launch equals a launch the framework shipped. A host-changed retired entry is kept and reported |
 | `tests/test_merge_json.py` | Pin that after a merge, every template-defined server equals the template entry, for each historical host shape. Pin that retired servers are removed only when their launch matches |
 
-Branch/commit: `hotfix/H008` → commit SHAs in the `[Unreleased]` entry of `CHANGELOG.md` (hotfixes may merge outside the sprint cycle, but never unreviewed). **Branch prefix is mandatory (`agents.md` RA-03)** — `fix/`, `feat/`, and `chore/` branch names are protocol loss even when the Conventional Commits message type is `fix`.
+Branch/commit: `hotfix/H008` → `f98f4d2`; `E10` correction in `SANDBOX_ENUMERATION.md` `86bab2a` (hotfixes may merge outside the sprint cycle, but never unreviewed). **Branch prefix is mandatory (`agents.md` RA-03)** — `fix/`, `feat/`, and `chore/` branch names are protocol loss even when the Conventional Commits message type is `fix`.
 
 **Perimeter (`agents.md §1 fail_closed_claims`).** Covered: the `mcpServers` entries the template
 defines, and the retired servers listed in `scripts/merge_json.py`, in any `.mcp.json` the merge
@@ -52,10 +52,13 @@ writes (`scripts/install.py` `merge_into` and `scripts/merge_json.py` `main`). N
 
 ## 4. Verification
 
-- The new tests fail on the parent commit and pass at the fix (`Repro:` trailer on the fix commit).
+- The new tests fail on the parent commit and pass at the fix (`Repro:` trailer on `f98f4d2`;
+  `python3 scripts/check_fix_reproduces.py --range main..HEAD` exits `0`).
+- Copies of the `.mcp.json` of the five local hosts, merged with `scripts/merge_json.py`: every
+  template-defined server equals the template entry, and `github-sentinel` is removed.
 - `make verify` exits `0`.
 
 ## 5. Rule Amendment Check
 - [ ] Is this failure class systemic? Yes. A fix to a template value reached fresh installs only, and no check compared the merged host result with the template. The rule question is routed to Sprint 057: should every template change that closes a vector carry a merge test over the historical host shapes?
 - [ ] Does the root cause reveal a design decision worth recording? Yes. The template owns the servers it names. N/A here; recorded in this file
-- [ ] Master Ledger entry added under `[Unreleased]`.
+- [x] Master Ledger entry added under `[Unreleased]`.
