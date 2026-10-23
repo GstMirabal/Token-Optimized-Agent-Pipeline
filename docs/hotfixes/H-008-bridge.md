@@ -37,12 +37,18 @@ strings, not mapping keys.
 | `scripts/merge_json.py` | In `mcpServers`, every server the template defines replaces the host entry of that name as a whole. A host entry that differed is reported. A retired server is removed when its launch equals a launch the framework shipped. A host-changed retired entry is kept and reported |
 | `tests/test_merge_json.py` | Pin that after a merge, every template-defined server equals the template entry, for each historical host shape. Pin that retired servers are removed only when their launch matches |
 
-Branch/commit: `hotfix/H008` → `f98f4d2`; `E10` correction in `SANDBOX_ENUMERATION.md` `86bab2a` (hotfixes may merge outside the sprint cycle, but never unreviewed). **Branch prefix is mandatory (`agents.md` RA-03)** — `fix/`, `feat/`, and `chore/` branch names are protocol loss even when the Conventional Commits message type is `fix`.
+Branch/commit: `hotfix/H008` → `f98f4d2`, `c78dbb2` (QA round 1 `R1-1`); `E10` correction in `SANDBOX_ENUMERATION.md` `86bab2a` (hotfixes may merge outside the sprint cycle, but never unreviewed). **Branch prefix is mandatory (`agents.md` RA-03)** — `fix/`, `feat/`, and `chore/` branch names are protocol loss even when the Conventional Commits message type is `fix`.
 
 **Perimeter (`agents.md §1 fail_closed_claims`).** Covered: the `mcpServers` entries the template
-defines, and the retired servers listed in `scripts/merge_json.py`, in any `.mcp.json` the merge
-writes (`scripts/install.py` `merge_into` and `scripts/merge_json.py` `main`). Not covered:
-- MCP servers the host defines itself. These are host jurisdiction.
+defines, and the retired servers listed in `scripts/merge_json.py`, in a `.mcp.json` the merge
+writes (`scripts/install.py` `merge_into` and `scripts/merge_json.py` `main`) whose `mcpServers` is a
+mapping or absent. If the host `mcpServers` is any other value, it is left as is, no template server
+is merged, and the merge reports it (`c78dbb2`). The Cursor bridge does not merge:
+`scripts/cursor_adapter.py` `_write_mcp` overwrites `.cursor/mcp.json` with the whole template, so its
+result already equals the template. Not covered:
+- MCP servers the host defines itself, in its `.mcp.json` or in another Claude Code scope such as
+  `~/.claude.json`, including one that reuses a template server's name there. These are host
+  jurisdiction.
 - A host that does not re-run the installer after the pin bump. The repair happens at the next merge.
 - Hook entries duplicated by the merge. `install.merge_into` does not call
   `prune_deprecated_hooks`. These are not a security vector because they run the same code, and
