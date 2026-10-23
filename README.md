@@ -181,7 +181,7 @@ The Orchestrator will scan your source code, identify your project's current Pha
 > [!IMPORTANT]
 > **Orchestration manifest:** The Orchestrator uses `.agents/skills/manifest_skills.json` to statically route tools, drastically reducing token consumption and discovery time during sessions — see the guide above for a worked example.
 
-Check [`workflows/`](workflows/) for automated protocols like project scaffolding, and [`mcp_servers/`](mcp_servers/) for bridging external LLM data nodes.
+Check [`workflows/`](workflows/) for automated protocols like project scaffolding, and [`claude/mcp.json`](claude/mcp.json) for the MCP servers merged into the host.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
