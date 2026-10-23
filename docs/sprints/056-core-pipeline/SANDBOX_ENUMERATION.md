@@ -192,7 +192,7 @@ Therefore the default wording of `RA-19` stands: write-denies and the absence of
 | `E7` | closed | `B2` |
 | `E8` | import shadowing closed; hook files sandbox-denied (corrected in section 6; previously recorded as approval-gated) | `B2` (`R13`: hooks ran and passed); sandbox on host `.git/hooks/` (`M04`) |
 | `E9` | closed | `B2` (`R02`) |
-| `E10` | closed | `B3`: `-I` (`R10` parent check); `venv_skillopt` was already denied |
+| `E10` | closed for fresh installs and, since Hotfix `H-008`, for hosts that re-run the installer; open on a host bridged before `246cd20` that has not (correction below) | `B3`: `-I` (`R10` parent check); `venv_skillopt` was already denied; `H-008` (`f98f4d2`) |
 | `E11` | closed inside `.agents/agents/` (`B2`); `.claude/agents/` closed by the sandbox (section 6.8; the earlier "stays approval-gated" is corrected) | `B2` (`R03`); sandbox (`P04`, `P05`) |
 | `E12` | closed | `B2` (`R04`) |
 | `E13` | session 1 verdict "open, approval-gated" is withdrawn (section 6). Submodule gitdir: closed by `R1` (`denyWrite ./.git/modules/.agents`; `N01`-`N04`). Host `.git/config` and `.git/hooks/`: closed by the sandbox (`M04`, `M05`) | `R1` (sandbox layer measured in session 7; the `Edit(/.git/modules/.agents/**)` rule was not exercised); sandbox |
@@ -200,6 +200,8 @@ Therefore the default wording of `RA-19` stands: write-denies and the absence of
 | `E15` | open | host environment (`R11`, `Q7`): the project venv is agent-writable |
 | `E16` | `.agents/` files closed (`R05`-`R07`); host `CLAUDE.md` and `.claude/rules/*.md` open (section 6.8, `Q06`, `Q04`) | host-owned instructions |
 | `E17` | closed | `B2` (`R08`); previously closed by per-tree rules |
+
+**`E10` correction (Hotfix `H-008`, 2026-10-23).** "Closed" held for fresh installs only. `scripts/merge_json.py` merged the template additively, so a host bridged before `246cd20` kept `graphify` without `-I`, and a re-install appended `-I` after the module name (`["-m", "graphify.serve", "graphify-out/graph.json", "-I"]`), where it isolates nothing; Hotfix `H-007` QA round 5 ran a shadow `graphify/serve.py` through that shape. Measured the same day: five local hosts carried the pre-`246cd20` entry. `H-008` makes a template-defined server replace its host entry whole at every merge (`docs/hotfixes/H-008-bridge.md`).
 
 ### 5.5 Residue
 
