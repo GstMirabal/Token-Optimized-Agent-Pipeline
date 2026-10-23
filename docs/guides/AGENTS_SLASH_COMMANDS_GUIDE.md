@@ -95,7 +95,7 @@ consumption and discovery time during sessions:
 ```
 
 Check the `/workflows/` directory for automated protocols like project
-scaffolding. Explore `/mcp_servers/` for bridging external LLM data nodes.
+scaffolding. The MCP servers merged into the host are declared in `claude/mcp.json`.
 
 If there's more than one valid path:
 - **If working inside the `.agents` repo itself (Nucleus Mode)**: the full host
