@@ -6,10 +6,10 @@ directory. A Python server started with `-m` and without `-I` puts that working
 directory first on sys.path, so a host-root package named like the served
 module (`graphify/`) shadows the installed one and runs unsandboxed
 (SANDBOX_ENUMERATION.md E10). A server that fetches a package from a registry at launch runs
-whatever the registry serves, unsandboxed (H-007), so none may.
+whatever the registry serves, unsandboxed (H-007), so every server must match a
+reviewed launch.
 """
 import json
-import re
 from pathlib import Path
 from typing import Any
 
@@ -43,15 +43,14 @@ def test_python_server_runs_isolated(name: str, server: dict[str, Any]) -> None:
     assert server["args"][:1] == ["-I"], name
 
 
-# Any token that fetches and runs a package from a registry. Matched as a word anywhere
-# in the launch text, quoted, flagged, nested in `bash -c` or commented alike: a shell
-# line is not parsed here, so the check fails closed instead (agents.md §1 forbids
-# crediting a heuristic scanner over a context-sensitive grammar as fail-closed).
-FETCH_RUNNER = re.compile(
-    r"\b(?:dlx|npx|bunx|uvx|pipx|npm\s+(?:exec|x)|bun\s+x)\b|\bpnpm\b.*\bexec\b"
-)
-LAUNCHER_SUFFIXES = (".sh", ".py", ".js", ".mjs", ".cjs")
-VENV_PYTHON = ("/bin/python", "/bin/python3")
+# Every server the template may ship, reviewed: its command and the leading arguments
+# that decide what runs. A server not listed here, or listed with another launch, fails
+# until it is reviewed and added. This is an allowlist on purpose: two rounds of
+# denylists over shell text (H-007 QA rounds 2 and 3) each let a registry fetch
+# through, and agents.md §1 forbids calling a heuristic scan of that grammar fail-closed.
+REVIEWED_LAUNCHES = {
+    "graphify": (".agents/venv_skillopt/bin/python", ["-I", "-m", "graphify.serve"]),
+}
 
 
 def _servers() -> dict[str, dict[str, Any]]:
@@ -63,71 +62,23 @@ def _servers() -> dict[str, dict[str, Any]]:
     return json.loads(TEMPLATE.read_text(encoding="utf-8"))["mcpServers"]
 
 
-def _launch_text(server: dict[str, Any]) -> str:
-    """Return the command line of a server plus the text of each launcher file it names.
-
-    Args:
-        server: One `mcpServers` entry.
-
-    Returns:
-        The command line, then the contents of every part of it (the command
-        included) that is a `.agents/` path to an existing script of this framework.
-    """
-    parts = [server["command"], *server.get("args", [])]
-    texts = [" ".join(parts)]
-    for part in parts:
-        launcher = ROOT / part.removeprefix(".agents/")
-        if part.startswith(".agents/") and launcher.suffix in LAUNCHER_SUFFIXES and launcher.is_file():
-            texts.append(launcher.read_text(encoding="utf-8"))
-    return "\n".join(texts)
-
-
-@pytest.mark.parametrize("line", [
-    "pnpm dlx @scope/pkg",
-    'pnpm --silent dlx "@scope/pkg"',
-    "pnpm --reporter silent dlx @scope/pkg",
-    "pnpm -C /tmp dlx @scope/pkg@1.2.3",
-    "npx -y 'pkg'",
-    "exec env FOO=1 npx -y pkg",
-    "npm exec -y pkg",
-    "npm x -y pkg",
-    "yarn dlx pkg",
-    "bunx pkg@1.0.0",
-    "bun x pkg",
-    "uvx tool==2.0.0",
-    "pipx run tool",
-    'bash -c "npx -y pkg"',
-    "# pnpm dlx in a comment",
-])
-def test_fetch_runner_fails_closed_on_every_form(line: str) -> None:
-    """Every runner form is caught, pinned or not, quoted, flagged or nested (QA-H007-2, R2-1)."""
-    assert FETCH_RUNNER.search(line)
-
-
-@pytest.mark.parametrize("line", [
-    ".agents/venv_skillopt/bin/python -I -m graphify.serve graphify-out/graph.json",
-    "pnpm install --frozen-lockfile",
-    "python3 -I scripts/session_state.py suspend",
-])
-def test_fetch_runner_ignores_non_fetching_lines(line: str) -> None:
-    """A line that runs local code only is not reported."""
-    assert not FETCH_RUNNER.search(line)
-
-
 @pytest.mark.parametrize("name", sorted(_servers()))
-def test_server_fetches_no_package_at_launch(name: str) -> None:
-    """No server, nor a launcher it names, fetches a package from a registry when started."""
-    found = FETCH_RUNNER.findall(_launch_text(_servers()[name]))
-    assert not found, (name, found)
-
-
-@pytest.mark.parametrize("name", sorted(_servers()))
-def test_server_launcher_paths_exist(name: str) -> None:
-    """Every `.agents/` file a server names exists, except the interpreter of the host venv."""
+def test_server_launch_is_reviewed(name: str) -> None:
+    """Every template server launches exactly as its reviewed entry says (H-007)."""
+    assert name in REVIEWED_LAUNCHES, f"{name}: unreviewed MCP server"
+    command, leading = REVIEWED_LAUNCHES[name]
     server = _servers()[name]
-    paths = [p for p in [server["command"], *server.get("args", [])] if p.startswith(".agents/")]
-    missing = [
-        p for p in paths
-        if not p.endswith(VENV_PYTHON) and not (ROOT / p.removeprefix(".agents/")).exists()
-    ]
-    assert not missing, (name, missing)
+    assert server["command"] == command, name
+    assert server.get("args", [])[:len(leading)] == leading, name
+
+
+@pytest.mark.parametrize("server", [
+    {"command": "/bin/bash", "args": [".agents/mcp_servers/github_mcp/scripts/start_mcp.sh"]},
+    {"command": "docker", "args": ["run", "-i", "--rm", "ghcr.io/github/github-mcp-server"]},
+    {"command": ".agents/venv_skillopt/bin/python", "args": ["-I", "-c", "import os"]},
+    {"command": ".agents/venv_skillopt/bin/python", "args": ["-m", "graphify.serve"]},
+])
+def test_unreviewed_launch_is_rejected(server: dict[str, Any]) -> None:
+    """A launch that differs from the reviewed entry does not match it (the guard is not vacuous)."""
+    command, leading = REVIEWED_LAUNCHES["graphify"]
+    assert (server["command"], server["args"][:len(leading)]) != (command, leading)
