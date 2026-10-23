@@ -34,12 +34,12 @@ a template MCP server launches.
 | :--- | :--- |
 | `claude/mcp.json` | Remove the `git-sync-agent` server |
 | `mcp_servers/github_mcp/` | Delete the launcher, its health check and its README/SKILL |
-| `tests/test_mcp_template.py` | Pin that no template server, nor any launcher script it names, fetches a package from a registry at launch (any package-runner word fails, pinned or not), and that every `.agents/` path a server names exists |
+| `tests/test_mcp_template.py` | Pin that every template server matches a reviewed launch (`REVIEWED_LAUNCHES`: command plus the leading arguments that decide what runs); an unlisted or changed server fails until it is reviewed and added |
 | `README.md`, `docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md`, `docs/architecture/topology_map.md` | Drop the references to the deleted `mcp_servers/` directory |
 
 Branch/commit: `hotfix/H007` → `dda6d39` (hotfixes may merge outside the sprint cycle, but never unreviewed). **Branch prefix is mandatory (`agents.md` RA-03)** — `fix/`, `feat/`, and `chore/` branch names are protocol loss even when the Conventional Commits message type is `fix`.
 
-QA Gate round 1 follow-ups on the same branch: `194fd1b` (`rules/project_topology.md` no longer names a GitHub MCP), `095a32a` (`README_TEMPLATE.md` row), the scanner widened in `c244ca5` and split in `4c4b4a4`, the record and routing follow-ups `5915042` and `c2fe310`. Round 2 found more shell forms the parsing scanner missed; the guard was then replaced by a fail-closed check that forbids any registry fetch at launch (`784a7d7`).
+QA Gate round 1 follow-ups on the same branch: `194fd1b` (`rules/project_topology.md` no longer names a GitHub MCP), `095a32a` (`README_TEMPLATE.md` row), the scanner widened in `c244ca5` and split in `4c4b4a4`, the record and routing follow-ups `5915042` and `c2fe310`. Rounds 2 and 3 each found shell forms that a scan of launch text let through (a parsing scanner, then a word denylist in `784a7d7`); the guard is now an allowlist of reviewed launches (`a26de25`), which is fail-closed because it checks what is permitted rather than what it recognises.
 
 Hosts bridged before this hotfix keep the `git-sync-agent` entry in their `.mcp.json`, because
 the JSON merge is additive. After the pin bump the entry points at a launcher that no longer
