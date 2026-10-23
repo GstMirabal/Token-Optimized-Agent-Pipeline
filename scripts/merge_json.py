@@ -6,7 +6,15 @@ claude/settings.hooks.json -> host .claude/settings.json and claude/mcp.json
 -> host .mcp.json.
 
 invoked_by: scripts/install.py (import; non-destructive settings/mcp merge).
+
+MCP servers are the exception to "non-destructive": a server the template
+defines is the template's, so its host entry is replaced whole, and a server
+the template retired is removed when its launch is the one the framework
+shipped (Hotfix H-008). An additive merge treated `args`, an ordered argv, as a
+set, so a host bridged before `246cd20` received `-I` after the module name,
+where it isolates nothing.
 """
+import copy
 import json
 import sys
 from collections.abc import Mapping
@@ -53,6 +61,78 @@ RETIRED_VALUES: Mapping[str, frozenset[str]] = MappingProxyType({
         "gh auth status",
     }),
 })
+
+
+# MCP servers the template once shipped and retired, with the launch (command,
+# args) it shipped them with. Removed from the host only when the host entry has
+# that launch; a host that relaunched a retired name keeps its entry (H-008).
+RETIRED_MCP_SERVERS: Mapping[str, tuple[str, tuple[str, ...]]] = MappingProxyType({
+    "github-sentinel": ("/bin/bash", (".agents/mcp_servers/github_mcp/scripts/start_mcp.sh",)),
+    "git-sync-agent": ("/bin/bash", (".agents/mcp_servers/github_mcp/scripts/start_mcp.sh",)),
+})
+
+
+def _launch(entry: Any) -> tuple[Any, tuple[Any, ...]] | None:
+    """Return the launch of an MCP server entry: its command and its args.
+
+    Args:
+        entry: One `mcpServers` value from a host file.
+
+    Returns:
+        (command, args) when the entry is a mapping, else None.
+    """
+    if not isinstance(entry, dict):
+        return None
+    return entry.get("command"), tuple(entry.get("args") or ())
+
+
+def _retire_mcp_servers(host: dict, shipped: dict) -> list[str]:
+    """Remove the retired servers whose host launch is the one the framework shipped.
+
+    Args:
+        host: The host `mcpServers` mapping, mutated in place.
+        shipped: The template `mcpServers` mapping; a name it still defines is skipped.
+
+    Returns:
+        One notice per retired name found in the host, removed or kept.
+    """
+    notices = []
+    for name, launch in RETIRED_MCP_SERVERS.items():
+        if name in shipped or name not in host:
+            continue
+        if _launch(host[name]) == launch:
+            del host[name]
+            notices.append(f"removed retired MCP server '{name}'")
+        else:
+            notices.append(f"kept MCP server '{name}': retired, but its launch was changed by the host")
+    return notices
+
+
+def sync_template_mcp_servers(dest: dict, template: dict) -> list[str]:
+    """Make every template-defined MCP server equal to the template, in place.
+
+    Args:
+        dest: Destination document; its `mcpServers` mapping is mutated.
+        template: Template document.
+
+    Returns:
+        Notices for each host entry replaced because it differed, and for each
+        retired server removed or kept. Empty when the template has no servers
+        or the destination's `mcpServers` is not a mapping.
+    """
+    shipped = template.get("mcpServers")
+    if not isinstance(shipped, dict):
+        return []
+    host = dest.setdefault("mcpServers", {})
+    if not isinstance(host, dict):
+        return []
+    notices = [
+        f"replaced MCP server '{name}' with the template entry"
+        for name, entry in shipped.items() if name in host and host[name] != entry
+    ]
+    for name, entry in shipped.items():
+        host[name] = copy.deepcopy(entry)
+    return notices + _retire_mcp_servers(host, shipped)
 
 
 def _prune_matcher_hooks(matcher: dict) -> None:
@@ -175,6 +255,9 @@ def merge(
 
     Retired template values are pruned from dest first (`prune_retired_values`),
     so every caller, including `install.merge_into`, upgrades on re-install.
+    Template-defined MCP servers then replace their host entries whole, and
+    retired ones are removed (`sync_template_mcp_servers`); each notice is
+    printed to stderr.
 
     Args:
         dest: Destination dict, mutated in place.
@@ -185,6 +268,8 @@ def merge(
         The merged dest.
     """
     prune_retired_values(dest, template, retired)
+    for notice in sync_template_mcp_servers(dest, template):
+        print(f"ℹ️  merge_json: {notice}", file=sys.stderr)
     return _merge_tree(dest, template)
 
 
