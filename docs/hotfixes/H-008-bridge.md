@@ -45,7 +45,8 @@ writes (`scripts/install.py` `merge_into` and `scripts/merge_json.py` `main`) wh
 mapping or absent. If the host `mcpServers` is any other value, it is left as is, no template server
 is merged, and the merge reports it (`c78dbb2`). The Cursor bridge does not merge:
 `scripts/cursor_adapter.py` `_write_mcp` overwrites `.cursor/mcp.json` with the whole template, so its
-result already equals the template. Not covered:
+result is the template with only the `.agents/` prefix of `command`/`args` strings removed in
+nucleus mode (`_rewrite_mcp_config`); no argument is dropped or reordered. Not covered:
 - MCP servers the host defines itself, in its `.mcp.json` or in another Claude Code scope such as
   `~/.claude.json`, including one that reuses a template server's name there. These are host
   jurisdiction.
