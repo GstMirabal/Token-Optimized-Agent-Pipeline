@@ -34,12 +34,12 @@ a template MCP server launches.
 | :--- | :--- |
 | `claude/mcp.json` | Remove the `git-sync-agent` server |
 | `mcp_servers/github_mcp/` | Delete the launcher, its health check and its README/SKILL |
-| `tests/test_mcp_template.py` | Pin that every template server matches a reviewed launch (`REVIEWED_LAUNCHES`: command plus the leading arguments that decide what runs); an unlisted or changed server fails until it is reviewed and added |
+| `tests/test_mcp_template.py` | Pin the whole `claude/mcp.json` to `REVIEWED_TEMPLATE` by equality: any change to a key, server or value fails until the reviewed copy changes in the same commit. It proves the template has not changed since review; it does not judge the reviewed copy, nor the code a server runs (`graphify.serve` comes from `graphifyy`, pinned in `requirements-core.txt`) |
 | `README.md`, `docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md`, `docs/architecture/topology_map.md` | Drop the references to the deleted `mcp_servers/` directory |
 
 Branch/commit: `hotfix/H007` → `dda6d39` (hotfixes may merge outside the sprint cycle, but never unreviewed). **Branch prefix is mandatory (`agents.md` RA-03)** — `fix/`, `feat/`, and `chore/` branch names are protocol loss even when the Conventional Commits message type is `fix`.
 
-QA Gate round 1 follow-ups on the same branch: `194fd1b` (`rules/project_topology.md` no longer names a GitHub MCP), `095a32a` (`README_TEMPLATE.md` row), the scanner widened in `c244ca5` and split in `4c4b4a4`, the record and routing follow-ups `5915042` and `c2fe310`. Rounds 2 and 3 each found shell forms that a scan of launch text let through (a parsing scanner, then a word denylist in `784a7d7`); the guard is now an allowlist of reviewed launches (`a26de25`), which is fail-closed because it checks what is permitted rather than what it recognises.
+QA Gate round 1 follow-ups on the same branch: `194fd1b` (`rules/project_topology.md` no longer names a GitHub MCP), `095a32a` (`README_TEMPLATE.md` row), the scanner widened in `c244ca5` and split in `4c4b4a4`, the record and routing follow-ups `5915042` and `c2fe310`. Rounds 2 to 4 each found a vector the guard of the previous round let through: a parsing scanner, a word denylist (`784a7d7`), then an allowlist of `command` and leading `args` only (`a26de25`), which passed `env`, `type`/`url` and `cwd` changes. Four consecutive `REJECTED` triggered `workflows/remediation_workflow.md` (negative KI `agents.md §1 fail_closed_claims`, `75da85a`). The guard now compares the whole template to its reviewed copy (`289bc94`).
 
 Hosts bridged before this hotfix keep the `git-sync-agent` entry in their `.mcp.json`, because
 the JSON merge is additive. After the pin bump the entry points at a launcher that no longer
@@ -51,10 +51,13 @@ over MCP returns in Sprint 059 as GitHub's maintained remote server, with no loc
 ## 4. Verification
 
 - `venv_skillopt/bin/python -m pytest tests/test_mcp_template.py` — the new test fails on the
-  parent commit and passes at the fix (`Repro:` trailer on the fix commit).
+  parent commit and passes at the fix (`Repro:` trailer on the fix commit). The trailer names
+  `test_server_fetches_no_unpinned_package`, the id at `dda6d39`; later commits replaced it with
+  `test_template_equals_reviewed_copy`. `scripts/check_fix_reproduces.py` replays the test file as
+  it was at the commit, so the recorded reproduction stays valid.
 - `make verify` exits `0`.
 
 ## 5. Rule Amendment Check
-- [x] Is this failure class systemic? Partly: an unpinned package executed outside the sandbox. The pinning test is the guard. The rule question (MCP launchers in `RA-19` enumeration and `§8`) is routed to the Sprint 059 sandbox block: N/A here
+- [x] Is this failure class systemic? Yes, twice. The guard class (fail-closed claims over enumerated checks) → `agents.md §1 fail_closed_claims` (`75da85a`). The launch class (MCP launchers in the `RA-19` enumeration and `§8`) is routed to the Sprint 059 sandbox block.
 - [ ] Does the root cause reveal a design decision worth recording? N/A
 - [x] Master Ledger entry added under `[Unreleased]`.
