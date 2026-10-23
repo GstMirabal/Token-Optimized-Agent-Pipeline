@@ -117,15 +117,16 @@ def sync_template_mcp_servers(dest: dict, template: dict) -> list[str]:
 
     Returns:
         Notices for each host entry replaced because it differed, and for each
-        retired server removed or kept. Empty when the template has no servers
-        or the destination's `mcpServers` is not a mapping.
+        retired server removed or kept. Empty when the template has no servers.
+        When the destination's `mcpServers` is not a mapping it is left as is,
+        no template server is added, and the one notice says so.
     """
     shipped = template.get("mcpServers")
     if not isinstance(shipped, dict):
         return []
     host = dest.setdefault("mcpServers", {})
     if not isinstance(host, dict):
-        return []
+        return ["kept host 'mcpServers': not a mapping, so no template MCP server was merged"]
     notices = [
         f"replaced MCP server '{name}' with the template entry"
         for name, entry in shipped.items() if name in host and host[name] != entry

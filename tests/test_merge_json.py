@@ -240,6 +240,15 @@ class TestTemplateOwnedMcpServers:
         merge({"mcpServers": {"graphify": copy.deepcopy(GRAPHIFY_PRE_246CD20)}}, _real_mcp_template())
         assert "graphify" in capsys.readouterr().err
 
+    @pytest.mark.parametrize("host_servers", [["x"], None, "x"])
+    def test_non_mapping_host_servers_are_reported(
+        self, host_servers: object, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        """A host `mcpServers` that is not a mapping is left as is and named on stderr (QA-H008-R1-1)."""
+        result = merge({"mcpServers": copy.deepcopy(host_servers)}, _real_mcp_template())
+        assert result["mcpServers"] == host_servers
+        assert "not a mapping" in capsys.readouterr().err
+
     @pytest.mark.parametrize("name", ["git-sync-agent", "github-sentinel"])
     def test_retired_server_with_shipped_launch_is_removed(self, name: str) -> None:
         """A retired server whose launch is the one the framework shipped is removed."""
