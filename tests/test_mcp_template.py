@@ -82,16 +82,27 @@ def _fetched_specs(line: str) -> list[str]:
         tokens = shlex.split(line, comments=True)
     except ValueError:
         return [line] if any(r in line for r in (*DIRECT_RUNNERS, *SUBCOMMAND_RUNNERS)) else []
-    specs = []
-    for i, tok in enumerate(tokens):
-        name = tok.rsplit("/", 1)[-1]
-        if name in DIRECT_RUNNERS:
-            specs.extend(_operands(tokens, i)[:1] or [tok])
-        elif name in SUBCOMMAND_RUNNERS:
-            rest = _operands(tokens, i)
-            if rest[:1] == [SUBCOMMAND_RUNNERS[name]]:
-                specs.extend(rest[1:2] or [tok])
-    return specs
+    return [spec for i in range(len(tokens)) for spec in _spec_at(tokens, i)]
+
+
+def _spec_at(tokens: list[str], i: int) -> list[str]:
+    """Return the package spec fetched by the runner at ``tokens[i]``, if it is one.
+
+    Args:
+        tokens: One shell-split command line.
+        i: Index of the token to inspect.
+
+    Returns:
+        One spec when ``tokens[i]`` is a runner (the runner itself when it names no
+        package, so the line cannot pass), or an empty list.
+    """
+    name = tokens[i].rsplit("/", 1)[-1]
+    rest = _operands(tokens, i)
+    if name in DIRECT_RUNNERS:
+        return rest[:1] or [tokens[i]]
+    if name in SUBCOMMAND_RUNNERS and rest[:1] == [SUBCOMMAND_RUNNERS[name]]:
+        return rest[1:2] or [tokens[i]]
+    return []
 
 
 def _servers() -> dict[str, dict[str, Any]]:
