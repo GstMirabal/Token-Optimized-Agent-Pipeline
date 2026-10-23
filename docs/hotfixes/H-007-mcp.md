@@ -37,12 +37,15 @@ a template MCP server launches.
 | `tests/test_mcp_template.py` | Pin that no template server, nor any launcher script it names, runs an unpinned `pnpm dlx`/`npx` package, and that every `.agents/` path a server names exists |
 | `README.md`, `docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md`, `docs/architecture/topology_map.md` | Drop the references to the deleted `mcp_servers/` directory |
 
-Branch/commit: `hotfix/H007` → commit SHAs in the `[Unreleased]` entry of `CHANGELOG.md`.
+Branch/commit: `hotfix/H007` → `dda6d39` (hotfixes may merge outside the sprint cycle, but never unreviewed). **Branch prefix is mandatory (`agents.md` RA-03)** — `fix/`, `feat/`, and `chore/` branch names are protocol loss even when the Conventional Commits message type is `fix`.
+
+QA Gate round 1 follow-ups on the same branch: `194fd1b` (`rules/project_topology.md` no longer names a GitHub MCP), `095a32a` (`README_TEMPLATE.md` row), and the widened scanner in `tests/test_mcp_template.py` (`c244ca5`).
 
 Hosts bridged before this hotfix keep the `git-sync-agent` entry in their `.mcp.json`, because
 the JSON merge is additive. After the pin bump the entry points at a launcher that no longer
 exists, so the server fails to start instead of running the package. Pruning the stale entry is
-routed to Sprint 057 with `KI-056-3` (retired template values are never pruned). GitHub access
+routed with `KI-056-3` (retired template values are never pruned), recorded in that row of
+`docs/roadmaps/core/pipeline/021-030-program-queue.md`. GitHub access
 over MCP returns in Sprint 059 as GitHub's maintained remote server, with no local launcher.
 
 ## 4. Verification
