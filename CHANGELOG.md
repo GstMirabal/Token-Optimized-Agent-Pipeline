@@ -4,6 +4,9 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Security
+- **Hotfix `H-007`** — `claude/mcp.json` shipped the `git-sync-agent` MCP server, whose launcher ran `pnpm dlx @modelcontextprotocol/server-github` with no version pinned, outside the agent sandbox and with `GITHUB_PERSONAL_ACCESS_TOKEN` in its environment; the package is an archived reference server that receives no security updates, and no workflow, rule or agent profile used the server. The entry and `mcp_servers/` are removed, and `tests/test_mcp_template.py` pins that no template server or launcher it names fetches an unpinned package and that every `.agents/` path a server names exists (`dda6d39`; record `f799c4c`, `docs/hotfixes/H-007-mcp.md`). Hosts bridged earlier keep the stale `.mcp.json` entry, which now fails to start instead of running the package; pruning it is routed to Sprint 057. #H007
+
 ## [4.39.0] - 2026-10-22
 
 ### Added
