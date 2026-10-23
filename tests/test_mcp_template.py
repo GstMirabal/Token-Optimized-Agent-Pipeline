@@ -10,11 +10,14 @@ server that fetches a package from a registry at launch runs whatever the
 registry serves, unsandboxed (H-007).
 
 What `test_template_equals_reviewed_copy` proves, and no more (agents.md §1
-`fail_closed_claims`): the whole template file is equal to `REVIEWED_TEMPLATE`,
-so any change to it (a key, a server, a value) fails until the reviewed copy is
-changed in the same commit, where a reviewer sees it. It does not judge the
-reviewed copy itself, and it does not cover the code a server runs: `graphify.serve`
-comes from `graphifyy`, pinned in requirements-core.txt.
+`fail_closed_claims`): the template, parsed with duplicate keys rejected, is
+equal to `REVIEWED_TEMPLATE`, so any change to a key, server or value fails
+until the reviewed copy is changed in the same commit, where a reviewer sees it.
+It does not judge the reviewed copy itself. It does not cover what install.py
+writes into a host `.mcp.json` that already holds an entry of the same name
+(the merge is not a copy), nor the code a server runs: `graphify.serve` comes
+from `graphifyy`, whose top-level version is pinned in requirements-core.txt
+while its dependencies are not.
 """
 import copy
 import json
@@ -48,13 +51,32 @@ PRE_H007_SERVER: dict[str, Any] = {
 }
 
 
+def _unique_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    """Build a JSON object, refusing a key that appears twice.
+
+    Args:
+        pairs: The key/value pairs of one JSON object, in document order.
+
+    Returns:
+        The object as a dict.
+
+    Raises:
+        ValueError: If a key is repeated; parsers keep one of the two silently.
+    """
+    keys = [key for key, _ in pairs]
+    duplicates = sorted({key for key in keys if keys.count(key) > 1})
+    if duplicates:
+        raise ValueError(f"duplicate JSON keys: {duplicates}")
+    return dict(pairs)
+
+
 def _template() -> dict[str, Any]:
     """Return the template as shipped.
 
     Returns:
-        The parsed content of `claude/mcp.json`.
+        The parsed content of `claude/mcp.json`, duplicate keys rejected.
     """
-    return json.loads(TEMPLATE.read_text(encoding="utf-8"))
+    return json.loads(TEMPLATE.read_text(encoding="utf-8"), object_pairs_hook=_unique_keys)
 
 
 def _is_reviewed(template: dict[str, Any]) -> bool:
@@ -123,6 +145,12 @@ MUTATIONS: dict[str, Callable[[dict[str, Any]], None]] = {
     "removed key": lambda t: _graphify(t).pop("description"),
     "top-level key": lambda t: t.update({"servers": {}}),
 }
+
+
+def test_duplicate_keys_are_refused() -> None:
+    """A repeated key fails to parse instead of one copy being kept silently (F-R5-4)."""
+    with pytest.raises(ValueError, match="duplicate JSON keys"):
+        json.loads('{"command": "/bin/bash", "command": "x"}', object_pairs_hook=_unique_keys)
 
 
 @pytest.mark.parametrize("mutation", sorted(MUTATIONS))
