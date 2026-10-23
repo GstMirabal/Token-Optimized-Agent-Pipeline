@@ -48,7 +48,6 @@ The following layers define the jurisdictional boundaries of the project, ensuri
 | **`agents.md` + `rules/`** | Core Governance Logic | Strategic logic and permanent rules. | Principal Agent |
 | **`skills/`** (flat) | Skill Library | Native tools and `-3rd` suffixed external imports. | Skill Architect |
 | **`profiles/`** | Project Packs | Opt-in project-specific rules/agents/skills. | Orchestrator |
-| **`mcp_servers/`** | Bridge Registry | Model Context Protocol servers. | MCP Registry Auditor |
 
 ---
 

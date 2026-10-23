@@ -1,0 +1,65 @@
+# 🚑 Hotfix: H-007-mcp
+**File**: `docs/hotfixes/H-007-mcp.md` (RA-03 emergency naming — sanctioned exception to RA-06)
+**Severity**: `CRITICAL`
+**Detected**: 2026-10-23 · **Resolved**: 2026-10-23
+
+---
+
+## 1. Symptom
+
+The template `claude/mcp.json` ships an MCP server, `git-sync-agent`, whose launcher
+`mcp_servers/github_mcp/scripts/start_mcp.sh` runs `pnpm dlx @modelcontextprotocol/server-github`
+with no version pinned. Claude Code starts MCP servers outside the agent sandbox, and this
+launcher requires `GITHUB_PERSONAL_ACCESS_TOKEN` in its environment. Any host that exports that
+token runs whatever version of the package the registry serves, unsandboxed, with the token in
+reach. The package belongs to the reference servers moved to `modelcontextprotocol/servers-archived`,
+which states that archived servers receive no security updates. Blast radius: every host
+bridged with `scripts/install.py` (the template is merged into the host `.mcp.json`, and
+`scripts/cursor_adapter.py` writes it into `.cursor/mcp.json`).
+
+Nothing uses the server: the workflows, rules and agent profiles name `gh` 28 times and this
+MCP server in none of them, and the nucleus bridge omits MCP servers entirely.
+
+## 2. Root Cause
+
+`mcp_servers/github_mcp/scripts/start_mcp.sh` resolves its package by name only
+(`pnpm dlx @modelcontextprotocol/server-github`). `agents.md §8` pins supply-chain settings for
+installs, but a `dlx` of an unversioned name still takes the newest release that the age gate
+admits, and the gate applies only where `dlx` reads `minimumReleaseAge`. No test inspected what
+a template MCP server launches.
+
+## 3. Fix Applied
+
+| File | Change |
+| :--- | :--- |
+| `claude/mcp.json` | Remove the `git-sync-agent` server |
+| `mcp_servers/github_mcp/` | Delete the launcher, its health check and its README/SKILL |
+| `tests/test_mcp_template.py` | Pin the whole `claude/mcp.json` to `REVIEWED_TEMPLATE` by equality: any change to a key, server or value fails until the reviewed copy changes in the same commit. It proves the template has not changed since review; it does not judge the reviewed copy, nor the code a server runs (`graphify.serve` comes from `graphifyy`, pinned in `requirements-core.txt`) |
+| `README.md`, `docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md`, `docs/architecture/topology_map.md` | Drop the references to the deleted `mcp_servers/` directory |
+
+Branch/commit: `hotfix/H007` → `dda6d39` (hotfixes may merge outside the sprint cycle, but never unreviewed). **Branch prefix is mandatory (`agents.md` RA-03)** — `fix/`, `feat/`, and `chore/` branch names are protocol loss even when the Conventional Commits message type is `fix`.
+
+QA Gate round 1 follow-ups on the same branch: `194fd1b` (`rules/project_topology.md` no longer names a GitHub MCP), `095a32a` (`README_TEMPLATE.md` row), the scanner widened in `c244ca5` and split in `4c4b4a4`, the record and routing follow-ups `5915042` and `c2fe310`. Rounds 2 to 4 each found a vector the guard of the previous round let through: a parsing scanner, a word denylist (`784a7d7`), then an allowlist of `command` and leading `args` only (`a26de25`), which passed `env`, `type`/`url` and `cwd` changes. Four consecutive `REJECTED` triggered `workflows/remediation_workflow.md` (negative KI `agents.md §1 fail_closed_claims`, `75da85a`). The guard now compares the whole template to its reviewed copy (`289bc94`), parsed with duplicate keys refused (`7896a6e`). Round 5 resolved the round-4 findings; its rule finding was fixed by separating fail-closed on error from coverage claims (`cdac204`).
+
+**Out of scope, routed to Hotfix `H-008`** (QA round 5 `F-R5-1`, S0): `scripts/merge_json.py` appends template list items into an existing host entry, so a host bridged before `246cd20` ends with the `graphify` args `["-m", "graphify.serve", "graphify-out/graph.json", "-I"]`, where `-I` is a module argument and does not isolate the interpreter (`SANDBOX_ENUMERATION.md` `E10`). This test covers the template, not what the merge writes into an existing host entry. H-007 and H-008 merge together.
+
+Hosts bridged before this hotfix keep the `git-sync-agent` entry in their `.mcp.json`, because
+the JSON merge is additive. After the pin bump the entry points at a launcher that no longer
+exists, so the server fails to start instead of running the package. Pruning the stale entry is
+routed with `KI-056-3` (retired template values are never pruned), recorded in that row of
+`docs/roadmaps/core/pipeline/021-030-program-queue.md`. GitHub access
+over MCP returns in Sprint 059 as GitHub's maintained remote server, with no local launcher.
+
+## 4. Verification
+
+- `venv_skillopt/bin/python -m pytest tests/test_mcp_template.py` — the new test fails on the
+  parent commit and passes at the fix (`Repro:` trailer on the fix commit). The trailer names
+  `test_server_fetches_no_unpinned_package`, the id at `dda6d39`; later commits replaced it with
+  `test_template_equals_reviewed_copy`. `scripts/check_fix_reproduces.py` replays the test file as
+  it was at the commit, so the recorded reproduction stays valid.
+- `make verify` exits `0`.
+
+## 5. Rule Amendment Check
+- [x] Is this failure class systemic? Yes, twice. The guard class (fail-closed claims over enumerated checks) → `agents.md §1 fail_closed_claims` (`75da85a`). The launch class (MCP launchers in the `RA-19` enumeration and `§8`) is routed to the Sprint 059 sandbox block.
+- [ ] Does the root cause reveal a design decision worth recording? N/A
+- [x] Master Ledger entry added under `[Unreleased]`.
