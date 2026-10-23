@@ -50,6 +50,8 @@ routed with `KI-056-3` (retired template values are never pruned), recorded in t
 `docs/roadmaps/core/pipeline/021-030-program-queue.md`. GitHub access
 over MCP returns in Sprint 059 as GitHub's maintained remote server, with no local launcher.
 
+**Release (`v4.39.1`, 2026-10-23).** Released together with Hotfix `H-008` as `v4.39.1`. `deployment_workflow.md` Phase 0 `sprint_seal_gate` was declared not applicable, by human decision: it refuses any tip that is not a sealed sprint close, and an `RA-03` hotfix is never one. The gate guards against publishing an unsealed or suspended sprint. Here no sprint was open, and the tip had passed QA Gate 1 and Tester Gate 2. The missing hotfix path in `deployment_workflow.md` is routed to Sprint 057.
+
 ## 4. Verification
 
 - `venv_skillopt/bin/python -m pytest tests/test_mcp_template.py` — the new test fails on the
