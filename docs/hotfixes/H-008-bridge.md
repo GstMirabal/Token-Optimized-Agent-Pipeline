@@ -57,6 +57,8 @@ nucleus mode (`_rewrite_mcp_config`); no argument is dropped or reordered. Not c
 - Retired permission/sandbox list values (`KI-056-3`).
 - The code a server runs.
 
+**Release (`v4.39.1`, 2026-10-23).** Released together with Hotfix `H-007` as `v4.39.1`. `deployment_workflow.md` Phase 0 `sprint_seal_gate` was declared not applicable, by human decision: it refuses any tip that is not a sealed sprint close, and an `RA-03` hotfix is never one. The gate guards against publishing an unsealed or suspended sprint. Here no sprint was open, and the tip had passed QA Gate 1 and Tester Gate 2. The missing hotfix path in `deployment_workflow.md` is routed to Sprint 057.
+
 ## 4. Verification
 
 - The new tests fail on the parent commit and pass at the fix (`Repro:` trailer on `f98f4d2`;
