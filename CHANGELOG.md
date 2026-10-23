@@ -4,6 +4,9 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Security
+- **Hotfix `H-008`** — `scripts/merge_json.py` merged the MCP template additively, treating a server's `args` (an ordered argv) as a set and keeping a host's conflicting `command`, so hosts bridged before `246cd20` kept `graphify` without `-I` and a re-install appended `-I` after the module name, where it isolates nothing (`SANDBOX_ENUMERATION.md` `E10`, found by Hotfix `H-007` QA round 5); retired servers (`git-sync-agent`, `github-sentinel`) were never removed. A template-defined server now replaces its host entry whole, a retired server is removed when its launch is the one shipped, and each change is reported (`f98f4d2`; record `10114f5`, `docs/hotfixes/H-008-bridge.md`). The `E10` closure is corrected to fresh installs and re-installed hosts (`86bab2a`). Not covered: host-defined servers, hosts that do not re-run the installer, hook entries duplicated by the merge (routed to Sprint 057), retired permission values (`KI-056-3`). #H008
+
 ## [4.39.0] - 2026-10-22
 
 ### Added
