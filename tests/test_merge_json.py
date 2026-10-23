@@ -1,10 +1,13 @@
 """Tests for scripts/merge_json.py — the non-destructive merge that touches
 host users' .claude/settings.json and .mcp.json. A regression here corrupts
 real user configuration, hence the coverage."""
+import copy
 import json
 import sys
 from pathlib import Path
 from typing import ClassVar
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 import merge_json
@@ -179,3 +182,84 @@ class TestShippedRetiredValues:
         excluded = merge(dest, template)["sandbox"]["excludedCommands"]
         assert not RETIRED_EXCLUDED & set(excluded)
         assert "gh run list *" in excluded
+
+
+# MCP server entries the template has shipped, and the shapes the additive merge
+# left in hosts bridged before `246cd20` (Hotfix H-008).
+GRAPHIFY_PRE_246CD20 = {
+    "command": ".agents/venv_skillopt/bin/python",
+    "args": ["-m", "graphify.serve", "graphify-out/graph.json"],
+    "description": "Graphify Knowledge Graph MCP Server",
+}
+RETIRED_LAUNCHER = ".agents/mcp_servers/github_mcp/scripts/start_mcp.sh"
+
+
+def _graphify_host_shapes() -> dict[str, dict]:
+    """Return the host `graphify` entries that a template merge must repair.
+
+    Returns:
+        Named host entries: the pre-`246cd20` shape, that shape after an
+        additive re-merge appended `-I` at the end, and a host-changed command.
+    """
+    appended = copy.deepcopy(GRAPHIFY_PRE_246CD20)
+    appended["args"].append("-I")
+    changed = {**copy.deepcopy(GRAPHIFY_PRE_246CD20), "command": "python3"}
+    return {"pre-246cd20": GRAPHIFY_PRE_246CD20, "appended -I": appended, "host command": changed}
+
+
+def _real_mcp_template() -> dict:
+    """Return the shipped `claude/mcp.json`.
+
+    Returns:
+        The parsed template.
+    """
+    path = Path(__file__).resolve().parent.parent / "claude" / "mcp.json"
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+class TestTemplateOwnedMcpServers:
+    """A server the template defines is the template's entry after every merge (H-008)."""
+
+    SHAPES: ClassVar[list[str]] = sorted(_graphify_host_shapes())
+
+    @pytest.mark.parametrize("shape", SHAPES)
+    def test_template_server_replaces_host_entry(self, shape: str) -> None:
+        """Every historical host shape of a template server becomes the template entry."""
+        template = _real_mcp_template()
+        dest = {"mcpServers": {"graphify": copy.deepcopy(_graphify_host_shapes()[shape])}}
+        assert merge(dest, template)["mcpServers"]["graphify"] == template["mcpServers"]["graphify"]
+
+    def test_host_own_server_is_untouched(self) -> None:
+        """A server the template does not define is left exactly as the host wrote it."""
+        own = {"command": "node", "args": ["server.js"], "env": {"K": "v"}}
+        result = merge({"mcpServers": {"host-server": copy.deepcopy(own)}}, _real_mcp_template())
+        assert result["mcpServers"]["host-server"] == own
+
+    def test_replacement_is_reported(self, capsys: pytest.CaptureFixture[str]) -> None:
+        """A host entry that differed from the template is named on stderr."""
+        merge({"mcpServers": {"graphify": copy.deepcopy(GRAPHIFY_PRE_246CD20)}}, _real_mcp_template())
+        assert "graphify" in capsys.readouterr().err
+
+    @pytest.mark.parametrize("host_servers", [["x"], None, "x"])
+    def test_non_mapping_host_servers_are_reported(
+        self, host_servers: object, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        """A host `mcpServers` that is not a mapping is left as is and named on stderr (QA-H008-R1-1)."""
+        result = merge({"mcpServers": copy.deepcopy(host_servers)}, _real_mcp_template())
+        assert result["mcpServers"] == host_servers
+        assert "not a mapping" in capsys.readouterr().err
+
+    @pytest.mark.parametrize("name", ["git-sync-agent", "github-sentinel"])
+    def test_retired_server_with_shipped_launch_is_removed(self, name: str) -> None:
+        """A retired server whose launch is the one the framework shipped is removed."""
+        entry = {"command": "/bin/bash", "args": [RETIRED_LAUNCHER], "env": {"GITHUB_TOKEN": "x"}}
+        template = {"mcpServers": {"graphify": GRAPHIFY_PRE_246CD20}}
+        assert name not in merge({"mcpServers": {name: entry}}, template)["mcpServers"]
+
+    def test_retired_name_with_host_launch_is_kept(self, capsys: pytest.CaptureFixture[str]) -> None:
+        """A retired name the host relaunched differently is kept and reported."""
+        entry = {"command": "node", "args": ["mine.js"]}
+        template = {"mcpServers": {"graphify": GRAPHIFY_PRE_246CD20}}
+        result = merge({"mcpServers": {"github-sentinel": copy.deepcopy(entry)}}, template)
+        assert result["mcpServers"]["github-sentinel"] == entry
+        assert "github-sentinel" in capsys.readouterr().err
