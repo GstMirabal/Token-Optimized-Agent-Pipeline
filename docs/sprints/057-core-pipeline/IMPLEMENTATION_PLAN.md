@@ -37,7 +37,7 @@ Qué es verdad al terminar:
 | Resultado | Medida |
 | :--- | :--- |
 | Carril S0 medido | `SANDBOX_DB_MEASUREMENT.md` registra, en sesiones headless `claude -p` con el template, si el sandbox permite TCP a `localhost`, leer `./.env.agent` y escribir `.git/worktrees/` |
-| Tests con BD sin secretos reales | Si la medición lo permite: `.env.agent` legible desde el sandbox, no escribible por el agente, validado contra `.env` por un proceso no-agente, y sondeo de BD antes de ejecutar |
+| Tests con BD sin secretos reales | Si la medición lo permite: `.env.agent` legible desde el sandbox, con `denyWrite` en el template, comprobado contra `.env` por el hook `SessionStart` (higiene, D2), y sondeo de BD antes de ejecutar |
 | Hotfix publicable sin declarar un gate "no aplicable" | `session_state.py require-released --hotfix H-NNN` sale `0` sobre una punta de hotfix registrada (hoy `H-004`, `H-007`, `H-008` se publicaron declarando Phase 0 no aplicable: `git log --oneline -3 5851b18`) |
 | Defectos del bloque 1 corregidos | Cada fila `fix(` lleva su test pareado, que falla en `5851b18` y pasa en la punta |
 | Escala S0–S3 vigente | Definición única en `rules/qa_and_testing.md §4`; columna `Severity` en `SPRINT_LOG_TEMPLATE.md`; `check_gate_log.py` cuenta `escape` |
@@ -89,9 +89,20 @@ Fichero de credenciales de test desechables. Template: `allowRead` y `denyWrite`
 `./.env.agent` (el agente lo lee, no lo escribe: un humano lo crea). Validador
 `scripts/env_agent_check.py`: comprueba que ningún valor de `.env.agent` aparece en
 `.env` e imprime solo nombres de variable, nunca valores (`RA-09`). Lo invoca el hook
-`SessionStart` (proceso no-agente que ya corre fuera del sandbox), nunca el agente: el
-agente no puede leer `.env`. En modo host el script vive en `./.agents`, que el template
-deniega en escritura; en el nucleus no hay `.env` y el script sale `0` con aviso.
+`SessionStart`, nunca el agente: el template deniega `Read(./.env)` al agente, lo que
+reduce exposición y no es una frontera (`RA-19`). El hook es la entrada `E1` de
+`docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md:48`: en modo host `hooks/` y
+`scripts/` de `./.agents` miden `denied (rule)`, pero los imports de la raíz vía
+`sys.path` miden escribibles (`F-055-N1`, abierto). Por eso W03 y W05 citan `E1` y
+`F-055-N1` y no llaman "seguro" ni "validado por un proceso no-agente" al validador: es
+una comprobación de higiene contra el error humano de copiar un secreto real en
+`.env.agent`, no un control contra un agente hostil. En el nucleus no hay `.env` y el
+script sale `0` con aviso. Ningún texto de W02-W06, de `SANDBOX_DB_MEASUREMENT.md` ni del
+CHANGELOG dice que el agente "no puede" leer `.env` (rule audit 4.3, S2).
+
+El test de W02 (`tests/test_template_sandbox.py`) nombra las claves exactas que comprueba
+(`sandbox.filesystem.allowRead`, `denyRead`, `denyWrite`) y no afirma cobertura sobre el
+resto del objeto (`agents.md §1 fail_closed_claims`).
 
 ### D3 — Sondeo de BD
 
@@ -137,10 +148,17 @@ en `agents.md §0` y `config/rule_triggers.json` antes de saber si el formato si
 
 ### D8 — Ítems reproduce-first
 
-B-4, B-5, B-7, C-1, C-2, C-5 y C-9 son `plausible` en el borrador. Su unidad empieza
+B-4, B-5, B-7, C-1, C-2, C-5 y C-9 son `plausible` en el borrador. B-2 también:
+`rules/code_craft.md:80` ya define `Repro: manual` como alternativa, así que W16 reproduce
+primero que el hook exige un test staged con `Repro: manual` antes de cambiarlo. Su unidad empieza
 ejecutando la reproducción contra `5851b18`. Si no reproduce, la unidad se cierra sin
 commit de código con una fila `RECORD` en `SPRINT_LOG.md` que nombra el comando y su
 salida, y el veredicto se comunica al host H1. Si reproduce, se corrige con test pareado.
+
+W25 tiene dos ramas. Si C-9 se resuelve borrando prescripciones, cada fichero de
+`workflows/`, `rules/` o `agents.md` que se edite es un sujeto estructural distinto: la
+sesión para, añade una fila por fichero a este plan y a `task_scope.md`, y solo entonces
+edita (`agents.md §2 jurisdictional_lock`).
 
 ---
 
@@ -162,7 +180,7 @@ nombran su test pareado en la misma fila (`rules/code_craft.md §6`).
 
 | # | File | Operation | Risk | Assignee (proposed) | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| W01 | `docs/sprints/057-core-pipeline/SANDBOX_DB_MEASUREMENT.md` | create — casos M1-M3 de D1, ≤ 6 llamadas `claude -p`, salida literal por caso | high | `devops_agent` | ⏳ |
+| W01 | `docs/sprints/057-core-pipeline/SANDBOX_DB_MEASUREMENT.md` | create — casos M1-M3 de D1, ≤ 6 llamadas `claude -p`, salida literal por caso; `devops_agent` ejecuta las sesiones y `doc_orchestrator` escribe el fichero (`agent_assignment.md`: `devops_agent` no tiene Write) | high | `doc_orchestrator` | ⏳ |
 | W02 | `claude/settings.hooks.json` | modify — `allowRead` y `denyWrite` de `./.env.agent`; test `tests/test_template_sandbox.py` | high | `implementer_agent` | ⏳ |
 | W03 | `scripts/env_agent_check.py` | create — validador de D2; test `tests/test_env_agent_check.py` | high | `implementer_agent` | ⏳ |
 | W04 | `scripts/db_probe.py` | create — sondeo de D3; test `tests/test_db_probe.py` | medium | `implementer_agent` | ⏳ |
@@ -179,7 +197,7 @@ nombran su test pareado en la misma fila (`rules/code_craft.md §6`).
 | W13 | `scripts/session_end_hook.py` | fix — E: lee `session_id` de stdin y no suspende si no coincide con el del anchor; test `tests/test_session_end_hook.py` | medium | `implementer_agent` | ⏳ |
 | W14 | `scripts/py_compile_tree.py` | fix — C-3: `cfile` en un `tempfile.TemporaryDirectory()`; test `tests/test_verify_py_compile.py` | medium | `implementer_agent` | ⏳ |
 | W15 | `scripts/_repro_grammar.py` | create — gramática única de D5; test `tests/test_repro_grammar.py` | medium | `implementer_agent` | ⏳ |
-| W16 | `hooks/on_commit.py` | fix — A-4: importa `_repro_grammar`; B-2: `Repro: manual` pasa sin test staged; B-6: `TEST_PATH` casa `*.spec.*` y `tests.py`; test `tests/test_on_commit.py` | high | `implementer_agent` | ⏳ |
+| W16 | `hooks/on_commit.py` | fix — A-4: importa `_repro_grammar`; B-2 (reproduce-first, D8): `Repro: manual` pasa sin test staged; B-6: `TEST_PATH` casa `*.spec.*` y `tests.py`; test `tests/test_on_commit.py` | high | `implementer_agent` | ⏳ |
 | W17 | `scripts/check_fix_reproduces.py` | fix — A-4: importa `_repro_grammar`; `KI-056-2`: quita `.json` de `NON_SOURCE_SUFFIXES`; test `tests/test_check_fix_reproduces.py` | medium | `implementer_agent` | ⏳ |
 | W18 | `scripts/check_fix_reproduces.py` | reproduce-first (D8) — B-4: distinguir fallo de test de error de setup; B-5: ruta sin `git worktree` si M3 lo deniega; test `tests/test_check_fix_reproduces.py` | medium | `implementer_agent` | ⏳ |
 | W19 | `scripts/check_task_scope.py` | fix — B-3: separador de celdas que respeta `\|` escapado; test `tests/test_check_task_scope.py` | low | `implementer_agent` | ⏳ |
@@ -221,7 +239,7 @@ nombran su test pareado en la misma fila (`rules/code_craft.md §6`).
 
 | Mechanism | Deterministic or agent judgment | Invoker (`RA-16`) |
 | :--- | :--- | :--- |
-| Validación `.env.agent` contra `.env` | script `scripts/env_agent_check.py` | hook `SessionStart` (`claude/settings.hooks.json`) |
+| Comprobación de higiene `.env.agent` contra `.env` (no es un control de seguridad, D2) | script `scripts/env_agent_check.py` | hook `SessionStart` (`claude/settings.hooks.json`; entrada `E1` de la enumeración 056) |
 | Sondeo de BD antes de tests con BD | script `scripts/db_probe.py` | `rules/project_topology.md` sección de BD; `tester_agent` antes de pytest |
 | Ruta de hotfix en Phase 0 | script `session_state.py require-released --hotfix` | `workflows/deployment_workflow.md` Phase 0 |
 | No suspender un sprint sellado | script `session_state.py suspend` | hook `SessionEnd` (`scripts/session_end_hook.py`) |
@@ -266,7 +284,7 @@ una sesión por ola, `session_state.py suspend` entre olas (`rules/token_economy
 | Command | Expected | Dry run | Positive control |
 | :--- | :--- | :--- | :--- |
 | `python3 skills/token-saver-auditor/scripts/audit_plan.py docs/sprints/057-core-pipeline/IMPLEMENTATION_PLAN.md` | exit `0` | 2026-10-24: exit `0` (`[OK] audit_plan`) | quitar la sección `## Cost` hace salir `2` (`IMPLEMENTATION_PLAN_TEMPLATE.md:97`) |
-| `make verify` | exit `0` | 2026-10-24 en Phase 1: exit `2`, solo por `check_task_scope: no task_scope.md under docs/sprints/057-core-pipeline` (lo crea Phase 4.3); `audit_plan --current-sprint` pasó antes | run at close para la punta; en la base se registra el exit actual |
+| `make verify` | exit `0` | 2026-10-24 en Phase 1: exit `2`, solo por `check_task_scope: no task_scope.md under docs/sprints/057-core-pipeline` (lo crea Phase 4.3); `audit_plan --current-sprint` pasó antes. Tras Phase 4.3, 2026-10-24: exit `0` | run at close para la punta; en la base se registra el exit actual |
 | `python3 scripts/check_changelog_tags.py` | exit `0`; en la base hay 45 tags `v4.*` (`git tag --list 'v4.*'`) y 45 cabeceras `## [4.` (`grep -c '^## \[4\.' CHANGELOG.md`) | run at close (W31 lo crea) | borrar una cabecera `## [4.38.0]` en una copia temporal hace salir `2` |
 | `python3 scripts/session_state.py require-released --hotfix H-008` sobre un fixture de hotfix | exit `0` | run at close (W10 lo crea) | el mismo comando con `status: SUSPENDED` sale `2` |
 | `python3 scripts/py_compile_tree.py` con `hooks/` en solo lectura | exit `0` y ningún `__pycache__` nuevo en `hooks/` | run at close (W14) | en la base el mismo comando escribe `hooks/__pycache__/` |
