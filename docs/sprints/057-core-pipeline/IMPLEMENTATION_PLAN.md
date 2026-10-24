@@ -260,6 +260,8 @@ nombran su test pareado en la misma fila (`rules/code_craft.md §6`).
 | Subagents dispatched | ≤ 44 (38 unidades + 2 gates × ≤ 3 rondas) | estimación de Phase 1 |
 | Prior session ratio | 16.8× (sesión 2026-10-22/24, superó el hard bound de 15×; por eso esta sesión arrancó limpia) · esta sesión 1.8× al redactar | `python3 scripts/session_cost.py --from-anchor --json` |
 
+**Actualización por soft bound (2026-10-24, sesión `20261024T112815Z-69921`)**: 5.1× tras las Olas A y parte de C (15 unidades cerradas o resueltas: W00, W01, W07-W12, W14-W17, W19, W20; W02-W06 no ejecutadas por abort criterion 1; W13 descartada). El humano eligió continuar en la misma sesión. La sesión sigue hasta el hard bound de 15× como máximo; el corte se hace al terminar la Ola C o al acercarse a 12×, lo que llegue antes, con `session_state.py suspend`.
+
 38 unidades no caben en una sesión dentro del soft bound de 5×. Corte previsto por olas:
 una sesión por ola, `session_state.py suspend` entre olas (`rules/token_economy.md §3.1`).
 
