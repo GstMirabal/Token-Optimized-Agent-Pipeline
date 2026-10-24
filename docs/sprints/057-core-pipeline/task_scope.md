@@ -56,14 +56,14 @@ Status values: ⏳ pending. Risk `high` touches a gate, the sandbox template or 
 | W15 | `scripts/_repro_grammar.py` | create (test `tests/test_repro_grammar.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `20d2013` |
 | W16 | `hooks/on_commit.py` | modify (fix: A-4, B-2, B-6; test `tests/test_on_commit.py`) | high | `implementer_agent` | sonnet | medium | ✅ `4785b1d` |
 | W17 | `scripts/check_fix_reproduces.py` | modify (fix: A-4, KI-056-2; test `tests/test_check_fix_reproduces.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `70faa66` |
-| W18 | `scripts/check_fix_reproduces.py` | modify (reproduce-first B-4, B-5; test `tests/test_check_fix_reproduces.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| W18 | `scripts/check_fix_reproduces.py` | modify (reproduce-first B-4, B-5; test `tests/test_check_fix_reproduces.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `a19ab8f` (B-4; B-5 not reproduced, M3) |
 | W19 | `scripts/check_task_scope.py` | modify (fix: B-3; test `tests/test_check_task_scope.py`) | low | `implementer_agent` | sonnet | medium | ✅ `a4db5df` |
 | W20 | `scripts/model_ledger.py` | modify (fix: B-8; test `tests/test_model_ledger.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `7705611` |
-| W21 | `scripts/detect_drift.py` | modify (reproduce-first C-1; test `tests/test_detect_drift.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| W21 | `scripts/detect_drift.py` | modify (reproduce-first C-1; test `tests/test_detect_drift.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `5a7ed6c` |
 | W22 | `workflows/reconciliation_workflow.md` | modify (reproduce-first C-2) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| W23 | `scripts/session_start.py` | modify (fix: C-4 and KI-056-4; test `tests/test_session_start.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| W24 | `scripts/check_role_artifact.py` | modify (reproduce-first B-7; test `tests/test_check_role_artifact.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| W25 | `scripts/session_state.py` | modify (reproduce-first C-9; branch B edits other files, see Audit 5) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W23 | `scripts/session_start.py` | modify (fix: C-4 and KI-056-4; test `tests/test_session_start.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `2ee3ded` |
+| W24 | `scripts/check_role_artifact.py` | modify (reproduce-first B-7; test `tests/test_check_role_artifact.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `4da3e2a` |
+| W25 | `scripts/session_state.py` | modify (reproduce-first C-9; branch B edits other files, see Audit 5) | low | `implementer_agent` | sonnet | medium | ⛔ RECORD: C-9 not reproduced in the nucleus (no reader, no prescription of the three fields) |
 | W26 | `scripts/extract_plan.py` | create (test `tests/test_extract_plan.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
 | W27 | `workflows/pipeline_workflow.md` | modify (Phase 3 invokes `extract_plan.py`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 | W28 | `scripts/session_state.py` | modify (subcommand `block --reason`; test `tests/test_session_state.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
@@ -180,3 +180,10 @@ No other rule violation found: contiguous ids W00-W37 (38 rows, matches `Cost`),
 | W13 | `KI-057-2`: defect E (SessionEnd suspends a session other than the one ending) needs the boot to record the harness `session_id` in the anchor; no comparable field exists (`claim` mints `20261024T112815Z-…`) | A later core-pipeline sprint |
 | W19 | Same naive `split("\|")` cell parsing remains in `scripts/check_forge_ladder.py:58`, `scripts/check_gate_log.py:64`, `scripts/detect_new_models.py:142` | `KI-057-3`, a later core-pipeline sprint |
 | W01 | M3: `git worktree add` measured allowed in a nucleus-shaped fixture; B-5 does not reproduce there (host `.git/modules/.agents` deny not carried) | W18: B-5 closes as not reproduced unless a host-shaped measurement says otherwise |
+| W24 | `KI-057-4` (S2, `instructing`): the `F-107-N1` closure in `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md:88` says `check_role_artifact.py` moved off `SubagentStop`, but `claude/settings.hooks.json:129` still runs it `--from-hook` on every subagent stop | A later core-pipeline sprint; tell host H1 with the B-7 verdict |
+| W21 | C-1 fixed for the only prescribed post-seal path outside anchor + CHANGELOG (`.agent_state/mirror.json`); host H1 is asked which file its routine commits touch | Host H1 verdict message |
+| W25 | C-9 verdict for host H1: not reproduced in the nucleus; the fields are likely host-side content | Host H1 verdict message |
+
+## Resume point (session suspended at 11.5x, 2026-10-24)
+
+Remaining units, in order: W22 (reproduce-first, doc) · W26 → W27 (W27 also fixes the 5-column gate header, carry-over W08) · W28 → W29 · W30 · W31 → W32 · wave D W33-W37. New scripts W26 and W31 each bump the `README.md` script count (`check_readme_counts.py`), staged in the same commit. Implementers do not commit; the lead commits with the `Repro:` trailer (parallel agents share one working tree).
