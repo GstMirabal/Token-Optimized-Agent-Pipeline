@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "_comment": "Framework-neutral MCP registry template. Project-specific servers live in profiles/[name]/mcp/registry.json (e.g. profiles/example-project/mcp/registry.json). Local-process commands MUST use 'pnpm dlx' per agents.md §8 — 'npx -y' is prohibited.",
+  "_comment": "Framework-neutral MCP registry template. Project-specific servers live in profiles/[name]/mcp/registry.json (e.g. profiles/example-project/mcp/registry.json). Local-process commands MUST use 'pnpm dlx <package>@<x.y.z>' with an exact version, because a registry fetch at launch runs whatever the registry serves (Hotfix H-007, docs/hotfixes/H-007-mcp.md), per agents.md §8 — 'npx -y' is prohibited.",
   "mcp_servers": {
     "example-remote-mcp": {
       "description": "Template entry for a remote MCP server. Duplicate, rename, and set status to 'enabled'.",
@@ -14,7 +14,7 @@
       "description": "Template entry for a local-process MCP server.",
       "status": "disabled",
       "connection_type": "local_process",
-      "command": "pnpm dlx example-mcp-server",
+      "command": "pnpm dlx example-mcp-server@1.0.0",
       "authorized_roles": []
     }
   }
