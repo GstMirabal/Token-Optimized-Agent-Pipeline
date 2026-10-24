@@ -103,3 +103,33 @@ def test_gate1_two_rounds_counted(
     assert ledger_mod.main() == 0
     text = (root / ledger_mod.OUT_REL).read_text(encoding="utf-8")
     assert "| 32 |" in text
+
+
+def test_host_mode_writes_under_host_root(
+    ledger_mod,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """B-8: in host mode the ledger lives in the host, never in `.agents/`."""
+    host = tmp_path / "host"
+    agents = host / ".agents"
+    agents.mkdir(parents=True)
+    monkeypatch.setattr(ledger_mod, "agents_root", lambda: agents)
+    monkeypatch.setattr(ledger_mod, "is_nucleus", lambda: False, raising=False)
+    assert ledger_mod.main() == 0
+    assert (host / ledger_mod.OUT_REL).is_file()
+    assert not (agents / ledger_mod.OUT_REL).exists()
+
+
+def test_nucleus_mode_writes_under_agents_root(
+    ledger_mod,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """Nucleus mode keeps the ledger at the framework root."""
+    root = tmp_path / "nucleus"
+    root.mkdir()
+    monkeypatch.setattr(ledger_mod, "agents_root", lambda: root)
+    monkeypatch.setattr(ledger_mod, "is_nucleus", lambda: True, raising=False)
+    assert ledger_mod.main() == 0
+    assert (root / ledger_mod.OUT_REL).is_file()
