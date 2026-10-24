@@ -925,3 +925,62 @@ def test_main_dispatches_block(repo: Path, monkeypatch: pytest.MonkeyPatch):
 
     assert ss.main() == 0
     assert _read_sprint(repo)["status"] == ss.BLOCKED
+
+
+# --- unblock (W38) ------------------------------------------------------------
+
+def test_unblock_restores_open_and_drops_reason_keeping_other_keys(
+    repo: Path, capsys: pytest.CaptureFixture
+):
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": "OPEN", "layer": "core"}})
+    assert ss.block("terminal loop") == 0
+    capsys.readouterr()
+
+    assert ss.unblock() == 0
+
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert state["current_sprint"] == {"id": 7, "status": "OPEN", "layer": "core"}
+    assert state["session_id"] == "keep-me"
+    assert "terminal loop" in capsys.readouterr().out
+
+
+def test_unblock_refuses_an_open_sprint_and_leaves_anchor_unchanged(repo: Path):
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": "OPEN"}})
+    before = (repo / "docs" / "active_state.json").read_text()
+
+    assert ss.unblock() == 2
+
+    assert (repo / "docs" / "active_state.json").read_text() == before
+
+
+def test_unblock_refuses_without_current_sprint(repo: Path):
+    _write_anchor(repo)
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    del state["current_sprint"]
+    (repo / "docs" / "active_state.json").write_text(json.dumps(state))
+    before = (repo / "docs" / "active_state.json").read_text()
+
+    assert ss.unblock() == 2
+
+    assert (repo / "docs" / "active_state.json").read_text() == before
+
+
+def test_unblock_refuses_a_sealed_sprint_and_leaves_anchor_unchanged(
+    repo: Path, capsys: pytest.CaptureFixture
+):
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": ss.CLOSED}})
+    before = (repo / "docs" / "active_state.json").read_text()
+
+    assert ss.unblock() == 2
+
+    assert (repo / "docs" / "active_state.json").read_text() == before
+    assert ss.CLOSED in capsys.readouterr().err
+
+
+def test_main_dispatches_unblock(repo: Path, monkeypatch: pytest.MonkeyPatch):
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": "OPEN"}})
+    assert ss.block("x") == 0
+    monkeypatch.setattr(sys, "argv", ["session_state.py", "unblock"])
+
+    assert ss.main() == 0
+    assert _read_sprint(repo)["status"] == "OPEN"

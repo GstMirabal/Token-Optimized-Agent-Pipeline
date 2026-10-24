@@ -78,8 +78,12 @@ Usage:
         # writes current_sprint.status = BLOCKED and current_sprint.blocked_reason,
         # preserving every other key; exit 2, nothing written, on an empty
         # reason, a missing current_sprint or a sealed sprint; a second call
-        # overwrites the reason. `open-sprint --id <same id>` is idempotent and
-        # does NOT lift the block. Top-level session fields are untouched.
+        # overwrites the reason. `unblock` lifts it; `open-sprint --id <same id>`
+        # stays idempotent and does NOT. Top-level session fields are untouched.
+    python3 scripts/session_state.py unblock
+        # requires current_sprint.status == BLOCKED; writes status = OPEN and
+        # removes blocked_reason, preserving every other key; exit 2, nothing
+        # written, when there is no current_sprint or its status is not BLOCKED.
     python3 scripts/session_state.py mark-audited --report <path>
         # writes current_sprint.last_audit_sprint = NNN, preserving every
         # other key. <path> must exist and be named
@@ -784,6 +788,35 @@ def block(reason: str) -> int:
     return 0
 
 
+def unblock() -> int:
+    """Lift a BLOCKED sprint back to OPEN and drop its reason.
+
+    Writes `current_sprint.status = "OPEN"` (the value `open_sprint()` writes)
+    and removes `blocked_reason`, preserving every other key. The top-level
+    SESSION status and lock fields are not touched.
+
+    Returns:
+        int: 0 when lifted; 2, with nothing written, when there is no
+            `current_sprint` or its status is not BLOCKED.
+    """
+    state = load_state()
+    sprint = state.get("current_sprint")
+    if not sprint:
+        print("Refusing unblock: the anchor has no current_sprint.", file=sys.stderr)
+        return 2
+    if sprint.get("status") != BLOCKED:
+        print(f"Refusing unblock: sprint {sprint.get('id')} status is "
+              f"{sprint.get('status')!r}, not {BLOCKED}.", file=sys.stderr)
+        return 2
+    reason = sprint.pop("blocked_reason", None)
+    sprint["status"] = "OPEN"
+    state["last_updated"] = now()
+    save_state(state)
+    print(f"Sprint {sprint.get('id')} unblocked: current_sprint.status=OPEN, "
+          f"lifted blocked_reason={reason!r}.")
+    return 0
+
+
 AUDIT_REPORT_RE = re.compile(r"^PIPELINE_AUDIT_REPORT-(\d+)\.md$")
 
 
@@ -918,6 +951,7 @@ def _add_other_subparsers(sub: argparse._SubParsersAction) -> None:
     block_parser.add_argument(
         "--reason", required=True, help="Why the sprint is blocked (non-empty)."
     )
+    sub.add_parser("unblock", help="Lift a BLOCKED sprint back to OPEN and drop blocked_reason.")
     _add_require_released_subparser(sub)
     refresh_parser = sub.add_parser(
         "refresh-baseline",
@@ -963,7 +997,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     Returns:
         argparse.ArgumentParser: Parser with every subcommand (`claim`,
-            `release`, `suspend`, `block`, `require-released`, `refresh-baseline`,
+            `release`, `suspend`, `block`, `unblock`, `require-released`, `refresh-baseline`,
             `set-topology`, `open-sprint`, `mark-audited`) and their flags registered.
     """
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
@@ -991,6 +1025,8 @@ def _dispatch(args: argparse.Namespace) -> int:
         return suspend()
     if args.command == "block":
         return block(args.reason)
+    if args.command == "unblock":
+        return unblock()
     if args.command == "require-released":
         return require_released(args.branch, args.hotfix)
     if args.command == "refresh-baseline":
