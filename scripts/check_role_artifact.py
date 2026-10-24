@@ -297,12 +297,58 @@ def sprint_dir_from_anchor(
     return root / f"docs/sprints/{int(sprint_id):03d}-{layer}-{app}"
 
 
+def _table_cells(header: list[str], rows: list[list[str]]) -> list[tuple[str, str]]:
+    """Return ``(Gate cell, Verdict cell)`` per row of one table; none without a Gate column."""
+    if "Gate" not in header:
+        return []
+    gate = header.index("Gate")
+    verdict = header.index("Verdict") if "Verdict" in header else None
+    out: list[tuple[str, str]] = []
+    for row in rows:
+        if len(row) <= gate:
+            continue
+        cell = row[verdict] if verdict is not None and len(row) > verdict else ""
+        out.append((row[gate].strip(), cell))
+    return out
+
+
+def _gate_cells(log: Path) -> list[tuple[str, str]]:
+    """Return ``(Gate cell, Verdict cell)`` for every gate-table row in ``log``."""
+    from check_gate_log import gate_tables
+
+    cells: list[tuple[str, str]] = []
+    for header, rows in gate_tables(log.read_text(encoding="utf-8")):
+        cells.extend(_table_cells(header, rows))
+    return cells
+
+
+def _predecessor_passed(role: str, tokens: dict[str, str], cells: list[tuple[str, str]]) -> bool:
+    """True when the gate that precedes ``role`` in the registry left a passing row.
+
+    The Double-Gate runs in registry order (QA, then Tester). A role is due
+    only once the previous gate has an ``APPROVED`` or ``RECORD`` row; the
+    first gate has no predecessor and is always due. ``SubagentStop`` fires on
+    every stop of that agent type, including mid-sprint dispatches, so
+    demanding the later row earlier blocks a legitimate log (B-7).
+    """
+    order = list(tokens)
+    index = order.index(role)
+    if index == 0:
+        return True
+    previous = tokens[order[index - 1]]
+    return any(
+        gate.startswith(previous) and ("APPROVED" in verdict or "RECORD" in verdict)
+        for gate, verdict in cells
+    )
+
+
 def missing_gate_row(role: str, sprint_dir: Path) -> str | None:
     """Describe the absent ``Gate`` row for ``role``, or None when it is there.
 
     A Double-Gate role owns no file of its own, so file existence cannot show
     it ran: ``SPRINT_LOG.md`` is written at Phase 3, long before any gate. The
-    evidence is a row inside it.
+    evidence is a row inside it. The row is owed only once the role's phase is
+    due (the preceding gate approved), see ``_predecessor_passed``.
 
     Args:
         role (str): Registry role display name.
@@ -312,22 +358,19 @@ def missing_gate_row(role: str, sprint_dir: Path) -> str | None:
         str | None: What is missing, or None when the role owes no gate row.
     """
     block = _registry().get("gate_evidence") or {}
-    token = (block.get("roles") or {}).get(role)
+    tokens = block.get("roles") or {}
+    token = tokens.get(role)
     if not token:
         return None
     log = sprint_dir / (block.get("file") or "SPRINT_LOG.md")
     if not log.is_file():
         return f"{log.name} (no gate log to carry the {token!r} row)"
 
-    from check_gate_log import gate_tables
-
-    for header, rows in gate_tables(log.read_text(encoding="utf-8")):
-        if "Gate" not in header:
-            continue
-        column = header.index("Gate")
-        cells = [row[column].strip() for row in rows if len(row) > column]
-        if any(cell.startswith(token) for cell in cells):
-            return None
+    cells = _gate_cells(log)
+    if any(gate.startswith(token) for gate, _ in cells):
+        return None
+    if not _predecessor_passed(role, tokens, cells):
+        return None
     return f"{token!r} row in {log.name}"
 
 
