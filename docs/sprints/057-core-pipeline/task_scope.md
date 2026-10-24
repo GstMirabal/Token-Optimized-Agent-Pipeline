@@ -60,13 +60,14 @@ Status values: ⏳ pending. Risk `high` touches a gate, the sandbox template or 
 | W19 | `scripts/check_task_scope.py` | modify (fix: B-3; test `tests/test_check_task_scope.py`) | low | `implementer_agent` | sonnet | medium | ✅ `a4db5df` |
 | W20 | `scripts/model_ledger.py` | modify (fix: B-8; test `tests/test_model_ledger.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `7705611` |
 | W21 | `scripts/detect_drift.py` | modify (reproduce-first C-1; test `tests/test_detect_drift.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `5a7ed6c` |
-| W22 | `workflows/reconciliation_workflow.md` | modify (reproduce-first C-2) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| W22 | `workflows/reconciliation_workflow.md` | modify (reproduce-first C-2) | low | `doc_orchestrator` | sonnet | medium | ✅ `9246d60` |
 | W23 | `scripts/session_start.py` | modify (fix: C-4 and KI-056-4; test `tests/test_session_start.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `2ee3ded` |
 | W24 | `scripts/check_role_artifact.py` | modify (reproduce-first B-7; test `tests/test_check_role_artifact.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `4da3e2a` |
 | W25 | `scripts/session_state.py` | modify (reproduce-first C-9; branch B edits other files, see Audit 5) | low | `implementer_agent` | sonnet | medium | ⛔ RECORD: C-9 not reproduced in the nucleus (no reader, no prescription of the three fields) |
-| W26 | `scripts/extract_plan.py` | create (test `tests/test_extract_plan.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| W27 | `workflows/pipeline_workflow.md` | modify (Phase 3 invokes `extract_plan.py`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| W28 | `scripts/session_state.py` | modify (subcommand `block --reason`; test `tests/test_session_state.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| W26 | `scripts/extract_plan.py` | create (test `tests/test_extract_plan.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `7c6c2be` |
+| W27 | `workflows/pipeline_workflow.md` | modify (Phase 3 invokes `extract_plan.py`) | low | `doc_orchestrator` | sonnet | medium | ✅ `2db6c56` |
+| W28 | `scripts/session_state.py` | modify (subcommand `block --reason`; test `tests/test_session_state.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `b0cb9d9` |
+| W38 | `scripts/session_state.py` | modify (subcommand `unblock`: BLOCKED → OPEN, drops `blocked_reason`; test `tests/test_session_state.py`) — added in execution, human decision 2026-10-24 | medium | `implementer_agent` | sonnet | medium | ⏳ |
 | W29 | `workflows/remediation_workflow.md` | modify (Phase 2, Phase 3, rule 3 of D6) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
 | W30 | `scripts/merge_json.py` | modify (fix: KI-056-3 and H-007 residue; test `tests/test_merge_json.py`) | high | `implementer_agent` | sonnet | medium | ⏳ |
 | W31 | `scripts/check_changelog_tags.py` | create (test `tests/test_check_changelog_tags.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
@@ -92,7 +93,7 @@ Every unit runs `sequential` (`agent_assignment.md`). A subject is claimed by on
 
 | Shared subject | Units, in execution order | Constraint |
 | :--- | :--- | :--- |
-| `scripts/session_state.py` | W10, W12, W25, W28 | Strictly one at a time, in this order. |
+| `scripts/session_state.py` | W10, W12, W25, W28, W38 | Strictly one at a time, in this order. |
 | `scripts/check_fix_reproduces.py` | W17, W18 | W17 lands before W18 starts. |
 
 Cross-subject ordering:
@@ -106,6 +107,7 @@ Cross-subject ordering:
 | W26 | W27 | W27 declares an invoker for a script that must already exist (`RA-16`). |
 | W31 | W32 | W32 wires a script that must already exist (`RA-16`). |
 | W28 | W29 | W29 Phase 3 invokes `session_state.py block`. |
+| W38 | W29 | W29 names `session_state.py unblock` as the only way to lift the block. |
 | W07, W08 | W29 | W29 applies rule 3 of D6 (defined in W07 and W08 artifacts). |
 | W12 | W13 | W13 depends on the `suspend()` contract fixed by W12. |
 | W10 | W11 | W11 documents the `--hotfix` route W10 implements. |
