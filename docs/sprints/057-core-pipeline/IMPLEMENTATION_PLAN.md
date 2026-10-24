@@ -262,6 +262,8 @@ nombran su test pareado en la misma fila (`rules/code_craft.md §6`).
 
 **Actualización por soft bound (2026-10-24, sesión `20261024T112815Z-69921`)**: 5.1× tras las Olas A y parte de C (15 unidades cerradas o resueltas: W00, W01, W07-W12, W14-W17, W19, W20; W02-W06 no ejecutadas por abort criterion 1; W13 descartada). El humano eligió continuar en la misma sesión. La sesión sigue hasta el hard bound de 15× como máximo; el corte se hace al terminar la Ola C o al acercarse a 12×, lo que llegue antes, con `session_state.py suspend`.
 
+**Actualización por soft bound (2026-10-24, sesión `d2b5fc4e-e365-4ed1-b5fb-0d4148b83a97`)**: 5.3× tras W22, W26-W29 y W38 (`unblock`, añadida en ejecución por decisión humana). El humano eligió continuar; corte con `session_state.py suspend` al terminar la Ola D o al acercarse a 12×, lo que llegue antes. Medido con `python3 scripts/session_cost.py --session <id>` (`--from-anchor` mide la sesión anterior).
+
 38 unidades no caben en una sesión dentro del soft bound de 5×. Corte previsto por olas:
 una sesión por ola, `session_state.py suspend` entre olas (`rules/token_economy.md §3.1`).
 
