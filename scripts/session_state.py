@@ -204,10 +204,17 @@ def suspend() -> int:
     baseline and `detect_drift.py` would treat everything after as conformant,
     blinding the detector Sprint 024 repaired.
 
+    A sprint already sealed by `release()` (``_sprint_is_sealed``) is left
+    untouched: SessionEnd calls this after every session, and SUSPENDED over a
+    sealed sprint makes it undeployable (`require-released`, B-9).
+
     Returns:
         int: 0 — suspending is never refused; the work is preserved, not judged.
     """
     state = load_state()
+    if _sprint_is_sealed((state.get("current_sprint") or {}).get("status")):
+        print("Sprint is sealed — nothing was suspended; anchor left unchanged.")
+        return 0
     state.update({
         "status": SUSPENDED,
         "end_time": now(),

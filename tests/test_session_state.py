@@ -809,3 +809,42 @@ def test_require_released_without_hotfix_flag_refuses_the_same_tip(repo: Path):
 def test_require_released_hotfix_refuses_malformed_id(repo: Path, bad: str):
     _hotfix_repo(repo)
     assert _require(repo, "--hotfix", bad) == 2
+
+
+# --- suspend: a sealed sprint is not suspended (B-9) ------------------------
+
+@pytest.mark.parametrize("sealed", sorted(ss.SEALED_STATUSES))
+def test_suspend_leaves_a_sealed_sprint_untouched(
+    repo: Path, capsys: pytest.CaptureFixture, sealed: str
+):
+    """SessionEnd calls `suspend()` after `release()`; writing SUSPENDED over a
+    sealed sprint makes the sealed tip undeployable (`require-released`)."""
+    _write_anchor(repo, {
+        "status": sealed,
+        "current_sprint": {"id": 7, "status": sealed},
+    })
+    anchor = repo / "docs" / "active_state.json"
+    before = anchor.read_text(encoding="utf-8")
+
+    rc = ss.suspend()
+
+    assert rc == 0
+    assert anchor.read_text(encoding="utf-8") == before
+    assert json.loads(before)["status"] != ss.SUSPENDED
+    out = capsys.readouterr().out.strip().splitlines()
+    assert len(out) == 1
+    assert "sealed" in out[0] and "nothing was suspended" in out[0]
+
+
+def test_suspend_still_suspends_an_open_sprint(repo: Path):
+    """Regression guard: unsealed sprints keep the pre-B-9 behaviour."""
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": "OPEN"}})
+
+    rc = ss.suspend()
+
+    assert rc == 0
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert state["status"] == ss.SUSPENDED
+    assert "resume_pointer" in state
+    assert "end_time" in state
+    assert "last_close_commit" not in state
