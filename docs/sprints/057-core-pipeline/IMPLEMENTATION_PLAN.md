@@ -2,7 +2,7 @@
 
 **Canonical path**: `docs/sprints/057-core-pipeline/IMPLEMENTATION_PLAN.md`
 **Branch**: `ai-sprint/057` · **Base**: `main` at `5851b18` (`v4.39.1`)
-**Status**: `DRAFT`
+**Status**: `APPROVED`
 
 > Authored at Phase 1 (Planning) by `principal_agent`, extracted to this path at
 > Phase 3, and **committed before Phase 5 approves it**: `agents.md §2 triple_lock`
@@ -338,9 +338,9 @@ una sesión por ola, `session_state.py suspend` entre olas (`rules/token_economy
 
 | Field | Value |
 | :--- | :--- |
-| **Approved by** | pendiente |
-| **Date** | pendiente |
-| **Plan commit at approval** | pendiente |
+| **Approved by** | GstMirabal (chat, Phase 5) |
+| **Date** | 2026-10-24 |
+| **Plan commit at approval** | `8d55058` |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an
