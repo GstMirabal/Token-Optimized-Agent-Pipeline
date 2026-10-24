@@ -43,11 +43,12 @@ import tempfile
 from collections.abc import Iterator
 from pathlib import Path
 
+from _repro_grammar import parse_trailers as _parse_claims
+
 LOG = logging.getLogger(__name__)
 RUNNER_PYTHON: str = sys.executable
 STRIPPED_ENV = ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "DJANGO_SETTINGS_MODULE")
-NON_SOURCE_SUFFIXES = frozenset({".md", ".rst", ".txt", ".json", ".yml", ".yaml", ".toml"})
-_REPRO = re.compile(r"^Repro:\s*(.+?)\s+(?:—|--)\s+(.*?)\s*$", re.MULTILINE)
+NON_SOURCE_SUFFIXES = frozenset({".md", ".rst", ".txt", ".yml", ".yaml", ".toml"})
 _FIX_SUBJECT = re.compile(r"^fix(\([^)]*\))?!?:|^fix\(")
 HINT = (
     "make the test fail by assertion on the parent (for example import the new "
@@ -157,9 +158,10 @@ def parse_trailers(message: str) -> list[str]:
         message: Full commit message.
 
     Returns:
-        The left-hand side of each trailer (a test id, or ``manual``).
+        The left-hand side of each well-formed trailer (a test id, or ``manual``),
+        under the grammar shared with the commit hook (``scripts/_repro_grammar.py``).
     """
-    return [m.group(1) for m in _REPRO.finditer(message)]
+    return [c.claim for c in _parse_claims(message)]
 
 
 @contextlib.contextmanager

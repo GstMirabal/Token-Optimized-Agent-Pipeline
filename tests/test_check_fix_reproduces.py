@@ -187,3 +187,28 @@ def test_runner_unavailable_shows_the_pytest_exit(repo, tmp_path, capsys):
     captured = capsys.readouterr()
     assert code == 2
     assert "No module named pytest" in captured.err
+
+
+def test_json_only_fix_is_judged_not_skipped(repo, capsys):
+    """KI-056-2: a fix( commit whose only non-test file is .json is replayed."""
+    base = commit_fix(repo, {"settings.json": "{}\n", "tests/test_calc.py": GREEN_TEST}, TRAILER)
+    code, out = run(repo, base, capsys)
+    assert "1 fix( commits in range" in out
+    assert "PASSES_ON_PARENT" in out
+    assert code == 2
+
+
+@pytest.mark.parametrize(
+    "trailer",
+    [
+        "Repro:tests/test_calc.py::test_add — fails at {base}",
+        "Repro: tests/test_calc.py::test_add — because it was broken",
+        "Repro: manual — ",
+    ],
+)
+def test_trailer_outside_the_shared_grammar_is_missing_trailer(repo, capsys, trailer):
+    """A-4: the replayer accepts exactly the grammar of the commit hook."""
+    base = commit_fix(repo, {"calc.py": FIXED, "tests/test_calc.py": RED_TEST}, trailer)
+    code, out = run(repo, base, capsys)
+    assert code == 2
+    assert "MISSING_TRAILER" in out
