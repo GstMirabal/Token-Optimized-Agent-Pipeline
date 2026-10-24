@@ -28,10 +28,10 @@ Status values: ⏳ pending. Risk `high` touches a gate, the sandbox template or 
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| W00 | `docs/guides/PROMPT_CRITERIA_GUIDE.md` | create | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| W07 | `rules/qa_and_testing.md` | modify (§4 scale S0-S3 and 5 convergence rules) | medium | `rule_validator` | sonnet | medium | ⏳ |
-| W08 | `docs/standards/templates/SPRINT_LOG_TEMPLATE.md` | modify (Severity column, escape mark) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| W09 | `scripts/check_gate_log.py` | modify (count escape rows; paired test `tests/test_check_gate_log.py`) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W00 | `docs/guides/PROMPT_CRITERIA_GUIDE.md` | create | low | `doc_orchestrator` | sonnet | medium | ✅ `4869bc6` |
+| W07 | `rules/qa_and_testing.md` | modify (§4 scale S0-S3 and 5 convergence rules) | medium | `rule_validator` | sonnet | medium | ✅ `b063af1` |
+| W08 | `docs/standards/templates/SPRINT_LOG_TEMPLATE.md` | modify (Severity column, escape mark) | low | `doc_orchestrator` | sonnet | medium | ✅ `7d91479` |
+| W09 | `scripts/check_gate_log.py` | modify (count escape rows; paired test `tests/test_check_gate_log.py`) | low | `implementer_agent` | sonnet | medium | ✅ `e973077` |
 
 ### Ola B — S0 lane (W01 blocks W02-W06)
 
@@ -168,3 +168,11 @@ No other rule violation found: contiguous ids W00-W37 (38 rows, matches `Cost`),
 | :--- | :--- |
 | W01 measures M1 or M2 blocked | W02-W06 move to ⛔ skipped; row goes to Sprint 059 as `KI-057-n`. |
 | Three rejections of one S0/S1 family on `claude/settings.hooks.json` (W02) or `scripts/merge_json.py` (W30) | Revert that unit (`git revert`), open `workflows/remediation_workflow.md` Phase 0; no fourth vector is added to an enumeration. |
+
+## Carry-over recorded during execution
+
+| From | Item | Destination |
+| :--- | :--- | :--- |
+| W08 | `workflows/pipeline_workflow.md` Phase 7 still names the 5-column gate table `Gate \| Round \| Verdict \| Class \| Notes`; the template now has `Severity` before `Notes` | W27 (same file): update the header string in the same commit |
+| W00 | Source guidance conflicts with `agents.md`: §1 `restrictions` vs positive rewrites (PC-11), normative MUST density (PC-01), precedent narratives across §1/§2/§5/§7 (PC-05), tables vs prose (§1 `technical_clarity`) | Sprint 060 prompt audit |
+| W07 | Precedence rule added by the lead: the stricter verdict wins when class and severity disagree | Gate 1 reviews it as part of W07 |
