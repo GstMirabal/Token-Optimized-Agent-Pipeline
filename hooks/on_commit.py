@@ -30,6 +30,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 sys.path.append(str(Path(__file__).parent.parent / "scripts"))
 from _mode import is_nucleus
+from _repro_grammar import parse_trailers
 
 from hooks.telemetry import log_error
 
@@ -761,7 +762,10 @@ def is_valid_commit_message(message: str) -> bool:
     return bool(COMMIT_MSG_REGEX.match(first_line))
 
 
-TEST_PATH = re.compile(r"(^|/)(tests?|__tests__)/|(^|/)test_[^/]+$|_test\.[a-z]+$|\.test\.[a-z]+$")
+TEST_PATH = re.compile(
+    r"(^|/)(tests?|__tests__)/|(^|/)test_[^/]+$|_test\.[a-z]+$|\.test\.[a-z]+$"
+    r"|\.spec\.[a-z]+$|(^|/)tests\.py$"
+)
 SOURCE_SUFFIXES = (".py", ".js", ".jsx", ".ts", ".tsx", ".go", ".rs", ".java", ".rb", ".php")
 MANIFESTS = ("requirements", "package.json", "pyproject.toml")
 # A manifest inside vendored material is not this project's dependency
@@ -770,14 +774,6 @@ MANIFESTS = ("requirements", "package.json", "pyproject.toml")
 # a vendored `-3rd` skill — nothing the author chose or controls.
 VENDORED = ("node_modules/", "-3rd/", "/3rd/", "venv_skillopt/")
 DEPENDENCY_LINE = re.compile(r"^Dependency:\s*\S+\s*[—-]\s*\S", re.MULTILINE)
-
-
-REPRO_TEST = re.compile(
-    r"^Repro:[ \t]+(?P<path>[^\s:]+)(?:::\S+)?[ \t]+(?:\u2014|--)[ \t]+fails at[ \t]+"
-    r"(?P<sha>[0-9a-fA-F]{7,40})[ \t]*$",
-    re.MULTILINE,
-)
-REPRO_MANUAL = re.compile(r"^Repro:[ \t]+manual[ \t]+(?:\u2014|--)[ \t]+\S", re.MULTILINE)
 
 
 def _has_repro_trailer(message: str, staged: list[str]) -> bool:
@@ -795,9 +791,10 @@ def _has_repro_trailer(message: str, staged: list[str]) -> bool:
     Returns:
         bool: True when a `Repro: manual` or a staged test-id trailer is present.
     """
-    if REPRO_MANUAL.search(message):
+    claims = parse_trailers(message)
+    if any(c.kind == "manual" for c in claims):
         return True
-    return any(m.group("path") in staged for m in REPRO_TEST.finditer(message))
+    return any(c.path in staged for c in claims)
 
 
 def audit_regression_test(message: str, staged: list[str]) -> str | None:
@@ -826,6 +823,8 @@ def audit_regression_test(message: str, staged: list[str]) -> str | None:
         return None
     if not any(path.endswith(SOURCE_SUFFIXES) for path in staged):
         return None  # Documentation, workflow or config fix: no test to write.
+    if any(c.kind == "manual" for c in parse_trailers(message)):
+        return None  # `Repro: manual` is the alternative when no test can show the defect.
     if not any(TEST_PATH.search(path) for path in staged):
         return ("A `fix(` commit must stage the test that proves the bug (rules/code_craft.md §6). "
                 "Write the failing test, record the failure in a `Repro:` trailer, then fix. If "
