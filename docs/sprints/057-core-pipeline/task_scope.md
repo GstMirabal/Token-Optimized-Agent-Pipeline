@@ -67,11 +67,12 @@ Status values: ⏳ pending. Risk `high` touches a gate, the sandbox template or 
 | W26 | `scripts/extract_plan.py` | create (test `tests/test_extract_plan.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `7c6c2be` |
 | W27 | `workflows/pipeline_workflow.md` | modify (Phase 3 invokes `extract_plan.py`) | low | `doc_orchestrator` | sonnet | medium | ✅ `2db6c56` |
 | W28 | `scripts/session_state.py` | modify (subcommand `block --reason`; test `tests/test_session_state.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `b0cb9d9` |
-| W38 | `scripts/session_state.py` | modify (subcommand `unblock`: BLOCKED → OPEN, drops `blocked_reason`; test `tests/test_session_state.py`) — added in execution, human decision 2026-10-24 | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| W29 | `workflows/remediation_workflow.md` | modify (Phase 2, Phase 3, rule 3 of D6) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
-| W30 | `scripts/merge_json.py` | modify (fix: KI-056-3 and H-007 residue; test `tests/test_merge_json.py`) | high | `implementer_agent` | sonnet | medium | ⏳ |
+| W38 | `scripts/session_state.py` | modify (subcommand `unblock`: BLOCKED → OPEN, drops `blocked_reason`; test `tests/test_session_state.py`) — added in execution, human decision 2026-10-24 | medium | `implementer_agent` | sonnet | medium | ✅ `eec0001` |
+| W29 | `workflows/remediation_workflow.md` | modify (Phase 2, Phase 3, rule 3 of D6) | medium | `doc_orchestrator` | sonnet | medium | ✅ `61395e5` |
+| W30 | `scripts/merge_json.py` | modify (fix: KI-056-3 and H-007 residue; test `tests/test_merge_json.py`) | high | `implementer_agent` | sonnet | medium | ✅ `1474fa6` |
 | W31 | `scripts/check_changelog_tags.py` | create (test `tests/test_check_changelog_tags.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
 | W32 | `Makefile` | modify (`verify` runs `check_changelog_tags.py`) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W39 | `.github/workflows/ci.yml` | modify (`fetch-depth: 0` on checkout so `make verify` sees tags for `check_changelog_tags.py` check 1) — added in execution, human decision 2026-10-24 | low | `implementer_agent` | sonnet | medium | ⏳ |
 
 ### Ola D — S3 residues and documentation
 
@@ -106,6 +107,7 @@ Cross-subject ordering:
 | W15 | W16, W17 | Both import `scripts/_repro_grammar.py`. The paired tests must fail on the parent for the right reason (exit exactly 1, not a collection error: `rules/code_craft.md:80-81`), which holds only when the module already exists at the parent. |
 | W26 | W27 | W27 declares an invoker for a script that must already exist (`RA-16`). |
 | W31 | W32 | W32 wires a script that must already exist (`RA-16`). |
+| W32 | W39 | W39 makes CI fetch the tags the wired check reads. |
 | W28 | W29 | W29 Phase 3 invokes `session_state.py block`. |
 | W38 | W29 | W29 names `session_state.py unblock` as the only way to lift the block. |
 | W07, W08 | W29 | W29 applies rule 3 of D6 (defined in W07 and W08 artifacts). |
