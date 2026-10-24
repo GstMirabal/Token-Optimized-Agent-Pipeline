@@ -848,3 +848,80 @@ def test_suspend_still_suspends_an_open_sprint(repo: Path):
     assert "resume_pointer" in state
     assert "end_time" in state
     assert "last_close_commit" not in state
+
+
+# --- block (W28) --------------------------------------------------------------
+
+def test_block_writes_status_and_reason_preserving_other_keys(repo: Path):
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": "OPEN", "layer": "core"}})
+
+    assert ss.block("terminal remediation loop") == 0
+
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert state["current_sprint"] == {
+        "id": 7, "status": ss.BLOCKED, "layer": "core",
+        "blocked_reason": "terminal remediation loop",
+    }
+    assert state["session_id"] == "keep-me"
+    assert "status" not in state
+
+
+@pytest.mark.parametrize("reason", ["", "   \t"])
+def test_block_refuses_empty_reason_and_leaves_anchor_unchanged(repo: Path, reason: str):
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": "OPEN"}})
+    before = (repo / "docs" / "active_state.json").read_text()
+
+    assert ss.block(reason) == 2
+
+    assert (repo / "docs" / "active_state.json").read_text() == before
+
+
+def test_block_refuses_sealed_sprint_and_leaves_anchor_unchanged(repo: Path):
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": ss.CLOSED}})
+    before = (repo / "docs" / "active_state.json").read_text()
+
+    assert ss.block("why") == 2
+
+    assert (repo / "docs" / "active_state.json").read_text() == before
+
+
+def test_block_refuses_without_current_sprint(repo: Path):
+    _write_anchor(repo)
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    del state["current_sprint"]
+    (repo / "docs" / "active_state.json").write_text(json.dumps(state))
+    before = (repo / "docs" / "active_state.json").read_text()
+
+    assert ss.block("why") == 2
+
+    assert (repo / "docs" / "active_state.json").read_text() == before
+
+
+def test_block_again_overwrites_the_reason(repo: Path, capsys: pytest.CaptureFixture):
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": "OPEN"}})
+    assert ss.block("first") == 0
+
+    assert ss.block("second") == 0
+
+    assert _read_sprint(repo)["blocked_reason"] == "second"
+    assert "re-blocked" in capsys.readouterr().out
+
+
+def test_open_sprint_same_id_does_not_lift_a_block(repo: Path):
+    """open-sprint is idempotent on the same id: BLOCKED and the reason survive."""
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": "OPEN"}})
+    assert ss.block("why") == 0
+
+    assert ss.open_sprint(7) == 0
+
+    sprint = _read_sprint(repo)
+    assert sprint["status"] == ss.BLOCKED
+    assert sprint["blocked_reason"] == "why"
+
+
+def test_main_dispatches_block(repo: Path, monkeypatch: pytest.MonkeyPatch):
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": "OPEN"}})
+    monkeypatch.setattr(sys, "argv", ["session_state.py", "block", "--reason", "x"])
+
+    assert ss.main() == 0
+    assert _read_sprint(repo)["status"] == ss.BLOCKED

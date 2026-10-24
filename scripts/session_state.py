@@ -74,6 +74,12 @@ Usage:
         # including the one that opens the next sprint) and never
         # current_sprint.status == IN_PROGRESS, which no writer ever
         # produces (F-3, S052 QA Gate 1, both remediation rounds)
+    python3 scripts/session_state.py block --reason <text>
+        # writes current_sprint.status = BLOCKED and current_sprint.blocked_reason,
+        # preserving every other key; exit 2, nothing written, on an empty
+        # reason, a missing current_sprint or a sealed sprint; a second call
+        # overwrites the reason. `open-sprint --id <same id>` is idempotent and
+        # does NOT lift the block. Top-level session fields are untouched.
     python3 scripts/session_state.py mark-audited --report <path>
         # writes current_sprint.last_audit_sprint = NNN, preserving every
         # other key. <path> must exist and be named
@@ -109,6 +115,7 @@ CHANGELOG = Path("CHANGELOG.md")
 IN_PROGRESS = "IN_PROGRESS"
 CLOSED = "CLOSED_SUCCESSFULLY"
 SUSPENDED = "SUSPENDED"  # session ended, sprint still open (token_economy.md §3.1)
+BLOCKED = "BLOCKED"  # sprint halted by a terminal remediation loop (remediation_workflow.md Phase 3)
 # "CLOSED" is the legacy literal `release()` wrote before Sprint 050; anchors
 # sealed under that pin still carry it, so `_sprint_is_sealed` must accept
 # both (KI-052-2, Sprint 053 `D1`).
@@ -725,6 +732,58 @@ def open_sprint(
     return 0
 
 
+def _block_refusal(text: str, sprint: dict | None) -> str | None:
+    """Name why `block` must refuse, or None when it may write.
+
+    Args:
+        text: The stripped `--reason` value.
+        sprint: The anchor's `current_sprint`, or None.
+
+    Returns:
+        str | None: The refusal sentence, or None to proceed.
+    """
+    if not text:
+        return "--reason must not be empty."
+    if not sprint:
+        return "the anchor has no current_sprint."
+    if _sprint_is_sealed(sprint.get("status")):
+        return f"sprint {sprint.get('id')} is sealed; its status is not overwritten."
+    return None
+
+
+def block(reason: str) -> int:
+    """Mark the current sprint BLOCKED and record why.
+
+    Writes `current_sprint.status = BLOCKED` and `current_sprint.blocked_reason`,
+    preserving every other key. The top-level SESSION status and lock fields are
+    not touched. Never overwrites a sealed sprint's status (B-9, `71a35c3`).
+
+    Args:
+        reason: Why the sprint is blocked; must not be empty or whitespace.
+
+    Returns:
+        int: 0 when written (including a re-block that overwrites the reason);
+            2, with nothing written, on an empty reason, a missing
+            `current_sprint`, or a sealed sprint.
+    """
+    text = reason.strip()
+    state = load_state()
+    sprint = state.get("current_sprint")
+    refusal = _block_refusal(text, sprint)
+    if refusal:
+        print(f"Refusing block: {refusal}", file=sys.stderr)
+        return 2
+    again = sprint.get("status") == BLOCKED
+    sprint["status"] = BLOCKED
+    sprint["blocked_reason"] = text
+    state["last_updated"] = now()
+    save_state(state)
+    verb = "re-blocked" if again else "blocked"
+    print(f"Sprint {sprint.get('id')} {verb}: current_sprint.status={BLOCKED}, "
+          f"blocked_reason={text!r}.")
+    return 0
+
+
 AUDIT_REPORT_RE = re.compile(r"^PIPELINE_AUDIT_REPORT-(\d+)\.md$")
 
 
@@ -852,6 +911,13 @@ def _add_other_subparsers(sub: argparse._SubParsersAction) -> None:
     """
     sub.add_parser("release", help="Seal the SPRINT at close.")
     sub.add_parser("suspend", help="End the SESSION with the sprint still open.")
+    block_parser = sub.add_parser(
+        "block",
+        help="Write current_sprint.status BLOCKED and blocked_reason (terminal remediation).",
+    )
+    block_parser.add_argument(
+        "--reason", required=True, help="Why the sprint is blocked (non-empty)."
+    )
     _add_require_released_subparser(sub)
     refresh_parser = sub.add_parser(
         "refresh-baseline",
@@ -897,7 +963,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     Returns:
         argparse.ArgumentParser: Parser with every subcommand (`claim`,
-            `release`, `suspend`, `require-released`, `refresh-baseline`,
+            `release`, `suspend`, `block`, `require-released`, `refresh-baseline`,
             `set-topology`, `open-sprint`, `mark-audited`) and their flags registered.
     """
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
@@ -923,6 +989,8 @@ def _dispatch(args: argparse.Namespace) -> int:
         )
     if args.command == "suspend":
         return suspend()
+    if args.command == "block":
+        return block(args.reason)
     if args.command == "require-released":
         return require_released(args.branch, args.hotfix)
     if args.command == "refresh-baseline":
