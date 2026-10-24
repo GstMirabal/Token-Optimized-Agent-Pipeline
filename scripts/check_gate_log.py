@@ -12,6 +12,9 @@ Usage:
     python3 scripts/check_gate_log.py --sprint-dir docs/sprints/031-core-pipeline
     python3 scripts/check_gate_log.py --current-sprint
 
+Output: after the verdict line, `escape rows: <N>` (advisory; never changes
+the exit code).
+
 Exit codes:
     0 — pass, skip (historical / no file / no rows)
     2 — vocabulary or class mismatch (RA-17; exit-code-2 blocking per RA-11 semantics)
@@ -33,6 +36,7 @@ VERDICTS = frozenset({"APPROVED", "REJECTED", "RECORD"})
 REJECTED_CLASSES = frozenset({"charter", "instructing"})
 RECORD_CLASS = "testifying"
 _HTML_COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
+_ESCAPE = re.compile(r"\bescape\b")
 
 
 def _strip_html_comments(text: str) -> str:
@@ -157,6 +161,28 @@ def collect_findings(text: str, sprint_id: int | None) -> list[str]:
     return findings
 
 
+def count_escape_rows(text: str) -> int:
+    """Count gate rows whose Notes cell holds the whole word ``escape``.
+
+    Advisory only (rules/qa_and_testing.md §4, convergence rule 2): the count
+    never feeds an exit code. Only the Notes cell is matched, so ``escaped``
+    or ``escape`` in another column is not counted. A table with no Notes
+    column contributes 0.
+
+    Args:
+        text: The full SPRINT_LOG.md content.
+
+    Returns:
+        int: Number of gate rows marked ``escape``.
+    """
+    return sum(
+        1
+        for header, rows in gate_tables(text)
+        for row in rows
+        if _ESCAPE.search(_col(header, row, "Notes"))
+    )
+
+
 def check(sprint_dir: Path) -> int:
     """Audit one sprint directory. Returns the process exit code."""
     path = sprint_dir / "SPRINT_LOG.md"
@@ -164,13 +190,16 @@ def check(sprint_dir: Path) -> int:
         print(f"[OK] check_gate_log: no SPRINT_LOG.md under {sprint_dir} (skip)")
         return 0
     sprint_id = sprint_id_from_dir(sprint_dir)
-    findings = collect_findings(path.read_text(encoding="utf-8"), sprint_id)
+    text = path.read_text(encoding="utf-8")
+    findings = collect_findings(text, sprint_id)
     if not findings:
         print(f"[OK] check_gate_log: {path}")
+        print(f"escape rows: {count_escape_rows(text)}")
         return 0
     print(f"❌ check_gate_log: {path}", file=sys.stderr)
     for item in findings:
         print(f"   • {item}", file=sys.stderr)
+    print(f"escape rows: {count_escape_rows(text)}")
     return 2
 
 

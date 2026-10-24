@@ -227,3 +227,65 @@ def test_sprint_dir_with_commented_stub_exits_zero(tmp_path: Path) -> None:
     (sprint / "SPRINT_LOG.md").write_text(body, encoding="utf-8")
     result = _run("--sprint-dir", str(sprint))
     assert result.returncode == 0, result.stderr
+
+
+# --- W09: advisory `escape rows: N` count ---------------------------------------
+
+HEADER6 = "Gate | Round | Verdict | Class | Severity | Notes"
+
+
+def _phase7_six(*rows: str) -> str:
+    lines = [
+        "# Sprint Log",
+        "",
+        f"| {HEADER6} |",
+        "| :--- | :--- | :--- | :--- | :--- | :--- |",
+        *rows,
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def test_two_escape_rows_counted_and_exit_unchanged(tmp_path: Path) -> None:
+    sprint = _log(
+        tmp_path,
+        "057-core-pipeline",
+        _phase7_six(
+            "| QA (Gate 1) | 1 | APPROVED |  | S2 | escape: found later |",
+            "| QA (Gate 1) | 2 | **REJECTED** | charter | S1 | an `escape` row |",
+        ),
+    )
+    result = _run("--sprint-dir", str(sprint))
+    assert result.returncode == 0, result.stderr
+    assert "escape rows: 2" in result.stdout
+
+
+def test_escape_count_does_not_mask_a_failing_exit(tmp_path: Path) -> None:
+    sprint = _log(
+        tmp_path,
+        "057-core-pipeline",
+        _phase7_six("| QA (Gate 1) | 1 | **REJECTED** |  | S1 | escape |"),
+    )
+    result = _run("--sprint-dir", str(sprint))
+    assert result.returncode == 2
+    assert "escape rows: 1" in result.stdout
+
+
+def test_escape_outside_notes_or_inside_longer_word_not_counted(check_mod) -> None:
+    body = _phase7_six(
+        "| escape | 1 | APPROVED |  | S2 | escaped the gate |",
+        "| QA (Gate 1) | 2 | APPROVED |  | S2 | no escapement here |",
+        "| QA (Gate 1) | 3 | APPROVED |  | escape | clean |",
+    )
+    assert check_mod.count_escape_rows(body) == 0
+
+
+def test_legacy_five_column_log_counts_zero_with_same_exit(tmp_path: Path) -> None:
+    sprint = _log(
+        tmp_path,
+        "031-core-pipeline",
+        _phase7("| QA (structural) | 1 | **RECORD** | testifying | stale comment |"),
+    )
+    result = _run("--sprint-dir", str(sprint))
+    assert result.returncode == 0, result.stderr
+    assert "escape rows: 0" in result.stdout
