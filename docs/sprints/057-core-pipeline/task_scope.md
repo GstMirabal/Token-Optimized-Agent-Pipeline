@@ -37,28 +37,28 @@ Status values: ⏳ pending. Risk `high` touches a gate, the sandbox template or 
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| W01 | `docs/sprints/057-core-pipeline/SANDBOX_DB_MEASUREMENT.md` | create (M1-M3 literal output; `devops_agent` runs the at most 6 `claude -p` calls and hands the output over unaltered) | high | `doc_orchestrator` | sonnet | medium | ⏳ |
-| W02 | `claude/settings.hooks.json` | modify (allowRead and denyWrite of `./.env.agent`; test `tests/test_template_sandbox.py`) | high | `implementer_agent` | sonnet | medium | ⏳ |
-| W03 | `scripts/env_agent_check.py` | create (test `tests/test_env_agent_check.py`) | high | `implementer_agent` | sonnet | medium | ⏳ |
-| W04 | `scripts/db_probe.py` | create (test `tests/test_db_probe.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| W05 | `rules/project_topology.md` | modify (database section) | medium | `rule_validator` | sonnet | medium | ⏳ |
-| W06 | `agents.md` | modify (RA-09 one sentence) | high | `rule_validator` | sonnet | medium | ⏳ |
+| W01 | `docs/sprints/057-core-pipeline/SANDBOX_DB_MEASUREMENT.md` | create (M1-M3 literal output; `devops_agent` runs the at most 6 `claude -p` calls and hands the output over unaltered) | high | `doc_orchestrator` | sonnet | medium | ✅ `7eb188b` |
+| W02 | `claude/settings.hooks.json` | modify (allowRead and denyWrite of `./.env.agent`; test `tests/test_template_sandbox.py`) | high | `implementer_agent` | sonnet | medium | ⛔ abort criterion 1 (M1 denied) → KI-057-1 |
+| W03 | `scripts/env_agent_check.py` | create (test `tests/test_env_agent_check.py`) | high | `implementer_agent` | sonnet | medium | ⛔ abort criterion 1 → KI-057-1 |
+| W04 | `scripts/db_probe.py` | create (test `tests/test_db_probe.py`) | medium | `implementer_agent` | sonnet | medium | ⛔ abort criterion 1 → KI-057-1 |
+| W05 | `rules/project_topology.md` | modify (database section) | medium | `rule_validator` | sonnet | medium | ⛔ abort criterion 1 → KI-057-1 |
+| W06 | `agents.md` | modify (RA-09 one sentence) | high | `rule_validator` | sonnet | medium | ⛔ abort criterion 1 → KI-057-1 |
 
 ### Ola C — block 1 defects
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| W10 | `scripts/session_state.py` | modify (fix: `require-released --hotfix`; test `tests/test_session_state.py`) | high | `implementer_agent` | sonnet | medium | ⏳ |
-| W11 | `workflows/deployment_workflow.md` | modify (Phase 0 hotfix route; C-5 squash body) | high | `doc_orchestrator` | sonnet | medium | ⏳ |
-| W12 | `scripts/session_state.py` | modify (fix: B-9 `suspend()`; test `tests/test_session_state.py`) | high | `implementer_agent` | sonnet | medium | ⏳ |
-| W13 | `scripts/session_end_hook.py` | modify (fix: E session_id; test `tests/test_session_end_hook.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| W14 | `scripts/py_compile_tree.py` | modify (fix: C-3 cfile; test `tests/test_verify_py_compile.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| W15 | `scripts/_repro_grammar.py` | create (test `tests/test_repro_grammar.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| W16 | `hooks/on_commit.py` | modify (fix: A-4, B-2, B-6; test `tests/test_on_commit.py`) | high | `implementer_agent` | sonnet | medium | ⏳ |
-| W17 | `scripts/check_fix_reproduces.py` | modify (fix: A-4, KI-056-2; test `tests/test_check_fix_reproduces.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| W10 | `scripts/session_state.py` | modify (fix: `require-released --hotfix`; test `tests/test_session_state.py`) | high | `implementer_agent` | sonnet | medium | ✅ `8352421` |
+| W11 | `workflows/deployment_workflow.md` | modify (Phase 0 hotfix route; C-5 squash body) | high | `doc_orchestrator` | sonnet | medium | ✅ `d0f332d` |
+| W12 | `scripts/session_state.py` | modify (fix: B-9 `suspend()`; test `tests/test_session_state.py`) | high | `implementer_agent` | sonnet | medium | ✅ `71a35c3` |
+| W13 | `scripts/session_end_hook.py` | modify (fix: E session_id; test `tests/test_session_end_hook.py`) | medium | `implementer_agent` | sonnet | medium | ⛔ not reproducible as specified → KI-057-2 |
+| W14 | `scripts/py_compile_tree.py` | modify (fix: C-3 cfile; test `tests/test_verify_py_compile.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `04b8fff` |
+| W15 | `scripts/_repro_grammar.py` | create (test `tests/test_repro_grammar.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `20d2013` |
+| W16 | `hooks/on_commit.py` | modify (fix: A-4, B-2, B-6; test `tests/test_on_commit.py`) | high | `implementer_agent` | sonnet | medium | ✅ `4785b1d` |
+| W17 | `scripts/check_fix_reproduces.py` | modify (fix: A-4, KI-056-2; test `tests/test_check_fix_reproduces.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `70faa66` |
 | W18 | `scripts/check_fix_reproduces.py` | modify (reproduce-first B-4, B-5; test `tests/test_check_fix_reproduces.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| W19 | `scripts/check_task_scope.py` | modify (fix: B-3; test `tests/test_check_task_scope.py`) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| W20 | `scripts/model_ledger.py` | modify (fix: B-8; test `tests/test_model_ledger.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| W19 | `scripts/check_task_scope.py` | modify (fix: B-3; test `tests/test_check_task_scope.py`) | low | `implementer_agent` | sonnet | medium | ✅ `a4db5df` |
+| W20 | `scripts/model_ledger.py` | modify (fix: B-8; test `tests/test_model_ledger.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `7705611` |
 | W21 | `scripts/detect_drift.py` | modify (reproduce-first C-1; test `tests/test_detect_drift.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
 | W22 | `workflows/reconciliation_workflow.md` | modify (reproduce-first C-2) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 | W23 | `scripts/session_start.py` | modify (fix: C-4 and KI-056-4; test `tests/test_session_start.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
@@ -176,3 +176,7 @@ No other rule violation found: contiguous ids W00-W37 (38 rows, matches `Cost`),
 | W08 | `workflows/pipeline_workflow.md` Phase 7 still names the 5-column gate table `Gate \| Round \| Verdict \| Class \| Notes`; the template now has `Severity` before `Notes` | W27 (same file): update the header string in the same commit |
 | W00 | Source guidance conflicts with `agents.md`: §1 `restrictions` vs positive rewrites (PC-11), normative MUST density (PC-01), precedent narratives across §1/§2/§5/§7 (PC-05), tables vs prose (§1 `technical_clarity`) | Sprint 060 prompt audit |
 | W07 | Precedence rule added by the lead: the stricter verdict wins when class and severity disagree | Gate 1 reviews it as part of W07 |
+| W01 | `KI-057-1`: pytest against a local database cannot run in the sandbox — TCP to 127.0.0.1 measured denied (M1, CLI 2.1.119); `.env.agent` readability (M2) feasible but unused until a DB route exists | Sprint 059 (sandbox regime) |
+| W13 | `KI-057-2`: defect E (SessionEnd suspends a session other than the one ending) needs the boot to record the harness `session_id` in the anchor; no comparable field exists (`claim` mints `20261024T112815Z-…`) | A later core-pipeline sprint |
+| W19 | Same naive `split("\|")` cell parsing remains in `scripts/check_forge_ladder.py:58`, `scripts/check_gate_log.py:64`, `scripts/detect_new_models.py:142` | `KI-057-3`, a later core-pipeline sprint |
+| W01 | M3: `git worktree add` measured allowed in a nucleus-shaped fixture; B-5 does not reproduce there (host `.git/modules/.agents` deny not carried) | W18: B-5 closes as not reproduced unless a host-shaped measurement says otherwise |
