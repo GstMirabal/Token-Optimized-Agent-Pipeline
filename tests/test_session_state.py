@@ -10,6 +10,7 @@ file adds direct coverage, and pairs it with `set-topology` (Sprint 050
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -724,3 +725,87 @@ def test_mark_audited_writes_field_and_keeps_other_keys(repo: Path):
     }
     assert state["session_id"] == "keep-me"
     assert state["active_layer"] == "core"
+
+
+# --- require-released --hotfix (Sprint 057 D4) ------------------------------
+
+def _git(root: Path, *args: str) -> str:
+    result = subprocess.run(
+        ["git", "-c", "user.name=t", "-c", "user.email=t@t", *args],
+        cwd=root, capture_output=True, text=True, check=True,
+    )
+    return result.stdout.strip()
+
+
+def _hotfix_repo(root: Path, status: str = "IN_PROGRESS") -> str:
+    """A repo whose anchor seals commit one, then a second commit on `hotfix/H-009`
+    with a hotfix record. Returns the sealed SHA."""
+    _git(root, "init", "-q", "-b", "main")
+    (root / "docs" / "hotfixes").mkdir()
+    (root / "seed.txt").write_text("seed", encoding="utf-8")
+    _git(root, "add", "seed.txt")
+    _git(root, "commit", "-q", "-m", "chore: seed #057")
+    seal = _git(root, "rev-parse", "HEAD")
+    _write_anchor(root, {"status": status, "last_close_commit": seal})
+    (root / "docs" / "hotfixes" / "H-009-bridge.md").write_text("# H-009", encoding="utf-8")
+    _git(root, "checkout", "-q", "-b", "hotfix/H-009")
+    (root / "fix.txt").write_text("fix", encoding="utf-8")
+    _git(root, "add", "fix.txt")
+    _git(root, "commit", "-q", "-m", "fix(bridge): repair the thing (H-009) #H009")
+    return seal
+
+
+def _require(root: Path, *extra: str) -> int:
+    script = SCRIPTS / "session_state.py"
+    return subprocess.run(
+        [sys.executable, str(script), "require-released", *extra],
+        cwd=root, capture_output=True, text=True, check=False,
+    ).returncode
+
+
+def test_require_released_hotfix_with_all_four_conditions_passes(repo: Path):
+    _hotfix_repo(repo)
+    assert _require(repo, "--hotfix", "H-009") == 0
+
+
+def test_require_released_hotfix_accepts_squash_subject_on_main(repo: Path):
+    _hotfix_repo(repo)
+    _git(repo, "checkout", "-q", "main")
+    _git(repo, "merge", "-q", "--squash", "hotfix/H-009")
+    _git(repo, "commit", "-q", "-m", "fix(bridge): repair the thing (H-009) (#92)")
+    assert _require(repo, "--hotfix", "H-009") == 0
+
+
+def test_require_released_hotfix_refuses_without_hotfix_record(repo: Path):
+    _hotfix_repo(repo)
+    (repo / "docs" / "hotfixes" / "H-009-bridge.md").unlink()
+    assert _require(repo, "--hotfix", "H-009") == 2
+
+
+def test_require_released_hotfix_refuses_wrong_branch_and_subject(repo: Path):
+    _hotfix_repo(repo)
+    _git(repo, "checkout", "-q", "-b", "other")
+    _git(repo, "commit", "-q", "--amend", "-m", "fix(bridge): unrelated #057")
+    assert _require(repo, "--hotfix", "H-009") == 2
+
+
+def test_require_released_hotfix_refuses_when_seal_is_not_an_ancestor(repo: Path):
+    _hotfix_repo(repo)
+    _write_anchor(repo, {"last_close_commit": _git(repo, "hash-object", "-w", "seed.txt")})
+    assert _require(repo, "--hotfix", "H-009") == 2
+
+
+def test_require_released_hotfix_refuses_suspended(repo: Path):
+    _hotfix_repo(repo, status="SUSPENDED")
+    assert _require(repo, "--hotfix", "H-009") == 2
+
+
+def test_require_released_without_hotfix_flag_refuses_the_same_tip(repo: Path):
+    _hotfix_repo(repo)
+    assert _require(repo) == 2
+
+
+@pytest.mark.parametrize("bad", ["H-9", "009", "h-009", "H-009x", "H-"])
+def test_require_released_hotfix_refuses_malformed_id(repo: Path, bad: str):
+    _hotfix_repo(repo)
+    assert _require(repo, "--hotfix", bad) == 2
