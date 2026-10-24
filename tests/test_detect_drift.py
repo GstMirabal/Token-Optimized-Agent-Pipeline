@@ -116,6 +116,31 @@ def test_a_routine_commit_does_not_hide_a_real_one(repo: Path) -> None:
     assert dd.main() == 2
 
 
+def test_a_post_seal_state_commit_carrying_the_mirror_is_routine(repo: Path) -> None:
+    """C-1: `close_workflow.md` state_sync refreshes the mirror with the anchor.
+
+    A host that tracks `.agent_state/mirror.json` commits it beside the anchor
+    after `last_close_commit`; that pair is routine, not drift.
+    """
+    baseline = _head(repo)
+    _write_anchor(repo, status="X", last_close_commit=baseline)
+    (repo / ".agent_state").mkdir()
+    (repo / ".agent_state" / "mirror.json").write_text("{}")
+    _commit_all(repo, "docs(state): refresh baseline and mirror")
+    assert dd.main() == 0
+
+
+def test_a_mirror_commit_that_also_touches_code_is_still_drift(repo: Path) -> None:
+    """The widened path set does not excuse a commit that touches other files."""
+    baseline = _head(repo)
+    _write_anchor(repo, status="X", last_close_commit=baseline)
+    (repo / ".agent_state").mkdir()
+    (repo / ".agent_state" / "mirror.json").write_text("{}")
+    (repo / "f.txt").write_text("smuggled change\n")
+    _commit_all(repo, "docs(state): refresh baseline and mirror")
+    assert dd.main() == 2
+
+
 def test_routine_shas_helper_identifies_only_the_state_only_docs_commit(
     repo: Path,
 ) -> None:
