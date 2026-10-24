@@ -166,7 +166,7 @@
     },
     {
       "id": "F-20260924-050F",
-      "summary": "A heuristic scanner over a context-sensitive lexical grammar (JS/TS: regex-literal-vs-division, keyword-vs-identifier) cannot be fail-closed without a real lexer — three remediation rounds on scripts/quality_audit.py's JS/TS path each fixed one silent-compliance case and surfaced a new one; the plan's own pre-declared Abort criterion, not a fourth patch, was the correct exit.",
+      "summary": "A heuristic scanner over a context-sensitive lexical grammar (JS/TS: regex-literal-vs-division, keyword-vs-identifier) cannot carry a coverage claim without a real lexer — three remediation rounds on scripts/quality_audit.py's JS/TS path each fixed one silent-compliance case and surfaced a new one; the plan's own pre-declared Abort criterion, not a fourth patch, was the correct exit.",
       "routing_class": "host"
     },
     {
