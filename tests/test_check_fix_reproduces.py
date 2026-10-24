@@ -212,3 +212,24 @@ def test_trailer_outside_the_shared_grammar_is_missing_trailer(repo, capsys, tra
     code, out = run(repo, base, capsys)
     assert code == 2
     assert "MISSING_TRAILER" in out
+
+
+SETUP_ERROR_TEST = (
+    "import pytest\n\n\n"
+    "@pytest.fixture\n"
+    "def service():\n"
+    "    from calc import add\n"
+    "    if add(2, 3) != 5:\n"
+    "        raise RuntimeError('service is not running')\n\n\n"
+    "def test_add(service):\n"
+    "    assert True\n"
+)
+
+
+def test_setup_error_on_parent_is_wrong_failure(repo, capsys):
+    """B-4: a fixture that raises on the parent is an error, not a reproduction."""
+    base = commit_fix(repo, {"calc.py": FIXED, "tests/test_calc.py": SETUP_ERROR_TEST}, TRAILER)
+    code, out = run(repo, base, capsys)
+    assert code == 2
+    assert "WRONG_FAILURE" in out
+    assert "setup error" in out

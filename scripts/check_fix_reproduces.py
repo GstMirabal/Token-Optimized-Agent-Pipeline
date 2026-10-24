@@ -40,6 +40,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import xml.etree.ElementTree as ET
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -194,20 +195,32 @@ def worktree(repo: Path, rev: str) -> Iterator[Path]:
             LOG.warning("temporary directory %s not removed: %s", base, exc)
 
 
-def run_pytest(cwd: Path, test_ids: list[str]) -> int:
-    """Run pytest on the given ids and return its exit code.
+def run_pytest(cwd: Path, test_ids: list[str]) -> tuple[int, int]:
+    """Run pytest on the given ids and return its exit code and error count.
 
     Args:
         cwd: Worktree used as working directory.
         test_ids: Pytest node ids or file paths.
 
     Returns:
-        The pytest process exit code, run with the module-level ``RUNNER_PYTHON``.
+        ``(exit_code, errors)``: the pytest process exit code, run with the
+        module-level ``RUNNER_PYTHON``, and the number of ``<error>`` results in a
+        ``--junitxml`` report (setup or teardown errors, which also exit 1). An
+        unreadable report counts as 0 errors, leaving the exit code to decide.
     """
-    cmd = [RUNNER_PYTHON, "-m", "pytest", "-q", "-p", "no:cacheprovider", *test_ids]
-    return subprocess.run(
-        cmd, cwd=cwd, env=_env(), capture_output=True, text=True, check=False, timeout=900
-    ).returncode
+    with tempfile.TemporaryDirectory() as tmp:
+        report = Path(tmp) / "report.xml"
+        cmd = [RUNNER_PYTHON, "-m", "pytest", "-q", "-p", "no:cacheprovider",
+               f"--junitxml={report}", *test_ids]
+        code = subprocess.run(
+            cmd, cwd=cwd, env=_env(), capture_output=True, text=True, check=False, timeout=900
+        ).returncode
+        try:
+            errors = len(ET.parse(report).getroot().findall(".//testcase/error"))
+        except (OSError, ET.ParseError) as exc:
+            LOG.warning("junit report not read: %s", exc)
+            errors = 0
+    return code, errors
 
 
 def resolve_python(repo: Path, override: str | None) -> str:
@@ -273,7 +286,7 @@ def _copy_tests(repo: Path, commit: str, wt: Path, test_ids: list[str]) -> None:
         target.write_text(shown.stdout, encoding="utf-8")
 
 
-def replay(repo: Path, commit: str, rev: str, test_ids: list[str]) -> int:
+def replay(repo: Path, commit: str, rev: str, test_ids: list[str]) -> tuple[int, int]:
     """Run the commit's tests inside a worktree at ``rev``.
 
     Args:
@@ -283,7 +296,7 @@ def replay(repo: Path, commit: str, rev: str, test_ids: list[str]) -> int:
         test_ids: Test ids from the trailers.
 
     Returns:
-        The pytest exit code.
+        The ``(exit_code, errors)`` pair from ``run_pytest``.
     """
     with worktree(repo, rev) as wt:
         _copy_tests(repo, commit, wt, test_ids)
@@ -309,12 +322,14 @@ def judge(repo: Path, sha: str) -> tuple[str, str]:
     bad = sorted({i.split("::")[0] for i in ids if not i.split("::")[0].endswith(".py")})
     if bad:
         return "UNREPLAYED", f"no runner for {', '.join(bad)} (pytest replays .py only)"
-    code = replay(repo, sha, f"{sha}^", ids)
+    code, errors = replay(repo, sha, f"{sha}^", ids)
+    if errors:
+        return "WRONG_FAILURE", f"{errors} test(s) hit a setup error on the parent, not an assertion failure; {HINT}"
     if code == 0:
         return "PASSES_ON_PARENT", "tests pass on the parent, so they do not reproduce the defect"
     if code != 1:
         return "WRONG_FAILURE", f"pytest exited {code} on the parent, expected 1; {HINT}"
-    code = replay(repo, sha, sha, ids)
+    code, _ = replay(repo, sha, sha, ids)
     if code != 0:
         return "FAILS_AT_COMMIT", f"pytest exited {code} at the commit, expected 0"
     return "OK", f"{len(ids)} test id(s) fail on the parent and pass at the commit"
