@@ -112,11 +112,11 @@ def install_command(target: str, nucleus: bool) -> str:
         nucleus: True in nucleus mode, False in a host (submodule) checkout.
 
     Returns:
-        str: `bash scripts/install.sh --target <t>` in the nucleus,
-        `bash .agents/scripts/install.sh --target <t>` in a host.
+        str: `python3 scripts/install.py --target <t>` in the nucleus,
+        `python3 .agents/scripts/install.py --target <t>` in a host.
     """
     prefix = "" if nucleus else ".agents/"
-    return f"bash {prefix}scripts/install.sh --target {target}"
+    return f"python3 {prefix}scripts/install.py --target {target}"
 
 
 def _report_write_denied(dest: Path) -> None:

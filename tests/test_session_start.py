@@ -766,7 +766,7 @@ def test_bridge_advisory_names_the_host_path_in_host_mode(
         session_start, monkeypatch, tmp_path, False,
         "PermissionError: '/host/.claude/settings.json'", 1,
     )
-    assert "bash .agents/scripts/install.sh --target claude" in text
+    assert "python3 .agents/scripts/install.py --target claude" in text
 
 
 def test_bridge_advisory_names_the_nucleus_path_in_nucleus_mode(
@@ -776,8 +776,8 @@ def test_bridge_advisory_names_the_nucleus_path_in_nucleus_mode(
         session_start, monkeypatch, tmp_path, True,
         "PermissionError: '/x/.claude/settings.json'", 1,
     )
-    assert "bash scripts/install.sh --target claude" in text
-    assert ".agents/scripts/install.sh" not in text
+    assert "python3 scripts/install.py --target claude" in text
+    assert ".agents/scripts/install.py" not in text
 
 
 def test_install_exit_3_alone_is_a_permission_denial(
@@ -787,7 +787,7 @@ def test_install_exit_3_alone_is_a_permission_denial(
     text = _denied_claude_boot(
         session_start, monkeypatch, tmp_path, False, "unrelated wording", 3,
     )
-    assert "install.sh --target claude" in text
+    assert "install.py --target claude" in text
 
 
 MEASURING_ROW = "| **Measuring CLI** | Claude Code 2.1.119, macOS (Seatbelt). |\n"
