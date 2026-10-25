@@ -17,16 +17,16 @@ The base installer never links profiles. From the host project root:
 **Illustrative pack inside the submodule** (this repo only):
 
 ```bash
-.agents/scripts/install.sh --profile example-project
+python3 .agents/scripts/install.py --profile example-project
 ```
 
 **Production / private profile outside the submodule** (RA-15 — your real project pack):
 
 ```bash
 # Convention: host-root/.agents-profile/ or any path you control
-.agents/scripts/install.sh --profile-path .agents-profile
+python3 .agents/scripts/install.py --profile-path .agents-profile
 # or
-.agents/scripts/install.sh --profile-path /path/to/your-profile
+python3 .agents/scripts/install.py --profile-path /path/to/your-profile
 ```
 
 The profile directory MUST contain the same layout: `agents/`, optional `skills/`,
