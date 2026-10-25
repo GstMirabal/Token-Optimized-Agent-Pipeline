@@ -70,19 +70,19 @@ Status values: ⏳ pending. Risk `high` touches a gate, the sandbox template or 
 | W38 | `scripts/session_state.py` | modify (subcommand `unblock`: BLOCKED → OPEN, drops `blocked_reason`; test `tests/test_session_state.py`) — added in execution, human decision 2026-10-24 | medium | `implementer_agent` | sonnet | medium | ✅ `eec0001` |
 | W29 | `workflows/remediation_workflow.md` | modify (Phase 2, Phase 3, rule 3 of D6) | medium | `doc_orchestrator` | sonnet | medium | ✅ `61395e5` |
 | W30 | `scripts/merge_json.py` | modify (fix: KI-056-3 and H-007 residue; test `tests/test_merge_json.py`) | high | `implementer_agent` | sonnet | medium | ✅ `1474fa6` |
-| W31 | `scripts/check_changelog_tags.py` | create (test `tests/test_check_changelog_tags.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| W32 | `Makefile` | modify (`verify` runs `check_changelog_tags.py`) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| W39 | `.github/workflows/ci.yml` | modify (`fetch-depth: 0` on checkout so `make verify` sees tags for `check_changelog_tags.py` check 1) — added in execution, human decision 2026-10-24 | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W31 | `scripts/check_changelog_tags.py` | create (test `tests/test_check_changelog_tags.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `f22a40e` |
+| W32 | `Makefile` | modify (`verify` runs `check_changelog_tags.py`) | low | `implementer_agent` | sonnet | medium | ✅ `58a6728` |
+| W39 | `.github/workflows/ci.yml` | modify (`fetch-depth: 0` on checkout so `make verify` sees tags for `check_changelog_tags.py` check 1) — added in execution, human decision 2026-10-24 | low | `implementer_agent` | sonnet | medium | ✅ `df50276` |
 
 ### Ola D — S3 residues and documentation
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| W33 | `skills/mcp-registry/registry.json` | modify (pinned version in `pnpm dlx` text) | low | `skill_architect` | sonnet | medium | ⏳ |
-| W34 | `tests/test_mcp_template.py` | modify (docstring) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| W35 | `memory_index.json` | modify (line 169 wording) | low | `governance_learner` | sonnet | medium | ⏳ |
-| W36 | `scripts/install.py` | modify (B5 message names `install.py`) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| W37 | `skills/env-shielding-auditor/README.md` | modify (badge) | low | `skill_architect` | sonnet | medium | ⏳ |
+| W33 | `skills/mcp-registry/registry.json` | modify (pinned version in `pnpm dlx` text) | low | `skill_architect` | sonnet | medium | ✅ `4d7c91a` |
+| W34 | `tests/test_mcp_template.py` | modify (docstring) | low | `implementer_agent` | sonnet | medium | ✅ `1f84424` |
+| W35 | `memory_index.json` | modify (line 169 wording) | low | `governance_learner` | sonnet | medium | ✅ `396754e` |
+| W36 | `scripts/install.py` | modify (B5 message names `install.py`) | low | `implementer_agent` | sonnet | medium | ✅ `186ec42` |
+| W37 | `skills/env-shielding-auditor/README.md` | modify (badge) | low | `skill_architect` | sonnet | medium | ✅ `9a084b5` |
 
 ---
 
@@ -187,7 +187,10 @@ No other rule violation found: contiguous ids W00-W37 (38 rows, matches `Cost`),
 | W24 | `KI-057-4` (S2, `instructing`): the `F-107-N1` closure in `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md:88` says `check_role_artifact.py` moved off `SubagentStop`, but `claude/settings.hooks.json:129` still runs it `--from-hook` on every subagent stop | A later core-pipeline sprint; tell host H1 with the B-7 verdict |
 | W21 | C-1 fixed for the only prescribed post-seal path outside anchor + CHANGELOG (`.agent_state/mirror.json`); host H1 is asked which file its routine commits touch | Host H1 verdict message |
 | W25 | C-9 verdict for host H1: not reproduced in the nucleus; the fields are likely host-side content | Host H1 verdict message |
+| W22 | C-2 reproduced from plan line 206 only: the host H1 report text is no longer in the repository; confirm with H1 that the defect matches. Open design question (not C-2): `agents.md §0` places history under `sprints/` and `config/artifact_registry.json` names `PHASE_REGISTER.md` the phase record, yet Phase 4 reconstructs it under `docs/roadmaps/` | Host H1 verdict message; a later core-pipeline sprint |
+| W36 | `install.sh` still named as the command in `scripts/bridge_state.py:33`, `scripts/session_start.py:488-490` (`_run_bridge_install` runs the shim and reports "scripts/install.sh missing"), `workflows/deployment_workflow.md:28`, `rules/project_topology.md:34`, `tests/test_session_start.py:764` docstring | `KI-057-5`, a later core-pipeline sprint |
+| W31 | `HISTORICAL_GAPS` = `v3.4.0`, `v3.5.2`: tags released without a ledger section; closed history not rewritten | Recorded; no action |
 
-## Resume point (session suspended at 11.5x, 2026-10-24)
+## Resume point (updated 2026-10-25, session `d2b5fc4e-e365-4ed1-b5fb-0d4148b83a97`)
 
-Remaining units, in order: W22 (reproduce-first, doc) · W26 → W27 (W27 also fixes the 5-column gate header, carry-over W08) · W28 → W29 · W30 · W31 → W32 · wave D W33-W37. New scripts W26 and W31 each bump the `README.md` script count (`check_readme_counts.py`), staged in the same commit. Implementers do not commit; the lead commits with the `Repro:` trailer (parallel agents share one working tree).
+Every Work row is resolved (✅ or ⛔ with its KI/RECORD). W38 and W39 were added in execution by human decision. Next: pipeline Phase 7 (Quality Gate), `qa_agent` then `tester_agent`, each in fresh context, base `5851b18`; Gate 1 starts with `python3 scripts/check_fix_reproduces.py --range 5851b18..HEAD`. Then Phase 8 closeout.
