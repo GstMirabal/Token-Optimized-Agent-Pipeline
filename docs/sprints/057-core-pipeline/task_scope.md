@@ -84,6 +84,33 @@ Status values: ⏳ pending. Risk `high` touches a gate, the sandbox template or 
 | W36 | `scripts/install.py` | modify (B5 message names `install.py`) | low | `implementer_agent` | sonnet | medium | ✅ `186ec42` |
 | W37 | `skills/env-shielding-auditor/README.md` | modify (badge) | low | `skill_architect` | sonnet | medium | ✅ `9a084b5` |
 
+### Ola E — `install.sh` residue (`KI-057-5`, added in execution by human decision 2026-10-25)
+
+Every row replaces a prescription to run the deprecated shim `install.sh` with `install.py` (`agents.md §3 federation`). Kept unchanged, because they describe the shim correctly: `agents.md:78,112`, `README.md:60,107`, `SECURITY.md:17`, `docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md:16,35,138`, `docs/guides/SELF_IMPROVEMENT_GUIDE.md:34`, `scripts/install.py:3,5`, `scripts/install_claude.sh`, `tests/test_installer.sh` (tests the shim itself).
+
+| # | File | Operation | Risk | Assignee | Model | Effort | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| W40 | `scripts/session_start.py` | modify (`_run_bridge_install` runs `install.py` with the running interpreter; message names `install.py`; test `tests/test_session_start.py`, incl. `:764` docstring) | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| W41 | `scripts/bridge_state.py` | modify (docstring `:33`, `:226`) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W42 | `scripts/_root.py` | modify (comment `:71`) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W43 | `tests/test_root_resolution.py` | modify (docstring `:57`) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W44 | `scripts/merge_json.py` | modify (`DEPRECATED_HOOK_COMMANDS` gains the `SessionStart` command string W45 retires; test `tests/test_merge_json.py`) | high | `implementer_agent` | sonnet | medium | ⏳ |
+| W45 | `claude/settings.hooks.json` | modify (`:78` hook fallback message names `install.py`; reviewed-copy tests updated in the same commit) | high | `implementer_agent` | sonnet | medium | ⏳ |
+| W46 | `config/invocation_exceptions.json` | modify (note `:65`) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W47 | `.gitignore` | modify (comment `:101`) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W48 | `workflows/start_workflow.md` | modify (`:33` bridge_check) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| W49 | `workflows/deployment_workflow.md` | modify (`:28` bridge_lock_refresh) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| W50 | `rules/project_topology.md` | modify (`:34` S-1 row) | medium | `rule_validator` | sonnet | medium | ⏳ |
+| W51 | `docs/guides/AUTONOMY_POSTURE_GUIDE.md` | modify (`:12`, `:29`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| W52 | `docs/guides/SELF_IMPROVEMENT_GUIDE.md` | modify (`:61`, `:92`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| W53 | `docs/standards/templates/SYSTEM_OVERVIEW_TEMPLATE.md` | modify (`:41`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| W54 | `docs/architecture/global_topology.md` | modify (`:53`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| W55 | `docs/architecture/topology_map.md` | modify (`:17`, `:20`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| W56 | `profiles/example-project/README.md` | modify (`:20`, `:27`, `:29`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| W57 | `.github/ISSUE_TEMPLATE/bug_report.yml` | modify (`:26`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| W58 | `skills/slash-commander/README.md` | modify (`:49`) | low | `skill_architect` | sonnet | medium | ⏳ |
+| W59 | `skills/slash-commander/SKILL.md` | modify (`:12`, `:30`; own skill, not vendored) | low | `skill_architect` | sonnet | medium | ⏳ |
+
 ---
 
 ## Rule audit
@@ -108,6 +135,7 @@ Cross-subject ordering:
 | W26 | W27 | W27 declares an invoker for a script that must already exist (`RA-16`). |
 | W31 | W32 | W32 wires a script that must already exist (`RA-16`). |
 | W32 | W39 | W39 makes CI fetch the tags the wired check reads. |
+| W44 | W45 | The merge must deprecate the old `SessionStart` command before the template stops shipping it, or a re-install leaves both hooks in the host. |
 | W28 | W29 | W29 Phase 3 invokes `session_state.py block`. |
 | W38 | W29 | W29 names `session_state.py unblock` as the only way to lift the block. |
 | W07, W08 | W29 | W29 applies rule 3 of D6 (defined in W07 and W08 artifacts). |
@@ -188,7 +216,7 @@ No other rule violation found: contiguous ids W00-W37 (38 rows, matches `Cost`),
 | W21 | C-1 fixed for the only prescribed post-seal path outside anchor + CHANGELOG (`.agent_state/mirror.json`); host H1 is asked which file its routine commits touch | Host H1 verdict message |
 | W25 | C-9 verdict for host H1: not reproduced in the nucleus; the fields are likely host-side content | Host H1 verdict message |
 | W22 | C-2 reproduced from plan line 206 only: the host H1 report text is no longer in the repository; confirm with H1 that the defect matches. Open design question (not C-2): `agents.md §0` places history under `sprints/` and `config/artifact_registry.json` names `PHASE_REGISTER.md` the phase record, yet Phase 4 reconstructs it under `docs/roadmaps/` | Host H1 verdict message; a later core-pipeline sprint |
-| W36 | `install.sh` still named as the command in `scripts/bridge_state.py:33`, `scripts/session_start.py:488-490` (`_run_bridge_install` runs the shim and reports "scripts/install.sh missing"), `workflows/deployment_workflow.md:28`, `rules/project_topology.md:34`, `tests/test_session_start.py:764` docstring | `KI-057-5`, a later core-pipeline sprint |
+| W36 | `install.sh` still named as the command in `scripts/bridge_state.py:33`, `scripts/session_start.py:488-490` (`_run_bridge_install` runs the shim and reports "scripts/install.sh missing"), `workflows/deployment_workflow.md:28`, `rules/project_topology.md:34`, `tests/test_session_start.py:764` docstring | `KI-057-5` → Ola E (W40-W59), this sprint, human decision 2026-10-25 |
 | W31 | `HISTORICAL_GAPS` = `v3.4.0`, `v3.5.2`: tags released without a ledger section; closed history not rewritten | Recorded; no action |
 
 ## Resume point (updated 2026-10-25, session `d2b5fc4e-e365-4ed1-b5fb-0d4148b83a97`)
