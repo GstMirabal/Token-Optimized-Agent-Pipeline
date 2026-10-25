@@ -31,6 +31,8 @@ from typing import Any
 # destination before merging so a re-install upgrades them instead of leaving
 # a stale duplicate alongside the new guarded variant (list-merge only appends).
 DEPRECATED_HOOK_COMMANDS = {
+    # Pre-W45 SessionStart command (echo names the install.sh shim); W45 retires it.
+    "if [ -f .agents/hooks/on_init.py ]; then python3 .agents/hooks/on_init.py; else echo '\u26a0\ufe0f [.agents] hooks unavailable \u2014 initialize the submodule: git submodule update --init .agents && .agents/scripts/install.sh'; fi",
     "python3 .agents/hooks/on_init.py",
     "python3 .agents/hooks/on_commit.py",
     "python3 .agents/hooks/state_mirror.py",
