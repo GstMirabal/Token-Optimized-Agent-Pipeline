@@ -9,7 +9,7 @@ Replace `bypassPermissions` with a four-axis posture — **effectiveness, securi
 
 ## 2. Prerequisites
 - `.agents` installed as a submodule (or this nucleus clone)
-- Bridge installed at least once: `.agents/scripts/install.sh --target claude` and/or `--target cursor`
+- Bridge installed at least once: `python3 .agents/scripts/install.py --target claude` and/or `--target cursor`
 - Sprint 027 scripts present: `persist_session_context.py`, `check_role_artifact.py`, `session_end_hook.py`
 
 ## 3. Steps
@@ -26,7 +26,7 @@ Replace `bypassPermissions` with a four-axis posture — **effectiveness, securi
 Binding rule: a control whose only instance is `settings.json` is not admitted as a framework guarantee.
 
 ### 3.2 Apply the template under Claude Code
-1. From the **host** root: `.agents/scripts/install.sh --target claude`
+1. From the **host** root: `python3 .agents/scripts/install.py --target claude`
 2. Confirm merge: host `.claude/settings.json` gained `hooks.PreCompact`, `SubagentStop`, `SessionEnd`, and retained any host-only `permissions.deny` entries (re-install is additive; see `scripts/merge_json.py`).
 3. Copy classifier posture to a scope Claude Code actually reads for auto mode:
    - Project `.claude/settings.json` still carries the template (deny floor, hooks, sandbox hints).
