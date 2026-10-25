@@ -88,6 +88,20 @@ class TestDeprecatedHookPrune:
         pre_cmds = [h["command"] for m in merged["hooks"]["PreToolUse"] for h in m["hooks"]]
         assert "python3 my_own_hook.py" in pre_cmds
 
+    def test_pre_install_py_session_start_command_is_replaced(self):
+        """W44: the SessionStart command naming the install.sh shim is retired."""
+        import json as _json
+        template = _json.loads(
+            (Path(__file__).resolve().parent.parent / "claude" / "settings.hooks.json").read_text())
+        new_cmd = template["hooks"]["SessionStart"][0]["hooks"][0]["command"]
+        old_cmd = next(c for c in merge_json.DEPRECATED_HOOK_COMMANDS if "install.sh" in c)
+        assert old_cmd != new_cmd
+        dest = {"hooks": {"SessionStart": [{"hooks": [{"type": "command", "command": old_cmd}]}]}}
+        merge_json.prune_deprecated_hooks(dest)
+        merged = merge_json.merge(dest, template)
+        cmds = [h["command"] for m in merged["hooks"]["SessionStart"] for h in m["hooks"]]
+        assert cmds == [new_cmd]
+
 
 def test_merge_preserves_host_deny_and_adds_template_deny():
     """Abort criterion for Sprint 027 C1: re-install must not drop host deny rules."""
