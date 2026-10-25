@@ -758,10 +758,37 @@ def _denied_claude_boot(session_start, monkeypatch, tmp_path, nucleus: bool, out
     return "\n".join(notes)
 
 
+def test_run_bridge_install_runs_install_py_with_the_running_interpreter(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """W40: the bridge installer is install.py under sys.executable, not bash."""
+    (tmp_path / "scripts").mkdir()
+    installer = tmp_path / "scripts" / "install.py"
+    installer.write_text("")
+    seen: list[list[str]] = []
+
+    def fake_run(argv, **kwargs):
+        seen.append(list(argv))
+        return subprocess.CompletedProcess(argv, 0, stdout="", stderr="")
+
+    monkeypatch.setattr(session_start.subprocess, "run", fake_run)
+    code, _ = session_start._run_bridge_install(tmp_path, "claude")
+    assert code == 0
+    assert seen == [[sys.executable, str(installer), "--target", "claude"]]
+
+
+def test_run_bridge_install_missing_names_install_py(
+    session_start, tmp_path: Path
+) -> None:
+    code, msg = session_start._run_bridge_install(tmp_path, "claude")
+    assert code == 2
+    assert "scripts/install.py" in msg
+
+
 def test_bridge_advisory_names_the_host_path_in_host_mode(
     session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    """Sprint 055 U06: a host has no `scripts/install.sh`, only `.agents/scripts/`."""
+    """Sprint 055 U06: a host has no `scripts/install.py`, only `.agents/scripts/`."""
     text = _denied_claude_boot(
         session_start, monkeypatch, tmp_path, False,
         "PermissionError: '/host/.claude/settings.json'", 1,

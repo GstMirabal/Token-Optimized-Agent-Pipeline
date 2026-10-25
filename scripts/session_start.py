@@ -485,13 +485,13 @@ def _refresh_bridge_lock(root: Path, target: str) -> int:
 
 
 def _run_bridge_install(root: Path, target: str) -> tuple[int, str]:
-    installer = root / "scripts" / "install.sh"
+    installer = root / "scripts" / "install.py"
     if not installer.is_file():
-        msg = "boot: scripts/install.sh missing"
+        msg = "boot: scripts/install.py missing"
         print(msg, file=sys.stderr)
         return 2, msg
     proc = subprocess.run(
-        ["bash", str(installer), "--target", target],
+        [sys.executable, str(installer), "--target", target],
         cwd=str(root),
         capture_output=True,
         text=True,
