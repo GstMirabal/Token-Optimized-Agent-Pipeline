@@ -26,7 +26,7 @@ cover the 38 units, so `Destination` is `N/A` on every row.
 
 ## Staffing
 
-### Ola A — criteria and scale
+### Wave A — criteria and scale
 
 | # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -35,7 +35,7 @@ cover the 38 units, so `Destination` is `N/A` on every row.
 | W08 | `docs/standards/templates/SPRINT_LOG_TEMPLATE.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | W09 | `scripts/check_gate_log.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 
-### Ola B — S0 lane (W01 blocks W02-W06)
+### Wave B — S0 lane (W01 blocks W02-W06)
 
 | # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -46,7 +46,7 @@ cover the 38 units, so `Destination` is `N/A` on every row.
 | W05 | `rules/project_topology.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
 | W06 | `agents.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
 
-### Ola C — block 1 defects
+### Wave C — block 1 defects
 
 | # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -74,7 +74,7 @@ cover the 38 units, so `Destination` is `N/A` on every row.
 | W31 | `scripts/check_changelog_tags.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | W32 | `Makefile` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 
-### Ola D — S3 residues and documentation
+### Wave D — S3 residues and documentation
 
 | # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -91,7 +91,7 @@ cover the 38 units, so `Destination` is `N/A` on every row.
 | W38 | `scripts/session_state.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | W39 | `.github/workflows/ci.yml` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 
-### Ola E — `install.sh` residue (`KI-057-5`, human decision 2026-10-25)
+### Wave E — `install.sh` residue (`KI-057-5`, human decision 2026-10-25)
 
 | # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -116,7 +116,7 @@ cover the 38 units, so `Destination` is `N/A` on every row.
 | W58 | `skills/slash-commander/README.md` | modify | sequential | `skill_architect` | N/A | `agents/skill_architect.md` |
 | W59 | `skills/slash-commander/SKILL.md` | modify | sequential | `skill_architect` | N/A | `agents/skill_architect.md` |
 
-### Ola F — Gate 1 round 1 remediation (human decision 2026-10-26)
+### Wave F — Gate 1 round 1 remediation (human decision 2026-10-26)
 
 | # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
