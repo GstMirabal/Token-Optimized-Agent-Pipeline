@@ -1,12 +1,14 @@
 ---
 description: "Emergency Rollback and Remediation Protocol (Keyword: remediation)"
-version: 2.0.0
+version: 2.0.1
 invoked_by: human:/agents:remediation, rules/qa_and_testing.md#4-the-double-gate-review-protocol, workflows/pipeline_workflow.md
 ---
 
 # 🛡️ Workflow: Remediation (Rollback & Recovery)
 
 A critical emergency protocol designed to intercept infinite hallucination loops or Double-Gate stalemates. Its sole purpose is to nuke corrupted state, extract negative-heuristics natively, and return the system to safety.
+
+**Command paths.** A command in this workflow without a `.agents/` prefix is written in nucleus form, relative to the `.agents` root (`python3 scripts/…`). A host runs it from the host root with the prefix (`python3 .agents/scripts/…`). The nucleus form fails in a host with `can't open file` (`F-115-N3`).
 
 ## Execution Flow
 
