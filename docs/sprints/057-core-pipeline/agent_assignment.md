@@ -84,6 +84,59 @@ cover the 38 units, so `Destination` is `N/A` on every row.
 | W36 | `scripts/install.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | W37 | `skills/env-shielding-auditor/README.md` | modify | sequential | `skill_architect` | N/A | `agents/skill_architect.md` |
 
+### Added in execution — W38, W39 (human decision 2026-10-24)
+
+| # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| W38 | `scripts/session_state.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W39 | `.github/workflows/ci.yml` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+
+### Ola E — `install.sh` residue (`KI-057-5`, human decision 2026-10-25)
+
+| # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| W40 | `scripts/session_start.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W41 | `scripts/bridge_state.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W42 | `scripts/_root.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W43 | `tests/test_root_resolution.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W44 | `scripts/merge_json.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W45 | `claude/settings.hooks.json` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W46 | `config/invocation_exceptions.json` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W47 | `.gitignore` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W48 | `workflows/start_workflow.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| W49 | `workflows/deployment_workflow.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| W50 | `rules/project_topology.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| W51 | `docs/guides/AUTONOMY_POSTURE_GUIDE.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| W52 | `docs/guides/SELF_IMPROVEMENT_GUIDE.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| W53 | `docs/standards/templates/SYSTEM_OVERVIEW_TEMPLATE.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| W54 | `docs/architecture/global_topology.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| W55 | `docs/architecture/topology_map.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| W56 | `profiles/example-project/README.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| W57 | `.github/ISSUE_TEMPLATE/bug_report.yml` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| W58 | `skills/slash-commander/README.md` | modify | sequential | `skill_architect` | N/A | `agents/skill_architect.md` |
+| W59 | `skills/slash-commander/SKILL.md` | modify | sequential | `skill_architect` | N/A | `agents/skill_architect.md` |
+
+### Ola F — Gate 1 round 1 remediation (human decision 2026-10-26)
+
+| # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| W60 | `scripts/session_state.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W61 | `scripts/_repro_grammar.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W62 | `scripts/check_fix_reproduces.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W63 | `scripts/check_fix_reproduces.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W64 | `hooks/on_commit.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W65 | `rules/code_craft.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| W66 | `agents.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| W67 | `scripts/install_claude.sh` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W68 | `docs/sprints/057-core-pipeline/task_scope.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
+| W69 | `scripts/session_start.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W70 | `scripts/check_changelog_tags.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W71 | `scripts/check_changelog_tags.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W72 | `scripts/py_compile_tree.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W73 | `scripts/check_role_artifact.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W74 | `workflows/pipeline_workflow.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| W75 | `workflows/remediation_workflow.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+
 ## Disagreements with the plan
 
 | # | Plan proposed | Assigned | Reason |

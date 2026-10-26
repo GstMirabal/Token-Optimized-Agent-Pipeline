@@ -111,6 +111,31 @@ Every row replaces a prescription to run the deprecated shim `install.sh` with `
 | W58 | `skills/slash-commander/README.md` | modify (`:49`) | low | `skill_architect` | sonnet | medium | ✅ `9d32318` |
 | W59 | `skills/slash-commander/SKILL.md` | modify (`:12`, `:30`; own skill, not vendored) | low | `skill_architect` | sonnet | medium | ✅ `e9cc07a` |
 
+### Ola F — Gate 1 round 1 remediation (QA1-1..QA1-10, added by human decision 2026-10-26)
+
+QA Gate 1 round 1 rejected the sprint (`SPRINT_LOG.md` Quality Gate, `a9ae7f9`). Every finding is remediated, S3 included, by human decision. QA1-3 widened during scoping: `hooks/on_commit.py` and `scripts/check_fix_reproduces.py` also disagree on what a test path is (`tests.py`; a staged test file counts as source in the hook). W61, W62 and W64 therefore replace both classifications with one shared definition instead of adding `.json` to the hook's suffix list (`agents.md §1 fail_closed_claims`). Gate 1 round 2 reviews `a9ae7f9..HEAD`.
+
+| # | File | Operation | Risk | Assignee | Model | Effort | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| W60 | `scripts/session_state.py` | modify (QA1-1: `_hotfix_refusal` judges the deployed ref: the branch condition reads `--branch` when given and the `HEAD` branch only otherwise; the hotfix record must exist in the tip tree, not the working tree; test `tests/test_session_state.py` reproduces the round 1 case) | high | `implementer_agent` | sonnet | medium | ⏳ |
+| W61 | `scripts/_repro_grammar.py` | modify (QA1-3: add `is_test_path` and `is_source_path`, one definition for hook and replayer; `tests.py` is a test; test `tests/test_repro_grammar.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| W62 | `scripts/check_fix_reproduces.py` | modify (QA1-3: import the W61 predicates, delete the local `is_test_path` and `NON_SOURCE_SUFFIXES`; existing tests unchanged) | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| W63 | `scripts/check_fix_reproduces.py` | modify (QA1-6: insert the script directory into `sys.path` before the sibling import, as `check_changelog_tags.py:54`; test `tests/test_check_fix_reproduces.py` runs the script under `python3 -I`) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W64 | `hooks/on_commit.py` | modify (QA1-3 + QA1-2: `audit_regression_test` uses the W61 predicates, deleting `TEST_PATH` and `SOURCE_SUFFIXES`; docstring and rejection text name `Repro: manual` as the route for an untestable fix; test `tests/test_on_commit.py`: a JSON-only `fix(` without trailer is rejected) | high | `implementer_agent` | sonnet | medium | ⏳ |
+| W65 | `rules/code_craft.md` | modify (QA1-2: `:80` commit-time row states the test-or-`Repro: manual` alternative and the W61 source definition) | low | `rule_validator` | sonnet | medium | ⏳ |
+| W66 | `agents.md` | modify (QA1-2: `§2 jurisdictional_lock` companion clause says a paired test or a `Repro: manual` trailer) | medium | `rule_validator` | sonnet | medium | ⏳ |
+| W67 | `scripts/install_claude.sh` | modify (QA1-4: deprecation message names `scripts/install.py`; `exec` target unchanged; test `tests/test_installer.sh` when it asserts the message) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W68 | `docs/sprints/057-core-pipeline/task_scope.md` | modify (QA1-5: W44/W45 rows state where the test landed and what it covers; QA1-4: drop `scripts/install_claude.sh` from the Ola E keep-list) | low | `orchestrator` | sonnet | medium | ⏳ |
+| W69 | `scripts/session_start.py` | modify (QA1-7: the lock permission-denied message names the SessionStart hook only for target `claude`; for any other target it names `install.py`'s `install_command`; test `tests/test_session_start.py`) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W70 | `scripts/check_changelog_tags.py` | modify (QA1-8: resolve `--changelog` against the invocation directory before `os.chdir`; test `tests/test_check_changelog_tags.py`) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W71 | `scripts/check_changelog_tags.py` | modify (QA1-9: Google-style `Args:`/`Returns:` at `:113`) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W72 | `scripts/py_compile_tree.py` | modify (QA1-9: Google-style `Args:`/`Returns:` at `:35`, `:45`) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W73 | `scripts/check_role_artifact.py` | modify (QA1-9: Google-style `Args:`/`Returns:` at `:300`, `:315`, `:325`) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W74 | `workflows/pipeline_workflow.md` | modify (QA1-10: one path-form note under the title: commands are written in nucleus form, a host prefixes `.agents/`; version bump; regenerated step map as companion) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| W75 | `workflows/remediation_workflow.md` | modify (QA1-10: same note; version bump; regenerated step map as companion) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+
+Ordering: W61 before W62 and W64 (both import its predicates); W62 before W63 (same subject); W70 before W71 (same subject); W60 claims `scripts/session_state.py` after W38. `fix(` units with paired test and `Repro:` trailer: W60, W63, W64, W69, W70 (W67 when `tests/test_installer.sh` asserts the message, else `Repro: manual`).
+
 ---
 
 ## Rule audit
@@ -219,6 +244,6 @@ No other rule violation found: contiguous ids W00-W37 (38 rows, matches `Cost`),
 | W36 | `install.sh` still named as the command in `scripts/bridge_state.py:33`, `scripts/session_start.py:488-490` (`_run_bridge_install` runs the shim and reports "scripts/install.sh missing"), `workflows/deployment_workflow.md:28`, `rules/project_topology.md:34`, `tests/test_session_start.py:764` docstring | `KI-057-5` → Ola E (W40-W59), this sprint, human decision 2026-10-25 |
 | W31 | `HISTORICAL_GAPS` = `v3.4.0`, `v3.5.2`: tags released without a ledger section; closed history not rewritten | Recorded; no action |
 
-## Resume point (updated 2026-10-25, session `d2b5fc4e-e365-4ed1-b5fb-0d4148b83a97`)
+## Resume point (updated 2026-10-26, session `aeda1d83-cbd8-463b-8f56-25f5958d428e`)
 
-Every Work row is resolved (✅ or ⛔ with its KI/RECORD). W38, W39 and wave E (W40-W59, `KI-057-5`) were added in execution by human decision; `make verify` 0, 1245 passed at the wave E tip. Next: pipeline Phase 7 (Quality Gate), `qa_agent` then `tester_agent`, each in fresh context, base `5851b18`; Gate 1 starts with `python3 scripts/check_fix_reproduces.py --range 5851b18..HEAD`. Then Phase 8 closeout.
+QA Gate 1 round 1 REJECTED (charter, S1; `a9ae7f9`). Next: execute Ola F (W60-W75) in row order, then Gate 1 round 2 in fresh context over the remediation diff `a9ae7f9..HEAD`, starting with `python3 scripts/check_fix_reproduces.py --range a9ae7f9..HEAD`; then Gate 2 (`tester_agent`, fresh context, base `5851b18`); then Phase 8 closeout. Before closeout, `SPRINT_LOG.md` Sprint Progression still shows its Phase 3 state and must be brought in line with this file.
