@@ -801,6 +801,19 @@ def test_require_released_hotfix_judges_the_branch_ref_not_head(repo: Path):
     assert _require(repo, "--branch", "ai-sprint/058", "--hotfix", "H-009") == 2
 
 
+
+def test_require_released_hotfix_branch_condition_reads_the_branch_ref(repo: Path):
+    """The tip tracks the record and its subject does not name the hotfix, so only
+    the branch condition decides; it must read `--branch`, not `HEAD` (QA2-1)."""
+    seal = _hotfix_repo(repo)
+    _git(repo, "checkout", "-q", "-b", "ai-sprint/059", seal)
+    (repo / "docs" / "hotfixes").mkdir(parents=True, exist_ok=True)
+    (repo / "docs" / "hotfixes" / "H-009-bridge.md").write_text("# H-009", encoding="utf-8")
+    _git(repo, "add", "docs/hotfixes/H-009-bridge.md")
+    _git(repo, "commit", "-q", "-m", "feat(x): unsealed sprint work #059")
+    _git(repo, "checkout", "-q", "hotfix/H-009")
+    assert _require(repo, "--branch", "ai-sprint/059", "--hotfix", "H-009") == 2
+
 def test_require_released_hotfix_accepts_hotfix_branch_ref_from_main(repo: Path):
     _hotfix_repo(repo)
     _git(repo, "checkout", "-q", "main")
