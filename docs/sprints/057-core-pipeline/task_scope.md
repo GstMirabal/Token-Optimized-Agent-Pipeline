@@ -159,6 +159,20 @@ QA Gate 1 round 2 rejected the remediation (`SPRINT_LOG.md` Quality Gate, `af071
 
 Ordering: W78-W82 before W88 (the check is green only once every instance is fixed); W86 and W87 last among the sprint records.
 
+
+### Wave H — Gate 1 round 3 record remediation (QA3-1..QA3-3, added by human decision 2026-10-26)
+
+QA Gate 1 round 3 emitted RECORD (testifying, S2) and closed QA2-1..QA2-7. Every recorded finding is remediated by the standing human decision to fix all findings. QA3-1 is the second misstatement of the same docstring paragraph about which staged files the regression gate sees (QA2-4, QA3-1), so W89 pins the behavior with an end-to-end test before W90 rewrites the text and cites it. Gate 1 round 4 reviews the wave H diff.
+
+| # | File | Operation | Risk | Assignee | Model | Effort | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| W89 | `tests/test_code_craft_gates.py` | modify (QA3-1: end-to-end tests in a scratch repository whose `commit-msg` hook runs `hooks/on_commit_msg.py`: `git add <source> && git commit -m "fix(...)"` and `git commit -a -m "fix(...)"` without a test or trailer are refused at commit time) | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| W90 | `hooks/on_commit.py` | modify (QA3-1: `audit_regression_test` docstring names both callers — the PreToolUse guard sees the index before the command runs; the `commit-msg` hook sees the index git commits — and cites the W89 tests) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W91 | `tests/test_session_state.py` | modify (QA3-2: two blank lines around the W77 test; `-> None` on it) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W92 | `docs/sprints/057-core-pipeline/task_scope.md` | modify (QA3-3: the W82 row drops "regenerated step map"; the W88 row points at the grep pattern in the Wave G paragraph) | low | `orchestrator` | sonnet | medium | ⏳ |
+
+Ordering: W89 before W90 (the docstring cites the tests).
+
 ---
 
 ## Rule audit
@@ -269,4 +283,4 @@ No other rule violation found: contiguous ids W00-W37 (38 rows, matches `Cost`),
 
 ## Resume point (updated 2026-10-26, session `aeda1d83-cbd8-463b-8f56-25f5958d428e`)
 
-QA Gate 1 round 2 REJECTED (charter, S2; `af071d9`); round 1 findings closed. Wave G (W77-W88) executed: every row ✅; `make verify` 0, 1277 passed; `python3 scripts/check_fix_reproduces.py --range af071d9..HEAD` 0 (no `fix(` commits). W77 mutation proof: reverting `on_branch` to `git_branch()` fails only the new test. W88 run against `af071d9` lists exactly the six round 2 instances. Next: Gate 1 round 3 in fresh context over `af071d9..HEAD`; then Gate 2 (`tester_agent`, fresh context, base `5851b18`); then Phase 8 closeout. A third consecutive REJECTED of the QA1-2 family opens `workflows/remediation_workflow.md`. Before closeout, `SPRINT_LOG.md` Sprint Progression still shows its Phase 3 state and must be brought in line with this file.
+QA Gate 1 round 3 RECORD (testifying, S2); QA2-1..QA2-7 closed. Next: execute Wave H (W89-W92), then Gate 1 round 4 in fresh context over the Wave H diff; then Gate 2 (`tester_agent`, fresh context, base `5851b18`); then Phase 8 closeout. Before closeout, `SPRINT_LOG.md` Sprint Progression still shows its Phase 3 state and must be brought in line with this file.
