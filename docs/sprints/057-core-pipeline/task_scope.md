@@ -173,6 +173,16 @@ QA Gate 1 round 3 emitted RECORD (testifying, S2) and closed QA2-1..QA2-7. Every
 
 Ordering: W89 before W90 (the docstring cites the tests).
 
+
+### Wave I — Gate 1 round 4 record remediation (QA4-1..QA4-3, added by human decision 2026-10-26)
+
+QA Gate 1 round 4 emitted RECORD (testifying, S2) and closed QA3-1..QA3-3. `RA-14` sweep before editing: `git grep -n -i -E "commit-msg|commit_msg|honestly partial|message gate"` outside `docs/sprints`, `docs/audits` and `CHANGELOG.md` leaves `hooks/on_commit.py:1071-1073` as the only stale statement; every other hit agrees with `hooks/on_commit_msg.py` and `scripts/install.py:428`. Gate 1 round 5 reviews the wave I diff.
+
+| # | File | Operation | Risk | Assignee | Model | Effort | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| W93 | `hooks/on_commit.py` | modify (QA4-1: `_run_commit_message_guards` docstring states that `hooks/on_commit_msg.py` covers terminal and IDE commits, instead of "needs a `commit-msg` hook") | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W94 | `tests/test_code_craft_gates.py` | modify (QA4-2: the W89 tests run git with `GIT_CONFIG_GLOBAL` set to an empty file and `GIT_CONFIG_NOSYSTEM=1`, proved by a global `core.hooksPath` that fails them before and not after; QA4-3: Google-style docstrings on `_install_commit_msg_hook` and `_shell`) | low | `implementer_agent` | sonnet | medium | ⏳ |
+
 ---
 
 ## Rule audit
@@ -283,4 +293,4 @@ No other rule violation found: contiguous ids W00-W37 (38 rows, matches `Cost`),
 
 ## Resume point (updated 2026-10-26, session `aeda1d83-cbd8-463b-8f56-25f5958d428e`)
 
-QA Gate 1 round 3 RECORD (testifying, S2); QA2-1..QA2-7 closed. Wave H (W89-W92) executed: every row ✅; `make verify` 0, 1279 passed; no `fix(` commits in `9b68a62..HEAD`. W89 mutation proof: removing `audit_regression_test` from `hooks/on_commit_msg.py` fails both new tests. Next: Gate 1 round 4 in fresh context over `9b68a62..HEAD`; then Gate 2 (`tester_agent`, fresh context, base `5851b18`); then Phase 8 closeout. Before closeout, `SPRINT_LOG.md` Sprint Progression still shows its Phase 3 state and must be brought in line with this file.
+QA Gate 1 round 4 RECORD (testifying, S2); QA3-1..QA3-3 closed. Next: execute Wave I (W93-W94), then Gate 1 round 5 in fresh context over the Wave I diff; then Gate 2 (`tester_agent`, fresh context, base `5851b18`); then Phase 8 closeout. Before closeout, `SPRINT_LOG.md` Sprint Progression still shows its Phase 3 state and must be brought in line with this file.

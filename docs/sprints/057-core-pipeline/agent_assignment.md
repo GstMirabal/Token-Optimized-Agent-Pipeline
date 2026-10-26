@@ -164,6 +164,13 @@ cover the 38 units, so `Destination` is `N/A` on every row.
 | W91 | `tests/test_session_state.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | W92 | `docs/sprints/057-core-pipeline/task_scope.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
 
+### Wave I — Gate 1 round 4 record remediation (human decision 2026-10-26)
+
+| # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| W93 | `hooks/on_commit.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W94 | `tests/test_code_craft_gates.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+
 ## Disagreements with the plan
 
 | # | Plan proposed | Assigned | Reason |
