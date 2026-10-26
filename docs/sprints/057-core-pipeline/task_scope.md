@@ -24,7 +24,7 @@ Declared escalations: none. No `devops_agent` row exists, so the mechanical-at-h
 
 Status values: ⏳ pending. Risk `high` touches a gate, the sandbox template or `agents.md`.
 
-### Ola A — criteria and scale
+### Wave A — criteria and scale
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -33,7 +33,7 @@ Status values: ⏳ pending. Risk `high` touches a gate, the sandbox template or 
 | W08 | `docs/standards/templates/SPRINT_LOG_TEMPLATE.md` | modify (Severity column, escape mark) | low | `doc_orchestrator` | sonnet | medium | ✅ `7d91479` |
 | W09 | `scripts/check_gate_log.py` | modify (count escape rows; paired test `tests/test_check_gate_log.py`) | low | `implementer_agent` | sonnet | medium | ✅ `e973077` |
 
-### Ola B — S0 lane (W01 blocks W02-W06)
+### Wave B — S0 lane (W01 blocks W02-W06)
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -44,7 +44,7 @@ Status values: ⏳ pending. Risk `high` touches a gate, the sandbox template or 
 | W05 | `rules/project_topology.md` | modify (database section) | medium | `rule_validator` | sonnet | medium | ⛔ abort criterion 1 → KI-057-1 |
 | W06 | `agents.md` | modify (RA-09 one sentence) | high | `rule_validator` | sonnet | medium | ⛔ abort criterion 1 → KI-057-1 |
 
-### Ola C — block 1 defects
+### Wave C — block 1 defects
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -74,7 +74,7 @@ Status values: ⏳ pending. Risk `high` touches a gate, the sandbox template or 
 | W32 | `Makefile` | modify (`verify` runs `check_changelog_tags.py`) | low | `implementer_agent` | sonnet | medium | ✅ `58a6728` |
 | W39 | `.github/workflows/ci.yml` | modify (`fetch-depth: 0` on checkout so `make verify` sees tags for `check_changelog_tags.py` check 1) — added in execution, human decision 2026-10-24 | low | `implementer_agent` | sonnet | medium | ✅ `df50276` |
 
-### Ola D — S3 residues and documentation
+### Wave D — S3 residues and documentation
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -84,7 +84,7 @@ Status values: ⏳ pending. Risk `high` touches a gate, the sandbox template or 
 | W36 | `scripts/install.py` | modify (B5 message names `install.py`) | low | `implementer_agent` | sonnet | medium | ✅ `186ec42` |
 | W37 | `skills/env-shielding-auditor/README.md` | modify (badge) | low | `skill_architect` | sonnet | medium | ✅ `9a084b5` |
 
-### Ola E — `install.sh` residue (`KI-057-5`, added in execution by human decision 2026-10-25)
+### Wave E — `install.sh` residue (`KI-057-5`, added in execution by human decision 2026-10-25)
 
 Every row replaces a prescription to run the deprecated shim `install.sh` with `install.py` (`agents.md §3 federation`). Kept unchanged, because they describe the shim correctly: `agents.md:78,112`, `README.md:60,107`, `SECURITY.md:17`, `docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md:16,35,138`, `docs/guides/SELF_IMPROVEMENT_GUIDE.md:34`, `scripts/install.py:3,5`, `tests/test_installer.sh` (tests the shim itself).
 
@@ -111,7 +111,7 @@ Every row replaces a prescription to run the deprecated shim `install.sh` with `
 | W58 | `skills/slash-commander/README.md` | modify (`:49`) | low | `skill_architect` | sonnet | medium | ✅ `9d32318` |
 | W59 | `skills/slash-commander/SKILL.md` | modify (`:12`, `:30`; own skill, not vendored) | low | `skill_architect` | sonnet | medium | ✅ `e9cc07a` |
 
-### Ola F — Gate 1 round 1 remediation (QA1-1..QA1-10, added by human decision 2026-10-26)
+### Wave F — Gate 1 round 1 remediation (QA1-1..QA1-10, added by human decision 2026-10-26)
 
 QA Gate 1 round 1 rejected the sprint (`SPRINT_LOG.md` Quality Gate, `a9ae7f9`). Every finding is remediated, S3 included, by human decision. QA1-3 widened during scoping: `hooks/on_commit.py` and `scripts/check_fix_reproduces.py` also disagree on what a test path is (`tests.py`; a staged test file counts as source in the hook). W61, W62 and W64 therefore replace both classifications with one shared definition instead of adding `.json` to the hook's suffix list (`agents.md §1 fail_closed_claims`). Gate 1 round 2 reviews `a9ae7f9..HEAD`.
 
@@ -125,7 +125,7 @@ QA Gate 1 round 1 rejected the sprint (`SPRINT_LOG.md` Quality Gate, `a9ae7f9`).
 | W65 | `rules/code_craft.md` | modify (QA1-2: `:80` commit-time row states the test-or-`Repro: manual` alternative and the W61 source definition) | low | `rule_validator` | sonnet | medium | ✅ `7a22d85` |
 | W66 | `agents.md` | modify (QA1-2: `§2 jurisdictional_lock` companion clause says a paired test or a `Repro: manual` trailer) | medium | `rule_validator` | sonnet | medium | ✅ `e10809c` |
 | W67 | `scripts/install_claude.sh` | modify (QA1-4: deprecation message names `scripts/install.py`; `exec` target unchanged; test `tests/test_installer.sh` when it asserts the message) | low | `implementer_agent` | sonnet | medium | ✅ `d5d242f` |
-| W68 | `docs/sprints/057-core-pipeline/task_scope.md` | modify (QA1-5: W44/W45 rows state where the test landed and what it covers; QA1-4: drop `scripts/install_claude.sh` from the Ola E keep-list) | low | `orchestrator` | sonnet | medium | ✅ `5e0df70` |
+| W68 | `docs/sprints/057-core-pipeline/task_scope.md` | modify (QA1-5: W44/W45 rows state where the test landed and what it covers; QA1-4: drop `scripts/install_claude.sh` from the Wave E keep-list) | low | `orchestrator` | sonnet | medium | ✅ `5e0df70` |
 | W69 | `scripts/session_start.py` | modify (QA1-7: the lock permission-denied message names the SessionStart hook only for target `claude`; for any other target it names `install.py`'s `install_command`; test `tests/test_session_start.py`) | low | `implementer_agent` | sonnet | medium | ✅ `4dc9fbf` |
 | W70 | `scripts/check_changelog_tags.py` | modify (QA1-8: resolve `--changelog` against the invocation directory before `os.chdir`; test `tests/test_check_changelog_tags.py`) | low | `implementer_agent` | sonnet | medium | ✅ `b5f8d3e` |
 | W71 | `scripts/check_changelog_tags.py` | modify (QA1-9: Google-style `Args:`/`Returns:` at `:113`) | low | `implementer_agent` | sonnet | medium | ✅ `9104649` |
@@ -264,7 +264,7 @@ No other rule violation found: contiguous ids W00-W37 (38 rows, matches `Cost`),
 | W21 | C-1 fixed for the only prescribed post-seal path outside anchor + CHANGELOG (`.agent_state/mirror.json`); host H1 is asked which file its routine commits touch | Host H1 verdict message |
 | W25 | C-9 verdict for host H1: not reproduced in the nucleus; the fields are likely host-side content | Host H1 verdict message |
 | W22 | C-2 reproduced from plan line 206 only: the host H1 report text is no longer in the repository; confirm with H1 that the defect matches. Open design question (not C-2): `agents.md §0` places history under `sprints/` and `config/artifact_registry.json` names `PHASE_REGISTER.md` the phase record, yet Phase 4 reconstructs it under `docs/roadmaps/` | Host H1 verdict message; a later core-pipeline sprint |
-| W36 | `install.sh` still named as the command in `scripts/bridge_state.py:33`, `scripts/session_start.py:488-490` (`_run_bridge_install` runs the shim and reports "scripts/install.sh missing"), `workflows/deployment_workflow.md:28`, `rules/project_topology.md:34`, `tests/test_session_start.py:764` docstring | `KI-057-5` → Ola E (W40-W59), this sprint, human decision 2026-10-25 |
+| W36 | `install.sh` still named as the command in `scripts/bridge_state.py:33`, `scripts/session_start.py:488-490` (`_run_bridge_install` runs the shim and reports "scripts/install.sh missing"), `workflows/deployment_workflow.md:28`, `rules/project_topology.md:34`, `tests/test_session_start.py:764` docstring | `KI-057-5` → Wave E (W40-W59), this sprint, human decision 2026-10-25 |
 | W31 | `HISTORICAL_GAPS` = `v3.4.0`, `v3.5.2`: tags released without a ledger section; closed history not rewritten | Recorded; no action |
 
 ## Resume point (updated 2026-10-26, session `aeda1d83-cbd8-463b-8f56-25f5958d428e`)
