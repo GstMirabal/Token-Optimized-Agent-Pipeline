@@ -44,12 +44,12 @@ import xml.etree.ElementTree as ET
 from collections.abc import Iterator
 from pathlib import Path
 
+from _repro_grammar import is_source_path
 from _repro_grammar import parse_trailers as _parse_claims
 
 LOG = logging.getLogger(__name__)
 RUNNER_PYTHON: str = sys.executable
 STRIPPED_ENV = ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "DJANGO_SETTINGS_MODULE")
-NON_SOURCE_SUFFIXES = frozenset({".md", ".rst", ".txt", ".yml", ".yaml", ".toml"})
 _FIX_SUBJECT = re.compile(r"^fix(\([^)]*\))?!?:|^fix\(")
 HINT = (
     "make the test fail by assertion on the parent (for example import the new "
@@ -116,24 +116,6 @@ def list_commits(repo: Path, spec: str) -> list[str]:
     return result.stdout.split()
 
 
-def is_test_path(path: str) -> bool:
-    """Tell whether a repository path is a test file.
-
-    Args:
-        path: Repository-relative path.
-
-    Returns:
-        True for files under a ``tests``/``test`` directory or named like a test.
-    """
-    p = Path(path)
-    name = p.name
-    return (
-        bool({"tests", "test", "__tests__"} & set(p.parts[:-1]))
-        or name.startswith("test_")
-        or p.stem.endswith(("_test", ".test", ".spec"))
-    )
-
-
 def touches_source(repo: Path, sha: str) -> bool:
     """Tell whether a commit changes at least one source file.
 
@@ -142,14 +124,10 @@ def touches_source(repo: Path, sha: str) -> bool:
         sha: Commit to inspect.
 
     Returns:
-        True when a changed path is neither a test nor a documentation/config file.
+        True when a changed path is source under ``_repro_grammar.is_source_path``.
     """
     out = _git(repo, "diff-tree", "--no-commit-id", "--name-only", "-r", "--root", sha).stdout
-    return any(
-        not is_test_path(f) and Path(f).suffix not in NON_SOURCE_SUFFIXES
-        for f in out.splitlines()
-        if f
-    )
+    return any(is_source_path(f) for f in out.splitlines() if f)
 
 
 def parse_trailers(message: str) -> list[str]:
