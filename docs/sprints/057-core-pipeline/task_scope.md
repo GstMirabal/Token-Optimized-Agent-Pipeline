@@ -86,7 +86,7 @@ Status values: ⏳ pending. Risk `high` touches a gate, the sandbox template or 
 
 ### Ola E — `install.sh` residue (`KI-057-5`, added in execution by human decision 2026-10-25)
 
-Every row replaces a prescription to run the deprecated shim `install.sh` with `install.py` (`agents.md §3 federation`). Kept unchanged, because they describe the shim correctly: `agents.md:78,112`, `README.md:60,107`, `SECURITY.md:17`, `docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md:16,35,138`, `docs/guides/SELF_IMPROVEMENT_GUIDE.md:34`, `scripts/install.py:3,5`, `scripts/install_claude.sh`, `tests/test_installer.sh` (tests the shim itself).
+Every row replaces a prescription to run the deprecated shim `install.sh` with `install.py` (`agents.md §3 federation`). Kept unchanged, because they describe the shim correctly: `agents.md:78,112`, `README.md:60,107`, `SECURITY.md:17`, `docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md:16,35,138`, `docs/guides/SELF_IMPROVEMENT_GUIDE.md:34`, `scripts/install.py:3,5`, `tests/test_installer.sh` (tests the shim itself).
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -94,8 +94,8 @@ Every row replaces a prescription to run the deprecated shim `install.sh` with `
 | W41 | `scripts/bridge_state.py` | modify (docstring `:33`, `:226`) | low | `implementer_agent` | sonnet | medium | ✅ `bedf2da` |
 | W42 | `scripts/_root.py` | modify (comment `:71`) | low | `implementer_agent` | sonnet | medium | ✅ `027d439` |
 | W43 | `tests/test_root_resolution.py` | modify (docstring `:57`) | low | `implementer_agent` | sonnet | medium | ✅ `7245cdc` |
-| W44 | `scripts/merge_json.py` | modify (`DEPRECATED_HOOK_COMMANDS` gains the `SessionStart` command string W45 retires; test `tests/test_merge_json.py`) | high | `implementer_agent` | sonnet | medium | ✅ `6296e09` |
-| W45 | `claude/settings.hooks.json` | modify (`:78` hook fallback message names `install.py`; reviewed-copy tests updated in the same commit) | high | `implementer_agent` | sonnet | medium | ✅ `3b35681` |
+| W44 | `scripts/merge_json.py` | modify (`DEPRECATED_HOOK_COMMANDS` gains the `SessionStart` command string W45 retires; its test `tests/test_merge_json.py::test_pre_install_py_session_start_command_is_replaced` landed with W45 in `3b35681`, because it reads the W45 template) | high | `implementer_agent` | sonnet | medium | ✅ `6296e09` |
+| W45 | `claude/settings.hooks.json` | modify (`:78` hook fallback message names `install.py`; carries W44's test `tests/test_merge_json.py::test_pre_install_py_session_start_command_is_replaced`, which pins that the retired command differs from the template's and is pruned on merge; no reviewed-copy test pins the new fallback text) | high | `implementer_agent` | sonnet | medium | ✅ `3b35681` |
 | W46 | `config/invocation_exceptions.json` | modify (note `:65`) | low | `implementer_agent` | sonnet | medium | ✅ `cabfa69` |
 | W47 | `.gitignore` | modify (comment `:101`) | low | `implementer_agent` | sonnet | medium | ✅ `2486161` |
 | W48 | `workflows/start_workflow.md` | modify (`:33` bridge_check) | low | `doc_orchestrator` | sonnet | medium | ✅ `0b110fc` |
