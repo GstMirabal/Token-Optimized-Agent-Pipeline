@@ -9,8 +9,9 @@ consumers import it. Pure stdlib, no I/O.
 
 The same split existed for which staged paths are tests and which are source
 (Gate 1 round 1, QA1-3): the hook used a suffix allowlist and the replayer a
-documentation denylist, so a JSON-only ``fix(`` passed the hook and failed the
-replay. ``is_test_path`` and ``is_source_path`` are the one definition both use.
+denylist of documentation and .yml/.yaml/.toml configuration suffixes, so a
+JSON-only ``fix(`` passed the hook and failed the replay. ``is_test_path`` and
+``is_source_path`` are the one definition both use.
 
 Accepted forms (the separator is an em dash or ``--``):
 
@@ -115,9 +116,10 @@ def is_test_path(path: str) -> bool:
 def is_source_path(path: str) -> bool:
     """Tell whether a repository path is source a ``fix(`` must prove with a test.
 
-    Source is every path that is neither a test nor a documentation file: a
-    denylist of ``NON_SOURCE_SUFFIXES``, so configuration (``.json``), shell and
-    suffixless files such as ``Makefile`` count as source.
+    Source is every path that is not a test and whose suffix is not in
+    ``NON_SOURCE_SUFFIXES``: documentation (``.md``, ``.rst``, ``.txt``) and
+    ``.yml``/``.yaml``/``.toml`` configuration. ``.json`` configuration, shell
+    and suffixless files such as ``Makefile`` count as source.
 
     Args:
         path: Repository-relative path.
