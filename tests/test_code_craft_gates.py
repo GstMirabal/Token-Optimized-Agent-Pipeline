@@ -142,3 +142,40 @@ def test_message_file_passes_when_the_test_is_staged(repo, monkeypatch):
 def test_missing_message_file_does_not_crash(monkeypatch, tmp_path):
     monkeypatch.setattr(sys, "argv", ["on_commit_msg.py", str(tmp_path / "absent")])
     assert ocm.main() == 0
+
+
+# --- commit-msg sees files staged by the same command (Sprint 057 QA3-1) ---
+
+HOOK_SCRIPT = Path(__file__).resolve().parent.parent / "hooks" / "on_commit_msg.py"
+
+
+def _install_commit_msg_hook(root: Path) -> None:
+    """Point `root`'s commit-msg hook at this repository's `on_commit_msg.py`."""
+    hook = root / ".git" / "hooks" / "commit-msg"
+    hook.write_text(f'#!/bin/sh\nexec "{sys.executable}" "{HOOK_SCRIPT}" "$1"\n')
+    hook.chmod(0o755)
+
+
+def _shell(command: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(command, shell=True, capture_output=True, text=True, check=False)
+
+
+def test_commit_msg_hook_judges_files_added_in_the_same_command(repo: Path) -> None:
+    """`git add x && git commit` stages after any PreToolUse check ran."""
+    _install_commit_msg_hook(repo)
+    Path("app.py").write_text("def f(): pass\n")
+    result = _shell('git add app.py && git commit -q -m "fix(app): correct it #057"')
+    assert result.returncode != 0
+    assert "must stage the test" in result.stderr
+
+
+def test_commit_msg_hook_judges_files_staged_by_commit_all(repo: Path) -> None:
+    """`git commit -a` stages tracked changes inside the commit itself."""
+    _install_commit_msg_hook(repo)
+    Path("cfg.json").write_text("{}\n")
+    subprocess.run(["git", "add", "cfg.json"], check=True)
+    subprocess.run(["git", "commit", "-q", "--no-verify", "-m", "chore: seed #057"], check=True)
+    Path("cfg.json").write_text('{"a": 1}\n')
+    result = _shell('git commit -a -q -m "fix(cfg): correct it #057"')
+    assert result.returncode != 0
+    assert "must stage the test" in result.stderr
