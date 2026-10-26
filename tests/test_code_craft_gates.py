@@ -226,3 +226,35 @@ def test_message_file_passes_sprint_commit_when_scope_exists(repo, monkeypatch):
     msg.write_text("feat(app): add f #052\n")
     monkeypatch.setattr(sys, "argv", ["on_commit_msg.py", str(msg)])
     assert ocm.main() == 0
+
+
+# --- one list of message audits for both hooks (Sprint 057 convergence rule 3) ---
+# Family QA2-4, QA3-1, QA4-1, QA5-1: prose misstated which hook runs which
+# message guard. Exact coverage of these two tests, and no more: (1) every
+# module-level `audit_*` function of `hooks/on_commit.py` whose parameters are
+# exactly `(message, staged)` is in `MESSAGE_AUDITS`; (2) `hooks/on_commit_msg.py`
+# imports `MESSAGE_AUDITS` and no `audit_*` name.
+
+def test_every_message_audit_is_in_message_audits() -> None:
+    import inspect
+
+    import hooks.on_commit as oc
+
+    declared = {
+        fn for name, fn in inspect.getmembers(oc, inspect.isfunction)
+        if fn.__module__ == oc.__name__ and name.startswith("audit_")
+        and list(inspect.signature(fn).parameters) == ["message", "staged"]
+    }
+    assert declared == {audit for audit, _code in oc.MESSAGE_AUDITS}
+
+
+def test_commit_msg_hook_imports_the_list_not_single_audits() -> None:
+    import ast
+
+    tree = ast.parse(HOOK_SCRIPT.read_text(encoding="utf-8"))
+    imported = {
+        alias.name for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)
+        for alias in node.names
+    }
+    assert "MESSAGE_AUDITS" in imported
+    assert not {name for name in imported if name.startswith("audit_")}
