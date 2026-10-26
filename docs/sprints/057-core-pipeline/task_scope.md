@@ -183,6 +183,21 @@ QA Gate 1 round 4 emitted RECORD (testifying, S2) and closed QA3-1..QA3-3. `RA-1
 | W93 | `hooks/on_commit.py` | modify (QA4-1: `_run_commit_message_guards` docstring states that `hooks/on_commit_msg.py` covers terminal and IDE commits, instead of "needs a `commit-msg` hook") | low | `implementer_agent` | sonnet | medium | ✅ `383dfb7` |
 | W94 | `tests/test_code_craft_gates.py` | modify (QA4-2: the W89 tests run git with `GIT_CONFIG_GLOBAL` set to an empty file and `GIT_CONFIG_NOSYSTEM=1`, proved by a global `core.hooksPath` that fails them before and not after; QA4-3: Google-style docstrings on `_install_commit_msg_hook` and `_shell`) | low | `implementer_agent` | sonnet | medium | ✅ `aab9a82` |
 
+
+### Wave J — Gate 1 round 5 record remediation (QA5-1..QA5-2, added by human decision 2026-10-26)
+
+QA Gate 1 round 5 emitted RECORD (testifying, S2). QA5-1 is the fourth finding of one family (QA2-4, QA3-1, QA4-1, QA5-1: `hooks/on_commit.py` prose misstates which path runs which message guard), so convergence rule 3 applies. Human decisions 2026-10-26: remediate it with a deterministic check before Gate 2, and close the pre-existing gap QA5-1 exposed (Guard 5, `audit_task_scope_precondition`, ran only on the agent path) by running it in `hooks/on_commit_msg.py`. Design: one definition, `MESSAGE_AUDITS` in `hooks/on_commit.py`, iterated by both hooks; W98 fails when an `audit_*(message, staged)` function is left out of it or when `hooks/on_commit_msg.py` imports an audit by name. Gate 1 round 6 reviews the wave J diff.
+
+| # | File | Operation | Risk | Assignee | Model | Effort | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| W95 | `hooks/on_commit_msg.py` | modify (QA5-1 gap: run `audit_task_scope_precondition`, so terminal and IDE sprint commits outside the sprint directory need `task_scope.md`; test `tests/test_code_craft_gates.py`) | high | `implementer_agent` | sonnet | medium | ⏳ |
+| W96 | `hooks/on_commit.py` | modify (QA5-1: `MESSAGE_AUDITS`, the `(audit, log code)` pairs of Guards 3-5, iterated by `_run_commit_message_guards`; its docstring states Guards 2-5 and both paths) | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| W97 | `hooks/on_commit_msg.py` | modify (QA5-1: iterate `MESSAGE_AUDITS` instead of naming audits) | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| W98 | `tests/test_code_craft_gates.py` | modify (convergence rule 3: every module-level `audit_*` function of `hooks/on_commit.py` whose parameters are exactly `(message, staged)` is in `MESSAGE_AUDITS`, and `hooks/on_commit_msg.py` imports no `audit_*` name; the claim covers exactly those two properties) | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| W99 | `tests/test_code_craft_gates.py` | modify (QA5-2: the W89 isolation also removes `GIT_CONFIG_COUNT` and `GIT_CONFIG_PARAMETERS`, proved by an injected `core.hooksPath` that fails the tests before and not after) | low | `implementer_agent` | sonnet | medium | ⏳ |
+
+Ordering: W95 before W96 (the W96 docstring states that the `commit-msg` hook runs Guard 5); W96 before W97 and W98 (both read `MESSAGE_AUDITS`); W98 before W99 (same subject).
+
 ---
 
 ## Rule audit
@@ -293,4 +308,4 @@ No other rule violation found: contiguous ids W00-W37 (38 rows, matches `Cost`),
 
 ## Resume point (updated 2026-10-26, session `aeda1d83-cbd8-463b-8f56-25f5958d428e`)
 
-QA Gate 1 round 4 RECORD (testifying, S2); QA3-1..QA3-3 closed. Wave I (W93-W94) executed: every row ✅; `make verify` 0, 1279 passed. W94 proof: with a global `core.hooksPath` the suite went from 2 failed to 20 passed, and removing `audit_regression_test` from `hooks/on_commit_msg.py` still fails both W89 tests. Next: Gate 1 round 5 in fresh context over `d017b24..HEAD`; then Gate 2 (`tester_agent`, fresh context, base `5851b18`); then Phase 8 closeout. Before closeout, `SPRINT_LOG.md` Sprint Progression still shows its Phase 3 state and must be brought in line with this file.
+QA Gate 1 round 5 RECORD (testifying, S2); QA4-1..QA4-3 closed. Next: execute Wave J (W95-W99), then Gate 1 round 6 in fresh context over the Wave J diff; then Gate 2 (`tester_agent`, fresh context, base `5851b18`); then Phase 8 closeout. Before closeout, `SPRINT_LOG.md` Sprint Progression still shows its Phase 3 state and must be brought in line with this file.

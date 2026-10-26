@@ -171,6 +171,16 @@ cover the 38 units, so `Destination` is `N/A` on every row.
 | W93 | `hooks/on_commit.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | W94 | `tests/test_code_craft_gates.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 
+### Wave J — Gate 1 round 5 record remediation (human decision 2026-10-26)
+
+| # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| W95 | `hooks/on_commit_msg.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W96 | `hooks/on_commit.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W97 | `hooks/on_commit_msg.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W98 | `tests/test_code_craft_gates.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W99 | `tests/test_code_craft_gates.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+
 ## Disagreements with the plan
 
 | # | Plan proposed | Assigned | Reason |
