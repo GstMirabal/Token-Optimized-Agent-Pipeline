@@ -30,7 +30,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 sys.path.append(str(Path(__file__).parent.parent / "scripts"))
 from _mode import is_nucleus
-from _repro_grammar import parse_trailers
+from _repro_grammar import is_source_path, is_test_path, parse_trailers
 
 from hooks.telemetry import log_error
 
@@ -762,11 +762,6 @@ def is_valid_commit_message(message: str) -> bool:
     return bool(COMMIT_MSG_REGEX.match(first_line))
 
 
-TEST_PATH = re.compile(
-    r"(^|/)(tests?|__tests__)/|(^|/)test_[^/]+$|_test\.[a-z]+$|\.test\.[a-z]+$"
-    r"|\.spec\.[a-z]+$|(^|/)tests\.py$"
-)
-SOURCE_SUFFIXES = (".py", ".js", ".jsx", ".ts", ".tsx", ".go", ".rs", ".java", ".rb", ".php")
 MANIFESTS = ("requirements", "package.json", "pyproject.toml")
 # A manifest inside vendored material is not this project's dependency
 # declaration. The retroactive run over 156 commits flagged two commits whose
@@ -800,9 +795,10 @@ def _has_repro_trailer(message: str, staged: list[str]) -> bool:
 def audit_regression_test(message: str, staged: list[str]) -> str | None:
     """A bug fix must ship its test and record that it reproduced the bug.
 
-    Measured here: PRESENCE of a staged test file, and a recorded CLAIM, a
-    `Repro:` trailer naming the test and the short SHA at which it failed (or
-    `Repro: manual` naming a SPRINT_LOG section). Nothing here observes
+    Measured here: either a `Repro: manual` CLAIM naming a SPRINT_LOG section,
+    which is the route when no test can show the defect, or the PRESENCE of a
+    staged test file plus a `Repro:` trailer naming that test and the short SHA
+    at which it failed. Nothing here observes
     ordering: whether the test failed before the fix is observed afterwards by
     the replay `scripts/check_fix_reproduces.py --range <base>..HEAD` at QA
     Gate 1 (`RA-13 SEQUENTIAL_GATES`; a per-commit replay is too slow for a hook).
@@ -810,7 +806,9 @@ def audit_regression_test(message: str, staged: list[str]) -> str | None:
     Exempt by design, following the PR #27 lesson that a gate must recognise
     the legitimate case instead of blocking everything that resembles the
     illegitimate one: a `fix(` commit that stages no source file at all has
-    nothing to write a test against.
+    nothing to write a test against. Test and source paths are the shared
+    definitions of `scripts/_repro_grammar.py`, the ones the replay uses, so a
+    commit this hook accepts is not refused at Gate 1 for its file set.
 
     Args:
         message: The commit message.
@@ -821,15 +819,16 @@ def audit_regression_test(message: str, staged: list[str]) -> str | None:
     """
     if not message.startswith("fix("):
         return None
-    if not any(path.endswith(SOURCE_SUFFIXES) for path in staged):
-        return None  # Documentation, workflow or config fix: no test to write.
+    if not any(is_source_path(path) for path in staged):
+        return None  # Documentation or tests only: no source to write a test against.
     if any(c.kind == "manual" for c in parse_trailers(message)):
         return None  # `Repro: manual` is the alternative when no test can show the defect.
-    if not any(TEST_PATH.search(path) for path in staged):
-        return ("A `fix(` commit must stage the test that proves the bug (rules/code_craft.md §6). "
-                "Write the failing test, record the failure in a `Repro:` trailer, then fix. If "
-                "this fix genuinely cannot be tested, that is information about the design — say "
-                "so and commit as `refactor(` or `chore(` instead of relabelling it.")
+    if not any(is_test_path(path) for path in staged):
+        return ("A `fix(` commit that stages source must stage the test that proves the bug "
+                "(rules/code_craft.md §6): write the failing test, record the failure in a "
+                "`Repro:` trailer, then fix. When no test can show the defect, carry "
+                "`Repro: manual \u2014 <SPRINT_LOG section>` naming where the reproduction is "
+                "recorded. Relabelling the fix as `refactor(` or `chore(` is not a route.")
     if _has_repro_trailer(message, staged):
         return None
     return ("A `fix(` commit that stages source must carry a `Repro:` trailer, in one of two forms: "
