@@ -149,29 +149,53 @@ def test_missing_message_file_does_not_crash(monkeypatch, tmp_path):
 HOOK_SCRIPT = Path(__file__).resolve().parent.parent / "hooks" / "on_commit_msg.py"
 
 
-def _install_commit_msg_hook(root: Path) -> None:
-    """Point `root`'s commit-msg hook at this repository's `on_commit_msg.py`."""
+def _install_commit_msg_hook(root: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Point `root`'s commit-msg hook at this repository's `on_commit_msg.py`.
+
+    Global and system git config are dropped for the rest of the test, so a
+    developer's `core.hooksPath` cannot route git away from this hook.
+
+    Args:
+        root: The scratch repository.
+        monkeypatch: Fixture that scopes the git environment to the test.
+    """
+    empty = root / ".empty_gitconfig"
+    empty.write_text("")
+    monkeypatch.setenv("GIT_CONFIG_GLOBAL", str(empty))
+    monkeypatch.setenv("GIT_CONFIG_NOSYSTEM", "1")
     hook = root / ".git" / "hooks" / "commit-msg"
     hook.write_text(f'#!/bin/sh\nexec "{sys.executable}" "{HOOK_SCRIPT}" "$1"\n')
     hook.chmod(0o755)
 
 
 def _shell(command: str) -> subprocess.CompletedProcess[str]:
+    """Run one shell command line in the current directory.
+
+    Args:
+        command: The command line, run with `shell=True` so `&&` chains apply.
+
+    Returns:
+        subprocess.CompletedProcess[str]: The finished process, never raising.
+    """
     return subprocess.run(command, shell=True, capture_output=True, text=True, check=False)
 
 
-def test_commit_msg_hook_judges_files_added_in_the_same_command(repo: Path) -> None:
+def test_commit_msg_hook_judges_files_added_in_the_same_command(
+    repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """`git add x && git commit` stages after any PreToolUse check ran."""
-    _install_commit_msg_hook(repo)
+    _install_commit_msg_hook(repo, monkeypatch)
     Path("app.py").write_text("def f(): pass\n")
     result = _shell('git add app.py && git commit -q -m "fix(app): correct it #057"')
     assert result.returncode != 0
     assert "must stage the test" in result.stderr
 
 
-def test_commit_msg_hook_judges_files_staged_by_commit_all(repo: Path) -> None:
+def test_commit_msg_hook_judges_files_staged_by_commit_all(
+    repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """`git commit -a` stages tracked changes inside the commit itself."""
-    _install_commit_msg_hook(repo)
+    _install_commit_msg_hook(repo, monkeypatch)
     Path("cfg.json").write_text("{}\n")
     subprocess.run(["git", "add", "cfg.json"], check=True)
     subprocess.run(["git", "commit", "-q", "--no-verify", "-m", "chore: seed #057"], check=True)
