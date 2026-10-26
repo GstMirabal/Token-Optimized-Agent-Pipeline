@@ -222,11 +222,15 @@ def main(argv: list[str] | None = None) -> int:
         int: 0 clean, 2 on violation or error.
     """
     parser = argparse.ArgumentParser(description="Check CHANGELOG.md against git tags.")
-    parser.add_argument("--changelog", help="CHANGELOG path (default: framework CHANGELOG.md).")
+    parser.add_argument(
+        "--changelog",
+        help="CHANGELOG path, relative to the current directory (default: framework CHANGELOG.md).",
+    )
     args = parser.parse_args([] if argv is None else argv)
 
+    given = Path(args.changelog).resolve() if args.changelog else None
     os.chdir(agents_root())
-    path = Path(args.changelog) if args.changelog else Path("CHANGELOG.md")
+    path = given or Path("CHANGELOG.md")
     try:
         text = path.read_text(encoding="utf-8")
         tags = read_git_tags()

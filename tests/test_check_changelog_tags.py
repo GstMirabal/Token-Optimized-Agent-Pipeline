@@ -83,6 +83,16 @@ def test_zero_tags_bad_order_exits_2(tmp_path: Path, monkeypatch: pytest.MonkeyP
     assert cct.main(["--changelog", str(good)]) == 0
 
 
+
+def test_relative_changelog_resolves_from_invocation_dir(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """QA1-8: `--changelog` is read from the caller's directory, not the framework root."""
+    monkeypatch.setattr(cct, "read_git_tags", list)
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "good.md").write_text(CLEAN, encoding="utf-8")
+    assert cct.main(["--changelog", "good.md"]) == 0
+
 def test_notice_printed_on_stderr(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
