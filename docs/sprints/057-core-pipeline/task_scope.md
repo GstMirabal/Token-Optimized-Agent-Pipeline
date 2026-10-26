@@ -133,8 +133,9 @@ QA Gate 1 round 1 rejected the sprint (`SPRINT_LOG.md` Quality Gate, `a9ae7f9`).
 | W73 | `scripts/check_role_artifact.py` | modify (QA1-9: Google-style `Args:`/`Returns:` at `:300`, `:315`, `:325`) | low | `implementer_agent` | sonnet | medium | ⏳ |
 | W74 | `workflows/pipeline_workflow.md` | modify (QA1-10: one path-form note under the title: commands are written in nucleus form, a host prefixes `.agents/`; version bump; regenerated step map as companion) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 | W75 | `workflows/remediation_workflow.md` | modify (QA1-10: same note; version bump; regenerated step map as companion) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| W76 | `workflows/deployment_workflow.md` | modify (`RA-14` companion of W60: `sprint_seal_gate` hotfix conditions (1) and (2) state the tip-tracked record and the deployed branch) — added in execution | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 
-Ordering: W61 before W62 and W64 (both import its predicates); W62 before W63 (same subject); W70 before W71 (same subject); W60 claims `scripts/session_state.py` after W38. `fix(` units with paired test and `Repro:` trailer: W60, W63, W64, W69, W70 (W67 when `tests/test_installer.sh` asserts the message, else `Repro: manual`).
+Ordering: W61 before W62 and W64 (both import its predicates); W62 before W63 (same subject); W70 before W71 (same subject); W60 claims `scripts/session_state.py` after W38; W60 before W76. `fix(` units with paired test and `Repro:` trailer: W60, W63, W64, W69, W70 (W67 when `tests/test_installer.sh` asserts the message, else `Repro: manual`).
 
 ---
 
