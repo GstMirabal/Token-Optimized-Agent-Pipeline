@@ -437,25 +437,50 @@ def rev_parse(ref: str) -> str | None:
     return result.stdout.strip() if result.returncode == 0 else None
 
 
-def _hotfix_refusal(hotfix: str, tip: str, seal: str) -> str | None:
+def _tip_has_hotfix_record(hotfix: str, tip: str) -> bool:
+    """Tell whether the tip's tree, not the working tree, holds the hotfix record.
+
+    Args:
+        hotfix: A validated hotfix id such as ``H-008``.
+        tip: Full SHA of the ref being deployed.
+
+    Returns:
+        bool: True when ``docs/hotfixes/<hotfix>-*.md`` is tracked at ``tip``.
+    """
+    listed = subprocess.run(
+        ["git", "ls-tree", "--name-only", tip, "docs/hotfixes/"],
+        capture_output=True,
+        text=True,
+        check=False,
+    ).stdout.splitlines()
+    prefix = f"docs/hotfixes/{hotfix}-"
+    return any(name.startswith(prefix) and name.endswith(".md") for name in listed)
+
+
+def _hotfix_refusal(hotfix: str, tip: str, seal: str, branch: str | None) -> str | None:
     """Name the first RA-03 hotfix condition that does not hold, if any.
+
+    Every condition is judged on the ref being deployed: the record must be
+    tracked at ``tip``, and the branch condition reads ``branch`` when the
+    caller named one, falling back to the checked-out branch only otherwise.
 
     Args:
         hotfix: A validated hotfix id such as ``H-008``.
         tip: Full SHA of the ref being deployed.
         seal: ``last_close_commit`` from the anchor.
+        branch: The ``--branch`` ref, or None when the deployed ref is ``HEAD``.
 
     Returns:
         str | None: The failed condition, or None when all three hold. The
             fourth condition (status is not SUSPENDED) is checked by the caller
             before any tip comparison.
     """
-    if not any(Path("docs/hotfixes").glob(f"{hotfix}-*.md")):
-        return f"no hotfix record docs/hotfixes/{hotfix}-*.md exists"
+    if not _tip_has_hotfix_record(hotfix, tip):
+        return f"no hotfix record docs/hotfixes/{hotfix}-*.md is tracked at the tip"
     subject = subprocess.run(
         ["git", "log", "-1", "--format=%s", tip], capture_output=True, text=True, check=False
     ).stdout.strip()
-    on_branch = git_branch() == f"hotfix/{hotfix}"
+    on_branch = (branch if branch is not None else git_branch()) == f"hotfix/{hotfix}"
     squash = f"({hotfix})" in subject or subject.endswith(f"#{hotfix.replace('-', '')}")
     if not (on_branch or squash):
         return (
@@ -484,8 +509,9 @@ def require_released(branch: str | None = None, hotfix: str | None = None) -> in
         branch: Git ref whose tip must equal ``last_close_commit``. Defaults
             to ``HEAD``.
         hotfix: An RA-03 hotfix id (``H-NNN``). Accepts a tip that is not
-            ``last_close_commit`` only when the hotfix record exists, the
-            branch or tip subject names the hotfix, ``last_close_commit`` is
+            ``last_close_commit`` only when the hotfix record is tracked at
+            the tip, the deployed branch (``branch``, else the checked-out
+            one) or the tip subject names the hotfix, ``last_close_commit`` is
             an ancestor of the tip, and status is not SUSPENDED.
 
     Returns:
@@ -518,7 +544,7 @@ def require_released(branch: str | None = None, hotfix: str | None = None) -> in
         print(f"Refusing deploy: cannot resolve ref `{ref}`.")
         return 2
     if tip != seal and hotfix is not None:
-        reason = _hotfix_refusal(hotfix, tip, seal)
+        reason = _hotfix_refusal(hotfix, tip, seal, branch)
         if reason is not None:
             print(f"Refusing deploy: hotfix path for {hotfix} failed: {reason}.")
             return 2

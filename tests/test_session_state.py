@@ -739,7 +739,7 @@ def _git(root: Path, *args: str) -> str:
 
 def _hotfix_repo(root: Path, status: str = "IN_PROGRESS") -> str:
     """A repo whose anchor seals commit one, then a second commit on `hotfix/H-009`
-    with a hotfix record. Returns the sealed SHA."""
+    that carries the hotfix record. Returns the sealed SHA."""
     _git(root, "init", "-q", "-b", "main")
     (root / "docs" / "hotfixes").mkdir()
     (root / "seed.txt").write_text("seed", encoding="utf-8")
@@ -747,10 +747,10 @@ def _hotfix_repo(root: Path, status: str = "IN_PROGRESS") -> str:
     _git(root, "commit", "-q", "-m", "chore: seed #057")
     seal = _git(root, "rev-parse", "HEAD")
     _write_anchor(root, {"status": status, "last_close_commit": seal})
-    (root / "docs" / "hotfixes" / "H-009-bridge.md").write_text("# H-009", encoding="utf-8")
     _git(root, "checkout", "-q", "-b", "hotfix/H-009")
+    (root / "docs" / "hotfixes" / "H-009-bridge.md").write_text("# H-009", encoding="utf-8")
     (root / "fix.txt").write_text("fix", encoding="utf-8")
-    _git(root, "add", "fix.txt")
+    _git(root, "add", "fix.txt", "docs/hotfixes/H-009-bridge.md")
     _git(root, "commit", "-q", "-m", "fix(bridge): repair the thing (H-009) #H009")
     return seal
 
@@ -779,7 +779,32 @@ def test_require_released_hotfix_accepts_squash_subject_on_main(repo: Path):
 def test_require_released_hotfix_refuses_without_hotfix_record(repo: Path):
     _hotfix_repo(repo)
     (repo / "docs" / "hotfixes" / "H-009-bridge.md").unlink()
+    _git(repo, "commit", "-q", "-a", "--amend", "--no-edit")
     assert _require(repo, "--hotfix", "H-009") == 2
+
+
+def test_require_released_hotfix_refuses_record_only_in_the_working_tree(repo: Path):
+    _hotfix_repo(repo)
+    _git(repo, "rm", "-q", "--cached", "docs/hotfixes/H-009-bridge.md")
+    _git(repo, "commit", "-q", "--amend", "--no-edit")
+    assert (repo / "docs" / "hotfixes" / "H-009-bridge.md").is_file()
+    assert _require(repo, "--hotfix", "H-009") == 2
+
+
+def test_require_released_hotfix_judges_the_branch_ref_not_head(repo: Path):
+    seal = _hotfix_repo(repo)
+    _git(repo, "checkout", "-q", "-b", "ai-sprint/058", seal)
+    (repo / "work.txt").write_text("work", encoding="utf-8")
+    _git(repo, "add", "work.txt")
+    _git(repo, "commit", "-q", "-m", "feat(x): unsealed sprint work #058")
+    _git(repo, "checkout", "-q", "hotfix/H-009")
+    assert _require(repo, "--branch", "ai-sprint/058", "--hotfix", "H-009") == 2
+
+
+def test_require_released_hotfix_accepts_hotfix_branch_ref_from_main(repo: Path):
+    _hotfix_repo(repo)
+    _git(repo, "checkout", "-q", "main")
+    assert _require(repo, "--branch", "hotfix/H-009", "--hotfix", "H-009") == 0
 
 
 def test_require_released_hotfix_refuses_wrong_branch_and_subject(repo: Path):
