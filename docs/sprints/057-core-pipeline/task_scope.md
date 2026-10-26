@@ -180,8 +180,8 @@ QA Gate 1 round 4 emitted RECORD (testifying, S2) and closed QA3-1..QA3-3. `RA-1
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| W93 | `hooks/on_commit.py` | modify (QA4-1: `_run_commit_message_guards` docstring states that `hooks/on_commit_msg.py` covers terminal and IDE commits, instead of "needs a `commit-msg` hook") | low | `implementer_agent` | sonnet | medium | ⏳ |
-| W94 | `tests/test_code_craft_gates.py` | modify (QA4-2: the W89 tests run git with `GIT_CONFIG_GLOBAL` set to an empty file and `GIT_CONFIG_NOSYSTEM=1`, proved by a global `core.hooksPath` that fails them before and not after; QA4-3: Google-style docstrings on `_install_commit_msg_hook` and `_shell`) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W93 | `hooks/on_commit.py` | modify (QA4-1: `_run_commit_message_guards` docstring states that `hooks/on_commit_msg.py` covers terminal and IDE commits, instead of "needs a `commit-msg` hook") | low | `implementer_agent` | sonnet | medium | ✅ `383dfb7` |
+| W94 | `tests/test_code_craft_gates.py` | modify (QA4-2: the W89 tests run git with `GIT_CONFIG_GLOBAL` set to an empty file and `GIT_CONFIG_NOSYSTEM=1`, proved by a global `core.hooksPath` that fails them before and not after; QA4-3: Google-style docstrings on `_install_commit_msg_hook` and `_shell`) | low | `implementer_agent` | sonnet | medium | ✅ `aab9a82` |
 
 ---
 
@@ -293,4 +293,4 @@ No other rule violation found: contiguous ids W00-W37 (38 rows, matches `Cost`),
 
 ## Resume point (updated 2026-10-26, session `aeda1d83-cbd8-463b-8f56-25f5958d428e`)
 
-QA Gate 1 round 4 RECORD (testifying, S2); QA3-1..QA3-3 closed. Next: execute Wave I (W93-W94), then Gate 1 round 5 in fresh context over the Wave I diff; then Gate 2 (`tester_agent`, fresh context, base `5851b18`); then Phase 8 closeout. Before closeout, `SPRINT_LOG.md` Sprint Progression still shows its Phase 3 state and must be brought in line with this file.
+QA Gate 1 round 4 RECORD (testifying, S2); QA3-1..QA3-3 closed. Wave I (W93-W94) executed: every row ✅; `make verify` 0, 1279 passed. W94 proof: with a global `core.hooksPath` the suite went from 2 failed to 20 passed, and removing `audit_regression_test` from `hooks/on_commit_msg.py` still fails both W89 tests. Next: Gate 1 round 5 in fresh context over `d017b24..HEAD`; then Gate 2 (`tester_agent`, fresh context, base `5851b18`); then Phase 8 closeout. Before closeout, `SPRINT_LOG.md` Sprint Progression still shows its Phase 3 state and must be brought in line with this file.
