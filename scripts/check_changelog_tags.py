@@ -111,7 +111,14 @@ def parse_headers(changelog_text: str) -> list[Version]:
 
 
 def fmt(version: Version) -> str:
-    """Render a version tuple as `X.Y.Z`."""
+    """Render a version tuple as `X.Y.Z`.
+
+    Args:
+        version: A `(major, minor, patch)` tuple.
+
+    Returns:
+        str: The dotted version string.
+    """
     return ".".join(str(part) for part in version)
 
 
