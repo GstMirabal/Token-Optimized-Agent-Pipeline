@@ -7,7 +7,14 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
-from _repro_grammar import REPRO_MANUAL, REPRO_TEST, ReproClaim, parse_trailers
+from _repro_grammar import (
+    REPRO_MANUAL,
+    REPRO_TEST,
+    ReproClaim,
+    is_source_path,
+    is_test_path,
+    parse_trailers,
+)
 
 ACCEPTED = [
     ("Repro: tests/test_on_commit.py::test_x — fails at 46d07cf",
@@ -73,3 +80,27 @@ def test_manual_wins_over_test_when_both_fit() -> None:
 def test_regex_constants_match_the_hook_forms() -> None:
     assert REPRO_TEST.search("Repro: tests/t.py — fails at abc1234")
     assert REPRO_MANUAL.search("Repro: manual -- text")
+
+
+@pytest.mark.parametrize("path", [
+    "tests/test_on_commit.py", "test/helpers.py", "web/__tests__/a.js", "test_x.py",
+    "app/tests.py", "pkg/calc_test.go", "src/calc.test.ts", "src/calc.spec.js",
+])
+def test_is_test_path_accepts_test_files(path: str) -> None:
+    assert is_test_path(path)
+    assert not is_source_path(path)
+
+
+@pytest.mark.parametrize("path", [
+    "scripts/x.py", "claude/settings.hooks.json", "scripts/install.sh", "Makefile", "src/a.ts",
+])
+def test_is_source_path_counts_code_config_and_suffixless_files(path: str) -> None:
+    assert is_source_path(path)
+
+
+@pytest.mark.parametrize("path", [
+    "README.md", "docs/a.rst", "notes.txt", "ci.yml", "ci.yaml", "pyproject.toml",
+])
+def test_is_source_path_excludes_documentation_suffixes(path: str) -> None:
+    assert not is_source_path(path)
+
