@@ -137,6 +137,28 @@ QA Gate 1 round 1 rejected the sprint (`SPRINT_LOG.md` Quality Gate, `a9ae7f9`).
 
 Ordering: W61 before W62 and W64 (both import its predicates); W62 before W63 (same subject); W70 before W71 (same subject); W60 claims `scripts/session_state.py` after W38; W60 before W76. `fix(` units with paired test and `Repro:` trailer: W60, W63, W64, W69, W70 (W67 when `tests/test_installer.sh` asserts the message, else `Repro: manual`).
 
+
+### Wave G — Gate 1 round 2 remediation (QA2-1..QA2-7, added by human decision 2026-10-26)
+
+QA Gate 1 round 2 rejected the remediation (`SPRINT_LOG.md` Quality Gate, `af071d9`). QA2-3 is the second occurrence of the QA1-2 family (an instructing text states the `fix(` paired test unconditionally, omitting the `Repro: manual` route), so `rules/qa_and_testing.md` §4 convergence rule 3 applies: W88 is a deterministic check that fails on every recorded instance. Instances found by `git grep -n -i -E "paired test|untestable|ships its (paired )?test|must stage the test|stage[sd]? (a|the|its) test"` outside `docs/sprints`, `docs/audits`, `CHANGELOG.md` and `tests`: W78-W82 and W83. Gate 1 round 3 reviews `af071d9..HEAD`.
+
+| # | File | Operation | Risk | Assignee | Model | Effort | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| W77 | `tests/test_session_state.py` | modify (QA2-1: a test whose tip tracks the record, sits on `ai-sprint/059` with a subject that does not name the hotfix, run with `HEAD` on `hotfix/H-009`; it must fail when `session_state.py` reverts `on_branch` to `git_branch()`, proved by that mutation) | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| W78 | `agents/implementer_agent.md` | modify (QA2-3: `:3` and `:20` name the `Repro: manual` route beside the paired test) | low | `agent_orchestrator` | sonnet | medium | ⏳ |
+| W79 | `agents/rule_validator.md` | modify (QA1-2 family: `:19` companion clause names the `Repro: manual` route) | low | `agent_orchestrator` | sonnet | medium | ⏳ |
+| W80 | `memory_index.json` | modify (QA2-2: `:89` replaces "must be committed as refactor(/build(/chore(" with the `Repro: manual` route) | low | `governance_learner` | sonnet | medium | ⏳ |
+| W81 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify (QA1-2 family: `:43` a `fix(` unit names its paired test or its `Repro: manual` record) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| W82 | `workflows/pipeline_workflow.md` | modify (QA1-2 family: `:24` companion clause names the `Repro: manual` route; regenerated step map as companion) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| W83 | `hooks/on_commit.py` | modify (QA2-4: the docstring parity claim is narrowed to the files staged when the hook runs; QA2-5: the exemption comment says documentation and configuration suffixes; `:1080` comment names the `Repro: manual` route) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W84 | `scripts/_repro_grammar.py` | modify (QA2-5: module and `is_source_path` docstrings say the denylist holds documentation and `.yml`/`.yaml`/`.toml` configuration suffixes) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W85 | `tests/test_check_changelog_tags.py` | modify (QA2-6: two blank lines around the W70 test) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W86 | `docs/sprints/057-core-pipeline/agent_assignment.md` | modify (QA2-7: every `Ola` heading becomes `Wave`) | low | `orchestrator` | sonnet | medium | ⏳ |
+| W87 | `docs/sprints/057-core-pipeline/task_scope.md` | modify (QA2-7: every `Ola` heading and mention becomes `Wave`) | low | `orchestrator` | sonnet | medium | ⏳ |
+| W88 | `tests/test_fix_route_wording.py` | create (convergence rule 3 for the QA1-2 family: every line of `agents.md`, `agents/*.md`, `rules/*.md`, `workflows/*.md`, `docs/standards/templates/*.md`, `docs/guides/*.md` and `memory_index.json` matching the W77-row grep pattern above also names `Repro: manual`; the claim covers exactly those files and that pattern; proved failing on each W78-W82 instance at `af071d9`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
+
+Ordering: W78-W82 before W88 (the check is green only once every instance is fixed); W86 and W87 last among the sprint records.
+
 ---
 
 ## Rule audit
@@ -247,4 +269,4 @@ No other rule violation found: contiguous ids W00-W37 (38 rows, matches `Cost`),
 
 ## Resume point (updated 2026-10-26, session `aeda1d83-cbd8-463b-8f56-25f5958d428e`)
 
-QA Gate 1 round 1 REJECTED (charter, S1; `a9ae7f9`). Ola F (W60-W76) executed: every row ✅; `make verify` 0, 1274 passed; `python3 scripts/check_fix_reproduces.py --range a9ae7f9..HEAD` 0 (6 `fix(` commits, 0 violations). W72 and W73 also completed the Google-style sections of every other function of `scripts/py_compile_tree.py` and `scripts/check_role_artifact.py` that lacked them, beyond the lines QA1-9 named. Next: Gate 1 round 2 in fresh context over `a9ae7f9..HEAD`; then Gate 2 (`tester_agent`, fresh context, base `5851b18`); then Phase 8 closeout. Before closeout, `SPRINT_LOG.md` Sprint Progression still shows its Phase 3 state and must be brought in line with this file.
+QA Gate 1 round 2 REJECTED (charter, S2; `af071d9`); round 1 findings closed. Next: execute Wave G (W77-W88), then Gate 1 round 3 in fresh context over `af071d9..HEAD`; then Gate 2 (`tester_agent`, fresh context, base `5851b18`); then Phase 8 closeout. A third consecutive REJECTED of the QA1-2 family opens `workflows/remediation_workflow.md`. Before closeout, `SPRINT_LOG.md` Sprint Progression still shows its Phase 3 state and must be brought in line with this file.

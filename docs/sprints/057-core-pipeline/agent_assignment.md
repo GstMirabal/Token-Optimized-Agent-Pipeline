@@ -138,6 +138,23 @@ cover the 38 units, so `Destination` is `N/A` on every row.
 | W75 | `workflows/remediation_workflow.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | W76 | `workflows/deployment_workflow.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 
+### Wave G — Gate 1 round 2 remediation (human decision 2026-10-26)
+
+| # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| W77 | `tests/test_session_state.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W78 | `agents/implementer_agent.md` | modify | sequential | `agent_orchestrator` | N/A | `agents/agent_orchestrator.md` |
+| W79 | `agents/rule_validator.md` | modify | sequential | `agent_orchestrator` | N/A | `agents/agent_orchestrator.md` |
+| W80 | `memory_index.json` | modify | sequential | `governance_learner` | N/A | `agents/governance_learner.md` |
+| W81 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| W82 | `workflows/pipeline_workflow.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| W83 | `hooks/on_commit.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W84 | `scripts/_repro_grammar.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W85 | `tests/test_check_changelog_tags.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W86 | `docs/sprints/057-core-pipeline/agent_assignment.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
+| W87 | `docs/sprints/057-core-pipeline/task_scope.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
+| W88 | `tests/test_fix_route_wording.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+
 ## Disagreements with the plan
 
 | # | Plan proposed | Assigned | Reason |
