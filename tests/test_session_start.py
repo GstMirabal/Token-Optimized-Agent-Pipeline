@@ -981,3 +981,23 @@ def test_refresh_bridge_lock_survives_permission_error(
     lock = tmp_path / ".bridge_claude.lock"
     assert f"boot: cannot write {lock}" in err
     assert "unsandboxed SessionStart hook refreshes it" in err
+
+
+def test_refresh_bridge_lock_denied_for_cursor_names_the_installer(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys
+) -> None:
+    """QA1-7: only the Claude lock is refreshed by the SessionStart hook."""
+    monkeypatch.setattr(
+        session_start.subprocess,
+        "run",
+        lambda *a, **k: subprocess.CompletedProcess(a, 0, stdout="abc123\n", stderr=""),
+    )
+
+    def deny(self: Path, *a: object, **k: object) -> int:
+        raise PermissionError(13, "denied", str(self))
+
+    monkeypatch.setattr(Path, "write_text", deny)
+    assert session_start._refresh_bridge_lock(tmp_path, "cursor") == 0
+    err = capsys.readouterr().err
+    assert "SessionStart hook" not in err
+    assert "scripts/install.py --target cursor" in err

@@ -474,11 +474,12 @@ def _refresh_bridge_lock(root: Path, target: str) -> int:
     try:
         lock.write_text(commit + "\n", encoding="utf-8")
     except PermissionError:
-        print(
-            f"boot: cannot write {lock} (permission denied); "
-            "the unsandboxed SessionStart hook refreshes it.",
-            file=sys.stderr,
+        refresher = (
+            "the unsandboxed SessionStart hook refreshes it"
+            if target == "claude"
+            else f"run `{install_command(target, is_nucleus())}` outside the sandbox to refresh it"
         )
+        print(f"boot: cannot write {lock} (permission denied); {refresher}.", file=sys.stderr)
         return 0
     print(f"boot: bridge lock refreshed to {commit[:12]} (content fresh).")
     return 0
