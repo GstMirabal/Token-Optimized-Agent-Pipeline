@@ -24,6 +24,7 @@ import logging
 import re
 import subprocess
 import sys
+from collections.abc import Callable
 from pathlib import Path
 
 # Add parent directory to path so 'hooks' module can be found if run directly
@@ -1062,16 +1063,26 @@ def block(reason: str) -> None:
     sys.exit(2)
 
 
-def _run_commit_message_guards(command: str) -> None:
-    """Runs Guards 2-4, which all need the parsed commit message.
+# Guards 3-5: every audit that judges the commit message against the staged
+# files, with the telemetry code this hook logs when it refuses.
+MESSAGE_AUDITS: tuple[tuple[Callable[[str, list[str]], str | None], str], ...] = (
+    (audit_regression_test, "REGRESSION_TEST_MISSING"),  # rules/code_craft.md §6
+    (audit_dependency_justification, "DEPENDENCY_UNJUSTIFIED"),  # rules/code_craft.md §7
+    (audit_task_scope_precondition, "TASK_SCOPE_PRECONDITION"),  # D7, ADR-0007
+)
 
-    Guards 2-4 need the commit message, which this hook can read only on
-    the agent path (the Bash command carries `-m`). At native pre-commit time
-    git has not yet finalised COMMIT_EDITMSG, so reading it there would test
-    the PREVIOUS commit's message — worse than not checking. Terminal and IDE
-    commits are covered instead by the git `commit-msg` hook,
-    `hooks/on_commit_msg.py`, installed by `scripts/install.py`; where that
-    hook is not installed, a native commit passes no message gate here.
+
+def _run_commit_message_guards(command: str) -> None:
+    """Runs Guards 2-5, which all need the parsed commit message.
+
+    Guard 2 is `is_valid_commit_message`; Guards 3-5 are `MESSAGE_AUDITS`.
+    This hook can read the message only on the agent path (the Bash command
+    carries `-m`). At native pre-commit time git has not yet finalised
+    COMMIT_EDITMSG, so reading it there would test the PREVIOUS commit's
+    message — worse than not checking. Terminal and IDE commits are judged
+    instead by the git `commit-msg` hook, `hooks/on_commit_msg.py`, installed
+    by `scripts/install.py`, which runs Guard 2 and Guards 3-5; where that hook
+    is not installed, a native commit passes no message gate.
 
     Args:
         command: The raw Bash command text from the PreToolUse payload.
@@ -1087,20 +1098,10 @@ def _run_commit_message_guards(command: str) -> None:
               "#[Sprint_ID] suffix, e.g. \"feat(auth): add login flow #078\" (agents.md §5).")
 
     staged = get_staged_files()
-    # Guard 3 (rules/code_craft.md §6): a bug fix ships its test or a `Repro: manual` trailer.
-    if reason := audit_regression_test(message, staged):
-        log_error("on_commit", "REGRESSION_TEST_MISSING", message[:80])
-        block(reason)
-    # Guard 4 (rules/code_craft.md §7): a new dependency says why.
-    if reason := audit_dependency_justification(message, staged):
-        log_error("on_commit", "DEPENDENCY_UNJUSTIFIED", message[:80])
-        block(reason)
-    # Guard 5 (D7, ADR-0007): a sprint commit needs task_scope.md
-    # before it touches anything outside its own sprint directory.
-    if reason := audit_task_scope_precondition(message, staged):
-        log_error("on_commit", "TASK_SCOPE_PRECONDITION", message[:80])
-        block(reason)
-
+    for audit, code in MESSAGE_AUDITS:
+        if reason := audit(message, staged):
+            log_error("on_commit", code, message[:80])
+            block(reason)
 
 def main():
     command = read_hook_command()
