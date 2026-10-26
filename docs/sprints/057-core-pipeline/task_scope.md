@@ -166,10 +166,10 @@ QA Gate 1 round 3 emitted RECORD (testifying, S2) and closed QA2-1..QA2-7. Every
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| W89 | `tests/test_code_craft_gates.py` | modify (QA3-1: end-to-end tests in a scratch repository whose `commit-msg` hook runs `hooks/on_commit_msg.py`: `git add <source> && git commit -m "fix(...)"` and `git commit -a -m "fix(...)"` without a test or trailer are refused at commit time) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| W90 | `hooks/on_commit.py` | modify (QA3-1: `audit_regression_test` docstring names both callers — the PreToolUse guard sees the index before the command runs; the `commit-msg` hook sees the index git commits — and cites the W89 tests) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| W91 | `tests/test_session_state.py` | modify (QA3-2: two blank lines around the W77 test; `-> None` on it) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| W92 | `docs/sprints/057-core-pipeline/task_scope.md` | modify (QA3-3: the W82 row drops "regenerated step map"; the W88 row points at the grep pattern in the Wave G paragraph) | low | `orchestrator` | sonnet | medium | ⏳ |
+| W89 | `tests/test_code_craft_gates.py` | modify (QA3-1: end-to-end tests in a scratch repository whose `commit-msg` hook runs `hooks/on_commit_msg.py`: `git add <source> && git commit -m "fix(...)"` and `git commit -a -m "fix(...)"` without a test or trailer are refused at commit time) | medium | `implementer_agent` | sonnet | medium | ✅ `10e59c5` |
+| W90 | `hooks/on_commit.py` | modify (QA3-1: `audit_regression_test` docstring names both callers — the PreToolUse guard sees the index before the command runs; the `commit-msg` hook sees the index git commits — and cites the W89 tests) | low | `implementer_agent` | sonnet | medium | ✅ `ac3f8e1` |
+| W91 | `tests/test_session_state.py` | modify (QA3-2: two blank lines around the W77 test; `-> None` on it) | low | `implementer_agent` | sonnet | medium | ✅ `2e8b31d` |
+| W92 | `docs/sprints/057-core-pipeline/task_scope.md` | modify (QA3-3: the W82 row drops "regenerated step map"; the W88 row points at the grep pattern in the Wave G paragraph) | low | `orchestrator` | sonnet | medium | ✅ `319a3bf` |
 
 Ordering: W89 before W90 (the docstring cites the tests).
 
@@ -283,4 +283,4 @@ No other rule violation found: contiguous ids W00-W37 (38 rows, matches `Cost`),
 
 ## Resume point (updated 2026-10-26, session `aeda1d83-cbd8-463b-8f56-25f5958d428e`)
 
-QA Gate 1 round 3 RECORD (testifying, S2); QA2-1..QA2-7 closed. Next: execute Wave H (W89-W92), then Gate 1 round 4 in fresh context over the Wave H diff; then Gate 2 (`tester_agent`, fresh context, base `5851b18`); then Phase 8 closeout. Before closeout, `SPRINT_LOG.md` Sprint Progression still shows its Phase 3 state and must be brought in line with this file.
+QA Gate 1 round 3 RECORD (testifying, S2); QA2-1..QA2-7 closed. Wave H (W89-W92) executed: every row ✅; `make verify` 0, 1279 passed; no `fix(` commits in `9b68a62..HEAD`. W89 mutation proof: removing `audit_regression_test` from `hooks/on_commit_msg.py` fails both new tests. Next: Gate 1 round 4 in fresh context over `9b68a62..HEAD`; then Gate 2 (`tester_agent`, fresh context, base `5851b18`); then Phase 8 closeout. Before closeout, `SPRINT_LOG.md` Sprint Progression still shows its Phase 3 state and must be brought in line with this file.
