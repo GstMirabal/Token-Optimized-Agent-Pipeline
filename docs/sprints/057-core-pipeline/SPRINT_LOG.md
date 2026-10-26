@@ -92,8 +92,9 @@ Example (do not uncomment — Phase 7 writes the real rows):
   | Tester Agent (Gate 2) | 1 | RECORD   | testifying | 701 passed, zero regression; N items recorded. |
 -->
 
-| Gate | Round | Verdict | Class | Notes |
-| :--- | :--- | :--- | :--- | :--- |
+| Gate | Round | Verdict | Class | Severity | Notes |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| QA Agent (Gate 1) | 1 | REJECTED | charter | S1 | `check_fix_reproduces.py --range 5851b18..HEAD` exit 0 (12 `fix(`, 0 violations); `make verify` exit 0, 1245 passed. QA1-1 (S1): `session_state.py:458` `--hotfix` judges the HEAD branch, not the `--branch` tip, and `:453` accepts an untracked hotfix record, so an unsealed sprint tip passes the seal gate. QA1-2/QA1-3/QA1-4 (S2); QA1-5..QA1-10 (S3, recorded). |
 
 ---
 
