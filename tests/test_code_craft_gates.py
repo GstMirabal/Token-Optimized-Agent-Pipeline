@@ -152,7 +152,8 @@ HOOK_SCRIPT = Path(__file__).resolve().parent.parent / "hooks" / "on_commit_msg.
 def _install_commit_msg_hook(root: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Point `root`'s commit-msg hook at this repository's `on_commit_msg.py`.
 
-    Global and system git config are dropped for the rest of the test, so a
+    Global, system and environment-injected git config (`GIT_CONFIG_COUNT`,
+    `GIT_CONFIG_PARAMETERS`) are dropped for the rest of the test, so a
     developer's `core.hooksPath` cannot route git away from this hook.
 
     Args:
@@ -163,6 +164,8 @@ def _install_commit_msg_hook(root: Path, monkeypatch: pytest.MonkeyPatch) -> Non
     empty.write_text("")
     monkeypatch.setenv("GIT_CONFIG_GLOBAL", str(empty))
     monkeypatch.setenv("GIT_CONFIG_NOSYSTEM", "1")
+    monkeypatch.delenv("GIT_CONFIG_COUNT", raising=False)
+    monkeypatch.delenv("GIT_CONFIG_PARAMETERS", raising=False)
     hook = root / ".git" / "hooks" / "commit-msg"
     hook.write_text(f'#!/bin/sh\nexec "{sys.executable}" "{HOOK_SCRIPT}" "$1"\n')
     hook.chmod(0o755)
