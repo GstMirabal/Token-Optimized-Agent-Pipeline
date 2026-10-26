@@ -1,12 +1,14 @@
 ---
 description: "Execution Pipeline Protocol (Keyword: pipeline)"
-version: 3.9.4
+version: 3.9.5
 invoked_by: human:/agents:pipeline, start_workflow.md#pipeline_invocation
 ---
 
 # 🛡️ Workflow: Pipeline (Execution Pipeline)
 
 Master operational protocol ensuring rigid task delegation, automated Double-Gate verification, and infrastructural stability.
+
+**Command paths.** A command in this workflow without a `.agents/` prefix is written in nucleus form, relative to the `.agents` root (`python3 scripts/…`, `python3 skills/…`). A host runs it from the host root with the prefix (`python3 .agents/scripts/…`, `python3 .agents/skills/…`, `make -f .agents/Makefile <target>`); a command already written with `.agents/` is the host form. The nucleus form fails in a host with `can't open file` (`F-115-N3`).
 
 ## 🚀 The Execution Pipeline
 
