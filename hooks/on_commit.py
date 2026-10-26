@@ -807,11 +807,17 @@ def audit_regression_test(message: str, staged: list[str]) -> str | None:
     the legitimate case instead of blocking everything that resembles the
     illegitimate one: a `fix(` commit that stages no source file at all has
     nothing to write a test against. Test and source paths are the shared
-    definitions of `scripts/_repro_grammar.py`, the ones the replay uses. The
-    hook classifies only `staged`, the files in the index when it runs: on the
-    agent path that is before the command executes, so files the same command
-    stages (`git add x && git commit`, `git commit -a`) are not seen here and
-    are judged only by the Gate 1 replay over the committed diff.
+    definitions of `scripts/_repro_grammar.py`, the ones the replay uses.
+
+    It judges `staged` as its caller read it, and it has two callers. The
+    PreToolUse guard in this file reads the index before the agent's command
+    runs, so it does not see files that command stages itself (`git add x &&
+    git commit`, `git commit -a`). The git `commit-msg` hook
+    (`hooks/on_commit_msg.py`, installed by `scripts/install.py`) reads the
+    index git is committing, so it does judge them; pinned by
+    `tests/test_code_craft_gates.py::test_commit_msg_hook_judges_files_added_in_the_same_command`
+    and `::test_commit_msg_hook_judges_files_staged_by_commit_all`. Where that
+    git hook is not installed, only the Gate 1 replay sees those files.
 
     Args:
         message: The commit message.
