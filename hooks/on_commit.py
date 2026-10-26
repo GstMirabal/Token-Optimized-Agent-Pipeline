@@ -1065,12 +1065,13 @@ def block(reason: str) -> None:
 def _run_commit_message_guards(command: str) -> None:
     """Runs Guards 2-4, which all need the parsed commit message.
 
-    Guards 2-4 need the commit message, which is only reliably available on
+    Guards 2-4 need the commit message, which this hook can read only on
     the agent path (the Bash command carries `-m`). At native pre-commit time
     git has not yet finalised COMMIT_EDITMSG, so reading it there would test
-    the PREVIOUS commit's message — worse than not checking. Closing that gap
-    needs a `commit-msg` hook; until then this coverage is honestly partial,
-    not silently assumed.
+    the PREVIOUS commit's message — worse than not checking. Terminal and IDE
+    commits are covered instead by the git `commit-msg` hook,
+    `hooks/on_commit_msg.py`, installed by `scripts/install.py`; where that
+    hook is not installed, a native commit passes no message gate here.
 
     Args:
         command: The raw Bash command text from the PreToolUse payload.
