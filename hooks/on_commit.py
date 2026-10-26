@@ -807,8 +807,11 @@ def audit_regression_test(message: str, staged: list[str]) -> str | None:
     the legitimate case instead of blocking everything that resembles the
     illegitimate one: a `fix(` commit that stages no source file at all has
     nothing to write a test against. Test and source paths are the shared
-    definitions of `scripts/_repro_grammar.py`, the ones the replay uses, so a
-    commit this hook accepts is not refused at Gate 1 for its file set.
+    definitions of `scripts/_repro_grammar.py`, the ones the replay uses. The
+    hook classifies only `staged`, the files in the index when it runs: on the
+    agent path that is before the command executes, so files the same command
+    stages (`git add x && git commit`, `git commit -a`) are not seen here and
+    are judged only by the Gate 1 replay over the committed diff.
 
     Args:
         message: The commit message.
@@ -820,7 +823,7 @@ def audit_regression_test(message: str, staged: list[str]) -> str | None:
     if not message.startswith("fix("):
         return None
     if not any(is_source_path(path) for path in staged):
-        return None  # Documentation or tests only: no source to write a test against.
+        return None  # Tests, documentation or .yml/.yaml/.toml configuration only.
     if any(c.kind == "manual" for c in parse_trailers(message)):
         return None  # `Repro: manual` is the alternative when no test can show the defect.
     if not any(is_test_path(path) for path in staged):
@@ -1077,7 +1080,7 @@ def _run_commit_message_guards(command: str) -> None:
               "#[Sprint_ID] suffix, e.g. \"feat(auth): add login flow #078\" (agents.md §5).")
 
     staged = get_staged_files()
-    # Guard 3 (rules/code_craft.md §6): a bug fix ships its test.
+    # Guard 3 (rules/code_craft.md §6): a bug fix ships its test or a `Repro: manual` trailer.
     if reason := audit_regression_test(message, staged):
         log_error("on_commit", "REGRESSION_TEST_MISSING", message[:80])
         block(reason)
