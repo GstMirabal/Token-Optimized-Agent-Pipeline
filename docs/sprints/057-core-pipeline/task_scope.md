@@ -90,26 +90,26 @@ Every row replaces a prescription to run the deprecated shim `install.sh` with `
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| W40 | `scripts/session_start.py` | modify (`_run_bridge_install` runs `install.py` with the running interpreter; message names `install.py`; test `tests/test_session_start.py`, incl. `:764` docstring) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| W41 | `scripts/bridge_state.py` | modify (docstring `:33`, `:226`) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| W42 | `scripts/_root.py` | modify (comment `:71`) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| W43 | `tests/test_root_resolution.py` | modify (docstring `:57`) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| W44 | `scripts/merge_json.py` | modify (`DEPRECATED_HOOK_COMMANDS` gains the `SessionStart` command string W45 retires; test `tests/test_merge_json.py`) | high | `implementer_agent` | sonnet | medium | ⏳ |
-| W45 | `claude/settings.hooks.json` | modify (`:78` hook fallback message names `install.py`; reviewed-copy tests updated in the same commit) | high | `implementer_agent` | sonnet | medium | ⏳ |
-| W46 | `config/invocation_exceptions.json` | modify (note `:65`) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| W47 | `.gitignore` | modify (comment `:101`) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| W48 | `workflows/start_workflow.md` | modify (`:33` bridge_check) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| W49 | `workflows/deployment_workflow.md` | modify (`:28` bridge_lock_refresh) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| W50 | `rules/project_topology.md` | modify (`:34` S-1 row) | medium | `rule_validator` | sonnet | medium | ⏳ |
-| W51 | `docs/guides/AUTONOMY_POSTURE_GUIDE.md` | modify (`:12`, `:29`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| W52 | `docs/guides/SELF_IMPROVEMENT_GUIDE.md` | modify (`:61`, `:92`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| W53 | `docs/standards/templates/SYSTEM_OVERVIEW_TEMPLATE.md` | modify (`:41`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| W54 | `docs/architecture/global_topology.md` | modify (`:53`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| W55 | `docs/architecture/topology_map.md` | modify (`:17`, `:20`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| W56 | `profiles/example-project/README.md` | modify (`:20`, `:27`, `:29`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| W57 | `.github/ISSUE_TEMPLATE/bug_report.yml` | modify (`:26`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| W58 | `skills/slash-commander/README.md` | modify (`:49`) | low | `skill_architect` | sonnet | medium | ⏳ |
-| W59 | `skills/slash-commander/SKILL.md` | modify (`:12`, `:30`; own skill, not vendored) | low | `skill_architect` | sonnet | medium | ⏳ |
+| W40 | `scripts/session_start.py` | modify (`_run_bridge_install` runs `install.py` with the running interpreter; message names `install.py`; test `tests/test_session_start.py`, incl. `:764` docstring) | medium | `implementer_agent` | sonnet | medium | ✅ `364df20` |
+| W41 | `scripts/bridge_state.py` | modify (docstring `:33`, `:226`) | low | `implementer_agent` | sonnet | medium | ✅ `bedf2da` |
+| W42 | `scripts/_root.py` | modify (comment `:71`) | low | `implementer_agent` | sonnet | medium | ✅ `027d439` |
+| W43 | `tests/test_root_resolution.py` | modify (docstring `:57`) | low | `implementer_agent` | sonnet | medium | ✅ `7245cdc` |
+| W44 | `scripts/merge_json.py` | modify (`DEPRECATED_HOOK_COMMANDS` gains the `SessionStart` command string W45 retires; test `tests/test_merge_json.py`) | high | `implementer_agent` | sonnet | medium | ✅ `6296e09` |
+| W45 | `claude/settings.hooks.json` | modify (`:78` hook fallback message names `install.py`; reviewed-copy tests updated in the same commit) | high | `implementer_agent` | sonnet | medium | ✅ `3b35681` |
+| W46 | `config/invocation_exceptions.json` | modify (note `:65`) | low | `implementer_agent` | sonnet | medium | ✅ `cabfa69` |
+| W47 | `.gitignore` | modify (comment `:101`) | low | `implementer_agent` | sonnet | medium | ✅ `2486161` |
+| W48 | `workflows/start_workflow.md` | modify (`:33` bridge_check) | low | `doc_orchestrator` | sonnet | medium | ✅ `0b110fc` |
+| W49 | `workflows/deployment_workflow.md` | modify (`:28` bridge_lock_refresh) | low | `doc_orchestrator` | sonnet | medium | ✅ `136b2e3` |
+| W50 | `rules/project_topology.md` | modify (`:34` S-1 row) | medium | `rule_validator` | sonnet | medium | ✅ `e3aef77` |
+| W51 | `docs/guides/AUTONOMY_POSTURE_GUIDE.md` | modify (`:12`, `:29`) | low | `doc_orchestrator` | sonnet | medium | ✅ `c04710f` |
+| W52 | `docs/guides/SELF_IMPROVEMENT_GUIDE.md` | modify (`:61`, `:92`) | low | `doc_orchestrator` | sonnet | medium | ✅ `379f9da` |
+| W53 | `docs/standards/templates/SYSTEM_OVERVIEW_TEMPLATE.md` | modify (`:41`) | low | `doc_orchestrator` | sonnet | medium | ✅ `36a6c7f` |
+| W54 | `docs/architecture/global_topology.md` | modify (`:53`) | low | `doc_orchestrator` | sonnet | medium | ✅ `3766aec` |
+| W55 | `docs/architecture/topology_map.md` | modify (`:17`, `:20`) | low | `doc_orchestrator` | sonnet | medium | ✅ `ad146ad` |
+| W56 | `profiles/example-project/README.md` | modify (`:20`, `:27`, `:29`) | low | `doc_orchestrator` | sonnet | medium | ✅ `0c0349a` |
+| W57 | `.github/ISSUE_TEMPLATE/bug_report.yml` | modify (`:26`) | low | `doc_orchestrator` | sonnet | medium | ✅ `231afdf` |
+| W58 | `skills/slash-commander/README.md` | modify (`:49`) | low | `skill_architect` | sonnet | medium | ✅ `9d32318` |
+| W59 | `skills/slash-commander/SKILL.md` | modify (`:12`, `:30`; own skill, not vendored) | low | `skill_architect` | sonnet | medium | ✅ `e9cc07a` |
 
 ---
 
@@ -221,4 +221,4 @@ No other rule violation found: contiguous ids W00-W37 (38 rows, matches `Cost`),
 
 ## Resume point (updated 2026-10-25, session `d2b5fc4e-e365-4ed1-b5fb-0d4148b83a97`)
 
-Every Work row is resolved (✅ or ⛔ with its KI/RECORD). W38 and W39 were added in execution by human decision. Next: pipeline Phase 7 (Quality Gate), `qa_agent` then `tester_agent`, each in fresh context, base `5851b18`; Gate 1 starts with `python3 scripts/check_fix_reproduces.py --range 5851b18..HEAD`. Then Phase 8 closeout.
+Every Work row is resolved (✅ or ⛔ with its KI/RECORD). W38, W39 and wave E (W40-W59, `KI-057-5`) were added in execution by human decision; `make verify` 0, 1245 passed at the wave E tip. Next: pipeline Phase 7 (Quality Gate), `qa_agent` then `tester_agent`, each in fresh context, base `5851b18`; Gate 1 starts with `python3 scripts/check_fix_reproduces.py --range 5851b18..HEAD`. Then Phase 8 closeout.
