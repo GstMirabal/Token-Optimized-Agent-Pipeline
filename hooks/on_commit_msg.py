@@ -29,6 +29,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from hooks.on_commit import (
     audit_dependency_justification,
     audit_regression_test,
+    audit_task_scope_precondition,
     get_staged_files,
     is_valid_commit_message,
 )
@@ -62,7 +63,7 @@ def main() -> int:
             "Commit message must follow Conventional Commits and end with the "
             "#[Sprint_ID] suffix, e.g. \"feat(auth): add login flow #078\" (agents.md §5)."
         )
-    for check in (audit_regression_test, audit_dependency_justification):
+    for check in (audit_regression_test, audit_dependency_justification, audit_task_scope_precondition):
         if reason := check(message, staged):
             failures.append(reason)
 

@@ -203,3 +203,26 @@ def test_commit_msg_hook_judges_files_staged_by_commit_all(
     result = _shell('git commit -a -q -m "fix(cfg): correct it #057"')
     assert result.returncode != 0
     assert "must stage the test" in result.stderr
+
+
+# --- commit-msg runs Guard 5, the task_scope precondition (Sprint 057 QA5-1) ---
+
+def test_message_file_refuses_sprint_commit_outside_dir_without_scope(repo, monkeypatch):
+    subprocess.run(["git", "checkout", "-q", "-b", "ai-sprint/052"], check=True)
+    stage("app.py", "def f(): pass\n")
+    msg = repo / "MSG"
+    msg.write_text("feat(app): add f #052\n")
+    monkeypatch.setattr(sys, "argv", ["on_commit_msg.py", str(msg)])
+    assert ocm.main() == 1
+
+
+def test_message_file_passes_sprint_commit_when_scope_exists(repo, monkeypatch):
+    subprocess.run(["git", "checkout", "-q", "-b", "ai-sprint/052"], check=True)
+    scope = repo / "docs" / "sprints" / "052-core-pipeline"
+    scope.mkdir(parents=True)
+    (scope / "task_scope.md").write_text("# scope\n")
+    stage("app.py", "def f(): pass\n")
+    msg = repo / "MSG"
+    msg.write_text("feat(app): add f #052\n")
+    monkeypatch.setattr(sys, "argv", ["on_commit_msg.py", str(msg)])
+    assert ocm.main() == 0
