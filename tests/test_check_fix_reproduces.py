@@ -233,3 +233,15 @@ def test_setup_error_on_parent_is_wrong_failure(repo, capsys):
     assert code == 2
     assert "WRONG_FAILURE" in out
     assert "setup error" in out
+
+
+def test_script_runs_under_isolated_mode() -> None:
+    """`python3 -I` drops the script directory from `sys.path` (QA1-6)."""
+    script = Path(__file__).resolve().parent.parent / "scripts" / "check_fix_reproduces.py"
+    result = subprocess.run(
+        [sys.executable, "-I", str(script), "--help"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr

@@ -44,6 +44,7 @@ import xml.etree.ElementTree as ET
 from collections.abc import Iterator
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _repro_grammar import is_source_path
 from _repro_grammar import parse_trailers as _parse_claims
 
