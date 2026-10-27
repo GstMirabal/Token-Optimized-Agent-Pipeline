@@ -1063,8 +1063,10 @@ def block(reason: str) -> None:
     sys.exit(2)
 
 
-# Guards 3-5: every audit that judges the commit message against the staged
-# files, with the telemetry code this hook logs when it refuses.
+# The message audits: every `audit_*(message, staged)` function of this module,
+# each with the telemetry code the PreToolUse guard below logs when it refuses
+# (`hooks/on_commit_msg.py` runs the same audits and logs
+# `MESSAGE_GATE_VIOLATION` instead).
 MESSAGE_AUDITS: tuple[tuple[Callable[[str, list[str]], str | None], str], ...] = (
     (audit_regression_test, "REGRESSION_TEST_MISSING"),  # rules/code_craft.md §6
     (audit_dependency_justification, "DEPENDENCY_UNJUSTIFIED"),  # rules/code_craft.md §7
@@ -1073,15 +1075,15 @@ MESSAGE_AUDITS: tuple[tuple[Callable[[str, list[str]], str | None], str], ...] =
 
 
 def _run_commit_message_guards(command: str) -> None:
-    """Runs Guards 2-5, which all need the parsed commit message.
+    """Runs the guards that need the parsed commit message.
 
-    Guard 2 is `is_valid_commit_message`; Guards 3-5 are `MESSAGE_AUDITS`.
-    This hook can read the message only on the agent path (the Bash command
-    carries `-m`). At native pre-commit time git has not yet finalised
+    They are Guard 2, `is_valid_commit_message`, and every entry of
+    `MESSAGE_AUDITS`. This hook can read the message only on the agent path
+    (the Bash command carries `-m`). At native pre-commit time git has not yet finalised
     COMMIT_EDITMSG, so reading it there would test the PREVIOUS commit's
     message — worse than not checking. Terminal and IDE commits are judged
     instead by the git `commit-msg` hook, `hooks/on_commit_msg.py`, installed
-    by `scripts/install.py`, which runs Guard 2 and Guards 3-5; where that hook
+    by `scripts/install.py`, which runs the same guards; where that hook
     is not installed, a native commit passes no message gate.
 
     Args:
@@ -1102,6 +1104,7 @@ def _run_commit_message_guards(command: str) -> None:
         if reason := audit(message, staged):
             log_error("on_commit", code, message[:80])
             block(reason)
+
 
 def main():
     command = read_hook_command()
