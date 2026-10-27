@@ -73,6 +73,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
   | QA Agent (Gate 1)     | 1 | REJECTED | instructing | S2 | 1 finding in scripts/x.py. |
   | QA Agent (Gate 1)     | 2 | APPROVED |  | none | ruff + lint clean; structure verified. |
   | Tester Agent (Gate 2) | 1 | RECORD   | testifying | S3 | 701 passed, zero regression; N items recorded. |
+| QA Agent (Gate 1) | 8 | REJECTED | instructing | S2 | Scope `ce4f0be..HEAD` (closeout records and wave L). `check_fix_reproduces.py --range 5851b18..HEAD` exit 0 (19 `fix(`, 0 violations); `make verify` exit 0, 1283 passed. W104/W105 fix both gate profiles. QA8-1 (S2, instructing): `agents/orchestrator.md:19` `gate_transcription` still defines each gate row as Verdict plus Class with no Severity, second occurrence of the A1 family (convergence rule 3). QA8-2 (S2, testifying): `CHANGELOG.md` `[Unreleased]` cites no wave L commit and says Gate 1 closed at round 7. QA8-3 (S3): roadmap `KI-056-3` cites only `1474fa6`, its `git-sync-agent` half closed by H-008 (`f98f4d2`). CHANGELOG SHAs, audit report figures and roadmap closures otherwise verified. |
   | Tester Agent (Gate 2) | 2 | REJECTED | instructing | S1 | escape: new failure in a module round 1 reviewed. |
 -->
 
