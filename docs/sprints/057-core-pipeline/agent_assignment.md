@@ -181,6 +181,14 @@ cover the 38 units, so `Destination` is `N/A` on every row.
 | W98 | `tests/test_code_craft_gates.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | W99 | `tests/test_code_craft_gates.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 
+### Wave K — Gate 1 round 6 record remediation (human decision 2026-10-26)
+
+| # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| W100 | `hooks/on_commit.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W101 | `CONTRIBUTING.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| W102 | `tests/test_code_craft_gates.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+
 ## Disagreements with the plan
 
 | # | Plan proposed | Assigned | Reason |

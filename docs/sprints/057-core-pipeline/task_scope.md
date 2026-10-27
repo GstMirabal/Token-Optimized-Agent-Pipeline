@@ -198,6 +198,17 @@ QA Gate 1 round 5 emitted RECORD (testifying, S2). QA5-1 is the fourth finding o
 
 Ordering: W95 before W96 (the W96 docstring states that the `commit-msg` hook runs Guard 5); W96 before W97 and W98 (both read `MESSAGE_AUDITS`); W98 before W99 (same subject).
 
+
+### Wave K — Gate 1 round 6 record remediation (QA6-1..QA6-2 and style notes, added by human decision 2026-10-26)
+
+QA Gate 1 round 6 emitted RECORD (testifying, S3) and closed QA5-1 and QA5-2. Human decision 2026-10-26: remediate every S3 observation before Gate 2, then a short Gate 1 round 7 over the wave K diff.
+
+| # | File | Operation | Risk | Assignee | Model | Effort | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| W100 | `hooks/on_commit.py` | modify (QA6-1: the `MESSAGE_AUDITS` comment and the `_run_commit_message_guards` docstring drop the unchecked guard ranges and name the claim W98 checks — every `audit_*(message, staged)` function of the module; the telemetry code is the one the PreToolUse guard logs, while `hooks/on_commit_msg.py` logs `MESSAGE_GATE_VIOLATION`; E302 before `def main():`) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W101 | `CONTRIBUTING.md` | modify (QA6-2: `:8` and `:10` state that the message gates run in the PreToolUse guard and in the `commit-msg` hook `hooks/on_commit_msg.py`, so terminal and IDE commits are covered; `:11` says the `Repro: manual` route needs no staged test) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| W102 | `tests/test_code_craft_gates.py` | modify (round 6 note: the W95 tests assert the refusal names `task_scope.md`, with type hints and docstrings) | low | `implementer_agent` | sonnet | medium | ⏳ |
+
 ---
 
 ## Rule audit
@@ -308,4 +319,4 @@ No other rule violation found: contiguous ids W00-W37 (38 rows, matches `Cost`),
 
 ## Resume point (updated 2026-10-26, session `aeda1d83-cbd8-463b-8f56-25f5958d428e`)
 
-QA Gate 1 round 5 RECORD (testifying, S2); QA4-1..QA4-3 closed. Wave J (W95-W99) executed: every row ✅; `make verify` 0, 1283 passed; `python3 scripts/check_fix_reproduces.py --range 7ab2aa4..HEAD` 0 (1 `fix(`, 0 violations). W98 mutation proof: dropping the Guard 5 entry from `MESSAGE_AUDITS` fails one test, importing `audit_regression_test` by name in `hooks/on_commit_msg.py` fails the other. W99 proof: `GIT_CONFIG_COUNT` injection went from 2 failed to passing. `RA-14` sweep (`git grep -n -i -E "guards? 2-4|guard 5|message gates|on_commit_msg"` outside `docs/sprints`, `docs/audits`, `CHANGELOG.md`, `tests`): no remaining statement contradicts Guards 2-5 on both paths. Next: Gate 1 round 6 in fresh context over `7ab2aa4..HEAD`; then Gate 2 (`tester_agent`, fresh context, base `5851b18`); then Phase 8 closeout. Before closeout, `SPRINT_LOG.md` Sprint Progression still shows its Phase 3 state and must be brought in line with this file.
+QA Gate 1 round 6 RECORD (testifying, S3); QA5-1 and QA5-2 closed. Next: execute Wave K (W100-W102), then Gate 1 round 7 in fresh context over the Wave K diff; then Gate 2 (`tester_agent`, fresh context, base `5851b18`); then Phase 8 closeout. Before closeout, `SPRINT_LOG.md` Sprint Progression still shows its Phase 3 state and must be brought in line with this file.
