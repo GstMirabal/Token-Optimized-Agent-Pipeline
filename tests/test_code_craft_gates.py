@@ -208,7 +208,7 @@ def test_commit_msg_hook_judges_files_staged_by_commit_all(
     assert "must stage the test" in result.stderr
 
 
-# --- commit-msg runs Guard 5, the task_scope precondition (Sprint 057 QA5-1) ---
+# --- commit-msg runs the task_scope precondition (Sprint 057 QA5-1) ---
 
 def test_message_file_refuses_sprint_commit_outside_dir_without_scope(
     repo: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
