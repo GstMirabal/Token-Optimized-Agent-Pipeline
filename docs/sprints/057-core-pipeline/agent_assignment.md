@@ -188,6 +188,7 @@ cover the 38 units, so `Destination` is `N/A` on every row.
 | W100 | `hooks/on_commit.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | W101 | `CONTRIBUTING.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | W102 | `tests/test_code_craft_gates.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W103 | `tests/test_code_craft_gates.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 
 ## Disagreements with the plan
 

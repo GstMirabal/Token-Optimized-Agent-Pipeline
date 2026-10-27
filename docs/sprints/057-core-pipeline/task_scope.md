@@ -208,6 +208,7 @@ QA Gate 1 round 6 emitted RECORD (testifying, S3) and closed QA5-1 and QA5-2. Hu
 | W100 | `hooks/on_commit.py` | modify (QA6-1: the `MESSAGE_AUDITS` comment and the `_run_commit_message_guards` docstring drop the unchecked guard ranges and name the claim W98 checks — every `audit_*(message, staged)` function of the module; the telemetry code is the one the PreToolUse guard logs, while `hooks/on_commit_msg.py` logs `MESSAGE_GATE_VIOLATION`; E302 before `def main():`) | low | `implementer_agent` | sonnet | medium | ✅ `77f34fe` |
 | W101 | `CONTRIBUTING.md` | modify (QA6-2: `:8` and `:10` state that the message gates run in the PreToolUse guard and in the `commit-msg` hook `hooks/on_commit_msg.py`, so terminal and IDE commits are covered; `:11` says the `Repro: manual` route needs no staged test) | low | `doc_orchestrator` | sonnet | medium | ✅ `cae29a7` |
 | W102 | `tests/test_code_craft_gates.py` | modify (round 6 note: the W95 tests assert the refusal names `task_scope.md`, with type hints and docstrings) | low | `implementer_agent` | sonnet | medium | ✅ `6cbde0a` |
+| W103 | `tests/test_code_craft_gates.py` | modify (QA7-1, Gate 1 round 7 RECORD S3: the section header drops "Guard 5"; a one-line comment, reviewed in Gate 2's range without a further Gate 1 round, by the human decision to proceed to Gate 2 after round 7) | low | `implementer_agent` | sonnet | medium | ⏳ |
 
 ---
 
