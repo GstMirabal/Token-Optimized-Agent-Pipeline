@@ -11,7 +11,11 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
   - upstream defect block 1, reported by host H1;
   - the S3 residues of Sprint 056 and the `install.sh` residue (`KI-057-5`).
 
-  QA Gate 1 closed `RECORD` at round 7 after remediation waves F-K. Tester Gate 2 closed `APPROVED` at round 1 with 1283 tests passing.
+  The Quality Gate rounds are recorded in `docs/sprints/057-core-pipeline/SPRINT_LOG.md`:
+  - remediation waves F-K followed QA Gate 1 rounds 1-6;
+  - Tester Gate 2 returned `APPROVED` at round 1 with 1283 tests passing;
+  - waves L-M followed the closeout audit and QA Gate 1 round 8.
+
   - **`docs/guides/PROMPT_CRITERIA_GUIDE.md`** (new) is the prompt criteria checklist (`4869bc6`).
   - **Severity scale**:
     - `rules/qa_and_testing.md` §4 rates each finding S0-S3 and adds five convergence rules (`b063af1`).
@@ -31,6 +35,7 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
   - **`scripts/check_changelog_tags.py`** (new) checks this file's version headers against the tags and their order (`KI-056-8`, `f22a40e`). `make verify` runs it (`58a6728`), CI fetches full history and tags so its presence check runs (`df50276`), and it resolves `--changelog` against the directory it was invoked from (`b5f8d3e`, docstring `9104649`).
   - **`MESSAGE_AUDITS`** in `hooks/on_commit.py` declares the message audits once (`d288709`). The `commit-msg` hook `hooks/on_commit_msg.py` runs the same list (`508a815`), including the `task_scope.md` precondition, which before ran only on agent commits (`7e77521`). `tests/test_code_craft_gates.py` checks that both hooks use that one list (`015a304`).
   - **`tests/test_fix_route_wording.py`** (new) requires every governance line that states the paired test of a `fix(` commit to name the `Repro: manual` route (convergence rule 3, `381b6cb`).
+  - **`tests/test_gate_row_wording.py`** (new) requires every governance line that describes the gate row or verdict register by `Verdict` and `Class` to name `Severity` too (convergence rule 3 for the closeout audit finding A1, `7b1cee3`).
 
 ### Changed
 - **`install.py` replaces `install.sh` as the named installer** (`KI-057-5`, Wave E):
@@ -41,6 +46,7 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
   - The `B5` refusal of `scripts/install.py` names `install.py` (`KI-056-5`, `186ec42`).
   - The `scripts/install_claude.sh` deprecation message names `scripts/install.py` (`d5d242f`).
 - **`Repro: manual` route named wherever a `fix(` paired test is stated**: `rules/code_craft.md` (`7a22d85`), `agents.md` `§2 jurisdictional_lock` (`e10809c`), `agents/implementer_agent.md` (`e7759db`), `agents/rule_validator.md` (`bf16a70`), `memory_index.json` (replaces the relabel prescription, `93689d0`), `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` (`0acbd55`), `workflows/pipeline_workflow.md` (`51640bd`) and `CONTRIBUTING.md`, which also names both message-gate paths (`cae29a7`).
+- **The gate profiles name the `Severity` cell of the gate row**: `agents/qa_agent.md` (`58afa46`), `agents/tester_agent.md` (`aba5ca9`) and the transcription row of `agents/orchestrator.md` (`5650e98`).
 - **`hooks/on_commit.py` docstrings** state which files each caller sees, that `hooks/on_commit_msg.py` covers terminal and IDE commits, and the property the `MESSAGE_AUDITS` test checks (`6d2a944`, `ac3f8e1`, `383dfb7`, `77f34fe`).
 - **Command path form**: `workflows/pipeline_workflow.md` and `workflows/remediation_workflow.md` state that commands are written in nucleus form and that a host prefixes them with `.agents/` (`c240c91`, `4661026`).
 - **`workflows/reconciliation_workflow.md`** names the root of the Phase 4 roadmap record by mode (C-2, `9246d60`).
@@ -94,7 +100,12 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
   - audit report `PIPELINE_AUDIT_REPORT-057.md` (`54541f2`) and its finding A2 (`7b5dc08`);
   - `graph_stats.json` (`d65546e`);
   - model ledger (`2e01ac6`);
-  - roadmap (`03c8b14`).
+  - roadmap (`03c8b14`, `6b72d49`, `e0822ea`);
+  - ledger entry (`0ffa68f`);
+  - wave L scoped and closed (`67bb23e`, `437904a`);
+  - QA Gate 1 round 8 verdict (`3dbaeff`);
+  - wave M scoped and recorded (`3c5c75d`, `e174291`);
+  - knowledge items indexed (`e8d39d3`).
 
 ## [4.39.1] - 2026-10-23
 
