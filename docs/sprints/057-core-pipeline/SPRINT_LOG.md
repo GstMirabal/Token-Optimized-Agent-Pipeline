@@ -9,7 +9,7 @@
 | :--- | :--- |
 | **Active Layer** | core |
 | **Strategic Goal** | s0-lane-and-defect-block: S0 lane (measure sandbox and database access, then `.env.agent`), upstream defect block 1, S3 residues and documentation (branch `ai-sprint/057`, base `main` at `5851b18`, plan commit `5a1b9bc`) |
-| **Intelligence State** | Phase 3 (Roadmap Drafting); Implementation Plan `DRAFT` at `docs/sprints/057-core-pipeline/IMPLEMENTATION_PLAN.md`, committed in `5a1b9bc`, awaiting Phase 5 approval |
+| **Intelligence State** | Phase 8 (Sprint Closeout); Implementation Plan `APPROVED` at `docs/sprints/057-core-pipeline/IMPLEMENTATION_PLAN.md` (`8d55058`); both Phase 7 gates closed |
 | **Start Time** | 2026-10-24T11:28:15Z |
 
 ---
@@ -17,48 +17,22 @@
 ## 🏁 Sprint Progression
 Tracking of atomic goals achieved during the session.
 
-- [ ] **Wave A: criteria and scale (first; applies to all later text)**
-    - `[ ]` W00 `docs/guides/PROMPT_CRITERIA_GUIDE.md` ⏳
-    - `[ ]` W07 `rules/qa_and_testing.md` ⏳
-    - `[ ]` W08 `docs/standards/templates/SPRINT_LOG_TEMPLATE.md` ⏳
-    - `[ ]` W09 `scripts/check_gate_log.py` ⏳
-- [ ] **Wave B: S0 lane (W01 blocks W02-W06)**
-    - `[ ]` W01 `docs/sprints/057-core-pipeline/SANDBOX_DB_MEASUREMENT.md` ⏳
-    - `[ ]` W02 `claude/settings.hooks.json` ⏳
-    - `[ ]` W03 `scripts/env_agent_check.py` ⏳
-    - `[ ]` W04 `scripts/db_probe.py` ⏳
-    - `[ ]` W05 `rules/project_topology.md` ⏳
-    - `[ ]` W06 `agents.md` ⏳
-- [ ] **Wave C: block 1 defects**
-    - `[ ]` W10 `scripts/session_state.py` ⏳
-    - `[ ]` W11 `workflows/deployment_workflow.md` ⏳
-    - `[ ]` W12 `scripts/session_state.py` ⏳
-    - `[ ]` W13 `scripts/session_end_hook.py` ⏳
-    - `[ ]` W14 `scripts/py_compile_tree.py` ⏳
-    - `[ ]` W15 `scripts/_repro_grammar.py` ⏳
-    - `[ ]` W16 `hooks/on_commit.py` ⏳
-    - `[ ]` W17 `scripts/check_fix_reproduces.py` ⏳
-    - `[ ]` W18 `scripts/check_fix_reproduces.py` ⏳
-    - `[ ]` W19 `scripts/check_task_scope.py` ⏳
-    - `[ ]` W20 `scripts/model_ledger.py` ⏳
-    - `[ ]` W21 `scripts/detect_drift.py` ⏳
-    - `[ ]` W22 `workflows/reconciliation_workflow.md` ⏳
-    - `[ ]` W23 `scripts/session_start.py` ⏳
-    - `[ ]` W24 `scripts/check_role_artifact.py` ⏳
-    - `[ ]` W25 `scripts/session_state.py` ⏳
-    - `[ ]` W26 `scripts/extract_plan.py` ⏳
-    - `[ ]` W27 `workflows/pipeline_workflow.md` ⏳
-    - `[ ]` W28 `scripts/session_state.py` ⏳
-    - `[ ]` W29 `workflows/remediation_workflow.md` ⏳
-    - `[ ]` W30 `scripts/merge_json.py` ⏳
-    - `[ ]` W31 `scripts/check_changelog_tags.py` ⏳
-    - `[ ]` W32 `Makefile` ⏳
-- [ ] **Wave D: S3 residues and documentation**
-    - `[ ]` W33 `skills/mcp-registry/registry.json` ⏳
-    - `[ ]` W34 `tests/test_mcp_template.py` ⏳
-    - `[ ]` W35 `memory_index.json` ⏳
-    - `[ ]` W36 `scripts/install.py` ⏳
-    - `[ ]` W37 `skills/env-shielding-auditor/README.md` ⏳
+- [x] **Phase 1 - Planning**: Implementation Plan drafted by `principal_agent`
+    - `[x]` `IMPLEMENTATION_PLAN.md` at `docs/sprints/057-core-pipeline/IMPLEMENTATION_PLAN.md`, committed `5a1b9bc`, Phase 4.3 audit applied `8d55058`
+- [x] **Phase 3 - Roadmap Drafting / Sprint Opening**
+    - `[x]` Branch `ai-sprint/057` created from `main` at `5851b18`
+    - `[x]` `SPRINT_LOG.md` created from `docs/standards/templates/SPRINT_LOG_TEMPLATE.md` (`bee8d63`)
+- [x] **Phase 4 - Assignment and Scope**: `agent_assignment.md` (`41aa896`), `skill_assignment.md` (`3ce2c91`; P1 hit, no forge), `task_scope.md` (`74a96c6`)
+- [x] **Phase 5 - Approval Gate**: Human OK for Sprint 057, 2026-10-24, plan commit at approval `8d55058`, recorded `a29648e`
+- [x] **Phase 6 - Execution**: per-unit status and commit SHAs are in `task_scope.md` `## Work`
+    - `[x]` Wave A (W00, W07-W09): criteria guide, S0-S3 scale, Severity column, escape-row count
+    - `[x]` Wave B (W01-W06): W01 measured M1 denied (`7eb188b`); W02-W06 skipped by abort criterion 1 → `KI-057-1`
+    - `[x]` Wave C (W10-W32, W38, W39): block 1 defects; W13 not reproducible as specified → `KI-057-2`; W25 RECORD (C-9 not reproduced)
+    - `[x]` Wave D (W33-W37): S3 residues and documentation
+    - `[x]` Wave E (W40-W59): `install.sh` residue (`KI-057-5`), human decision 2026-10-25
+- [x] **Phase 7 - Quality Gate**: QA Gate 1 rounds 1-7 (REJECTED at rounds 1-2, RECORD at rounds 3-7); Tester Gate 2 APPROVED at round 1
+    - `[x]` Remediation waves F-K (W60-W102) and W103, one per Gate 1 round, each added by human decision 2026-10-26/27
+- [ ] **Phase 8 - Sprint Closeout** (`/agents:close`)
 
 ---
 
@@ -108,7 +82,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 ## ⚓ Documentation Entry Point Seal
 Closing the session state and certifying traceability.
 
-**Strategic Lock**: OPEN (Implementation Plan `DRAFT`; Phase 5 approval pending)
-**Next Phase**: Phase 4 (rule validation and `task_scope.md`), then Phase 5 Approval Gate
+**Strategic Lock**: OPEN (Phase 8 closeout in progress)
+**Next Phase**: `workflows/close_workflow.md`, then `workflows/deployment_workflow.md`
 
 *Certified under conventional commit standard: feat(scope): message #057*
