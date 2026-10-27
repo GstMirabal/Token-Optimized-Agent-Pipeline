@@ -216,8 +216,8 @@ QA Gate 1 round 6 emitted RECORD (testifying, S3) and closed QA5-1 and QA5-2. Hu
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| W104 | `agents/qa_agent.md` | modify (A1: `:17` `verdict_routing` and `:22` `final_message_register` add Severity, the highest S0-S3 of the round or `none`, per `rules/qa_and_testing.md` §4) | low | `agent_orchestrator` | sonnet | medium | ⏳ |
-| W105 | `agents/tester_agent.md` | modify (A1: same two lines for Gate 2) | low | `agent_orchestrator` | sonnet | medium | ⏳ |
+| W104 | `agents/qa_agent.md` | modify (A1: `:17` `verdict_routing` and `:22` `final_message_register` add Severity, the highest S0-S3 of the round or `none`, per `rules/qa_and_testing.md` §4) | low | `agent_orchestrator` | sonnet | medium | ✅ `58afa46` |
+| W105 | `agents/tester_agent.md` | modify (A1: same two lines for Gate 2) | low | `agent_orchestrator` | sonnet | medium | ✅ `aba5ca9` |
 
 ---
 
