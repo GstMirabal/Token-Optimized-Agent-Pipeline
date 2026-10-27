@@ -190,6 +190,13 @@ cover the 38 units, so `Destination` is `N/A` on every row.
 | W102 | `tests/test_code_craft_gates.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | W103 | `tests/test_code_craft_gates.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 
+### Wave L — closeout audit finding A1 (human decision 2026-10-27)
+
+| # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| W104 | `agents/qa_agent.md` | modify | sequential | `agent_orchestrator` | N/A | `agents/agent_orchestrator.md` |
+| W105 | `agents/tester_agent.md` | modify | sequential | `agent_orchestrator` | N/A | `agents/agent_orchestrator.md` |
+
 ## Disagreements with the plan
 
 | # | Plan proposed | Assigned | Reason |

@@ -210,6 +210,15 @@ QA Gate 1 round 6 emitted RECORD (testifying, S3) and closed QA5-1 and QA5-2. Hu
 | W102 | `tests/test_code_craft_gates.py` | modify (round 6 note: the W95 tests assert the refusal names `task_scope.md`, with type hints and docstrings) | low | `implementer_agent` | sonnet | medium | ✅ `6cbde0a` |
 | W103 | `tests/test_code_craft_gates.py` | modify (QA7-1, Gate 1 round 7 RECORD S3: the section header drops "Guard 5"; a one-line comment, reviewed in Gate 2's range without a further Gate 1 round, by the human decision to proceed to Gate 2 after round 7) | low | `implementer_agent` | sonnet | medium | ✅ `c48bc3c` |
 
+### Wave L — closeout audit finding A1 (added by human decision 2026-10-27)
+
+`docs/audits/PIPELINE_AUDIT_REPORT-057.md` A1 (S2, instructing): the two gate profiles define the verdict register as Verdict plus Class and never name the Severity cell that W07/W08 made part of the gate table. Human decision 2026-10-27: fix it in this sprint, then `make verify` and a short Gate 1 round 8 over the wave L diff.
+
+| # | File | Operation | Risk | Assignee | Model | Effort | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| W104 | `agents/qa_agent.md` | modify (A1: `:17` `verdict_routing` and `:22` `final_message_register` add Severity, the highest S0-S3 of the round or `none`, per `rules/qa_and_testing.md` §4) | low | `agent_orchestrator` | sonnet | medium | ⏳ |
+| W105 | `agents/tester_agent.md` | modify (A1: same two lines for Gate 2) | low | `agent_orchestrator` | sonnet | medium | ⏳ |
+
 ---
 
 ## Rule audit
