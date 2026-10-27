@@ -228,7 +228,7 @@ QA Gate 1 round 8 emitted REJECTED (instructing, S2). QA8-1 is the second occurr
 | W106 | `agents/orchestrator.md` | modify (QA8-1: `:19` `gate_transcription` names the Severity cell, the highest S0-S3 of the round or `none`) | low | `agent_orchestrator` | sonnet | medium | ✅ `5650e98` |
 | W107 | `tests/test_gate_row_wording.py` | create (convergence rule 3 for the A1 family: every line of the scanned governance files that names both `Verdict` and `Class` and speaks of a row, register, transcription or the `Gate`/`Round` header also names `Severity`; must fail at the parent of W106) | low | `implementer_agent` | sonnet | medium | ✅ `7b1cee3` |
 | W108 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify (QA8-3: the `KI-056-3` row cites H-008 `f98f4d2` for its `git-sync-agent` half) | low | `doc_orchestrator` | sonnet | medium | ✅ `6b72d49` |
-| W109 | `CHANGELOG.md` | modify (QA8-2: `[Unreleased]` cites wave L, wave M and every later close commit, and states the final Gate 1 round) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| W109 | `CHANGELOG.md` | modify (QA8-2: `[Unreleased]` cites wave L, wave M and every later close commit, and states the final Gate 1 round) | low | `doc_orchestrator` | sonnet | medium | ✅ `cfe2330` |
 
 ---
 
@@ -341,4 +341,4 @@ No other rule violation found: contiguous ids W00-W37 (38 rows, matches `Cost`),
 
 ## Resume point (updated 2026-10-27, session `aeda1d83-cbd8-463b-8f56-25f5958d428e`)
 
-Phase 7 closed: QA Gate 1 RECORD at round 7, Tester Gate 2 APPROVED at round 1 (`ce4f0be`). Every Work row W00-W103 is resolved. Next: Phase 8 closeout through `workflows/close_workflow.md`, then `workflows/deployment_workflow.md`.
+Phase 8 closeout in progress. The closeout audit (`PIPELINE_AUDIT_REPORT-057.md`) found A1 and A2; QA Gate 1 round 8 REJECTED (instructing, S2) wave L; wave M (W106-W109) remediates it. Every Work row W00-W109 is resolved. Next: a short QA Gate 1 round 9 over the wave M diff, then `PHASE_REGISTER.md`, `session_state.py release` and the push of `ai-sprint/057`.
