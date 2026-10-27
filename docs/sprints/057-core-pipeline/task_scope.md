@@ -205,9 +205,9 @@ QA Gate 1 round 6 emitted RECORD (testifying, S3) and closed QA5-1 and QA5-2. Hu
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| W100 | `hooks/on_commit.py` | modify (QA6-1: the `MESSAGE_AUDITS` comment and the `_run_commit_message_guards` docstring drop the unchecked guard ranges and name the claim W98 checks — every `audit_*(message, staged)` function of the module; the telemetry code is the one the PreToolUse guard logs, while `hooks/on_commit_msg.py` logs `MESSAGE_GATE_VIOLATION`; E302 before `def main():`) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| W101 | `CONTRIBUTING.md` | modify (QA6-2: `:8` and `:10` state that the message gates run in the PreToolUse guard and in the `commit-msg` hook `hooks/on_commit_msg.py`, so terminal and IDE commits are covered; `:11` says the `Repro: manual` route needs no staged test) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| W102 | `tests/test_code_craft_gates.py` | modify (round 6 note: the W95 tests assert the refusal names `task_scope.md`, with type hints and docstrings) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W100 | `hooks/on_commit.py` | modify (QA6-1: the `MESSAGE_AUDITS` comment and the `_run_commit_message_guards` docstring drop the unchecked guard ranges and name the claim W98 checks — every `audit_*(message, staged)` function of the module; the telemetry code is the one the PreToolUse guard logs, while `hooks/on_commit_msg.py` logs `MESSAGE_GATE_VIOLATION`; E302 before `def main():`) | low | `implementer_agent` | sonnet | medium | ✅ `77f34fe` |
+| W101 | `CONTRIBUTING.md` | modify (QA6-2: `:8` and `:10` state that the message gates run in the PreToolUse guard and in the `commit-msg` hook `hooks/on_commit_msg.py`, so terminal and IDE commits are covered; `:11` says the `Repro: manual` route needs no staged test) | low | `doc_orchestrator` | sonnet | medium | ✅ `cae29a7` |
+| W102 | `tests/test_code_craft_gates.py` | modify (round 6 note: the W95 tests assert the refusal names `task_scope.md`, with type hints and docstrings) | low | `implementer_agent` | sonnet | medium | ✅ `6cbde0a` |
 
 ---
 
@@ -317,6 +317,6 @@ No other rule violation found: contiguous ids W00-W37 (38 rows, matches `Cost`),
 | W36 | `install.sh` still named as the command in `scripts/bridge_state.py:33`, `scripts/session_start.py:488-490` (`_run_bridge_install` runs the shim and reports "scripts/install.sh missing"), `workflows/deployment_workflow.md:28`, `rules/project_topology.md:34`, `tests/test_session_start.py:764` docstring | `KI-057-5` → Wave E (W40-W59), this sprint, human decision 2026-10-25 |
 | W31 | `HISTORICAL_GAPS` = `v3.4.0`, `v3.5.2`: tags released without a ledger section; closed history not rewritten | Recorded; no action |
 
-## Resume point (updated 2026-10-26, session `aeda1d83-cbd8-463b-8f56-25f5958d428e`)
+## Resume point (updated 2026-10-27, session `aeda1d83-cbd8-463b-8f56-25f5958d428e`)
 
-QA Gate 1 round 6 RECORD (testifying, S3); QA5-1 and QA5-2 closed. Next: execute Wave K (W100-W102), then Gate 1 round 7 in fresh context over the Wave K diff; then Gate 2 (`tester_agent`, fresh context, base `5851b18`); then Phase 8 closeout. Before closeout, `SPRINT_LOG.md` Sprint Progression still shows its Phase 3 state and must be brought in line with this file.
+QA Gate 1 round 6 RECORD (testifying, S3); QA5-1 and QA5-2 closed. Wave K (W100-W102) executed: every row ✅; `make verify` 0, 1283 passed. W101 also aligned two `CONTRIBUTING.md` headings with the edited bullets (`:9` names `hooks/on_commit.py` for the secret scan; `:11` names the `Repro: manual` route). Next: Gate 1 round 7 in fresh context over `4baf0e0..HEAD`; then Gate 2 (`tester_agent`, fresh context, base `5851b18`); then Phase 8 closeout. Before closeout, `SPRINT_LOG.md` Sprint Progression still shows its Phase 3 state and must be brought in line with this file.
