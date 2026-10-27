@@ -197,6 +197,15 @@ cover the 38 units, so `Destination` is `N/A` on every row.
 | W104 | `agents/qa_agent.md` | modify | sequential | `agent_orchestrator` | N/A | `agents/agent_orchestrator.md` |
 | W105 | `agents/tester_agent.md` | modify | sequential | `agent_orchestrator` | N/A | `agents/agent_orchestrator.md` |
 
+### Wave M — Gate 1 round 8 remediation (human decision 2026-10-27)
+
+| # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| W106 | `agents/orchestrator.md` | modify | sequential | `agent_orchestrator` | N/A | `agents/agent_orchestrator.md` |
+| W107 | `tests/test_gate_row_wording.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W108 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| W109 | `CHANGELOG.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+
 ## Disagreements with the plan
 
 | # | Plan proposed | Assigned | Reason |

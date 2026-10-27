@@ -219,6 +219,17 @@ QA Gate 1 round 6 emitted RECORD (testifying, S3) and closed QA5-1 and QA5-2. Hu
 | W104 | `agents/qa_agent.md` | modify (A1: `:17` `verdict_routing` and `:22` `final_message_register` add Severity, the highest S0-S3 of the round or `none`, per `rules/qa_and_testing.md` §4) | low | `agent_orchestrator` | sonnet | medium | ✅ `58afa46` |
 | W105 | `agents/tester_agent.md` | modify (A1: same two lines for Gate 2) | low | `agent_orchestrator` | sonnet | medium | ✅ `aba5ca9` |
 
+### Wave M — Gate 1 round 8 remediation (QA8-1..QA8-3, added by human decision 2026-10-27 to fix every finding)
+
+QA Gate 1 round 8 emitted REJECTED (instructing, S2). QA8-1 is the second occurrence of the A1 family, so convergence rule 3 (`rules/qa_and_testing.md` §4) makes a deterministic check the mandatory fix (W107). W109 runs last so the ledger cites every sprint commit before it. Then a short Gate 1 round 9 over the wave M diff.
+
+| # | File | Operation | Risk | Assignee | Model | Effort | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| W106 | `agents/orchestrator.md` | modify (QA8-1: `:19` `gate_transcription` names the Severity cell, the highest S0-S3 of the round or `none`) | low | `agent_orchestrator` | sonnet | medium | ⏳ |
+| W107 | `tests/test_gate_row_wording.py` | create (convergence rule 3 for the A1 family: every line of the scanned governance files that names both `Verdict` and `Class` and speaks of a row, register, transcription or the `Gate`/`Round` header also names `Severity`; must fail at the parent of W106) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W108 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify (QA8-3: the `KI-056-3` row cites H-008 `f98f4d2` for its `git-sync-agent` half) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| W109 | `CHANGELOG.md` | modify (QA8-2: `[Unreleased]` cites wave L, wave M and every later close commit, and states the final Gate 1 round) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+
 ---
 
 ## Rule audit
