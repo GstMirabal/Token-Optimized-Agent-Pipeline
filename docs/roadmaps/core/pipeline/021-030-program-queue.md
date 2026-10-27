@@ -386,6 +386,18 @@ Seven routing entries decided at the Sprint 056 close extract (2026-10-22, human
 | `KI-056-7` | `skills/env-shielding-auditor/README.md` badge says "Built With: Bash" for a Python script | **Closed in Sprint 057** (`9a084b5`) |
 | `KI-056-8` | The Sprint 056 `[Unreleased]` insertion (`c40bbe1`) overwrote the `## [4.38.0] - 2026-10-11` header of `CHANGELOG.md`, fusing its date onto the last 056 bullet; `make verify`, `scripts/detect_drift.py`, both gates and CI passed, and `session_state.py set-topology` silently derived `4.37.0`. Found at `ledger_seal` and repaired in `367e055`. Add a check that every tag `vX.Y.Z` has a `## [X.Y.Z]` section and versions descend | **Closed in Sprint 057** (`scripts/check_changelog_tags.py` `f22a40e`, wired into `make verify` `58a6728`) |
 
+### Still open for a later program — routed out of Sprint 057 (`docs/sprints/057-core-pipeline/`)
+
+Five routing entries decided at the Sprint 057 close extract (2026-10-27, human-confirmed at Phase 2.5), all `routing_class: nucleus`. `KI-057-5` was closed inside the sprint (Wave E).
+
+| # | Finding | Proposed destination |
+| :--- | :--- | :--- |
+| `KI-057-1` | Tests against a local database cannot run in the template sandbox: TCP to `127.0.0.1` measured denied (M1, CLI 2.1.119, `SANDBOX_DB_MEASUREMENT.md`); `.env.agent` readability (M2) is feasible but unused until a database route exists. Units W02-W06 skipped by abort criterion 1 | **Sprint 059** (sandbox regime) |
+| `KI-057-2` | Defect E: `SessionEnd` can suspend a session other than the one ending, because the anchor records no harness `session_id` (`claim` mints its own id); not reproducible as specified (W13) | A later core-pipeline sprint |
+| `KI-057-3` | The naive `split("\|")` cell parsing fixed in `scripts/check_task_scope.py` (B-3, `a4db5df`) remains in `scripts/check_forge_ladder.py`, `scripts/check_gate_log.py` and `scripts/detect_new_models.py` | A later core-pipeline sprint |
+| `KI-057-4` | The `F-107-N1` closure in `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` says `scripts/check_role_artifact.py` moved off `SubagentStop`, but `claude/settings.hooks.json` still runs it `--from-hook` on every subagent stop (S2, instructing) | A later core-pipeline sprint; tell host H1 with the B-7 verdict |
+| `KI-057-6` | `session_state.py require-released --hotfix` checks the record, the branch or subject, ancestry and status (plan D4), but not that every commit between `last_close_commit` and the tip is hotfix work, so a `hotfix/H-NNN` branch can carry an unsealed sprint commit under a committed record (Tester Gate 2 observation) | A later core-pipeline sprint (design change to D4) |
+
 ---
 
 ### Queued for **037** — rider **S** (Cursor agent sandbox false reds)
