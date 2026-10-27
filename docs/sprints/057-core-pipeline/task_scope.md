@@ -225,9 +225,9 @@ QA Gate 1 round 8 emitted REJECTED (instructing, S2). QA8-1 is the second occurr
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| W106 | `agents/orchestrator.md` | modify (QA8-1: `:19` `gate_transcription` names the Severity cell, the highest S0-S3 of the round or `none`) | low | `agent_orchestrator` | sonnet | medium | ⏳ |
-| W107 | `tests/test_gate_row_wording.py` | create (convergence rule 3 for the A1 family: every line of the scanned governance files that names both `Verdict` and `Class` and speaks of a row, register, transcription or the `Gate`/`Round` header also names `Severity`; must fail at the parent of W106) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| W108 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify (QA8-3: the `KI-056-3` row cites H-008 `f98f4d2` for its `git-sync-agent` half) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| W106 | `agents/orchestrator.md` | modify (QA8-1: `:19` `gate_transcription` names the Severity cell, the highest S0-S3 of the round or `none`) | low | `agent_orchestrator` | sonnet | medium | ✅ `5650e98` |
+| W107 | `tests/test_gate_row_wording.py` | create (convergence rule 3 for the A1 family: every line of the scanned governance files that names both `Verdict` and `Class` and speaks of a row, register, transcription or the `Gate`/`Round` header also names `Severity`; must fail at the parent of W106) | low | `implementer_agent` | sonnet | medium | ✅ `7b1cee3` |
+| W108 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify (QA8-3: the `KI-056-3` row cites H-008 `f98f4d2` for its `git-sync-agent` half) | low | `doc_orchestrator` | sonnet | medium | ✅ `6b72d49` |
 | W109 | `CHANGELOG.md` | modify (QA8-2: `[Unreleased]` cites wave L, wave M and every later close commit, and states the final Gate 1 round) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 
 ---
