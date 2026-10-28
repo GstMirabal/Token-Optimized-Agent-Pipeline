@@ -17,19 +17,28 @@
 ---
 
 ## 🏁 Sprint Progression
-Tracking of atomic goals achieved during the session. Work units: 49 (A 17, C 9, B 15, D 8). Execution order: A, C, B, D.
+Tracking of atomic goals achieved during the session. Work units: 48 (A 17, C 9, B 15, D 7). Execution order: A, C, B, D.
 
 - [x] **Phase 1 (Planning)**: scope approved by the human on 2026-10-28 («ok»).
     - `[x]` Scope: upstream channel (Q1-Q6, channels A/B/C, intake filter, elements 5-7); reproduce-first rules R-4, R-5/C-6, R-6, R-8, R-9/A-2, R-10, A-1, A-3, KI-057-3, KI-057-4, KI-057-6; Dependabot #88/#89.
     - `[x]` Human decision: #89 = measure then decide.
     - `[x]` Human decision: channel A is in Sprint 058.
-    - `[ ]` Human decision: elements (5)-(7) per the recommendation in plan Design D4 (pending confirmation at Phase 5).
+    - `[x]` Human decision: elements (5)-(7) per the recommendation in plan Design D4 (confirmed at Phase 5 on 2026-10-28).
 - [x] **Phase 3 (Roadmap Drafting)**: sprint opened.
     - `[x]` `scripts/session_state.py open-sprint --id 58` exit 0.
     - `[x]` Branch `ai-sprint/058` created from `main` at `f0b11f8`.
     - `[x]` `IMPLEMENTATION_PLAN.md` extracted to the canonical sprint directory.
-- [ ] **Execution (A, C, B, D)**: 49 work units (A 17, C 9, B 15, D 8). Not started.
-- [ ] **Phase 5 (Approval Gate)**: pending.
+- [x] **Phase 4 (Assignment and Rule Audit)**: artifacts written and checked.
+    - `[x]` `agent_assignment.md`, `skill_assignment.md` and `task_scope.md` written.
+    - `[x]` `check_forge_ladder.py` and `check_task_scope.py` exit 0.
+    - `[x]` Phase 4.3 raised findings F-1 (S2, instructing) and F-2..F-9 (S3); all resolved in the plan at commit `232efdd`.
+    - `[x]` D-08 removed, so there are 48 units (A 17, C 9, B 15, D 7).
+    - `[x]` Artifacts committed at `73976f7`.
+- [ ] **Execution (A, C, B, D)**: 48 work units (A 17, C 9, B 15, D 7). Not started.
+- [x] **Phase 5 (Approval Gate)**: human OK in chat («ok») on 2026-10-28 over plan commit `232efdd`.
+    - `[x]` Plan status APPROVED, recorded at `02de746`.
+    - `[x]` `audit_plan.py` exits 0.
+    - `[x]` Draft `docs/plans/058-upstream-channel-and-reproduce-first-DRAFT.md` deleted after approval.
 - [ ] **Phase 7 (Quality Gate)**: pending.
 
 ---
@@ -82,7 +91,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 ## ⚓ Documentation Entry Point Seal
 Closing the session state and certifying traceability.
 
-**Strategic Lock**: Open. Plan status DRAFT; Phase 5 Approval Gate (single attended human authorization) not yet passed.
-**Next Phase**: Phase 4.1 Agent Assignment (`agent_assignment.md`), 4.2 Skill Assignment (`skill_assignment.md`), 4.3 Rule Audit (`task_scope.md`), then Phase 5 Approval Gate.
+**Strategic Lock**: Locked. Plan APPROVED (`02de746`), Phase 5 passed.
+**Next Phase**: Phase 6 Execution, Wave A (A-01..A-17), on `ai-sprint/058`.
 
 *Certified under conventional commit standard: feat(scope): message #058*
