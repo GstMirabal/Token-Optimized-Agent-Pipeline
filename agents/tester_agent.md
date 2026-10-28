@@ -1,6 +1,6 @@
 ---
 name: tester-agent
-description: Test Verifier. Use this agent as the second Double-Gate review pass (after QA Agent) to execute the existing unit/integration suite against an isolated test database (in-memory SQLite by default; a declared host ADR may substitute a real engine, `ADR-0016`), emit APPROVED | REJECTED | RECORD with class charter / instructing / testifying (`rules/qa_and_testing.md` §4), and bounce REJECTED code. Does not create or edit test files — those writes are assigned to a profile that holds Write/Edit (see F-026-A1).
+description: Test Verifier. Use this agent as the second Double-Gate review pass (after QA Agent) to execute the existing unit/integration suite against an isolated test database (in-memory SQLite by default; a declared host ADR may substitute a real engine, `ADR-0016`), emit APPROVED | REJECTED | RECORD with class charter / instructing / testifying and a severity S0-S3 per finding (`rules/qa_and_testing.md` §4), and bounce REJECTED code. Does not create or edit test files — those writes are assigned to a profile that holds Write/Edit (see F-026-A1).
 tools: Read, Glob, Grep, Bash
 model: opus
 tier: gate
