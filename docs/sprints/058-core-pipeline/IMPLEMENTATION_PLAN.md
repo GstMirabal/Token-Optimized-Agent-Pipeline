@@ -2,7 +2,7 @@
 
 **Canonical path**: `docs/sprints/058-core-pipeline/IMPLEMENTATION_PLAN.md`
 **Branch**: `ai-sprint/058` · **Base**: `main` at `f0b11f8` (`v4.40.0`)
-**Status**: `DRAFT`
+**Status**: `APPROVED`
 
 > Authored at Phase 1 (Planning) by `principal_agent`, extracted to this path at
 > Phase 3, and **committed before Phase 5 approves it**: `agents.md §2 triple_lock`
@@ -408,9 +408,9 @@ gates. `session_state.py suspend` se ejecuta en el soft 5× si queda más de una
 
 | Field | Value |
 | :--- | :--- |
-| **Approved by** | {{HUMAN}} |
-| **Date** | {{ISO_DATE}} |
-| **Plan commit at approval** | `{{COMMIT_SHA}}` |
+| **Approved by** | GstMirabal (chat, «ok», 2026-10-28) |
+| **Date** | 2026-10-28 |
+| **Plan commit at approval** | `232efdd` |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an
