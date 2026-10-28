@@ -96,7 +96,7 @@ exists (037). Do not re-run gate-replay inside sprints 034–037.
 | **Purpose** | Offline second pass of a gate candidate over a **historical closed sprint diff** without touching `main` |
 | **Preferred corpus** | Sprints **032** and **033** (both APPROVED on Double-Gate round 1) |
 | **Selection** | Pick a closed sprint whose `SPRINT_LOG.md` has a Double-Gate table; the diff is that sprint's merge range versus its base branch |
-| **Recording** | Log every finding with ADR-0008 vocabulary: verdict `APPROVED` \| `REJECTED` \| `RECORD`, plus class `charter` \| `instructing` \| `testifying` |
+| **Recording** | Log every finding with ADR-0008 vocabulary: verdict `APPROVED` \| `REJECTED` \| `RECORD`, plus class `charter` \| `instructing` \| `testifying`, plus a severity `S0` \| `S1` \| `S2` \| `S3` per finding (`rules/qa_and_testing.md` §4) |
 | **Ownership** | Protocol text lives here (E0 / Sprint 035); **execution** is Sprint 038 (`GATE_REPLAY.md`) |
 
 ### 5.1 Classification of replay outcomes (informative only)
