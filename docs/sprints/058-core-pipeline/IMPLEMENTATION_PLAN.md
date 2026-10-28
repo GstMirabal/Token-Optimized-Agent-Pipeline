@@ -76,8 +76,9 @@ regla (`RA-14`). Decisiones confirmadas en el debate de 057 (borrador, sección 
 
 **El escaneo de genericización es un denylist de patrones** y no hace afirmación de cobertura
 (`agents.md §1 fail_closed_claims`). Comprueba exactamente tres familias, que su docstring
-enumera: rutas absolutas POSIX y Windows, direcciones de email y los prefijos de token del
-escáner de secretos ya presente en el repositorio. El control real es `genericized: true`,
+enumera: rutas absolutas POSIX y Windows, direcciones de email y las formas de asignación de
+secreto `SECRET_ASSIGNMENT` y `UNQUOTED_ASSIGNMENT` de `hooks/on_commit.py`, importadas y no
+copiadas, para que no haya dos listas que diverjan. El control real es `genericized: true`,
 que firma el humano del host. El escaneo es un tope que reduce errores, no una garantía.
 
 ### D2 — Transporte por canal (Q2)
@@ -137,7 +138,7 @@ es la que el host H1 vio fallar con A-1 y A-2.
 | R-4 «el gate nunca es el primer verificador» | `rules/qa_and_testing.md §4`: antes de reenviar a un gate, el remediador ejecuta cada comando de ese gate y anota cada exit code (leído con `$?`, nunca por tubería) en la tabla `Remediation notes` de `SPRINT_LOG.md` | `scripts/check_gate_log.py`: una fila de gate de ronda ≥ 2 sin una fila `Remediation notes` de la ronda anterior con al menos un comando y su exit sale `2` |
 | R-5 radio de impacto (+ C-6) | `rules/qa_and_testing.md §4`: un cambio en un módulo compartido ejecuta la suite completa de su stack | `config/blast_radius.json` (globs del nucleus + `full_suite_command`), que el host sustituye con `<host-root>/.agents-blast-radius.json`; `audit_plan.py` sale `2` si una fila Work toca un glob y ninguna fila Verification contiene `full_suite_command` |
 | R-6 replay (= `KI-054-1`) | `rules/code_craft.md §6`: la tabla nombra vitest | `check_fix_reproduces.py` añade un runner vitest: enlaza el `node_modules` del checkout principal en el worktree temporal, ejecuta `pnpm exec vitest run <ids> --reporter=junit` y distingue un test fallido de un error de setup (`<error>` frente a `<failure>`), igual que B-4 hace con pytest |
-| R-8 comportamiento, no texto fuente | `rules/code_craft.md §6`: un test que lee código fuente como texto no es una reproducción | `check_fix_reproduces.py` emite el aviso `SOURCE_TEXT` (exit sin cambio) cuando un test `Repro:` contiene uno de estos cinco patrones: `readFileSync(`, `?raw`, `.read_text(`, `open(` sobre una ruta no-test o `Path(__file__)` junto a `read`. Es un denylist que no afirma cobertura (`§1 fail_closed_claims`) |
+| R-8 comportamiento, no texto fuente | `rules/code_craft.md §6`: un test que lee código fuente como texto no es una reproducción | `check_fix_reproduces.py` emite el aviso `SOURCE_TEXT` (exit sin cambio) cuando un test `Repro:` contiene uno de estos cinco patrones: las subcadenas literales `readFileSync(`, `?raw`, `.read_text(`, `.read_bytes(` y `open(`, sin condición de ruta (un aviso no bloquea, así que el falso positivo es barato). Es un denylist que no afirma cobertura (`§1 fail_closed_claims`) |
 | R-9 / A-2 criterios de aborto | `workflows/pipeline_workflow.md`: `principal_agent` mide cada criterio de aborto en cada frontera de fase y lo anota en la tabla `Abort criteria` de `SPRINT_LOG.md`; un criterio solo se cierra con la observación que nombra («cumplido por aritmética» lo deja abierto) | `scripts/check_plan_closure.py`: cada criterio numerado de `## Abort criterion` tiene ≥ 1 fila con un comando entre backticks y su exit code; si no, exit `2` |
 | R-10 resultados al cierre | `workflows/close_workflow.md` Phase 2.6 | `scripts/check_plan_closure.py`: la tabla `Plan results` de `SPRINT_LOG.md` tiene una fila por cada fila de Tests y de Verification del plan, con el mismo número de filas y un resultado no vacío; si no, exit `2` |
 | A-1 cadenas de remediación antes del gate | `rules/qa_and_testing.md §4`: una cadena cuenta igual que una etiqueta `remediation-regression` | `scripts/check_remediation_chain.py --range <base>..HEAD`: un commit `fix(` cuyas líneas cambiadas (`git blame` en el padre) introdujo otro `fix(` del mismo rango es un eslabón. Imprime las cadenas y sale `2` a partir de la segunda. Invocadores: `hooks/on_commit.py` en cada `fix(` (aviso, exit `0`) y QA Gate 1 (segundo check) |
@@ -162,9 +163,11 @@ parser ya respeta `\|`.
   venv desechable del scratchpad y mide (a) si alguna opción del CLI o de configuración
   vuelve a incluir el JSON de datos, (b) el recuento de nodos frente a `0.8.30` sobre `f0b11f8`
   y (c) qué variables de proveedor lee.
-  - **Rama sí** (existe la opción): se ejecutan D-03..D-08.
+  - **Rama sí** (existe la opción): se ejecutan D-03..D-07.
   - **Rama no**: `graphifyy==0.8.30` se queda; se cierra #89 citando la medición y se abre
-    `KI-058-n` en la cola del programa. D-03..D-08 no se ejecutan.
+    `KI-058-n` en la cola del programa. D-03..D-07 no se ejecutan.
+  - En las dos ramas, `graph_stats.json` lo escribe el cierre (Phase 8, `graphify-rebuild`),
+    no una unidad: así cada rama tiene un solo escritor (Phase 4.3 F-8).
 
 ### Alternativas rechazadas
 
@@ -180,8 +183,18 @@ parser ya respeta `\|`.
 
 ## Work
 
-Orden de ejecución: A, C (C-01 antes de B-05), B, D. Las filas `fix(` llevan su test pareado
-en la misma fila (`rules/code_craft.md §6`).
+Orden de ejecución: A, C, B, D. Las filas `fix(` llevan su test pareado en la misma fila
+(`rules/code_craft.md §6`). C-01 y C-02 se commitean seguidos, para que `_md_table.py`
+nunca quede sin importador (`RA-16`; Phase 4.3 F-6).
+
+**Companions generados (Phase 4.3 F-1).** `make verify` ejecuta `scripts/check_readme_counts.py`
+y `scripts/map_workflows.py --check` (`Makefile:83-84`). Una unidad que crea un `scripts/*.py`
+o un `config/*.json` regenera en su mismo commit el bloque `COUNTED` de `README.md` con
+`python3 scripts/check_readme_counts.py --write`. Una unidad que modifica un `workflows/*.md`
+regenera `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` con `python3 scripts/map_workflows.py`.
+Los dos ficheros son companions obligatorios que exigen las reglas del propio sujeto, igual
+que un test pareado (`agents.md §2 jurisdictional_lock`): no son sujetos, nunca se editan a
+mano y `make verify` queda en verde después de cada unidad.
 
 ### Wave A — canal upstream (D1-D4)
 
@@ -194,10 +207,10 @@ en la misma fila (`rules/code_craft.md §6`).
 | A-05 | `.gitignore` | modify — ignora `.upstream_hosts.json` | low | `implementer_agent` | ⏳ |
 | A-06 | `scripts/session_start.py` | modify — `section_upstream` añade la cola de intake de `upstream_intake.py`; test `tests/test_session_start.py` | medium | `implementer_agent` | ⏳ |
 | A-07 | `.github/ISSUE_TEMPLATE/host-finding.yml` | create — Issue Form que refleja el schema (canal B) | low | `implementer_agent` | ⏳ |
-| A-08 | `.github/workflows/host-finding-intake.yml` | create — filtro de D3, actions fijadas por SHA, cuerpo del issue pasado por variable de entorno | high | `implementer_agent` | ⏳ |
+| A-08 | `.github/workflows/host-finding-intake.yml` | create — filtro de D3, actions fijadas por SHA, cuerpo del issue pasado por variable de entorno; la expresión `github.event.issue` no aparece entre `${{ }}` en ningún sitio del fichero, tampoco en un comentario (fila V5; Phase 4.3 F-2) | high | `implementer_agent` | ⏳ |
 | A-09 | `scripts/sync_agents_pin.py` | modify — (5) imprime `Ships host findings: <ids>` tras subir el pin; test `tests/test_sync_agents_pin.py` | medium | `implementer_agent` | ⏳ |
 | A-10 | `docs/standards/templates/CHANGELOG_TEMPLATE.md` | modify — cita `host:<id>` en una entrada que publica un hallazgo de host | low | `doc_orchestrator` | ⏳ |
-| A-11 | `agents.md` | modify — `§4 feedback_upstream`: outbox, validador antes del transporte, canales A/B/C, triage en Phase 1, sustitución de los documentos libres y (5)-(7) | high | `rule_validator` | ⏳ |
+| A-11 | `agents.md` | modify — `§4 feedback_upstream`: outbox, validador antes del transporte, canales A/B/C, triage en Phase 1, sustitución de los documentos libres y (5)-(7); actualiza en el mismo commit la reformulación de `§4` en `§3 jurisdiction` (`RA-14`; Phase 4.3 F-9). Sin «complete», «any» ni «every» sobre el escaneo | high | `rule_validator` | ⏳ |
 | A-12 | `workflows/extract_workflow.md` | modify — `upstream_feedback` escribe una entrada del outbox y ejecuta `upstream_outbox.py check` | medium | `doc_orchestrator` | ⏳ |
 | A-13 | `workflows/pipeline_workflow.md` | modify — Phase 1: triage obligatorio de la cola de intake (Q4) | medium | `doc_orchestrator` | ⏳ |
 | A-14 | `workflows/close_workflow.md` | modify — en un host, el cierre ejecuta `upstream_outbox.py aged` y `deltas` como advisory | medium | `doc_orchestrator` | ⏳ |
@@ -229,7 +242,7 @@ en la misma fila (`rules/code_craft.md §6`).
 | B-04 | `scripts/check_gate_log.py` | modify — R-4: fila de ronda ≥ 2 sin nota de remediación → exit `2`; test `tests/test_check_gate_log.py` | medium | `implementer_agent` | ⏳ |
 | B-05 | `scripts/check_remediation_chain.py` | create — A-1; test `tests/test_check_remediation_chain.py` | medium | `implementer_agent` | ⏳ |
 | B-06 | `hooks/on_commit.py` | modify — A-1: llama a `check_remediation_chain.py` en un `fix(` (aviso, exit `0`); test `tests/test_on_commit.py` | medium | `implementer_agent` | ⏳ |
-| B-07 | `config/blast_radius.json` | create — R-5: globs de módulos compartidos del nucleus y `full_suite_command` | low | `implementer_agent` | ⏳ |
+| B-07 | `config/blast_radius.json` | create — R-5: globs de módulos compartidos del nucleus y `full_suite_command` con el valor exacto `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider`, que coincide con la fila de Verification de este plan (Phase 4.3 F-4) | low | `implementer_agent` | ⏳ |
 | B-08 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify — C-6: lee `config/blast_radius.json` o el override del host; test `tests/test_token_saver_auditor.py` | medium | `skill_architect` | ⏳ |
 | B-09 | `scripts/check_plan_closure.py` | create — R-9 y R-10; test `tests/test_check_plan_closure.py` | medium | `implementer_agent` | ⏳ |
 | B-10 | `workflows/close_workflow.md` | modify — Phase 2.6 ejecuta `check_plan_closure.py` (`RA-16`) | low | `doc_orchestrator` | ⏳ |
@@ -250,7 +263,6 @@ en la misma fila (`rules/code_craft.md §6`).
 | D-05 | `rules/graphify.md` | modify — rama sí: versión y variables leídas (`:18`, `:32`) | low | `rule_validator` | ⏳ |
 | D-06 | `rules/project_topology.md` | modify — rama sí: `:37` | low | `rule_validator` | ⏳ |
 | D-07 | `config/with_env_allowlist.json` | modify — rama sí: el campo `reason` nombra las variables medidas | medium | `implementer_agent` | ⏳ |
-| D-08 | `docs/sprints/058-core-pipeline/graph_stats.json` | create — rama sí: `graph_stats` tras la reconstrucción | low | `devops_agent` | ⏳ |
 
 ---
 
@@ -289,11 +301,11 @@ no añade `package.json`.
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 49 | Count of rows in Work tables (A 17, C 9, B 15, D 8; D-03..D-08 solo en la rama sí) |
-| Subagents dispatched | 49 unidades + 2 gates por ronda, más Phase 3/4 (orchestrator, agent_orchestrator, skill_architect, rule_validator) | `agent_assignment.md` |
+| Work units | 48 | Count of rows in Work tables (A 17, C 9, B 15, D 7; D-03..D-07 solo en la rama sí) |
+| Subagents dispatched | 48 unidades + 2 gates por ronda, más Phase 3/4 (orchestrator, agent_orchestrator, skill_architect, rule_validator) | `agent_assignment.md` |
 | Prior session ratio | pico de ciclo `14.6×` (9 ciclos: 6.1, 9.0, 9.8, 10.6, 12.3, 13.2, 8.9, 10.7, 14.6), a 0.4 del umbral duro de 15× | `python3 scripts/session_cost.py --from-anchor --json` |
 
-La sesión de 057 rozó el umbral duro. 058 tiene un tamaño parecido (49 unidades frente a
+La sesión de 057 rozó el umbral duro. 058 tiene un tamaño parecido (48 unidades frente a
 las 38 + 20 de 057), así que se planifica una sesión por wave: A, C+B, D y después los
 gates. `session_state.py suspend` se ejecuta en el soft 5× si queda más de una wave.
 
@@ -332,7 +344,7 @@ gates. `session_state.py suspend` se ejecuta en el soft 5× si queda más de una
 | `rg -n '\$\{\{ *github\.event\.issue' .github/workflows/` | no output | exit `1`, sin salida (el fichero de A-08 aún no existe) | la misma expresión sobre un fichero de scratchpad con `run: echo ${{ github.event.issue.body }}` imprimió esa línea, exit `0` |
 | `python3 scripts/upstream_outbox.py check docs/standards/templates/UPSTREAM_OUTBOX_TEMPLATE.json` | exit `0` | run at close — el script y el template los crean A-01 y A-02 | n/a |
 | `python3 scripts/check_fix_reproduces.py --range f0b11f8..HEAD` | exit `0` | run at close — necesita los commits `fix(` del sprint | n/a |
-| `python3 scripts/check_remediation_chain.py --range f0b11f8..HEAD` | exit `0` | run at close — el script lo crea B-05 | n/a |
+| `python3 scripts/check_remediation_chain.py --range f0b11f8..HEAD` | exit `0`: menos de dos cadenas dentro del sprint. Solo cuentan commits del rango, así que una corrección sobre una línea de un `fix(` de un sprint anterior no es un eslabón. Un exit `2` no es un fallo del check: es la parada de A-1, y el bloque se re-planifica con el humano (Phase 4.3 F-3) | run at close — el script lo crea B-05 | n/a |
 | `python3 scripts/check_plan_closure.py --sprint-dir docs/sprints/058-core-pipeline` | exit `0` | run at close — el script lo crea B-09 y se ejecuta sobre el `SPRINT_LOG.md` final | n/a |
 | `python3 skills/token-saver-auditor/scripts/audit_plan.py docs/sprints/058-core-pipeline/IMPLEMENTATION_PLAN.md` | exit `0` | se ejecuta sobre este borrador antes de Phase 3 | n/a |
 | `rg -n -F 'claude-agent-sdk==0.2.88' requirements-skillopt.txt` | no output | 1 línea (antes de D-01) | la misma orden en `f0b11f8` imprimió la línea `6` |
@@ -349,7 +361,8 @@ gates. `session_state.py suspend` se ejecuta en el soft 5× si queda más de una
 | `docs/standards/templates/` | `UPSTREAM_OUTBOX_TEMPLATE.json` (nuevo), `SPRINT_LOG_TEMPLATE.md`, `CHANGELOG_TEMPLATE.md` |
 | `docs/guides/SELF_IMPROVEMENT_GUIDE.md`, `SECURITY.md` | guía del host; canal C |
 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | informe del host H1 y veredictos; cierre de `F-107-N1` |
-| `README.md` | recuentos de `scripts/*.py` y `config/*.json` (`check_readme_counts.py --write` al cierre) |
+| `README.md` | recuentos de `scripts/*.py` y `config/*.json`: companion generado en cada unidad que los desplaza (`check_readme_counts.py --write`, preámbulo de Work) |
+| `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` | regenerado por `scripts/map_workflows.py` en cada unidad que modifica un workflow (preámbulo de Work) |
 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | cierra `KI-054-1`, `KI-054-2`, `KI-057-3`, `KI-057-4`, `KI-057-6`; `KI-058-n` si D7 sale por la rama no |
 | `rules/graphify.md`, `rules/project_topology.md`, `Makefile`, `config/with_env_allowlist.json` | solo en la rama sí de D7 |
 
