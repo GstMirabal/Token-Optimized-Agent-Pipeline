@@ -236,11 +236,11 @@ QA Gate 1 round 9 emitted RECORD (testifying, S3) and closed QA8-1..QA8-3; QA9-1
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| W110 | `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` | modify (QA9-3: `:99` the recording row adds the severity S0-S3 per finding) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| W111 | `agents/qa_agent.md` | modify (QA9-3: `:3` description names the severity beside the class) | low | `agent_orchestrator` | sonnet | medium | ⏳ |
-| W112 | `agents/tester_agent.md` | modify (QA9-3: `:3` description names the severity beside the class) | low | `agent_orchestrator` | sonnet | medium | ⏳ |
-| W113 | `agents.md` | modify (QA9-3: `RA-17` names the per-finding severity S0-S3 beside the class, pointing to `rules/qa_and_testing.md` §4) | medium | `rule_validator` | sonnet | medium | ⏳ |
-| W114 | `tests/test_gate_row_wording.py` | modify (QA9-3: a second pattern, a line stating `RECORD` followed by "plus class" or "with class", must also name severity; fails before W110-W113) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W110 | `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` | modify (QA9-3: `:99` the recording row adds the severity S0-S3 per finding) | low | `doc_orchestrator` | sonnet | medium | ✅ `e10bb76` |
+| W111 | `agents/qa_agent.md` | modify (QA9-3: `:3` description names the severity beside the class) | low | `agent_orchestrator` | sonnet | medium | ✅ `571ebdf` |
+| W112 | `agents/tester_agent.md` | modify (QA9-3: `:3` description names the severity beside the class) | low | `agent_orchestrator` | sonnet | medium | ✅ `5beb03f` |
+| W113 | `agents.md` | modify (QA9-3: `RA-17` names the per-finding severity S0-S3 beside the class, pointing to `rules/qa_and_testing.md` §4) | medium | `rule_validator` | sonnet | medium | ✅ `c1b13ea` |
+| W114 | `tests/test_gate_row_wording.py` | modify (QA9-3: a second pattern, a line stating `RECORD` followed by "plus class" or "with class", must also name severity; fails before W110-W113) | low | `implementer_agent` | sonnet | medium | ✅ `c9ba694` |
 | W115 | `CHANGELOG.md` | modify (`[Unreleased]` cites wave N and the close commits since `cfe2330`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 
 ---
