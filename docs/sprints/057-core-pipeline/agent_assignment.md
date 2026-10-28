@@ -206,6 +206,17 @@ cover the 38 units, so `Destination` is `N/A` on every row.
 | W108 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | W109 | `CHANGELOG.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 
+### Wave N — Gate 1 round 9 record remediation (human decision 2026-10-28)
+
+| # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| W110 | `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| W111 | `agents/qa_agent.md` | modify | sequential | `agent_orchestrator` | N/A | `agents/agent_orchestrator.md` |
+| W112 | `agents/tester_agent.md` | modify | sequential | `agent_orchestrator` | N/A | `agents/agent_orchestrator.md` |
+| W113 | `agents.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| W114 | `tests/test_gate_row_wording.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W115 | `CHANGELOG.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+
 ## Disagreements with the plan
 
 | # | Plan proposed | Assigned | Reason |

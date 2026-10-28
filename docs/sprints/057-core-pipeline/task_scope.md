@@ -230,6 +230,19 @@ QA Gate 1 round 8 emitted REJECTED (instructing, S2). QA8-1 is the second occurr
 | W108 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify (QA8-3: the `KI-056-3` row cites H-008 for its `git-sync-agent` half, as `c3cfdfe` (PR #92 squash on `main`; the hotfix branch commit `f98f4d2` is not reachable from the sprint branch)) | low | `doc_orchestrator` | sonnet | medium | ✅ `6b72d49` |
 | W109 | `CHANGELOG.md` | modify (QA8-2: `[Unreleased]` cites wave L, wave M and every later close commit, and replaces the "closed at round 7" claim with a pointer to the `SPRINT_LOG.md` gate table, which holds every round; QA9-1 corrected this wording) | low | `doc_orchestrator` | sonnet | medium | ✅ `cfe2330` |
 
+### Wave N — Gate 1 round 9 record remediation (QA9-3, added by human decision 2026-10-28)
+
+QA Gate 1 round 9 emitted RECORD (testifying, S3) and closed QA8-1..QA8-3; QA9-1 and QA9-2 were record text, corrected in `931cc1b`. Human decision 2026-10-28: fix all four QA9-3 lines, extend W107's check to the phrasing they use, then a short Gate 1 round 10 over the wave N diff.
+
+| # | File | Operation | Risk | Assignee | Model | Effort | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| W110 | `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` | modify (QA9-3: `:99` the recording row adds the severity S0-S3 per finding) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| W111 | `agents/qa_agent.md` | modify (QA9-3: `:3` description names the severity beside the class) | low | `agent_orchestrator` | sonnet | medium | ⏳ |
+| W112 | `agents/tester_agent.md` | modify (QA9-3: `:3` description names the severity beside the class) | low | `agent_orchestrator` | sonnet | medium | ⏳ |
+| W113 | `agents.md` | modify (QA9-3: `RA-17` names the per-finding severity S0-S3 beside the class, pointing to `rules/qa_and_testing.md` §4) | medium | `rule_validator` | sonnet | medium | ⏳ |
+| W114 | `tests/test_gate_row_wording.py` | modify (QA9-3: a second pattern, a line stating `RECORD` followed by "plus class" or "with class", must also name severity; fails before W110-W113) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| W115 | `CHANGELOG.md` | modify (`[Unreleased]` cites wave N and the close commits since `cfe2330`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+
 ---
 
 ## Rule audit
@@ -339,6 +352,6 @@ No other rule violation found: contiguous ids W00-W37 (38 rows, matches `Cost`),
 | W31 | `HISTORICAL_GAPS` = `v3.4.0`, `v3.5.2`: tags released without a ledger section; closed history not rewritten | Recorded; no action |
 | Gate 2 | `KI-057-6` (observation, not a finding): `session_state.py require-released --hotfix` checks the record, the branch or subject, ancestry and status (plan D4), but not that every commit between `last_close_commit` and the tip is hotfix work, so a `hotfix/H-NNN` branch can carry an unsealed sprint commit under a committed record | A later core-pipeline sprint (design change to D4) |
 
-## Resume point (updated 2026-10-27, session `aeda1d83-cbd8-463b-8f56-25f5958d428e`)
+## Resume point (updated 2026-10-28, session `aeda1d83-cbd8-463b-8f56-25f5958d428e`)
 
-Phase 8 closeout in progress. The closeout audit (`PIPELINE_AUDIT_REPORT-057.md`) found A1 and A2; QA Gate 1 round 8 REJECTED (instructing, S2) wave L; wave M (W106-W109) remediates it. Every Work row W00-W109 is resolved. Next: a short QA Gate 1 round 9 over the wave M diff, then `PHASE_REGISTER.md`, `session_state.py release` and the push of `ai-sprint/057`.
+Phase 8 closeout in progress. QA Gate 1 round 9 RECORD (testifying, S3); wave N (W110-W115) remediates QA9-3 by human decision. Next: wave N, then a short QA Gate 1 round 10 over its diff, then `PHASE_REGISTER.md`, `session_state.py release` and the push of `ai-sprint/057`.
