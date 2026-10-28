@@ -9,7 +9,7 @@
 | :--- | :--- |
 | **Active Layer** | core |
 | **Strategic Goal** | s0-lane-and-defect-block: S0 lane (measure sandbox and database access, then `.env.agent`), upstream defect block 1, S3 residues and documentation (branch `ai-sprint/057`, base `main` at `5851b18`, plan commit `5a1b9bc`) |
-| **Intelligence State** | Phase 8 (Sprint Closeout); Implementation Plan `APPROVED` at `docs/sprints/057-core-pipeline/IMPLEMENTATION_PLAN.md` (`8d55058`); both Phase 7 gates closed |
+| **Intelligence State** | Phase 8 (Sprint Closeout) complete; Implementation Plan `APPROVED` (`8d55058`); QA Gate 1 APPROVED at round 10, Tester Gate 2 APPROVED at round 1 |
 | **Start Time** | 2026-10-24T11:28:15Z |
 
 ---
@@ -30,9 +30,9 @@ Tracking of atomic goals achieved during the session.
     - `[x]` Wave C (W10-W32, W38, W39): block 1 defects; W13 not reproducible as specified → `KI-057-2`; W25 RECORD (C-9 not reproduced)
     - `[x]` Wave D (W33-W37): S3 residues and documentation
     - `[x]` Wave E (W40-W59): `install.sh` residue (`KI-057-5`), human decision 2026-10-25
-- [x] **Phase 7 - Quality Gate**: QA Gate 1 rounds 1-7 (REJECTED at rounds 1-2, RECORD at rounds 3-7); Tester Gate 2 APPROVED at round 1
+- [x] **Phase 7 - Quality Gate**: QA Gate 1 rounds 1-7 (REJECTED at rounds 1-2, RECORD at rounds 3-7); Tester Gate 2 APPROVED at round 1; QA Gate 1 rounds 8-10 at closeout (REJECTED, RECORD, APPROVED)
     - `[x]` Remediation waves F-K (W60-W102) and W103, one per Gate 1 round, each added by human decision 2026-10-26/27
-- [ ] **Phase 8 - Sprint Closeout** (`/agents:close`)
+- [x] **Phase 8 - Sprint Closeout** (`/agents:close`, human-confirmed Phase 2.5 on 2026-10-27): evidence per step in `docs/sprints/057-core-pipeline/PHASE_REGISTER.md`; closeout audit `PIPELINE_AUDIT_REPORT-057.md` findings A1 and A2 fixed (waves L-N, W104-W115)
 
 ---
 
@@ -95,7 +95,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 ## ⚓ Documentation Entry Point Seal
 Closing the session state and certifying traceability.
 
-**Strategic Lock**: OPEN (Phase 8 closeout in progress)
-**Next Phase**: `workflows/close_workflow.md`, then `workflows/deployment_workflow.md`
+**Strategic Lock**: SEALED at close (`session_state.py release`)
+**Next Phase**: `workflows/deployment_workflow.md`
 
 *Certified under conventional commit standard: feat(scope): message #057*

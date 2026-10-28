@@ -354,4 +354,4 @@ No other rule violation found: contiguous ids W00-W37 (38 rows, matches `Cost`),
 
 ## Resume point (updated 2026-10-28, session `aeda1d83-cbd8-463b-8f56-25f5958d428e`)
 
-Phase 8 closeout in progress. Every Work row W00-W115 is resolved. Next: a short QA Gate 1 round 10 over the wave N diff (`6cde57a..HEAD`), then `PHASE_REGISTER.md`, `session_state.py release` and the push of `ai-sprint/057`.
+Phase 8 closeout complete: QA Gate 1 APPROVED at round 10, Tester Gate 2 APPROVED at round 1; every Work row W00-W115 is resolved; `PHASE_REGISTER.md` written. Next: `workflows/deployment_workflow.md`.
