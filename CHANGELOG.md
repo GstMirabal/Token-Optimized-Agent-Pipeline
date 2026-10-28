@@ -4,6 +4,8 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.40.0] - 2026-10-28
+
 ### Added
 - **Sprint 057 `s0-lane-and-defect-block`**: one sprint covering four scopes:
   - the Opus 5.5 prompt criteria and a per-finding S0-S3 severity scale for the Quality Gate;
