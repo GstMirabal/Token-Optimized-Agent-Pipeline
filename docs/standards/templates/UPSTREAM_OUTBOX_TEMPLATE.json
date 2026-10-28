@@ -1,0 +1,20 @@
+{
+  "entries": [
+    {
+      "id": "H-EXAMPLE-1",
+      "title": "check_gate_log.py splits table cells on an escaped pipe",
+      "defect": "A Notes cell containing an escaped pipe is split into two cells, so the row is read with one column too many and rejected.",
+      "evidence": {
+        "command": "python3 .agents/scripts/check_gate_log.py --sprint-dir docs/sprints/042-example-layer",
+        "output": "[FAIL] SPRINT_LOG.md: gate row has 7 cells, expected 6"
+      },
+      "nucleus_artifact": "scripts/check_gate_log.py",
+      "proposed_change": "Split cells with the escaped-pipe-aware separator already used by check_task_scope.py.",
+      "pin": "v4.40.0",
+      "genericized": true,
+      "channel": "B",
+      "recurs": null,
+      "status": "drafted"
+    }
+  ]
+}

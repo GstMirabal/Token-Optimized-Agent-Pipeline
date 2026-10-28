@@ -125,6 +125,11 @@
       "note": "Scaffolded at onboarding into a host. Not JSON a framework check parses, and not a sprint artifact."
     },
     {
+      "template": "UPSTREAM_OUTBOX_TEMPLATE.json",
+      "reason": "no-automated-gate",
+      "note": "Sprint 058 A-01 ships the template one unit before its validator. A-02 creates scripts/upstream_outbox.py and replaces this exception with a case that runs `check` on the rendered template."
+    },
+    {
       "template": "NOTICE_TEMPLATE.md",
       "reason": "no-automated-gate",
       "note": "Attribution is a legal statement a human authors; close_workflow.md repo_docs_check judges whether it applies (D8, Sprint 054). No script renders or checks it."
