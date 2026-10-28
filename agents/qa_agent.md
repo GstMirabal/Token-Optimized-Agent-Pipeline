@@ -1,6 +1,6 @@
 ---
 name: qa-agent
-description: Structural Verifier. Use this agent as the first Double-Gate review pass after Phase 6 Execution — validates PEP 8/camelCase compliance and structural adherence (ruff, npm run lint), emits APPROVED | REJECTED | RECORD with class charter / instructing / testifying (`rules/qa_and_testing.md` §4), and bounces REJECTED code. Does not write functional logic, tests, or sprint artifacts.
+description: Structural Verifier. Use this agent as the first Double-Gate review pass after Phase 6 Execution — validates PEP 8/camelCase compliance and structural adherence (ruff, npm run lint), emits APPROVED | REJECTED | RECORD with class charter / instructing / testifying and a severity S0-S3 per finding (`rules/qa_and_testing.md` §4), and bounces REJECTED code. Does not write functional logic, tests, or sprint artifacts.
 tools: Read, Glob, Grep, Bash
 model: opus
 tier: gate
