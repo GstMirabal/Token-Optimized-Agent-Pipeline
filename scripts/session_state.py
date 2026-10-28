@@ -47,8 +47,9 @@ Usage:
         # written before Sprint 050 (SEALED_STATUSES, KI-052-2) and a
         # host-written `DEPLOYED` (F-114-N2, Sprint 054).
     python3 scripts/session_state.py suspend   # ends the SESSION only
-    python3 scripts/session_state.py require-released [--branch <ref>]
+    python3 scripts/session_state.py require-released [--branch <ref>] [--hotfix H-NNN]
         # deployment preflight: refuse SUSPENDED; tip must equal last_close_commit
+        # (--hotfix: or be an RA-03 hotfix tip descending from it; D4, Sprint 057)
     python3 scripts/session_state.py refresh-baseline [--sha HEX]
         # post-deploy: set last_close_commit to the integrated tip (default HEAD)
     python3 scripts/session_state.py set-topology
@@ -73,6 +74,16 @@ Usage:
         # including the one that opens the next sprint) and never
         # current_sprint.status == IN_PROGRESS, which no writer ever
         # produces (F-3, S052 QA Gate 1, both remediation rounds)
+    python3 scripts/session_state.py block --reason <text>
+        # writes current_sprint.status = BLOCKED and current_sprint.blocked_reason,
+        # preserving every other key; exit 2, nothing written, on an empty
+        # reason, a missing current_sprint or a sealed sprint; a second call
+        # overwrites the reason. `unblock` lifts it; `open-sprint --id <same id>`
+        # stays idempotent and does NOT. Top-level session fields are untouched.
+    python3 scripts/session_state.py unblock
+        # requires current_sprint.status == BLOCKED; writes status = OPEN and
+        # removes blocked_reason, preserving every other key; exit 2, nothing
+        # written, when there is no current_sprint or its status is not BLOCKED.
     python3 scripts/session_state.py mark-audited --report <path>
         # writes current_sprint.last_audit_sprint = NNN, preserving every
         # other key. <path> must exist and be named
@@ -108,6 +119,7 @@ CHANGELOG = Path("CHANGELOG.md")
 IN_PROGRESS = "IN_PROGRESS"
 CLOSED = "CLOSED_SUCCESSFULLY"
 SUSPENDED = "SUSPENDED"  # session ended, sprint still open (token_economy.md §3.1)
+BLOCKED = "BLOCKED"  # sprint halted by a terminal remediation loop (remediation_workflow.md Phase 3)
 # "CLOSED" is the legacy literal `release()` wrote before Sprint 050; anchors
 # sealed under that pin still carry it, so `_sprint_is_sealed` must accept
 # both (KI-052-2, Sprint 053 `D1`).
@@ -115,6 +127,7 @@ SUSPENDED = "SUSPENDED"  # session ended, sprint still open (token_economy.md §
 # a host's deployment step does after merge and tag. It is later in the
 # lifecycle than CLOSED_SUCCESSFULLY, so it is sealed too (F-114-N2, D9).
 SEALED_STATUSES = frozenset({CLOSED, "CLOSED", "DEPLOYED"})
+HOTFIX_ID = re.compile(r"H-\d{3,}")  # RA-03 hotfix identifier
 
 
 def now() -> str:
@@ -202,10 +215,17 @@ def suspend() -> int:
     baseline and `detect_drift.py` would treat everything after as conformant,
     blinding the detector Sprint 024 repaired.
 
+    A sprint already sealed by `release()` (``_sprint_is_sealed``) is left
+    untouched: SessionEnd calls this after every session, and SUSPENDED over a
+    sealed sprint makes it undeployable (`require-released`, B-9).
+
     Returns:
         int: 0 — suspending is never refused; the work is preserved, not judged.
     """
     state = load_state()
+    if _sprint_is_sealed((state.get("current_sprint") or {}).get("status")):
+        print("Sprint is sealed — nothing was suspended; anchor left unchanged.")
+        return 0
     state.update({
         "status": SUSPENDED,
         "end_time": now(),
@@ -417,7 +437,65 @@ def rev_parse(ref: str) -> str | None:
     return result.stdout.strip() if result.returncode == 0 else None
 
 
-def require_released(branch: str | None = None) -> int:
+def _tip_has_hotfix_record(hotfix: str, tip: str) -> bool:
+    """Tell whether the tip's tree, not the working tree, holds the hotfix record.
+
+    Args:
+        hotfix: A validated hotfix id such as ``H-008``.
+        tip: Full SHA of the ref being deployed.
+
+    Returns:
+        bool: True when ``docs/hotfixes/<hotfix>-*.md`` is tracked at ``tip``.
+    """
+    listed = subprocess.run(
+        ["git", "ls-tree", "--name-only", tip, "docs/hotfixes/"],
+        capture_output=True,
+        text=True,
+        check=False,
+    ).stdout.splitlines()
+    prefix = f"docs/hotfixes/{hotfix}-"
+    return any(name.startswith(prefix) and name.endswith(".md") for name in listed)
+
+
+def _hotfix_refusal(hotfix: str, tip: str, seal: str, branch: str | None) -> str | None:
+    """Name the first RA-03 hotfix condition that does not hold, if any.
+
+    Every condition is judged on the ref being deployed: the record must be
+    tracked at ``tip``, and the branch condition reads ``branch`` when the
+    caller named one, falling back to the checked-out branch only otherwise.
+
+    Args:
+        hotfix: A validated hotfix id such as ``H-008``.
+        tip: Full SHA of the ref being deployed.
+        seal: ``last_close_commit`` from the anchor.
+        branch: The ``--branch`` ref, or None when the deployed ref is ``HEAD``.
+
+    Returns:
+        str | None: The failed condition, or None when all three hold. The
+            fourth condition (status is not SUSPENDED) is checked by the caller
+            before any tip comparison.
+    """
+    if not _tip_has_hotfix_record(hotfix, tip):
+        return f"no hotfix record docs/hotfixes/{hotfix}-*.md is tracked at the tip"
+    subject = subprocess.run(
+        ["git", "log", "-1", "--format=%s", tip], capture_output=True, text=True, check=False
+    ).stdout.strip()
+    on_branch = (branch if branch is not None else git_branch()) == f"hotfix/{hotfix}"
+    squash = f"({hotfix})" in subject or subject.endswith(f"#{hotfix.replace('-', '')}")
+    if not (on_branch or squash):
+        return (
+            f"the branch is not hotfix/{hotfix} and the tip subject "
+            f"does not contain ({hotfix}) or end with #{hotfix.replace('-', '')}"
+        )
+    ancestor = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", seal, tip], check=False
+    )
+    if ancestor.returncode != 0:
+        return f"last_close_commit {seal[:7]} is not an ancestor of the tip"
+    return None
+
+
+def require_released(branch: str | None = None, hotfix: str | None = None) -> int:
     """Refuse `/agents:deployment` unless the tip is exactly what close sealed.
 
     A session that ends in ``SUSPENDED`` leaves the sprint open — deploying
@@ -430,10 +508,18 @@ def require_released(branch: str | None = None) -> int:
     Args:
         branch: Git ref whose tip must equal ``last_close_commit``. Defaults
             to ``HEAD``.
+        hotfix: An RA-03 hotfix id (``H-NNN``). Accepts a tip that is not
+            ``last_close_commit`` only when the hotfix record is tracked at
+            the tip, the deployed branch (``branch``, else the checked-out
+            one) or the tip subject names the hotfix, ``last_close_commit`` is
+            an ancestor of the tip, and status is not SUSPENDED.
 
     Returns:
         int: 0 when deployable; 2 when refused (RA-11).
     """
+    if hotfix is not None and not HOTFIX_ID.fullmatch(hotfix):
+        print(f"Refusing deploy: `--hotfix {hotfix}` is not an id of the form H-NNN.")
+        return 2
     state = load_state()
     status = state.get("status")
     if status == SUSPENDED:
@@ -457,6 +543,16 @@ def require_released(branch: str | None = None) -> int:
     if tip is None:
         print(f"Refusing deploy: cannot resolve ref `{ref}`.")
         return 2
+    if tip != seal and hotfix is not None:
+        reason = _hotfix_refusal(hotfix, tip, seal, branch)
+        if reason is not None:
+            print(f"Refusing deploy: hotfix path for {hotfix} failed: {reason}.")
+            return 2
+        print(
+            f"✅ Deploy preflight passed — `{ref}` tip {tip[:7]} is hotfix {hotfix} "
+            f"on top of sealed close {seal[:7]} (status={status})."
+        )
+        return 0
     if tip != seal:
         print(
             f"Refusing deploy: `{ref}` tip {tip[:7]} is not the sealed close "
@@ -666,6 +762,87 @@ def open_sprint(
     return 0
 
 
+def _block_refusal(text: str, sprint: dict | None) -> str | None:
+    """Name why `block` must refuse, or None when it may write.
+
+    Args:
+        text: The stripped `--reason` value.
+        sprint: The anchor's `current_sprint`, or None.
+
+    Returns:
+        str | None: The refusal sentence, or None to proceed.
+    """
+    if not text:
+        return "--reason must not be empty."
+    if not sprint:
+        return "the anchor has no current_sprint."
+    if _sprint_is_sealed(sprint.get("status")):
+        return f"sprint {sprint.get('id')} is sealed; its status is not overwritten."
+    return None
+
+
+def block(reason: str) -> int:
+    """Mark the current sprint BLOCKED and record why.
+
+    Writes `current_sprint.status = BLOCKED` and `current_sprint.blocked_reason`,
+    preserving every other key. The top-level SESSION status and lock fields are
+    not touched. Never overwrites a sealed sprint's status (B-9, `71a35c3`).
+
+    Args:
+        reason: Why the sprint is blocked; must not be empty or whitespace.
+
+    Returns:
+        int: 0 when written (including a re-block that overwrites the reason);
+            2, with nothing written, on an empty reason, a missing
+            `current_sprint`, or a sealed sprint.
+    """
+    text = reason.strip()
+    state = load_state()
+    sprint = state.get("current_sprint")
+    refusal = _block_refusal(text, sprint)
+    if refusal:
+        print(f"Refusing block: {refusal}", file=sys.stderr)
+        return 2
+    again = sprint.get("status") == BLOCKED
+    sprint["status"] = BLOCKED
+    sprint["blocked_reason"] = text
+    state["last_updated"] = now()
+    save_state(state)
+    verb = "re-blocked" if again else "blocked"
+    print(f"Sprint {sprint.get('id')} {verb}: current_sprint.status={BLOCKED}, "
+          f"blocked_reason={text!r}.")
+    return 0
+
+
+def unblock() -> int:
+    """Lift a BLOCKED sprint back to OPEN and drop its reason.
+
+    Writes `current_sprint.status = "OPEN"` (the value `open_sprint()` writes)
+    and removes `blocked_reason`, preserving every other key. The top-level
+    SESSION status and lock fields are not touched.
+
+    Returns:
+        int: 0 when lifted; 2, with nothing written, when there is no
+            `current_sprint` or its status is not BLOCKED.
+    """
+    state = load_state()
+    sprint = state.get("current_sprint")
+    if not sprint:
+        print("Refusing unblock: the anchor has no current_sprint.", file=sys.stderr)
+        return 2
+    if sprint.get("status") != BLOCKED:
+        print(f"Refusing unblock: sprint {sprint.get('id')} status is "
+              f"{sprint.get('status')!r}, not {BLOCKED}.", file=sys.stderr)
+        return 2
+    reason = sprint.pop("blocked_reason", None)
+    sprint["status"] = "OPEN"
+    state["last_updated"] = now()
+    save_state(state)
+    print(f"Sprint {sprint.get('id')} unblocked: current_sprint.status=OPEN, "
+          f"lifted blocked_reason={reason!r}.")
+    return 0
+
+
 AUDIT_REPORT_RE = re.compile(r"^PIPELINE_AUDIT_REPORT-(\d+)\.md$")
 
 
@@ -762,14 +939,12 @@ def _add_mark_audited_subparser(sub: argparse._SubParsersAction) -> None:
     )
 
 
-def _add_other_subparsers(sub: argparse._SubParsersAction) -> None:
-    """Register every subcommand but `claim` (which `_add_claim_subparser` owns).
+def _add_require_released_subparser(sub: argparse._SubParsersAction) -> None:
+    """Register `require-released` and its `--branch` / `--hotfix` flags.
 
     Args:
         sub: Subparsers action from `parser.add_subparsers()`.
     """
-    sub.add_parser("release", help="Seal the SPRINT at close.")
-    sub.add_parser("suspend", help="End the SESSION with the sprint still open.")
     require_parser = sub.add_parser(
         "require-released",
         help="Deployment preflight: tip must equal last_close_commit; refuse SUSPENDED.",
@@ -779,6 +954,31 @@ def _add_other_subparsers(sub: argparse._SubParsersAction) -> None:
         default=None,
         help="Ref to check (default: HEAD). Use ai-sprint/[ID] when HEAD moved on.",
     )
+    require_parser.add_argument(
+        "--hotfix",
+        default=None,
+        help="RA-03 hotfix id (H-NNN): accept a tip past last_close_commit when its record, "
+        "branch or subject, and ancestry all hold.",
+    )
+
+
+def _add_other_subparsers(sub: argparse._SubParsersAction) -> None:
+    """Register every subcommand but `claim` (which `_add_claim_subparser` owns).
+
+    Args:
+        sub: Subparsers action from `parser.add_subparsers()`.
+    """
+    sub.add_parser("release", help="Seal the SPRINT at close.")
+    sub.add_parser("suspend", help="End the SESSION with the sprint still open.")
+    block_parser = sub.add_parser(
+        "block",
+        help="Write current_sprint.status BLOCKED and blocked_reason (terminal remediation).",
+    )
+    block_parser.add_argument(
+        "--reason", required=True, help="Why the sprint is blocked (non-empty)."
+    )
+    sub.add_parser("unblock", help="Lift a BLOCKED sprint back to OPEN and drop blocked_reason.")
+    _add_require_released_subparser(sub)
     refresh_parser = sub.add_parser(
         "refresh-baseline",
         help="Post-deploy: set last_close_commit to the integrated tip.",
@@ -823,7 +1023,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     Returns:
         argparse.ArgumentParser: Parser with every subcommand (`claim`,
-            `release`, `suspend`, `require-released`, `refresh-baseline`,
+            `release`, `suspend`, `block`, `unblock`, `require-released`, `refresh-baseline`,
             `set-topology`, `open-sprint`, `mark-audited`) and their flags registered.
     """
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
@@ -849,8 +1049,12 @@ def _dispatch(args: argparse.Namespace) -> int:
         )
     if args.command == "suspend":
         return suspend()
+    if args.command == "block":
+        return block(args.reason)
+    if args.command == "unblock":
+        return unblock()
     if args.command == "require-released":
-        return require_released(args.branch)
+        return require_released(args.branch, args.hotfix)
     if args.command == "refresh-baseline":
         return refresh_baseline(args.sha)
     if args.command == "set-topology":

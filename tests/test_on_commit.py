@@ -779,3 +779,53 @@ def test_feat_without_a_trailer_is_unaffected():
 def test_fix_staging_only_docs_is_unaffected():
     assert on_commit.audit_regression_test(
         FIX_SUBJECT, ["docs/guide.md", "workflows/x.md"]) is None
+
+
+# --- Sprint 057 W16: B-2 manual repro without a staged test, B-6 test path forms ---
+
+def test_fix_with_manual_repro_and_no_staged_test_passes():
+    message = _fix_message("Repro: manual — SPRINT_LOG.md §X")
+    assert on_commit.audit_regression_test(message, ["hooks/on_commit.py"]) is None
+
+
+@pytest.mark.parametrize("path", [
+    "src/a.spec.ts",
+    "web/src/a.spec.jsx",
+    "app/tests.py",
+    "tests.py",
+])
+def test_test_path_matches_spec_files_and_django_tests_module(path):
+    assert on_commit.is_test_path(path)
+
+
+@pytest.mark.parametrize("path", [
+    "inspect.py",
+    "app/contests.py",
+    "docs/specs.md",
+    "src/spec.ts",
+    "app/tests.pyc",
+])
+def test_test_path_does_not_match_non_test_files(path):
+    assert not on_commit.is_test_path(path)
+
+
+# --- Gate 1 round 1 QA1-3/QA1-2: one source definition with the replayer ---
+
+def test_fix_staging_only_json_without_trailer_is_refused():
+    """The replayer counts `.json` as source; the hook must refuse what it would."""
+    reason = on_commit.audit_regression_test(FIX_SUBJECT, ["claude/settings.hooks.json"])
+    assert reason is not None
+    assert "Repro: manual" in reason
+
+
+def test_fix_staging_only_a_test_is_unaffected():
+    """A test file is not source for the replayer; the hook agrees."""
+    assert on_commit.audit_regression_test(FIX_SUBJECT, ["tests/test_on_commit.py"]) is None
+
+
+def test_missing_test_refusal_does_not_prescribe_relabelling():
+    reason = on_commit.audit_regression_test(FIX_SUBJECT, ["hooks/on_commit.py"])
+    assert reason is not None
+    assert "Repro: manual" in reason
+    assert "commit as `refactor(`" not in reason
+

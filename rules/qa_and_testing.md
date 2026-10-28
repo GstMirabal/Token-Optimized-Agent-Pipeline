@@ -68,6 +68,33 @@ C6's operational table lives here, not in a sprint log.
 - **Unsatisfiable plan rows** (`F-114-N7`, Sprint 054): a Tests or Verification row of an Implementation Plan whose expected result contradicts a deliverable that the same plan requires is an `instructing` finding at Phase 4. Example shape: a Verification row greps a deliverable for a term that the deliverable must define, and expects no output. `rule_validator` records it in `task_scope.md` at Phase 4.3 (Rule Audit), and the plan returns to Phase 1 before the Phase 5 Approval Gate, so the contradiction is found before approval and not at the Quality Gate. `QA Agent` does not run at Phase 4.
 - **How "watch it fail" is verified** (Sprint 054): a `fix(` commit proves its test reproduces the defect by two mechanisms. (1) The `Repro:` trailer in the commit message, checked at commit time by `hooks/on_commit.py`. (2) `scripts/check_fix_reproduces.py`, which `QA Agent` runs first at QA Gate 1; its verdict is its per-commit lines: a line carrying a violation (`MISSING_TRAILER`, `UNREPLAYED`, `PASSES_ON_PARENT`, `WRONG_FAILURE`, `FAILS_AT_COMMIT`) is a `charter` `REJECTED`. An exit `2` that prints no per-commit violation line judged no commit — `RUNNER_UNAVAILABLE` (the interpreter cannot run pytest; default `<repo>/venv_skillopt/bin/python`, override `--python`) or `ERROR:` (a bad `--range`, no repository) — so it is not a verdict: fix the invocation and rerun before emitting anything.
 
+### Severity scale (S0-S3)
+
+Severity is a per-finding axis, orthogonal to the verdict class above: the class (`charter`, `instructing`, `testifying`) decides what the gate emits for the row (`RA-17`), and the severity ranks each finding inside it. Each finding on a `SPRINT_LOG.md` gate row carries one level in the `Severity` column (`docs/standards/templates/SPRINT_LOG_TEMPLATE.md`).
+
+| Level | What it is | Proof required | Effect |
+| :--- | :--- | :--- | :--- |
+| S0 Security | Secret exposure, execution outside the sandbox, write into protected paths, bypass of a security gate, leak of host data (`RA-15`) | The vector: the entry point and what it reaches. A finding without reproduction stays S0 (`suspected`) and is measured before the sprint closes; lack of proof never downgrades it | Blocks merge and deploy. Never `RECORD`. Remediation re-runs the `RA-19` enumeration. When a host reports it, the channel is private vulnerability reporting, never a public issue |
+| S1 Blocking | Wrong behavior, data loss, a rule that states something false, a gate that passes silently | A concrete failure scenario (input and wrong output) reproducible by a command | `REJECTED`; fixed before merge |
+| S2 Defect | Wrong but bounded: broken citation, contradiction, edge case without a test, misleading text | The exact line and the source it contradicts | In scope: fixed in the sprint. Out of scope: a `KI` entry that names its destination, or a discard with a one-line reason (a human decision) |
+| S3 Observation | Style, wording | None | `RECORD`; never blocks and never reopens a gate |
+
+- **Relation to `RECORD`**: `RECORD` is the verdict for S3 findings and for the `testifying` class. S0 can never be `RECORD`, whatever its class. S1 is always `REJECTED`.
+- **Precedence**: when class and severity disagree, the stricter verdict wins. An S0 or S1 finding on a `testifying` row makes the row `REJECTED` and moves it to class `instructing` when the text tells an agent what to do, or `charter` otherwise; an S2 or S3 finding follows the class table above.
+- **Downgrade**: a non-functional finding with no failure scenario is not S1; its maximum is S2. S0 is never downgraded.
+
+Convergence rules, applied at every gate round:
+
+| # | Rule |
+| :--- | :--- |
+| 1 | A round 2 or later reviews only the diff since the previous round and the fix of each S0, S1 and S2 finding. A new S3 is noted, nothing more |
+| 2 | A new S0 or S1 in round 2 or later, on text or code a previous round already reviewed, is marked `escape` in the log row and states why the previous round let it pass |
+| 3 | At the second occurrence of the same S0, S1 or S2 family, the mandatory fix is a deterministic check; the procedure is in `workflows/remediation_workflow.md` |
+| 4 | "No findings" is a valid, explicit verdict; every finding states the reason for its level |
+| 5 | A finding discarded with a reason does not reappear as new; a later round cites the discard |
+
+Instruments: the `Severity` column and the `escape` mark in `docs/standards/templates/SPRINT_LOG_TEMPLATE.md`; `scripts/check_gate_log.py` prints the `escape` count (advisory, exit `0`).
+
 ## 5. Waiving a secret-scan finding
 
 `hooks/on_commit.py` blocks a commit when it finds a credential assigned to a

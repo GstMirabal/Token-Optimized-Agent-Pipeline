@@ -46,7 +46,7 @@ The **Slash Commander** is the core skill that keeps every high-integrity protoc
 ## 🚀 Usage & Integration
 Install/repair the bridge for a host project (run once after `git submodule add`, and again any time `.agents` updates):
 ```bash
-.agents/scripts/install.sh
+python3 .agents/scripts/install.py
 ```
 
 Check for orphaned command→workflow references:

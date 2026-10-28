@@ -24,12 +24,14 @@ import logging
 import re
 import subprocess
 import sys
+from collections.abc import Callable
 from pathlib import Path
 
 # Add parent directory to path so 'hooks' module can be found if run directly
 sys.path.append(str(Path(__file__).parent.parent))
 sys.path.append(str(Path(__file__).parent.parent / "scripts"))
 from _mode import is_nucleus
+from _repro_grammar import is_source_path, is_test_path, parse_trailers
 
 from hooks.telemetry import log_error
 
@@ -761,8 +763,6 @@ def is_valid_commit_message(message: str) -> bool:
     return bool(COMMIT_MSG_REGEX.match(first_line))
 
 
-TEST_PATH = re.compile(r"(^|/)(tests?|__tests__)/|(^|/)test_[^/]+$|_test\.[a-z]+$|\.test\.[a-z]+$")
-SOURCE_SUFFIXES = (".py", ".js", ".jsx", ".ts", ".tsx", ".go", ".rs", ".java", ".rb", ".php")
 MANIFESTS = ("requirements", "package.json", "pyproject.toml")
 # A manifest inside vendored material is not this project's dependency
 # declaration. The retroactive run over 156 commits flagged two commits whose
@@ -770,14 +770,6 @@ MANIFESTS = ("requirements", "package.json", "pyproject.toml")
 # a vendored `-3rd` skill — nothing the author chose or controls.
 VENDORED = ("node_modules/", "-3rd/", "/3rd/", "venv_skillopt/")
 DEPENDENCY_LINE = re.compile(r"^Dependency:\s*\S+\s*[—-]\s*\S", re.MULTILINE)
-
-
-REPRO_TEST = re.compile(
-    r"^Repro:[ \t]+(?P<path>[^\s:]+)(?:::\S+)?[ \t]+(?:\u2014|--)[ \t]+fails at[ \t]+"
-    r"(?P<sha>[0-9a-fA-F]{7,40})[ \t]*$",
-    re.MULTILINE,
-)
-REPRO_MANUAL = re.compile(r"^Repro:[ \t]+manual[ \t]+(?:\u2014|--)[ \t]+\S", re.MULTILINE)
 
 
 def _has_repro_trailer(message: str, staged: list[str]) -> bool:
@@ -795,17 +787,19 @@ def _has_repro_trailer(message: str, staged: list[str]) -> bool:
     Returns:
         bool: True when a `Repro: manual` or a staged test-id trailer is present.
     """
-    if REPRO_MANUAL.search(message):
+    claims = parse_trailers(message)
+    if any(c.kind == "manual" for c in claims):
         return True
-    return any(m.group("path") in staged for m in REPRO_TEST.finditer(message))
+    return any(c.path in staged for c in claims)
 
 
 def audit_regression_test(message: str, staged: list[str]) -> str | None:
     """A bug fix must ship its test and record that it reproduced the bug.
 
-    Measured here: PRESENCE of a staged test file, and a recorded CLAIM, a
-    `Repro:` trailer naming the test and the short SHA at which it failed (or
-    `Repro: manual` naming a SPRINT_LOG section). Nothing here observes
+    Measured here: either a `Repro: manual` CLAIM naming a SPRINT_LOG section,
+    which is the route when no test can show the defect, or the PRESENCE of a
+    staged test file plus a `Repro:` trailer naming that test and the short SHA
+    at which it failed. Nothing here observes
     ordering: whether the test failed before the fix is observed afterwards by
     the replay `scripts/check_fix_reproduces.py --range <base>..HEAD` at QA
     Gate 1 (`RA-13 SEQUENTIAL_GATES`; a per-commit replay is too slow for a hook).
@@ -813,7 +807,18 @@ def audit_regression_test(message: str, staged: list[str]) -> str | None:
     Exempt by design, following the PR #27 lesson that a gate must recognise
     the legitimate case instead of blocking everything that resembles the
     illegitimate one: a `fix(` commit that stages no source file at all has
-    nothing to write a test against.
+    nothing to write a test against. Test and source paths are the shared
+    definitions of `scripts/_repro_grammar.py`, the ones the replay uses.
+
+    It judges `staged` as its caller read it, and it has two callers. The
+    PreToolUse guard in this file reads the index before the agent's command
+    runs, so it does not see files that command stages itself (`git add x &&
+    git commit`, `git commit -a`). The git `commit-msg` hook
+    (`hooks/on_commit_msg.py`, installed by `scripts/install.py`) reads the
+    index git is committing, so it does judge them; pinned by
+    `tests/test_code_craft_gates.py::test_commit_msg_hook_judges_files_added_in_the_same_command`
+    and `::test_commit_msg_hook_judges_files_staged_by_commit_all`. Where that
+    git hook is not installed, only the Gate 1 replay sees those files.
 
     Args:
         message: The commit message.
@@ -824,13 +829,16 @@ def audit_regression_test(message: str, staged: list[str]) -> str | None:
     """
     if not message.startswith("fix("):
         return None
-    if not any(path.endswith(SOURCE_SUFFIXES) for path in staged):
-        return None  # Documentation, workflow or config fix: no test to write.
-    if not any(TEST_PATH.search(path) for path in staged):
-        return ("A `fix(` commit must stage the test that proves the bug (rules/code_craft.md §6). "
-                "Write the failing test, record the failure in a `Repro:` trailer, then fix. If "
-                "this fix genuinely cannot be tested, that is information about the design — say "
-                "so and commit as `refactor(` or `chore(` instead of relabelling it.")
+    if not any(is_source_path(path) for path in staged):
+        return None  # Tests, documentation or .yml/.yaml/.toml configuration only.
+    if any(c.kind == "manual" for c in parse_trailers(message)):
+        return None  # `Repro: manual` is the alternative when no test can show the defect.
+    if not any(is_test_path(path) for path in staged):
+        return ("A `fix(` commit that stages source must stage the test that proves the bug "
+                "(rules/code_craft.md §6): write the failing test, record the failure in a "
+                "`Repro:` trailer, then fix. When no test can show the defect, carry "
+                "`Repro: manual \u2014 <SPRINT_LOG section>` naming where the reproduction is "
+                "recorded. Relabelling the fix as `refactor(` or `chore(` is not a route.")
     if _has_repro_trailer(message, staged):
         return None
     return ("A `fix(` commit that stages source must carry a `Repro:` trailer, in one of two forms: "
@@ -1055,15 +1063,28 @@ def block(reason: str) -> None:
     sys.exit(2)
 
 
-def _run_commit_message_guards(command: str) -> None:
-    """Runs Guards 2-4, which all need the parsed commit message.
+# The message audits: every `audit_*(message, staged)` function of this module,
+# each with the telemetry code the PreToolUse guard below logs when it refuses
+# (`hooks/on_commit_msg.py` runs the same audits and logs
+# `MESSAGE_GATE_VIOLATION` instead).
+MESSAGE_AUDITS: tuple[tuple[Callable[[str, list[str]], str | None], str], ...] = (
+    (audit_regression_test, "REGRESSION_TEST_MISSING"),  # rules/code_craft.md §6
+    (audit_dependency_justification, "DEPENDENCY_UNJUSTIFIED"),  # rules/code_craft.md §7
+    (audit_task_scope_precondition, "TASK_SCOPE_PRECONDITION"),  # D7, ADR-0007
+)
 
-    Guards 2-4 need the commit message, which is only reliably available on
-    the agent path (the Bash command carries `-m`). At native pre-commit time
-    git has not yet finalised COMMIT_EDITMSG, so reading it there would test
-    the PREVIOUS commit's message — worse than not checking. Closing that gap
-    needs a `commit-msg` hook; until then this coverage is honestly partial,
-    not silently assumed.
+
+def _run_commit_message_guards(command: str) -> None:
+    """Runs the guards that need the parsed commit message.
+
+    They are Guard 2, `is_valid_commit_message`, and every entry of
+    `MESSAGE_AUDITS`. This hook can read the message only on the agent path
+    (the Bash command carries `-m`). At native pre-commit time git has not yet finalised
+    COMMIT_EDITMSG, so reading it there would test the PREVIOUS commit's
+    message — worse than not checking. Terminal and IDE commits are judged
+    instead by the git `commit-msg` hook, `hooks/on_commit_msg.py`, installed
+    by `scripts/install.py`, which runs the same guards; where that hook
+    is not installed, a native commit passes no message gate.
 
     Args:
         command: The raw Bash command text from the PreToolUse payload.
@@ -1079,19 +1100,10 @@ def _run_commit_message_guards(command: str) -> None:
               "#[Sprint_ID] suffix, e.g. \"feat(auth): add login flow #078\" (agents.md §5).")
 
     staged = get_staged_files()
-    # Guard 3 (rules/code_craft.md §6): a bug fix ships its test.
-    if reason := audit_regression_test(message, staged):
-        log_error("on_commit", "REGRESSION_TEST_MISSING", message[:80])
-        block(reason)
-    # Guard 4 (rules/code_craft.md §7): a new dependency says why.
-    if reason := audit_dependency_justification(message, staged):
-        log_error("on_commit", "DEPENDENCY_UNJUSTIFIED", message[:80])
-        block(reason)
-    # Guard 5 (D7, ADR-0007): a sprint commit needs task_scope.md
-    # before it touches anything outside its own sprint directory.
-    if reason := audit_task_scope_precondition(message, staged):
-        log_error("on_commit", "TASK_SCOPE_PRECONDITION", message[:80])
-        block(reason)
+    for audit, code in MESSAGE_AUDITS:
+        if reason := audit(message, staged):
+            log_error("on_commit", code, message[:80])
+            block(reason)
 
 
 def main():

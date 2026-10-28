@@ -1,6 +1,6 @@
 {
-  "last_update": "2026-10-22",
-  "sprint_id": "056",
+  "last_update": "2026-10-27",
+  "sprint_id": "057",
   "_schema": "Entries are summary-only Knowledge Items. The 'file' field is omitted once the raw log has been purged (agents.md §4 definitive_amnesia) — the 1-line summary IS the retained knowledge.",
   "items": [
     {
@@ -86,7 +86,7 @@
     },
     {
       "id": "F-20260907-044A",
-      "summary": "A fix( commit must carry its proving test in the SAME commit (hooks/on_commit.py audit_regression_test, rules/code_craft.md §6); this is ordinary compliance with jurisdictional_lock (agents.md §2, restated Sprint 048 — the mandatory paired test is not a second claimable subject, not an exception to it), and a genuinely untestable fix must be committed as refactor(/build(/chore( instead.",
+      "summary": "A fix( commit must carry its proving test in the SAME commit (hooks/on_commit.py audit_regression_test, rules/code_craft.md §6); this is ordinary compliance with jurisdictional_lock (agents.md §2, restated Sprint 048 — the mandatory paired test is not a second claimable subject, not an exception to it), and a fix no test can show carries a Repro: manual trailer naming its SPRINT_LOG section instead of a test, never a relabel as refactor(/build(/chore(.",
       "routing_class": "host"
     },
     {
@@ -166,7 +166,7 @@
     },
     {
       "id": "F-20260924-050F",
-      "summary": "A heuristic scanner over a context-sensitive lexical grammar (JS/TS: regex-literal-vs-division, keyword-vs-identifier) cannot be fail-closed without a real lexer — three remediation rounds on scripts/quality_audit.py's JS/TS path each fixed one silent-compliance case and surfaced a new one; the plan's own pre-declared Abort criterion, not a fourth patch, was the correct exit.",
+      "summary": "A heuristic scanner over a context-sensitive lexical grammar (JS/TS: regex-literal-vs-division, keyword-vs-identifier) cannot carry a coverage claim without a real lexer — three remediation rounds on scripts/quality_audit.py's JS/TS path each fixed one silent-compliance case and surfaced a new one; the plan's own pre-declared Abort criterion, not a fourth patch, was the correct exit.",
       "routing_class": "host"
     },
     {
@@ -197,6 +197,16 @@
     {
       "id": "F-20261022-S562",
       "summary": "Stage a file by name only when exactly one unit's edit is pending in it, because `git add -p` is unavailable non-interactively — Sprint 056 commit `d40f3da` carried two units' `agents.md` hunks (A8 and A16) after the parent staged the whole file.",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20261027-S571",
+      "summary": "Describe a guard list in prose by the property its parity test checks (every `audit_*(message, staged)` is in `MESSAGE_AUDITS`), never by enumerating guards per commit path, because Sprint 057 Gate 1 found the `hooks/on_commit.py` docstrings stale five rounds running (QA2-4 to QA6-1) until the list and its test replaced the enumeration.",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20261027-S572",
+      "summary": "Run an end-to-end git hook test with `GIT_CONFIG_GLOBAL` pointing at an empty file, `GIT_CONFIG_NOSYSTEM=1` and `GIT_CONFIG_COUNT`/`GIT_CONFIG_PARAMETERS` removed, because Sprint 057 Gate 1 rerouted the `commit-msg` tests twice through a global and then an environment-injected `core.hooksPath` (QA4-2, QA5-2).",
       "routing_class": "host"
     }
   ]

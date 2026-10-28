@@ -14,10 +14,10 @@ Version: 1.4.0 | **VERIFIED_TOPOLOGY_SIG:** b7e2f914-pipeline-v3.7-documentation
 | **`memory/`** | Framework-Persist | Long-term memory (Knowledge Items). | ✅ INDEXED |
 | **`skills/`** | Framework-Library | Validated binary and quality tools. | ✅ AUDITED |
 | **`agents/`** | Core-Intelligence | Subagent profiles (real Claude Code frontmatter: `name`/`description`/`tools`). | ✅ PROTECTED |
-| **`commands/`** | System-Bridge | Real Claude Code slash commands (`.md`, `@`-referencing `workflows/`). Installed as `/agents:*` via `scripts/install.sh`, never generated. | ✅ ALIGNED |
+| **`commands/`** | System-Bridge | Real Claude Code slash commands (`.md`, `@`-referencing `workflows/`). Installed as `/agents:*` via `scripts/install.py`, never generated. | ✅ ALIGNED |
 | **`hooks/`** | DevOps-Gates | Execution gates for telemetry and structural mirrors; wired into the host's `.claude/settings.json` via `claude/settings.hooks.json`. | ✅ PROTECTED |
 | **`claude/`** | System-Bridge | Templates merged into the host by the installer: `mcp.json`, `settings.hooks.json`. | ✅ ALIGNED |
-| **`scripts/install.sh`** | System-Bridge | The only sanctioned mechanism for wiring `.agents/` into a host's `.claude/` (symlinks + non-destructive JSON merge + `CLAUDE.md` governance-rules import). | ✅ ALIGNED |
+| **`scripts/install.py`** | System-Bridge | The only sanctioned mechanism for wiring `.agents/` into a host's `.claude/` (symlinks + non-destructive JSON merge + `CLAUDE.md` governance-rules import); the deprecated `scripts/install.sh` shim forwards to it. | ✅ ALIGNED |
 | **`profiles/`** | Project-Packs | Opt-in project-specific packs (rules/agents/skills/mcp) installed only via `--profile [name]`. Preserves project self-learning without contaminating other hosts. | ✅ ALIGNED |
 | **`styles/`** | Framework-Core | Vale prose-lint style packages (`styles/Diataxis/`), scoped via `.vale.ini`. New in v1.4.0 (`rules/documentation_standard.md`). | ✅ ALIGNED |
 | **`Makefile`** | DevOps-Gates | Deterministic entrypoints: `graphify-update`, `graphify-rebuild`, `verify`. | ✅ ALIGNED |

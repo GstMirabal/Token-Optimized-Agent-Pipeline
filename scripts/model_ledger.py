@@ -15,6 +15,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _mode import is_nucleus
 from _root import agents_root
 from check_gate_log import gate_tables
 from check_task_scope import (
@@ -240,8 +241,14 @@ def collect(root: Path) -> tuple[list[dict[str, str | int]], list[str]]:
 
 
 def main() -> int:
-    """Write the ledger and return 0."""
-    root = agents_root()
+    """Write the ledger under the host root and return 0.
+
+    The root is the repository whose anchor is in force: the nucleus itself in
+    nucleus mode, the parent of the `.agents/` submodule in host mode, so a host
+    session never writes inside `./.agents` (`agents.md §3 jurisdiction`).
+    """
+    framework = agents_root()
+    root = framework if is_nucleus() else framework.parent
     rows, omitted = collect(root)
     out = root / OUT_REL
     out.parent.mkdir(parents=True, exist_ok=True)

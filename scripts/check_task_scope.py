@@ -106,8 +106,16 @@ def current_sprint_dir(root: Path) -> Path | None:
 
 
 def _cells(line: str) -> list[str]:
-    raw = [part.strip().strip("`") for part in line.strip().strip("|").split("|")]
-    return raw
+    """Split a Markdown table row into cells, honouring the ``\\|`` escape.
+
+    Args:
+        line: One raw table row.
+
+    Returns:
+        list[str]: Stripped cells; an escaped pipe stays inside its cell as ``|``.
+    """
+    parts = re.split(r"(?<!\\)\|", line.strip().removeprefix("|").removesuffix("|"))
+    return [part.replace("\\|", "|").strip().strip("`") for part in parts]
 
 
 def _is_separator(line: str) -> bool:

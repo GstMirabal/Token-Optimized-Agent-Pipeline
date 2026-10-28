@@ -58,7 +58,7 @@ governance violation, not a kept secret.
 2. Install:
 
    ```bash
-   .agents/scripts/install.sh --profile-path .agents-profile
+   python3 .agents/scripts/install.py --profile-path .agents-profile
    ```
 
 3. Never commit real profiles to the public nucleus (`RA-15`).
@@ -89,7 +89,7 @@ During `/agents:extract` (`extract_workflow.md`):
 test -f .claude/agents/your_agent.md
 
 # External profile linked
-.agents/scripts/install.sh --profile-path .agents-profile
+python3 .agents/scripts/install.py --profile-path .agents-profile
 test -L .claude/agents/your_agent.md
 
 # Submodule untouched after host-only work

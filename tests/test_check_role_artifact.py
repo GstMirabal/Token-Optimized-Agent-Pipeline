@@ -285,3 +285,46 @@ def test_from_hook_falls_back_to_process_cwd_when_no_path_given(
     assert check_mod.main_from_hook(payload) == 2
     (sprint / "SPRINT_LOG.md").write_text("# log\n", encoding="utf-8")
     assert check_mod.main_from_hook(payload) == 0
+
+
+# --- Sprint 057 B-7: the Tester row was demanded before the Tester phase was
+# due (host H1). The SubagentStop hook fires on every tester-agent stop,
+# including a mid-sprint dispatch, long before Gate 1 has approved. ---
+
+_GATE_HEADER = (
+    "| Gate | Round | Verdict | Class | Notes |\n"
+    "| :--- | :--- | :--- | :--- | :--- |\n"
+)
+
+
+def _tester_sprint(tmp_path: Path, rows: str) -> Path:
+    """Sprint dir whose SPRINT_LOG.md holds the gate table with ``rows``."""
+    sprint = tmp_path / "sprint"
+    sprint.mkdir()
+    (sprint / "SPRINT_LOG.md").write_text(_GATE_HEADER + rows, encoding="utf-8")
+    return sprint
+
+
+def test_tester_row_not_demanded_before_qa_gate_approved(check_mod, tmp_path: Path) -> None:
+    """Gate 1 has not approved (no row, then REJECTED): the Tester phase is
+    not due, so a tester-agent stop must not be blocked for a missing row."""
+    sprint = _tester_sprint(tmp_path, "")
+    assert check_mod.main(["--role", "tester_agent", "--sprint-dir", str(sprint)]) == 0
+    (sprint / "SPRINT_LOG.md").write_text(
+        _GATE_HEADER + "| QA (structural) | 1 | **REJECTED** | charter | ruff |\n",
+        encoding="utf-8",
+    )
+    assert check_mod.main(["--role", "tester_agent", "--sprint-dir", str(sprint)]) == 0
+
+
+def test_tester_row_required_once_qa_gate_approved(check_mod, tmp_path: Path) -> None:
+    """The requirement stays at close: QA approved, Tester row absent -> 2."""
+    sprint = _tester_sprint(tmp_path, "| QA (structural) | 2 | **APPROVED** | | ok |\n")
+    assert check_mod.main(["--role", "tester_agent", "--sprint-dir", str(sprint)]) == 2
+    (sprint / "SPRINT_LOG.md").write_text(
+        _GATE_HEADER
+        + "| QA (structural) | 2 | **APPROVED** | | ok |\n"
+        + "| Tester (functional) | 1 | **APPROVED** | | ok |\n",
+        encoding="utf-8",
+    )
+    assert check_mod.main(["--role", "tester_agent", "--sprint-dir", str(sprint)]) == 0

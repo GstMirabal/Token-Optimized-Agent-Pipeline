@@ -30,7 +30,7 @@ Usage:
     from bridge_state import bridge_stale, lock_stale, mirror_missing
 
     if bridge_stale(root, "claude", nucleus=True):
-        ...  # run scripts/install.sh --target claude
+        ...  # run python3 scripts/install.py --target claude
 """
 
 from __future__ import annotations
@@ -223,7 +223,7 @@ def bridge_stale(
             Defaults to ``host_dir``.
 
     Returns:
-        bool: True when ``install.sh --target <target>`` must run.
+        bool: True when ``install.py --target <target>`` must run.
     """
     if mirror_missing(host_dir, target, framework_root=framework_root):
         return True

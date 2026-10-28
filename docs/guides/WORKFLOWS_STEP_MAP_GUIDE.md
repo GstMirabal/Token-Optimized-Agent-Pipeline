@@ -18,7 +18,7 @@ protocols that should mirror each other shows up there first.
 | `extract_workflow` | — | — | — | — | — | — | — | — | — | ?/verify/write | — | — | — |
 | `pipeline_workflow` | write | write | write | write | verify/write | — | write | write | write | — | — | — | — |
 | `reconciliation_workflow` | — | — | — | — | — | — | — | write | write | — | — | write | — |
-| `remediation_workflow` | — | — | — | — | — | — | — | write | — | — | — | — | — |
+| `remediation_workflow` | — | write | — | — | — | — | — | write | — | — | — | — | — |
 | `repository_hardening_workflow` | — | — | — | — | — | — | — | — | — | — | — | — | — |
 | `reverse_documentation_workflow` | — | — | — | — | — | — | — | — | — | — | — | — | — |
 | `skill_forge_workflow` | — | — | — | — | — | — | — | — | — | — | — | — | — |
@@ -154,7 +154,8 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 0. Trigger | `auto_invocation` | write |
 | 1. Deadlock Term | `reversibility` | verify |
 | 1. Deadlock Term | `state_nuke` | ambiguous |
-| 2. Extraction | `error_mining` | ambiguous |
+| 2. Extraction | `error_mining` | write |
+| 2. Extraction | `family_check` | write |
 | 2. Extraction | `negative_ki` | ambiguous |
 | 3. Rollback | `roadmap_tag` | write |
 | 3. Rollback | `session_lock` | ambiguous |

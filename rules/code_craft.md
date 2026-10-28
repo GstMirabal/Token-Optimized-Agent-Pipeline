@@ -77,7 +77,7 @@ Enforced in two places, because staging a test proves only that a test exists (`
 
 | Where | Mechanism | What it checks |
 | :--- | :--- | :--- |
-| Commit time | `hooks/on_commit.py audit_regression_test` | A `fix(` commit that stages source also stages a test file **and** carries a trailer `Repro: <test id> — fails at <parent sha>` naming a staged test, or `Repro: manual — <SPRINT_LOG section>` when no test can show the defect. The trailer is a claim. |
+| Commit time | `hooks/on_commit.py audit_regression_test` | A `fix(` commit that stages source either stages a test file **and** carries a trailer `Repro: <test id> — fails at <parent sha>` naming a staged test, or carries `Repro: manual — <SPRINT_LOG section>` when no test can show the defect (no staged test required on that route). Source and test paths are `scripts/_repro_grammar.py` `is_source_path`/`is_test_path`, the definitions the replay below also uses: source is every path that is not a test and whose suffix is not `.md`, `.rst`, `.txt`, `.yml`, `.yaml` or `.toml`, so `.json`, shell and `Makefile` count. The trailer is a claim. |
 | QA Gate 1, first check | `scripts/check_fix_reproduces.py --range <base>..HEAD` | Observes the claim: each `Repro:` test exits exactly `1` on the parent tree (an import or collection error is not a reproduction) and `0` at the commit. Pytest only; any other runner is `UNREPLAYED` unless the commit says `Repro: manual` (`KI-054-1`). |
 
 ## 7. Dependency justification (enforced)

@@ -17,7 +17,7 @@ It does not judge the reviewed copy itself. It does not cover what install.py
 writes into a host `.mcp.json` that already holds an entry of the same name
 (the merge is not a copy), nor the code a server runs: `graphify.serve` comes
 from `graphifyy`, whose top-level version is pinned in requirements-core.txt
-while its dependencies are not.
+while not all of its dependencies are.
 """
 import copy
 import json

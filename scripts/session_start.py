@@ -454,21 +454,6 @@ def _lock_stale(root: Path, target: str) -> bool:
     return _bridge_lock_stale(root, target)
 
 
-def _commands_body_stale(root: Path, target: str) -> bool:
-    """True when this target's bridge needs reinstalling.
-
-    Mirror missing or incomplete, **or** rendered content diverged — the union
-    `workflows/start_workflow.md` Phase 1.5 has always described. Until Sprint
-    041 this returned ``False`` for every target but ``cursor``, so the Claude
-    path could only ever reach the lock-only branch below and reported a
-    checkout with no ``.claude/`` directory as fresh.
-
-    The name is kept: it is the seam the suite patches, and renaming it would
-    be churn without a behavioural difference.
-    """
-    return bridge_stale(root, target, nucleus=True)
-
-
 def _refresh_bridge_lock(root: Path, target: str) -> int:
     """Write ``.bridge_<target>.lock`` to ``HEAD`` without reinstalling the mirror."""
     proc = subprocess.run(
@@ -486,19 +471,28 @@ def _refresh_bridge_lock(root: Path, target: str) -> int:
         return 2
     commit = proc.stdout.strip()
     lock = _lock_path(root, target)
-    lock.write_text(commit + "\n", encoding="utf-8")
+    try:
+        lock.write_text(commit + "\n", encoding="utf-8")
+    except PermissionError:
+        refresher = (
+            "the unsandboxed SessionStart hook refreshes it"
+            if target == "claude"
+            else f"run `{install_command(target, is_nucleus())}` outside the sandbox to refresh it"
+        )
+        print(f"boot: cannot write {lock} (permission denied); {refresher}.", file=sys.stderr)
+        return 0
     print(f"boot: bridge lock refreshed to {commit[:12]} (content fresh).")
     return 0
 
 
 def _run_bridge_install(root: Path, target: str) -> tuple[int, str]:
-    installer = root / "scripts" / "install.sh"
+    installer = root / "scripts" / "install.py"
     if not installer.is_file():
-        msg = "boot: scripts/install.sh missing"
+        msg = "boot: scripts/install.py missing"
         print(msg, file=sys.stderr)
         return 2, msg
     proc = subprocess.run(
-        ["bash", str(installer), "--target", target],
+        [sys.executable, str(installer), "--target", target],
         cwd=str(root),
         capture_output=True,
         text=True,
@@ -525,7 +519,7 @@ def _bridge_permission_denied(output: str, target: str) -> bool:
     ``<host>/.claude/settings.json`` under an agent sandbox. Until Sprint 044
     this matched ``.cursor`` alone, so a denied ``claude``-target install fell
     through to the hard-stop branch (``F-BOOT-1``); Sprint 041 had generalised
-    ``_commands_body_stale`` to every target but left this predicate behind.
+    ``bridge_stale`` to every target but left this predicate behind.
 
     Args:
         output: Combined stdout+stderr captured from the install attempt.
@@ -563,7 +557,9 @@ def _bridge_triage(root: Path, target: str | None) -> tuple[int, list[str]]:
     """
     if target is None:
         return 0, []
-    if _commands_body_stale(root, target):
+    nucleus = is_nucleus()
+    host_dir = root if nucleus else root.parent
+    if bridge_stale(host_dir, target, nucleus=nucleus, framework_root=root):
         install_rc, install_out = _run_bridge_install(root, target)
         if install_rc == 0:
             return 0, []

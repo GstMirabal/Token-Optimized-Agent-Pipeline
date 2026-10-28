@@ -88,6 +88,20 @@ class TestDeprecatedHookPrune:
         pre_cmds = [h["command"] for m in merged["hooks"]["PreToolUse"] for h in m["hooks"]]
         assert "python3 my_own_hook.py" in pre_cmds
 
+    def test_pre_install_py_session_start_command_is_replaced(self):
+        """W44: the SessionStart command naming the install.sh shim is retired."""
+        import json as _json
+        template = _json.loads(
+            (Path(__file__).resolve().parent.parent / "claude" / "settings.hooks.json").read_text())
+        new_cmd = template["hooks"]["SessionStart"][0]["hooks"][0]["command"]
+        old_cmd = next(c for c in merge_json.DEPRECATED_HOOK_COMMANDS if "install.sh" in c)
+        assert old_cmd != new_cmd
+        dest = {"hooks": {"SessionStart": [{"hooks": [{"type": "command", "command": old_cmd}]}]}}
+        merge_json.prune_deprecated_hooks(dest)
+        merged = merge_json.merge(dest, template)
+        cmds = [h["command"] for m in merged["hooks"]["SessionStart"] for h in m["hooks"]]
+        assert cmds == [new_cmd]
+
 
 def test_merge_preserves_host_deny_and_adds_template_deny():
     """Abort criterion for Sprint 027 C1: re-install must not drop host deny rules."""
@@ -169,11 +183,92 @@ RETIRED_EXCLUDED = frozenset({
 })
 
 
+# KI-056-3: the per-subtree entries `d70d00c` replaced with the whole submodule.
+_SUBTREES = ("hooks", "scripts", "config", "skills", "claude")
+RETIRED_SUBTREE_DENY = frozenset({
+    "Edit(/.agents/scripts/with_env.py)",
+    "Edit(/.agents/config/with_env_allowlist.json)",
+    "Edit(/.agents/venv_skillopt/**)",
+    *(f"Edit(/.agents/{name}/**)" for name in _SUBTREES),
+})
+RETIRED_SUBTREE_DENY_WRITE = frozenset({
+    "./.agents/scripts/with_env.py",
+    "./.agents/config/with_env_allowlist.json",
+    "./.agents/venv_skillopt",
+    *(f"./.agents/{name}" for name in _SUBTREES),
+})
+
+
+def _real_settings_template() -> dict:
+    path = Path(__file__).parent.parent / "claude" / "settings.hooks.json"
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+class TestSubtreeDenyRetirement:
+    """Hosts bridged before `d70d00c` lose the per-subtree denies, keep their own."""
+
+    def test_old_subtree_denies_are_pruned_and_host_entries_survive(self):
+        dest = {
+            "permissions": {"deny": [*sorted(RETIRED_SUBTREE_DENY), "Read(/.env)", "Edit(/secrets/**)"]},
+            "sandbox": {"filesystem": {"denyWrite": [
+                *sorted(RETIRED_SUBTREE_DENY_WRITE), "./.env", "./host-own"]}},
+        }
+        merged = merge(dest, _real_settings_template())
+        deny = merged["permissions"]["deny"]
+        deny_write = merged["sandbox"]["filesystem"]["denyWrite"]
+        assert not RETIRED_SUBTREE_DENY & set(deny)
+        assert not RETIRED_SUBTREE_DENY_WRITE & set(deny_write)
+        assert {"Edit(/secrets/**)", "Edit(/.agents/**)", "Read(/.env)"} <= set(deny)
+        assert {"./host-own", "./.agents", "./.env"} <= set(deny_write)
+
+
+class TestShippedHooksReplaced:
+    """The merge itself (the install path) replaces shipped hook commands once."""
+
+    ON_COMMIT = "if [ -f .agents/hooks/on_commit.py ]; then python3 .agents/hooks/on_commit.py; fi"
+
+    def _commands(self, settings: dict, event: str) -> list[str]:
+        return [h["command"] for m in settings["hooks"][event] for h in m["hooks"]]
+
+    def test_bare_deprecated_command_does_not_survive_merge(self):
+        dest = {"hooks": {"PreToolUse": [{"matcher": "Bash", "hooks": [
+            {"type": "command", "command": "python3 .agents/hooks/on_commit.py"}]}]}}
+        merged = merge(dest, _real_settings_template())
+        assert self._commands(merged, "PreToolUse") == [self.ON_COMMIT]
+
+    def test_changed_matcher_shape_does_not_duplicate_shipped_command(self):
+        old_shape = {"matcher": "Bash|Edit", "hooks": [
+            {"type": "command", "command": self.ON_COMMIT},
+            {"type": "command", "command": "python3 my_own_hook.py"}]}
+        merged = merge({"hooks": {"PreToolUse": [old_shape]}}, _real_settings_template())
+        commands = self._commands(merged, "PreToolUse")
+        assert commands.count(self.ON_COMMIT) == 1
+        assert "python3 my_own_hook.py" in commands
+
+    def test_merge_twice_equals_merge_once(self):
+        template = _real_settings_template()
+        dest = {"hooks": {"PreToolUse": [{"matcher": "Bash", "hooks": [
+            {"type": "command", "command": "python3 .agents/hooks/on_commit.py"},
+            {"type": "command", "command": "python3 my_own_hook.py"}]}]}}
+        once = merge(copy.deepcopy(dest), template)
+        twice = merge(copy.deepcopy(once), template)
+        assert twice == once
+
+    def test_events_the_template_lacks_are_untouched(self):
+        dest = {"hooks": {"HostEvent": [{"hooks": [{"type": "command", "command": "x"}]}]}}
+        merged = merge(copy.deepcopy(dest), _real_settings_template())
+        assert merged["hooks"]["HostEvent"] == dest["hooks"]["HostEvent"]
+
+
 class TestShippedRetiredValues:
     """The real RETIRED_VALUES applied against the real shipped template."""
 
-    def test_retired_values_are_exactly_the_ten_excluded_commands(self):
-        assert dict(merge_json.RETIRED_VALUES) == {"sandbox.excludedCommands": RETIRED_EXCLUDED}
+    def test_retired_values_are_exactly_the_reviewed_three_lists(self):
+        assert dict(merge_json.RETIRED_VALUES) == {
+            "sandbox.excludedCommands": RETIRED_EXCLUDED,
+            "permissions.deny": RETIRED_SUBTREE_DENY,
+            "sandbox.filesystem.denyWrite": RETIRED_SUBTREE_DENY_WRITE,
+        }
 
     def test_real_template_merge_drops_retired_and_keeps_host_entry(self):
         template_path = Path(__file__).parent.parent / "claude" / "settings.hooks.json"

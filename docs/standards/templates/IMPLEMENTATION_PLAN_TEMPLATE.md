@@ -40,9 +40,9 @@ One row per unit. One unit is one atomic commit (`RA-08`) with **one physical fi
 its structural subject** (`agents.md §2 jurisdictional_lock`) — the file the unit exists
 to change, which is the file this row names.
 
-A unit whose commit will be `fix(`-typed names its paired test **in the same row**:
-`rules/code_craft.md §6` requires that test in the same commit, and a mandatory
-companion file is not a second subject. Plan the pair at Phase 1. Splitting
+A unit whose commit will be `fix(`-typed names its paired test, or its `Repro: manual` record, **in the same row**:
+`rules/code_craft.md §6` requires that test in the same commit unless no test can show
+the defect, and a mandatory companion file is not a second subject. Plan the pair at Phase 1. Splitting
 implementation and test into separate Work rows is what forced Sprint 047 to re-pair 7
 units mid-execution.
 

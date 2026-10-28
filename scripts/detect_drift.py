@@ -171,7 +171,13 @@ def commits_since(baseline: str, *exclude: str) -> list[str]:
 
 
 _STATE_SUBJECT = re.compile(r"^docs\((?:state|changelog)\)")
-_LEDGER_PATHS = frozenset({"docs/active_state.json", "CHANGELOG.md"})
+# `.agent_state/mirror.json` is the anchor's backup: `close_workflow.md` Phase 4
+# `state_sync` ("And refresh the mirror again", `hooks/state_mirror.py`) and
+# `config/artifact_registry.json` (`mirror.json`, repository scope) prescribe it
+# beside the anchor. A host that tracks it commits both after the seal (C-1).
+_LEDGER_PATHS = frozenset(
+    {"docs/active_state.json", "CHANGELOG.md", ".agent_state/mirror.json"}
+)
 
 
 def _routine_state_shas(commits: list[str]) -> set[str]:

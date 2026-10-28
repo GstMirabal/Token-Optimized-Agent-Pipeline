@@ -231,3 +231,30 @@ def test_a_non_numeric_id_is_the_one_case_where_skipping_is_right(
     _anchor2 = tmp_path / "docs" / "active_state.json"
     _anchor2.write_text(json.dumps({"current_sprint": {"id": True}}), encoding="utf-8")
     assert cts.current_sprint_dir(tmp_path) is None
+
+
+# --- B-3: a Markdown-escaped pipe inside a cell is not a column separator. ---
+
+ESCAPED_PIPE = f"""# Task Scope
+
+**Mode.** Cursor.
+
+| {SHAPE} |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| X | `a\\|b.py` | modify | low | `devops_agent` | `composer-2.5` | N/A | ⏳ |
+"""
+
+
+def test_escaped_pipe_does_not_split_a_cell() -> None:
+    from check_task_scope import _cells
+
+    cells = _cells("| X | `a\\|b` | modify |")
+    assert cells == ["X", "a|b", "modify"]
+
+
+def test_escaped_pipe_in_a_cell_does_not_shift_columns(tmp_path: Path) -> None:
+    """A shifted row reads Operation as `b.py` and skips the capability check."""
+    sprint = _scope(tmp_path, ESCAPED_PIPE)
+    result = _run("--sprint-dir", str(sprint))
+    assert result.returncode == 2
+    assert "Write/Edit" in result.stderr

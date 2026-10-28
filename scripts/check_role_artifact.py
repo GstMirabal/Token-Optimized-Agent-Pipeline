@@ -97,30 +97,54 @@ _AGENT_TYPE_TO_ROLE = {
 
 
 def _registry() -> dict:
-    """Return the parsed framework registry."""
+    """Return the parsed framework registry.
+
+    Returns:
+        dict: ``config/artifact_registry.json`` as parsed JSON.
+    """
     path = agents_root() / "config" / "artifact_registry.json"
     return json.loads(path.read_text(encoding="utf-8"))
 
 
 def load_registry() -> list[dict]:
-    """Return the artifacts list from the framework registry."""
+    """Return the artifacts list from the framework registry.
+
+    Returns:
+        list[dict]: The registry's ``artifacts`` entries, empty when absent.
+    """
     return list(_registry().get("artifacts") or [])
 
 
 def gate_evidence() -> dict[str, str]:
-    """Registry role display name -> token its ``Gate`` cell must start with."""
+    """Map each registry role display name to the token its ``Gate`` cell must start with.
+
+    Returns:
+        dict[str, str]: ``gate_evidence.roles`` from the registry, empty when absent.
+    """
     block = _registry().get("gate_evidence") or {}
     return dict(block.get("roles") or {})
 
 
 def known_roles() -> set[str]:
-    """Role display names the registry declares, artifacts and gates alike."""
+    """Role display names the registry declares, artifacts and gates alike.
+
+    Returns:
+        set[str]: Every artifact ``role`` plus every gate-evidence role.
+    """
     roles = {entry.get("role") for entry in load_registry() if entry.get("role")}
     return roles | set(gate_evidence())
 
 
 def missing_for_role(role: str, sprint_dir: Path) -> list[str]:
-    """Filenames required for ``role`` that are absent under ``sprint_dir``."""
+    """Filenames required for ``role`` that are absent under ``sprint_dir``.
+
+    Args:
+        role: Registry role display name.
+        sprint_dir: Sprint directory to inspect.
+
+    Returns:
+        list[str]: Required sprint-scope filenames of ``role`` that do not exist.
+    """
     missing: list[str] = []
     for entry in load_registry():
         if entry.get("scope") != "sprint":
@@ -297,12 +321,83 @@ def sprint_dir_from_anchor(
     return root / f"docs/sprints/{int(sprint_id):03d}-{layer}-{app}"
 
 
+def _table_cells(header: list[str], rows: list[list[str]]) -> list[tuple[str, str]]:
+    """Return ``(Gate cell, Verdict cell)`` per row of one table; none without a Gate column.
+
+    Args:
+        header: Column names of the table.
+        rows: Data rows as lists of cells.
+
+    Returns:
+        list[tuple[str, str]]: One pair per row long enough to hold a Gate cell; the
+            Verdict cell is empty when the table or the row has none.
+    """
+    if "Gate" not in header:
+        return []
+    gate = header.index("Gate")
+    verdict = header.index("Verdict") if "Verdict" in header else None
+    out: list[tuple[str, str]] = []
+    for row in rows:
+        if len(row) <= gate:
+            continue
+        cell = row[verdict] if verdict is not None and len(row) > verdict else ""
+        out.append((row[gate].strip(), cell))
+    return out
+
+
+def _gate_cells(log: Path) -> list[tuple[str, str]]:
+    """Return ``(Gate cell, Verdict cell)`` for every gate-table row in ``log``.
+
+    Args:
+        log: Path of a ``SPRINT_LOG.md``.
+
+    Returns:
+        list[tuple[str, str]]: Pairs from every table whose header holds ``Verdict``.
+    """
+    from check_gate_log import gate_tables
+
+    cells: list[tuple[str, str]] = []
+    for header, rows in gate_tables(log.read_text(encoding="utf-8")):
+        cells.extend(_table_cells(header, rows))
+    return cells
+
+
+def _predecessor_passed(role: str, tokens: dict[str, str], cells: list[tuple[str, str]]) -> bool:
+    """True when the gate that precedes ``role`` in the registry left a passing row.
+
+    The Double-Gate runs in registry order (QA, then Tester). A role is due
+    only once the previous gate has an ``APPROVED`` or ``RECORD`` row; the
+    first gate has no predecessor and is always due. ``SubagentStop`` fires on
+    every stop of that agent type, including mid-sprint dispatches, so
+    demanding the later row earlier blocks a legitimate log (B-7).
+
+    Args:
+        role: Registry role display name.
+        tokens: Gate-evidence map from ``gate_evidence``, in registry order.
+        cells: ``(Gate cell, Verdict cell)`` pairs from ``_gate_cells``.
+
+    Returns:
+        bool: True for the first gate, or when the previous gate has an
+            ``APPROVED`` or ``RECORD`` row.
+    """
+    order = list(tokens)
+    index = order.index(role)
+    if index == 0:
+        return True
+    previous = tokens[order[index - 1]]
+    return any(
+        gate.startswith(previous) and ("APPROVED" in verdict or "RECORD" in verdict)
+        for gate, verdict in cells
+    )
+
+
 def missing_gate_row(role: str, sprint_dir: Path) -> str | None:
     """Describe the absent ``Gate`` row for ``role``, or None when it is there.
 
     A Double-Gate role owns no file of its own, so file existence cannot show
     it ran: ``SPRINT_LOG.md`` is written at Phase 3, long before any gate. The
-    evidence is a row inside it.
+    evidence is a row inside it. The row is owed only once the role's phase is
+    due (the preceding gate approved), see ``_predecessor_passed``.
 
     Args:
         role (str): Registry role display name.
@@ -312,27 +407,33 @@ def missing_gate_row(role: str, sprint_dir: Path) -> str | None:
         str | None: What is missing, or None when the role owes no gate row.
     """
     block = _registry().get("gate_evidence") or {}
-    token = (block.get("roles") or {}).get(role)
+    tokens = block.get("roles") or {}
+    token = tokens.get(role)
     if not token:
         return None
     log = sprint_dir / (block.get("file") or "SPRINT_LOG.md")
     if not log.is_file():
         return f"{log.name} (no gate log to carry the {token!r} row)"
 
-    from check_gate_log import gate_tables
-
-    for header, rows in gate_tables(log.read_text(encoding="utf-8")):
-        if "Gate" not in header:
-            continue
-        column = header.index("Gate")
-        cells = [row[column].strip() for row in rows if len(row) > column]
-        if any(cell.startswith(token) for cell in cells):
-            return None
+    cells = _gate_cells(log)
+    if any(gate.startswith(token) for gate, _ in cells):
+        return None
+    if not _predecessor_passed(role, tokens, cells):
+        return None
     return f"{token!r} row in {log.name}"
 
 
 def _report(role: str, sprint_dir: Path) -> int:
-    """Shared exit logic for CLI and --from-hook."""
+    """Shared exit logic for CLI and --from-hook.
+
+    Args:
+        role: Registry role display name.
+        sprint_dir: Sprint directory to inspect.
+
+    Returns:
+        int: 0 when every required artifact and gate row is present, 2 otherwise
+            or when ``sprint_dir`` does not exist.
+    """
     if not sprint_dir.is_dir():
         print(f"❌ [ROLE-ARTIFACT] sprint dir not found: {sprint_dir}", file=sys.stderr)
         return 2
@@ -370,6 +471,13 @@ def main_from_hook(stdin_text: str | None = None) -> int:
     cannot change it), so it cannot by itself distinguish a gate that audited
     a nested clone opened for ``agents.md §4 feedback_upstream`` from one
     that audited the host.
+
+    Args:
+        stdin_text: The hook payload; read from stdin when None.
+
+    Returns:
+        int: 0 on an advisory skip or when artifacts are present, 2 when a
+            required artifact or gate row is missing.
     """
     raw = stdin_text if stdin_text is not None else sys.stdin.read()
     try:
@@ -399,7 +507,15 @@ def main_from_hook(stdin_text: str | None = None) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    """CLI entry: exit 2 when required role artifacts are missing."""
+    """CLI entry: exit 2 when required role artifacts are missing.
+
+    Args:
+        argv: Arguments without the program name; ``sys.argv`` when None.
+
+    Returns:
+        int: The ``main_from_hook`` or ``_report`` result, or 2 for an unknown
+            role; argparse exits 2 itself on a usage error.
+    """
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n", 1)[0])
     parser.add_argument(
         "--from-hook",

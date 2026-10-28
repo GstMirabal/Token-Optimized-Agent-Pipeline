@@ -142,3 +142,129 @@ def test_message_file_passes_when_the_test_is_staged(repo, monkeypatch):
 def test_missing_message_file_does_not_crash(monkeypatch, tmp_path):
     monkeypatch.setattr(sys, "argv", ["on_commit_msg.py", str(tmp_path / "absent")])
     assert ocm.main() == 0
+
+
+# --- commit-msg sees files staged by the same command (Sprint 057 QA3-1) ---
+
+HOOK_SCRIPT = Path(__file__).resolve().parent.parent / "hooks" / "on_commit_msg.py"
+
+
+def _install_commit_msg_hook(root: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Point `root`'s commit-msg hook at this repository's `on_commit_msg.py`.
+
+    Global, system and environment-injected git config (`GIT_CONFIG_COUNT`,
+    `GIT_CONFIG_PARAMETERS`) are dropped for the rest of the test, so a
+    developer's `core.hooksPath` cannot route git away from this hook.
+
+    Args:
+        root: The scratch repository.
+        monkeypatch: Fixture that scopes the git environment to the test.
+    """
+    empty = root / ".empty_gitconfig"
+    empty.write_text("")
+    monkeypatch.setenv("GIT_CONFIG_GLOBAL", str(empty))
+    monkeypatch.setenv("GIT_CONFIG_NOSYSTEM", "1")
+    monkeypatch.delenv("GIT_CONFIG_COUNT", raising=False)
+    monkeypatch.delenv("GIT_CONFIG_PARAMETERS", raising=False)
+    hook = root / ".git" / "hooks" / "commit-msg"
+    hook.write_text(f'#!/bin/sh\nexec "{sys.executable}" "{HOOK_SCRIPT}" "$1"\n')
+    hook.chmod(0o755)
+
+
+def _shell(command: str) -> subprocess.CompletedProcess[str]:
+    """Run one shell command line in the current directory.
+
+    Args:
+        command: The command line, run with `shell=True` so `&&` chains apply.
+
+    Returns:
+        subprocess.CompletedProcess[str]: The finished process, never raising.
+    """
+    return subprocess.run(command, shell=True, capture_output=True, text=True, check=False)
+
+
+def test_commit_msg_hook_judges_files_added_in_the_same_command(
+    repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """`git add x && git commit` stages after any PreToolUse check ran."""
+    _install_commit_msg_hook(repo, monkeypatch)
+    Path("app.py").write_text("def f(): pass\n")
+    result = _shell('git add app.py && git commit -q -m "fix(app): correct it #057"')
+    assert result.returncode != 0
+    assert "must stage the test" in result.stderr
+
+
+def test_commit_msg_hook_judges_files_staged_by_commit_all(
+    repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """`git commit -a` stages tracked changes inside the commit itself."""
+    _install_commit_msg_hook(repo, monkeypatch)
+    Path("cfg.json").write_text("{}\n")
+    subprocess.run(["git", "add", "cfg.json"], check=True)
+    subprocess.run(["git", "commit", "-q", "--no-verify", "-m", "chore: seed #057"], check=True)
+    Path("cfg.json").write_text('{"a": 1}\n')
+    result = _shell('git commit -a -q -m "fix(cfg): correct it #057"')
+    assert result.returncode != 0
+    assert "must stage the test" in result.stderr
+
+
+# --- commit-msg runs the task_scope precondition (Sprint 057 QA5-1) ---
+
+def test_message_file_refuses_sprint_commit_outside_dir_without_scope(
+    repo: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A terminal sprint commit outside its directory is refused for the missing scope."""
+    subprocess.run(["git", "checkout", "-q", "-b", "ai-sprint/052"], check=True)
+    stage("app.py", "def f(): pass\n")
+    msg = repo / "MSG"
+    msg.write_text("feat(app): add f #052\n")
+    monkeypatch.setattr(sys, "argv", ["on_commit_msg.py", str(msg)])
+    assert ocm.main() == 1
+    assert "task_scope.md is absent" in capsys.readouterr().err
+
+
+def test_message_file_passes_sprint_commit_when_scope_exists(
+    repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The same commit passes once the sprint directory holds `task_scope.md`."""
+    subprocess.run(["git", "checkout", "-q", "-b", "ai-sprint/052"], check=True)
+    scope = repo / "docs" / "sprints" / "052-core-pipeline"
+    scope.mkdir(parents=True)
+    (scope / "task_scope.md").write_text("# scope\n")
+    stage("app.py", "def f(): pass\n")
+    msg = repo / "MSG"
+    msg.write_text("feat(app): add f #052\n")
+    monkeypatch.setattr(sys, "argv", ["on_commit_msg.py", str(msg)])
+    assert ocm.main() == 0
+
+
+# --- one list of message audits for both hooks (Sprint 057 convergence rule 3) ---
+# Family QA2-4, QA3-1, QA4-1, QA5-1: prose misstated which hook runs which
+# message guard. Exact coverage of these two tests, and no more: (1) every
+# module-level `audit_*` function of `hooks/on_commit.py` whose parameters are
+# exactly `(message, staged)` is in `MESSAGE_AUDITS`; (2) `hooks/on_commit_msg.py`
+# imports `MESSAGE_AUDITS` and no `audit_*` name.
+
+def test_every_message_audit_is_in_message_audits() -> None:
+    import inspect
+
+    import hooks.on_commit as oc
+
+    declared = {
+        fn for name, fn in inspect.getmembers(oc, inspect.isfunction)
+        if fn.__module__ == oc.__name__ and name.startswith("audit_")
+        and list(inspect.signature(fn).parameters) == ["message", "staged"]
+    }
+    assert declared == {audit for audit, _code in oc.MESSAGE_AUDITS}
+
+
+def test_commit_msg_hook_imports_the_list_not_single_audits() -> None:
+    import ast
+
+    tree = ast.parse(HOOK_SCRIPT.read_text(encoding="utf-8"))
+    imported = {
+        alias.name for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)
+        for alias in node.names
+    }
+    assert "MESSAGE_AUDITS" in imported
+    assert not {name for name in imported if name.startswith("audit_")}

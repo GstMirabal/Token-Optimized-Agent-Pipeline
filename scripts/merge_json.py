@@ -13,6 +13,11 @@ the template retired is removed when its launch is the one the framework
 shipped (Hotfix H-008). An additive merge treated `args`, an ordered argv, as a
 set, so a host bridged before `246cd20` received `-I` after the module name,
 where it isolates nothing.
+
+Hook entries are a second exception (`prune_shipped_hooks`): for each event the
+template defines, a host hook entry whose `command` is one the template ships
+for that event, or is in DEPRECATED_HOOK_COMMANDS, is removed and the template's
+matcher is appended once. Host hook entries with any other command are kept.
 """
 import copy
 import json
@@ -26,6 +31,8 @@ from typing import Any
 # destination before merging so a re-install upgrades them instead of leaving
 # a stale duplicate alongside the new guarded variant (list-merge only appends).
 DEPRECATED_HOOK_COMMANDS = {
+    # Pre-W45 SessionStart command (echo names the install.sh shim); W45 retires it.
+    "if [ -f .agents/hooks/on_init.py ]; then python3 .agents/hooks/on_init.py; else echo '\u26a0\ufe0f [.agents] hooks unavailable \u2014 initialize the submodule: git submodule update --init .agents && .agents/scripts/install.sh'; fi",
     "python3 .agents/hooks/on_init.py",
     "python3 .agents/hooks/on_commit.py",
     "python3 .agents/hooks/state_mirror.py",
@@ -59,6 +66,31 @@ RETIRED_VALUES: Mapping[str, frozenset[str]] = MappingProxyType({
         "gh repo view *",
         "gh release view *",
         "gh auth status",
+    }),
+    # KI-056-3: the sixteen per-subtree entries that `d70d00c` replaced with the
+    # whole-submodule `./.agents` / `Edit(/.agents/**)`. Pruning them is safe:
+    # each is a sub-path of an entry the current template ships and the merge
+    # re-appends, and `prune_retired_values` keeps any value the template still
+    # ships. `Read(/.env)` and `./.env` are not listed: the template still ships them.
+    "permissions.deny": frozenset({
+        "Edit(/.agents/scripts/with_env.py)",
+        "Edit(/.agents/config/with_env_allowlist.json)",
+        "Edit(/.agents/venv_skillopt/**)",
+        "Edit(/.agents/hooks/**)",
+        "Edit(/.agents/scripts/**)",
+        "Edit(/.agents/config/**)",
+        "Edit(/.agents/skills/**)",
+        "Edit(/.agents/claude/**)",
+    }),
+    "sandbox.filesystem.denyWrite": frozenset({
+        "./.agents/scripts/with_env.py",
+        "./.agents/config/with_env_allowlist.json",
+        "./.agents/venv_skillopt",
+        "./.agents/hooks",
+        "./.agents/scripts",
+        "./.agents/config",
+        "./.agents/skills",
+        "./.agents/claude",
     }),
 })
 
@@ -162,6 +194,91 @@ def prune_deprecated_hooks(dest: dict) -> None:
             del dest["hooks"][event]
 
 
+def _matcher_commands(matcher: Any) -> set[str]:
+    """Collect the string `command` values of one matcher's `hooks` list.
+
+    Args:
+        matcher: One entry of a `hooks.<event>` list.
+
+    Returns:
+        The commands found; empty when the matcher is not a mapping or has no list.
+    """
+    hooks = matcher.get("hooks") if isinstance(matcher, dict) else None
+    if not isinstance(hooks, list):
+        return set()
+    return {
+        h["command"] for h in hooks
+        if isinstance(h, dict) and isinstance(h.get("command"), str)
+    }
+
+
+def _hook_commands(matchers: Any) -> set[str]:
+    """Collect the `command` strings of the hook entries in a list of matchers.
+
+    Args:
+        matchers: A `hooks.<event>` value; anything but a list yields an empty set.
+
+    Returns:
+        The string `command` values found in the matchers' `hooks` lists.
+    """
+    found: set[str] = set()
+    for matcher in matchers if isinstance(matchers, list) else []:
+        found |= _matcher_commands(matcher)
+    return found
+
+
+def _drop_commands(matchers: list, commands: set[str]) -> list:
+    """Return the matchers without the hook entries whose command is in `commands`.
+
+    A matcher left with no hooks is dropped; a matcher that had none to begin
+    with, or any non-mapping item, is kept as found.
+
+    Args:
+        matchers: One `hooks.<event>` list from a host file.
+        commands: Exact `command` strings to remove.
+
+    Returns:
+        A new list of matchers.
+    """
+    kept = []
+    for matcher in matchers:
+        hooks = matcher.get("hooks") if isinstance(matcher, dict) else None
+        if not isinstance(hooks, list):
+            kept.append(matcher)
+            continue
+        left = [h for h in hooks if not (isinstance(h, dict) and h.get("command") in commands)]
+        if left:
+            kept.append({**matcher, "hooks": left})
+    return kept
+
+
+def prune_shipped_hooks(dest: dict, template: dict) -> None:
+    """Remove from the host the hook entries the template re-adds, in place.
+
+    For each `hooks.<event>` the template defines, a host hook entry is removed
+    when its `command` is exactly one the template ships for that event or a
+    member of DEPRECATED_HOOK_COMMANDS; matchers left empty and events left
+    empty are dropped. Entries with any other command, and events the template
+    does not define, are untouched. The tree merge then appends the template
+    matchers once, so a changed matcher shape does not leave the old one beside it.
+
+    Args:
+        dest: Destination settings dict, mutated in place.
+        template: Template settings dict; never mutated.
+    """
+    shipped = template.get("hooks")
+    host = dest.get("hooks")
+    if not isinstance(shipped, dict) or not isinstance(host, dict):
+        return
+    for event, matchers in shipped.items():
+        if not isinstance(host.get(event), list):
+            continue
+        host[event] = _drop_commands(
+            host[event], _hook_commands(matchers) | DEPRECATED_HOOK_COMMANDS)
+        if not host[event]:
+            del host[event]
+
+
 def _get_path(data: Any, path: str) -> Any:
     """Walks a dotted key path through nested dicts.
 
@@ -256,6 +373,8 @@ def merge(
 
     Retired template values are pruned from dest first (`prune_retired_values`),
     so every caller, including `install.merge_into`, upgrades on re-install.
+    Hook entries whose command the template ships for the same event are then
+    removed from dest (`prune_shipped_hooks`) so the tree merge appends them once.
     Template-defined MCP servers then replace their host entries whole, and
     retired ones are removed (`sync_template_mcp_servers`); each notice is
     printed to stderr.
@@ -269,6 +388,7 @@ def merge(
         The merged dest.
     """
     prune_retired_values(dest, template, retired)
+    prune_shipped_hooks(dest, template)
     for notice in sync_template_mcp_servers(dest, template):
         print(f"ℹ️  merge_json: {notice}", file=sys.stderr)
     return _merge_tree(dest, template)

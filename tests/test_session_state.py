@@ -10,6 +10,7 @@ file adds direct coverage, and pairs it with `set-topology` (Sprint 050
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -724,3 +725,300 @@ def test_mark_audited_writes_field_and_keeps_other_keys(repo: Path):
     }
     assert state["session_id"] == "keep-me"
     assert state["active_layer"] == "core"
+
+
+# --- require-released --hotfix (Sprint 057 D4) ------------------------------
+
+def _git(root: Path, *args: str) -> str:
+    result = subprocess.run(
+        ["git", "-c", "user.name=t", "-c", "user.email=t@t", *args],
+        cwd=root, capture_output=True, text=True, check=True,
+    )
+    return result.stdout.strip()
+
+
+def _hotfix_repo(root: Path, status: str = "IN_PROGRESS") -> str:
+    """A repo whose anchor seals commit one, then a second commit on `hotfix/H-009`
+    that carries the hotfix record. Returns the sealed SHA."""
+    _git(root, "init", "-q", "-b", "main")
+    (root / "docs" / "hotfixes").mkdir()
+    (root / "seed.txt").write_text("seed", encoding="utf-8")
+    _git(root, "add", "seed.txt")
+    _git(root, "commit", "-q", "-m", "chore: seed #057")
+    seal = _git(root, "rev-parse", "HEAD")
+    _write_anchor(root, {"status": status, "last_close_commit": seal})
+    _git(root, "checkout", "-q", "-b", "hotfix/H-009")
+    (root / "docs" / "hotfixes" / "H-009-bridge.md").write_text("# H-009", encoding="utf-8")
+    (root / "fix.txt").write_text("fix", encoding="utf-8")
+    _git(root, "add", "fix.txt", "docs/hotfixes/H-009-bridge.md")
+    _git(root, "commit", "-q", "-m", "fix(bridge): repair the thing (H-009) #H009")
+    return seal
+
+
+def _require(root: Path, *extra: str) -> int:
+    script = SCRIPTS / "session_state.py"
+    return subprocess.run(
+        [sys.executable, str(script), "require-released", *extra],
+        cwd=root, capture_output=True, text=True, check=False,
+    ).returncode
+
+
+def test_require_released_hotfix_with_all_four_conditions_passes(repo: Path):
+    _hotfix_repo(repo)
+    assert _require(repo, "--hotfix", "H-009") == 0
+
+
+def test_require_released_hotfix_accepts_squash_subject_on_main(repo: Path):
+    _hotfix_repo(repo)
+    _git(repo, "checkout", "-q", "main")
+    _git(repo, "merge", "-q", "--squash", "hotfix/H-009")
+    _git(repo, "commit", "-q", "-m", "fix(bridge): repair the thing (H-009) (#92)")
+    assert _require(repo, "--hotfix", "H-009") == 0
+
+
+def test_require_released_hotfix_refuses_without_hotfix_record(repo: Path):
+    _hotfix_repo(repo)
+    (repo / "docs" / "hotfixes" / "H-009-bridge.md").unlink()
+    _git(repo, "commit", "-q", "-a", "--amend", "--no-edit")
+    assert _require(repo, "--hotfix", "H-009") == 2
+
+
+def test_require_released_hotfix_refuses_record_only_in_the_working_tree(repo: Path):
+    _hotfix_repo(repo)
+    _git(repo, "rm", "-q", "--cached", "docs/hotfixes/H-009-bridge.md")
+    _git(repo, "commit", "-q", "--amend", "--no-edit")
+    assert (repo / "docs" / "hotfixes" / "H-009-bridge.md").is_file()
+    assert _require(repo, "--hotfix", "H-009") == 2
+
+
+def test_require_released_hotfix_judges_the_branch_ref_not_head(repo: Path):
+    seal = _hotfix_repo(repo)
+    _git(repo, "checkout", "-q", "-b", "ai-sprint/058", seal)
+    (repo / "work.txt").write_text("work", encoding="utf-8")
+    _git(repo, "add", "work.txt")
+    _git(repo, "commit", "-q", "-m", "feat(x): unsealed sprint work #058")
+    _git(repo, "checkout", "-q", "hotfix/H-009")
+    assert _require(repo, "--branch", "ai-sprint/058", "--hotfix", "H-009") == 2
+
+
+def test_require_released_hotfix_branch_condition_reads_the_branch_ref(repo: Path) -> None:
+    """The tip tracks the record and its subject does not name the hotfix, so only
+    the branch condition decides; it must read `--branch`, not `HEAD` (QA2-1)."""
+    seal = _hotfix_repo(repo)
+    _git(repo, "checkout", "-q", "-b", "ai-sprint/059", seal)
+    (repo / "docs" / "hotfixes").mkdir(parents=True, exist_ok=True)
+    (repo / "docs" / "hotfixes" / "H-009-bridge.md").write_text("# H-009", encoding="utf-8")
+    _git(repo, "add", "docs/hotfixes/H-009-bridge.md")
+    _git(repo, "commit", "-q", "-m", "feat(x): unsealed sprint work #059")
+    _git(repo, "checkout", "-q", "hotfix/H-009")
+    assert _require(repo, "--branch", "ai-sprint/059", "--hotfix", "H-009") == 2
+
+
+def test_require_released_hotfix_accepts_hotfix_branch_ref_from_main(repo: Path):
+    _hotfix_repo(repo)
+    _git(repo, "checkout", "-q", "main")
+    assert _require(repo, "--branch", "hotfix/H-009", "--hotfix", "H-009") == 0
+
+
+def test_require_released_hotfix_refuses_wrong_branch_and_subject(repo: Path):
+    _hotfix_repo(repo)
+    _git(repo, "checkout", "-q", "-b", "other")
+    _git(repo, "commit", "-q", "--amend", "-m", "fix(bridge): unrelated #057")
+    assert _require(repo, "--hotfix", "H-009") == 2
+
+
+def test_require_released_hotfix_refuses_when_seal_is_not_an_ancestor(repo: Path):
+    _hotfix_repo(repo)
+    _write_anchor(repo, {"last_close_commit": _git(repo, "hash-object", "-w", "seed.txt")})
+    assert _require(repo, "--hotfix", "H-009") == 2
+
+
+def test_require_released_hotfix_refuses_suspended(repo: Path):
+    _hotfix_repo(repo, status="SUSPENDED")
+    assert _require(repo, "--hotfix", "H-009") == 2
+
+
+def test_require_released_without_hotfix_flag_refuses_the_same_tip(repo: Path):
+    _hotfix_repo(repo)
+    assert _require(repo) == 2
+
+
+@pytest.mark.parametrize("bad", ["H-9", "009", "h-009", "H-009x", "H-"])
+def test_require_released_hotfix_refuses_malformed_id(repo: Path, bad: str):
+    _hotfix_repo(repo)
+    assert _require(repo, "--hotfix", bad) == 2
+
+
+# --- suspend: a sealed sprint is not suspended (B-9) ------------------------
+
+@pytest.mark.parametrize("sealed", sorted(ss.SEALED_STATUSES))
+def test_suspend_leaves_a_sealed_sprint_untouched(
+    repo: Path, capsys: pytest.CaptureFixture, sealed: str
+):
+    """SessionEnd calls `suspend()` after `release()`; writing SUSPENDED over a
+    sealed sprint makes the sealed tip undeployable (`require-released`)."""
+    _write_anchor(repo, {
+        "status": sealed,
+        "current_sprint": {"id": 7, "status": sealed},
+    })
+    anchor = repo / "docs" / "active_state.json"
+    before = anchor.read_text(encoding="utf-8")
+
+    rc = ss.suspend()
+
+    assert rc == 0
+    assert anchor.read_text(encoding="utf-8") == before
+    assert json.loads(before)["status"] != ss.SUSPENDED
+    out = capsys.readouterr().out.strip().splitlines()
+    assert len(out) == 1
+    assert "sealed" in out[0] and "nothing was suspended" in out[0]
+
+
+def test_suspend_still_suspends_an_open_sprint(repo: Path):
+    """Regression guard: unsealed sprints keep the pre-B-9 behaviour."""
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": "OPEN"}})
+
+    rc = ss.suspend()
+
+    assert rc == 0
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert state["status"] == ss.SUSPENDED
+    assert "resume_pointer" in state
+    assert "end_time" in state
+    assert "last_close_commit" not in state
+
+
+# --- block (W28) --------------------------------------------------------------
+
+def test_block_writes_status_and_reason_preserving_other_keys(repo: Path):
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": "OPEN", "layer": "core"}})
+
+    assert ss.block("terminal remediation loop") == 0
+
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert state["current_sprint"] == {
+        "id": 7, "status": ss.BLOCKED, "layer": "core",
+        "blocked_reason": "terminal remediation loop",
+    }
+    assert state["session_id"] == "keep-me"
+    assert "status" not in state
+
+
+@pytest.mark.parametrize("reason", ["", "   \t"])
+def test_block_refuses_empty_reason_and_leaves_anchor_unchanged(repo: Path, reason: str):
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": "OPEN"}})
+    before = (repo / "docs" / "active_state.json").read_text()
+
+    assert ss.block(reason) == 2
+
+    assert (repo / "docs" / "active_state.json").read_text() == before
+
+
+def test_block_refuses_sealed_sprint_and_leaves_anchor_unchanged(repo: Path):
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": ss.CLOSED}})
+    before = (repo / "docs" / "active_state.json").read_text()
+
+    assert ss.block("why") == 2
+
+    assert (repo / "docs" / "active_state.json").read_text() == before
+
+
+def test_block_refuses_without_current_sprint(repo: Path):
+    _write_anchor(repo)
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    del state["current_sprint"]
+    (repo / "docs" / "active_state.json").write_text(json.dumps(state))
+    before = (repo / "docs" / "active_state.json").read_text()
+
+    assert ss.block("why") == 2
+
+    assert (repo / "docs" / "active_state.json").read_text() == before
+
+
+def test_block_again_overwrites_the_reason(repo: Path, capsys: pytest.CaptureFixture):
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": "OPEN"}})
+    assert ss.block("first") == 0
+
+    assert ss.block("second") == 0
+
+    assert _read_sprint(repo)["blocked_reason"] == "second"
+    assert "re-blocked" in capsys.readouterr().out
+
+
+def test_open_sprint_same_id_does_not_lift_a_block(repo: Path):
+    """open-sprint is idempotent on the same id: BLOCKED and the reason survive."""
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": "OPEN"}})
+    assert ss.block("why") == 0
+
+    assert ss.open_sprint(7) == 0
+
+    sprint = _read_sprint(repo)
+    assert sprint["status"] == ss.BLOCKED
+    assert sprint["blocked_reason"] == "why"
+
+
+def test_main_dispatches_block(repo: Path, monkeypatch: pytest.MonkeyPatch):
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": "OPEN"}})
+    monkeypatch.setattr(sys, "argv", ["session_state.py", "block", "--reason", "x"])
+
+    assert ss.main() == 0
+    assert _read_sprint(repo)["status"] == ss.BLOCKED
+
+
+# --- unblock (W38) ------------------------------------------------------------
+
+def test_unblock_restores_open_and_drops_reason_keeping_other_keys(
+    repo: Path, capsys: pytest.CaptureFixture
+):
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": "OPEN", "layer": "core"}})
+    assert ss.block("terminal loop") == 0
+    capsys.readouterr()
+
+    assert ss.unblock() == 0
+
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    assert state["current_sprint"] == {"id": 7, "status": "OPEN", "layer": "core"}
+    assert state["session_id"] == "keep-me"
+    assert "terminal loop" in capsys.readouterr().out
+
+
+def test_unblock_refuses_an_open_sprint_and_leaves_anchor_unchanged(repo: Path):
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": "OPEN"}})
+    before = (repo / "docs" / "active_state.json").read_text()
+
+    assert ss.unblock() == 2
+
+    assert (repo / "docs" / "active_state.json").read_text() == before
+
+
+def test_unblock_refuses_without_current_sprint(repo: Path):
+    _write_anchor(repo)
+    state = json.loads((repo / "docs" / "active_state.json").read_text())
+    del state["current_sprint"]
+    (repo / "docs" / "active_state.json").write_text(json.dumps(state))
+    before = (repo / "docs" / "active_state.json").read_text()
+
+    assert ss.unblock() == 2
+
+    assert (repo / "docs" / "active_state.json").read_text() == before
+
+
+def test_unblock_refuses_a_sealed_sprint_and_leaves_anchor_unchanged(
+    repo: Path, capsys: pytest.CaptureFixture
+):
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": ss.CLOSED}})
+    before = (repo / "docs" / "active_state.json").read_text()
+
+    assert ss.unblock() == 2
+
+    assert (repo / "docs" / "active_state.json").read_text() == before
+    assert ss.CLOSED in capsys.readouterr().err
+
+
+def test_main_dispatches_unblock(repo: Path, monkeypatch: pytest.MonkeyPatch):
+    _write_anchor(repo, {"current_sprint": {"id": 7, "status": "OPEN"}})
+    assert ss.block("x") == 0
+    monkeypatch.setattr(sys, "argv", ["session_state.py", "unblock"])
+
+    assert ss.main() == 0
+    assert _read_sprint(repo)["status"] == "OPEN"

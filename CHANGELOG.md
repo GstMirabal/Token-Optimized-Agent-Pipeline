@@ -4,6 +4,112 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Added
+- **Sprint 057 `s0-lane-and-defect-block`**: one sprint covering four scopes:
+  - the Opus 5.5 prompt criteria and a per-finding S0-S3 severity scale for the Quality Gate;
+  - a measured S0 lane for database access from the sandbox, stopped at abort criterion 1 because the TCP connection was denied (`KI-057-1`);
+  - upstream defect block 1, reported by host H1;
+  - the S3 residues of Sprint 056 and the `install.sh` residue (`KI-057-5`).
+
+  The Quality Gate rounds are recorded in `docs/sprints/057-core-pipeline/SPRINT_LOG.md`:
+  - remediation waves F-K followed QA Gate 1 rounds 1-6;
+  - Tester Gate 2 returned `APPROVED` at round 1 with 1283 tests passing;
+  - waves L-N followed the closeout audit and QA Gate 1 rounds 8-9.
+
+  - **`docs/guides/PROMPT_CRITERIA_GUIDE.md`** (new) is the prompt criteria checklist (`4869bc6`).
+  - **Severity scale**:
+    - `rules/qa_and_testing.md` §4 rates each finding S0-S3 and adds five convergence rules (`b063af1`).
+    - `docs/standards/templates/SPRINT_LOG_TEMPLATE.md` adds a `Severity` column and the `escape` mark to the gate table (`7d91479`).
+    - `scripts/check_gate_log.py` prints an advisory count of `escape` rows (`e973077`).
+  - **`docs/sprints/057-core-pipeline/SANDBOX_DB_MEASUREMENT.md`** (new) records the M1-M3 measurements of database access from the sandbox (`7eb188b`).
+  - **`scripts/_repro_grammar.py`** (new) is the single grammar of the `Repro:` trailer (`20d2013`). It defines `is_test_path` and `is_source_path` once, for both the hook and the replayer (`698cc57`), and its docstrings state that the non-source suffixes also include `.yml`, `.yaml` and `.toml` configuration files (`98825ae`).
+  - **Hotfix route in `session_state.py require-released --hotfix H-NNN`** (`8352421`): the seal gate accepts a hotfix tip when all four conditions hold:
+    - the tip tracks the hotfix record;
+    - the deployed branch is `hotfix/H-NNN`, or the tip subject names the hotfix;
+    - `last_close_commit` is an ancestor of the tip;
+    - the sprint status is not `SUSPENDED`.
+
+    The gate judges the deployed ref, not `HEAD` (`1d5313e`, pinned by `75c6370`). `workflows/deployment_workflow.md` documents the route and passes the squash body explicitly (`d0f332d`, `493d300`).
+  - **`session_state.py block --reason`** writes a `BLOCKED` sprint (`b0cb9d9`) and **`unblock`** lifts it (`eec0001`). `workflows/remediation_workflow.md` reads the gate log and the stash, blocks through these subcommands and adds `family_check` (`61395e5`).
+  - **`scripts/extract_plan.py`** (new) files the Phase 1 plan at the canonical sprint path (`7c6c2be`). `workflows/pipeline_workflow.md` runs it at Phase 3 and names the `Severity` column at Phase 7 (`2db6c56`).
+  - **`scripts/check_changelog_tags.py`** (new) checks this file's version headers against the tags and their order (`KI-056-8`, `f22a40e`). `make verify` runs it (`58a6728`), CI fetches full history and tags so its presence check runs (`df50276`), and it resolves `--changelog` against the directory it was invoked from (`b5f8d3e`, docstring `9104649`).
+  - **`MESSAGE_AUDITS`** in `hooks/on_commit.py` declares the message audits once (`d288709`). The `commit-msg` hook `hooks/on_commit_msg.py` runs the same list (`508a815`), including the `task_scope.md` precondition, which before ran only on agent commits (`7e77521`). `tests/test_code_craft_gates.py` checks that both hooks use that one list (`015a304`).
+  - **`tests/test_fix_route_wording.py`** (new) requires every governance line that states the paired test of a `fix(` commit to name the `Repro: manual` route (convergence rule 3, `381b6cb`).
+  - **`tests/test_gate_row_wording.py`** (new) requires every governance line that describes the gate row or verdict register by `Verdict` and `Class` to name `Severity` too (convergence rule 3 for the closeout audit finding A1, `7b1cee3`); a second pattern requires severity wherever a text states the emitted verdict and class (`c9ba694`).
+
+### Changed
+- **`install.py` replaces `install.sh` as the named installer** (`KI-057-5`, Wave E):
+  - The boot runs `install.py` with the running interpreter (`364df20`).
+  - The `SessionStart` command that named `install.sh` is deprecated on merge (`6296e09`), and the fallback message names `install.py` (`3b35681`).
+  - Docstrings and comments name `install.py`: `bedf2da`, `027d439`, `7245cdc`, `cabfa69`, `2486161`.
+  - Rules, workflows, guides and templates name it: `e3aef77`, `0b110fc`, `136b2e3`, `c04710f`, `379f9da`, `36a6c7f`, `3766aec`, `ad146ad`, `0c0349a`, `231afdf`, `9d32318`, `e9cc07a`.
+  - The `B5` refusal of `scripts/install.py` names `install.py` (`KI-056-5`, `186ec42`).
+  - The `scripts/install_claude.sh` deprecation message names `scripts/install.py` (`d5d242f`).
+- **`Repro: manual` route named wherever a `fix(` paired test is stated**: `rules/code_craft.md` (`7a22d85`), `agents.md` `§2 jurisdictional_lock` (`e10809c`), `agents/implementer_agent.md` (`e7759db`), `agents/rule_validator.md` (`bf16a70`), `memory_index.json` (replaces the relabel prescription, `93689d0`), `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` (`0acbd55`), `workflows/pipeline_workflow.md` (`51640bd`) and `CONTRIBUTING.md`, which also names both message-gate paths (`cae29a7`).
+- **The gate profiles name the `Severity` cell of the gate row**: `agents/qa_agent.md` (`58afa46`), `agents/tester_agent.md` (`aba5ca9`) and the transcription row of `agents/orchestrator.md` (`5650e98`); the two profile descriptions (`571ebdf`, `5beb03f`), `agents.md` `RA-17` (`c1b13ea`) and the recording row of `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` (`e10bb76`) name the per-finding severity.
+- **`hooks/on_commit.py` docstrings** state which files each caller sees, that `hooks/on_commit_msg.py` covers terminal and IDE commits, and the property the `MESSAGE_AUDITS` test checks (`6d2a944`, `ac3f8e1`, `383dfb7`, `77f34fe`).
+- **Command path form**: `workflows/pipeline_workflow.md` and `workflows/remediation_workflow.md` state that commands are written in nucleus form and that a host prefixes them with `.agents/` (`c240c91`, `4661026`).
+- **`workflows/reconciliation_workflow.md`** names the root of the Phase 4 roadmap record by mode (C-2, `9246d60`).
+- **Documentation residues**:
+  - `skills/mcp-registry/registry.json` requires an exact version in `pnpm dlx` commands (`4d7c91a`).
+  - `skills/env-shielding-auditor/README.md` shows the Python badge (`KI-056-7`, `9a084b5`).
+  - `memory_index.json` uses the coverage sense explicitly (`396754e`).
+  - `tests/test_mcp_template.py` states that not all `graphifyy` dependencies are pinned (`1f84424`).
+  - Google-style docstrings in `scripts/py_compile_tree.py` (`7561d8a`) and `scripts/check_role_artifact.py` (`2416fee`).
+  - Test spacing and annotations: `da92b04`, `2e8b31d`.
+
+### Fixed
+- **`scripts/session_state.py`** no longer suspends a sealed sprint (B-9, `71a35c3`).
+- **`scripts/py_compile_tree.py`** compiles into a temporary directory instead of the scanned tree (C-3, `04b8fff`).
+- **`hooks/on_commit.py`**:
+  - uses the single `Repro:` grammar, accepts `Repro: manual` alone, and treats `.spec` and `tests.py` paths as tests (A-4, B-2, B-6, `4785b1d`);
+  - classifies `fix(` paths with the replayer's definition (`f782d37`).
+- **`scripts/check_fix_reproduces.py`**:
+  - replays with the single grammar and judges a fix whose only source change is `.json` (A-4, `KI-056-2`, `70faa66`);
+  - judges a setup error on the parent as `WRONG_FAILURE` (B-4, `a19ab8f`);
+  - classifies paths with the shared predicates (`368f86c`);
+  - imports the shared grammar under `python3 -I` (`87b8d84`).
+- **`scripts/model_ledger.py`** writes the ledger under the host root in host mode (B-8, `7705611`).
+- **`scripts/check_task_scope.py`** no longer splits a cell on an escaped pipe (B-3, `a4db5df`).
+- **`scripts/session_start.py`**:
+  - triages the bridge with `bridge_stale` and keeps running when a lock write is denied (C-4, `KI-056-4`, `2ee3ded`);
+  - names the real lock refresher when a Cursor lock write is denied (`4dc9fbf`).
+- **`scripts/check_role_artifact.py`** demands a gate row only once the preceding gate has passed (B-7, `4da3e2a`).
+- **`scripts/detect_drift.py`** treats the prescribed post-seal mirror refresh as routine (C-1, `5a7ed6c`).
+- **`scripts/merge_json.py`** prunes the retired per-subtree denies and replaces shipped hooks on merge (`KI-056-3`, `1474fa6`).
+- **Tests of the `commit-msg` hook**:
+  - pin that it judges files staged by the same command (`10e59c5`);
+  - are isolated from global and environment-injected git config (`aab9a82`, `0580064`);
+  - assert the refusal reason of the `task_scope.md` precondition (`6cbde0a`);
+  - drop a stale guard number from a section header (`c48bc3c`).
+
+### Sprint record
+- Plan and opening:
+  - plan drafted (`5a1b9bc`) and amended by the Phase 4.3 audit (`8d55058`);
+  - log opened (`bee8d63`);
+  - Phase 4 records (`41aa896`, `3ce2c91`, `74a96c6`);
+  - Phase 5 approval (`a29648e`).
+- Execution records:
+  - progress and resume points (`19a9b0d`, `1452b74`, `7910fd8`, `ef4ce71`, `7e7a15a`, `68ed5e7`, `de64421`, `4abaf11`);
+  - cost bound decisions (`5f33b68`, `1978e38`).
+- Quality Gate records:
+  - Gate 1 verdicts, wave scoping and wave closures for rounds 1-7, F-K and W103: `a9ae7f9`, `a2b590c`, `5e0df70`, `b93cea0`, `af071d9`, `c77990e`, `8551086`, `3f4eb0a`, `319a3bf`, `14c88e8`, `9b68a62`, `f3bca51`, `d017b24`, `cb8de27`, `e8889e8`, `7ab2aa4`, `b8daf0a`, `c4cbade`, `4baf0e0`, `4d0f6d4`, `6532af1`, `e3f9c5a`;
+  - Gate 2 verdict (`ce4f0be`).
+- Close:
+  - log at Phase 8 and `KI-057-6` (`17e6e10`);
+  - audit report `PIPELINE_AUDIT_REPORT-057.md` (`54541f2`) and its finding A2 (`7b5dc08`);
+  - `graph_stats.json` (`d65546e`);
+  - model ledger (`2e01ac6`);
+  - roadmap (`03c8b14`, `6b72d49`, `e0822ea`);
+  - ledger entry (`0ffa68f`, `cfe2330`);
+  - wave L scoped and closed (`67bb23e`, `437904a`);
+  - QA Gate 1 round 8 verdict (`3dbaeff`);
+  - wave M scoped and recorded (`3c5c75d`, `e174291`);
+  - knowledge items indexed (`e8d39d3`);
+  - wave M closed (`d2615a0`);
+  - QA Gate 1 round 9 verdict (`6cde57a`) and its record corrections (`931cc1b`);
+  - wave N scoped and recorded (`61141fd`, `68a81b3`).
+
 ## [4.39.1] - 2026-10-23
 
 ### Security

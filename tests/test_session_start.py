@@ -187,7 +187,7 @@ def test_boot_claims_when_drift_is_clean(
 
     monkeypatch.setattr(session_start, "_run_script", mock_run_script)
     monkeypatch.setattr(session_start, "_lock_stale", lambda *a, **k: False)
-    monkeypatch.setattr(session_start, "_commands_body_stale", lambda *a, **k: False)
+    monkeypatch.setattr(session_start, "bridge_stale", lambda *a, **k: False)
 
     assert session_start.main(["--boot", "--tool", "cursor"]) == 0
     assert (
@@ -203,7 +203,7 @@ def test_boot_lock_only_when_commands_fresh(
     monkeypatch.setattr(session_start, "repo_root", lambda: root)
     monkeypatch.setattr(session_start, "_run_script", lambda *a, **k: 0)
     monkeypatch.setattr(session_start, "_lock_stale", lambda *a, **k: True)
-    monkeypatch.setattr(session_start, "_commands_body_stale", lambda *a, **k: False)
+    monkeypatch.setattr(session_start, "bridge_stale", lambda *a, **k: False)
     install_calls: list[str] = []
 
     def mock_install(root_path: Path, target: str) -> tuple[int, str]:
@@ -230,7 +230,7 @@ def test_boot_permission_error_is_advisory(
     monkeypatch.setattr(session_start, "repo_root", lambda: root)
     monkeypatch.setattr(session_start, "_run_script", lambda *a, **k: 0)
     monkeypatch.setattr(session_start, "_lock_stale", lambda *a, **k: True)
-    monkeypatch.setattr(session_start, "_commands_body_stale", lambda *a, **k: True)
+    monkeypatch.setattr(session_start, "bridge_stale", lambda *a, **k: True)
 
     def mock_install(root_path: Path, target: str) -> tuple[int, str]:
         return 1, "PermissionError: bridge: permission denied on .cursor (x)"
@@ -248,7 +248,7 @@ def test_boot_generic_install_failure_still_exits_2(
     monkeypatch.setattr(session_start, "repo_root", lambda: root)
     monkeypatch.setattr(session_start, "_run_script", lambda *a, **k: 0)
     monkeypatch.setattr(session_start, "_lock_stale", lambda *a, **k: False)
-    monkeypatch.setattr(session_start, "_commands_body_stale", lambda *a, **k: True)
+    monkeypatch.setattr(session_start, "bridge_stale", lambda *a, **k: True)
 
     def mock_install(root_path: Path, target: str) -> tuple[int, str]:
         return 1, "some other install failure"
@@ -259,7 +259,7 @@ def test_boot_generic_install_failure_still_exits_2(
 
 # ---------------------------------------------------------------------------
 # Claude Code boot path (Sprint 041). Every case below fails against the tree
-# before this sprint, where _commands_body_stale returned False for every
+# before this sprint, where the removed _commands_body_stale returned False for every
 # target but cursor, so the claude path could only ever refresh the lock.
 # ---------------------------------------------------------------------------
 
@@ -303,7 +303,7 @@ def test_boot_claude_is_lock_only_when_the_mirror_is_intact(
     monkeypatch.setattr(session_start, "repo_root", lambda: root)
     monkeypatch.setattr(session_start, "_run_script", lambda *a, **k: 0)
     monkeypatch.setattr(session_start, "_lock_stale", lambda *a, **k: True)
-    monkeypatch.setattr(session_start, "_commands_body_stale", lambda *a, **k: False)
+    monkeypatch.setattr(session_start, "bridge_stale", lambda *a, **k: False)
     install_calls: list[str] = []
     refresh_calls: list[str] = []
     monkeypatch.setattr(
@@ -330,7 +330,7 @@ def test_boot_claude_never_touches_the_cursor_bridge(
     monkeypatch.setattr(session_start, "repo_root", lambda: root)
     monkeypatch.setattr(session_start, "_run_script", lambda *a, **k: 0)
     monkeypatch.setattr(session_start, "_lock_stale", lambda *a, **k: True)
-    monkeypatch.setattr(session_start, "_commands_body_stale", lambda *a, **k: True)
+    monkeypatch.setattr(session_start, "bridge_stale", lambda *a, **k: True)
     targets: list[str] = []
     monkeypatch.setattr(
         session_start,
@@ -380,7 +380,7 @@ def test_boot_claude_permission_error_is_advisory(
     monkeypatch.setattr(session_start, "repo_root", lambda: root)
     monkeypatch.setattr(session_start, "_run_script", lambda *a, **k: 0)
     monkeypatch.setattr(session_start, "_lock_stale", lambda *a, **k: True)
-    monkeypatch.setattr(session_start, "_commands_body_stale", lambda *a, **k: True)
+    monkeypatch.setattr(session_start, "bridge_stale", lambda *a, **k: True)
 
     def mock_install(root_path: Path, target: str) -> tuple[int, str]:
         return 1, (
@@ -749,7 +749,7 @@ def _denied_claude_boot(session_start, monkeypatch, tmp_path, nucleus: bool, out
     root = _write_minimal_root(tmp_path / "repo")
     monkeypatch.setattr(session_start, "repo_root", lambda: root)
     monkeypatch.setattr(session_start, "is_nucleus", lambda: nucleus)
-    monkeypatch.setattr(session_start, "_commands_body_stale", lambda *a, **k: True)
+    monkeypatch.setattr(session_start, "bridge_stale", lambda *a, **k: True)
     monkeypatch.setattr(
         session_start, "_run_bridge_install", lambda *a, **k: (rc, output)
     )
@@ -758,15 +758,42 @@ def _denied_claude_boot(session_start, monkeypatch, tmp_path, nucleus: bool, out
     return "\n".join(notes)
 
 
+def test_run_bridge_install_runs_install_py_with_the_running_interpreter(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """W40: the bridge installer is install.py under sys.executable, not bash."""
+    (tmp_path / "scripts").mkdir()
+    installer = tmp_path / "scripts" / "install.py"
+    installer.write_text("")
+    seen: list[list[str]] = []
+
+    def fake_run(argv, **kwargs):
+        seen.append(list(argv))
+        return subprocess.CompletedProcess(argv, 0, stdout="", stderr="")
+
+    monkeypatch.setattr(session_start.subprocess, "run", fake_run)
+    code, _ = session_start._run_bridge_install(tmp_path, "claude")
+    assert code == 0
+    assert seen == [[sys.executable, str(installer), "--target", "claude"]]
+
+
+def test_run_bridge_install_missing_names_install_py(
+    session_start, tmp_path: Path
+) -> None:
+    code, msg = session_start._run_bridge_install(tmp_path, "claude")
+    assert code == 2
+    assert "scripts/install.py" in msg
+
+
 def test_bridge_advisory_names_the_host_path_in_host_mode(
     session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    """Sprint 055 U06: a host has no `scripts/install.sh`, only `.agents/scripts/`."""
+    """Sprint 055 U06: a host has no `scripts/install.py`, only `.agents/scripts/`."""
     text = _denied_claude_boot(
         session_start, monkeypatch, tmp_path, False,
         "PermissionError: '/host/.claude/settings.json'", 1,
     )
-    assert "bash .agents/scripts/install.sh --target claude" in text
+    assert "python3 .agents/scripts/install.py --target claude" in text
 
 
 def test_bridge_advisory_names_the_nucleus_path_in_nucleus_mode(
@@ -776,8 +803,8 @@ def test_bridge_advisory_names_the_nucleus_path_in_nucleus_mode(
         session_start, monkeypatch, tmp_path, True,
         "PermissionError: '/x/.claude/settings.json'", 1,
     )
-    assert "bash scripts/install.sh --target claude" in text
-    assert ".agents/scripts/install.sh" not in text
+    assert "python3 scripts/install.py --target claude" in text
+    assert ".agents/scripts/install.py" not in text
 
 
 def test_install_exit_3_alone_is_a_permission_denial(
@@ -787,7 +814,7 @@ def test_install_exit_3_alone_is_a_permission_denial(
     text = _denied_claude_boot(
         session_start, monkeypatch, tmp_path, False, "unrelated wording", 3,
     )
-    assert "install.sh --target claude" in text
+    assert "install.py --target claude" in text
 
 
 MEASURING_ROW = "| **Measuring CLI** | Claude Code 2.1.119, macOS (Seatbelt). |\n"
@@ -896,3 +923,81 @@ def test_boot_unreadable_measuring_row_says_so_once(
     lines = [line for line in out.splitlines() if "Measuring CLI" in line]
     assert len(lines) == 1 and "skipped" in lines[0]
     assert not calls
+
+
+def _intact_host_mirror(tmp_path: Path) -> tuple[Path, Path]:
+    """Host dir with a complete `.claude` mirror and a framework checkout at `.agents`."""
+    host = tmp_path / "host"
+    framework = host / ".agents"
+    for rel in ("commands/start.md", "agents/principal_agent.md"):
+        (framework / rel).parent.mkdir(parents=True, exist_ok=True)
+        (framework / rel).write_text("x", encoding="utf-8")
+    for rel in (
+        ".claude/commands/agents/start.md",
+        ".claude/agents/principal_agent.md",
+    ):
+        (host / rel).parent.mkdir(parents=True, exist_ok=True)
+        (host / rel).write_text("x", encoding="utf-8")
+    return host, framework
+
+
+def test_triage_agrees_with_bridge_state_in_host_mode(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """C-4: the triage must ask `bridge_stale` about the host mirror, as the refresh path does."""
+    from bridge_state import bridge_stale
+
+    host, framework = _intact_host_mirror(tmp_path)
+    monkeypatch.setattr(session_start, "is_nucleus", lambda: False)
+    monkeypatch.setattr(session_start, "_lock_stale", lambda *a, **k: False)
+    installs: list[str] = []
+    monkeypatch.setattr(
+        session_start,
+        "_run_bridge_install",
+        lambda root, target: (installs.append(target) or (0, "")),
+    )
+    assert bridge_stale(host, "claude", nucleus=False, framework_root=framework) is False
+    code, notes = session_start._bridge_triage(framework, "claude")
+    assert (code, notes) == (0, [])
+    assert installs == []
+
+
+def test_refresh_bridge_lock_survives_permission_error(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys
+) -> None:
+    """KI-056-4: a denied lock write is logged and the boot continues."""
+    monkeypatch.setattr(
+        session_start.subprocess,
+        "run",
+        lambda *a, **k: subprocess.CompletedProcess(a, 0, stdout="abc123\n", stderr=""),
+    )
+
+    def deny(self: Path, *a: object, **k: object) -> int:
+        raise PermissionError(13, "denied", str(self))
+
+    monkeypatch.setattr(Path, "write_text", deny)
+    assert session_start._refresh_bridge_lock(tmp_path, "claude") == 0
+    err = capsys.readouterr().err
+    lock = tmp_path / ".bridge_claude.lock"
+    assert f"boot: cannot write {lock}" in err
+    assert "unsandboxed SessionStart hook refreshes it" in err
+
+
+def test_refresh_bridge_lock_denied_for_cursor_names_the_installer(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys
+) -> None:
+    """QA1-7: only the Claude lock is refreshed by the SessionStart hook."""
+    monkeypatch.setattr(
+        session_start.subprocess,
+        "run",
+        lambda *a, **k: subprocess.CompletedProcess(a, 0, stdout="abc123\n", stderr=""),
+    )
+
+    def deny(self: Path, *a: object, **k: object) -> int:
+        raise PermissionError(13, "denied", str(self))
+
+    monkeypatch.setattr(Path, "write_text", deny)
+    assert session_start._refresh_bridge_lock(tmp_path, "cursor") == 0
+    err = capsys.readouterr().err
+    assert "SessionStart hook" not in err
+    assert "scripts/install.py --target cursor" in err

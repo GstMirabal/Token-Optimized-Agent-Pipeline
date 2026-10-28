@@ -53,7 +53,7 @@ def test_merge_into_denied_write_exits_3_without_traceback(
     assert "PermissionError" in err
     assert ".claude/settings.json" in err
     assert str(tmp_path) not in err
-    assert "bash .agents/scripts/install.sh --target claude" in err
+    assert "python3 .agents/scripts/install.py --target claude" in err
 
 
 def test_merge_into_denied_write_nucleus_form(
@@ -65,5 +65,5 @@ def test_merge_into_denied_write_nucleus_form(
         install.merge_into(template, dest)
     assert excinfo.value.code == 3
     err = capsys.readouterr().err
-    assert "bash scripts/install.sh --target claude" in err
-    assert ".agents/scripts/install.sh" not in err
+    assert "python3 scripts/install.py --target claude" in err
+    assert ".agents/scripts/install.py" not in err
