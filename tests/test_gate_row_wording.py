@@ -7,8 +7,9 @@ describes the gate row or verdict register as Verdict plus Class, omitting the
 
 Exact coverage, and no more (`agents.md §1 fail_closed_claims`): every line of
 the files in `SCANNED` that matches `FIELDS` and `ROW_CONTEXT` must also contain
-`Severity`. A line that describes the row without naming both `Verdict` and
-`Class`, or without one of the `ROW_CONTEXT` words, is not checked.
+`Severity`, and every line that matches `EMITTED` (Gate 1 round 9, QA9-3) must
+name severity in any case. A line that describes the row or the emitted verdict
+in other words is not checked.
 """
 
 import re
@@ -27,6 +28,8 @@ SCANNED = (
 FIELDS = re.compile(r"\bVerdict\b.*\bClass\b|\bClass\b.*\bVerdict\b")
 ROW_CONTEXT = re.compile(r"\brows?\b|register|transcrib|Gate \\?\| Round", re.IGNORECASE)
 REQUIRED = "Severity"
+EMITTED = re.compile(r"RECORD`?[^.]{0,30}\b(plus|with) class\b", re.IGNORECASE)
+EMITTED_REQUIRED = re.compile(r"severity", re.IGNORECASE)
 
 
 def scanned_files(root: Path) -> list[Path]:
@@ -58,8 +61,29 @@ def row_lines_without_severity(root: Path) -> list[str]:
     ]
 
 
+def emitted_lines_without_severity(root: Path) -> list[str]:
+    """List every scanned line stating the emitted verdict and class but no severity.
+
+    Args:
+        root: Framework root to scan.
+
+    Returns:
+        list[str]: ``<path>:<line>`` for each offending line, in scan order.
+    """
+    return [
+        f"{path.relative_to(root)}:{number}"
+        for path in scanned_files(root)
+        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1)
+        if EMITTED.search(line) and not EMITTED_REQUIRED.search(line)
+    ]
+
+
 def test_every_gate_row_description_names_severity() -> None:
     assert row_lines_without_severity(ROOT) == []
+
+
+def test_every_emitted_verdict_statement_names_severity() -> None:
+    assert emitted_lines_without_severity(ROOT) == []
 
 
 def test_scanned_patterns_resolve_to_files() -> None:
@@ -79,3 +103,12 @@ def test_family_matches_the_known_row_descriptions() -> None:
     for name in known:
         lines = (ROOT / name).read_text(encoding="utf-8").splitlines()
         assert any(FIELDS.search(line) and ROW_CONTEXT.search(line) for line in lines), name
+
+
+def test_emitted_pattern_matches_the_known_statements() -> None:
+    """`EMITTED` still selects the four QA9-3 lines; see the test above."""
+    known = ("agents.md", "agents/qa_agent.md", "agents/tester_agent.md",
+             "docs/guides/MODEL_TIER_TRIAL_GUIDE.md")
+    for name in known:
+        lines = (ROOT / name).read_text(encoding="utf-8").splitlines()
+        assert any(EMITTED.search(line) for line in lines), name
