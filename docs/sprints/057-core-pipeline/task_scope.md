@@ -241,7 +241,7 @@ QA Gate 1 round 9 emitted RECORD (testifying, S3) and closed QA8-1..QA8-3; QA9-1
 | W112 | `agents/tester_agent.md` | modify (QA9-3: `:3` description names the severity beside the class) | low | `agent_orchestrator` | sonnet | medium | ✅ `5beb03f` |
 | W113 | `agents.md` | modify (QA9-3: `RA-17` names the per-finding severity S0-S3 beside the class, pointing to `rules/qa_and_testing.md` §4) | medium | `rule_validator` | sonnet | medium | ✅ `c1b13ea` |
 | W114 | `tests/test_gate_row_wording.py` | modify (QA9-3: a second pattern, a line stating `RECORD` followed by "plus class" or "with class", must also name severity; fails before W110-W113) | low | `implementer_agent` | sonnet | medium | ✅ `c9ba694` |
-| W115 | `CHANGELOG.md` | modify (`[Unreleased]` cites wave N and the close commits since `cfe2330`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| W115 | `CHANGELOG.md` | modify (`[Unreleased]` cites wave N and the close commits since `cfe2330`) | low | `doc_orchestrator` | sonnet | medium | ✅ `6184b35` |
 
 ---
 
@@ -354,4 +354,4 @@ No other rule violation found: contiguous ids W00-W37 (38 rows, matches `Cost`),
 
 ## Resume point (updated 2026-10-28, session `aeda1d83-cbd8-463b-8f56-25f5958d428e`)
 
-Phase 8 closeout in progress. QA Gate 1 round 9 RECORD (testifying, S3); wave N (W110-W115) remediates QA9-3 by human decision. Next: wave N, then a short QA Gate 1 round 10 over its diff, then `PHASE_REGISTER.md`, `session_state.py release` and the push of `ai-sprint/057`.
+Phase 8 closeout in progress. Every Work row W00-W115 is resolved. Next: a short QA Gate 1 round 10 over the wave N diff (`6cde57a..HEAD`), then `PHASE_REGISTER.md`, `session_state.py release` and the push of `ai-sprint/057`.
