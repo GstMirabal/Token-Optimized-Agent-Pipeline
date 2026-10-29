@@ -28,6 +28,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _md_table import split_cells
 from _root import agents_root
 from check_task_scope import current_sprint_dir, sprint_id_from_dir
 
@@ -61,8 +62,7 @@ def _strip_html_comments(text: str) -> str:
 
 
 def _cells(line: str) -> list[str]:
-    raw = [part.strip().strip("`") for part in line.strip().strip("|").split("|")]
-    return raw
+    return [cell.strip("`") for cell in split_cells(line)]
 
 
 def _is_separator(line: str) -> bool:

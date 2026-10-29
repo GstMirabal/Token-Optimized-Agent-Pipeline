@@ -289,3 +289,12 @@ def test_legacy_five_column_log_counts_zero_with_same_exit(tmp_path: Path) -> No
     result = _run("--sprint-dir", str(sprint))
     assert result.returncode == 0, result.stderr
     assert "escape rows: 0" in result.stdout
+
+
+def test_escaped_pipe_in_a_cell_does_not_shift_the_verdict_column(check_mod) -> None:
+    """An escaped pipe in the Gate cell keeps Verdict in its column (KI-057-3)."""
+    body = _gate_table(
+        r"| QA Agent \| Gate 1 | 1 | APPROVED |  | clean |",
+    )
+    assert check_mod.collect_findings(body, 47) == []
+    assert _parsed_rows(check_mod, body)[0][:3] == ["QA Agent | Gate 1", "1", "APPROVED"]
