@@ -1,6 +1,6 @@
 """Split one Markdown table row into cells, honouring the ``\\|`` escape.
 
-Three scripts split rows with a naive ``split("|")``, so an escaped pipe inside
+Three scripts split rows with a plain string split on the pipe character, so an escaped pipe inside
 a cell cut that cell in two and shifted every column after it (`KI-057-3`).
 `scripts/check_task_scope.py` already held the correct splitter as a private
 ``_cells``; this module is its single home so the callers share one definition

@@ -71,6 +71,7 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _md_table import split_cells
 from _root import agents_root
 
 TIERS_FILE = agents_root() / "config" / "model_tiers.json"
@@ -139,7 +140,7 @@ def parse_catalogue(path: Path) -> dict[str, dict]:
     for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
         if not line.lstrip().startswith("|"):
             continue
-        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        cells = split_cells(line)
         if len(cells) < 3:
             continue
         alias = ALIAS_CELL.match(cells[1])
