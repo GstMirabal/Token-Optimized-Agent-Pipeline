@@ -29,6 +29,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _md_table import split_cells
 from _mode import is_nucleus
 from _root import agents_root
 
@@ -55,7 +56,7 @@ P_MISS_TRAIL_RE = re.compile(
 
 
 def _cells(line: str) -> list[str]:
-    return [part.strip().strip("`") for part in line.strip().strip("|").split("|")]
+    return [cell.strip("`") for cell in split_cells(line)]
 
 
 def _is_separator(line: str) -> bool:
