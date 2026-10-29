@@ -102,6 +102,21 @@ class TestDeprecatedHookPrune:
         cmds = [h["command"] for m in merged["hooks"]["SessionStart"] for h in m["hooks"]]
         assert cmds == [new_cmd]
 
+    def test_retired_subagent_stop_entry_is_pruned_and_host_entry_kept(self):
+        """KI-057-4: the retired check_role_artifact SubagentStop entry leaves hosts."""
+        import json as _json
+        template = _json.loads(
+            (Path(__file__).resolve().parent.parent / "claude" / "settings.hooks.json").read_text())
+        retired = ("if [ -f .agents/scripts/check_role_artifact.py ]; then "
+                   "python3 .agents/scripts/check_role_artifact.py --from-hook; fi")
+        dest = {"hooks": {"SubagentStop": [{"hooks": [
+            {"type": "command", "command": retired},
+            {"type": "command", "command": "python3 my_own_stop_hook.py"}]}]}}
+        merge_json.prune_deprecated_hooks(dest)
+        merged = merge_json.merge(dest, template)
+        cmds = [h["command"] for m in merged["hooks"]["SubagentStop"] for h in m["hooks"]]
+        assert cmds == ["python3 my_own_stop_hook.py"]
+
 
 def test_merge_preserves_host_deny_and_adds_template_deny():
     """Abort criterion for Sprint 027 C1: re-install must not drop host deny rules."""
