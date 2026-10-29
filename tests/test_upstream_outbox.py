@@ -119,7 +119,7 @@ def test_absent_or_malformed_outbox_exits_2(tmp_path: Path) -> None:
 @pytest.mark.parametrize(
     ("text", "family"),
     [
-        ("see /home/someone/project/app.py", "posix-path"),
+        ("see /home/example/project/app.py", "posix-path"),
         (r"see C:\Users\someone\app.py", "windows-path"),
         ("mail owner@example.org", "email"),
         ('API_KEY = "abcd1234efgh"', "secret-assignment"),
@@ -145,15 +145,15 @@ def test_scan_ignores_relative_text(text: str) -> None:
 
 
 def test_genericized_entry_with_path_fails_without_echoing_it(tmp_path: Path) -> None:
-    entry = _entry(defect="Broke in /Users/realname/realproject/app.py")
+    entry = _entry(defect="Broke in /Users/example/hostproject/app.py")
     result = _run("check", str(_outbox(tmp_path, entry)))
     assert result.returncode == 2
     assert "defect: posix-path" in result.stdout
-    assert "realname" not in result.stdout
+    assert "hostproject" not in result.stdout
 
 
 def test_ungenericized_draft_is_a_note(tmp_path: Path) -> None:
-    entry = _entry(genericized=False, defect="Broke in /Users/realname/realproject/app.py")
+    entry = _entry(genericized=False, defect="Broke in /Users/example/hostproject/app.py")
     result = _run("check", str(_outbox(tmp_path, entry)))
     assert result.returncode == 0, result.stdout
     assert "[NOTE] H-7: defect: posix-path" in result.stdout
