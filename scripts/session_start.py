@@ -55,6 +55,7 @@ from _mode import is_nucleus
 from bridge_state import bridge_stale
 from bridge_state import lock_stale as _bridge_lock_stale
 from install import BRIDGE_WRITE_DENIED, install_command
+from upstream_intake import intake_lines
 
 LINE_CAP = 80
 DRIFT_OUTPUT_LINES = 15
@@ -159,7 +160,25 @@ def section_drift(root: Path) -> list[str]:
 
 
 def section_upstream(root: Path) -> list[str]:
-    lines = ["## Open upstream findings"]
+    """Summarise the upstream register and, in the nucleus, the intake queue.
+
+    The channel A queue (``upstream_intake.py``, Sprint 058 plan D2) prints
+    structured fields only, so host free text never enters the briefing.
+
+    Args:
+        root: Framework root.
+
+    Returns:
+        list[str]: Section lines.
+    """
+    lines = ["## Open upstream findings", *_findings_summary(root)]
+    if is_nucleus():
+        lines += intake_lines(root)[0]
+    return lines
+
+
+def _findings_summary(root: Path) -> list[str]:
+    lines: list[str] = []
     path = root / "docs" / "audits" / "UPSTREAM_FINDINGS_FROM_HOSTS.md"
     if not path.is_file():
         lines.append(

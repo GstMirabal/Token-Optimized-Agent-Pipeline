@@ -134,6 +134,29 @@ def test_upstream_open_entries_excludes_closed_markers(
     assert "open entries (### - [ ]): 1" in section
 
 
+def test_upstream_lists_intake_queue_in_nucleus(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Channel A: a registered host's pending entry reaches the briefing."""
+    outbox = tmp_path / "outbox.json"
+    entry = {
+        "id": "H-7", "title": "Escaped pipe", "defect": "DEFECT-TEXT",
+        "evidence": {"command": "c", "output": "o"}, "nucleus_artifact": "scripts/x.py",
+        "proposed_change": "p", "pin": "v4.40.0", "genericized": True, "channel": "A",
+        "recurs": None, "status": "drafted",
+    }
+    outbox.write_text(json.dumps({"entries": [entry]}), encoding="utf-8")
+    root = _write_minimal_root(tmp_path / "repo", upstream_body="")
+    hosts = {"hosts": [{"name": "h1", "outbox": str(outbox)}]}
+    (root / ".upstream_hosts.json").write_text(json.dumps(hosts), encoding="utf-8")
+    monkeypatch.setattr(session_start, "is_nucleus", lambda: True)
+    section = "\n".join(session_start.section_upstream(root))
+    assert "- h1: H-7 | drafted | A | scripts/x.py | Escaped pipe" in section
+    assert "DEFECT-TEXT" not in section
+    monkeypatch.setattr(session_start, "is_nucleus", lambda: False)
+    assert "intake queue" not in "\n".join(session_start.section_upstream(root))
+
+
 def test_cli_against_real_repo_stays_under_line_cap() -> None:
     """Integration: real checkout still exits 0 and never dumps UPSTREAM path body."""
     proc = subprocess.run(
