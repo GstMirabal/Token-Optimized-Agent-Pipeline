@@ -38,6 +38,19 @@
 
   "cases": [
     {
+      "id": "upstream-outbox",
+      "authored_at_phase": "extract (host, upstream_feedback)",
+      "render": {
+        "UPSTREAM_OUTBOX_TEMPLATE.json": "upstream_outbox.json"
+      },
+      "command": [
+        "python3",
+        "scripts/upstream_outbox.py",
+        "check",
+        "{sprint_dir}/upstream_outbox.json"
+      ]
+    },
+    {
       "id": "implementation-plan",
       "authored_at_phase": "1",
       "render": {
@@ -123,11 +136,6 @@
       "template": "IDENTITY_TEMPLATE.json",
       "reason": "no-automated-gate",
       "note": "Scaffolded at onboarding into a host. Not JSON a framework check parses, and not a sprint artifact."
-    },
-    {
-      "template": "UPSTREAM_OUTBOX_TEMPLATE.json",
-      "reason": "no-automated-gate",
-      "note": "Sprint 058 A-01 ships the template one unit before its validator. A-02 creates scripts/upstream_outbox.py and replaces this exception with a case that runs `check` on the rendered template."
     },
     {
       "template": "NOTICE_TEMPLATE.md",
