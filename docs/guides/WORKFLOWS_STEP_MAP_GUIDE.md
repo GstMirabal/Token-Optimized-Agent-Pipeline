@@ -72,6 +72,7 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 2. Sprint Closeout | `readme_counts` | write |
 | 2. Sprint Closeout | `repo_docs_check` | write |
 | 2. Sprint Closeout | `extract_handoff` | write |
+| 2. Sprint Closeout | `upstream_outbox_advisory` | write |
 | 2.5 Heuristic Pulse Gate | `heuristic_pulse_gate` | verify |
 | 2.6 Phase Completion Gate | `double_gate_evidence` | write |
 | 3. Zero-Tolerance Purge | `memory_wipe` | write |
