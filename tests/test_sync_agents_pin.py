@@ -124,6 +124,59 @@ def test_bump_checks_out_newer_tag(
     assert ["fetch", "--tags", "upstream"] in calls
 
 
+def test_bump_reports_shipped_host_findings(
+    pin_mod, monkeypatch: pytest.MonkeyPatch, capsys
+) -> None:
+    """Plan D4 element 5: the bump names the host ids its CHANGELOG added."""
+    calls: list[list[str]] = []
+    diff = (
+        "+++ b/CHANGELOG.md\n"
+        "+- fix(gate): split escaped pipes (host:H-7, host:H-9) `abc1234`\n"
+        "+- docs: recurs host:H-7\n"
+        "-- old line host:H-1\n"
+    )
+
+    def fake_git(args: list[str], cwd: Path | None, timeout: int | None = None):
+        calls.append(args)
+        if args[:1] == ["remote"]:
+            return _done(0, "origin\n")
+        if args[:2] == ["tag", "--sort=-v:refname"]:
+            return _done(0, "v4.17.0\nv4.16.0\n")
+        if args[:3] == ["describe", "--tags", "--abbrev=0"]:
+            return _done(0, "v4.16.0\n")
+        if args[:2] == ["rev-parse", "HEAD"]:
+            return _done(0, "1111111\n")
+        if args[:1] == ["diff"]:
+            return _done(0, diff)
+        return _done(0, "")
+
+    monkeypatch.setattr(pin_mod, "git", fake_git)
+    assert pin_mod.main() == 0
+    assert "Ships host findings: H-7, H-9." in capsys.readouterr().out
+    assert ["diff", "--unified=0", "1111111", "v4.17.0", "--", "CHANGELOG.md"] in calls
+
+
+def test_bump_without_host_citations_prints_no_ship_line(
+    pin_mod, monkeypatch: pytest.MonkeyPatch, capsys
+) -> None:
+    def fake_git(args: list[str], cwd: Path | None, timeout: int | None = None):
+        if args[:1] == ["remote"]:
+            return _done(0, "origin\n")
+        if args[:2] == ["tag", "--sort=-v:refname"]:
+            return _done(0, "v4.17.0\nv4.16.0\n")
+        if args[:3] == ["describe", "--tags", "--abbrev=0"]:
+            return _done(0, "v4.16.0\n")
+        if args[:2] == ["rev-parse", "HEAD"]:
+            return _done(0, "1111111\n")
+        if args[:1] == ["diff"]:
+            return _done(0, "+- feat: nothing from a host\n")
+        return _done(0, "")
+
+    monkeypatch.setattr(pin_mod, "git", fake_git)
+    assert pin_mod.main() == 0
+    assert "Ships host findings" not in capsys.readouterr().out
+
+
 def test_dirty_while_behind_exits_2(
     pin_mod, monkeypatch: pytest.MonkeyPatch, capsys
 ) -> None:
