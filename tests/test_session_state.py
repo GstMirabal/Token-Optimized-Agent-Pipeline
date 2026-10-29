@@ -801,6 +801,27 @@ def test_require_released_hotfix_judges_the_branch_ref_not_head(repo: Path):
     assert _require(repo, "--branch", "ai-sprint/058", "--hotfix", "H-009") == 2
 
 
+def test_require_released_hotfix_refuses_a_sprint_commit_inside_the_range(repo: Path) -> None:
+    """KI-057-6: a hotfix branch carrying an unsealed `#058` commit under a committed
+    record must be refused, not deployed with the hotfix."""
+    _hotfix_repo(repo)
+    (repo / "work.txt").write_text("work", encoding="utf-8")
+    _git(repo, "add", "work.txt")
+    _git(repo, "commit", "-q", "-m", "feat(x): unsealed sprint work #058")
+    (repo / "fix2.txt").write_text("fix2", encoding="utf-8")
+    _git(repo, "add", "fix2.txt")
+    _git(repo, "commit", "-q", "-m", "fix(bridge): finish the thing (H-009) #H009")
+    assert _require(repo, "--hotfix", "H-009") == 2
+
+
+def test_require_released_hotfix_accepts_a_range_of_only_hotfix_commits(repo: Path) -> None:
+    _hotfix_repo(repo)
+    (repo / "fix2.txt").write_text("fix2", encoding="utf-8")
+    _git(repo, "add", "fix2.txt")
+    _git(repo, "commit", "-q", "-m", "fix(bridge): finish the thing #H009")
+    assert _require(repo, "--hotfix", "H-009") == 0
+
+
 def test_require_released_hotfix_branch_condition_reads_the_branch_ref(repo: Path) -> None:
     """The tip tracks the record and its subject does not name the hotfix, so only
     the branch condition decides; it must read `--branch`, not `HEAD` (QA2-1)."""
