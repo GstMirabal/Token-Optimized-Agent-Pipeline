@@ -33,6 +33,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _md_table import split_cells
 from _root import agents_root
 
 MODEL_FROM_SPRINT = 28
@@ -114,8 +115,7 @@ def _cells(line: str) -> list[str]:
     Returns:
         list[str]: Stripped cells; an escaped pipe stays inside its cell as ``|``.
     """
-    parts = re.split(r"(?<!\\)\|", line.strip().removeprefix("|").removesuffix("|"))
-    return [part.replace("\\|", "|").strip().strip("`") for part in parts]
+    return [cell.strip("`") for cell in split_cells(line)]
 
 
 def _is_separator(line: str) -> bool:
