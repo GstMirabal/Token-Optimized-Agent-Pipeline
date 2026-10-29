@@ -22,29 +22,29 @@ Declared escalations: none. No row is assigned to a `mechanical` profile, so the
 
 ## Work
 
-Status values: ⏳ pending. Risk `high` touches a gate, the CI workflow, the sandbox template, `merge_json.py`, `session_state.py` or `agents.md`. Execution order is the plan's: Wave A, Wave C, Wave B, Wave D (C-01 before B-05). The table holds 48 units (A 17, C 9, B 15, D 7; D-08 was deleted from the plan). Wave D rows D-03..D-07 run only on the "yes" branch of plan D7 (D-02 decides).
+Status values: ⏳ pending, ✅ committed (short SHA). Risk `high` touches a gate, the CI workflow, the sandbox template, `merge_json.py`, `session_state.py` or `agents.md`. Execution order is the plan's: Wave A, Wave C, Wave B, Wave D (C-01 before B-05). The table holds 48 units (A 17, C 9, B 15, D 7; D-08 was deleted from the plan). Wave D rows D-03..D-07 run only on the "yes" branch of plan D7 (D-02 decides).
 
 ### Wave A — upstream channel (D1-D4)
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| A-01 | `docs/standards/templates/UPSTREAM_OUTBOX_TEMPLATE.json` | create (D1 schema, one genericized example entry) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-02 | `scripts/upstream_outbox.py` | create (subcommands `check`, `check-issue`, `export`, `aged`, `deltas`; paired test `tests/test_upstream_outbox.py`) | high | `implementer_agent` | sonnet | medium | ⏳ |
-| A-03 | `config/upstream_intake.json` | create (`min_pin`, `aged_after_sprints`, `rate_limit_per_day`, security words) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| A-04 | `scripts/upstream_intake.py` | create (channel A reader, structured fields only; paired test `tests/test_upstream_intake.py`) | high | `implementer_agent` | sonnet | medium | ⏳ |
-| A-05 | `.gitignore` | modify (ignore `.upstream_hosts.json`) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| A-06 | `scripts/session_start.py` | modify (`section_upstream` adds the intake queue; paired test `tests/test_session_start.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| A-07 | `.github/ISSUE_TEMPLATE/host-finding.yml` | create (Issue Form mirroring the schema, channel B) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| A-08 | `.github/workflows/host-finding-intake.yml` | create (D3 filter, actions pinned by commit SHA, issue body through an environment variable) | high | `implementer_agent` | sonnet | medium | ⏳ |
-| A-09 | `scripts/sync_agents_pin.py` | modify (print `Ships host findings: <ids>`; paired test `tests/test_sync_agents_pin.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| A-10 | `docs/standards/templates/CHANGELOG_TEMPLATE.md` | modify (`host:<id>` citation) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-11 | `agents.md` | modify (`§4 feedback_upstream` and the `§3 jurisdiction` restatement it names) | high | `rule_validator` | sonnet | medium | ⏳ |
-| A-12 | `workflows/extract_workflow.md` | modify (`upstream_feedback` writes an outbox entry, runs `upstream_outbox.py check`) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-13 | `workflows/pipeline_workflow.md` | modify (Phase 1 mandatory intake triage) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-14 | `workflows/close_workflow.md` | modify (host close runs `upstream_outbox.py aged` and `deltas`, advisory) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-15 | `docs/guides/SELF_IMPROVEMENT_GUIDE.md` | modify (host guide: outbox, channels, delta discipline) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-16 | `SECURITY.md` | modify (channel C) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-17 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify (record host H1 report, genericized, with 2026-10-22 verdicts) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-01 | `docs/standards/templates/UPSTREAM_OUTBOX_TEMPLATE.json` | create (D1 schema, one genericized example entry) | low | `doc_orchestrator` | sonnet | medium | ✅ `e0acd13` |
+| A-02 | `scripts/upstream_outbox.py` | create (subcommands `check`, `check-issue`, `export`, `aged`, `deltas`; paired test `tests/test_upstream_outbox.py`) | high | `implementer_agent` | sonnet | medium | ✅ `52896f6`, `65475dd` |
+| A-03 | `config/upstream_intake.json` | create (`min_pin`, `aged_after_sprints`, `rate_limit_per_day`, security words) | low | `implementer_agent` | sonnet | medium | ✅ `2fb7fbb` |
+| A-04 | `scripts/upstream_intake.py` | create (channel A reader, structured fields only; paired test `tests/test_upstream_intake.py`) | high | `implementer_agent` | sonnet | medium | ✅ `81cdd25` |
+| A-05 | `.gitignore` | modify (ignore `.upstream_hosts.json`) | low | `implementer_agent` | sonnet | medium | ✅ `468a5bf` |
+| A-06 | `scripts/session_start.py` | modify (`section_upstream` adds the intake queue; paired test `tests/test_session_start.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `bce0063` |
+| A-07 | `.github/ISSUE_TEMPLATE/host-finding.yml` | create (Issue Form mirroring the schema, channel B) | low | `implementer_agent` | sonnet | medium | ✅ `214c9d1` |
+| A-08 | `.github/workflows/host-finding-intake.yml` | create (D3 filter, actions pinned by commit SHA, issue body through an environment variable) | high | `implementer_agent` | sonnet | medium | ✅ `7433ac1` |
+| A-09 | `scripts/sync_agents_pin.py` | modify (print `Ships host findings: <ids>`; paired test `tests/test_sync_agents_pin.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `007ed7b` |
+| A-10 | `docs/standards/templates/CHANGELOG_TEMPLATE.md` | modify (`host:<id>` citation) | low | `doc_orchestrator` | sonnet | medium | ✅ `50ed6ba` |
+| A-11 | `agents.md` | modify (`§4 feedback_upstream` and the `§3 jurisdiction` restatement it names) | high | `rule_validator` | sonnet | medium | ✅ `200b0fe` |
+| A-12 | `workflows/extract_workflow.md` | modify (`upstream_feedback` writes an outbox entry, runs `upstream_outbox.py check`) | medium | `doc_orchestrator` | sonnet | medium | ✅ `dc3cce1` |
+| A-13 | `workflows/pipeline_workflow.md` | modify (Phase 1 mandatory intake triage) | medium | `doc_orchestrator` | sonnet | medium | ✅ `da19f4f` |
+| A-14 | `workflows/close_workflow.md` | modify (host close runs `upstream_outbox.py aged` and `deltas`, advisory) | medium | `doc_orchestrator` | sonnet | medium | ✅ `c251057` |
+| A-15 | `docs/guides/SELF_IMPROVEMENT_GUIDE.md` | modify (host guide: outbox, channels, delta discipline) | low | `doc_orchestrator` | sonnet | medium | ✅ `d3b7db4` |
+| A-16 | `SECURITY.md` | modify (channel C) | low | `doc_orchestrator` | sonnet | medium | ✅ `f9b564e` |
+| A-17 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify (record host H1 report, genericized, with 2026-10-22 verdicts) | medium | `doc_orchestrator` | sonnet | medium | ✅ `bb12f71` |
 
 ### Wave C — Known Issues of Sprint 057 (D6)
 

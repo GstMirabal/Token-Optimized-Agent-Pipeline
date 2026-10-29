@@ -34,7 +34,14 @@ Tracking of atomic goals achieved during the session. Work units: 48 (A 17, C 9,
     - `[x]` Phase 4.3 raised findings F-1 (S2, instructing) and F-2..F-9 (S3); all resolved in the plan at commit `232efdd`.
     - `[x]` D-08 removed, so there are 48 units (A 17, C 9, B 15, D 7).
     - `[x]` Artifacts committed at `73976f7`.
-- [ ] **Execution (A, C, B, D)**: 48 work units (A 17, C 9, B 15, D 7). Not started.
+- [ ] **Execution (A, C, B, D)**: 48 work units (A 17, C 9, B 15, D 7). Wave A done; C, B and D pending.
+    - `[x]` Wave A (A-01..A-17) committed `e0acd13`..`bb12f71` (18 commits; `65475dd` is an A-02 fixture follow-up). `make verify` exit 0 after each unit.
+    - `[x]` A-01 records a `no-automated-gate` exception in `config/template_gates.json` until A-02; A-02 replaces it with the `upstream-outbox` case.
+    - `[x]` A-03 ran before A-02, because `check-issue` and `aged` read `config/upstream_intake.json`. `task_scope.md` names no order between them.
+    - `[x]` Deviation from plan D2: `export` prints `gh issue create --repo <slug> --title ... --body-file ... --label host-finding`, without `--template`. The body file already carries the form fields, and `--repo` targets the nucleus rather than the host repository the command runs in.
+    - `[x]` Host outbox path fixed at `docs/audits/UPSTREAM_OUTBOX.json` (A-12, A-14, A-15); the plan named no path.
+    - `[x]` A-17 source: the 2026-10-22 nucleus session transcript (report 1/2 and the human-confirmed verdict reply). 45 rows, 43 with a request (`awk`/`grep -c` over the section).
+    - `[x]` Session cost after Wave A: highest cycle ratio 10.4x (`session_cost.py --from-anchor`), under the 15x hard bound; the session suspends here per the one-wave-per-session plan.
 - [x] **Phase 5 (Approval Gate)**: human OK in chat («ok») on 2026-10-28 over plan commit `232efdd`.
     - `[x]` Plan status APPROVED, recorded at `02de746`.
     - `[x]` `audit_plan.py` exits 0.
@@ -48,6 +55,7 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 
 | Friction Point | Resolution / Workaround | KI ID |
 | :--- | :--- | :--- |
+| `make verify` passed with A-02's new test file untracked and failed once it was committed: `scripts/check_absolute_paths.py` scans tracked files only (`git grep`), so a fixture home path outside its allow-list was invisible before `git add` | Fixed by `65475dd`. From A-04 on, each unit runs `make verify` after `git add`, which `git grep` then reads | KI-058-1 |
 
 ---
 
@@ -92,6 +100,6 @@ Example (do not uncomment — Phase 7 writes the real rows):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Locked. Plan APPROVED (`02de746`), Phase 5 passed.
-**Next Phase**: Phase 6 Execution, Wave A (A-01..A-17), on `ai-sprint/058`.
+**Next Phase**: Phase 6 Execution, Wave C (C-01..C-09), on `ai-sprint/058`, in a fresh session.
 
 *Certified under conventional commit standard: feat(scope): message #058*
