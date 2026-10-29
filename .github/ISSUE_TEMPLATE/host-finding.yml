@@ -1,0 +1,93 @@
+name: Host finding
+description: A framework-class finding from a host project (channel B of agents.md §4 feedback_upstream).
+labels: ["host-finding"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        One field per key of `docs/standards/templates/UPSTREAM_OUTBOX_TEMPLATE.json`.
+        `python3 .agents/scripts/upstream_outbox.py export <outbox> --id <id> --out <file>`
+        writes this body for you from a validated outbox entry. Field labels are the schema
+        keys on purpose: `.github/workflows/host-finding-intake.yml` reads them back.
+
+        Anything that touches `RA-09`/`RA-19`, secrets, hooks or the sandbox is **channel C**:
+        do not open an issue — follow `SECURITY.md`.
+  - type: input
+    id: id
+    attributes:
+      label: id
+      description: The entry id in your outbox, e.g. `H-12`.
+    validations:
+      required: true
+  - type: input
+    id: title
+    attributes:
+      label: title
+      description: One line naming the defect.
+    validations:
+      required: true
+  - type: textarea
+    id: defect
+    attributes:
+      label: defect
+      description: What the nucleus artifact does, and what it should do.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence_command
+    attributes:
+      label: evidence_command
+      description: The exact command that shows the defect.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: evidence_output
+    attributes:
+      label: evidence_output
+      description: Its literal output.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: nucleus_artifact
+    attributes:
+      label: nucleus_artifact
+      description: The nucleus file the finding is about, e.g. `scripts/check_gate_log.py`.
+    validations:
+      required: true
+  - type: textarea
+    id: proposed_change
+    attributes:
+      label: proposed_change
+      description: The change you propose.
+    validations:
+      required: true
+  - type: input
+    id: pin
+    attributes:
+      label: pin
+      description: The `.agents` version your host is pinned to, e.g. `v4.40.0`.
+    validations:
+      required: true
+  - type: dropdown
+    id: channel
+    attributes:
+      label: channel
+      description: Channel B is the only public channel. Channel C goes through SECURITY.md.
+      options:
+        - B
+    validations:
+      required: true
+  - type: input
+    id: recurs
+    attributes:
+      label: recurs
+      description: Optional. The id of a closed nucleus finding this one reopens, e.g. `F-107-N1`.
+  - type: checkboxes
+    id: genericized
+    attributes:
+      label: genericized
+      options:
+        - label: Every host-identifying string is genericized (RA-15)
+          required: true
