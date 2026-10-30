@@ -75,6 +75,7 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 2. Sprint Closeout | `upstream_outbox_advisory` | write |
 | 2.5 Heuristic Pulse Gate | `heuristic_pulse_gate` | verify |
 | 2.6 Phase Completion Gate | `double_gate_evidence` | write |
+| 2.6 Phase Completion Gate | `plan_closure_gate` | write |
 | 3. Zero-Tolerance Purge | `memory_wipe` | write |
 | 3.5 Platform Recheck | `platform_recheck` | verify |
 | 4. State Sync | `state_sync` | write |
