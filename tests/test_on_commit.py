@@ -1,6 +1,7 @@
 """Tests for hooks/on_commit.py — the PreToolUse gate that can block real
 commits/pushes. Covers the RA-12 push guard, commit message validation, the
 Three-File Skill Standard audit, and the hardcoded-secret scan (F-086-S2)."""
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -829,3 +830,70 @@ def test_missing_test_refusal_does_not_prescribe_relabelling():
     assert "Repro: manual" in reason
     assert "commit as `refactor(`" not in reason
 
+
+
+# --- warn_remediation_chain (A-1 warning, B-06) ---------------------------
+
+
+def _chain_env(tmp_path, monkeypatch, *, base="abc123", result=None, exc=None):
+    """Point the hook at a tmp anchor and stub the chain subprocess."""
+    (tmp_path / "docs").mkdir()
+    state = {"last_close_commit": base} if base else {}
+    (tmp_path / "docs" / "active_state.json").write_text(json.dumps(state))
+    monkeypatch.chdir(tmp_path)
+    calls = []
+
+    def fake_run(cmd, **kwargs):
+        calls.append(cmd)
+        if exc:
+            raise exc
+        return result
+
+    monkeypatch.setattr(on_commit.subprocess, "run", fake_run)
+    return calls
+
+
+def _proc(code, out="", err=""):
+    return subprocess.CompletedProcess([], code, out, err)
+
+
+def test_fix_commit_calls_chain_script_with_range(tmp_path, monkeypatch, capsys):
+    calls = _chain_env(tmp_path, monkeypatch, result=_proc(0, "1 chain"))
+    on_commit.warn_remediation_chain("fix(x): y #058")
+    assert len(calls) == 1
+    assert calls[0][-2:] == ["--range", "abc123..HEAD"]
+    assert "1 chain" in capsys.readouterr().err
+
+
+def test_feat_commit_does_not_call_chain_script(tmp_path, monkeypatch):
+    calls = _chain_env(tmp_path, monkeypatch, result=_proc(0))
+    on_commit.warn_remediation_chain("feat(x): y #058")
+    assert calls == []
+
+
+def test_chain_script_failure_warns_and_continues(tmp_path, monkeypatch, capsys):
+    _chain_env(tmp_path, monkeypatch, exc=OSError("boom"))
+    on_commit.warn_remediation_chain("fix: y #058")
+    assert "skipped" in capsys.readouterr().err
+
+
+def test_missing_base_warns_and_skips(tmp_path, monkeypatch, capsys):
+    calls = _chain_env(tmp_path, monkeypatch, base=None, result=_proc(0))
+    on_commit.warn_remediation_chain("fix: y #058")
+    assert calls == []
+    assert "skipped" in capsys.readouterr().err
+
+
+def test_chain_exit_2_is_only_a_warning(tmp_path, monkeypatch, capsys):
+    _chain_env(tmp_path, monkeypatch, result=_proc(2, "2 chains"))
+    on_commit.warn_remediation_chain("fix(x): y #058")  # must not raise SystemExit
+    assert "2 chains" in capsys.readouterr().err
+
+
+def test_guards_invoke_the_warning_for_a_fix_message(monkeypatch):
+    seen = []
+    monkeypatch.setattr(on_commit, "warn_remediation_chain", seen.append)
+    monkeypatch.setattr(on_commit, "get_staged_files", list)
+    monkeypatch.setattr(on_commit, "MESSAGE_AUDITS", ())
+    on_commit._run_commit_message_guards('git commit -m "fix(x): y #058"')
+    assert seen == ["fix(x): y #058"]
