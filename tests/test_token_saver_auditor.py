@@ -6,6 +6,7 @@ healthy tree proves nothing.
 
 from __future__ import annotations
 
+import json
 import re
 import subprocess
 import sys
@@ -221,5 +222,85 @@ def test_filled_template_passes(tmp_path: Path) -> None:
 
 def test_sprint_054_plan_passes_the_new_checks() -> None:
     target = REPO / "docs" / "sprints" / "054-core-pipeline" / "IMPLEMENTATION_PLAN.md"
+    result = _run(target)
+    # The 054 plan predates R-5 (Sprint 058); only that rule may flag it.
+    findings = [ln for ln in result.stderr.splitlines() if ln.lstrip().startswith("•")]
+    assert all("R-5" in ln for ln in findings), result.stderr
+
+
+# --- R-5 blast radius (Sprint 058, B-08) ---------------------------------
+
+SUITE = "venv_skillopt/bin/python -m pytest -q -p no:cacheprovider"
+SHARED = "scripts/_root.py"
+
+
+def _blast_plan(tmp_path: Path, file_cell: str, command: str) -> Path:
+    body = (
+        MECHANISMS
+        + "\n## Cost\n\nx\n"
+        + f"\n## Work\n\n| # | File | Operation |\n| :--- | :--- | :--- |\n| A-1 | {file_cell} | modify |\n"
+        + "\n## Verification\n\n| Command | Expected | Dry run | Positive control |\n"
+        + "| :--- | :--- | :--- | :--- |\n"
+        + f"| {command} | exit `0` | exit `0` | n/a |\n"
+    )
+    return _plan(tmp_path, body)
+
+
+def _run_in(path: Path, cwd: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(AUDIT), str(path)], cwd=cwd, capture_output=True, text=True, check=False
+    )
+
+
+def test_shared_file_with_full_suite_row_passes(tmp_path: Path) -> None:
+    result = _run(_blast_plan(tmp_path, f"`{SHARED}`", f"`{SUITE}` (full suite)"))
+    assert "R-5" not in result.stderr
+
+
+def test_shared_file_without_full_suite_row_exits_2(tmp_path: Path) -> None:
+    result = _run(_blast_plan(tmp_path, f"`{SHARED}`", "`make verify`"))
+    assert result.returncode == 2
+    assert "R-5" in result.stderr
+
+
+def test_unshared_file_needs_no_full_suite_row(tmp_path: Path) -> None:
+    result = _run(_blast_plan(tmp_path, "`docs/foo.md`", "`make verify`"))
+    assert "R-5" not in result.stderr
+
+
+def test_host_override_replaces_nucleus_list(tmp_path: Path) -> None:
+    host = tmp_path / "host"
+    host.mkdir()
+    (host / ".agents-blast-radius.json").write_text(
+        json.dumps({"full_suite_command": "make test", "shared_globs": ["app/*.py"]}), encoding="utf-8"
+    )
+    plan = _blast_plan(tmp_path, f"`{SHARED}`", "`make verify`")
+    assert "R-5" not in _run_in(plan, host).stderr  # nucleus glob no longer applies
+    plan = _blast_plan(tmp_path, "`app/core.py`", "`make verify`")
+    assert _run_in(plan, host).returncode == 2
+
+
+def test_malformed_list_exits_2(tmp_path: Path) -> None:
+    host = tmp_path / "host"
+    host.mkdir()
+    plan = _blast_plan(tmp_path, "`docs/foo.md`", "`make verify`")
+    for content in ("{not json", json.dumps({"shared_globs": []})):
+        (host / ".agents-blast-radius.json").write_text(content, encoding="utf-8")
+        result = _run_in(plan, host)
+        assert result.returncode == 2
+        assert "malformed" in result.stderr
+
+
+def test_missing_list_skips_with_note(tmp_path: Path) -> None:
+    sys.path.insert(0, str(AUDIT.parent))
+    try:
+        import audit_plan
+    finally:
+        sys.path.remove(str(AUDIT.parent))
+    assert audit_plan.load_blast_radius(tmp_path, tmp_path / "absent.json") is None
+
+
+def test_sprint_058_plan_exits_0() -> None:
+    target = REPO / "docs" / "sprints" / "058-core-pipeline" / "IMPLEMENTATION_PLAN.md"
     result = _run(target)
     assert result.returncode == 0, result.stderr
