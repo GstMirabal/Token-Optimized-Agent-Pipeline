@@ -34,7 +34,7 @@ Tracking of atomic goals achieved during the session. Work units: 48 (A 17, C 9,
     - `[x]` Phase 4.3 raised findings F-1 (S2, instructing) and F-2..F-9 (S3); all resolved in the plan at commit `232efdd`.
     - `[x]` D-08 removed, so there are 48 units (A 17, C 9, B 15, D 7).
     - `[x]` Artifacts committed at `73976f7`.
-- [ ] **Execution (A, C, B, D)**: 48 work units (A 17, C 9, B 15, D 7). Wave A done; C, B and D pending.
+- [ ] **Execution (A, C, B, D)**: 48 work units (A 17, C 9, B 15, D 7). Waves A and C done; B and D pending.
     - `[x]` Wave A (A-01..A-17) committed `e0acd13`..`bb12f71` (18 commits; `65475dd` is an A-02 fixture follow-up). `make verify` exit 0 after each unit.
     - `[x]` A-01 records a `no-automated-gate` exception in `config/template_gates.json` until A-02; A-02 replaces it with the `upstream-outbox` case.
     - `[x]` A-03 ran before A-02, because `check-issue` and `aged` read `config/upstream_intake.json`. `task_scope.md` names no order between them.
@@ -42,6 +42,14 @@ Tracking of atomic goals achieved during the session. Work units: 48 (A 17, C 9,
     - `[x]` Host outbox path fixed at `docs/audits/UPSTREAM_OUTBOX.json` (A-12, A-14, A-15); the plan named no path.
     - `[x]` A-17 source: the 2026-10-22 nucleus session transcript (report 1/2 and the human-confirmed verdict reply). 45 rows, 43 with a request (`awk`/`grep -c` over the section).
     - `[x]` Session cost after Wave A: highest cycle ratio 10.4x (`session_cost.py --from-anchor`), under the 15x hard bound; the session suspends here per the one-wave-per-session plan.
+    - `[x]` Wave C (C-01..C-09) committed `cd190f4`..`5b0e45d` (9 commits, one per unit). `make verify` exit 0 after each unit; full suite `1361 passed` at `324dfb4`.
+    - `[x]` Every `fix(` unit (C-03..C-07, C-09) has a `Repro:` test that the implementer observed failing on the parent with an assertion and passing at the commit. QA Gate 1 replays it with `check_fix_reproduces.py`.
+    - `[x]` Verification probes after Wave C: `rg -n 'split\("\|"\)' scripts/` and `rg -n -F 'check_role_artifact.py --from-hook' claude/settings.hooks.json` both print nothing.
+    - `[x]` Deviation: C-05 (`b8d08d4`) also stages `scripts/_md_table.py`, outside its subject. The docstring there quoted the literal naive split call, which the Verification probe above would have matched. The commit body says so.
+    - `[x]` Deviation: C-01 was amended once before C-02 existed, to drop an unused `# noqa: E402` that ruff flagged.
+    - `[x]` C-07: `prune_shipped_hooks` skips events the template no longer defines, so the retired `SubagentStop` entry is pruned by `prune_deprecated_hooks`, which `merge_json.main()` runs over all events.
+    - `[x]` C-08 also corrects the `F-051-R3` paragraph (RA-14 grep), which repeated the inaccurate `F-107-N1` closure. The session was interrupted once during C-02; the resumed agent checked the staged diff before committing.
+    - `[x]` Session cost after Wave C: highest cycle ratio 10.7x, under the 15x hard bound; the session suspends here.
 - [x] **Phase 5 (Approval Gate)**: human OK in chat («ok») on 2026-10-28 over plan commit `232efdd`.
     - `[x]` Plan status APPROVED, recorded at `02de746`.
     - `[x]` `audit_plan.py` exits 0.
@@ -100,6 +108,6 @@ Example (do not uncomment — Phase 7 writes the real rows):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Locked. Plan APPROVED (`02de746`), Phase 5 passed.
-**Next Phase**: Phase 6 Execution, Wave C (C-01..C-09), on `ai-sprint/058`, in a fresh session.
+**Next Phase**: Phase 6 Execution, Wave B (B-01..B-15), on `ai-sprint/058`, in a fresh session.
 
 *Certified under conventional commit standard: feat(scope): message #058*

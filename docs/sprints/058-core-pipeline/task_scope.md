@@ -50,15 +50,15 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk `high` touches a gat
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| C-01 | `scripts/_md_table.py` | create (`split_cells()` honouring `\|`; paired test `tests/test_md_table.py`) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| C-02 | `scripts/check_task_scope.py` | refactor (`_cells` imports `_md_table.split_cells`; `tests/test_check_task_scope.py` unchanged and green) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| C-03 | `scripts/check_gate_log.py` | modify (fix `KI-057-3`; paired test `tests/test_check_gate_log.py`) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| C-04 | `scripts/check_forge_ladder.py` | modify (fix `KI-057-3`; paired test `tests/test_check_forge_ladder.py`) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| C-05 | `scripts/detect_new_models.py` | modify (fix `KI-057-3`; new paired test `tests/test_detect_new_models.py`) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| C-06 | `claude/settings.hooks.json` | modify (`KI-057-4`: remove the `SubagentStop` entry of `check_role_artifact.py --from-hook`; test `tests/test_template_sandbox.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| C-07 | `scripts/merge_json.py` | modify (`KI-057-4`: prune the retired hook entry from hosts; test `tests/test_merge_json.py`) | high | `implementer_agent` | sonnet | medium | ⏳ |
-| C-08 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify (`KI-057-4`: `F-107-N1` closing text cites C-06 and C-07) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| C-09 | `scripts/session_state.py` | modify (fix `KI-057-6`: every commit of `last_close_commit..tip` is hotfix work; paired test `tests/test_session_state.py`) | high | `implementer_agent` | sonnet | medium | ⏳ |
+| C-01 | `scripts/_md_table.py` | create (`split_cells()` honouring `\|`; paired test `tests/test_md_table.py`) | low | `implementer_agent` | sonnet | medium | ✅ `cd190f4` |
+| C-02 | `scripts/check_task_scope.py` | refactor (`_cells` imports `_md_table.split_cells`; `tests/test_check_task_scope.py` unchanged and green) | low | `implementer_agent` | sonnet | medium | ✅ `5836365` |
+| C-03 | `scripts/check_gate_log.py` | modify (fix `KI-057-3`; paired test `tests/test_check_gate_log.py`) | low | `implementer_agent` | sonnet | medium | ✅ `775c5d0` |
+| C-04 | `scripts/check_forge_ladder.py` | modify (fix `KI-057-3`; paired test `tests/test_check_forge_ladder.py`) | low | `implementer_agent` | sonnet | medium | ✅ `435691a` |
+| C-05 | `scripts/detect_new_models.py` | modify (fix `KI-057-3`; new paired test `tests/test_detect_new_models.py`) | low | `implementer_agent` | sonnet | medium | ✅ `b8d08d4` |
+| C-06 | `claude/settings.hooks.json` | modify (`KI-057-4`: remove the `SubagentStop` entry of `check_role_artifact.py --from-hook`; test `tests/test_template_sandbox.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `a543b51` |
+| C-07 | `scripts/merge_json.py` | modify (`KI-057-4`: prune the retired hook entry from hosts; test `tests/test_merge_json.py`) | high | `implementer_agent` | sonnet | medium | ✅ `e45f555` |
+| C-08 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify (`KI-057-4`: `F-107-N1` closing text cites C-06 and C-07) | low | `doc_orchestrator` | sonnet | medium | ✅ `5b0e45d` |
+| C-09 | `scripts/session_state.py` | modify (fix `KI-057-6`: every commit of `last_close_commit..tip` is hotfix work; paired test `tests/test_session_state.py`) | high | `implementer_agent` | sonnet | medium | ✅ `324dfb4` |
 
 ### Wave B — reproduce-first rules (D5)
 
