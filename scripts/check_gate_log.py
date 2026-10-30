@@ -5,6 +5,26 @@ From 031, each Gate-1 and Gate-2 row emits APPROVED | REJECTED | RECORD.
 REJECTED requires class charter or instructing. RECORD requires testifying.
 RECORD rows do not count toward consecutive-rejection remediation.
 
+Remediation notes (R-4, "the gate is never the first verifier"). Before work is
+re-sent to a gate, the remediator runs each command of that gate and records
+its exit code, read with `$?` and never through a pipe, in a Markdown table
+whose header names the columns Gate, Round, Command and Exit:
+
+    | Gate | Round | Command | Exit |
+    | :--- | :--- | :--- | :--- |
+    | QA Agent \\| Gate 1 | 1 | `make verify` | 0 |
+
+Gate repeats the gate cell of the gate table. Round is the round that was
+REJECTED and is being remediated. Command holds at least one backticked
+command. Exit is a non-negative integer. A gate row with Round N >= 2 needs
+one such row for the same Gate (case-insensitive) with Round N-1; a row with
+no backticked command or a non-integer Exit is a finding, as is a Round cell
+that is not an integer.
+
+Scope of the remediation-notes check: it runs only when the sprint id parsed
+from the directory name is >= 58 (`NOTES_FROM`). Earlier sprint logs carry
+round >= 2 rows with no notes table and are not examined by it.
+
 invoked_by: workflows/close_workflow.md Phase 2.6, workflows/pipeline_workflow.md
 Phase 7, Makefile `verify`.
 
@@ -33,6 +53,7 @@ from _root import agents_root
 from check_task_scope import current_sprint_dir, sprint_id_from_dir
 
 SKIP_BEFORE = 31
+NOTES_FROM = 58
 VERDICTS = frozenset({"APPROVED", "REJECTED", "RECORD"})
 REJECTED_CLASSES = frozenset({"charter", "instructing"})
 RECORD_CLASS = "testifying"
@@ -158,6 +179,94 @@ def collect_findings(text: str, sprint_id: int | None) -> list[str]:
     findings: list[str] = []
     for header, rows in gate_tables(text):
         findings.extend(_table_findings(header, rows))
+    if sprint_id is not None and sprint_id >= NOTES_FROM:
+        findings.extend(remediation_findings(text))
+    return findings
+
+
+def _note_tables(text: str) -> tuple[set[tuple[str, int]], list[str]]:
+    """Collect the (gate, round) pairs recorded by Remediation notes tables.
+
+    A table qualifies when its header names Gate, Round, Command and Exit.
+
+    Args:
+        text: The full SPRINT_LOG.md content.
+
+    Returns:
+        tuple: (recorded pairs, findings for malformed note rows).
+    """
+    recorded: set[tuple[str, int]] = set()
+    findings: list[str] = []
+    header: list[str] = []
+    for line in _strip_html_comments(text).splitlines():
+        if not line.strip().startswith("|"):
+            header = []
+            continue
+        if _is_separator(line):
+            continue
+        cells = [_plain_keep(cell) for cell in split_cells(line)]
+        if {"Gate", "Round", "Command", "Exit"} <= {_plain(c) for c in cells}:
+            header = [_plain(c) for c in cells]
+            continue
+        if header:
+            _note_row(header, cells, recorded, findings)
+    return recorded, findings
+
+
+def _plain_keep(cell: str) -> str:
+    return cell.replace("*", "").strip()
+
+
+def _note_row(
+    header: list[str],
+    cells: list[str],
+    recorded: set[tuple[str, int]],
+    findings: list[str],
+) -> None:
+    """Validate one note row and add its pair to ``recorded`` when well formed."""
+    row = dict(zip(header, cells, strict=False))
+    gate = _plain(row.get("Gate", "")).casefold()
+    round_text = _plain(row.get("Round", ""))
+    command = row.get("Command", "")
+    exit_text = _plain(row.get("Exit", ""))
+    if not round_text.isdigit() or not re.search(r"`[^`]+`", command) or not exit_text.isdigit():
+        findings.append(f"malformed Remediation notes row for gate {gate!r}: {cells}")
+        return
+    recorded.add((gate, int(round_text)))
+
+
+def _round_finding(
+    header: list[str], row: list[str], recorded: set[tuple[str, int]]
+) -> str | None:
+    """Finding for one gate row, or None when the row needs no note or has one."""
+    if not _plain(_col(header, row, "Verdict")):
+        return None
+    gate = _plain(_col(header, row, "Gate"))
+    round_text = _plain(_col(header, row, "Round"))
+    if not round_text.isdigit():
+        return f"gate {gate!r}: Round {round_text!r} is not an integer"
+    previous = int(round_text) - 1
+    if previous >= 1 and (gate.casefold(), previous) not in recorded:
+        return (
+            f"gate {gate!r} round {round_text}: no Remediation notes row for "
+            f"round {previous} with a backticked command and an Exit code"
+        )
+    return None
+
+
+def remediation_findings(text: str) -> list[str]:
+    """Findings for gate rows of Round >= 2 lacking a note for the prior round.
+
+    Args:
+        text: The full SPRINT_LOG.md content.
+
+    Returns:
+        list[str]: Non-empty finding messages; empty means the rule holds.
+    """
+    recorded, findings = _note_tables(text)
+    for header, rows in gate_tables(text):
+        items = (_round_finding(header, row, recorded) for row in rows)
+        findings.extend(item for item in items if item)
     return findings
 
 
