@@ -337,3 +337,79 @@ def test_missing_pnpm_is_explicit_unreplayed(js_repo, capsys, monkeypatch):
     assert code == 2
     assert "UNREPLAYED" in out
     assert "pnpm is not on PATH" in out
+
+
+# --- SOURCE_TEXT warning (R-8): denylist of five literal substrings, no coverage claim ---
+
+PATTERN_BODIES = {
+    "readFileSync(": "    data = lambda: readFileSync('x')\n",
+    "?raw": "    data = '?raw'\n",
+    ".read_text(": "    data = lambda: Path('calc.py').read_text()\n",
+    ".read_bytes(": "    data = lambda: Path('calc.py').read_bytes()\n",
+    "open(": "    data = lambda: open('calc.py')\n",
+}
+
+
+def _py_test(body: str) -> str:
+    return "def test_add():\n    from calc import add\n" + body + "    assert add(2, 3) == 5\n"
+
+
+@pytest.mark.parametrize("pattern", sorted(PATTERN_BODIES))
+def test_each_pattern_triggers_source_text(repo, capsys, pattern):
+    text = _py_test(PATTERN_BODIES[pattern])
+    base = commit_fix(repo, {"calc.py": FIXED, "tests/test_calc.py": text}, TRAILER)
+    code, out = run(repo, base, capsys)
+    sha = git(repo, "rev-parse", "--short=7", "HEAD")
+    assert f"SOURCE_TEXT {sha} tests/test_calc.py::test_add: {pattern}" in out
+    assert code == 0 and " OK " in out
+
+
+def test_behaviour_test_has_no_source_text(repo, capsys):
+    base = commit_fix(repo, {"calc.py": FIXED, "tests/test_calc.py": RED_TEST}, TRAILER)
+    _, out = run(repo, base, capsys)
+    assert "SOURCE_TEXT" not in out
+
+
+def test_source_text_does_not_change_verdict_or_exit(repo, capsys):
+    text = _py_test(PATTERN_BODIES["open("]).replace("== 5", "== 5 or True")
+    base = commit_fix(repo, {"calc.py": FIXED, "tests/test_calc.py": text}, TRAILER)
+    code, out = run(repo, base, capsys)
+    assert "SOURCE_TEXT" in out and "PASSES_ON_PARENT" in out
+    assert code == 2
+
+
+def test_class_qualified_id_resolves_to_method(repo, capsys):
+    text = (
+        "class TestCalc:\n    def test_add(self):\n        from calc import add\n"
+        "        data = lambda: open('calc.py')\n        assert add(2, 3) == 5\n"
+    )
+    trailer = "Repro: tests/test_calc.py::TestCalc::test_add — fails at {base}"
+    base = commit_fix(repo, {"calc.py": FIXED, "tests/test_calc.py": text}, trailer)
+    code, out = run(repo, base, capsys)
+    assert code == 0
+    assert "TestCalc::test_add: open(" in out
+    assert "function not located" not in out
+
+
+def test_hit_in_sibling_function_does_not_trigger(repo, capsys):
+    text = RED_TEST + "\n\ndef test_other():\n    open('calc.py')\n"
+    base = commit_fix(repo, {"calc.py": FIXED, "tests/test_calc.py": text}, TRAILER)
+    _, out = run(repo, base, capsys)
+    assert "SOURCE_TEXT" not in out
+
+
+def test_unlocated_python_function_falls_back_to_whole_file(repo):
+    sha_base = commit_fix(repo, {"calc.py": FIXED, "tests/test_calc.py": "x = open('a')\n"}, TRAILER)
+    sha = git(repo, "rev-parse", "HEAD")
+    lines = cfr.source_text_hits(repo, sha, ["tests/test_calc.py::test_add"])
+    assert sha_base and lines == [
+        f"SOURCE_TEXT {sha[:7]} tests/test_calc.py::test_add: open( (whole file: function not located)"
+    ]
+
+
+def test_js_id_inspects_whole_file(repo):
+    js = "import fs from 'fs';\nconst a = 1;\ntest('t', () => {});\nfs.readFileSync('x');\n"
+    commit_fix(repo, {"calc.py": FIXED, "web/a.test.ts": js}, "Repro: web/a.test.ts::t — fails at {base}")
+    sha = git(repo, "rev-parse", "HEAD")
+    lines = cfr.source_text_hits(repo, sha, ["web/a.test.ts::t"])
+    assert lines == [f"SOURCE_TEXT {sha[:7]} web/a.test.ts::t: readFileSync("]

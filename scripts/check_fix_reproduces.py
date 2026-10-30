@@ -21,6 +21,22 @@ RUNNER_UNAVAILABLE is not a per-commit verdict: the runner interpreter cannot
 run pytest (checked with ``<python> -m pytest --version`` before any replay), so
 nothing is replayed and the script exits 2.
 
+SOURCE_TEXT warning (R-8, behaviour not source text): a test that reads source
+code as text is not a reproduction. For each replayable ``Repro:`` id the script
+prints ``SOURCE_TEXT <sha> <test id>: <pattern>`` when the inspected text
+contains one of exactly five literal substrings: ``readFileSync(``, ``?raw``,
+``.read_text(``, ``.read_bytes(``, ``open(``. This is a denylist of those five
+substrings and makes no coverage claim (``agents.md`` section 1
+``fail_closed_claims``); it names nothing about other ways to read source. A
+false positive is cheap because the warning never blocks (``open(`` also
+matches ``reopen(``). Predicate scope: for a ``.py`` id, the source of the named
+test function at the commit, located with stdlib ``ast`` by name (including
+``Class::test``; a ``[param]`` suffix is ignored); if that function cannot be
+located the whole file is inspected and the line ends with ``(whole file:
+function not located)``. For a JS/TS id, the whole test file at the commit,
+because the stdlib has no JS parser. The warning leaves the verdict and the
+exit code unchanged.
+
 Runner interpreter: ``--python <path>``, else ``<repo>/venv_skillopt/bin/python``
 when it exists, else the interpreter running this script.
 
@@ -41,6 +57,7 @@ Exit codes:
 from __future__ import annotations
 
 import argparse
+import ast
 import contextlib
 import logging
 import os
@@ -62,6 +79,7 @@ RUNNER_PYTHON: str = sys.executable
 STRIPPED_ENV = ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "DJANGO_SETTINGS_MODULE")
 _FIX_SUBJECT = re.compile(r"^fix(\([^)]*\))?!?:|^fix\(")
 JS_SUFFIXES = (".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs")
+SOURCE_PATTERNS = ("readFileSync(", "?raw", ".read_text(", ".read_bytes(", "open(")
 HINT = (
     "make the test fail by assertion on the parent (for example import the new "
     "name inside the test function), not by a collection error"
@@ -453,6 +471,77 @@ def judge(repo: Path, sha: str) -> tuple[str, str]:
     return next((r for r in results if r[0] != "OK"), results[0])
 
 
+def _find_function(tree: ast.AST, parts: list[str]) -> ast.AST | None:
+    """Locate a function by name, walking through ``Class`` qualifiers.
+
+    Args:
+        tree: Parsed module.
+        parts: Id parts after the file, for example ``["TestX", "test_y"]``.
+
+    Returns:
+        The function node, or ``None`` when it cannot be located.
+    """
+    scope: ast.AST = tree
+    for name in parts:
+        kinds = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+        found = [n for n in getattr(scope, "body", []) if isinstance(n, kinds) and n.name == name]
+        if not found:
+            return None
+        scope = found[0]
+    return scope if isinstance(scope, (ast.FunctionDef, ast.AsyncFunctionDef)) else None
+
+
+def _inspected_text(text: str, test_id: str) -> tuple[str, bool]:
+    """Pick the text the SOURCE_TEXT patterns are searched in.
+
+    Args:
+        text: The test file content at the commit.
+        test_id: The ``Repro:`` id.
+
+    Returns:
+        ``(text, located)``. A ``.py`` id yields the named function's source with
+        ``located`` True; a JS/TS id, or a Python function that cannot be
+        located, yields the whole file (``located`` True only for JS/TS).
+    """
+    rel, *parts = test_id.split("::")
+    if not rel.endswith(".py"):
+        return text, True
+    parts = [p.split("[")[0] for p in parts]
+    try:
+        node = _find_function(ast.parse(text), parts)
+    except SyntaxError:
+        node = None
+    segment = ast.get_source_segment(text, node) if node is not None else None
+    return (segment, True) if segment is not None else (text, False)
+
+
+def source_text_hits(repo: Path, sha: str, ids: list[str]) -> list[str]:
+    """Return the SOURCE_TEXT warning lines for the ``Repro:`` ids of a commit.
+
+    A denylist of five literal substrings (``SOURCE_PATTERNS``); it makes no
+    coverage claim. Scope is stated in the module docstring.
+
+    Args:
+        repo: Repository directory.
+        sha: The ``fix(`` commit.
+        ids: Test ids from the trailers.
+
+    Returns:
+        One ``SOURCE_TEXT <sha> <test id>: <pattern>`` line per pattern hit.
+    """
+    lines = []
+    for test_id in ids:
+        shown = _git(repo, "show", f"{sha}:{test_id.split('::')[0]}")
+        if shown.returncode != 0:
+            continue
+        inspected, located = _inspected_text(shown.stdout, test_id)
+        note = "" if located else " (whole file: function not located)"
+        lines += [
+            f"SOURCE_TEXT {sha[:7]} {test_id}: {p}{note}" for p in SOURCE_PATTERNS if p in inspected
+        ]
+    return lines
+
+
 def select_fixes(repo: Path, commits: list[str]) -> list[str]:
     """Keep the ``fix(`` commits that touch a source file.
 
@@ -511,6 +600,9 @@ def main(argv: list[str] | None = None) -> int:
         verdict, detail = judge(repo, sha)
         violations += verdict not in ("OK", "MANUAL")
         print(f"{sha[:7]} {verdict} {detail}")
+        claims = [c for c in parse_trailers(_git(repo, "log", "-1", "--format=%B", sha).stdout) if c != "manual"]
+        for warning in source_text_hits(repo, sha, claims):
+            print(warning)
     print(f"{len(fixes)} fix( commits in range, {violations} violation(s)")
     return 2 if violations else 0
 
