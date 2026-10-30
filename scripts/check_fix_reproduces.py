@@ -7,6 +7,14 @@ commit's version of the named test files into each, runs pytest, and requires
 exit code EXACTLY 1 on the parent and 0 at the commit. A collection or usage
 error on the parent (pytest exit 2/3/4/5) is not a reproduction.
 
+JS/TS test ids (``.js .jsx .ts .tsx .mjs .cjs``) are replayed the same way with
+``pnpm exec vitest run <file> -t <name> --reporter=junit`` and a stdlib parse of
+the JUnit XML: a ``<failure>`` is a reproduction; an ``<error>``, a missing or
+unreadable report, or no executed testcase is a setup error (``WRONG_FAILURE``
+on the parent). The main checkout's ``node_modules`` is symlinked into the
+worktree; without it, or without ``pnpm`` on PATH, the verdict is
+``UNREPLAYED`` naming the missing piece. The nucleus ships no JS dependency.
+
 Verdicts: OK, MANUAL, MISSING_TRAILER, UNREPLAYED, PASSES_ON_PARENT,
 WRONG_FAILURE, FAILS_AT_COMMIT. Everything except OK and MANUAL is a violation.
 RUNNER_UNAVAILABLE is not a per-commit verdict: the runner interpreter cannot
@@ -37,6 +45,7 @@ import contextlib
 import logging
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -52,6 +61,7 @@ LOG = logging.getLogger(__name__)
 RUNNER_PYTHON: str = sys.executable
 STRIPPED_ENV = ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "DJANGO_SETTINGS_MODULE")
 _FIX_SUBJECT = re.compile(r"^fix(\([^)]*\))?!?:|^fix\(")
+JS_SUFFIXES = (".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs")
 HINT = (
     "make the test fail by assertion on the parent (for example import the new "
     "name inside the test function), not by a collection error"
@@ -282,25 +292,126 @@ def replay(repo: Path, commit: str, rev: str, test_ids: list[str]) -> tuple[int,
         return run_pytest(wt, test_ids)
 
 
-def judge(repo: Path, sha: str) -> tuple[str, str]:
-    """Replay one ``fix(`` commit and return its verdict.
+def run_vitest(cwd: Path, test_ids: list[str]) -> tuple[int, int]:
+    """Run vitest once per id and count failing and erroring testcases.
+
+    Args:
+        cwd: Worktree (with ``node_modules`` linked) used as working directory.
+        test_ids: ``path[::name]`` ids of JS/TS tests.
+
+    Returns:
+        ``(failures, errors)`` summed over the ids, read from a JUnit report. A
+        ``<failure>`` is an assertion failure; an ``<error>``, an unreadable
+        report, or a report with no executed testcase counts as one error.
+    """
+    failures = errors = 0
+    for test_id in test_ids:
+        path, _, name = test_id.partition("::")
+        with tempfile.TemporaryDirectory() as tmp:
+            report = Path(tmp) / "report.xml"
+            cmd = ["pnpm", "exec", "vitest", "run", path]
+            cmd += ["-t", re.escape(name)] if name else []
+            cmd += ["--reporter=junit", f"--outputFile={report}"]
+            subprocess.run(
+                cmd, cwd=cwd, env=_env(), capture_output=True, text=True, check=False, timeout=900
+            )
+            f, e = _read_junit(report)
+        failures, errors = failures + f, errors + e
+    return failures, errors
+
+
+def _read_junit(report: Path) -> tuple[int, int]:
+    """Count failures and errors in a vitest JUnit report.
+
+    Args:
+        report: Path of the XML written by ``--outputFile``.
+
+    Returns:
+        ``(failures, errors)``. Unreadable XML or no executed (non-skipped)
+        testcase yields ``(0, 1)``, a setup error, never a pass.
+    """
+    try:
+        root = ET.parse(report).getroot()
+    except (OSError, ET.ParseError) as exc:
+        LOG.warning("vitest junit report not read: %s", exc)
+        return 0, 1
+    cases = [c for c in root.iter("testcase") if c.find("skipped") is None]
+    failures = sum(c.find("failure") is not None for c in cases)
+    errors = len(root.findall(".//testcase/error")) + len(root.findall("./error"))
+    return failures, errors if cases or errors else 1
+
+
+def vitest_problem(repo: Path) -> str | None:
+    """Explain why vitest cannot be replayed, or return None when it can.
+
+    Args:
+        repo: Main checkout expected to hold ``node_modules``.
+
+    Returns:
+        A reason naming the missing piece, or None.
+    """
+    if shutil.which("pnpm") is None:
+        return "pnpm is not on PATH"
+    if not (repo / "node_modules").is_dir():
+        return f"no node_modules in {repo}"
+    return None
+
+
+def replay_vitest(repo: Path, commit: str, rev: str, test_ids: list[str]) -> tuple[int, int]:
+    """Run the commit's JS/TS tests inside a worktree at ``rev``.
+
+    Args:
+        repo: Repository directory; its ``node_modules`` is symlinked in.
+        commit: Commit whose version of the test files is copied in.
+        rev: Revision checked out in the worktree.
+        test_ids: JS/TS test ids from the trailers.
+
+    Returns:
+        The ``(failures, errors)`` pair from ``run_vitest``.
+    """
+    with worktree(repo, rev) as wt:
+        _copy_tests(repo, commit, wt, test_ids)
+        (wt / "node_modules").symlink_to(repo / "node_modules", target_is_directory=True)
+        return run_vitest(wt, test_ids)
+
+
+def judge_vitest(repo: Path, sha: str, ids: list[str]) -> tuple[str, str]:
+    """Replay JS/TS test ids on the parent and at the commit.
 
     Args:
         repo: Repository directory.
         sha: The ``fix(`` commit.
+        ids: JS/TS test ids.
+
+    Returns:
+        ``(verdict, detail)``; ``OK`` only if the parent shows a ``<failure>``
+        and no error, and the commit shows neither.
+    """
+    problem = vitest_problem(repo)
+    if problem:
+        return "UNREPLAYED", f"cannot replay JS/TS ids with vitest: {problem}"
+    failures, errors = replay_vitest(repo, sha, f"{sha}^", ids)
+    if errors:
+        return "WRONG_FAILURE", f"vitest reported {errors} setup error(s) on the parent, not an assertion failure; {HINT}"
+    if not failures:
+        return "PASSES_ON_PARENT", "vitest tests pass on the parent, so they do not reproduce the defect"
+    failures, errors = replay_vitest(repo, sha, sha, ids)
+    if failures or errors:
+        return "FAILS_AT_COMMIT", f"vitest reported {failures} failure(s), {errors} error(s) at the commit, expected none"
+    return "OK", f"{len(ids)} vitest id(s) fail on the parent and pass at the commit"
+
+
+def judge_pytest(repo: Path, sha: str, ids: list[str]) -> tuple[str, str]:
+    """Replay ``.py`` test ids on the parent and at the commit.
+
+    Args:
+        repo: Repository directory.
+        sha: The ``fix(`` commit.
+        ids: Pytest ids.
 
     Returns:
         ``(verdict, detail)``.
     """
-    claims = parse_trailers(_git(repo, "log", "-1", "--format=%B", sha).stdout)
-    if not claims:
-        return "MISSING_TRAILER", "fix( commit carries no 'Repro:' trailer"
-    ids = [c for c in claims if c != "manual"]
-    if not ids:
-        return "MANUAL", "Repro: manual (not replayed)"
-    bad = sorted({i.split("::")[0] for i in ids if not i.split("::")[0].endswith(".py")})
-    if bad:
-        return "UNREPLAYED", f"no runner for {', '.join(bad)} (pytest replays .py only)"
     code, errors = replay(repo, sha, f"{sha}^", ids)
     if errors:
         return "WRONG_FAILURE", f"{errors} test(s) hit a setup error on the parent, not an assertion failure; {HINT}"
@@ -312,6 +423,34 @@ def judge(repo: Path, sha: str) -> tuple[str, str]:
     if code != 0:
         return "FAILS_AT_COMMIT", f"pytest exited {code} at the commit, expected 0"
     return "OK", f"{len(ids)} test id(s) fail on the parent and pass at the commit"
+
+
+def judge(repo: Path, sha: str) -> tuple[str, str]:
+    """Replay one ``fix(`` commit and return its verdict.
+
+    Args:
+        repo: Repository directory.
+        sha: The ``fix(`` commit.
+
+    Returns:
+        ``(verdict, detail)``. Ids are split by suffix (``.py`` to pytest, JS/TS
+        to vitest); the first group that is not ``OK`` decides.
+    """
+    claims = parse_trailers(_git(repo, "log", "-1", "--format=%B", sha).stdout)
+    if not claims:
+        return "MISSING_TRAILER", "fix( commit carries no 'Repro:' trailer"
+    ids = [c for c in claims if c != "manual"]
+    if not ids:
+        return "MANUAL", "Repro: manual (not replayed)"
+    files = {i: i.split("::")[0] for i in ids}
+    py = [i for i, f in files.items() if f.endswith(".py")]
+    js = [i for i, f in files.items() if f.endswith(JS_SUFFIXES)]
+    bad = sorted({f for i, f in files.items() if i not in py and i not in js})
+    if bad:
+        return "UNREPLAYED", f"no runner for {', '.join(bad)} (replayable: .py via pytest; {', '.join(JS_SUFFIXES)} via vitest)"
+    results = [judge_pytest(repo, sha, py)] if py else []
+    results += [judge_vitest(repo, sha, js)] if js else []
+    return next((r for r in results if r[0] != "OK"), results[0])
 
 
 def select_fixes(repo: Path, commits: list[str]) -> list[str]:

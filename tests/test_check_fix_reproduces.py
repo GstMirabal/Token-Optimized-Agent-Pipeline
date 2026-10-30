@@ -95,12 +95,13 @@ def test_manual_trailer_is_skipped(repo, capsys):
     assert "MANUAL" in out
 
 
-def test_non_python_test_is_unreplayed(repo, capsys):
-    trailer = "Repro: tests/calc.test.ts::adds — fails at {base}"
-    base = commit_fix(repo, {"calc.py": FIXED, "tests/calc.test.ts": "// t\n"}, trailer)
+def test_unsupported_suffix_is_unreplayed(repo, capsys):
+    trailer = "Repro: tests/calc_spec.rb::adds — fails at {base}"
+    base = commit_fix(repo, {"calc.py": FIXED, "tests/calc_spec.rb": "# t\n"}, trailer)
     code, out = run(repo, base, capsys)
     assert code == 2
     assert "UNREPLAYED" in out
+    assert "no runner for tests/calc_spec.rb" in out
 
 
 def test_test_failing_at_commit_is_refused(repo, capsys):
@@ -245,3 +246,94 @@ def test_script_runs_under_isolated_mode() -> None:
         check=False,
     )
     assert result.returncode == 0, result.stderr
+
+
+JS_TRAILER = "Repro: tests/calc.test.ts::adds — fails at {base}"
+PASS_XML = '<testsuites><testsuite><testcase name="adds"/></testsuite></testsuites>'
+FAIL_XML = '<testsuites><testsuite><testcase name="adds"><failure message="x"/></testcase></testsuite></testsuites>'
+ERROR_XML = '<testsuites><testsuite><testcase name="adds"><error message="x"/></testcase></testsuite></testsuites>'
+
+
+@pytest.fixture
+def js_repo(repo: Path) -> Path:
+    (repo / "node_modules").mkdir()
+    return repo
+
+
+def fake_vitest(monkeypatch, parent_xml, commit_xml="", calls=None):
+    """Simulated runner: writes fixture JUnit XML instead of running pnpm."""
+    real = subprocess.run
+    monkeypatch.setattr(cfr.shutil, "which", lambda name: "/fake/pnpm")
+
+    def fake(cmd, *a, **kw):
+        if cmd[0] != "pnpm":
+            return real(cmd, *a, **kw)
+        if calls is not None:
+            calls.append(cmd)
+        out = next(c for c in cmd if c.startswith("--outputFile=")).split("=", 1)[1]
+        on_parent = (Path(kw["cwd"]) / "calc.py").read_text() == BROKEN
+        xml = parent_xml if on_parent else commit_xml
+        if xml:
+            Path(out).write_text(xml)
+        return subprocess.CompletedProcess(cmd, 0, "", "")
+
+    monkeypatch.setattr(cfr.subprocess, "run", fake)
+
+
+def commit_js(repo: Path) -> str:
+    return commit_fix(repo, {"calc.py": FIXED, "tests/calc.test.ts": "// t\n"}, JS_TRAILER)
+
+
+def test_vitest_failure_then_pass_is_ok(js_repo, capsys, monkeypatch):
+    calls: list[list[str]] = []
+    fake_vitest(monkeypatch, FAIL_XML, PASS_XML, calls)
+    code, out = run(js_repo, commit_js(js_repo), capsys)
+    assert code == 0
+    assert " OK " in out
+    assert calls[0][:5] == ["pnpm", "exec", "vitest", "run", "tests/calc.test.ts"]
+    assert "-t" in calls[0] and "--reporter=junit" in calls[0]
+
+
+def test_vitest_error_on_parent_is_wrong_failure(js_repo, capsys, monkeypatch):
+    fake_vitest(monkeypatch, ERROR_XML, PASS_XML)
+    code, out = run(js_repo, commit_js(js_repo), capsys)
+    assert code == 2
+    assert "WRONG_FAILURE" in out
+
+
+def test_vitest_missing_report_is_wrong_failure(js_repo, capsys, monkeypatch):
+    fake_vitest(monkeypatch, "", PASS_XML)
+    code, out = run(js_repo, commit_js(js_repo), capsys)
+    assert code == 2
+    assert "WRONG_FAILURE" in out
+
+
+def test_vitest_pass_on_parent_is_refused(js_repo, capsys, monkeypatch):
+    fake_vitest(monkeypatch, PASS_XML, PASS_XML)
+    code, out = run(js_repo, commit_js(js_repo), capsys)
+    assert code == 2
+    assert "PASSES_ON_PARENT" in out
+
+
+def test_vitest_failing_at_commit_is_refused(js_repo, capsys, monkeypatch):
+    fake_vitest(monkeypatch, FAIL_XML, FAIL_XML)
+    code, out = run(js_repo, commit_js(js_repo), capsys)
+    assert code == 2
+    assert "FAILS_AT_COMMIT" in out
+
+
+def test_missing_node_modules_is_explicit_unreplayed(repo, capsys, monkeypatch):
+    fake_vitest(monkeypatch, FAIL_XML, PASS_XML)
+    code, out = run(repo, commit_js(repo), capsys)
+    assert code == 2
+    assert "UNREPLAYED" in out
+    assert "no node_modules" in out
+
+
+def test_missing_pnpm_is_explicit_unreplayed(js_repo, capsys, monkeypatch):
+    fake_vitest(monkeypatch, FAIL_XML, PASS_XML)
+    monkeypatch.setattr(cfr.shutil, "which", lambda name: None)
+    code, out = run(js_repo, commit_js(js_repo), capsys)
+    assert code == 2
+    assert "UNREPLAYED" in out
+    assert "pnpm is not on PATH" in out
