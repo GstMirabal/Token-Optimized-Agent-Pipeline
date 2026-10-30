@@ -64,21 +64,21 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk `high` touches a gat
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| B-01 | `rules/qa_and_testing.md` | modify (§4: R-4, R-5, A-1) | high | `rule_validator` | sonnet | medium | ⏳ |
-| B-02 | `rules/code_craft.md` | modify (§6: R-8 and the vitest runner row) | medium | `rule_validator` | sonnet | medium | ⏳ |
-| B-03 | `docs/standards/templates/SPRINT_LOG_TEMPLATE.md` | modify (`Remediation notes`, `Abort criteria`, `Plan results` tables) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| B-04 | `scripts/check_gate_log.py` | modify (R-4: round >= 2 row without remediation note exits 2; paired test `tests/test_check_gate_log.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| B-05 | `scripts/check_remediation_chain.py` | create (A-1; paired test `tests/test_check_remediation_chain.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| B-06 | `hooks/on_commit.py` | modify (A-1: call `check_remediation_chain.py` on a `fix(` commit, warning, exit 0; paired test `tests/test_on_commit.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| B-07 | `config/blast_radius.json` | create (R-5: shared-module globs and `full_suite_command`) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| B-08 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify (C-6: read `config/blast_radius.json` or host override; companion test `tests/test_token_saver_auditor.py`, not a second subject) | medium | `skill_architect` | sonnet | medium | ⏳ |
-| B-09 | `scripts/check_plan_closure.py` | create (R-9, R-10; paired test `tests/test_check_plan_closure.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| B-10 | `workflows/close_workflow.md` | modify (Phase 2.6 runs `check_plan_closure.py`) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| B-11 | `workflows/pipeline_workflow.md` | modify (R-9/A-2 abort-criteria measurement per phase boundary; Phase 7 R-4 and `check_remediation_chain.py` second check) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
+| B-01 | `rules/qa_and_testing.md` | modify (§4: R-4, R-5, A-1) | high | `rule_validator` | sonnet | medium | ✅ `30d7847` |
+| B-02 | `rules/code_craft.md` | modify (§6: R-8 and the vitest runner row) | medium | `rule_validator` | sonnet | medium | ✅ `ccdc4d9` |
+| B-03 | `docs/standards/templates/SPRINT_LOG_TEMPLATE.md` | modify (`Remediation notes`, `Abort criteria`, `Plan results` tables) | low | `doc_orchestrator` | sonnet | medium | ✅ `efc7403` |
+| B-04 | `scripts/check_gate_log.py` | modify (R-4: round >= 2 row without remediation note exits 2; paired test `tests/test_check_gate_log.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `7345f0d` |
+| B-05 | `scripts/check_remediation_chain.py` | create (A-1; paired test `tests/test_check_remediation_chain.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `9a6cc19` |
+| B-06 | `hooks/on_commit.py` | modify (A-1: call `check_remediation_chain.py` on a `fix(` commit, warning, exit 0; paired test `tests/test_on_commit.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `4942828` |
+| B-07 | `config/blast_radius.json` | create (R-5: shared-module globs and `full_suite_command`) | low | `implementer_agent` | sonnet | medium | ✅ `4fda3e2` |
+| B-08 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify (C-6: read `config/blast_radius.json` or host override; companion test `tests/test_token_saver_auditor.py`, not a second subject) | medium | `skill_architect` | sonnet | medium | ✅ `39d35e2` |
+| B-09 | `scripts/check_plan_closure.py` | create (R-9, R-10; paired test `tests/test_check_plan_closure.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `9a3b3d9` |
+| B-10 | `workflows/close_workflow.md` | modify (Phase 2.6 runs `check_plan_closure.py`) | low | `doc_orchestrator` | sonnet | medium | ✅ `0c04d3c` |
+| B-11 | `workflows/pipeline_workflow.md` | modify (R-9/A-2 abort-criteria measurement per phase boundary; Phase 7 R-4 and `check_remediation_chain.py` second check) | medium | `doc_orchestrator` | sonnet | medium | ✅ `e5e08e2` |
 | B-12 | `agents/qa_agent.md` | modify (existing profile; Gate 1 second check `check_remediation_chain.py`) | low | `agent_orchestrator` | sonnet | medium | ⏳ |
-| B-13 | `scripts/check_fix_reproduces.py` | modify (R-6 / `KI-054-1`: vitest runner; paired test `tests/test_check_fix_reproduces.py` with a simulated runner) | high | `implementer_agent` | sonnet | medium | ⏳ |
-| B-14 | `scripts/check_fix_reproduces.py` | modify (R-8: `SOURCE_TEXT` warning with the five D5 patterns; paired test `tests/test_check_fix_reproduces.py`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| B-15 | `agents.md` | modify (`§0` row "Command paths", A-3 / `KI-054-2`) | medium | `rule_validator` | sonnet | medium | ⏳ |
+| B-13 | `scripts/check_fix_reproduces.py` | modify (R-6 / `KI-054-1`: vitest runner; paired test `tests/test_check_fix_reproduces.py` with a simulated runner) | high | `implementer_agent` | sonnet | medium | ✅ `abbf856` |
+| B-14 | `scripts/check_fix_reproduces.py` | modify (R-8: `SOURCE_TEXT` warning with the five D5 patterns; paired test `tests/test_check_fix_reproduces.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `6bded6d` |
+| B-15 | `agents.md` | modify (`§0` row "Command paths", A-3 / `KI-054-2`) | medium | `rule_validator` | sonnet | medium | ✅ `1952437` |
 
 ### Wave D — Dependabot (D7)
 

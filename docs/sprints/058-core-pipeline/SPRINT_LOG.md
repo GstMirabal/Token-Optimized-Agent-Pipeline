@@ -34,7 +34,7 @@ Tracking of atomic goals achieved during the session. Work units: 48 (A 17, C 9,
     - `[x]` Phase 4.3 raised findings F-1 (S2, instructing) and F-2..F-9 (S3); all resolved in the plan at commit `232efdd`.
     - `[x]` D-08 removed, so there are 48 units (A 17, C 9, B 15, D 7).
     - `[x]` Artifacts committed at `73976f7`.
-- [ ] **Execution (A, C, B, D)**: 48 work units (A 17, C 9, B 15, D 7). Waves A and C done; B and D pending.
+- [ ] **Execution (A, C, B, D)**: 48 work units (A 17, C 9, B 15, D 7). Waves A and C done; B-12 and Wave D pending.
     - `[x]` Wave A (A-01..A-17) committed `e0acd13`..`bb12f71` (18 commits; `65475dd` is an A-02 fixture follow-up). `make verify` exit 0 after each unit.
     - `[x]` A-01 records a `no-automated-gate` exception in `config/template_gates.json` until A-02; A-02 replaces it with the `upstream-outbox` case.
     - `[x]` A-03 ran before A-02, because `check-issue` and `aged` read `config/upstream_intake.json`. `task_scope.md` names no order between them.
@@ -50,6 +50,15 @@ Tracking of atomic goals achieved during the session. Work units: 48 (A 17, C 9,
     - `[x]` C-07: `prune_shipped_hooks` skips events the template no longer defines, so the retired `SubagentStop` entry is pruned by `prune_deprecated_hooks`, which `merge_json.main()` runs over all events.
     - `[x]` C-08 also corrects the `F-051-R3` paragraph (RA-14 grep), which repeated the inaccurate `F-107-N1` closure. The session was interrupted once during C-02; the resumed agent checked the staged diff before committing.
     - `[x]` Session cost after Wave C: highest cycle ratio 10.7x, under the 15x hard bound; the session suspends here.
+    - `[ ]` Wave B: 14 of 15 units committed `7345f0d`..`e5e08e2` (B-04 `7345f0d`, B-05 `9a6cc19`, B-06 `4942828`, B-07 `4fda3e2`, B-08 `39d35e2`, B-09 `9a3b3d9`, B-13 `abbf856`, B-14 `6bded6d`, B-01 `30d7847`, B-02 `ccdc4d9`, B-15 `1952437`, B-03 `efc7403`, B-10 `0c04d3c`, B-11 `e5e08e2`). B-12 (`agents/qa_agent.md`, Gate 1 second check) pending. `make verify` exit 0 after each unit, run after `git add`.
+    - `[x]` Deviation from the plan's Wave B order: instruments first (B-04..B-09, B-13, B-14), then prose (B-01, B-02, B-15, B-03, B-10, B-11), so each rule and the template cite a format the parser already reads. Every `task_scope.md` dependency still holds.
+    - `[x]` Abort criterion 3 not triggered: the vitest runner adds no JS dependency and tells `<failure>` from `<error>`; `rg -q -F "pytest replays .py only" scripts/check_fix_reproduces.py` exits 1.
+    - `[x]` `check_remediation_chain.py --range f0b11f8..HEAD` prints `chains: 0`; `check_fix_reproduces.py --range f0b11f8..HEAD` exits 0 (6 `fix(` commits `OK`).
+    - `[x]` One `SOURCE_TEXT` warning on `e45f555` (`tests/test_merge_json.py`, `.read_text(`): a false positive. The test reads the JSON template `claude/settings.hooks.json` as data and then exercises the prune.
+    - `[x]` Gap for the gate: B-06 warns only on commits through `hooks/on_commit.py`; `hooks/on_commit_msg.py` (terminal/IDE commits) does not call `check_remediation_chain.py`. Stated in `rules/qa_and_testing.md §4` A-1.
+    - `[x]` B-08 narrowed `test_sprint_054_plan_passes_the_new_checks`: the 054 plan predates R-5 and touches `hooks/on_commit.py`, so the test now accepts R-5 findings only.
+    - `[x]` `check_plan_closure.py --sprint-dir docs/sprints/058-core-pipeline` exits 2 by design until close fills `Abort criteria` and `Plan results`.
+    - `[x]` Session suspended at the human's request after B-11.
 - [x] **Phase 5 (Approval Gate)**: human OK in chat («ok») on 2026-10-28 over plan commit `232efdd`.
     - `[x]` Plan status APPROVED, recorded at `02de746`.
     - `[x]` `audit_plan.py` exits 0.
@@ -108,6 +117,6 @@ Example (do not uncomment — Phase 7 writes the real rows):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Locked. Plan APPROVED (`02de746`), Phase 5 passed.
-**Next Phase**: Phase 6 Execution, Wave B (B-01..B-15), on `ai-sprint/058`, in a fresh session.
+**Next Phase**: Phase 6 Execution, B-12 (`agents/qa_agent.md`) then Wave D (D-01..D-07), on `ai-sprint/058`, in a fresh session.
 
 *Certified under conventional commit standard: feat(scope): message #058*
