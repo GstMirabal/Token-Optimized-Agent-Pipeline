@@ -68,6 +68,69 @@ Example (do not uncomment — Phase 7 writes the real rows):
 | Gate | Round | Verdict | Class | Severity | Notes |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 
+### Remediation notes
+
+The remediator fills this table before re-sending a REJECTED round to its gate, one
+row per command run; `scripts/check_gate_log.py` (sprint ids >= 58) exits 2 when a
+Quality Gate row of Round N >= 2 has no row here for the same Gate and Round N-1.
+Leave it with **no data rows** until a gate emits a REJECTED round.
+
+<!--
+Gate: repeats the Gate cell of the Quality Gate table (compared case-insensitively).
+Round: the REJECTED round being remediated.
+Command: at least one backticked command.
+Exit: a non-negative integer, read with `$?` on that command alone, never through a pipe.
+Example (do not uncomment):
+  | QA Agent (Gate 1) | 1 | `python3 -I -m pytest tests/test_x.py` | 0 |
+-->
+
+| Gate | Round | Command | Exit |
+| :--- | :--- | :--- | :--- |
+
+---
+
+## 🛑 Abort Criteria
+
+`principal_agent` measures each numbered item of the plan's `## Abort criterion` at
+every phase boundary and appends one row per measurement; `scripts/check_plan_closure.py`
+reads it at close (`workflows/close_workflow.md` Phase 2.6) and requires at least one
+row per criterion. Leave it with **no data rows** until the first measurement.
+
+<!--
+Criterion: the integer of a numbered item in the plan's `## Abort criterion`.
+Command: at least one backticked command.
+Exit: an integer.
+Observation: what the command showed. A criterion closes only on the observation it
+  names; "met by arithmetic" leaves it open.
+Example (do not uncomment):
+  | 1 | `make verify` | 0 | verify passes at the Phase 3 boundary. |
+-->
+
+| Criterion | Command | Exit | Observation |
+| :--- | :--- | :--- | :--- |
+
+---
+
+## ✅ Plan Results
+
+`principal_agent` fills this table at close; `scripts/check_plan_closure.py` reads it
+and requires exactly one row per data row of the plan's Tests table and per data row
+of its Verification table, each with a non-empty Result. Leave it with **no data rows**
+until close.
+
+<!--
+Section: `Tests` or `Verification`.
+Row: the 1-based index of a data row in that plan table.
+Check: the check that row names.
+Result: non-empty; the observed outcome.
+Example (do not uncomment):
+  | Tests | 1 | tests/test_x.py passes | 12 passed, exit 0. |
+  | Verification | 1 | make verify | exit 0. |
+-->
+
+| Section | Row | Check | Result |
+| :--- | :--- | :--- | :--- |
+
 ---
 
 ## ⚓ Documentation Entry Point Seal
