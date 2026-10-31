@@ -57,7 +57,7 @@ Tracking of atomic goals achieved during the session. Work units: 48 (A 17, C 9,
     - `[x]` One `SOURCE_TEXT` warning on `e45f555` (`tests/test_merge_json.py`, `.read_text(`): a false positive. The test reads the JSON template `claude/settings.hooks.json` as data and then exercises the prune.
     - `[x]` Gap for the gate: B-06 warns only on commits through `hooks/on_commit.py`; `hooks/on_commit_msg.py` (terminal/IDE commits) does not call `check_remediation_chain.py`. Stated in `rules/qa_and_testing.md §4` A-1.
     - `[x]` B-08 narrowed `test_sprint_054_plan_passes_the_new_checks`: the 054 plan predates R-5 and touches `hooks/on_commit.py`, so the test now accepts R-5 findings only.
-    - `[x]` `check_plan_closure.py --sprint-dir docs/sprints/058-core-pipeline` exits 2 by design until close fills `Abort criteria` and `Plan results`.
+    - `[x]` `check_plan_closure.py --sprint-dir docs/sprints/058-core-pipeline` exits 2 until close fills `Plan results`. The `Abort criteria` table was not filled at the Phase 6 -> 7 boundary, although B-11 (`e5e08e2`) requires it (QA1-4); it was measured during the QA Gate 1 round 1 remediation.
     - `[x]` Session suspended at the human's request after B-11.
     - `[x]` B-12 (`3fc5da4`, session #65) adds the `remediation_chain_check` row to `agents/qa_agent.md`. The row also covers an exit `2` with `check_remediation_chain: error:` and no `chains:` line (a bad `--range`), which judges no commit. `scripts/check_remediation_chain.py:200-202` returns `2` on that error too.
     - `[x]` Wave D: D-01 `42355f7` bumps `claude-agent-sdk` `0.2.88` -> `0.2.175` (supersedes Dependabot #88). Deviation from plan D7 ("latest"): `0.2.176`, uploaded 2026-10-31T01:45Z, was under the 24-hour release-age floor of `agents.md §8` at the run, so the pin takes `0.2.175`. A pip dry-run of the full `requirements-skillopt.txt` resolves with exit 0.
@@ -67,7 +67,13 @@ Tracking of atomic goals achieved during the session. Work units: 48 (A 17, C 9,
     - `[x]` Plan status APPROVED, recorded at `02de746`.
     - `[x]` `audit_plan.py` exits 0.
     - `[x]` Draft `docs/plans/058-upstream-channel-and-reproduce-first-DRAFT.md` deleted after approval.
-- [ ] **Phase 7 (Quality Gate)**: pending.
+- [ ] **Phase 7 (Quality Gate)**: QA Gate 1 round 1 REJECTED (instructing, S1); remediation in progress.
+    - `[x]` Round 1 remediation, all six findings (the human chose QA1-3 option b and asked to include the optional S3 findings):
+    - `[x]` QA1-1 and QA1-2: `fe8996d` (`workflows/pipeline_workflow.md`: `<base>..HEAD` and the error exit) and `6d6718f` (`rules/qa_and_testing.md` A-1: the error exit and the shared fix-subject pattern). `python3 scripts/check_remediation_chain.py --range nosuchref..HEAD` prints `check_remediation_chain: error:` and no `chains:` line.
+    - `[x]` QA1-3: `bba11b5` (`fix(upstream-intake)`): the briefing drops `title` and prints `id`, `status`, `channel` and `nucleus_artifact` only when each is a token; a non-token host `name` exits 2. `Repro: tests/test_upstream_intake.py::test_host_text_never_enters_the_briefing`. It also edits `tests/test_session_start.py`, which asserted the old title suffix. Plan D2 amended at `c753df7`.
+    - `[x]` QA1-4: `Abort criteria` table below, criteria 1-5, measured on 2026-10-31.
+    - `[x]` QA1-5: `3d34795` (`scripts/check_plan_closure.py`) and `c53a6a1` (`scripts/check_gate_log.py`): Google docstrings, no behaviour change.
+    - `[x]` QA1-6: `d1a6737` (`scripts/check_remediation_chain.py`) and `6a1bad7` (`hooks/on_commit.py`) use the `_FIX_SUBJECT` pattern of `scripts/check_fix_reproduces.py`. Only the bare `fix!:` was missed; `fix(scope)!:` already matched through `^fix\(`.
 
 ---
 
@@ -115,6 +121,35 @@ Example (do not uncomment — Phase 7 writes the real rows):
 
 | Gate | Round | Verdict | Class | Severity | Notes |
 | :--- | :--- | :--- | :--- | :--- | :--- |
+| QA Agent (Gate 1) | 1 | REJECTED | instructing | S1 | 6 findings at `aa2766e`: QA1-2 and QA1-3 (S1), QA1-1 and QA1-4 (S2), QA1-5 and QA1-6 (S3). `check_fix_reproduces.py` 6 OK, 0 violations; `check_remediation_chain.py` `chains: 0`; `make verify` 0; 1416 passed. |
+
+---
+
+### Remediation notes
+
+Filled by the remediator before re-sending a REJECTED round to its gate (`rules/qa_and_testing.md` §4 R-4); one row per command, exit read with `$?` on that command alone.
+
+| Gate | Round | Command | Exit |
+| :--- | :--- | :--- | :--- |
+| QA Agent (Gate 1) | 1 | `python3 scripts/check_fix_reproduces.py --range f0b11f8..HEAD` | 0 |
+| QA Agent (Gate 1) | 1 | `python3 scripts/check_remediation_chain.py --range f0b11f8..HEAD` | 0 |
+| QA Agent (Gate 1) | 1 | `make verify` | 0 |
+| QA Agent (Gate 1) | 1 | `python3 scripts/check_task_scope.py --sprint-dir docs/sprints/058-core-pipeline` | 0 |
+| QA Agent (Gate 1) | 1 | `venv_skillopt/bin/python -m pytest -q tests/` | 0 |
+
+---
+
+## 🛑 Abort Criteria
+
+Measured by `principal_agent` per numbered item of the plan's `## Abort criterion` (`workflows/pipeline_workflow.md`, B-11).
+
+| Criterion | Command | Exit | Observation |
+| :--- | :--- | :--- | :--- |
+| 1 | `python3 scripts/upstream_outbox.py check docs/standards/templates/UPSTREAM_OUTBOX_TEMPLATE.json` | 0 | Phase 6 -> 7, measured 2026-10-31 after QA Gate 1 round 1: `1 entry valid`. No gate has rejected the genericization scan; not triggered. |
+| 2 | `rg -n '\$\{\{ *github\.event\.issue' .github/workflows/` | 1 | Phase 6 -> 7: no output. QA Gate 1 round 1 found no S0 in the intake workflow; not triggered. |
+| 3 | `rg -q -F "pytest replays .py only" scripts/check_fix_reproduces.py` | 1 | Phase 6 -> 7: the vitest runner shipped (`abbf856`) with no JS dependency and tells `<failure>` from `<error>`; not triggered. |
+| 4 | `git log --oneline f0b11f8..HEAD -- scripts/merge_json.py claude/settings.hooks.json` | 0 | Phase 6 -> 7: two commits (`e45f555`, `a543b51`); QA Gate 1 round 1 rejected neither; not triggered. |
+| 5 | `python3 scripts/session_cost.py --from-anchor` | 0 | Phase 6 -> 7: highest cycle ratio 6.7x, under the 15x bound; not triggered. |
 
 ---
 
@@ -122,6 +157,6 @@ Example (do not uncomment — Phase 7 writes the real rows):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Locked. Plan APPROVED (`02de746`), Phase 5 passed.
-**Next Phase**: Phase 7 Quality Gate (QA Gate 1 then Tester Gate 2, fresh agents), on `ai-sprint/058`.
+**Next Phase**: Phase 7, QA Gate 1 round 2 (fresh agent), then Tester Gate 2, on `ai-sprint/058`.
 
 *Certified under conventional commit standard: feat(scope): message #058*
