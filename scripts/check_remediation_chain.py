@@ -33,7 +33,7 @@ import re
 import subprocess
 import sys
 
-FIX_RE = re.compile(r"^fix(\(|:)")
+FIX_RE = re.compile(r"^fix(\([^)]*\))?!?:|^fix\(")
 HUNK_RE = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+")
 BLAME_RE = re.compile(r"^([0-9a-f]{40}) \d+ \d+")
 OLD_PATH_RE = re.compile(r"^--- a/(.+)$")

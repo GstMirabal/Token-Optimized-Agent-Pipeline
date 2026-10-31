@@ -68,6 +68,17 @@ def test_three_link_chain_is_one_chain(repo: Path) -> None:
     assert "chains: 1" in r.stdout
 
 
+def test_breaking_fix_subject_is_a_link(repo: Path) -> None:
+    subject = "fix!: breaking"
+    base = _git(repo, "rev-parse", "HEAD")
+    a = _commit(repo, "a.txt", "1\n2\n", "fix(a): first")
+    b = _commit(repo, "a.txt", "1\n2b\n", subject)
+    r = _run(repo, f"{base}..HEAD")
+    assert r.returncode == 0
+    assert "chains: 1" in r.stdout
+    assert a[:7] in r.stdout and b[:7] in r.stdout
+
+
 def test_two_independent_chains_exit_2(repo: Path) -> None:
     base = _git(repo, "rev-parse", "HEAD")
     for name in ("a.txt", "b.txt"):
