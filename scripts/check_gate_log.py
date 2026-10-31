@@ -214,6 +214,14 @@ def _note_tables(text: str) -> tuple[set[tuple[str, int]], list[str]]:
 
 
 def _plain_keep(cell: str) -> str:
+    """Strip emphasis asterisks from a table cell, keeping backtick marks.
+
+    Args:
+        cell: One cell of a Markdown table row.
+
+    Returns:
+        str: The cell without ``*`` characters, trimmed.
+    """
     return cell.replace("*", "").strip()
 
 
@@ -223,7 +231,15 @@ def _note_row(
     recorded: set[tuple[str, int]],
     findings: list[str],
 ) -> None:
-    """Validate one note row and add its pair to ``recorded`` when well formed."""
+    """Validate one note row and add its pair to ``recorded`` when well formed.
+
+    Args:
+        header: Header names of the Remediation notes table.
+        cells: Cells of the row, in header order.
+        recorded: (gate, round) pairs accepted so far; a well-formed row is
+            added to it.
+        findings: Findings so far; a malformed row appends one.
+    """
     row = dict(zip(header, cells, strict=False))
     gate = _plain(row.get("Gate", "")).casefold()
     round_text = _plain(row.get("Round", ""))
@@ -238,7 +254,17 @@ def _note_row(
 def _round_finding(
     header: list[str], row: list[str], recorded: set[tuple[str, int]]
 ) -> str | None:
-    """Finding for one gate row, or None when the row needs no note or has one."""
+    """Find the missing Remediation note for one gate row.
+
+    Args:
+        header: Header names of the gate table.
+        row: Cells of the gate row, in header order.
+        recorded: (gate, round) pairs that have a well-formed note row.
+
+    Returns:
+        str | None: The finding, or None when the row has no verdict yet, is
+        round 1, or has a note for the prior round.
+    """
     if not _plain(_col(header, row, "Verdict")):
         return None
     gate = _plain(_col(header, row, "Gate"))
