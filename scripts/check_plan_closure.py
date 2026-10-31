@@ -66,10 +66,27 @@ class ClosureError(Exception):
 
 
 def _plain(cell: str) -> str:
+    """Strip Markdown emphasis and code marks from a table cell.
+
+    Args:
+        cell: One cell of a Markdown table row.
+
+    Returns:
+        str: The cell without ``*`` and backtick characters, trimmed.
+    """
     return cell.replace("*", "").replace("`", "").strip()
 
 
 def _is_separator(line: str) -> bool:
+    """Tell whether a line is the ``|---|---|`` separator of a Markdown table.
+
+    Args:
+        line: One line of text.
+
+    Returns:
+        bool: True when the line starts with ``|`` and holds only ``|``, ``:``,
+        ``-`` and spaces.
+    """
     stripped = line.strip()
     return stripped.startswith("|") and set(stripped) <= set("|:- ")
 
@@ -103,7 +120,15 @@ def _section_lines(text: str, title: str) -> list[str]:
 
 
 def _pipe_blocks(lines: list[str]) -> list[list[str]]:
-    """Group consecutive pipe-led lines, dropping separator lines."""
+    """Group consecutive pipe-led lines, dropping separator lines.
+
+    Args:
+        lines: Lines of one section.
+
+    Returns:
+        list[list[str]]: One non-empty list of table lines per table; a line
+        that does not start with ``|`` ends the current table.
+    """
     blocks: list[list[str]] = [[]]
     for line in lines:
         if not line.strip().startswith("|"):
@@ -115,7 +140,15 @@ def _pipe_blocks(lines: list[str]) -> list[list[str]]:
 
 
 def _table_rows(lines: list[str]) -> list[list[str]] | None:
-    """Return the data rows of the first table in ``lines``, or None if absent."""
+    """Return the data rows of the first table in ``lines``.
+
+    Args:
+        lines: Lines of one section.
+
+    Returns:
+        list[list[str]] | None: The cells of every row after the header row, or
+        None when ``lines`` holds no table.
+    """
     blocks = _pipe_blocks(lines)
     if not blocks:
         return None
@@ -182,7 +215,16 @@ def log_table(text: str, header: tuple[str, ...]) -> list[dict[str, str]]:
 
 
 def abort_findings(criteria: list[int], rows: list[dict[str, str]]) -> list[str]:
-    """Findings for the Abort criteria table against the plan's numbered items."""
+    """Check the Abort criteria table against the plan's numbered items.
+
+    Args:
+        criteria: Numbers of the plan's Abort criteria.
+        rows: Rows of the log's Abort criteria table, keyed by header name.
+
+    Returns:
+        list[str]: One finding per malformed row and per criterion with no
+        closing row; empty when the table is complete.
+    """
     findings: list[str] = []
     closed: set[int] = set()
     for row in rows:
@@ -196,6 +238,15 @@ def abort_findings(criteria: list[int], rows: list[dict[str, str]]) -> list[str]
 
 
 def _result_key(row: dict[str, str]) -> tuple[str, int] | None:
+    """Read the (Section, Row) key of a Plan results row.
+
+    Args:
+        row: One row of the Plan results table, keyed by header name.
+
+    Returns:
+        tuple[str, int] | None: The section name and row number, or None when
+        the section is not in ``SECTIONS`` or the row is not an integer.
+    """
     section, index = _plain(row.get("Section", "")), _plain(row.get("Row", ""))
     if section not in SECTIONS or not index.isdigit():
         return None
@@ -203,7 +254,16 @@ def _result_key(row: dict[str, str]) -> tuple[str, int] | None:
 
 
 def _row_finding(row: dict[str, str], counts: dict[str, int], seen: set[tuple[str, int]]) -> str | None:
-    """Finding for one Plan results row; records a valid row in ``seen``."""
+    """Check one Plan results row and record it when valid.
+
+    Args:
+        row: One row of the Plan results table, keyed by header name.
+        counts: Data-row count of each plan section.
+        seen: Keys of the rows accepted so far; a valid row is added to it.
+
+    Returns:
+        str | None: The finding for this row, or None when the row is valid.
+    """
     key = _result_key(row)
     if key is None or key[1] < 1 or key[1] > counts[key[0]]:
         return f"Plan results: Section/Row names no plan row: {row}"
@@ -216,7 +276,16 @@ def _row_finding(row: dict[str, str], counts: dict[str, int], seen: set[tuple[st
 
 
 def result_findings(counts: dict[str, int], rows: list[dict[str, str]]) -> list[str]:
-    """Findings for the Plan results table against the plan's row counts."""
+    """Check the Plan results table against the plan's row counts.
+
+    Args:
+        counts: Data-row count of each plan section.
+        rows: Rows of the log's Plan results table, keyed by header name.
+
+    Returns:
+        list[str]: One finding per invalid row, per count mismatch and per plan
+        row with no result; empty when the table is complete.
+    """
     seen: set[tuple[str, int]] = set()
     findings = [item for row in rows if (item := _row_finding(row, counts, seen))]
     expected = sum(counts.values())
@@ -228,6 +297,17 @@ def result_findings(counts: dict[str, int], rows: list[dict[str, str]]) -> list[
 
 
 def _read(path: Path) -> str:
+    """Read a UTF-8 file with its HTML comments removed.
+
+    Args:
+        path: File to read.
+
+    Returns:
+        str: The text of the file without HTML comments.
+
+    Raises:
+        ClosureError: When the file cannot be read.
+    """
     try:
         return _strip_html_comments(path.read_text(encoding="utf-8"))
     except OSError as error:
@@ -263,7 +343,11 @@ def check(sprint_dir: Path) -> int:
 
 
 def main() -> int:
-    """Parse arguments and run the check."""
+    """Parse arguments and run the check.
+
+    Returns:
+        int: The exit code of ``check`` for the ``--sprint-dir`` argument.
+    """
     parser = argparse.ArgumentParser(description=__doc__.split("\n", 1)[0])
     parser.add_argument("--sprint-dir", type=Path, required=True)
     return check(parser.parse_args().sprint_dir)
