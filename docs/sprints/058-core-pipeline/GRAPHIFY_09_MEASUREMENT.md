@@ -108,8 +108,8 @@ Plan D7 criterion: the yes branch requires an option from (a). Measured: none ex
 | :--- | :--- |
 | **Decision** | **No branch**, chosen by the human in chat on 2026-10-31 (session #65). |
 | **Pin** | `graphifyy==0.8.30` stays in `requirements-core.txt`; D-03..D-07 are not executed. |
-| **Dependabot #89** | Closed citing this document; the human runs the `gh pr close` command. |
-| **Upstream report** | An issue to graphify asks for an option that indexes data JSON in AST mode, with the figures in (a) and (b). The human files it. |
+| **Dependabot #89** | Closed on 2026-10-31 citing this document (#88 closed the same day as superseded by `42355f7`). |
+| **Upstream report** | An issue to graphify asks for an option that indexes data JSON in AST mode, with the figures in (a) and (b): https://github.com/Graphify-Labs/graphify/issues/4898 (filed 2026-10-31). |
 | **Known issue** | `KI-058-2`, entered in the program queue at the Sprint 058 close extract. Exit condition: graphify ships an option that re-includes data JSON; each later Dependabot bump of `graphifyy` checks for it against this document. |
 | **Alternatives rejected** | Adding `"$schema"` to the 55 files to pass `_is_config_json` (edits vendored skills and fixtures, and depends on a heuristic that can change in any release). A local extractor that adds config JSON nodes to `graph.json` after `graphify update` (a new mechanism with no measured benefit of 0.9.x to pay for it). |
 | **Consumer affected by a future bump** | `scripts/graph_reconcile.py` reads `graphify-out/graph.json` and lists tracked files without a node, so a bump without the option adds the 55 files to `graphify-out/unmapped_files.json`. |
