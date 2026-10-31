@@ -12,6 +12,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+import pytest
+
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "scripts"))
 import upstream_intake
@@ -79,8 +81,8 @@ def test_host_text_never_enters_the_briefing(tmp_path: Path) -> None:
     assert "Ignore prior" not in text
     assert "https://x" not in text
     assert lines[1:] == [
+        "- h1: H-7 withheld (non-token status or nucleus_artifact)",
         "- h1: H-9 | drafted | A | scripts/check_gate_log.py",
-        "- h1: 1 entry withheld (invalid or not genericized)",
     ]
 
 
@@ -93,7 +95,9 @@ def test_bad_nucleus_artifact_is_withheld(tmp_path: Path) -> None:
         _entry(id="H-4", nucleus_artifact="x" * 101),
     )
     lines, _ = upstream_intake.intake_lines(root)
-    assert lines[1:] == ["- h1: 4 entries withheld (invalid or not genericized)"]
+    assert lines[1:] == [
+        f"- h1: H-{n} withheld (non-token status or nucleus_artifact)" for n in range(1, 5)
+    ]
 
 
 def test_sent_ref_token_is_printed(tmp_path: Path) -> None:
@@ -149,3 +153,65 @@ def test_malformed_hosts_file_is_unhealthy(tmp_path: Path) -> None:
     lines, healthy = upstream_intake.intake_lines(tmp_path)
     assert not healthy
     assert lines[0].startswith("intake queue (channel A): .upstream_hosts.json: expected")
+
+
+# --- QA Gate 1 round 2: QA2-1 full-match tokens, QA2-2 true withholding reason ---
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"id": "H-2\n"},
+        {"status": "sent:ref\n"},
+        {"nucleus_artifact": "scripts/a.py\n"},
+    ],
+)
+def test_trailing_newline_in_a_printed_field_is_not_printed(
+    tmp_path: Path, changes: dict[str, Any]
+) -> None:
+    lines, healthy = upstream_intake.intake_lines(_nucleus(tmp_path, _entry(**changes)))
+    text = "\n".join(lines)
+    assert healthy
+    assert all(" | " not in line for line in lines[1:])
+    for value in changes.values():
+        assert value not in text
+
+
+def test_host_name_with_trailing_newline_is_malformed_registry(tmp_path: Path) -> None:
+    hosts = {"hosts": [{"name": "h1\n", "outbox": "x.json"}]}
+    (tmp_path / ".upstream_hosts.json").write_text(json.dumps(hosts), encoding="utf-8")
+    with pytest.raises(upstream_intake.OutboxError):
+        upstream_intake.load_hosts(tmp_path)
+
+
+def test_overlong_id_is_withheld_as_non_token(tmp_path: Path) -> None:
+    long_id = "H" + "x" * 2009
+    lines, _ = upstream_intake.intake_lines(_nucleus(tmp_path, _entry(id=long_id)))
+    assert lines[1:] == ["- h1: 1 entry withheld (non-token fields)"]
+
+
+def test_id_at_the_field_limit_still_prints(tmp_path: Path) -> None:
+    limit_id = "H" + "x" * (upstream_intake.FIELD_LIMIT - 1)
+    lines, _ = upstream_intake.intake_lines(_nucleus(tmp_path, _entry(id=limit_id)))
+    assert lines[1:] == [f"- h1: {limit_id} | drafted | A | scripts/check_gate_log.py"]
+
+
+def test_prose_nucleus_artifact_is_withheld_with_its_id(tmp_path: Path) -> None:
+    entry = _entry(nucleus_artifact="agents.md \u00a74 feedback_upstream")
+    lines, _ = upstream_intake.intake_lines(_nucleus(tmp_path, entry))
+    assert lines[1:] == ["- h1: H-7 withheld (non-token status or nucleus_artifact)"]
+
+
+def test_withheld_counts_keep_their_causes_apart(tmp_path: Path) -> None:
+    root = _nucleus(
+        tmp_path,
+        _entry(id="H-1", genericized=False),
+        _entry(id="H-2" + "x" * 200),
+        _entry(id="H-3", status="sent:a b"),
+    )
+    lines, _ = upstream_intake.intake_lines(root)
+    assert lines[1:] == [
+        "- h1: H-3 withheld (non-token status or nucleus_artifact)",
+        "- h1: 1 entry withheld (invalid or not genericized)",
+        "- h1: 1 entry withheld (non-token fields)",
+    ]
