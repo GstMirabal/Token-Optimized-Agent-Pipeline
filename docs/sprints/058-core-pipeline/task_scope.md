@@ -75,7 +75,7 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk `high` touches a gat
 | B-09 | `scripts/check_plan_closure.py` | create (R-9, R-10; paired test `tests/test_check_plan_closure.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `9a3b3d9` |
 | B-10 | `workflows/close_workflow.md` | modify (Phase 2.6 runs `check_plan_closure.py`) | low | `doc_orchestrator` | sonnet | medium | ✅ `0c04d3c` |
 | B-11 | `workflows/pipeline_workflow.md` | modify (R-9/A-2 abort-criteria measurement per phase boundary; Phase 7 R-4 and `check_remediation_chain.py` second check) | medium | `doc_orchestrator` | sonnet | medium | ✅ `e5e08e2` |
-| B-12 | `agents/qa_agent.md` | modify (existing profile; Gate 1 second check `check_remediation_chain.py`) | low | `agent_orchestrator` | sonnet | medium | ⏳ |
+| B-12 | `agents/qa_agent.md` | modify (existing profile; Gate 1 second check `check_remediation_chain.py`) | low | `agent_orchestrator` | sonnet | medium | ✅ `3fc5da4` |
 | B-13 | `scripts/check_fix_reproduces.py` | modify (R-6 / `KI-054-1`: vitest runner; paired test `tests/test_check_fix_reproduces.py` with a simulated runner) | high | `implementer_agent` | sonnet | medium | ✅ `abbf856` |
 | B-14 | `scripts/check_fix_reproduces.py` | modify (R-8: `SOURCE_TEXT` warning with the five D5 patterns; paired test `tests/test_check_fix_reproduces.py`) | medium | `implementer_agent` | sonnet | medium | ✅ `6bded6d` |
 | B-15 | `agents.md` | modify (`§0` row "Command paths", A-3 / `KI-054-2`) | medium | `rule_validator` | sonnet | medium | ✅ `1952437` |
