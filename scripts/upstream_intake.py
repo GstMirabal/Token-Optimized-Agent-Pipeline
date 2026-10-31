@@ -8,12 +8,16 @@ real hosts. Its shape is::
     {"hosts": [{"name": "<label>", "outbox": "<path to the host's outbox>"}]}
 
 **The host's text is untrusted data entering a nucleus session's context.**
-Only structured fields are printed — ``id``, ``status``, ``channel`` and
-``nucleus_artifact`` — plus ``title`` cut to 100 characters, with control
-characters replaced by spaces, and only for entries that pass
-``upstream_outbox.entry_errors`` and carry ``genericized: true``. ``defect``,
-``evidence`` and ``proposed_change`` are never printed here: the triage reads
-them on demand, as data and never as instruction (``agents.md §4``).
+The printed set is exactly ``id``, ``status``, ``channel`` and
+``nucleus_artifact`` of each entry, plus the registry label ``name`` of the
+host. Every printed field must be a token: ``name`` matches ``NAME_RE``,
+``status`` is ``drafted`` or ``sent:<ref>`` with ``<ref>`` matching ``REF_RE``,
+``nucleus_artifact`` is a relative path matching ``ARTIFACT_RE`` without a
+``..`` segment, and the entry passes ``upstream_outbox.entry_errors`` and
+carries ``genericized: true``. An entry failing a check is counted as withheld,
+not printed. ``title``, ``defect``, ``evidence`` and ``proposed_change`` are
+never printed here: the triage reads them on demand, as data and never as
+instruction (``agents.md §4``).
 
 An entry is pending when its ``channel`` is ``A`` and its ``status`` is
 ``drafted`` or ``sent:<ref>``. Triaged, shipped and rejected entries are done.
@@ -28,6 +32,7 @@ Exit codes:
 
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -38,20 +43,9 @@ from upstream_outbox import OutboxError, entry_errors, load_entries, load_json
 
 HOSTS_FILE = ".upstream_hosts.json"
 FIELD_LIMIT = 100
-PENDING_PREFIXES = ("drafted", "sent:")
-
-
-def clean(text: str) -> str:
-    """Cut host text to ``FIELD_LIMIT`` characters with control characters blanked.
-
-    Args:
-        text: A free-text field written by a host.
-
-    Returns:
-        str: One printable line of at most ``FIELD_LIMIT`` characters.
-    """
-    printable = "".join(ch if ch.isprintable() else " " for ch in text)
-    return printable[:FIELD_LIMIT]
+NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,40}$")
+REF_RE = re.compile(r"^[A-Za-z0-9._#/:-]{1,100}$")
+ARTIFACT_RE = re.compile(r"^[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*$")
 
 
 def load_hosts(root: Path) -> list[dict[str, str]]:
@@ -75,11 +69,35 @@ def load_hosts(root: Path) -> list[dict[str, str]]:
     valid = isinstance(hosts, list) and all(
         isinstance(h, dict) and set(h) == {"name", "outbox"}
         and all(isinstance(v, str) and v.strip() for v in h.values())
+        and NAME_RE.match(h["name"]) is not None
         for h in hosts
     )
     if not valid:
         raise OutboxError(f'{HOSTS_FILE}: expected {{"hosts": [{{"name": ..., "outbox": ...}}]}}')
     return hosts
+
+
+def is_token_entry(entry: dict[str, Any]) -> bool:
+    """Tell whether every printed field of an entry is a token.
+
+    Args:
+        entry: An outbox entry that already passed ``entry_errors``.
+
+    Returns:
+        bool: True when ``status`` and ``nucleus_artifact`` match their token
+        grammar, so printing them cannot carry free text.
+    """
+    status = entry["status"]
+    artifact = entry["nucleus_artifact"]
+    status_ok = status == "drafted" or (
+        status.startswith("sent:") and REF_RE.match(status[len("sent:"):]) is not None
+    )
+    artifact_ok = (
+        len(artifact) <= FIELD_LIMIT
+        and ARTIFACT_RE.match(artifact) is not None
+        and ".." not in artifact.split("/")
+    )
+    return status_ok and artifact_ok
 
 
 def pending_lines(host: dict[str, str], entries: list[dict[str, Any]]) -> list[str]:
@@ -91,7 +109,8 @@ def pending_lines(host: dict[str, str], entries: list[dict[str, Any]]) -> list[s
 
     Returns:
         list[str]: One line per pending entry, then one line counting the
-        entries withheld because they are invalid or not genericized.
+        entries withheld because they are invalid, not genericized or carry a
+        non-token printed field.
     """
     lines: list[str] = []
     withheld = 0
@@ -99,12 +118,15 @@ def pending_lines(host: dict[str, str], entries: list[dict[str, Any]]) -> list[s
         if entry_errors(entry) or not entry["genericized"]:
             withheld += 1
             continue
-        if entry["channel"] == "A" and entry["status"].startswith(PENDING_PREFIXES):
-            fields = (entry["id"], entry["status"], entry["channel"], entry["nucleus_artifact"])
-            lines.append(f"- {clean(host['name'])}: " + " | ".join(clean(f) for f in fields)
-                         + f" | {clean(entry['title'])}")
+        if entry["channel"] != "A" or not entry["status"].startswith(("drafted", "sent:")):
+            continue
+        if not is_token_entry(entry):
+            withheld += 1
+            continue
+        fields = (entry["id"], entry["status"], entry["channel"], entry["nucleus_artifact"])
+        lines.append(f"- {host['name']}: " + " | ".join(fields))
     if withheld:
-        lines.append(f"- {clean(host['name'])}: {withheld} entr{'y' if withheld == 1 else 'ies'} withheld (invalid or not genericized)")
+        lines.append(f"- {host['name']}: {withheld} entr{'y' if withheld == 1 else 'ies'} withheld (invalid or not genericized)")
     return lines
 
 
@@ -123,13 +145,13 @@ def intake_lines(root: Path) -> tuple[list[str], bool]:
         return [f"intake queue (channel A): {exc}"], False
     if not hosts:
         return [f"intake queue (channel A): no {HOSTS_FILE} registered"], True
-    lines = ["intake queue (channel A): id | status | channel | nucleus_artifact | title"]
+    lines = ["intake queue (channel A): id | status | channel | nucleus_artifact"]
     healthy = True
     for host in hosts:
         try:
             entries = load_entries(Path(host["outbox"]).expanduser())
         except OutboxError:
-            lines.append(f"- {clean(host['name'])}: outbox absent or malformed")
+            lines.append(f"- {host['name']}: outbox absent or malformed")
             healthy = False
             continue
         lines += pending_lines(host, entries)

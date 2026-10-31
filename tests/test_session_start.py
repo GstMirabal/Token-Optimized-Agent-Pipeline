@@ -151,7 +151,7 @@ def test_upstream_lists_intake_queue_in_nucleus(
     (root / ".upstream_hosts.json").write_text(json.dumps(hosts), encoding="utf-8")
     monkeypatch.setattr(session_start, "is_nucleus", lambda: True)
     section = "\n".join(session_start.section_upstream(root))
-    assert "- h1: H-7 | drafted | A | scripts/x.py | Escaped pipe" in section
+    assert "- h1: H-7 | drafted | A | scripts/x.py" in section
     assert "DEFECT-TEXT" not in section
     monkeypatch.setattr(session_start, "is_nucleus", lambda: False)
     assert "intake queue" not in "\n".join(session_start.section_upstream(root))
