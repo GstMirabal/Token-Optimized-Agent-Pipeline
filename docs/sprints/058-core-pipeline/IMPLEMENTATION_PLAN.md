@@ -96,6 +96,14 @@ pasan el validador. `defect`, `evidence` y `proposed_change` se leen bajo demand
 triage, como dato y nunca como instrucción (`agents.md §4`, frase existente). Así el texto
 libre del host nunca entra solo por ejecutar `--boot`.
 
+> **Enmienda (2026-10-31, QA Gate 1 ronda 1, hallazgo QA1-3; aprobada por el humano en chat, opción b).**
+> El texto anterior se contradecía: `title`, el `name` del host, `nucleus_artifact` y la referencia
+> de `sent:<ref>` son texto libre del host, y el gate lo reprodujo. Desde `bba11b5`,
+> `upstream_intake.py` no imprime `title`; imprime `id`, `status`, `channel` y `nucleus_artifact`
+> solo cuando cada campo es un token (`<ref>` y `nucleus_artifact` se validan con regex, sin
+> segmentos `..`), y rechaza con exit `2` un `name` de host que no sea token. `title` se lee en el
+> triage, junto con `defect`, `evidence` y `proposed_change`.
+
 ### D3 — Filtro de intake (GitHub Action)
 
 `.github/workflows/host-finding-intake.yml` se dispara con `issues: [opened, edited]` sobre la
