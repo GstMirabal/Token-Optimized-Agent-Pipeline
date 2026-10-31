@@ -865,6 +865,18 @@ def test_fix_commit_calls_chain_script_with_range(tmp_path, monkeypatch, capsys)
     assert "1 chain" in capsys.readouterr().err
 
 
+def test_breaking_fix_commit_calls_chain_script(tmp_path, monkeypatch):
+    calls = _chain_env(tmp_path, monkeypatch, result=_proc(0, "1 chain"))
+    on_commit.warn_remediation_chain("fix!: y #058")
+    assert len(calls) == 1
+
+
+def test_scoped_breaking_fix_commit_calls_chain_script(tmp_path, monkeypatch):
+    calls = _chain_env(tmp_path, monkeypatch, result=_proc(0, "1 chain"))
+    on_commit.warn_remediation_chain("fix(x)!: y #058")
+    assert len(calls) == 1
+
+
 def test_feat_commit_does_not_call_chain_script(tmp_path, monkeypatch):
     calls = _chain_env(tmp_path, monkeypatch, result=_proc(0))
     on_commit.warn_remediation_chain("feat(x): y #058")
