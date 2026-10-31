@@ -84,13 +84,13 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk `high` touches a gat
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| D-01 | `requirements-skillopt.txt` | modify (`claude-agent-sdk` to latest; `Dependency:` trailer) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| D-02 | `docs/sprints/058-core-pipeline/GRAPHIFY_09_MEASUREMENT.md` | create (measurements (a)-(c), literal output per case; `devops_agent` runs them with `Bash` and hands the output over unaltered) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
-| D-03 | `requirements-core.txt` | modify ("yes" branch: `graphifyy` to latest `0.9.x`; `Dependency:` trailer) | high | `implementer_agent` | sonnet | medium | ⏳ |
-| D-04 | `Makefile` | modify ("yes" branch: graphify targets and the comment at `:52`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| D-05 | `rules/graphify.md` | modify ("yes" branch: version and variables read, `:18`, `:32`) | low | `rule_validator` | sonnet | medium | ⏳ |
-| D-06 | `rules/project_topology.md` | modify ("yes" branch: `:37`) | low | `rule_validator` | sonnet | medium | ⏳ |
-| D-07 | `config/with_env_allowlist.json` | modify ("yes" branch: `reason` names the measured variables) | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| D-01 | `requirements-skillopt.txt` | modify (`claude-agent-sdk` to latest; `Dependency:` trailer) | low | `implementer_agent` | sonnet | medium | ✅ `42355f7` |
+| D-02 | `docs/sprints/058-core-pipeline/GRAPHIFY_09_MEASUREMENT.md` | create (measurements (a)-(c), literal output per case; `devops_agent` runs them with `Bash` and hands the output over unaltered) | medium | `doc_orchestrator` | sonnet | medium | ✅ `c27bc37` |
+| D-03 | `requirements-core.txt` | modify ("yes" branch: `graphifyy` to latest `0.9.x`; `Dependency:` trailer) | high | `implementer_agent` | sonnet | medium | not executed (no branch, D-02) |
+| D-04 | `Makefile` | modify ("yes" branch: graphify targets and the comment at `:52`) | medium | `implementer_agent` | sonnet | medium | not executed (no branch, D-02) |
+| D-05 | `rules/graphify.md` | modify ("yes" branch: version and variables read, `:18`, `:32`) | low | `rule_validator` | sonnet | medium | not executed (no branch, D-02) |
+| D-06 | `rules/project_topology.md` | modify ("yes" branch: `:37`) | low | `rule_validator` | sonnet | medium | not executed (no branch, D-02) |
+| D-07 | `config/with_env_allowlist.json` | modify ("yes" branch: `reason` names the measured variables) | medium | `implementer_agent` | sonnet | medium | not executed (no branch, D-02) |
 
 ## Rule audit
 

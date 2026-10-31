@@ -34,7 +34,7 @@ Tracking of atomic goals achieved during the session. Work units: 48 (A 17, C 9,
     - `[x]` Phase 4.3 raised findings F-1 (S2, instructing) and F-2..F-9 (S3); all resolved in the plan at commit `232efdd`.
     - `[x]` D-08 removed, so there are 48 units (A 17, C 9, B 15, D 7).
     - `[x]` Artifacts committed at `73976f7`.
-- [ ] **Execution (A, C, B, D)**: 48 work units (A 17, C 9, B 15, D 7). Waves A, C and B done; Wave D pending.
+- [x] **Execution (A, C, B, D)**: 48 work units (A 17, C 9, B 15, D 7). Waves A, C, B and D done (D-03..D-07 not executed: no branch of plan D7).
     - `[x]` Wave A (A-01..A-17) committed `e0acd13`..`bb12f71` (18 commits; `65475dd` is an A-02 fixture follow-up). `make verify` exit 0 after each unit.
     - `[x]` A-01 records a `no-automated-gate` exception in `config/template_gates.json` until A-02; A-02 replaces it with the `upstream-outbox` case.
     - `[x]` A-03 ran before A-02, because `check-issue` and `aged` read `config/upstream_intake.json`. `task_scope.md` names no order between them.
@@ -60,6 +60,8 @@ Tracking of atomic goals achieved during the session. Work units: 48 (A 17, C 9,
     - `[x]` `check_plan_closure.py --sprint-dir docs/sprints/058-core-pipeline` exits 2 by design until close fills `Abort criteria` and `Plan results`.
     - `[x]` Session suspended at the human's request after B-11.
     - `[x]` B-12 (`3fc5da4`, session #65) adds the `remediation_chain_check` row to `agents/qa_agent.md`. The row also covers an exit `2` with `check_remediation_chain: error:` and no `chains:` line (a bad `--range`), which judges no commit. `scripts/check_remediation_chain.py:200-202` returns `2` on that error too.
+    - `[x]` Wave D: D-01 `42355f7` bumps `claude-agent-sdk` `0.2.88` -> `0.2.175` (supersedes Dependabot #88). Deviation from plan D7 ("latest"): `0.2.176`, uploaded 2026-10-31T01:45Z, was under the 24-hour release-age floor of `agents.md §8` at the run, so the pin takes `0.2.175`. A pip dry-run of the full `requirements-skillopt.txt` resolves with exit 0.
+    - `[x]` D-02 `c27bc37` (`GRAPHIFY_09_MEASUREMENT.md`): graphifyy `0.9.97` (the latest `0.9.x` older than 24 h) offers no option that re-includes data JSON; 55 JSON sources drop out of the graph (9996 -> 9538 nodes). The human chose the no branch on 2026-10-31: `graphifyy==0.8.30` stays, D-03..D-07 are not executed, and `KI-058-2` is opened. The human closes #88 and #89 and files the graphify issue (commands prepared by the lead, `RA-09`).
     - `[x]` Open for the gate: B-11 writes the Gate 1 second check range as `<last_close_commit>..HEAD` (`workflows/pipeline_workflow.md:25`), and the plan line 144, `rules/qa_and_testing.md:68` and B-12 write `<base>..HEAD`. Both resolve to `f0b11f8` in Sprint 058. They differ only when a sprint branch does not start at the last sealed close.
 - [x] **Phase 5 (Approval Gate)**: human OK in chat («ok») on 2026-10-28 over plan commit `232efdd`.
     - `[x]` Plan status APPROVED, recorded at `02de746`.
@@ -75,6 +77,7 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | Friction Point | Resolution / Workaround | KI ID |
 | :--- | :--- | :--- |
 | `make verify` passed with A-02's new test file untracked and failed once it was committed: `scripts/check_absolute_paths.py` scans tracked files only (`git grep`), so a fixture home path outside its allow-list was invisible before `git add` | Fixed by `65475dd`. From A-04 on, each unit runs `make verify` after `git add`, which `git grep` then reads | KI-058-1 |
+| graphifyy `0.9.x` (from `0.9.70`) skips data JSON in AST mode (`extractors/json_config.py:293-294`) and offers no option to re-include it, so Dependabot #89 cannot land without the graph losing every `config/*.json` and `claude/settings.hooks.json` (`GRAPHIFY_09_MEASUREMENT.md`) | `graphifyy==0.8.30` kept (no branch of plan D7); an upstream issue asks graphify for the option. Exit condition: the option ships; each later Dependabot bump of `graphifyy` checks for it. Enter in the program queue at the close extract | KI-058-2 |
 
 ---
 
@@ -119,6 +122,6 @@ Example (do not uncomment — Phase 7 writes the real rows):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Locked. Plan APPROVED (`02de746`), Phase 5 passed.
-**Next Phase**: Phase 6 Execution, Wave D (D-01..D-07), on `ai-sprint/058`.
+**Next Phase**: Phase 7 Quality Gate (QA Gate 1 then Tester Gate 2, fresh agents), on `ai-sprint/058`.
 
 *Certified under conventional commit standard: feat(scope): message #058*
