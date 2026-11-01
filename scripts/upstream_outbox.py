@@ -50,8 +50,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shlex
+import stat
 import subprocess
 import sys
 from collections import Counter
@@ -66,6 +68,10 @@ from hooks.on_commit import SECRET_ASSIGNMENT, UNQUOTED_ASSIGNMENT
 
 CONFIG_PATH = Path("config/upstream_intake.json")
 IDENTITY_PATH = Path("config/framework_identity.json")
+# Largest JSON file ``load_json`` reads, in bytes (4 MiB). An outbox, the host
+# registry, the config and the identity file are all far smaller; the bound
+# exists because an outbox path is chosen by a host.
+MAX_READ_BYTES = 4 * 1024 * 1024
 FIELDS = (
     "id",
     "title",
@@ -127,6 +133,38 @@ def _reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
     return dict(pairs)
 
 
+def read_regular_bytes(path: Path) -> bytes:
+    """Read a regular file of at most ``MAX_READ_BYTES`` bytes without blocking.
+
+    The path (symlinks followed) is checked with ``os.stat`` before it is
+    opened, so a device is never opened, and checked again with ``os.fstat``
+    on a descriptor opened ``O_NONBLOCK``, so a path swapped for a FIFO between
+    the two calls cannot block the ``open``. At most ``MAX_READ_BYTES + 1``
+    bytes are read, so a file that grows after the check is still bounded.
+
+    Args:
+        path: File to read.
+
+    Returns:
+        bytes: The whole file.
+
+    Raises:
+        OSError: When the path is absent or unreadable, is not a regular file
+            (a FIFO, a device, a directory or a socket), or holds more than
+            ``MAX_READ_BYTES`` bytes.
+    """
+    if not stat.S_ISREG(os.stat(path).st_mode):
+        raise OSError("not a regular file")
+    descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_NONBLOCK", 0))
+    with os.fdopen(descriptor, "rb") as handle:
+        if not stat.S_ISREG(os.fstat(handle.fileno()).st_mode):
+            raise OSError("not a regular file")
+        data = handle.read(MAX_READ_BYTES + 1)
+    if len(data) > MAX_READ_BYTES:
+        raise OSError(f"larger than {MAX_READ_BYTES} bytes")
+    return data
+
+
 def load_json(path: Path) -> Any:
     """Read a JSON file with duplicate keys rejected.
 
@@ -142,9 +180,11 @@ def load_json(path: Path) -> Any:
             ``ValueError``), nested beyond the recursion limit, or holding a
             string with a lone surrogate escape, which no UTF-8 output can
             print (``UnicodeEncodeError``, a ``ValueError``).
+        OutboxError: Also when the path is not a regular file or is larger
+            than ``MAX_READ_BYTES`` (``read_regular_bytes``, an ``OSError``).
     """
     try:
-        text = path.read_text(encoding="utf-8")
+        text = read_regular_bytes(path).decode("utf-8")
         document = json.loads(text, object_pairs_hook=_reject_duplicate_keys)
         json.dumps(document, ensure_ascii=False).encode("utf-8")
         return document

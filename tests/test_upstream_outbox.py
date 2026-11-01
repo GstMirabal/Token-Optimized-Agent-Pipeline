@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -164,6 +165,103 @@ def test_absent_or_malformed_outbox_exits_2(tmp_path: Path) -> None:
     path = tmp_path / "outbox.json"
     path.write_text("[]", encoding="utf-8")
     assert _run("check", str(path)).returncode == 2
+
+
+# QA Gate 1 round 5 self-attack: a host controls what its outbox path names.
+# A FIFO blocked the read forever and /dev/zero read until memory ran out, so
+# each case runs in a subprocess with a timeout; on the unfixed tree the
+# timeout is the observed failure. The cap is stated here, not imported, so the
+# parent fails on behaviour rather than on a missing name.
+READ_CAP = 4 * 1024 * 1024
+READ_TIMEOUT = 10
+
+
+def _check_within_timeout(path: Path) -> subprocess.CompletedProcess[str]:
+    try:
+        return subprocess.run(
+            [sys.executable, "-I", str(SCRIPT), "check", str(path)],
+            capture_output=True, text=True, check=False, timeout=READ_TIMEOUT,
+        )
+    except subprocess.TimeoutExpired:
+        pytest.fail(f"check on {path.name} did not finish within {READ_TIMEOUT} s")
+
+
+def _fifo(tmp_path: Path) -> Path:
+    path = tmp_path / "outbox.fifo"
+    os.mkfifo(path)
+    return path
+
+
+def _over_cap(tmp_path: Path) -> Path:
+    path = tmp_path / "big.json"
+    path.write_bytes(b'{"entries": []}'.ljust(READ_CAP + 1))
+    return path
+
+
+def _symlink_to_fifo(tmp_path: Path) -> Path:
+    link = tmp_path / "link.json"
+    link.symlink_to(_fifo(tmp_path))
+    return link
+
+
+NOT_A_BOUNDED_REGULAR_FILE = {
+    "fifo": _fifo,
+    "symlink_to_fifo": _symlink_to_fifo,
+    "char_device": lambda _tmp: Path("/dev/zero"),
+    "directory": lambda tmp: tmp,
+    "over_cap": _over_cap,
+}
+
+
+@pytest.mark.parametrize(
+    "make", list(NOT_A_BOUNDED_REGULAR_FILE.values()), ids=list(NOT_A_BOUNDED_REGULAR_FILE)
+)
+def test_outbox_that_is_not_a_bounded_regular_file_exits_2_without_hanging(
+    tmp_path: Path, make: Any
+) -> None:
+    path = make(tmp_path)
+    if not path.exists():
+        pytest.skip(f"{path} does not exist on this platform")
+    result = _check_within_timeout(path)
+    assert "Traceback" not in result.stderr
+    assert result.returncode == 2
+    assert result.stdout.startswith("[FAIL] ")
+
+
+def test_outbox_at_the_read_cap_is_still_read(tmp_path: Path) -> None:
+    path = tmp_path / "at_cap.json"
+    path.write_bytes(b'{"entries": []}'.ljust(READ_CAP))
+    result = _check_within_timeout(path)
+    assert (result.returncode, "[FAIL]" in result.stdout) == (0, False)
+    assert upstream_outbox.MAX_READ_BYTES == READ_CAP
+
+
+def test_intake_reports_a_fifo_outbox_and_lists_the_other_host(tmp_path: Path) -> None:
+    fifo = _fifo(tmp_path)
+    good = _outbox(tmp_path, _entry(channel="A"))
+    root = tmp_path / "nucleus"
+    root.mkdir()
+    hosts = {"hosts": [{"name": "bad", "outbox": str(fifo)}, {"name": "ok", "outbox": str(good)}]}
+    (root / ".upstream_hosts.json").write_text(json.dumps(hosts), encoding="utf-8")
+    code = (
+        f"import sys; sys.path.insert(0, {str(REPO / 'scripts')!r})\n"
+        "from pathlib import Path\nimport upstream_intake\n"
+        f"upstream_intake.agents_root = lambda: Path({str(root)!r})\n"
+        "sys.exit(upstream_intake.main())\n"
+    )
+    try:
+        result = subprocess.run(
+            [sys.executable, "-I", "-c", code],
+            capture_output=True, text=True, check=False, timeout=READ_TIMEOUT,
+        )
+    except subprocess.TimeoutExpired:
+        pytest.fail(f"intake did not finish within {READ_TIMEOUT} s on a FIFO outbox")
+    assert result.returncode == 2
+    assert "Traceback" not in result.stderr
+    assert result.stdout.splitlines()[1:] == [
+        "- bad: outbox absent or malformed",
+        "- ok: H-7 | drafted | A | scripts/check_gate_log.py",
+    ]
 
 
 # QA Gate 1 round 3, QA3-1: every decode-time failure is a malformed outbox.
