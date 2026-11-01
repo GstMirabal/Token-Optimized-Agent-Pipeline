@@ -2151,6 +2151,50 @@ request, and R-1 and R-2 carried none (the nucleus already covered them).
 | D-12 | No agent path for database-backed tests | merge-into:`KI-056-1` (touches `RA-09` and `RA-19`; needs an amendment) | Sprint 059 |
 | E | `SessionEnd` → `suspend` evidence and five proposal points | merge-into:B-9 (all five points accepted) | point 1 shipped with B-9; point 2 (suspend only the ending session) is `KI-057-2`, Sprint 059; points 3-5 have no unit yet |
 
+## Reported by a host — 2026-11-01 (direct session message, accepted during Sprint 058 Phase 7)
+
+A host session sent one free-form message on 2026-11-01, outside the outbox schema
+(`agents.md §4 feedback_upstream`). The nucleus first returned it with the
+instruction to fill the schema. The human then accepted it directly the same day,
+after the nucleus reproduced both defects on its own transcripts (below). It is the
+host's "Message 4"; its "Message 3" (the replay counts a run that executed no test
+as `FAILS_AT_COMMIT`) has not been sent and is not triaged here. The ids are
+assigned by the nucleus. Genericized per `RA-15`: no host name, paths or session id.
+
+### - [ ] `F-116-N1` — `session_cost.py` takes a cold-cache turn as the cycle baseline, so the ratio is `None`
+
+- **Host evidence:** a 392-turn host session, 5 cycles, `first` = 0 in 4 of them,
+  so no ratio could be computed even by hand.
+- **Nucleus reproduction:** `python3 -I scripts/session_cost.py --session <id> --json`
+  over every nucleus transcript printed `first_turn` = 0 in cycle 1 of 11 sessions.
+  The first usage-bearing turn of session `0c9ba7ee` reads `cache_read_input_tokens`
+  0 and `cache_creation_input_tokens` 44,264: the turn writes the cache instead of
+  reading it. `cycle_summary` (`scripts/session_cost.py:128-133`) takes `reads[0]`
+  as `first` and returns `ratio: None` when it is 0. `segment_cycles` also opens a
+  cycle on such a turn, because 0 is below `previous * RESET_RATIO`.
+- **Answer to the host's question 3:** not a parsing defect. The cycle shape is
+  expected, and the baseline choice is the defect.
+- **Proposed direction (decided at triage):** take the baseline as the first turn's
+  context size (`cache_read + cache_creation + input`), not `cache_read` alone. The
+  host proposed the minimum non-zero `cache_read`.
+- **Verdict:** accept. **Where it stands:** Sprint 059 Phase 1 triage.
+
+### - [ ] `F-116-N2` — the `rules/token_economy.md §3.1` bound has no in-session invoker
+
+- **Host evidence:** a host cycle climbed to 5.7× with no signal during the session.
+  The human had to ask whether spend was being audited.
+- **Nucleus reproduction:** `scripts/session_probe.py` runs only from the boot
+  (`scripts/session_start.py:673`). `grep -rn "session_cost\|session_probe" hooks/`
+  printed nothing, so no hook, Phase 6 step or `token_economy_agent` invoker measures
+  the ratio while the session runs (`RA-16`).
+- **Host proposal:** (a) a periodic in-session measurement that warns at soft and
+  blocks new work at hard; (b) see `F-116-N1`; (c) a declared Phase 6 invoker.
+- **Open questions for triage:** hook or workflow step (a hook runs outside the
+  sandbox, so the `RA-19` enumeration applies); block or warn at hard while
+  calibration is n=1.
+- **Verdict:** accept. **Where it stands:** Sprint 059 Phase 1 triage, after
+  `F-116-N1` (a bound measured against a 0 baseline cannot fire).
+
 ## How to work this file
 
 1. **Reproduce before repairing.** Every item above states how. The
