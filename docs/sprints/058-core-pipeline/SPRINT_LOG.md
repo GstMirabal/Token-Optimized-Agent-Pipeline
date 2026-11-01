@@ -67,7 +67,7 @@ Tracking of atomic goals achieved during the session. Work units: 48 (A 17, C 9,
     - `[x]` Plan status APPROVED, recorded at `02de746`.
     - `[x]` `audit_plan.py` exits 0.
     - `[x]` Draft `docs/plans/058-upstream-channel-and-reproduce-first-DRAFT.md` deleted after approval.
-- [ ] **Phase 7 (Quality Gate)**: QA Gate 1 round 1 REJECTED (instructing, S1); round 2 REJECTED (charter, S2, first `remediation-regression` of the sprint); remediation in progress.
+- [ ] **Phase 7 (Quality Gate)**: QA Gate 1 round 1 REJECTED (instructing, S1); round 2 REJECTED (charter, S2, first `remediation-regression` of the sprint); round 3 REJECTED (charter, S2).
     - `[x]` Round 1 remediation, all six findings (the human chose QA1-3 option b and asked to include the optional S3 findings):
     - `[x]` QA1-1 and QA1-2: `fe8996d` (`workflows/pipeline_workflow.md`: `<base>..HEAD` and the error exit) and `6d6718f` (`rules/qa_and_testing.md` A-1: the error exit and the shared fix-subject pattern). `python3 scripts/check_remediation_chain.py --range nosuchref..HEAD` prints `check_remediation_chain: error:` and no `chains:` line.
     - `[x]` QA1-3: `bba11b5` (`fix(upstream-intake)`): the briefing drops `title` and prints `id`, `status`, `channel` and `nucleus_artifact` only when each is a token; a non-token host `name` exits 2. `Repro: tests/test_upstream_intake.py::test_host_text_never_enters_the_briefing`. It also edits `tests/test_session_start.py`, which asserted the old title suffix. Plan D2 amended at `c753df7`.
@@ -79,7 +79,13 @@ Tracking of atomic goals achieved during the session. Work units: 48 (A 17, C 9,
     - `[x]` QA2-3: `d5c2eeb` (`scripts/session_start.py` docstring) and the `upstream_intake.py` docstring in `3f627b2` state the enforced token grammar and that a token can still carry host-chosen words.
     - `[x]` QA2-4: (a) the open-item bullet now records its closure by `fe8996d`; (b) `8801d2a` (`fix(hooks)`): `audit_regression_test` uses `FIX_SUBJECT_RE`, so `fix:` and `fix!:` commits need a `Repro:` trailer too.
     - `[x]` `check_remediation_chain.py --range f0b11f8..HEAD` prints one chain (`bba11b5` -> `3f627b2`), exit 0: reported, not the A-1 stop. A second chain stops the block.
-    - `[x]` Left as observed, not changed: host-side `STATUS_PATTERN` still accepts `drafted\n` (the intake withholds it); uppercase `FIX:` subjects are caught by neither the hook nor the replayer.
+    - `[x]` Left as observed, not changed: host-side `STATUS_PATTERN` still accepts `drafted\n` (the intake withholds it); uppercase `FIX:` subjects are caught by neither the hook nor the replayer. The `STATUS_PATTERN` half is closed by `f11d9b3` in round 3.
+    - `[x]` Round 3 remediation (QA3-1..QA3-5):
+    - `[x]` QA3-1: `5c6d1d8` (`fix(upstream-outbox)`): `load_json` turns `ValueError` and `RecursionError` into `OutboxError` and rejects lone surrogates, so an undecodable outbox exits 2 instead of crashing `intake_lines` and the `/start` briefing. `5f7606a` (`fix(upstream-intake)`): `classify` skips non-pending entries, so only pending channel A entries count as withheld. `8b751ed` (`fix(upstream-outbox)`): every other file read (`--body-file`, `--open-titles-file`, the `deltas` rule files, the `aged` git log decode) fails closed through `read_text_file`, with no traceback.
+    - `[x]` QA3-2..QA3-5: `83be2a2` (`workflows/pipeline_workflow.md`) and `3ba6953` (`SPRINT_LOG_TEMPLATE.md`) escalate after more than 3 consecutive `REJECTED`, the `remediation_workflow.md` Phase 0 threshold, and limit the `escape` token to S0/S1. `914afe6` (`rules/code_craft.md`) names the fix-subject pattern in the commit-time `Repro:` row. `f11d9b3` (`fix(upstream-outbox)`) full-matches `STATUS_PATTERN` and `PIN_PATTERN`, so a trailing newline is invalid, and a whitespace-padded pin in an entry is now invalid.
+    - `[x]` `check_remediation_chain.py --range f0b11f8..HEAD` prints one chain (`bba11b5` -> `3f627b2` -> `5f7606a`), exit 0: the A-1 stop is not reached. `8b751ed` and `f11d9b3` change only lines from Wave A `52896f6`.
+    - `[x]` Left as observed, not changed (the implementer's out-of-scope list): `export --out` to a missing directory crashes on the write; `deltas` exits 0 with no output on a missing `--rules` path; `PIN_PATTERN` `\d` accepts non-ASCII digits. Candidates for a later sprint, not regressions of this one.
+    - `[x]` Accepted host findings `F-116-N1` and `F-116-N2` (human direction 2026-11-01), recorded in `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` after the nucleus reproduced both; routed to Sprint 059 Phase 1. Not Sprint 058 scope.
 
 ---
 
@@ -89,7 +95,8 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | Friction Point | Resolution / Workaround | KI ID |
 | :--- | :--- | :--- |
 | `make verify` passed with A-02's new test file untracked and failed once it was committed: `scripts/check_absolute_paths.py` scans tracked files only (`git grep`), so a fixture home path outside its allow-list was invisible before `git add` | Fixed by `65475dd`. From A-04 on, each unit runs `make verify` after `git add`, which `git grep` then reads | KI-058-1 |
-| graphifyy from `0.8.37` (`a37672f2`; the `0.9.70` boundary first stated here was corrected upstream in https://github.com/Graphify-Labs/graphify/issues/4898) skips data JSON in AST mode, and the semantic pass does not receive it either (`cli.py:4108`), (`extractors/json_config.py:293-294`) and offers no option to re-include it, so Dependabot #89 cannot land without the graph losing every `config/*.json` and `claude/settings.hooks.json` (`GRAPHIFY_09_MEASUREMENT.md`) | `graphifyy==0.8.30` kept (no branch of plan D7); upstream issue https://github.com/Graphify-Labs/graphify/issues/4898 asks graphify for the option. Exit condition: a release older than 24 h ships `json.include` / `--include-json` (upstream PR https://github.com/Graphify-Labs/graphify/pull/4911); the bump re-runs the D-02 measurement with the include globs. Enter in the program queue at the close extract | KI-058-2 |
+| graphifyy from `0.8.37` (`a37672f2`; the `0.9.70` boundary first stated here was corrected upstream in https://github.com/Graphify-Labs/graphify/issues/4898) skips data JSON in AST mode, and the semantic pass does not receive it either (`cli.py:4108`). The skip is at `extractors/json_config.py:293-294`, and 0.9.97 offers no option to re-include it, so Dependabot #89 cannot land without the graph losing every `config/*.json` and `claude/settings.hooks.json` (`GRAPHIFY_09_MEASUREMENT.md`) | `graphifyy==0.8.30` kept (no branch of plan D7); upstream issue https://github.com/Graphify-Labs/graphify/issues/4898 asks graphify for the option. Exit condition: a release older than 24 h ships `json.include` / `--include-json` (upstream PR https://github.com/Graphify-Labs/graphify/pull/4911); the bump re-runs the D-02 measurement with the include globs. Enter in the program queue at the close extract | KI-058-2 |
+| A host reported in one free-form message that the `rules/token_economy.md §3.1` bound is measured only at the next boot, and that `scripts/session_cost.py` prints `first` = 0 for most of its cycles. The nucleus reproduced both: `first_turn` = 0 in cycle 1 of 11 nucleus sessions, because a cycle can open on a cold-cache turn (`cache_read` 0, `cache_creation` 44,264), and no hook calls `session_cost.py` or `session_probe.py` | Accepted by the human on 2026-11-01 as `F-116-N1` (baseline) and `F-116-N2` (in-session invoker) in `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md`. Destination: Sprint 059 Phase 1 triage, `F-116-N1` first. Enter in the program queue at the close extract | KI-058-3 |
 
 ---
 
@@ -106,16 +113,17 @@ and a fabricated row would teach authors to invent verdicts
 Verdict vocabulary (`rules/qa_and_testing.md §4`, `RA-17`):
   Verdict ∈ APPROVED | REJECTED | RECORD
   APPROVED  → Class cell empty
-  REJECTED  → Class ∈ charter | instructing   (3rd consecutive REJECTED of one
-              logic block → workflows/remediation_workflow.md)
+  REJECTED  → Class ∈ charter | instructing   (more than 3 consecutive REJECTED
+              of one logic block → workflows/remediation_workflow.md Phase 0)
   RECORD    → Class = testifying               (does NOT count toward remediation)
 Gate cell: Gate 1 row starts with "QA"; Gate 2 row starts with "Tester".
 Severity cell ∈ S0 | S1 | S2 | S3 | none. Scale and definitions: `rules/qa_and_testing.md §4`
   (not restated here). Write the highest severity found in that round; write
   `none` for a round with no findings.
 escape token: write the literal lowercase word `escape` in the Notes cell of a
-  row when that round reports a finding that is new in round 2 or later AND sits
-  on material an earlier round of the same gate already reviewed. Write it
+  row when that round reports an S0 or S1 finding that is new in round 2 or later
+  AND sits on material an earlier round of the same gate already reviewed
+  (`rules/qa_and_testing.md §4` convergence rule 2; an S2 or S3 carries no token). Write it
   once per row, with no other use of the word `escape` in Notes. Rows without
   such a finding carry no token.
 Example (do not uncomment — Phase 7 writes the real rows):
@@ -129,6 +137,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | QA Agent (Gate 1) | 1 | REJECTED | instructing | S1 | 6 findings at `aa2766e`: QA1-2 and QA1-3 (S1), QA1-1 and QA1-4 (S2), QA1-5 and QA1-6 (S3). `check_fix_reproduces.py` 6 OK, 0 violations; `check_remediation_chain.py` `chains: 0`; `make verify` 0; 1416 passed. |
 | QA Agent (Gate 1) | 2 | REJECTED | charter | S2 | remediation-regression from `bba11b5`. 3 findings at `7e6bbfb`: QA2-1 and QA2-2 (S2, charter), QA2-3 (S2, testifying); 1 S3 note (QA2-4). Round 1: QA1-1, QA1-2, QA1-4, QA1-5 and QA1-6 closed; QA1-3 not closed. `check_fix_reproduces.py` 9 OK, 0 violations; `check_remediation_chain.py` `chains: 0`; `make verify` 0; 1422 passed. |
+| QA Agent (Gate 1) | 3 | REJECTED | charter | S2 | 1 finding at `804e38d` (the gate wrote the token for this S2; removed at transcription per `rules/qa_and_testing.md §4` convergence rule 2, which marks only S0/S1, QA3-2): QA3-1 (S2, charter), an undecodable outbox crashes `intake_lines` and the `/start` briefing; 4 S3 notes (QA3-2..QA3-5). Round 2: QA2-1..QA2-4 closed. No remediation-regression label (`load_json` blames to Wave A `52896f6`). `check_fix_reproduces.py` 12 OK, 0 violations; `chains: 1`, exit 0; `make verify` 0; 1437 passed. |
 
 ---
 
@@ -148,6 +157,11 @@ Filled by the remediator before re-sending a REJECTED round to its gate (`rules/
 | QA Agent (Gate 1) | 2 | `make verify` | 0 |
 | QA Agent (Gate 1) | 2 | `python3 scripts/check_task_scope.py --sprint-dir docs/sprints/058-core-pipeline` | 0 |
 | QA Agent (Gate 1) | 2 | `venv_skillopt/bin/python -m pytest -q tests/` | 0 |
+| QA Agent (Gate 1) | 3 | `python3 scripts/check_fix_reproduces.py --range f0b11f8..HEAD` | 0 |
+| QA Agent (Gate 1) | 3 | `python3 scripts/check_remediation_chain.py --range f0b11f8..HEAD` | 0 |
+| QA Agent (Gate 1) | 3 | `make verify` | 0 |
+| QA Agent (Gate 1) | 3 | `python3 scripts/check_task_scope.py --sprint-dir docs/sprints/058-core-pipeline` | 0 |
+| QA Agent (Gate 1) | 3 | `venv_skillopt/bin/python -m pytest -q tests/` | 0 |
 
 ---
 
@@ -169,6 +183,6 @@ Measured by `principal_agent` per numbered item of the plan's `## Abort criterio
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Locked. Plan APPROVED (`02de746`), Phase 5 passed.
-**Next Phase**: Phase 7, QA Gate 1 round 3 (fresh agent), then Tester Gate 2, on `ai-sprint/058`.
+**Next Phase**: Phase 7, QA Gate 1 round 4 (fresh agent; a 4th consecutive REJECTED of the channel A intake block escalates to `workflows/remediation_workflow.md` Phase 0), then Tester Gate 2, on `ai-sprint/058`.
 
 *Certified under conventional commit standard: feat(scope): message #058*
