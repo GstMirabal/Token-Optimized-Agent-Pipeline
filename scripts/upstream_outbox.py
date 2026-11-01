@@ -134,12 +134,18 @@ def load_json(path: Path) -> Any:
         Any: The decoded document.
 
     Raises:
-        OutboxError: When the file is absent or is not valid JSON.
+        OutboxError: When the file is absent or cannot be decoded: not UTF-8,
+            not valid JSON, an integer over the int-string limit (each a
+            ``ValueError``), nested beyond the recursion limit, or holding a
+            string with a lone surrogate escape, which no UTF-8 output can
+            print (``UnicodeEncodeError``, a ``ValueError``).
     """
     try:
         text = path.read_text(encoding="utf-8")
-        return json.loads(text, object_pairs_hook=_reject_duplicate_keys)
-    except (OSError, json.JSONDecodeError) as exc:
+        document = json.loads(text, object_pairs_hook=_reject_duplicate_keys)
+        json.dumps(document, ensure_ascii=False).encode("utf-8")
+        return document
+    except (OSError, ValueError, RecursionError) as exc:
         raise OutboxError(f"{path}: {exc}") from exc
 
 

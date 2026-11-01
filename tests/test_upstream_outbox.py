@@ -124,6 +124,31 @@ def test_absent_or_malformed_outbox_exits_2(tmp_path: Path) -> None:
     assert _run("check", str(path)).returncode == 2
 
 
+# QA Gate 1 round 3, QA3-1: every decode-time failure is a malformed outbox.
+UNDECODABLE = {
+    "non_utf8": b'{"entries": [\xff]}',
+    "deep_nesting": b'{"entries": [' + b"[" * 100000 + b"]" * 100000 + b"]}",
+    "over_int_limit": b'{"entries": [{"x": ' + b"9" * 5000 + b"}]}",
+    "lone_surrogate": b'{"entries": [{"id": "\\ud800"}]}',
+}
+
+
+@pytest.mark.parametrize("raw", list(UNDECODABLE.values()), ids=list(UNDECODABLE))
+def test_undecodable_outbox_exits_2_without_traceback(tmp_path: Path, raw: bytes) -> None:
+    path = tmp_path / "outbox.json"
+    path.write_bytes(raw)
+    result = subprocess.run(
+        [sys.executable, "-I", str(SCRIPT), "check", str(path)],
+        cwd=REPO,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 2, result.stderr
+    assert "Traceback" not in result.stderr
+    assert str(path) in result.stdout + result.stderr
+
+
 @pytest.mark.parametrize(
     ("text", "family"),
     [

@@ -148,6 +148,45 @@ def test_absent_outbox_is_unhealthy_and_reported(tmp_path: Path) -> None:
     assert "- h1: outbox absent or malformed" in lines
 
 
+# QA Gate 1 round 3, QA3-1: an undecodable outbox is reported, the others listed.
+UNDECODABLE = {
+    "non_utf8": b'{"entries": [\xff]}',
+    "deep_nesting": b'{"entries": [' + b"[" * 100000 + b"]" * 100000 + b"]}",
+    "over_int_limit": b'{"entries": [{"x": ' + b"9" * 5000 + b"}]}",
+    "lone_surrogate": b'{"entries": [{"id": "\\ud800"}]}',
+}
+
+
+@pytest.mark.parametrize("raw", list(UNDECODABLE.values()), ids=list(UNDECODABLE))
+def test_undecodable_outbox_is_reported_and_other_hosts_listed(
+    tmp_path: Path, raw: bytes
+) -> None:
+    bad = tmp_path / "bad.json"
+    bad.write_bytes(raw)
+    good = tmp_path / "good.json"
+    good.write_text(json.dumps({"entries": [_entry()]}), encoding="utf-8")
+    root = tmp_path / "nucleus"
+    root.mkdir()
+    hosts = {"hosts": [{"name": "h1", "outbox": str(bad)}, {"name": "h2", "outbox": str(good)}]}
+    (root / ".upstream_hosts.json").write_text(json.dumps(hosts), encoding="utf-8")
+    lines, healthy = upstream_intake.intake_lines(root)
+    assert not healthy
+    assert lines[1:] == [
+        "- h1: outbox absent or malformed",
+        "- h2: H-7 | drafted | A | scripts/check_gate_log.py",
+    ]
+
+
+@pytest.mark.parametrize("raw", list(UNDECODABLE.values()), ids=list(UNDECODABLE))
+def test_undecodable_hosts_file_is_malformed_registry(tmp_path: Path, raw: bytes) -> None:
+    (tmp_path / ".upstream_hosts.json").write_bytes(raw)
+    lines, healthy = upstream_intake.intake_lines(tmp_path)
+    assert not healthy
+    assert lines == [lines[0]]
+    assert lines[0].startswith("intake queue (channel A): ")
+    assert ".upstream_hosts.json" in lines[0]
+
+
 def test_malformed_hosts_file_is_unhealthy(tmp_path: Path) -> None:
     (tmp_path / ".upstream_hosts.json").write_text('{"hosts": [{"name": "h1"}]}', encoding="utf-8")
     lines, healthy = upstream_intake.intake_lines(tmp_path)
