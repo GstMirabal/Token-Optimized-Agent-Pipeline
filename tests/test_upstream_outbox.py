@@ -117,6 +117,48 @@ def test_duplicate_json_key_exits_2(tmp_path: Path) -> None:
     assert _run("check", str(path)).returncode == 2
 
 
+# QA Gate 1 round 4, QA4-4: the duplicate-key check was quadratic
+# (``keys.count`` per key; 32,000 keys took 5.56 s at boot on host input).
+# Measured as a count of key comparisons, not wall-clock, so it cannot flake.
+class _CountingKey(str):
+    """A JSON key that counts how often it is compared for equality."""
+
+    comparisons = 0
+    __hash__ = str.__hash__
+
+    def __eq__(self, other: object) -> bool:
+        type(self).comparisons += 1
+        return str.__eq__(self, other)
+
+
+def test_duplicate_key_check_compares_keys_a_linear_number_of_times() -> None:
+    size = 400
+    pairs = [(_CountingKey(f"k{n}"), n) for n in range(size)]
+    _CountingKey.comparisons = 0
+    assert upstream_outbox._reject_duplicate_keys(pairs) == {f"k{n}": n for n in range(size)}
+    assert _CountingKey.comparisons <= size
+
+
+@pytest.mark.parametrize(
+    ("pairs", "message"),
+    [
+        ([("b", 1), ("a", 2), ("b", 3), ("a", 4), ("a", 5), ("c", 6)], "duplicate key(s) a, b"),
+        ([("x", 1), ("x", 2)], "duplicate key(s) x"),
+    ],
+)
+def test_duplicate_key_message_lists_each_repeat_once_sorted(
+    pairs: list[tuple[str, int]], message: str
+) -> None:
+    with pytest.raises(upstream_outbox.OutboxError) as raised:
+        upstream_outbox._reject_duplicate_keys(pairs)
+    assert str(raised.value) == message
+
+
+def test_duplicate_key_check_keeps_order_and_values_without_repeats() -> None:
+    pairs = [("z", 1), ("a", [2]), ("m", {"n": 3})]
+    assert list(upstream_outbox._reject_duplicate_keys(pairs).items()) == pairs
+
+
 def test_absent_or_malformed_outbox_exits_2(tmp_path: Path) -> None:
     assert _run("check", str(tmp_path / "absent.json")).returncode == 2
     path = tmp_path / "outbox.json"

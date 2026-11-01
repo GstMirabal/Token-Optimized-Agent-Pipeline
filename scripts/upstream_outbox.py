@@ -54,6 +54,7 @@ import re
 import shlex
 import subprocess
 import sys
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -116,9 +117,11 @@ def _reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
 
     Raises:
         OutboxError: When a key repeats; the last copy would silently win.
+            Counted in one pass (linear in the number of keys), because the
+            object comes from host input.
     """
-    keys = [key for key, _ in pairs]
-    duplicates = sorted({key for key in keys if keys.count(key) > 1})
+    counts = Counter(key for key, _ in pairs)
+    duplicates = sorted(key for key, count in counts.items() if count > 1)
     if duplicates:
         raise OutboxError(f"duplicate key(s) {', '.join(duplicates)}")
     return dict(pairs)
