@@ -126,11 +126,32 @@ def test_done_and_other_channel_entries_are_not_pending(tmp_path: Path) -> None:
 
 
 def test_invalid_or_ungenericized_entries_are_withheld(tmp_path: Path) -> None:
-    root = _nucleus(tmp_path, _entry(genericized=False), _entry(id="H-8", channel="Z"))
+    root = _nucleus(tmp_path, _entry(genericized=False), _entry(id="H-8", status="sent:x", genericized=False))
     lines, healthy = upstream_intake.intake_lines(root)
     assert healthy
     assert lines[1:] == ["- h1: 2 entries withheld (invalid or not genericized)"]
     assert "H-7" not in "\n".join(lines)
+
+
+# QA Gate 1 round 3, QA3-3: only pending channel A entries are counted at all.
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"channel": "B", "genericized": False},
+        {"channel": "C", "genericized": False},
+        {"channel": "Z"},
+        {"channel": ["A"]},
+        {"status": "triaged:accept", "genericized": False},
+        {"status": "shipped:v4.41.0", "pin": "not-a-pin"},
+        {"status": 7},
+    ],
+)
+def test_entry_outside_the_channel_a_queue_is_not_counted(
+    tmp_path: Path, changes: dict[str, Any]
+) -> None:
+    lines, healthy = upstream_intake.intake_lines(_nucleus(tmp_path, _entry(**changes)))
+    assert healthy
+    assert lines[1:] == ["- (none pending)"]
 
 
 def test_empty_queue_says_none_pending(tmp_path: Path) -> None:

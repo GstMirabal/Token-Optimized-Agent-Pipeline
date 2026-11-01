@@ -18,9 +18,12 @@ match): ``name`` matches ``NAME_RE``, ``id`` matches
 ``REF_RE``, ``channel`` is ``A``, and ``nucleus_artifact`` matches
 ``ARTIFACT_RE`` and has no ``..`` segment. A token can still carry words the
 host chose; the triage reads it as data. A host whose ``name`` is not a token
-makes ``.upstream_hosts.json`` malformed. An entry that fails
+makes ``.upstream_hosts.json`` malformed. An entry that is not pending (below)
+is skipped before any counting, whatever its shape. A pending entry that fails
 ``upstream_outbox.entry_errors`` or lacks ``genericized: true`` is counted as
-withheld (invalid or not genericized). A pending entry whose ``id`` is not a
+withheld (invalid or not genericized); that includes a channel A ``drafted``
+entry the host's human has not yet signed, which is pending but not printable.
+A pending entry whose ``id`` is not a
 token is counted as withheld (non-token fields); one whose ``id`` is a token
 but whose ``status`` or ``nucleus_artifact`` is not is withheld on its own line
 naming its ``id``. ``title``, ``defect``, ``evidence`` and ``proposed_change``
@@ -147,15 +150,18 @@ def classify(entry: dict[str, Any]) -> str:
         entry: A raw outbox entry.
 
     Returns:
-        str: ``invalid`` (fails ``entry_errors`` or not genericized), ``done``
-        (not a pending channel A entry), ``non_token`` (its ``id`` is not a
-        token), ``withheld`` (its ``status`` or ``nucleus_artifact`` is not a
-        token) or ``print``.
+        str: ``done`` (not a pending channel A entry, decided first so it is
+        never counted), ``invalid`` (pending, but fails ``entry_errors`` or is
+        not genericized), ``non_token`` (its ``id`` is not a token),
+        ``withheld`` (its ``status`` or ``nucleus_artifact`` is not a token) or
+        ``print``.
     """
+    status = entry.get("status")
+    pending = isinstance(status, str) and status.startswith(("drafted", "sent:"))
+    if entry.get("channel") != "A" or not pending:
+        return "done"
     if entry_errors(entry) or entry["genericized"] is not True:
         return "invalid"
-    if entry["channel"] != "A" or not entry["status"].startswith(("drafted", "sent:")):
-        return "done"
     if not is_token(entry["id"], ID_RE):
         return "non_token"
     return "print" if is_token_entry(entry) else "withheld"
@@ -191,7 +197,8 @@ def pending_lines(host: dict[str, str], entries: list[dict[str, Any]]) -> list[s
     Returns:
         list[str]: One line per pending entry, either its fields or, when its
         ``status`` or ``nucleus_artifact`` is not a token, its ``id`` and the
-        cause; then one line counting entries invalid or not genericized, and
+        cause; then one line counting pending entries invalid or not
+        genericized (an entry that is not pending is never counted), and
         one counting pending entries whose ``id`` is not a token.
     """
     lines: list[str] = []
