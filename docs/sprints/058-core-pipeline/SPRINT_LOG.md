@@ -194,6 +194,6 @@ Measured by `principal_agent` per numbered item of the plan's `## Abort criterio
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Locked. Plan APPROVED (`02de746`), Phase 5 passed.
-**Next Phase**: `workflows/remediation_workflow.md` for the channel A intake block (Phase 0 triggered by QA Gate 1 round 4), then QA Gate 1 round 5 (fresh agent), then Tester Gate 2, on `ai-sprint/058`.
+**Next Phase**: BLOCKED (`TERMINAL_REMEDIATION_LOOP`, `remediation_workflow.md` Phase 3, 2026-11-01). The human decides how to resume and runs `python3 scripts/session_state.py unblock`; then QA Gate 1 round 5 (fresh agent) over `f6fe31e..HEAD`, then Tester Gate 2, then Tester Gate 2, on `ai-sprint/058`.
 
 *Certified under conventional commit standard: feat(scope): message #058*
