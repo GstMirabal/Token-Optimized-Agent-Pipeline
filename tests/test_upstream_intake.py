@@ -346,3 +346,30 @@ def test_unresolvable_home_in_one_outbox_path_lists_the_others(
     code = upstream_intake.main()
     captured = capsys.readouterr()
     _assert_bad_reported_ok_listed(code, captured.out, captured.err)
+
+
+# --- QA Gate 1 round 5: the registry read sits behind the same boundary ---
+class FreshRegistryError(Exception):
+    """An exception type no production code can know about."""
+
+
+@pytest.mark.parametrize("fault", [FreshRegistryError, RuntimeError, PermissionError])
+def test_any_exception_from_load_hosts_exits_2_without_traceback(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    fault: type[Exception],
+) -> None:
+    def broken(_root: Path) -> list[dict[str, str]]:
+        raise fault("HOST-TEXT-MUST-NOT-PRINT")
+
+    monkeypatch.setattr(upstream_intake, "load_hosts", broken)
+    monkeypatch.setattr(upstream_intake, "agents_root", lambda: tmp_path)
+    code = upstream_intake.main()
+    captured = capsys.readouterr()
+    assert code == 2
+    assert "Traceback" not in captured.out + captured.err
+    assert "HOST-TEXT-MUST-NOT-PRINT" not in captured.out + captured.err
+    assert captured.out.splitlines() == [
+        f"intake queue (channel A): .upstream_hosts.json unreadable ({fault.__name__})"
+    ]

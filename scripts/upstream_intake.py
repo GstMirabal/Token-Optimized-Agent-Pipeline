@@ -258,6 +258,9 @@ def intake_lines(root: Path) -> tuple[list[str], bool]:
         hosts = load_hosts(root)
     except OutboxError as exc:
         return [f"intake queue (channel A): {exc}"], False
+    except Exception as exc:  # noqa: BLE001 - total, like the per-host boundary
+        # The type name only: the message of an unexpected error can quote host text.
+        return [f"intake queue (channel A): {HOSTS_FILE} unreadable ({type(exc).__name__})"], False
     if not hosts:
         return [f"intake queue (channel A): no {HOSTS_FILE} registered"], True
     lines = ["intake queue (channel A): id | status | channel | nucleus_artifact"]
