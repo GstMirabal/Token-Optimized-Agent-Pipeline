@@ -149,6 +149,25 @@ def load_json(path: Path) -> Any:
         raise OutboxError(f"{path}: {exc}") from exc
 
 
+def read_text_file(path: Path) -> str:
+    """Read a UTF-8 text file that is not JSON (issue body, titles, rule file).
+
+    Args:
+        path: File to read.
+
+    Returns:
+        str: The file's text.
+
+    Raises:
+        OutboxError: When the file is absent or unreadable (``OSError``) or
+            not UTF-8 (``UnicodeDecodeError``, a ``ValueError``).
+    """
+    try:
+        return path.read_text(encoding="utf-8")
+    except (OSError, ValueError) as exc:
+        raise OutboxError(f"{path}: {exc}") from exc
+
+
 def load_entries(path: Path) -> list[dict[str, Any]]:
     """Read an outbox and return its entries.
 
@@ -436,15 +455,8 @@ def cmd_check_issue(args: argparse.Namespace) -> int:
         int: 0 once the labels are printed.
     """
     config = load_config(agents_root())
-    try:
-        body = Path(args.body_file).read_text(encoding="utf-8")
-        titles_text = (
-            Path(args.open_titles_file).read_text(encoding="utf-8")
-            if args.open_titles_file
-            else ""
-        )
-    except OSError as exc:
-        raise OutboxError(str(exc)) from exc
+    body = read_text_file(Path(args.body_file))
+    titles_text = read_text_file(Path(args.open_titles_file)) if args.open_titles_file else ""
     titles = [line for line in titles_text.splitlines() if line.strip()]
     for label in issue_labels(body, config, titles, args.author_recent_count):
         print(label)
@@ -537,11 +549,17 @@ def _git(repo: Path, *argv: str) -> str | None:
         *argv: Git arguments.
 
     Returns:
-        str | None: Standard output, or None on a non-zero exit.
+        str | None: Standard output, or None on a non-zero exit, when git
+            cannot run (``OSError``) or when its output is not UTF-8 (a
+            ``ValueError``, e.g. under ``i18n.logOutputEncoding``).
     """
-    result = subprocess.run(
-        ["git", "-C", str(repo), *argv], capture_output=True, text=True, check=False
-    )
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(repo), *argv], capture_output=True, text=True,
+            encoding="utf-8", check=False,
+        )
+    except (OSError, ValueError):
+        return None
     return result.stdout if result.returncode == 0 else None
 
 
@@ -637,7 +655,7 @@ def delta_tags(rules: Path) -> list[tuple[str, str]]:
     """
     tags: list[tuple[str, str]] = []
     for path in sorted(rules.rglob("*.md")):
-        lines = path.read_text(encoding="utf-8").splitlines()
+        lines = read_text_file(path).splitlines()
         tags += [
             (f"{path}:{number}", entry_id)
             for number, line in enumerate(lines, start=1)

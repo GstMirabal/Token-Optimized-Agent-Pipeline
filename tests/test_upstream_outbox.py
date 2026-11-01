@@ -326,3 +326,93 @@ def test_deltas_silent_while_not_shipped(tmp_path: Path) -> None:
     rules.mkdir()
     (rules / "local.md").write_text("Rule A outbox:H-7\n", encoding="utf-8")
     assert _run("deltas", str(outbox), "--rules", str(rules)).stdout == ""
+
+
+# Pre-emptive QA Gate 1 round 4, U12: every file the script reads fails closed
+# on decode. The outbox, config and identity files go through load_json
+# (QA3-1); the issue body, the open titles file, the rule files of `deltas` and
+# the git history of `aged` were read outside it.
+NOT_UTF8 = b"### id\n\nH-7 outbox:H-7 \xff\n"
+
+
+def _read_sites(tmp_path: Path) -> dict[str, tuple[list[str], Path]]:
+    bad = tmp_path / "bad.md"
+    bad.write_bytes(NOT_UTF8)
+    raw = tmp_path / "raw.json"
+    raw.write_bytes(UNDECODABLE["non_utf8"])
+    body = tmp_path / "body.md"
+    body.write_text(_issue(), encoding="utf-8")
+    outbox = _outbox(tmp_path, _entry())
+    rules = tmp_path / "rules"
+    rules.mkdir()
+    (rules / "local.md").write_bytes(NOT_UTF8)
+    folder = tmp_path / "folder"
+    (folder / "dir.md").mkdir(parents=True)
+    return {
+        "check-outbox": (["check", str(raw)], raw),
+        "check-issue-body": (["check-issue", "--body-file", str(bad)], bad),
+        "check-issue-open-titles": (
+            ["check-issue", "--body-file", str(body), "--open-titles-file", str(bad)], bad
+        ),
+        "export-outbox": (["export", str(raw), "--id", "H-7", "--out", str(tmp_path / "o.md")], raw),
+        "aged-outbox": (["aged", str(raw)], raw),
+        "deltas-outbox": (["deltas", str(raw), "--rules", str(rules)], raw),
+        "deltas-rule-file": (["deltas", str(outbox), "--rules", str(rules)], rules / "local.md"),
+        "deltas-rule-is-dir": (["deltas", str(outbox), "--rules", str(folder)], folder / "dir.md"),
+    }
+
+
+SITES = (
+    "check-outbox", "check-issue-body", "check-issue-open-titles", "export-outbox",
+    "aged-outbox", "deltas-outbox", "deltas-rule-file", "deltas-rule-is-dir", "aged-git-log",
+)
+
+
+def _aged_with_undecodable_log(tmp_path: Path) -> list[str]:
+    outbox = _repo_with_outbox(tmp_path, 1)
+    (outbox.parent / "g").write_text("x", encoding="utf-8")
+    _git(outbox.parent, "add", "g")
+    _git(outbox.parent, "commit", "-q", "-m", "feat: café #003")
+    _git(outbox.parent, "config", "i18n.logOutputEncoding", "latin1")
+    return ["aged", str(outbox)]
+
+
+@pytest.mark.parametrize("site", SITES)
+def test_every_read_fails_closed_without_traceback(tmp_path: Path, site: str) -> None:
+    if site == "aged-git-log":
+        argv, expected, marker = _aged_with_undecodable_log(tmp_path), 0, "[AGED?] H-7"
+    else:
+        argv, named = _read_sites(tmp_path)[site]
+        expected, marker = 2, str(named)
+    result = subprocess.run(
+        [sys.executable, "-I", str(SCRIPT), *argv],
+        cwd=REPO,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == expected, result.stderr
+    assert "Traceback" not in result.stderr
+    assert marker in result.stdout
+
+
+@pytest.mark.parametrize("subcommand", ["check-issue", "aged", "export"])
+def test_config_and_identity_reads_fail_closed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], subcommand: str
+) -> None:
+    """The framework config and identity files are read through load_json too."""
+    root = tmp_path / "root"
+    (root / "config").mkdir(parents=True)
+    for name in (upstream_outbox.CONFIG_PATH, upstream_outbox.IDENTITY_PATH):
+        (root / name).write_bytes(UNDECODABLE["non_utf8"])
+    monkeypatch.setattr(upstream_outbox, "agents_root", lambda: root)
+    body = tmp_path / "body.md"
+    body.write_text(_issue(), encoding="utf-8")
+    outbox = str(_outbox(tmp_path, _entry()))
+    argv = {
+        "check-issue": ["check-issue", "--body-file", str(body)],
+        "aged": ["aged", outbox],
+        "export": ["export", outbox, "--id", "H-7", "--out", str(tmp_path / "o.md")],
+    }[subcommand]
+    assert upstream_outbox.main(argv) == 2
+    assert str(root / "config") in capsys.readouterr().out
