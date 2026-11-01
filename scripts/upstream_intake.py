@@ -218,6 +218,33 @@ def pending_lines(host: dict[str, str], entries: list[dict[str, Any]]) -> list[s
     return lines
 
 
+def host_lines(host: dict[str, str]) -> tuple[list[str], bool]:
+    """Build the lines of one host behind a total fault boundary.
+
+    Every step of one host — resolving its outbox path, reading it, and
+    building its pending lines — sits inside a single ``except Exception``.
+    The boundary is deliberately not a list of exception types: QA3-1 (a
+    decode error) and QA4-1 (``Path.expanduser`` raising ``RuntimeError``)
+    were two members of one family, "an exception from one host aborts every
+    host", and a list closes only the members already found. Keep any new
+    per-host step inside the ``try``.
+
+    Args:
+        host: The host record, already validated by ``load_hosts``.
+
+    Returns:
+        tuple[list[str], bool]: That host's lines, and False when any step
+        raised, in which case the only line is
+        ``- <name>: outbox absent or malformed``. The exception's type name,
+        never its message (which can quote host text), is logged to stderr.
+    """
+    try:
+        return pending_lines(host, load_entries(Path(host["outbox"]).expanduser())), True
+    except Exception as exc:  # noqa: BLE001 - the per-host boundary is total by design
+        print(f"upstream_intake: host {host['name']}: {type(exc).__name__}", file=sys.stderr)
+        return [f"- {host['name']}: outbox absent or malformed"], False
+
+
 def intake_lines(root: Path) -> tuple[list[str], bool]:
     """Build the intake queue section for the boot briefing.
 
@@ -236,13 +263,9 @@ def intake_lines(root: Path) -> tuple[list[str], bool]:
     lines = ["intake queue (channel A): id | status | channel | nucleus_artifact"]
     healthy = True
     for host in hosts:
-        try:
-            entries = load_entries(Path(host["outbox"]).expanduser())
-        except OutboxError:
-            lines.append(f"- {host['name']}: outbox absent or malformed")
-            healthy = False
-            continue
-        lines += pending_lines(host, entries)
+        own, ok = host_lines(host)
+        lines += own
+        healthy = healthy and ok
     if len(lines) == 1:
         lines.append("- (none pending)")
     return lines, healthy

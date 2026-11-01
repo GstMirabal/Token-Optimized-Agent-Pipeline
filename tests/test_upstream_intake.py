@@ -275,3 +275,74 @@ def test_withheld_counts_keep_their_causes_apart(tmp_path: Path) -> None:
         "- h1: 1 entry withheld (invalid or not genericized)",
         "- h1: 1 entry withheld (non-token fields)",
     ]
+
+
+# --- QA Gate 1 round 4, QA4-1: the per-host fault boundary is total ---
+# The family (QA3-1 decode, QA4-1 ``expanduser``) is "any exception from one
+# host aborts every host". The test does not enumerate causes: each injected
+# type is unrelated to the others and one is defined here, so no handler that
+# lists types can pass it.
+
+
+class FreshHostError(Exception):
+    """An exception type no production code can know about."""
+
+
+FAULTS = [RuntimeError, KeyError, TypeError, AttributeError, ZeroDivisionError, FreshHostError]
+# Each stage of one host's processing: the read and the building of its lines.
+STAGES = ["load_entries", "pending_lines"]
+
+
+def _two_hosts(tmp_path: Path, bad_outbox: str) -> Path:
+    good = tmp_path / "good.json"
+    good.write_text(json.dumps({"entries": [_entry()]}), encoding="utf-8")
+    root = tmp_path / "nucleus"
+    root.mkdir()
+    hosts = {"hosts": [{"name": "bad", "outbox": bad_outbox}, {"name": "ok", "outbox": str(good)}]}
+    (root / ".upstream_hosts.json").write_text(json.dumps(hosts), encoding="utf-8")
+    return root
+
+
+def _assert_bad_reported_ok_listed(code: int, out: str, err: str) -> None:
+    assert code == 2
+    assert "Traceback" not in out + err
+    assert out.splitlines()[1:] == [
+        "- bad: outbox absent or malformed",
+        "- ok: H-7 | drafted | A | scripts/check_gate_log.py",
+    ]
+
+
+@pytest.mark.parametrize("stage", STAGES)
+@pytest.mark.parametrize("fault", FAULTS, ids=[f.__name__ for f in FAULTS])
+def test_any_exception_from_one_host_reports_it_and_lists_the_others(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    stage: str,
+    fault: type[Exception],
+) -> None:
+    bad = tmp_path / "bad.json"
+    bad.write_text(json.dumps({"entries": [_entry(id="H-BAD")]}), encoding="utf-8")
+    root = _two_hosts(tmp_path, str(bad))
+    real = getattr(upstream_intake, stage)
+
+    def faulty(*args: Any) -> Any:
+        if args[0] == bad or (isinstance(args[0], dict) and args[0].get("name") == "bad"):
+            raise fault("injected")
+        return real(*args)
+
+    monkeypatch.setattr(upstream_intake, stage, faulty)
+    monkeypatch.setattr(upstream_intake, "agents_root", lambda: root)
+    code = upstream_intake.main()
+    captured = capsys.readouterr()
+    _assert_bad_reported_ok_listed(code, captured.out, captured.err)
+
+
+def test_unresolvable_home_in_one_outbox_path_lists_the_others(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    root = _two_hosts(tmp_path, "~nosuchuser-r5-qa41/outbox.json")
+    monkeypatch.setattr(upstream_intake, "agents_root", lambda: root)
+    code = upstream_intake.main()
+    captured = capsys.readouterr()
+    _assert_bad_reported_ok_listed(code, captured.out, captured.err)
