@@ -67,7 +67,7 @@ Tracking of atomic goals achieved during the session. Work units: 48 (A 17, C 9,
     - `[x]` Plan status APPROVED, recorded at `02de746`.
     - `[x]` `audit_plan.py` exits 0.
     - `[x]` Draft `docs/plans/058-upstream-channel-and-reproduce-first-DRAFT.md` deleted after approval.
-- [ ] **Phase 7 (Quality Gate)**: QA Gate 1 round 1 REJECTED (instructing, S1); round 2 REJECTED (charter, S2, first `remediation-regression` of the sprint); round 3 REJECTED (charter, S2).
+- [ ] **Phase 7 (Quality Gate)**: QA Gate 1 round 1 REJECTED (instructing, S1); round 2 REJECTED (charter, S2, first `remediation-regression` of the sprint); round 3 REJECTED (charter, S2); round 4 REJECTED (charter, S2), the `remediation_workflow.md` Phase 0 trigger.
     - `[x]` Round 1 remediation, all six findings (the human chose QA1-3 option b and asked to include the optional S3 findings):
     - `[x]` QA1-1 and QA1-2: `fe8996d` (`workflows/pipeline_workflow.md`: `<base>..HEAD` and the error exit) and `6d6718f` (`rules/qa_and_testing.md` A-1: the error exit and the shared fix-subject pattern). `python3 scripts/check_remediation_chain.py --range nosuchref..HEAD` prints `check_remediation_chain: error:` and no `chains:` line.
     - `[x]` QA1-3: `bba11b5` (`fix(upstream-intake)`): the briefing drops `title` and prints `id`, `status`, `channel` and `nucleus_artifact` only when each is a token; a non-token host `name` exits 2. `Repro: tests/test_upstream_intake.py::test_host_text_never_enters_the_briefing`. It also edits `tests/test_session_start.py`, which asserted the old title suffix. Plan D2 amended at `c753df7`.
@@ -138,6 +138,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 | QA Agent (Gate 1) | 1 | REJECTED | instructing | S1 | 6 findings at `aa2766e`: QA1-2 and QA1-3 (S1), QA1-1 and QA1-4 (S2), QA1-5 and QA1-6 (S3). `check_fix_reproduces.py` 6 OK, 0 violations; `check_remediation_chain.py` `chains: 0`; `make verify` 0; 1416 passed. |
 | QA Agent (Gate 1) | 2 | REJECTED | charter | S2 | remediation-regression from `bba11b5`. 3 findings at `7e6bbfb`: QA2-1 and QA2-2 (S2, charter), QA2-3 (S2, testifying); 1 S3 note (QA2-4). Round 1: QA1-1, QA1-2, QA1-4, QA1-5 and QA1-6 closed; QA1-3 not closed. `check_fix_reproduces.py` 9 OK, 0 violations; `check_remediation_chain.py` `chains: 0`; `make verify` 0; 1422 passed. |
 | QA Agent (Gate 1) | 3 | REJECTED | charter | S2 | 1 finding at `804e38d` (the gate wrote the token for this S2; removed at transcription per `rules/qa_and_testing.md §4` convergence rule 2, which marks only S0/S1, QA3-2): QA3-1 (S2, charter), an undecodable outbox crashes `intake_lines` and the `/start` briefing; 4 S3 notes (QA3-2..QA3-5). Round 2: QA2-1..QA2-4 closed. No remediation-regression label (`load_json` blames to Wave A `52896f6`). `check_fix_reproduces.py` 12 OK, 0 violations; `chains: 1`, exit 0; `make verify` 0; 1437 passed. |
+| QA Agent (Gate 1) | 4 | REJECTED | charter | S2 | 1 finding at `e7bfaac`: QA4-1 (S2, charter), a `.upstream_hosts.json` outbox path that `Path.expanduser` cannot resolve (`~user` with no such user) raises `RuntimeError` out of `intake_lines` (`scripts/upstream_intake.py:240`) and the `/start` briefing, exit 1, the other hosts unlisted; second occurrence of the QA3-1 family (convergence rule 3). 3 S3 notes (QA4-2..QA4-4). Round 3: QA3-1..QA3-5 closed. No remediation-regression label (`upstream_intake.py:240` blames to feat `81cdd25`). Fourth consecutive REJECTED of the channel A intake block: `workflows/remediation_workflow.md` Phase 0 trigger (`>3`). `check_fix_reproduces.py` 16 OK, 0 violations; `chains: 1`, exit 0; `make verify` 0; 1482 passed. |
 
 ---
 
@@ -183,6 +184,6 @@ Measured by `principal_agent` per numbered item of the plan's `## Abort criterio
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Locked. Plan APPROVED (`02de746`), Phase 5 passed.
-**Next Phase**: Phase 7, QA Gate 1 round 4 (fresh agent; a 4th consecutive REJECTED of the channel A intake block escalates to `workflows/remediation_workflow.md` Phase 0), then Tester Gate 2, on `ai-sprint/058`.
+**Next Phase**: `workflows/remediation_workflow.md` for the channel A intake block (Phase 0 triggered by QA Gate 1 round 4), then QA Gate 1 round 5 (fresh agent), then Tester Gate 2, on `ai-sprint/058`.
 
 *Certified under conventional commit standard: feat(scope): message #058*
