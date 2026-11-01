@@ -32,7 +32,7 @@ CLI flags read from top-level `--help` (`graphify update --help` and `extract --
 | `language.<ext>=<name>` | `rcfile.py:72` | Maps suffixes only; does not touch `_is_config_json` |
 | `GRAPHIFY_OUT`, `GRAPHIFY_OUT_NAME`, `GRAPHIFY_INSTALLED_FILES`, `GRAPHIFY_GOOGLE_WORKSPACE` | `detect.py`, `rcfile.py` | None concerns JSON |
 
-Result: no flag, environment variable or config key re-includes data JSON. A file is indexed only if its name or root keys match the config rules, or through the LLM semantic pass. Override run not executed (no override exists).
+Result: no flag, environment variable or config key re-includes data JSON. A file is indexed only if its name or root keys match the config rules, or through the LLM semantic pass (corrected below: the semantic pass does not receive JSON). Override run not executed (no override exists).
 
 ## (b) Graph size on f0b11f8
 
@@ -110,6 +110,19 @@ Plan D7 criterion: the yes branch requires an option from (a). Measured: none ex
 | **Pin** | `graphifyy==0.8.30` stays in `requirements-core.txt`; D-03..D-07 are not executed. |
 | **Dependabot #89** | Closed on 2026-10-31 citing this document (#88 closed the same day as superseded by `42355f7`). |
 | **Upstream report** | An issue to graphify asks for an option that indexes data JSON in AST mode, with the figures in (a) and (b): https://github.com/Graphify-Labs/graphify/issues/4898 (filed 2026-10-31). |
-| **Known issue** | `KI-058-2`, entered in the program queue at the Sprint 058 close extract. Exit condition: graphify ships an option that re-includes data JSON; each later Dependabot bump of `graphifyy` checks for it against this document. |
+| **Known issue** | `KI-058-2`, entered in the program queue at the Sprint 058 close extract. Exit condition: a `graphifyy` release older than 24 h ships `json.include` / `--include-json` (upstream PR https://github.com/Graphify-Labs/graphify/pull/4911, open on 2026-11-01); the bump re-runs (b) with the include globs and checks that the 55 JSON sources return, including under parallel workers. |
 | **Alternatives rejected** | Adding `"$schema"` to the 55 files to pass `_is_config_json` (edits vendored skills and fixtures, and depends on a heuristic that can change in any release). A local extractor that adds config JSON nodes to `graph.json` after `graphify update` (a new mechanism with no measured benefit of 0.9.x to pay for it). |
 | **Consumer affected by a future bump** | `scripts/graph_reconcile.py` reads `graphify-out/graph.json` and lists tracked files without a node, so a bump without the option adds the 55 files to `graphify-out/unmapped_files.json`. |
+
+
+## Upstream corrections (2026-10-31)
+
+A contributor reproduced the report on 0.9.97 in https://github.com/Graphify-Labs/graphify/issues/4898 and corrected two statements of this document. The measured figures in (a)-(c) are unchanged.
+
+| Statement here | Correction upstream |
+| :--- | :--- |
+| The skip started at 0.9.70 (Sprint 058 plan, Dependabot #89 title) | `_is_config_json()` was added in `a37672f2`, first released in v0.8.37; the 0.9.70 diff does not touch `json_config.py`. The pin 0.8.30 predates it. |
+| Data JSON is left to the LLM semantic pass (`extract.py:8855-8859` comment) | The semantic pass receives only documents, papers and images (`cli.py:4108`), so `graphify extract --mode deep` does not index these files either. |
+| (not observed here) | The manifest stamps the skipped files, so the next `update` reports them as cached. |
+
+Proposed fix: PR https://github.com/Graphify-Labs/graphify/pull/4911 adds `json.include=<glob>` in `.graphifyrc` and `--include-json GLOB` on `update` and `extract`. Ignore files, the secret filter and JSON Schema rejection still win, and a policy change invalidates the cache without `--force`. The upstream review bot flagged one item that matters to this repository: the policy is thread-local, and pool workers receive it only through `_worker_init`. Not verified upstream.
