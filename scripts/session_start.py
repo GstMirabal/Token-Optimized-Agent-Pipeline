@@ -163,7 +163,8 @@ def section_upstream(root: Path) -> list[str]:
     """Summarise the upstream register and, in the nucleus, the intake queue.
 
     The channel A queue (``upstream_intake.py``, Sprint 058 plan D2) prints
-    structured fields only, so host free text never enters the briefing.
+    only the fields that fully match its token grammar. A token can still
+    carry words the host chose; the triage reads it as data.
 
     Args:
         root: Framework root.
