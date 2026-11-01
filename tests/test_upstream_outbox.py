@@ -328,6 +328,26 @@ def test_deltas_silent_while_not_shipped(tmp_path: Path) -> None:
     assert _run("deltas", str(outbox), "--rules", str(rules)).stdout == ""
 
 
+# QA Gate 1 round 4, QA4-2: an outbox that parses but carries an unhashable
+# ``id`` crashed ``deltas`` with TypeError. Every non-string id is skipped and
+# reported by position; the other entries are still evaluated.
+@pytest.mark.parametrize("bad_id", [["H-7"], {"x": 1}, 7, None], ids=["list", "dict", "int", "null"])
+def test_deltas_skips_a_non_string_id_and_still_evaluates_the_rest(
+    tmp_path: Path, bad_id: Any
+) -> None:
+    outbox = _outbox(tmp_path, _entry(id=bad_id), _entry(status="shipped:v4.41.0"))
+    rules = tmp_path / "rules"
+    rules.mkdir()
+    (rules / "local.md").write_text("Rule A outbox:H-7\n", encoding="utf-8")
+    result = _run("deltas", str(outbox), "--rules", str(rules))
+    assert "Traceback" not in result.stdout + result.stderr
+    assert result.returncode == 0
+    assert result.stdout.splitlines() == [
+        "[SKIP] entry 1: id is not a string",
+        f"[DELTA] {rules / 'local.md'}:1: outbox:H-7 is shipped:v4.41.0; delete the host delta",
+    ]
+
+
 # Pre-emptive QA Gate 1 round 4, U12: every file the script reads fails closed
 # on decode. The outbox, config and identity files go through load_json
 # (QA3-1); the issue body, the open titles file, the rule files of `deltas` and

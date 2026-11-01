@@ -629,13 +629,26 @@ def aged_line(entry_id: str, count: int | None, limit: int) -> str:
 def cmd_deltas(args: argparse.Namespace) -> int:
     """Run ``deltas``: list host rule deltas whose outbox entry has shipped.
 
+    An entry whose ``id`` is not a string (a list or an object would not even
+    hash) cannot be named by an ``outbox:<id>`` tag: it is skipped and
+    reported by its 1-based position, and the other entries are evaluated.
+
     Args:
         args: Parsed arguments with ``outbox`` and ``rules``.
 
     Returns:
-        int: 0 always once the outbox parses (advisory, plan D4 element 6).
+        int: 0 once the outbox and every rule file are read (advisory, plan
+        D4 element 6). An outbox or a rule file that is absent or cannot be
+        decoded raises ``OutboxError``, which ``main`` turns into exit 2
+        (since ``8b751ed``).
     """
-    status = {e.get("id"): str(e.get("status")) for e in load_entries(Path(args.outbox))}
+    status: dict[str, str] = {}
+    for position, entry in enumerate(load_entries(Path(args.outbox)), start=1):
+        entry_id = entry.get("id")
+        if not isinstance(entry_id, str):
+            print(f"[SKIP] entry {position}: id is not a string")
+            continue
+        status[entry_id] = str(entry.get("status"))
     for where, entry_id in delta_tags(Path(args.rules)):
         state = status.get(entry_id)
         if state is None or state.startswith("shipped:"):
