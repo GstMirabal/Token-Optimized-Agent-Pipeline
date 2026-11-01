@@ -93,6 +93,14 @@ def test_invalid_entry_exits_2(tmp_path: Path, changes: dict[str, Any]) -> None:
     assert result.returncode == 2, result.stdout
 
 
+def test_id_with_trailing_newline_is_invalid() -> None:
+    """QA2-1: ``$`` matches before a trailing newline; the id check must not."""
+    assert upstream_outbox.entry_errors(_entry()) == []
+    assert "`id` must match [A-Za-z0-9][A-Za-z0-9._-]*" in upstream_outbox.entry_errors(
+        _entry(id="H-2\n")
+    )
+
+
 def test_missing_key_exits_2(tmp_path: Path) -> None:
     entry = _entry()
     del entry["status"]

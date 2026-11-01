@@ -81,7 +81,8 @@ FIELDS = (
 TEXT_FIELDS = ("title", "defect", "nucleus_artifact", "proposed_change", "pin")
 SCANNED_FIELDS = ("title", "defect", "nucleus_artifact", "proposed_change")
 CHANNELS = ("A", "B", "C")
-ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+# Applied with ``fullmatch``: ``$`` also matches before a trailing newline (QA2-1).
+ID_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
 STATUS_PATTERN = re.compile(r"^(?:drafted|(?:sent|triaged|shipped|rejected):\S.*)$")
 PIN_PATTERN = re.compile(r"^v?(\d+)\.(\d+)\.(\d+)$")
 SPRINT_SUFFIX = re.compile(r"#(\d+)\s*$")
@@ -279,7 +280,7 @@ def entry_errors(entry: dict[str, Any]) -> list[str]:
     errors = _shape_errors(entry)
     if errors:
         return errors
-    if not ID_PATTERN.match(entry["id"]):
+    if not ID_PATTERN.fullmatch(entry["id"]):
         errors.append("`id` must match [A-Za-z0-9][A-Za-z0-9._-]*")
     if entry["channel"] not in CHANNELS:
         errors.append("`channel` must be A, B or C")
