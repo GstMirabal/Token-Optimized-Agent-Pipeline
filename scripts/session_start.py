@@ -164,7 +164,10 @@ def section_upstream(root: Path) -> list[str]:
 
     The channel A queue (``upstream_intake.py``, Sprint 058 plan D2) prints
     only the fields that fully match its token grammar. A token can still
-    carry words the host chose; the triage reads it as data.
+    carry words the host chose; the triage reads it as data. Any exception
+    from the queue costs one ``unreadable (<ExcType>)`` line, never the boot;
+    the type name is printed and the message, which can quote host text, is
+    not.
 
     Args:
         root: Framework root.
@@ -174,7 +177,10 @@ def section_upstream(root: Path) -> list[str]:
     """
     lines = ["## Open upstream findings", *_findings_summary(root)]
     if is_nucleus():
-        lines += intake_lines(root)[0]
+        try:
+            lines += intake_lines(root)[0]
+        except Exception as exc:  # noqa: BLE001 - the boot must survive any intake fault
+            lines.append(f"intake queue (channel A): unreadable ({type(exc).__name__})")
     return lines
 
 
