@@ -832,6 +832,28 @@ def test_missing_test_refusal_does_not_prescribe_relabelling():
 
 
 
+# --- Gate 1 round 2 QA2-4(b): every fix subject form, the shared FIX_SUBJECT_RE ---
+
+@pytest.mark.parametrize("subject", [
+    "fix: reject empty input #058",
+    "fix!: reject empty input #058",
+    "fix(hooks)!: reject empty input #058",
+])
+def test_every_fix_subject_form_staging_source_needs_a_trailer(subject):
+    reason = on_commit.audit_regression_test(subject, FIX_STAGED)
+    assert reason is not None
+    assert "Repro: <test id>" in reason
+
+
+@pytest.mark.parametrize("subject", [
+    "fixup! reject empty input #058",
+    "fixes: reject empty input #058",
+    "feat: fix empty input #058",
+])
+def test_non_fix_subjects_are_unaffected(subject):
+    assert on_commit.audit_regression_test(subject, FIX_STAGED) is None
+
+
 # --- warn_remediation_chain (A-1 warning, B-06) ---------------------------
 
 

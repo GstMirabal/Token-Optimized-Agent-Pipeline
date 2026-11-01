@@ -804,6 +804,10 @@ def audit_regression_test(message: str, staged: list[str]) -> str | None:
     the replay `scripts/check_fix_reproduces.py --range <base>..HEAD` at QA
     Gate 1 (`RA-13 SEQUENTIAL_GATES`; a per-commit replay is too slow for a hook).
 
+    A fix commit is any subject `FIX_SUBJECT_RE` matches (`fix(`, `fix:`,
+    `fix!:`, `fix(x)!:`), the pattern `warn_remediation_chain` also uses; the
+    messages below say `fix(` for all of them.
+
     Exempt by design, following the PR #27 lesson that a gate must recognise
     the legitimate case instead of blocking everything that resembles the
     illegitimate one: a `fix(` commit that stages no source file at all has
@@ -827,8 +831,8 @@ def audit_regression_test(message: str, staged: list[str]) -> str | None:
     Returns:
         str | None: Failure reason, or None when the commit passes.
     """
-    if not message.startswith("fix("):
-        return None
+    if not FIX_SUBJECT_RE.match(message.lstrip()):
+        return None  # Any fix form: `fix(`, `fix:`, `fix!:`, `fix(x)!:` (QA2-4(b)).
     if not any(is_source_path(path) for path in staged):
         return None  # Tests, documentation or .yml/.yaml/.toml configuration only.
     if any(c.kind == "manual" for c in parse_trailers(message)):
