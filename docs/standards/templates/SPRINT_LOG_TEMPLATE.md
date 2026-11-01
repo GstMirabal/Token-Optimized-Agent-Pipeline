@@ -46,16 +46,17 @@ and a fabricated row would teach authors to invent verdicts
 Verdict vocabulary (`rules/qa_and_testing.md §4`, `RA-17`):
   Verdict ∈ APPROVED | REJECTED | RECORD
   APPROVED  → Class cell empty
-  REJECTED  → Class ∈ charter | instructing   (3rd consecutive REJECTED of one
-              logic block → workflows/remediation_workflow.md)
+  REJECTED  → Class ∈ charter | instructing   (more than 3 consecutive REJECTED
+              of one logic block → workflows/remediation_workflow.md Phase 0)
   RECORD    → Class = testifying               (does NOT count toward remediation)
 Gate cell: Gate 1 row starts with "QA"; Gate 2 row starts with "Tester".
 Severity cell ∈ S0 | S1 | S2 | S3 | none. Scale and definitions: `rules/qa_and_testing.md §4`
   (not restated here). Write the highest severity found in that round; write
   `none` for a round with no findings.
 escape token: write the literal lowercase word `escape` in the Notes cell of a
-  row when that round reports a finding that is new in round 2 or later AND sits
-  on material an earlier round of the same gate already reviewed. Write it
+  row when that round reports an S0 or S1 finding that is new in round 2 or later
+  AND sits on material an earlier round of the same gate already reviewed
+  (`rules/qa_and_testing.md §4` convergence rule 2; an S2 or S3 carries no token). Write it
   once per row, with no other use of the word `escape` in Notes. Rows without
   such a finding carry no token.
 Example (do not uncomment — Phase 7 writes the real rows):
