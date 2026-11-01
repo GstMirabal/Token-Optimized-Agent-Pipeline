@@ -12,7 +12,7 @@ made without `start`, without `close`, or without either.
 > [!IMPORTANT]
 > **This workflow reverts nothing.** The work is good; what is missing is its
 > record. Confusing this with `workflows/remediation_workflow.md` — which
-> revokes bad work with `git restore .` after three consecutive rejections —
+> revokes bad work with `git restore .` after more than 3 consecutive rejections —
 > would destroy exactly the work that needs documenting.
 
 ## Why it exists
