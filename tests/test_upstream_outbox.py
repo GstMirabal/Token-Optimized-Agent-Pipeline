@@ -416,3 +416,34 @@ def test_config_and_identity_reads_fail_closed(
     }[subcommand]
     assert upstream_outbox.main(argv) == 2
     assert str(root / "config") in capsys.readouterr().out
+
+
+STATUS_ERROR = "`status` must be drafted, or sent:/triaged:/shipped:/rejected: + text"
+
+
+@pytest.mark.parametrize(
+    ("status", "valid"),
+    [
+        ("drafted", True),
+        ("sent:#4 by mail", True),
+        ("triaged:accept", True),
+        ("shipped:v4.41.0", True),
+        ("rejected:dup of H-1", True),
+        ("drafted\n", False),
+        ("sent:x\n", False),
+        ("shipped:v4.41.0\n", False),
+        ("sent:x\ny", False),
+        ("sent:", False),
+    ],
+)
+def test_status_is_full_matched(status: str, valid: bool) -> None:
+    """U13: ``$`` matches before a trailing newline; the status check must not."""
+    assert (STATUS_ERROR not in upstream_outbox.entry_errors(_entry(status=status))) is valid
+
+
+@pytest.mark.parametrize("pin", ["v4.40.0\n", "4.40.0\n", " v4.40.0", "v4.40.0 "])
+def test_pin_is_full_matched(pin: str) -> None:
+    """U13: ``parse_pin`` stripped its input, so a newline-padded pin validated."""
+    assert upstream_outbox.parse_pin(pin) is None
+    assert "`pin` must be vX.Y.Z" in upstream_outbox.entry_errors(_entry(pin=pin))
+    assert upstream_outbox.parse_pin(pin.strip()) == (4, 40, 0)

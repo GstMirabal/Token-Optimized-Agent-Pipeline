@@ -83,8 +83,8 @@ SCANNED_FIELDS = ("title", "defect", "nucleus_artifact", "proposed_change")
 CHANNELS = ("A", "B", "C")
 # Applied with ``fullmatch``: ``$`` also matches before a trailing newline (QA2-1).
 ID_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
-STATUS_PATTERN = re.compile(r"^(?:drafted|(?:sent|triaged|shipped|rejected):\S.*)$")
-PIN_PATTERN = re.compile(r"^v?(\d+)\.(\d+)\.(\d+)$")
+STATUS_PATTERN = re.compile(r"(?:drafted|(?:sent|triaged|shipped|rejected):\S.*)")
+PIN_PATTERN = re.compile(r"v?(\d+)\.(\d+)\.(\d+)")
 SPRINT_SUFFIX = re.compile(r"#(\d+)\s*$")
 DELTA_TAG = re.compile(r"outbox:([A-Za-z0-9][A-Za-z0-9._-]*)")
 SCAN_FAMILIES = (
@@ -225,7 +225,7 @@ def parse_pin(pin: str) -> tuple[int, int, int] | None:
     Returns:
         tuple[int, int, int] | None: The version, or None when it is not one.
     """
-    match = PIN_PATTERN.match(pin.strip())
+    match = PIN_PATTERN.fullmatch(pin)
     if match is None:
         return None
     return (int(match.group(1)), int(match.group(2)), int(match.group(3)))
@@ -309,7 +309,7 @@ def entry_errors(entry: dict[str, Any]) -> list[str]:
         errors.append("`id` must match [A-Za-z0-9][A-Za-z0-9._-]*")
     if entry["channel"] not in CHANNELS:
         errors.append("`channel` must be A, B or C")
-    if not STATUS_PATTERN.match(entry["status"]):
+    if not STATUS_PATTERN.fullmatch(entry["status"]):
         errors.append("`status` must be drafted, or sent:/triaged:/shipped:/rejected: + text")
     if parse_pin(entry["pin"]) is None:
         errors.append("`pin` must be vX.Y.Z")
