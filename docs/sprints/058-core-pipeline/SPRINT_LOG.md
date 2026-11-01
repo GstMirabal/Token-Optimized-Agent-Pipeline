@@ -62,18 +62,24 @@ Tracking of atomic goals achieved during the session. Work units: 48 (A 17, C 9,
     - `[x]` B-12 (`3fc5da4`, session #65) adds the `remediation_chain_check` row to `agents/qa_agent.md`. The row also covers an exit `2` with `check_remediation_chain: error:` and no `chains:` line (a bad `--range`), which judges no commit. `scripts/check_remediation_chain.py:200-202` returns `2` on that error too.
     - `[x]` Wave D: D-01 `42355f7` bumps `claude-agent-sdk` `0.2.88` -> `0.2.175` (supersedes Dependabot #88). Deviation from plan D7 ("latest"): `0.2.176`, uploaded 2026-10-31T01:45Z, was under the 24-hour release-age floor of `agents.md §8` at the run, so the pin takes `0.2.175`. A pip dry-run of the full `requirements-skillopt.txt` resolves with exit 0.
     - `[x]` D-02 `c27bc37` (`GRAPHIFY_09_MEASUREMENT.md`): graphifyy `0.9.97` (the latest `0.9.x` older than 24 h) offers no option that re-includes data JSON; 55 JSON sources drop out of the graph (9996 -> 9538 nodes). The human chose the no branch on 2026-10-31: `graphifyy==0.8.30` stays, D-03..D-07 are not executed, and `KI-058-2` is opened. The lead closed #88 and #89 and filed https://github.com/Graphify-Labs/graphify/issues/4898 on 2026-10-31. The session is unsandboxed (`HTTPS_PROXY` unset, checked before each call), so the canonical `gh` row of `rules/project_topology.md` §4 lets the agent run `gh`.
-    - `[x]` Open for the gate: B-11 writes the Gate 1 second check range as `<last_close_commit>..HEAD` (`workflows/pipeline_workflow.md:25`), and the plan line 144, `rules/qa_and_testing.md:68` and B-12 write `<base>..HEAD`. Both resolve to `f0b11f8` in Sprint 058. They differ only when a sprint branch does not start at the last sealed close.
+    - `[x]` Closed by `fe8996d` (QA1-1): B-11 wrote the Gate 1 second check range as `<last_close_commit>..HEAD` (`workflows/pipeline_workflow.md:25`), and the plan line 144, `rules/qa_and_testing.md:68` and B-12 write `<base>..HEAD`. Both resolve to `f0b11f8` in Sprint 058. They differ only when a sprint branch does not start at the last sealed close.
 - [x] **Phase 5 (Approval Gate)**: human OK in chat («ok») on 2026-10-28 over plan commit `232efdd`.
     - `[x]` Plan status APPROVED, recorded at `02de746`.
     - `[x]` `audit_plan.py` exits 0.
     - `[x]` Draft `docs/plans/058-upstream-channel-and-reproduce-first-DRAFT.md` deleted after approval.
-- [ ] **Phase 7 (Quality Gate)**: QA Gate 1 round 1 REJECTED (instructing, S1); remediation in progress.
+- [ ] **Phase 7 (Quality Gate)**: QA Gate 1 round 1 REJECTED (instructing, S1); round 2 REJECTED (charter, S2, first `remediation-regression` of the sprint); remediation in progress.
     - `[x]` Round 1 remediation, all six findings (the human chose QA1-3 option b and asked to include the optional S3 findings):
     - `[x]` QA1-1 and QA1-2: `fe8996d` (`workflows/pipeline_workflow.md`: `<base>..HEAD` and the error exit) and `6d6718f` (`rules/qa_and_testing.md` A-1: the error exit and the shared fix-subject pattern). `python3 scripts/check_remediation_chain.py --range nosuchref..HEAD` prints `check_remediation_chain: error:` and no `chains:` line.
     - `[x]` QA1-3: `bba11b5` (`fix(upstream-intake)`): the briefing drops `title` and prints `id`, `status`, `channel` and `nucleus_artifact` only when each is a token; a non-token host `name` exits 2. `Repro: tests/test_upstream_intake.py::test_host_text_never_enters_the_briefing`. It also edits `tests/test_session_start.py`, which asserted the old title suffix. Plan D2 amended at `c753df7`.
     - `[x]` QA1-4: `Abort criteria` table below, criteria 1-5, measured on 2026-10-31.
     - `[x]` QA1-5: `3d34795` (`scripts/check_plan_closure.py`) and `c53a6a1` (`scripts/check_gate_log.py`): Google docstrings, no behaviour change.
     - `[x]` QA1-6: `d1a6737` (`scripts/check_remediation_chain.py`) and `6a1bad7` (`hooks/on_commit.py`) use the `_FIX_SUBJECT` pattern of `scripts/check_fix_reproduces.py`. Only the bare `fix!:` was missed; `fix(scope)!:` already matched through `^fix\(`.
+    - `[x]` Round 2 remediation (QA2-1..QA2-4; QA2-2 takes the gate's first alternative, a separate withheld line with its cause):
+    - `[x]` QA2-1 and QA2-2: `3f627b2` (`fix(upstream-intake)`): every printed value is a `str` of at most 100 characters that `re.fullmatch` accepts; `id` has its own check; a non-token `status` or `nucleus_artifact` prints `<id> withheld (non-token status or nucleus_artifact)`, kept apart from `invalid or not genericized`. `aff8ba1` (`fix(upstream-outbox)`): `entry_errors` full-matches the `id`. The implementer's attack harness (1584 intake fixtures: control and line-separator characters, non-string types, length bounds) found 0 violations at `3f627b2` and 406 at the parent `7e6bbfb`.
+    - `[x]` QA2-3: `d5c2eeb` (`scripts/session_start.py` docstring) and the `upstream_intake.py` docstring in `3f627b2` state the enforced token grammar and that a token can still carry host-chosen words.
+    - `[x]` QA2-4: (a) the open-item bullet now records its closure by `fe8996d`; (b) `8801d2a` (`fix(hooks)`): `audit_regression_test` uses `FIX_SUBJECT_RE`, so `fix:` and `fix!:` commits need a `Repro:` trailer too.
+    - `[x]` `check_remediation_chain.py --range f0b11f8..HEAD` prints one chain (`bba11b5` -> `3f627b2`), exit 0: reported, not the A-1 stop. A second chain stops the block.
+    - `[x]` Left as observed, not changed: host-side `STATUS_PATTERN` still accepts `drafted\n` (the intake withholds it); uppercase `FIX:` subjects are caught by neither the hook nor the replayer.
 
 ---
 
@@ -83,7 +89,7 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | Friction Point | Resolution / Workaround | KI ID |
 | :--- | :--- | :--- |
 | `make verify` passed with A-02's new test file untracked and failed once it was committed: `scripts/check_absolute_paths.py` scans tracked files only (`git grep`), so a fixture home path outside its allow-list was invisible before `git add` | Fixed by `65475dd`. From A-04 on, each unit runs `make verify` after `git add`, which `git grep` then reads | KI-058-1 |
-| graphifyy `0.9.x` (from `0.9.70`) skips data JSON in AST mode (`extractors/json_config.py:293-294`) and offers no option to re-include it, so Dependabot #89 cannot land without the graph losing every `config/*.json` and `claude/settings.hooks.json` (`GRAPHIFY_09_MEASUREMENT.md`) | `graphifyy==0.8.30` kept (no branch of plan D7); upstream issue https://github.com/Graphify-Labs/graphify/issues/4898 asks graphify for the option. Exit condition: the option ships; each later Dependabot bump of `graphifyy` checks for it. Enter in the program queue at the close extract | KI-058-2 |
+| graphifyy from `0.8.37` (`a37672f2`; the `0.9.70` boundary first stated here was corrected upstream in https://github.com/Graphify-Labs/graphify/issues/4898) skips data JSON in AST mode, and the semantic pass does not receive it either (`cli.py:4108`), (`extractors/json_config.py:293-294`) and offers no option to re-include it, so Dependabot #89 cannot land without the graph losing every `config/*.json` and `claude/settings.hooks.json` (`GRAPHIFY_09_MEASUREMENT.md`) | `graphifyy==0.8.30` kept (no branch of plan D7); upstream issue https://github.com/Graphify-Labs/graphify/issues/4898 asks graphify for the option. Exit condition: a release older than 24 h ships `json.include` / `--include-json` (upstream PR https://github.com/Graphify-Labs/graphify/pull/4911); the bump re-runs the D-02 measurement with the include globs. Enter in the program queue at the close extract | KI-058-2 |
 
 ---
 
@@ -122,6 +128,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 | Gate | Round | Verdict | Class | Severity | Notes |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | QA Agent (Gate 1) | 1 | REJECTED | instructing | S1 | 6 findings at `aa2766e`: QA1-2 and QA1-3 (S1), QA1-1 and QA1-4 (S2), QA1-5 and QA1-6 (S3). `check_fix_reproduces.py` 6 OK, 0 violations; `check_remediation_chain.py` `chains: 0`; `make verify` 0; 1416 passed. |
+| QA Agent (Gate 1) | 2 | REJECTED | charter | S2 | remediation-regression from `bba11b5`. 3 findings at `7e6bbfb`: QA2-1 and QA2-2 (S2, charter), QA2-3 (S2, testifying); 1 S3 note (QA2-4). Round 1: QA1-1, QA1-2, QA1-4, QA1-5 and QA1-6 closed; QA1-3 not closed. `check_fix_reproduces.py` 9 OK, 0 violations; `check_remediation_chain.py` `chains: 0`; `make verify` 0; 1422 passed. |
 
 ---
 
@@ -136,6 +143,11 @@ Filled by the remediator before re-sending a REJECTED round to its gate (`rules/
 | QA Agent (Gate 1) | 1 | `make verify` | 0 |
 | QA Agent (Gate 1) | 1 | `python3 scripts/check_task_scope.py --sprint-dir docs/sprints/058-core-pipeline` | 0 |
 | QA Agent (Gate 1) | 1 | `venv_skillopt/bin/python -m pytest -q tests/` | 0 |
+| QA Agent (Gate 1) | 2 | `python3 scripts/check_fix_reproduces.py --range f0b11f8..HEAD` | 0 |
+| QA Agent (Gate 1) | 2 | `python3 scripts/check_remediation_chain.py --range f0b11f8..HEAD` | 0 |
+| QA Agent (Gate 1) | 2 | `make verify` | 0 |
+| QA Agent (Gate 1) | 2 | `python3 scripts/check_task_scope.py --sprint-dir docs/sprints/058-core-pipeline` | 0 |
+| QA Agent (Gate 1) | 2 | `venv_skillopt/bin/python -m pytest -q tests/` | 0 |
 
 ---
 
@@ -157,6 +169,6 @@ Measured by `principal_agent` per numbered item of the plan's `## Abort criterio
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Locked. Plan APPROVED (`02de746`), Phase 5 passed.
-**Next Phase**: Phase 7, QA Gate 1 round 2 (fresh agent), then Tester Gate 2, on `ai-sprint/058`.
+**Next Phase**: Phase 7, QA Gate 1 round 3 (fresh agent), then Tester Gate 2, on `ai-sprint/058`.
 
 *Certified under conventional commit standard: feat(scope): message #058*
