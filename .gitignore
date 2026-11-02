@@ -8,6 +8,10 @@
 *.crt
 id_rsa*
 
+# Channel A host registry (scripts/upstream_intake.py): names real host paths,
+# never committed (RA-15)
+/.upstream_hosts.json
+
 # Local Project-Specific Records (Ignored by Global Submodule)
 #
 # This block used to also exclude the pipeline's own records — docs/sprints/,

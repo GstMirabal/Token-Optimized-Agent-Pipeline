@@ -121,16 +121,6 @@
         ]
       }
     ],
-    "SubagentStop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if [ -f .agents/scripts/check_role_artifact.py ]; then python3 .agents/scripts/check_role_artifact.py --from-hook; fi"
-          }
-        ]
-      }
-    ],
     "SessionEnd": [
       {
         "hooks": [

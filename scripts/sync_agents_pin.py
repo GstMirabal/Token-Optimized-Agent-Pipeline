@@ -22,6 +22,7 @@ Exit codes:
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -260,6 +261,7 @@ def bump_if_behind(root: Path, current: str | None, latest: str) -> int:
             file=sys.stderr,
         )
         return 2
+    before = git(["rev-parse", "HEAD"], cwd=root).stdout.strip()
     if not checkout_tag(root, latest):
         return 2
     was = current if current is not None else "untagged"
@@ -268,7 +270,42 @@ def bump_if_behind(root: Path, current: str | None, latest: str) -> int:
         "Host gitlink is dirty until committed. Read `.agents/CHANGELOG.md`. "
         "If `agents.md` §0 Rule Contexts gained a file, read it (advisory)."
     )
+    shipped = shipped_host_ids(root, before, latest)
+    if shipped:
+        print(
+            f"[sync_agents_pin] Ships host findings: {', '.join(shipped)}. "
+            "Run `upstream_outbox.py deltas` to find the host deltas they retire."
+        )
     return 0
+
+
+HOST_CITATION = re.compile(r"host:([A-Za-z0-9][A-Za-z0-9._-]*)")
+
+
+def shipped_host_ids(root: Path, before: str, latest: str) -> list[str]:
+    """List the ``host:<id>`` citations a pin bump added to ``CHANGELOG.md``.
+
+    A nucleus CHANGELOG entry that publishes a host finding cites it as
+    ``host:<id>`` (Sprint 058 plan D4, element 5); the ids added between the
+    old pin and the new one are the findings this bump ships.
+
+    Args:
+        root: Framework checkout.
+        before: Commit the checkout held before the bump; empty if unknown.
+        latest: The tag just checked out.
+
+    Returns:
+        list[str]: Cited ids, deduplicated, in CHANGELOG order; empty when
+        ``before`` is unknown or the diff cannot be read.
+    """
+    if not before:
+        return []
+    diff = git(["diff", "--unified=0", before, latest, "--", "CHANGELOG.md"], cwd=root)
+    if diff.returncode != 0:
+        return []
+    added = [line for line in diff.stdout.splitlines() if line.startswith("+") and not line.startswith("+++")]
+    ids = [match for line in added for match in HOST_CITATION.findall(line)]
+    return list(dict.fromkeys(ids))
 
 
 def main() -> int:

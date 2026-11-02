@@ -36,6 +36,9 @@ DEPRECATED_HOOK_COMMANDS = {
     "python3 .agents/hooks/on_init.py",
     "python3 .agents/hooks/on_commit.py",
     "python3 .agents/hooks/state_mirror.py",
+    # Sprint 058 C-06 (KI-057-4): the SubagentStop entry for check_role_artifact.py
+    # left the template; F-107-N1 had already moved the script to pipeline Phase 7.
+    "if [ -f .agents/scripts/check_role_artifact.py ]; then python3 .agents/scripts/check_role_artifact.py --from-hook; fi",
 }
 
 # String values shipped by PREVIOUS template versions and since retired, keyed

@@ -9,7 +9,7 @@ that were not, and each of those states its own provenance.
 Genericized per `RA-15`: no host project name, no absolute paths, no host
 business logic. Where a measurement is quoted it is a count, not an identity.
 
-**Five sections, and the differences are load-bearing.**
+**Seven sections, and the differences are load-bearing.**
 
 | Section | What it holds | Reproduction status |
 | :--- | :--- | :--- |
@@ -18,6 +18,8 @@ business logic. Where a measurement is quoted it is a count, not an identity.
 | *Added by Sprint 026* | Three items the nucleus found in itself: one at the Agent Assignment phase, one at the Phase 4 tier audit, one during Hito 1 execution, none while repairing another entry | Measured against the tree at `b5bfb6a`, the commit `docs/sprints/026-core-pipeline/task_scope.md` names as Sprint 026's base |
 | *Inherited from host sprint records* | Leads from a host's sprint history | **Not** re-measured when written. Treat each as a lead, reproduce it first, and delete it if it no longer holds |
 | *Reported by a host — Sprint 054 intake* | Ten findings a host handed over on 2026-10-04: nine open, one (`F-103-N1`) closed on re-measurement | Each reproduced in the nucleus against `v4.36.0` (`d848302`) by Sprint 054 Phase 1, **except `F-115-N2`**, which is host-reported and not re-measured in the nucleus sandbox (its entry says so) |
+| *Found by Sprint 055 QA Gate 1 round 4* | `F-055-N1`, measured on a host fixture by the nucleus's own gate | Measured by that gate; open |
+| *Reported by host H1 — 2026-10-22 triage* | One verdict per item of a host report against `v4.38.0`, the first triage of the Sprint 058 upstream channel | Verdicts human-confirmed 2026-10-22; items CONFIRMED in code at `v4.39.0` are named in the section, the rest are each reproduced at the start of the unit that takes them |
 
 A finding carried forward on the strength of an old record is exactly the defect
 several of these findings are about — which is why *Inherited from host sprint
@@ -85,7 +87,7 @@ sessions that obey it.
 | | |
 | :--- | :--- |
 | **Closed, and never marked as such** | `F-086-A1` (resolved by design — `implementer_agent` owns those trees, `ADR-0009`) · `F-087-P1` (`session_probe.py:447` adds `UNDETERMINED`) · `F-086-S1` (`SCANNED_SUFFIXES` covers `.tf`/`.yml`/`.yaml`/`.toml` plus whole-name files) · `F-086-S2` (`on_commit.py:128` adds the unquoted pattern) · `F-086-S3` (`SKILL.md` is 247 lines, not a 20-line stub) · `F-093-N1` (`agents.md §0` states it is host-only by design) · `F-093-N2` (`check_readme_counts.py` `main()` does `os.chdir(agents_root())`; verified from `/` and from a home directory, exit `0` both) · `G-03` (`check_task_scope.py` gained `--sprint-dir`) · `C5` (`agents.md §3 symlink_gate_exclusion`) · `#12` (14 of 14 profiles declare `model:`) |
-| **Closed since the host last looked** | `_bridge_permission_denied` generalised beyond `.cursor` in Sprint 044 — its own docstring records it · `ci_gate.py:55,148` handles the HTTP 403 a private repository returns · `check_forge_ladder.py` `_skill_forge_claimed` no longer scans prose for a skill path · `F-107-N1` `check_role_artifact.py` moved off `SubagentStop` to `config/template_gates.json:84` |
+| **Closed since the host last looked** | `_bridge_permission_denied` generalised beyond `.cursor` in Sprint 044 — its own docstring records it · `ci_gate.py:55,148` handles the HTTP 403 a private repository returns · `check_forge_ladder.py` `_skill_forge_claimed` no longer scans prose for a skill path · `F-107-N1` `check_role_artifact.py` moved off `SubagentStop` to `config/template_gates.json:84` — **this closure was inaccurate until Sprint 058** (`KI-057-4`): `claude/settings.hooks.json` still ran it `--from-hook` on every subagent stop; the entry is removed from the template (C-06, `a543b51`) and pruned from already-bridged hosts by `scripts/merge_json.py` (C-07, `e45f555`), which a host receives by re-running `python3 .agents/scripts/install.py` after the pin bump |
 | **Closed by this sprint** | `F-112-N1` drift judged against HEAD rather than the integration branch · `F-112-N2` no pytest configuration, so rootdir escaped into the host · `F-112-N3` and its shell sibling, tests naming a platform temporary path instead of honouring `TMPDIR` · `H099-3` `node_delta` raising `TypeError` on a present-but-null count, **unchanged for eleven sprints because this file said nothing was open** · `loop_guard.py` looking for `task_scope.md` at the repository root, where no host keeps it · the IDE-branch-prefix gap in `RA-03`/`RA-12` · the Phase 5 approval that did not say it names one `Sprint_ID` |
 | **Still open** | Six, each with its own entry below: **`REVDOC-G1`** (verdict changed, not a framework defect, risk retained), **`ADR-0006`**, **`ADR-0007`**, **`#13`** (`owned-by-050`), and **`F-051-R1`** plus **`F-051-R3`** opened by this sprint. The briefing's count is of *rows* in this table, not of items — read the entries (Sprint 052 unit `S052-3`, commit `fb820f1`, changed the briefing to count `### - [ ]` entries directly, closing this distinction going forward). `F-051-R1`: `config/artifact_registry.json` and `pipeline_workflow.md` Phase 8 name `principal_agent` as the author of `IMPLEMENTATION_PLAN.md`, `PHASE_REGISTER.md` and `CHANGELOG.md`, and `agents/principal_agent.md:4` declares `tools: Read, Glob, Grep, TodoWrite` — no `Write`, no `Edit`. Reproduced live: a Sprint 051 session dispatched that profile to author its Implementation Plan and had to file the text itself. Wider than the host's report, which named only the `CHANGELOG` row. **Not patched here**: either the profile gains `Write` for its own declared documents, or the registry names a writer separately from the owner, and choosing between those redraws a role boundary — which `§9`'s principle says is not resolved by improvisation inside a sprint |
 | **Verdict changed, not closed** | **`REVDOC-G1`** — the graph dropping unprocessable files is **not a framework defect**: `Makefile graphify-update`/`-rebuild` shell straight to a third-party package and the nucleus carries no wrapper that could record a drop (`grep` for skip/unprocessable/dropped across `scripts/` and `hooks/` → 0). The **risk** is still the nucleus's, because `§2 graph_sovereignty` mandates querying the graph before any codebase research, and a silently incomplete graph answers confidently. Closing it would need a new reconciliation mechanism, not a fix |
@@ -1529,7 +1531,10 @@ without being satisfied — it simply repeats.
 Distinct from the closed `F-107-N1`, and the distinction is the useful part. That
 finding was about *which stop* the check fires on and was closed by moving it to
 `config/template_gates.json`. This is about *which repository it resolves against*,
-which the move did not touch. Reported by the gate agent itself.
+which the move did not touch. Reported by the gate agent itself. (The `F-107-N1`
+closure was itself inaccurate until Sprint 058: the template kept its `SubagentStop`
+entry for `check_role_artifact.py --from-hook` — `KI-057-4`, removed by C-06
+`a543b51`, pruned from bridged hosts by C-07 `e45f555`.)
 
 **Related, and worth a separate look**: across six gate-subagent runs in three
 sprints, each agent ended its turn with a one-line report, having put its findings
@@ -2074,6 +2079,121 @@ table above:
 | `Q9`, `Q10` | `KI-055-3` | closed `b2bf703`, `8dba69b`, `40b2ffc`, `2016dad` |
 
 ---
+
+## Reported by host H1 — 2026-10-22 triage (report against `v4.38.0`)
+
+Host H1 sent a framework-class report in two messages on 2026-10-22, pinned at
+`v4.38.0`, and asked for one verdict per item. The nucleus re-measured part of it
+at `v4.39.0` and the human confirmed the verdicts the same day. They were sent
+back to the host and, until Sprint 058, recorded nowhere in this register
+(`rg -c "host H1"` on this file printed nothing). This section is that record and
+the first triage of the upstream channel `agents.md §4 feedback_upstream` now
+describes. Source: the two messages and the verdict reply, recovered from the
+nucleus session transcript of 2026-10-22. Genericized per `RA-15`: no host name,
+paths or business logic; host finding ids (`F-115-N*`) are kept because the
+Sprint 054 intake above already uses them.
+
+**Confirmed in code at `v4.39.0`** before the verdicts: B-9/E, C-3, A-4/B-1, B-2,
+B-6, B-3. Every other `accept` is reproduced at the start of the unit that takes it.
+
+**Message 2/2** proposed the channel itself (outbox schema, transport, intake
+triage, closure). Accepted as an extension of `§4`, not a new `RA-20`; delivered
+by Sprint 058 Wave A (plan D1-D4).
+
+The host's message counted 43 findings. The table has 45 rows: 43 carry a
+request, and R-1 and R-2 carried none (the nucleus already covered them).
+
+| Item | Defect, in brief | Verdict | Where it stands |
+| :--- | :--- | :--- | :--- |
+| R-1 | Reproduce before repair | no request (covered by `rules/code_craft.md §6`) | host deletes its copy |
+| R-2 | `Repro:` trailer | no request (covered by `hooks/on_commit.py`) | host deletes its copy |
+| R-3 | `Repro: manual` exists only on paper | see B-2 | shipped `v4.40.0` with B-2 |
+| R-4 | The gate is never the first verifier | accept | Sprint 058 B-01, B-04 |
+| R-5 | A fix to a shared module runs its stack's full suite | accept (host-configurable path list) | Sprint 058 B-01, B-07, B-08 |
+| R-6 | Replay is pytest only | merge-into:`KI-054-1` | Sprint 058 B-13 |
+| R-7 | `remediation-regression` label | see A-1 | Sprint 058 with A-1 |
+| R-8 | A test that reads source text is not a reproduction | accept | Sprint 058 B-02, B-14 |
+| R-9 | Abort criteria close only by the observation they name | accept | Sprint 058 B-09, B-11 |
+| R-10 | The close lists every Tests/Verification row with its result | accept (extends `F-114-N7` to the close) | Sprint 058 B-09, B-10 |
+| A-1 | Remediation chains before a gate never count | accept | Sprint 058 B-01, B-05, B-06 |
+| A-2 | Abort criteria have no owner or cadence | accept (with R-9) | Sprint 058 B-11 |
+| A-3 | Phase 7 command paths resolve to a host copy | merge-into:`KI-054-2` | per-file notes shipped `v4.40.0` (`c240c91`, `4661026`); one `agents.md §0` row in Sprint 058 B-15 |
+| A-4 | Three `Repro:` grammars | accept | shipped `v4.40.0` (`4785b1d`, `70faa66`) |
+| B-1 (`F-115-N4`) | Hook and replay disagree on the vitest test-id grammar | merge-into:A-4 | shipped with A-4 |
+| B-2 (`F-115-N5`) | `Repro: manual` can never pass; `*.spec.ts` not a test path | accept | shipped `v4.40.0` (`4785b1d`) |
+| B-3 (`F-115-N6`) | `check_task_scope.py` splits a cell on an escaped pipe | accept | shipped `v4.40.0` (`a4db5df`); the same split in three other scripts is `KI-057-3`, Sprint 058 C-01..C-05 |
+| B-4 (`F-115-N7`) | Replay reports an unrunnable test as a violation | accept | shipped `v4.40.0` (`a19ab8f`) |
+| B-5 (`F-115-N8`) | Replay needs `.git/worktrees`, which the sandbox denies | accept (absorbs D-7) | not reproduced: Sprint 057 `M3` measured `git worktree add` allowed on a nucleus-shaped fixture (`docs/sprints/057-core-pipeline/SANDBOX_DB_MEASUREMENT.md`); a host-shaped re-measurement is not scheduled |
+| B-6 (`F-115-N9`) | `TEST_PATH` misses `tests.py` | merge-into:B-2 | shipped with B-2 |
+| B-7 (`F-115-N10`) | `check_role_artifact.py` on `SubagentStop` demands a row from a read-only role | accept (recurrence of `F-107-N1`) | shipped `v4.40.0` (`4da3e2a`); the retired hook entry is `KI-057-4`, Sprint 058 C-06..C-08 |
+| B-8 (`F-115-N11`) | `model_ledger.py` rewrites the nucleus ledger from a host | accept | shipped `v4.40.0` (`7705611`) |
+| B-9 (`F-115-N12`) | `SessionEnd` → `suspend` unseals a sealed sprint | accept, highest priority | shipped `v4.40.0` (`71a35c3`) |
+| C-1 | The post-deploy certify commit forces a reconcile | accept | shipped `v4.40.0` (`5a7ed6c`) |
+| C-2 | A reconcile commit that writes the roadmap cannot cite itself | accept | shipped `v4.40.0` (`9246d60`) |
+| C-3 | `make verify` writes `__pycache__` into a write-denied tree | accept | shipped `v4.40.0` (`04b8fff`) |
+| C-4 | Boot bridge advisory false positive | merge-into:`KI-056-4` | shipped `v4.40.0` (`2ee3ded`) |
+| C-5 | `Repro:` evidence lost at squash | accept | shipped `v4.40.0`: the squash body is passed explicitly (`d0f332d`, `493d300`) |
+| C-6 | `audit_plan.py` does not check full-suite rows | merge-into:R-5 | Sprint 058 B-07, B-08 |
+| C-7 | The owner/writer split costs a dispatch per trivial step (`ADR-0017`) | accept for debate (needs a new ADR) | Sprint 059 |
+| C-8 | Plan extraction is not deterministic | accept | shipped `v4.40.0` (`7c6c2be`, `scripts/extract_plan.py`) |
+| C-9 | Anchor free-text fields have no writer | accept | not reproduced: Sprint 057 W25 recorded it `RECORD` (`docs/sprints/057-core-pipeline/SPRINT_LOG.md`) |
+| D-1 | `.env` read and `stat()` denied | merge-into:`KI-056-1` | Sprint 059 |
+| D-2 | Docker socket | reject: no request (accepted human-run) | closed |
+| D-3 | `gh` TLS failure under the sandbox | merge-into:`KI-056-1` | Sprint 059 |
+| D-4 | A `git pull`/checkout that rewrites `.claude/settings.json` is missing from the sandbox table | accept (documentation) | Sprint 059 |
+| D-5 | Boot bridge advisory | merge-into:`KI-056-4` | shipped with C-4 |
+| D-6 | `.agents/hooks` write-deny breaks `make verify` | merge-into:C-3 | shipped with C-3 |
+| D-7 | `.git/worktrees` | merge-into:B-5 | with B-5 |
+| D-8 | pnpm store lock after a workspace change | merge-into:`KI-056-6` (re-measure with a config change) | Sprint 059 |
+| D-9 | Chromium / Playwright | reject: no request (accepted human-run) | closed |
+| D-10 | The mandated graph rebuild is unsandboxed or human-run, and `graph_sync` does not say so | accept (documentation) | Sprint 059 |
+| D-11 | `open` / `osascript` | reject: no request (accepted) | closed |
+| D-12 | No agent path for database-backed tests | merge-into:`KI-056-1` (touches `RA-09` and `RA-19`; needs an amendment) | Sprint 059 |
+| E | `SessionEnd` → `suspend` evidence and five proposal points | merge-into:B-9 (all five points accepted) | point 1 shipped with B-9; point 2 (suspend only the ending session) is `KI-057-2`, Sprint 059; points 3-5 have no unit yet |
+
+## Reported by a host — 2026-11-01 (direct session message, accepted during Sprint 058 Phase 7)
+
+A host session sent one free-form message on 2026-11-01, outside the outbox schema
+(`agents.md §4 feedback_upstream`). The nucleus first returned it with the
+instruction to fill the schema. The human then accepted it directly the same day,
+after the nucleus reproduced both defects on its own transcripts (below). It is the
+host's "Message 4"; its "Message 3" (the replay counts a run that executed no test
+as `FAILS_AT_COMMIT`) has not been sent and is not triaged here. The ids are
+assigned by the nucleus. Genericized per `RA-15`: no host name, paths or session id.
+
+### - [ ] `F-116-N1` — `session_cost.py` takes a cold-cache turn as the cycle baseline, so the ratio is `None`
+
+- **Host evidence:** a 392-turn host session, 5 cycles, `first` = 0 in 4 of them,
+  so no ratio could be computed even by hand.
+- **Nucleus reproduction:** `python3 -I scripts/session_cost.py --session <id> --json`
+  over every nucleus transcript printed `first_turn` = 0 in cycle 1 of 11 sessions.
+  The first usage-bearing turn of session `0c9ba7ee` reads `cache_read_input_tokens`
+  0 and `cache_creation_input_tokens` 44,264: the turn writes the cache instead of
+  reading it. `cycle_summary` (`scripts/session_cost.py:128-133`) takes `reads[0]`
+  as `first` and returns `ratio: None` when it is 0. `segment_cycles` also opens a
+  cycle on such a turn, because 0 is below `previous * RESET_RATIO`.
+- **Answer to the host's question 3:** not a parsing defect. The cycle shape is
+  expected, and the baseline choice is the defect.
+- **Proposed direction (decided at triage):** take the baseline as the first turn's
+  context size (`cache_read + cache_creation + input`), not `cache_read` alone. The
+  host proposed the minimum non-zero `cache_read`.
+- **Verdict:** accept. **Where it stands:** Sprint 059 Phase 1 triage.
+
+### - [ ] `F-116-N2` — the `rules/token_economy.md §3.1` bound has no in-session invoker
+
+- **Host evidence:** a host cycle climbed to 5.7× with no signal during the session.
+  The human had to ask whether spend was being audited.
+- **Nucleus reproduction:** `scripts/session_probe.py` runs only from the boot
+  (`scripts/session_start.py:673`). `grep -rn "session_cost\|session_probe" hooks/`
+  printed nothing, so no hook, Phase 6 step or `token_economy_agent` invoker measures
+  the ratio while the session runs (`RA-16`).
+- **Host proposal:** (a) a periodic in-session measurement that warns at soft and
+  blocks new work at hard; (b) see `F-116-N1`; (c) a declared Phase 6 invoker.
+- **Open questions for triage:** hook or workflow step (a hook runs outside the
+  sandbox, so the `RA-19` enumeration applies); block or warn at hard while
+  calibration is n=1.
+- **Verdict:** accept. **Where it stands:** Sprint 059 Phase 1 triage, after
+  `F-116-N1` (a bound measured against a 0 baseline cannot fire).
 
 ## How to work this file
 

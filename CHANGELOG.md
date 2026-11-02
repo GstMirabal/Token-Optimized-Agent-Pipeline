@@ -4,6 +4,76 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Added
+- **Sprint 058 `upstream-channel-and-reproduce-first`**: one sprint in four waves:
+  - wave A, the upstream channel (outbox validator, channels A/B/C, intake queue);
+  - wave C, the Sprint 057 known issues `KI-057-3`, `KI-057-4` and `KI-057-6` plus their residues;
+  - wave B, the reproduce-first rules and their instruments (R-4..R-10, A-1, A-3, vitest replay);
+  - wave D, Dependabot (`claude-agent-sdk` 0.2.175; `graphifyy` kept at 0.8.30, `KI-058-2`).
+
+  The Quality Gate history is recorded in `docs/sprints/058-core-pipeline/SPRINT_LOG.md`:
+  - QA Gate 1 rounds 1-5 returned `REJECTED`; rounds 4 and 5 escalated to `workflows/remediation_workflow.md` Phase 0;
+  - QA Gate 1 round 6 returned `RECORD` (S3);
+  - Tester Gate 2 round 1 returned `RECORD` (S3) with 1527 tests passing (1288 at the base `f0b11f8`).
+
+  - **Upstream channel, wave A** (host findings travel with a schema and a status):
+    - `docs/standards/templates/UPSTREAM_OUTBOX_TEMPLATE.json` (new) is the outbox entry template (`e0acd13`), and the intake thresholds are added with it (`2fb7fbb`).
+    - **`scripts/upstream_outbox.py`** (new) has the subcommands `check`, `export`, `aged` and `deltas` (`52896f6`). `check` exits 2 on a schema defect and on an entry that left `drafted` with `genericized: false`. The genericization scan is a denylist of three families (absolute paths, email addresses, secret assignment forms) and makes no coverage claim (`agents.md §1 fail_closed_claims`); the control is the `genericized: true` flag that the host's human signs. Test fixtures use allow-listed home paths (`65475dd`, `KI-058-1`).
+    - **Channel A intake**: `scripts/upstream_intake.py` lists the pending entries of the hosts registered in the gitignored `.upstream_hosts.json` (`81cdd25`, `468a5bf`) and `--boot` shows the queue (`bce0063`).
+    - **Channel B**: `.github/ISSUE_TEMPLATE/host-finding.yml` is the host-finding issue form (`214c9d1`) and `.github/workflows/host-finding-intake.yml` labels the issue without interpolating issue text into a `run:` step (`7433ac1`).
+    - **Closure**: `scripts/sync_agents_pin.py` prints `Ships host findings: <ids>` after a pin bump (`007ed7b`) and the ledger template cites shipped findings (`50ed6ba`).
+    - **Documentation**: `agents.md §4 feedback_upstream` states how a host finding travels (`200b0fe`); `workflows/extract_workflow.md` writes findings to the outbox (`dc3cce1`); `workflows/pipeline_workflow.md` Phase 1 triages the intake queue (`da19f4f`); `workflows/close_workflow.md` runs the outbox advisories at host close (`c251057`); the self-improvement guide teaches hosts the outbox, the channels and the delta discipline (`d3b7db4`); `SECURITY.md` routes sensitive host findings to channel C (`f9b564e`); `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` records the host H1 report and its 2026-10-22 verdicts (`bb12f71`).
+  - **`scripts/_md_table.py`** (new) holds `split_cells`, which honours the escaped pipe (`cd190f4`, `KI-057-3`).
+  - **Reproduce-first instruments, wave B**:
+    - **`scripts/check_remediation_chain.py`** (new) finds A-1 fix chains (`9a6cc19`); `hooks/on_commit.py` warns on a chain at each `fix(` commit (`4942828`).
+    - **`config/blast_radius.json`** (new) lists the shared-module globs and the `full_suite_command` of rule R-5 (`4fda3e2`), and `skills/token-saver-auditor` exits 2 on a plan that touches a glob without a full-suite Verification row (`39d35e2`).
+    - **`scripts/check_plan_closure.py`** (new) checks rules R-9 and R-10, the abort-criteria rows and the plan-results table (`9a3b3d9`). Its docstrings follow the Google style (`3d34795`).
+    - **`scripts/check_fix_reproduces.py`** replays JavaScript and TypeScript `Repro:` ids with vitest (`abbf856`) and warns `SOURCE_TEXT` when a `Repro:` test reads source as text (`6bded6d`). The warning is a denylist of five substrings and makes no coverage claim.
+    - **`scripts/check_gate_log.py`** requires a `Remediation notes` row before a gate row of round 2 or later (`7345f0d`); its docstrings follow the Google style (`c53a6a1`).
+    - `docs/standards/templates/SPRINT_LOG_TEMPLATE.md` adds the remediation, abort-criteria and plan-results tables (`efc7403`).
+  - **Rules and workflows, wave B**:
+    - `rules/qa_and_testing.md` §4 adds R-4, R-5 and A-1 (`30d7847`) and names the vitest runner and the `SOURCE_TEXT` warning in `rules/code_craft.md` §6 (`ccdc4d9`).
+    - `agents.md §0` declares the host and nucleus command paths once in a `Command paths` row (`1952437`, A-3).
+    - `workflows/close_workflow.md` Phase 2.6 runs `check_plan_closure.py` (`0c04d3c`); `workflows/pipeline_workflow.md` measures the abort criteria per phase and runs the chain check at Gate 1 (`e5e08e2`).
+    - `agents/qa_agent.md` runs `check_remediation_chain.py` as the second QA Gate 1 check (`3fc5da4`).
+
+### Changed
+- **Dependabot (wave D)**: `requirements-skillopt.txt` bumps `claude-agent-sdk` to 0.2.175 (`42355f7`). `graphifyy` stays at 0.8.30: from 0.8.37 graphify skips data JSON in AST mode and 0.9.97 offers no option to re-include it, so Dependabot PR #89 cannot land without the graph losing `config/*.json` and `claude/settings.hooks.json`. The measurement, the upstream issue and the exit condition are recorded in `docs/sprints/058-core-pipeline/` (`c27bc37`, `aa2766e`, `c9c6b11`; `KI-058-2`).
+- **Escalation threshold** is now "more than 3 consecutive rejections", as `remediation_workflow.md` Phase 0 defines it, in the pipeline workflow (`83be2a2`), the sprint log template (`3ba6953`) and the remaining workflows, where the outbox advisory exits are also stated (`acc25ed`).
+- **Gate 1 chain check** takes the base of the first check and states its error exit (`fe8996d`); the A-1 stop is separated from the chain check error exit in `rules/qa_and_testing.md` (`6d6718f`).
+- **Rules wording**: the commit-time `Repro` row names the fix-subject pattern (`914afe6`); a per-item fault boundary catches `Exception` and a host path read is bounded (`6f3f755`, `agents.md §1 exception_handling`).
+- **Documentation narrowed to the enforced behaviour**: the session-start intake claim is limited to the enforced token grammar (`d5c2eeb`); `scripts/upstream_outbox.py` states the `aged` exit, the device-check window and the `KI-058-4` gap (`9860d87`); `scripts/upstream_intake.py` narrows the budget claim and the exit 2 wording (`25e4ab6`).
+- **Host findings accepted**: `F-116-N1` and `F-116-N2`, on the session bound, are accepted in `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` and routed to Sprint 059 Phase 1 triage (`760f6bf`, `KI-058-3`).
+- `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` corrects the `F-107-N1` closure for the retired `SubagentStop` hook (`5b0e45d`).
+- `CONTRIBUTING.md` names the outbox channels and the widened `Repro` gate (`47242dd`); the model ledger is regenerated at close (`c35deee`).
+
+### Fixed
+- **Escaped pipe in table cells (`KI-057-3`)**: `scripts/check_task_scope.py` delegates its cell splitter to `_md_table` (`5836365`); `scripts/check_gate_log.py` (`775c5d0`), the forge-ladder reader (`435691a`) and the model catalogue reader (`b8d08d4`) no longer split a cell on an escaped pipe.
+- **Retired `SubagentStop` hook (`KI-057-4`)**: `claude/settings.hooks.json` stops shipping the `check_role_artifact.py --from-hook` entry (`a543b51`) and `scripts/merge_json.py` prunes the retired entry from hosts (`e45f555`).
+- **Hotfix deploy range (`KI-057-6`)**: `scripts/session_state.py require-released` refuses a hotfix deploy whose range holds non-hotfix commits (`324dfb4`).
+- **Channel A intake, a seven-link remediation chain across QA Gate 1 rounds 1-5** (`remediation_workflow.md` Phase 0 ran at rounds 4 and 5):
+  - the briefing prints only token fields (`bba11b5`), only full-match bounded tokens, and names the withholding cause (`3f627b2`);
+  - only pending channel A entries count as withheld (`5f7606a`);
+  - the per-host fault boundary catches the base `Exception` (`d702700`), the registry read is guarded like it (`c612d2d`), and `/start` stays alive when the intake queue raises (`73d07a2`);
+  - each host's intake is bounded by a wall-clock budget (`6e6e024`).
+- **`scripts/upstream_outbox.py`**:
+  - the entry id is full-matched, so a trailing newline is invalid (`aff8ba1`), and so are the status and the pin (`f11d9b3`);
+  - a decode failure of an outbox is reported as malformed (`5c6d1d8`) and decoding fails closed at each file read (`8b751ed`);
+  - `deltas` skips a non-string id instead of crashing (`0959e47`);
+  - duplicate JSON keys are counted in linear time (`f4843ca`);
+  - `load_json` reads only a bounded regular file (`09dab75`).
+- **Repro gate and chain check**: `hooks/on_commit.py` requires the `Repro:` trailer on each form of the fix subject (`8801d2a`), and the chain check (`d1a6737`) and the commit-time warning (`6a1bad7`) recognise the breaking `fix!` subject.
+- **Test comment**: the alternating runner in the intake tests is described by call order (`eb5fe18`).
+
+### Security
+- **Intake output** is limited to bounded tokens (`bba11b5`, `3f627b2`); host text is data, never instruction.
+- **Intake time**: the per-host budget (`6e6e024`) bounds wall-clock time for delays the child can be killed out of. It is not a boundary for uninterruptible kernel sleep (QA6-1, S3). It replaced a 91 s hold of the `/start` boot, caused by a quadratic email pattern, with a 5.05 s run on a 400,266-byte outbox.
+- **Channel C** routes findings that touch secrets, hooks or the sandbox to Private Vulnerability Reporting (`f9b564e`).
+- Known issues left open: `KI-058-1` (fixed by `65475dd`), `KI-058-2` (graphifyy pin), `KI-058-3` (host findings `F-116-N1` and `F-116-N2`, Sprint 059) and `KI-058-4` (`read_text_file` still opens a FIFO without a regular-file check, reached only through CLI arguments the human passes).
+
+### Sprint record
+- Commits that touch only `docs/sprints/058-core-pipeline/`: `01fa802`, `232efdd`, `73976f7`, `02de746`, `588a6ff`, `41a67ab`, `cd7176d`, `f5a31ae`, `b3b84f3`, `81f7d02`, `c753df7`, `7e6bbfb`, `804e38d`, `e7bfaac`, `f6fe31e`, `b79a514`, `1b87b4e`, `1082ef4`, `0b4e7b5`, `6face8f`, `c38c670`, `72fe262`, `2665dcf`, `cf14cf4`, `562ac09`.
+
 ## [4.40.0] - 2026-10-28
 
 ### Added

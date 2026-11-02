@@ -134,6 +134,54 @@ def test_upstream_open_entries_excludes_closed_markers(
     assert "open entries (### - [ ]): 1" in section
 
 
+def test_upstream_lists_intake_queue_in_nucleus(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Channel A: a registered host's pending entry reaches the briefing."""
+    outbox = tmp_path / "outbox.json"
+    entry = {
+        "id": "H-7", "title": "Escaped pipe", "defect": "DEFECT-TEXT",
+        "evidence": {"command": "c", "output": "o"}, "nucleus_artifact": "scripts/x.py",
+        "proposed_change": "p", "pin": "v4.40.0", "genericized": True, "channel": "A",
+        "recurs": None, "status": "drafted",
+    }
+    outbox.write_text(json.dumps({"entries": [entry]}), encoding="utf-8")
+    root = _write_minimal_root(tmp_path / "repo", upstream_body="")
+    hosts = {"hosts": [{"name": "h1", "outbox": str(outbox)}]}
+    (root / ".upstream_hosts.json").write_text(json.dumps(hosts), encoding="utf-8")
+    monkeypatch.setattr(session_start, "is_nucleus", lambda: True)
+    section = "\n".join(session_start.section_upstream(root))
+    assert "- h1: H-7 | drafted | A | scripts/x.py" in section
+    assert "DEFECT-TEXT" not in section
+    monkeypatch.setattr(session_start, "is_nucleus", lambda: False)
+    assert "intake queue" not in "\n".join(session_start.section_upstream(root))
+
+
+class FreshIntakeError(Exception):
+    """An exception type no production code can know about."""
+
+
+INTAKE_FAULTS = [RuntimeError, OSError, TypeError, KeyError, FreshIntakeError]
+
+
+@pytest.mark.parametrize("fault", INTAKE_FAULTS, ids=[f.__name__ for f in INTAKE_FAULTS])
+def test_upstream_survives_any_exception_from_the_intake_queue(
+    session_start, monkeypatch: pytest.MonkeyPatch, tmp_path: Path, fault: type[Exception]
+) -> None:
+    """QA4-1 follow-up: an intake failure costs one line, never the boot."""
+    root = _write_minimal_root(tmp_path / "repo", upstream_body="")
+
+    def broken(_root: Path) -> tuple[list[str], bool]:
+        raise fault("injected HOST-TEXT-MUST-NOT-PRINT")
+
+    monkeypatch.setattr(session_start, "intake_lines", broken)
+    monkeypatch.setattr(session_start, "is_nucleus", lambda: True)
+    lines = session_start.section_upstream(root)
+    assert lines[0] == "## Open upstream findings"
+    assert lines[-1] == f"intake queue (channel A): unreadable ({fault.__name__})"
+    assert "HOST-TEXT-MUST-NOT-PRINT" not in "\n".join(lines)
+
+
 def test_cli_against_real_repo_stays_under_line_cap() -> None:
     """Integration: real checkout still exits 0 and never dumps UPSTREAM path body."""
     proc = subprocess.run(

@@ -38,6 +38,19 @@
 
   "cases": [
     {
+      "id": "upstream-outbox",
+      "authored_at_phase": "extract (host, upstream_feedback)",
+      "render": {
+        "UPSTREAM_OUTBOX_TEMPLATE.json": "upstream_outbox.json"
+      },
+      "command": [
+        "python3",
+        "scripts/upstream_outbox.py",
+        "check",
+        "{sprint_dir}/upstream_outbox.json"
+      ]
+    },
+    {
       "id": "implementation-plan",
       "authored_at_phase": "1",
       "render": {

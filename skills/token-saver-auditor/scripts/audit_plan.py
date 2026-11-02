@@ -11,14 +11,22 @@ Usage:
     python3 skills/token-saver-auditor/scripts/audit_plan.py <plan.md>
     python3 skills/token-saver-auditor/scripts/audit_plan.py --current-sprint
 
+Blast radius (R-5): a Work row whose File cell matches a ``shared_globs``
+pattern needs a Verification row whose Command contains ``full_suite_command``.
+Source: ``<cwd>/.agents-blast-radius.json`` when it exists (the host root is the
+current directory, as for ``--current-sprint``), which REPLACES the nucleus
+``config/blast_radius.json`` wholesale (resolved from this script, never merged).
+Neither file present: the check is skipped with a printed note.
+
 Exit codes:
     0 — pass, or --current-sprint skipped (no plan, or sprint id < 30)
-    2 — structural waste found (RA-11)
+    2 — structural waste found (RA-11), or a malformed blast-radius list
 """
 
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import json
 import re
 import sys
@@ -26,6 +34,8 @@ from pathlib import Path
 
 COST_FROM_SPRINT = 30
 EMPTY = {"", "—", "-"}
+HOST_BLAST_FILE = ".agents-blast-radius.json"
+NUCLEUS_BLAST_FILE = Path(__file__).resolve().parents[3] / "config" / "blast_radius.json"
 
 
 def sprint_id_from_path(path: Path) -> int | None:
@@ -264,14 +274,94 @@ def _tests_findings(text: str) -> list[str]:
     return findings
 
 
-def collect_findings(text: str) -> list[str]:
-    """Structural wastes in one plan. Empty means pass.
+def load_blast_radius(
+    cwd: Path, nucleus_file: Path = NUCLEUS_BLAST_FILE
+) -> tuple[str, list[str]] | None:
+    """Read the blast-radius list: host override first, else the nucleus file.
+
+    Args:
+        cwd: Host root; ``<cwd>/.agents-blast-radius.json`` replaces the nucleus list.
+        nucleus_file: Path of the nucleus ``config/blast_radius.json``.
+
+    Returns:
+        ``(full_suite_command, shared_globs)``, or ``None`` when neither file exists.
+
+    Raises:
+        ValueError: The chosen file is not valid JSON or lacks a well-formed key.
+    """
+    host_file = cwd / HOST_BLAST_FILE
+    source = host_file if host_file.is_file() else nucleus_file
+    if not source.is_file():
+        return None
+    try:
+        data = json.loads(source.read_text(encoding="utf-8"))
+        command, globs = data["full_suite_command"], data["shared_globs"]
+    except (OSError, ValueError, KeyError, TypeError) as error:
+        raise ValueError(f"blast-radius list {source} is malformed: {error!r}") from error
+    if not isinstance(command, str) or not command.strip():
+        raise ValueError(f"blast-radius list {source}: full_suite_command must be a non-empty string")
+    if not isinstance(globs, list) or not all(isinstance(g, str) for g in globs):
+        raise ValueError(f"blast-radius list {source}: shared_globs must be a list of strings")
+    return command.strip(), globs
+
+
+def _work_files(text: str) -> list[str]:
+    """Paths named in the File column of every Work table.
 
     Args:
         text: Full plan markdown.
 
     Returns:
+        Backticked spans of each File cell, or the bare cell when it has none.
+    """
+    files: list[str] = []
+    for header, rows in _tables(_section(text, "Work")):
+        column = _column(header, "File")
+        for row in rows if column is not None else []:
+            cell = _cell(row, column)
+            files += re.findall(r"`([^`]+)`", cell) or [cell.strip()]
+    return files
+
+
+def _blast_findings(text: str, cwd: Path) -> list[str]:
+    """R-5 finding: shared file touched by Work with no full-suite Verification row.
+
+    Args:
+        text: Full plan markdown.
+        cwd: Host root used to find the override list.
+
+    Returns:
+        One finding, or empty when the list is absent, nothing shared is touched,
+        or a Verification Command contains the full-suite command.
+    """
+    loaded = load_blast_radius(cwd)
+    if loaded is None:
+        print("note: no blast-radius list found; R-5 check skipped.", file=sys.stderr)
+        return []
+    command, globs = loaded
+    hits = [f for f in _work_files(text) if any(fnmatch.fnmatch(f, g) for g in globs)]
+    commands = [
+        _cell(row, 0).replace("`", "")
+        for _, rows in _tables(_section(text, "Verification"))
+        for row in rows
+    ]
+    if hits and not any(command in item for item in commands):
+        return [f"R-5: Work touches shared {sorted(set(hits))} but no Verification row runs `{command}`."]
+    return []
+
+
+def collect_findings(text: str, cwd: Path | None = None) -> list[str]:
+    """Structural wastes in one plan. Empty means pass.
+
+    Args:
+        text: Full plan markdown.
+        cwd: Host root for the blast-radius override; defaults to the current directory.
+
+    Returns:
         One message per structural waste found.
+
+    Raises:
+        ValueError: The blast-radius list is malformed.
     """
     findings: list[str] = []
     lowered = text.lower()
@@ -287,7 +377,8 @@ def collect_findings(text: str) -> list[str]:
         findings.append("Mechanisms table has no Invoker column (RA-16).")
     if not _has_heading(text, "Cost"):
         findings.append("Cost section is missing (required from Sprint 030).")
-    return findings + _verification_findings(text) + _tests_findings(text)
+    findings += _verification_findings(text) + _tests_findings(text)
+    return findings + _blast_findings(text, cwd or Path.cwd())
 
 
 def audit(path: Path) -> int:
@@ -295,7 +386,11 @@ def audit(path: Path) -> int:
     if not path.is_file():
         print(f"⚠️  No plan at {path}; skip.", file=sys.stderr)
         return 0
-    findings = collect_findings(path.read_text(encoding="utf-8"))
+    try:
+        findings = collect_findings(path.read_text(encoding="utf-8"))
+    except ValueError as error:
+        print(f"❌ audit_plan: {error}", file=sys.stderr)
+        return 2
     if not findings:
         print(f"[OK] audit_plan: {path}")
         return 0

@@ -804,6 +804,10 @@ def audit_regression_test(message: str, staged: list[str]) -> str | None:
     the replay `scripts/check_fix_reproduces.py --range <base>..HEAD` at QA
     Gate 1 (`RA-13 SEQUENTIAL_GATES`; a per-commit replay is too slow for a hook).
 
+    A fix commit is any subject `FIX_SUBJECT_RE` matches (`fix(`, `fix:`,
+    `fix!:`, `fix(x)!:`), the pattern `warn_remediation_chain` also uses; the
+    messages below say `fix(` for all of them.
+
     Exempt by design, following the PR #27 lesson that a gate must recognise
     the legitimate case instead of blocking everything that resembles the
     illegitimate one: a `fix(` commit that stages no source file at all has
@@ -827,8 +831,8 @@ def audit_regression_test(message: str, staged: list[str]) -> str | None:
     Returns:
         str | None: Failure reason, or None when the commit passes.
     """
-    if not message.startswith("fix("):
-        return None
+    if not FIX_SUBJECT_RE.match(message.lstrip()):
+        return None  # Any fix form: `fix(`, `fix:`, `fix!:`, `fix(x)!:` (QA2-4(b)).
     if not any(is_source_path(path) for path in staged):
         return None  # Tests, documentation or .yml/.yaml/.toml configuration only.
     if any(c.kind == "manual" for c in parse_trailers(message)):
@@ -1074,6 +1078,46 @@ MESSAGE_AUDITS: tuple[tuple[Callable[[str, list[str]], str | None], str], ...] =
 )
 
 
+FIX_SUBJECT_RE = re.compile(r"^fix(\([^)]*\))?!?:|^fix\(")
+
+
+def warn_remediation_chain(message: str) -> None:
+    """Prints the A-1 fix-chain report to stderr when the commit is a `fix(`.
+
+    Warning only (`RA-11`): this never raises and never exits, whatever the
+    chain script reports, so it cannot cause an exit 2. Range base: the
+    `last_close_commit` stored in `docs/active_state.json` (the commit where
+    the last sprint close sealed), as `<last_close_commit>..HEAD`. The hook
+    runs before the new commit exists, so the range covers the sprint's
+    commits so far, not the commit being made. When the field is missing or
+    unreadable the check is skipped with a one-line warning. The chain script
+    is resolved from this file's location, which holds in nucleus and host
+    (`.agents/`) layouts alike.
+
+    Args:
+        message: The commit message being made.
+    """
+    if not FIX_SUBJECT_RE.match(message.lstrip()):
+        return
+    try:
+        state = json.loads(Path("docs/active_state.json").read_text(encoding="utf-8"))
+        base = state.get("last_close_commit")
+        if not isinstance(base, str) or not base:
+            raise ValueError("last_close_commit absent")
+        script = Path(__file__).resolve().parent.parent / "scripts" / "check_remediation_chain.py"
+        proc = subprocess.run(
+            [sys.executable, str(script), "--range", f"{base}..HEAD"],
+            capture_output=True, text=True, check=False, timeout=60,
+        )
+    except (OSError, ValueError, subprocess.SubprocessError) as exc:
+        logger.warning("remediation chain check skipped: %s", exc)
+        print(f"[DEVOPS AGENT] remediation chain check skipped: {exc}", file=sys.stderr)
+        return
+    report = (proc.stdout + proc.stderr).strip()
+    if report:
+        print(f"[DEVOPS AGENT] A-1 remediation chain (warning only):\n{report}", file=sys.stderr)
+
+
 def _run_commit_message_guards(command: str) -> None:
     """Runs the guards that need the parsed commit message.
 
@@ -1104,6 +1148,7 @@ def _run_commit_message_guards(command: str) -> None:
         if reason := audit(message, staged):
             log_error("on_commit", code, message[:80])
             block(reason)
+    warn_remediation_chain(message)
 
 
 def main():

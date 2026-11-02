@@ -55,6 +55,7 @@ from _mode import is_nucleus
 from bridge_state import bridge_stale
 from bridge_state import lock_stale as _bridge_lock_stale
 from install import BRIDGE_WRITE_DENIED, install_command
+from upstream_intake import intake_lines
 
 LINE_CAP = 80
 DRIFT_OUTPUT_LINES = 15
@@ -159,7 +160,32 @@ def section_drift(root: Path) -> list[str]:
 
 
 def section_upstream(root: Path) -> list[str]:
-    lines = ["## Open upstream findings"]
+    """Summarise the upstream register and, in the nucleus, the intake queue.
+
+    The channel A queue (``upstream_intake.py``, Sprint 058 plan D2) prints
+    only the fields that fully match its token grammar. A token can still
+    carry words the host chose; the triage reads it as data. Any exception
+    from the queue costs one ``unreadable (<ExcType>)`` line, never the boot;
+    the type name is printed and the message, which can quote host text, is
+    not.
+
+    Args:
+        root: Framework root.
+
+    Returns:
+        list[str]: Section lines.
+    """
+    lines = ["## Open upstream findings", *_findings_summary(root)]
+    if is_nucleus():
+        try:
+            lines += intake_lines(root)[0]
+        except Exception as exc:  # noqa: BLE001 - the boot must survive any intake fault
+            lines.append(f"intake queue (channel A): unreadable ({type(exc).__name__})")
+    return lines
+
+
+def _findings_summary(root: Path) -> list[str]:
+    lines: list[str] = []
     path = root / "docs" / "audits" / "UPSTREAM_FINDINGS_FROM_HOSTS.md"
     if not path.is_file():
         lines.append(

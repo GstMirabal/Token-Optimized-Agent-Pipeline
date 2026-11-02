@@ -289,3 +289,76 @@ def test_legacy_five_column_log_counts_zero_with_same_exit(tmp_path: Path) -> No
     result = _run("--sprint-dir", str(sprint))
     assert result.returncode == 0, result.stderr
     assert "escape rows: 0" in result.stdout
+
+
+def test_escaped_pipe_in_a_cell_does_not_shift_the_verdict_column(check_mod) -> None:
+    """An escaped pipe in the Gate cell keeps Verdict in its column (KI-057-3)."""
+    body = _gate_table(
+        r"| QA Agent \| Gate 1 | 1 | APPROVED |  | clean |",
+    )
+    assert check_mod.collect_findings(body, 47) == []
+    assert _parsed_rows(check_mod, body)[0][:3] == ["QA Agent | Gate 1", "1", "APPROVED"]
+
+
+# --- B-04 (R-4): Remediation notes required before a round >= 2 gate row --------
+
+NOTES_HEADER = "| Gate | Round | Command | Exit |\n| :--- | :--- | :--- | :--- |"
+ROUND2 = [
+    r"| QA Agent \| Gate 1 | 1 | REJECTED | charter | S1 |",
+    r"| QA Agent \| Gate 1 | 2 | APPROVED |  | none |",
+]
+
+
+def _notes_log(*note_rows: str) -> str:
+    gate = "\n".join(
+        [
+            "| Gate | Round | Verdict | Class | Notes |",
+            "| :--- | :--- | :--- | :--- | :--- |",
+            *[r.rsplit("|", 2)[0] + "| x |" for r in ROUND2],
+        ]
+    )
+    notes = NOTES_HEADER + "\n" + "\n".join(note_rows) if note_rows else ""
+    return f"## Quality Gate\n\n{gate}\n\n## Remediation notes\n\n{notes}\n"
+
+
+def _notes_exit(tmp_path: Path, sprint: str, *note_rows: str) -> int:
+    sprint_dir = _log(tmp_path, sprint, _notes_log(*note_rows))
+    return _run("--sprint-dir", str(sprint_dir)).returncode
+
+
+GOOD = r"| QA Agent \| Gate 1 | 1 | `make verify` | 0 |"
+
+
+def test_round_two_with_note_passes(tmp_path: Path) -> None:
+    assert _notes_exit(tmp_path, "058-core-pipeline", GOOD) == 0
+
+
+def test_round_two_without_note_fails(tmp_path: Path) -> None:
+    assert _notes_exit(tmp_path, "058-core-pipeline") == 2
+
+
+def test_note_without_exit_code_fails(tmp_path: Path) -> None:
+    row = r"| QA Agent \| Gate 1 | 1 | `make verify` |  |"
+    assert _notes_exit(tmp_path, "058-core-pipeline", row) == 2
+
+
+def test_note_without_backticked_command_fails(tmp_path: Path) -> None:
+    row = r"| QA Agent \| Gate 1 | 1 | make verify | 0 |"
+    assert _notes_exit(tmp_path, "058-core-pipeline", row) == 2
+
+
+def test_note_for_wrong_gate_or_round_fails(tmp_path: Path) -> None:
+    wrong_gate = r"| Tester \| Gate 2 | 1 | `make verify` | 0 |"
+    assert _notes_exit(tmp_path, "058-core-pipeline", wrong_gate) == 2
+    wrong_round = r"| QA Agent \| Gate 1 | 2 | `make verify` | 0 |"
+    assert _notes_exit(tmp_path / "b", "058-core-pipeline", wrong_round) == 2
+
+
+def test_round_one_only_passes(tmp_path: Path) -> None:
+    body = _phase7(r"| QA Agent \| Gate 1 | 1 | REJECTED | charter | S1 |")
+    sprint_dir = _log(tmp_path, "058-core-pipeline", body)
+    assert _run("--sprint-dir", str(sprint_dir)).returncode == 0
+
+
+def test_historical_log_without_notes_is_not_examined(tmp_path: Path) -> None:
+    assert _notes_exit(tmp_path, "057-core-pipeline") == 0

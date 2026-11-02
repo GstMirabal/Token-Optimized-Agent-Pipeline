@@ -1,0 +1,89 @@
+# Channel B intake filter for `host-finding` issues (agents.md §4
+# feedback_upstream; Sprint 058 plan D3). Labels an issue from its own text and
+# from two GitHub queries; no agent and no agent secret runs here.
+#
+# The issue body is written by anyone, so no field of the issue event is ever
+# interpolated into this file with an expression: every step reads the event
+# from the JSON file at $GITHUB_EVENT_PATH instead, and passes values to the
+# script as files or validated shell variables. The intake label set is fixed:
+# a label outside it stops the job before anything is applied.
+#
+# Actions are pinned by commit SHA (actions/checkout v4.3.1).
+
+name: host-finding-intake
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  intake:
+    if: contains(github.event.issue.labels.*.name, 'host-finding')
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      INTAKE_LABELS: needs-schema needs-evidence needs-genericization security-suspect possible-duplicate unsupported-pin rate-limited
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
+
+      - name: Read the issue from the event file
+        run: |
+          mkdir -p "$RUNNER_TEMP/issue"
+          python3 - "$RUNNER_TEMP/issue" <<'PY'
+          import json, os, re, sys
+          from pathlib import Path
+          out = Path(sys.argv[1])
+          issue = json.loads(Path(os.environ["GITHUB_EVENT_PATH"]).read_text())["issue"]
+          login = issue["user"]["login"]
+          if not re.fullmatch(r"[A-Za-z0-9-]+(\[bot\])?", login):
+              sys.exit(f"unexpected author login shape: {login!r}")
+          (out / "body.md").write_text(issue.get("body") or "")
+          (out / "number.txt").write_text(str(int(issue["number"])))
+          (out / "author.txt").write_text(login)
+          PY
+
+      - name: Compute the intake labels
+        run: |
+          dir="$RUNNER_TEMP/issue"
+          number="$(cat "$dir/number.txt")"
+          author="$(cat "$dir/author.txt")"
+          since="$(date -u -d '24 hours ago' +%Y-%m-%dT%H:%M:%SZ)"
+          gh issue list --repo "$GITHUB_REPOSITORY" --label host-finding --state open \
+            --limit 500 --json number,title \
+            --jq ".[] | select(.number != $number) | .title" > "$dir/titles.txt"
+          recent="$(gh issue list --repo "$GITHUB_REPOSITORY" --label host-finding --state all \
+            --author "$author" --search "created:>=$since" --limit 100 --json number --jq length)"
+          python3 scripts/upstream_outbox.py check-issue \
+            --body-file "$dir/body.md" \
+            --open-titles-file "$dir/titles.txt" \
+            --author-recent-count "$recent" > "$dir/labels.txt"
+          cat "$dir/labels.txt"
+
+      - name: Apply the intake labels
+        run: |
+          dir="$RUNNER_TEMP/issue"
+          number="$(cat "$dir/number.txt")"
+          while read -r label; do
+            case " $INTAKE_LABELS " in
+              *" $label "*) ;;
+              *) echo "label outside the intake set: $label"; exit 1 ;;
+            esac
+          done < "$dir/labels.txt"
+          for label in $INTAKE_LABELS; do
+            if grep -qx "$label" "$dir/labels.txt"; then
+              gh label create "$label" --repo "$GITHUB_REPOSITORY" 2>/dev/null || true
+              gh issue edit "$number" --repo "$GITHUB_REPOSITORY" --add-label "$label"
+            else
+              gh issue edit "$number" --repo "$GITHUB_REPOSITORY" --remove-label "$label" 2>/dev/null || true
+            fi
+          done
+          if grep -qx security-suspect "$dir/labels.txt"; then
+            gh issue comment "$number" --repo "$GITHUB_REPOSITORY" --body \
+              "This finding may touch secrets, hooks or the sandbox (RA-09/RA-19). Those go through channel C: close this issue and report privately as SECURITY.md describes."
+          fi

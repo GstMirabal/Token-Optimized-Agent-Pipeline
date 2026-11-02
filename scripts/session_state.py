@@ -492,6 +492,35 @@ def _hotfix_refusal(hotfix: str, tip: str, seal: str, branch: str | None) -> str
     )
     if ancestor.returncode != 0:
         return f"last_close_commit {seal[:7]} is not an ancestor of the tip"
+    return _non_hotfix_commit(hotfix, tip, seal)
+
+
+def _non_hotfix_commit(hotfix: str, tip: str, seal: str) -> str | None:
+    """Name the first commit of ``seal..tip`` whose subject is not hotfix work.
+
+    Args:
+        hotfix: A validated hotfix id such as ``H-008``.
+        tip: Full SHA of the ref being deployed.
+        seal: ``last_close_commit`` from the anchor.
+
+    Returns:
+        str | None: A refusal naming the offending short SHA and subject, a
+            refusal when the range cannot be listed (fail closed), or None when
+            every subject contains ``(<hotfix>)`` or ends with ``#H<NNN>``.
+    """
+    listed = subprocess.run(
+        ["git", "log", "--format=%h%x09%s", f"{seal}..{tip}"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if listed.returncode != 0:
+        return f"the commits of {seal[:7]}..{tip[:7]} could not be listed"
+    suffix = f"#{hotfix.replace('-', '')}"
+    for line in listed.stdout.splitlines():
+        short, _, subject = line.partition("\t")
+        if f"({hotfix})" not in subject and not subject.endswith(suffix):
+            return f"commit {short} is not work of {hotfix}: {subject!r}"
     return None
 
 

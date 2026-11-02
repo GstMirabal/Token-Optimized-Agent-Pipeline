@@ -1,0 +1,19 @@
+{
+  "_comment": [
+    "R-5 blast radius: a plan Work row that touches a shared_globs pattern requires a Verification row containing full_suite_command.",
+    "Selection criterion: a module is shared when it is imported by >= 2 other mechanisms (scripts, hooks, skill scripts), measured by grep of import lines on commit 4942828.",
+    "Measured importer counts: scripts/_root.py 27, scripts/_mode.py 11, scripts/_md_table.py 4, hooks/telemetry.py 3, hooks/state_mirror.py 3, scripts/_repro_grammar.py 2, hooks/on_commit.py 2 (hooks/on_commit_msg.py, scripts/upstream_outbox.py).",
+    "scripts/merge_json.py and scripts/install.py have 1 importer each and are not listed.",
+    "A host replaces this file wholesale with <host-root>/.agents-blast-radius.json; the two files are never merged."
+  ],
+  "full_suite_command": "venv_skillopt/bin/python -m pytest -q -p no:cacheprovider",
+  "shared_globs": [
+    "scripts/_root.py",
+    "scripts/_mode.py",
+    "scripts/_md_table.py",
+    "scripts/_repro_grammar.py",
+    "hooks/telemetry.py",
+    "hooks/state_mirror.py",
+    "hooks/on_commit.py"
+  ]
+}

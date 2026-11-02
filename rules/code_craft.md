@@ -77,8 +77,29 @@ Enforced in two places, because staging a test proves only that a test exists (`
 
 | Where | Mechanism | What it checks |
 | :--- | :--- | :--- |
-| Commit time | `hooks/on_commit.py audit_regression_test` | A `fix(` commit that stages source either stages a test file **and** carries a trailer `Repro: <test id> — fails at <parent sha>` naming a staged test, or carries `Repro: manual — <SPRINT_LOG section>` when no test can show the defect (no staged test required on that route). Source and test paths are `scripts/_repro_grammar.py` `is_source_path`/`is_test_path`, the definitions the replay below also uses: source is every path that is not a test and whose suffix is not `.md`, `.rst`, `.txt`, `.yml`, `.yaml` or `.toml`, so `.json`, shell and `Makefile` count. The trailer is a claim. |
-| QA Gate 1, first check | `scripts/check_fix_reproduces.py --range <base>..HEAD` | Observes the claim: each `Repro:` test exits exactly `1` on the parent tree (an import or collection error is not a reproduction) and `0` at the commit. Pytest only; any other runner is `UNREPLAYED` unless the commit says `Repro: manual` (`KI-054-1`). |
+| Commit time | `hooks/on_commit.py audit_regression_test` | A fix commit (subject matching `^fix(\([^)]*\))?!?:\|^fix\(`, so `fix:` and `fix!:` too; the same pattern as the replay below) that stages source either stages a test file **and** carries a trailer `Repro: <test id> — fails at <parent sha>` naming a staged test, or carries `Repro: manual — <SPRINT_LOG section>` when no test can show the defect (no staged test required on that route). Source and test paths are `scripts/_repro_grammar.py` `is_source_path`/`is_test_path`, the definitions the replay below also uses: source is every path that is not a test and whose suffix is not `.md`, `.rst`, `.txt`, `.yml`, `.yaml` or `.toml`, so `.json`, shell and `Makefile` count. The trailer is a claim. |
+| QA Gate 1, first check | `scripts/check_fix_reproduces.py --range <base>..HEAD` | Observes the claim: each `Repro:` test exits exactly `1` on the parent tree (an import or collection error is not a reproduction) and `0` at the commit. The runner is chosen by the suffix of the id's file, per the runner table below (`KI-054-1`); a suffix with no runner is `UNREPLAYED` unless the commit says `Repro: manual`. |
+
+**Runner table (`R-6`, `KI-054-1`; vitest runner in commit `abbf856`).** `scripts/check_fix_reproduces.py` replays each `Repro:` id in a temporary worktree of the parent commit and of the fix commit:
+
+| Id file suffix | Runner and command | Verdict on the parent tree |
+| :--- | :--- | :--- |
+| `.py` | pytest, as in the QA Gate 1 row above | Exit exactly `1` is a reproduction; an import or collection error is not |
+| `.js`, `.jsx`, `.ts`, `.tsx`, `.mjs`, `.cjs` | `pnpm exec vitest run <file> -t <name> --reporter=junit --outputFile=<tmp>.xml`, run in the same temporary worktree as the pytest path, with the `node_modules` of the main checkout symlinked into it | A `<failure>` in the junit report is a reproduction. An `<error>`, a missing report, or no executed testcase is `WRONG_FAILURE`: a setup error, not a reproduction |
+| Any other suffix | None | `UNREPLAYED`, reason `no runner for <file>` |
+
+- A JS/TS id is `UNREPLAYED` when `pnpm` is absent from the `PATH` or the main checkout has no `node_modules`; the printed reason names the missing piece.
+- The nucleus adds no JS dependency. A host that uses JS/TS ids supplies its own `node_modules` and `vitest`.
+
+**R-8: a test that reads source code as text is not a reproduction.** A test that asserts on the text of a source file passes or fails on wording, not on behavior, so it cannot show that the defect is gone. Instrument: `scripts/check_fix_reproduces.py` prints `SOURCE_TEXT <sha> <test id>: <pattern>` (commit `6bded6d`). It is a warning only: the verdict and the exit code do not change.
+
+| Item | Value |
+| :--- | :--- |
+| Trigger | The inspected text contains one of five literal substrings: `readFileSync(`, `?raw`, `.read_text(`, `.read_bytes(`, `open(`. No path condition |
+| Inspected text, Python ids | The source of the named test function, located with `ast` (`Class::test` included). If the function cannot be located, the whole file, with the note `(whole file: function not located)` |
+| Inspected text, JS/TS ids | The whole test file, because the standard library has no JS parser |
+
+The check is a denylist of exactly those five substrings and makes no coverage claim (`agents.md §1 fail_closed_claims`): a test that reads source by another route is not flagged. A false positive is expected and cheap, because the warning does not block: `open(` also matches `reopen(`, and reading a JSON data template is not reading source.
 
 ## 7. Dependency justification (enforced)
 

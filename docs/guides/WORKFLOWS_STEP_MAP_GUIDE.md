@@ -15,7 +15,7 @@ protocols that should mirror each other shows up there first.
 | `audit_workflow` | — | — | — | — | — | — | — | write | — | — | — | — | verify |
 | `close_workflow` | write | write | write | write | write | write | write | write | write | verify/write | write | — | — |
 | `deployment_workflow` | — | — | — | — | — | — | — | write | write | — | — | — | — |
-| `extract_workflow` | — | — | — | — | — | — | — | — | — | ?/verify/write | — | — | — |
+| `extract_workflow` | — | — | — | — | — | — | — | — | — | verify/write | — | — | — |
 | `pipeline_workflow` | write | write | write | write | verify/write | — | write | write | write | — | — | — | — |
 | `reconciliation_workflow` | — | — | — | — | — | — | — | write | write | — | — | write | — |
 | `remediation_workflow` | — | write | — | — | — | — | — | write | — | — | — | — | — |
@@ -72,8 +72,10 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 2. Sprint Closeout | `readme_counts` | write |
 | 2. Sprint Closeout | `repo_docs_check` | write |
 | 2. Sprint Closeout | `extract_handoff` | write |
+| 2. Sprint Closeout | `upstream_outbox_advisory` | write |
 | 2.5 Heuristic Pulse Gate | `heuristic_pulse_gate` | verify |
 | 2.6 Phase Completion Gate | `double_gate_evidence` | write |
+| 2.6 Phase Completion Gate | `plan_closure_gate` | write |
 | 3. Zero-Tolerance Purge | `memory_wipe` | write |
 | 3.5 Platform Recheck | `platform_recheck` | verify |
 | 4. State Sync | `state_sync` | write |
@@ -112,7 +114,7 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 1. Strategic Extraction | `signal_scan` | verify |
 | 1. Strategic Extraction | `amnesia_test` | ambiguous |
 | 2. Rule Integration Check | `rule_vs_ki` | write |
-| 2. Rule Integration Check | `upstream_feedback` | ambiguous |
+| 2. Rule Integration Check | `upstream_feedback` | write |
 | 3. Semantic Indexing | `routing_gate` | verify |
 | 3. Semantic Indexing | `index_update` | write |
 | 3. Semantic Indexing | `last_update` | write |

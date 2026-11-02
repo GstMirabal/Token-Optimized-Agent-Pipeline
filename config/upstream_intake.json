@@ -1,0 +1,7 @@
+{
+  "_doc": "Thresholds of the host-finding intake (agents.md §4 feedback_upstream; Sprint 058 plan D1-D3). Read by scripts/upstream_outbox.py: `check-issue` (channel B filter run by .github/workflows/host-finding-intake.yml) and `aged` (host close, advisory). min_pin: a report against an older pin is labelled `unsupported-pin`. aged_after_sprints: a `drafted` entry older than this many sprints is listed as aged; advisory only until several sprints of host data fix the number (plan Q3). rate_limit_per_day: more `host-finding` issues than this from one author in 24 hours is labelled `rate-limited`. security_words: case-insensitive substrings that label an issue `security-suspect` and redirect it to channel C (SECURITY.md).",
+  "min_pin": "v4.40.0",
+  "aged_after_sprints": 3,
+  "rate_limit_per_day": 5,
+  "security_words": [".env", "secret", "token", "sandbox", "hook", "RA-09", "RA-19"]
+}

@@ -144,3 +144,12 @@ def test_host_skill_forged_under_agents_skills_exits_2(
     err = capsys.readouterr().err
     assert "contamination" in err
     assert SKILL_NAME in err
+
+
+def test_escaped_pipe_in_a_cell_does_not_shift_the_destination_column(forge_mod) -> None:
+    """An escaped pipe in the Operation cell keeps Destination in its column."""
+    mod = forge_mod[0]
+    text = AGENT_ASSIGNMENT.replace("| create |", r"| create \| edit |")
+    header, rows = mod._tables(text)[0]
+    assert mod._col(header, rows[0], "Operation") == "create | edit"
+    assert mod._col(header, rows[0], "Destination") == "host:.claude/agents/"

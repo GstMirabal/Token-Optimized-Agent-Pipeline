@@ -118,3 +118,14 @@ def test_allow_read_env_templates(template: dict[str, Any], path: str) -> None:
 def test_no_allow_mach_lookup(template: dict[str, Any]) -> None:
     """allowMachLookup fails open on CLI 2.1.119 (SANDBOX_MEASUREMENT.md section 4)."""
     assert "allowMachLookup" not in template["sandbox"].get("network", {})
+
+
+def test_no_hook_invokes_check_role_artifact(template: dict[str, Any]) -> None:
+    """KI-057-4: check_role_artifact.py left SubagentStop (F-107-N1); its invoker is Phase 7."""
+    commands = [
+        hook.get("command", "")
+        for matchers in template.get("hooks", {}).values()
+        for matcher in matchers
+        for hook in matcher.get("hooks", [])
+    ]
+    assert not [c for c in commands if "check_role_artifact.py" in c]
