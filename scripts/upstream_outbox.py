@@ -137,9 +137,11 @@ def read_regular_bytes(path: Path) -> bytes:
     """Read a regular file of at most ``MAX_READ_BYTES`` bytes without blocking.
 
     The path (symlinks followed) is checked with ``os.stat`` before it is
-    opened, so a device is never opened, and checked again with ``os.fstat``
-    on a descriptor opened ``O_NONBLOCK``, so a path swapped for a FIFO between
-    the two calls cannot block the ``open``. At most ``MAX_READ_BYTES + 1``
+    opened: a path that is a device at that first check is never opened. It
+    is checked again with ``os.fstat`` on a descriptor opened ``O_NONBLOCK``:
+    a path swapped for a FIFO between the two calls cannot block the ``open``,
+    and a path swapped for a device in that window is opened, then rejected by
+    the ``fstat`` check right after the open and before any read. At most ``MAX_READ_BYTES + 1``
     bytes are read, so a file that grows after the check is still bounded.
 
     Args:
@@ -194,6 +196,13 @@ def load_json(path: Path) -> Any:
 
 def read_text_file(path: Path) -> str:
     """Read a UTF-8 text file that is not JSON (issue body, titles, rule file).
+
+    Known open violation (``KI-058-4``, Sprint 058 ``SPRINT_LOG.md``): this
+    function does not do the regular-file check and byte cap that
+    ``agents.md §1`` ``exception_handling`` requires for a path supplied by a
+    host or by data. It serves ``--body-file``, ``--open-titles-file`` and the
+    ``deltas`` rule files. Deferred because changing its lines would open a
+    second remediation chain; do not read this docstring as a guarantee.
 
     Args:
         path: File to read.
@@ -639,7 +648,10 @@ def cmd_aged(args: argparse.Namespace) -> int:
         args: Parsed arguments with ``outbox``.
 
     Returns:
-        int: 0 always once the outbox parses (advisory, plan Q3).
+        int: 0 once the configuration and the outbox are read (advisory, plan
+        Q3). A configuration that cannot be read (``load_config`` runs first)
+        or an outbox that is absent or malformed raises ``OutboxError``, which
+        ``main`` turns into exit 2.
     """
     limit = load_config(agents_root())["aged_after_sprints"]
     outbox = Path(args.outbox).resolve()
