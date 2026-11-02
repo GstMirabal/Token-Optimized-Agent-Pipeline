@@ -38,10 +38,13 @@ invoked_by: scripts/session_start.py.
 **Per-host wall-clock budget (QA5-1).** The work of one host (resolving its
 outbox path, reading it, building its lines) runs in a child interpreter
 (``python -I``) that the parent kills after ``HOST_BUDGET_SECONDS`` of wall
-clock. That bounds the time one host can take whatever the cause of the delay
-(a regex, a loop, a blocked read): a thread or ``signal.alarm`` cannot
-interrupt a C-level regex, a killed process can. It bounds time only: it
-claims nothing about memory or output size. The child prints one JSON object
+clock. That bounds the time one host can take for any delay the child can be
+killed out of: a user-space loop, a regex, an interruptible wait. A thread or
+``signal.alarm`` cannot interrupt a C-level regex, a killed process can.
+**Exception**: after ``kill()``, ``subprocess.run`` calls ``wait()`` with no
+timeout, so a child in uninterruptible kernel sleep (for example a read from
+a hard-mounted network filesystem) is not bounded. The budget bounds time
+only: it claims nothing about memory or output size. The child prints one JSON object
 ``{"lines": [...]}`` on stdout; the parent re-validates its shape. A child
 that times out yields ``- <name>: outbox timed out``; a child that exits
 non-zero or prints a malformed object yields
@@ -53,8 +56,9 @@ stdout and stderr are never echoed, because they can quote host text.
 
 Exit codes:
     0 — the queue was listed, or no ``.upstream_hosts.json`` exists
-    2 — ``.upstream_hosts.json`` is malformed, or a listed outbox is absent,
-        malformed or exceeded its budget (each is reported, and the other
+    2 — ``.upstream_hosts.json`` is malformed, or a listed outbox could not be
+        read or processed (a fault in the child, the nucleus's own code
+        included), or exceeded its budget (each is reported, and the other
         hosts are still listed)
 """
 
