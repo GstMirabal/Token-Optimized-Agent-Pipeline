@@ -1,0 +1,9 @@
+{
+  "nodes": 15421,
+  "edges": 21921,
+  "communities": 1124,
+  "source": "graphify-out/graph.json",
+  "sprint": 58,
+  "built_at_commit": "cf14cf4",
+  "note": "Counts from `make graphify-update` (AST, no LLM) at HEAD before the close-workflow closeout commits (this file, model_ledger_regen). Previous snapshot is Sprint 057's (14521/20190/1101). The delta reflects the new scripts/upstream_outbox.py, scripts/upstream_intake.py, scripts/check_remediation_chain.py, scripts/check_plan_closure.py and scripts/_md_table.py, the vitest replay in scripts/check_fix_reproduces.py, the per-host budget of the channel A intake and the tests added for them. graphifyy stays at 0.8.30 (KI-058-2)."
+}
