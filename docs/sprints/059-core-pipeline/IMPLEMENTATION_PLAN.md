@@ -48,7 +48,7 @@ abarata y acelera todo lo que viene después.
 | P8 | `KI-057-2`: `SessionEnd` puede suspender otra sesión | `docs/roadmaps/core/pipeline/021-030-program-queue.md:396` |
 | P9 | MCP de GitHub remoto con OAuth; actions de `ci.yml` con tags móviles | `.github/workflows/ci.yml:24`, `:28`, `:39` (`@v4`, `@v5`, `@v2`) |
 | P10 | C-7: la separación owner/writer (`ADR-0017`) cuesta un dispatch por paso trivial | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md:2137` |
-| P11 | Residuos del 058 (decisión humana 2026-11-02: cerrar en este sprint todo lo que depende del núcleo): `KI-058-1` (`check_absolute_paths.py` solo mira archivos trackeados), `KI-058-4` (`read_text_file` sin chequeo de archivo regular), `KI-058-5` (cuatro residuos S3), y los puntos 3-5 de la propuesta E | `docs/roadmaps/core/pipeline/021-030-program-queue.md:407-411`; `scripts/upstream_outbox.py:94` (`PIN_PATTERN`), `:136` (`read_regular_bytes`), `:197` (`read_text_file`) |
+| P11 | Residuos del 058 (decisión humana 2026-11-02: cerrar en este sprint todo lo que depende del núcleo): `KI-058-1` (`check_absolute_paths.py` solo mira archivos trackeados), `KI-058-4` (`read_text_file` sin chequeo de archivo regular), `KI-058-5` (cuatro residuos S3), y los puntos 3-5 de la propuesta E — su texto no está en el repositorio; decisión humana 2026-11-02 en Phase 5: se enruta a un `KI-059-n` (Z-02) con condición de desbloqueo "recuperar su texto" | `docs/roadmaps/core/pipeline/021-030-program-queue.md:407-411`; `scripts/upstream_outbox.py:94` (`PIN_PATTERN`), `:136` (`read_regular_bytes`), `:197` (`read_text_file`) |
 
 **Hecho en Phase 1, fuera de los repositorios.** Los symlinks
 `.claude/commands/agents/` (ignorados por git, recreables con `install.py`) se
@@ -173,7 +173,7 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11).
 | # | File | Operation | Risk | Assignee (proposed) | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | Z-01 | `CHANGELOG.md` | modify — entrada `[Unreleased]` del sprint; cita `host:F-116-N1` y `host:F-116-N2` (`agents.md §4 feedback_upstream`, cierre) | low | `doc_orchestrator` | ⏳ |
-| Z-02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify — cerrar o re-enrutar `KI-056-1`, `KI-056-6`, `KI-057-1`, `KI-057-2`, `KI-058-1`, `KI-058-3`, `KI-058-4`, `KI-058-5`; `KI-058-2` y los condicionados de Out of scope quedan con su condición de desbloqueo; nuevos `KI-059-n` | low | `doc_orchestrator` | ⏳ |
+| Z-02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify — cerrar o re-enrutar `KI-056-1`, `KI-056-6`, `KI-057-1`, `KI-057-2`, `KI-058-1`, `KI-058-3`, `KI-058-4`, `KI-058-5`; `KI-058-2` y los condicionados de Out of scope quedan con su condición de desbloqueo; nuevos `KI-059-n`, incluido uno para los puntos 3-5 de la propuesta E (P11) | low | `doc_orchestrator` | ⏳ |
 
 ---
 
@@ -305,9 +305,9 @@ transcript exists for this tool.
 
 | Field | Value |
 | :--- | :--- |
-| **Approved by** | {{HUMAN}} |
-| **Date** | {{ISO_DATE}} |
-| **Plan commit at approval** | `{{COMMIT_SHA}}` |
+| **Approved by** | GstMirabal («Aprobado», Phase 5, session `b1572a48`) |
+| **Date** | 2026-11-02 |
+| **Plan commit at approval** | `65c86d3` (this block and the P11/Z-02 routing of proposal E were added after approval, as recorded) |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an

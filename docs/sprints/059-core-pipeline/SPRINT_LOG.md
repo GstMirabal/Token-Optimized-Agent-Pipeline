@@ -32,8 +32,8 @@ Tracking of atomic goals achieved during the session. Work units: 44 in six wave
     - `[x]` `skill_assignment.md` written; ladder terminates at P1, no skill forged.
     - `[x]` `task_scope.md` written by `rule_validator` (fresh subagent); `check_task_scope.py`, `check_forge_ladder.py` and `audit_plan.py` exit 0.
     - `[x]` Phase 4.3 raised F-1..F-12 except F-7 (S2, instructing) and F-7, F-13, F-14 (S3, testifying); each one verified against the tree and resolved in the plan (`task_scope.md` `## Resolution of the findings`). Work units 44 → 47 (B-07, E-01c, H-03).
-    - `[ ]` Open for the human at Phase 5: the destination of "proposal E points 3-5" (cited in plan P11; its source is not in the repository).
-- [ ] **Phase 5 (Approval Gate)**: Human OK on the committed plan.
+    - `[x]` "Proposal E points 3-5" (plan P11; source not in the repository): human decision at Phase 5, routed to a `KI-059-n` by Z-02.
+- [x] **Phase 5 (Approval Gate)**: Human OK («Aprobado») on 2026-11-02 over the plan at `65c86d3`.
 
 ---
 
@@ -149,7 +149,7 @@ Example (do not uncomment):
 ## ⚓ Documentation Entry Point Seal
 Closing the session state and certifying traceability.
 
-**Strategic Lock**: Phase 4 open — `task_scope.md` pending.
-**Next Phase**: Phase 5 Approval Gate, after `check_task_scope.py` exits 0.
+**Strategic Lock**: Plan approved (`triple_lock` lock 1).
+**Next Phase**: Phase 6 Execution, Wave 1 (A-05, A-09, A-10, A-11, A-12, A-08, A-01).
 
 *Certified under conventional commit standard: feat(scope): message #059*
