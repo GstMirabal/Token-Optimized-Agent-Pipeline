@@ -425,7 +425,7 @@ def test_host_that_hangs_for_any_cause_times_out_and_the_others_are_listed(
     real = upstream_intake.child_command
 
     def command() -> list[str]:
-        # Only the first host hangs: it is the one whose stdin names "bad".
+        # Only the first host hangs: the first call, i.e. the first registered host.
         return [sys.executable, "-I", *HANG_CHILDREN[cause]]
 
     calls = {"n": 0}
