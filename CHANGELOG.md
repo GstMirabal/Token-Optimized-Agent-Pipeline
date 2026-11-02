@@ -4,6 +4,8 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.41.0] - 2026-11-02
+
 ### Added
 - **Sprint 058 `upstream-channel-and-reproduce-first`**: one sprint in four waves:
   - wave A, the upstream channel (outbox validator, channels A/B/C, intake queue);
