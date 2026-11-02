@@ -203,6 +203,41 @@ Measured by `principal_agent` per numbered item of the plan's `## Abort criterio
 
 ---
 
+## 📋 Plan Results
+
+Measured at close on 2026-11-02 at `2665dcf`, one row per row of the plan's Tests and Verification tables (R-10). Defect-presence probes pass at exit `1`.
+
+| Section | Row | Check | Result |
+| :--- | :--- | :--- | :--- |
+| Tests | 1 | `test -f scripts/upstream_outbox.py` | exit `0` (exit `1` at `f0b11f8`) |
+| Tests | 2 | `test -f .github/ISSUE_TEMPLATE/host-finding.yml` | exit `0` (exit `1` at `f0b11f8`) |
+| Tests | 3 | `test -f scripts/check_remediation_chain.py` | exit `0` (exit `1` at `f0b11f8`) |
+| Tests | 4 | `test -f scripts/check_plan_closure.py` | exit `0` (exit `1` at `f0b11f8`) |
+| Tests | 5 | `test -f config/blast_radius.json` | exit `0` (exit `1` at `f0b11f8`) |
+| Tests | 6 | `rg -q "Remediation notes" docs/standards/templates/SPRINT_LOG_TEMPLATE.md` | exit `0` (exit `1` at `f0b11f8`) |
+| Tests | 7 | `rg -q "Command paths" agents.md` | exit `0` (exit `1` at `f0b11f8`) |
+| Tests | 8 | `rg -q -F "Ships host findings" scripts/sync_agents_pin.py` | exit `0` (exit `1` at `f0b11f8`) |
+| Tests | 9 | `rg -q -F "pytest replays .py only" scripts/check_fix_reproduces.py` | exit `1`: the defect is gone (exit `0` at `f0b11f8`) |
+| Tests | 10 | `rg -n 'split\("\x7c"\)' scripts/` | exit `1`, no output (3 lines at `f0b11f8`) |
+| Tests | 11 | `rg -n -F 'check_role_artifact.py --from-hook' claude/settings.hooks.json` | exit `1`, no output (line `129` at `f0b11f8`) |
+| Tests | 12 | `KI-057-6` hotfix range holding a `#058` commit | Built by C-09 (`324dfb4`): `tests/test_session_state.py::test_require_released_hotfix_refuses_a_sprint_commit_inside_the_range` fails at `e45f555` and passes at HEAD (`check_fix_reproduces.py` OK); `pytest tests/test_session_state.py -k hotfix` `18 passed` |
+| Tests | 13 | `rg -q -F 'claude-agent-sdk==0.2.88' requirements-skillopt.txt` | exit `1`: the old pin is gone (D-01 `42355f7`) |
+| Tests | 14 | `make verify` | exit `0` |
+| Tests | 15 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider` | exit `0`, `1527 passed` (`1288 passed` at `f0b11f8`) |
+| Verification | 1 | `make verify` | exit `0` |
+| Verification | 2 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider` | exit `0`, `1527 passed` |
+| Verification | 3 | `rg -n 'split\("\x7c"\)' scripts/` | no output, exit `1` |
+| Verification | 4 | `rg -n -F 'check_role_artifact.py --from-hook' claude/settings.hooks.json` | no output, exit `1` |
+| Verification | 5 | `rg -n '\$\{\{ *github\.event\.issue' .github/workflows/` | no output, exit `1` |
+| Verification | 6 | `python3 scripts/upstream_outbox.py check docs/standards/templates/UPSTREAM_OUTBOX_TEMPLATE.json` | exit `0`, `1 entry valid` |
+| Verification | 7 | `python3 scripts/check_fix_reproduces.py --range f0b11f8..HEAD` | exit `0`, `23 fix( commits in range, 0 violation(s)` |
+| Verification | 8 | `python3 scripts/check_remediation_chain.py --range f0b11f8..HEAD` | exit `0`, `chains: 1` (7 links): under the A-1 stop |
+| Verification | 9 | `python3 scripts/check_plan_closure.py --sprint-dir docs/sprints/058-core-pipeline` | exit `0` once this table is committed (Phase 2.6 `plan_closure_gate`) |
+| Verification | 10 | `python3 skills/token-saver-auditor/scripts/audit_plan.py docs/sprints/058-core-pipeline/IMPLEMENTATION_PLAN.md` | exit `0` |
+| Verification | 11 | `rg -n -F 'claude-agent-sdk==0.2.88' requirements-skillopt.txt` | no output, exit `1` |
+
+---
+
 ## ⚓ Documentation Entry Point Seal
 Closing the session state and certifying traceability.
 
