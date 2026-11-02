@@ -1,0 +1,168 @@
+# Task Scope — Sprint 059 (core-pipeline)
+
+Source: `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` (`## Work`, `## Design`, `## Tests`, `## Verification`, `## Abort criterion`).
+Staffing authority: `agent_assignment.md` (its Assignee column overrides the plan's `Assignee (proposed)` and is used verbatim; the six overwrites A-00, A-07, H-01, C-01, D-01, F-01 are listed in its "Disagreements with the plan"). Tools: no `skill_assignment.md` was read for this artifact.
+Phase 4.3 of `workflows/pipeline_workflow.md`. Enforced by `scripts/check_task_scope.py`.
+Mode: `claude-code`, `delegation_mode: native`. Sprint id 59 >= `MODEL_FROM_SPRINT` (28), so Model and Effort are required. No template for this artifact exists under `docs/standards/templates/`; the shape comes from `scripts/check_task_scope.py` (`WORK_KEYS`: File, Operation, Risk, Assignee, plus Model and Effort).
+
+## Tier transcription
+
+Model and Effort are transcribed from each assignee's `agents/<role>.md` frontmatter (`model:`, `tier:`) and the `claude_code` column of `config/model_tiers.json` (`tiers.author.claude_code` = `sonnet` / `medium`; `tiers.mechanical.claude_code` = `haiku` / `low`). No tier is invented and no dated model ID is written. `session_tool` is `claude-code`, so `make cursor-tiers` does not apply.
+
+| Assignee | model | tier | effort |
+| :--- | :--- | :--- | :--- |
+| `doc_orchestrator` | sonnet | author | medium |
+| `rule_validator` | sonnet | author | medium |
+| `implementer_agent` | sonnet | author | medium |
+| `orchestrator` | sonnet | author | medium |
+| `skill_architect` | sonnet | author | medium |
+| `token_economy_agent` (measures for A-00 and H-01; owns no row) | sonnet | author | medium |
+| `devops_agent` (measures for C-01; owns no row) | haiku | mechanical | low |
+
+Declared escalations: none. No Work row is assigned to a `mechanical` profile, so the mechanical-at-high-risk check of `check_task_scope.py` does not apply. High-risk rows stay on the `author` tier: the adversarial check on them is the Phase 7 gate (`tier: gate`), not the author. Plan abort criterion 4 may move `qa_agent` back to `opus`; that is a gate profile and owns no row here.
+
+## Work
+
+Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from the plan. `after X` in Operation is the plan's dependency; G-01 and H-02 add the `Depends on`, `Est. cost` and `Suspend after` columns later, so they are not written here. Execution order is the plan's: Wave 1 to Wave 6, then Close. The tables hold 44 units (Wave 1: 7, Wave 2: 6, Wave 3: 8, Wave 4: 5, Wave 5: 5, Wave 6: 11, Close: 2). Rows D-04, E-01b and F-02 are conditional on an ADR decision (see findings F-1 and F-8).
+
+### Wave 1 — Cost levers
+
+| # | File | Operation | Risk | Assignee | Model | Effort | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| A-05 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify: record the triage verdicts of the plan Context (`F-116-N1`, `F-116-N2`: accept, with command and exit); C-02 marks both closed | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-09 | `rules/code_craft.md` | modify: receive the measurement and history of linter_command, max_indentation, max_lines_per_func, fail_closed_claims, exception_handling moved out of agents.md (D10) | medium | `rule_validator` | sonnet | medium | ⏳ |
+| A-10 | `rules/project_topology.md` | modify: receive the history and precedents of RA-09, RA-19, jurisdiction moved out of agents.md (D10) | medium | `rule_validator` | sonnet | medium | ⏳ |
+| A-11 | `docs/guides/SELF_IMPROVEMENT_GUIDE.md` | modify: receive the transport, channels, triage and closure of feedback_upstream moved out of agents.md (D10) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-12 | `agents.md` | modify: after A-09, A-10 and A-11, trim rows to rule plus pointer, at most 20000 bytes, `make verify` exit 0; keep every string a test pins in `agents.md` (`grep -n "agents.md" tests/*.py`: `RA-18` in `tests/test_cursor_phase1.py`, the `EMITTED` line of `tests/test_gate_row_wording.py`, the `Command paths` row); RA-14 grep of each moved term and every citation updated in the same commit | high | `rule_validator` | sonnet | medium | ⏳ |
+| A-08 | `agents/qa_agent.md` | modify: set model sonnet and tier author (D9); mandatory companion `config/model_tiers.json` (move qa_agent to author.profiles, add the trial and its return criterion to the gate basis) | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| A-01 | `scripts/session_cost.py` | modify: fix( cycle_summary baseline D1; paired test `tests/test_session_cost.py` (new) with a turn of cache_read 0 and cache_creation above 0 | medium | `implementer_agent` | sonnet | medium | ⏳ |
+
+### Wave 2 — Pace and autonomy
+
+| # | File | Operation | Risk | Assignee | Model | Effort | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| G-01 | `scripts/check_task_scope.py` | modify: add the `Depends on` column and a subcommand printing parallel batches (dependencies landed, disjoint files, at most 4); tests in `tests/test_check_task_scope.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| G-02 | `workflows/pipeline_workflow.md` | modify: after G-01, Phase 6 dispatches each batch in parallel with `isolation: "worktree"` and integrates in table order; after each batch the orchestrator removes every worktree and its branch (`git worktree remove`, `git branch -D`) and re-runs `check_task_scope.py` on `ai-sprint/[ID]`, exit 0, before the next batch; Phase 7 stays serial per wave (D11) | medium | `orchestrator` | sonnet | medium | ⏳ |
+| B-01 | `scripts/prompt_count.py` | create: count authorizations per session from transcripts, `--json`; test `tests/test_prompt_count.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| B-07 | `workflows/close_workflow.md` | modify: after B-01, advisory step running `python3 scripts/prompt_count.py --session <id> --json` on the closing session; RA-16 invoker of B-01 | low | `orchestrator` | sonnet | medium | ⏳ |
+| B-02 | `docs/sprints/059-core-pipeline/PROMPT_MEASUREMENT.md` | create: after B-01, baseline count for one real nucleus session and one genericized host session (RA-15); re-measure after B-06 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| B-06 | `scripts/install.py` | modify: after B-02, `install_nucleus_bridge` installs the `sandbox` block with `autoAllowBashIfSandboxed: true`, no hooks and no `excludedCommands` (D12); new test `tests/test_install_nucleus_sandbox.py` | high | `implementer_agent` | sonnet | medium | ⏳ |
+| E-01 | `scripts/session_state.py` | modify: fix( SessionEnd `suspend` acts only when the hook session_id matches the anchor (KI-057-2); paired test `tests/test_session_end_hook.py`; reproduce first or RECORD | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| E-01c | `scripts/session_state.py` | modify: after E-01, fix( `suspend` between sprints (sealed sprint, session `IN_PROGRESS`) releases the session lock without touching the sealed sprint; paired test in `tests/test_session_state.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
+
+### Wave 3 — In-session token economy
+
+| # | File | Operation | Risk | Assignee | Model | Effort | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| A-00 | `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | create: D8 study with one table per piece and per mechanism with sources, context growth boot to close, real cost per unit for Sprints 056-058, 2-4 candidate methods (figures supplied by `token_economy_agent`) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-06 | `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | modify: after A-00, add a `Debate` section with options, objections and the human's decision | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-07 | `docs/decisions/ADR-0018-in-session-token-economy.md` | create: after A-06, the chosen method, confirming or replacing D2; leftovers go to KI-059-n | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-02 | `scripts/session_cost.py` | modify: after A-01 and A-07, feat( flag `--bound` (OK, SOFT, HARD, exit 0, D3) or the form ADR-0018 sets; test in `tests/test_session_cost.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| A-03 | `rules/token_economy.md` | modify: after A-07, section 3.1 new unit (D1), in-session invoker and the per-unit budget with planned suspend points (D14) | low | `rule_validator` | sonnet | medium | ⏳ |
+| H-01 | `config/unit_cost_estimates.json` | create: after A-07, estimate table by unit type and risk with the A-00 source and `measured_at` per figure (figures supplied by `token_economy_agent`) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| H-02 | `scripts/check_task_scope.py` | modify: after G-01 and H-01, add `Est. cost` and `Suspend after` columns; accumulate cost in order and exit 2 when the cumulative projection passes soft (5x) with no earlier `Suspend after: yes` (D14); tests in `tests/test_check_task_scope.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| H-03 | `workflows/close_workflow.md` | modify: after H-01 and B-07, advisory step comparing each unit's measured cost (`session_cost.py --json`) with its `Est. cost`; RA-16 invoker of the `config/unit_cost_estimates.json` recalibration | low | `orchestrator` | sonnet | medium | ⏳ |
+| A-04 | `workflows/pipeline_workflow.md` | modify: after G-02, A-02 and H-02, Phase 4.3 fills `Est. cost` and `Suspend after`; Phase 6 runs the measurement per unit (RA-16 invoker of A-02), compares it with `Est. cost`, and runs `session_state.py suspend` at each `Suspend after: yes` | low | `orchestrator` | sonnet | medium | ⏳ |
+
+### Wave 4 — Sandbox measurement
+
+| # | File | Operation | Risk | Assignee | Model | Effort | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| B-03 | `scripts/py_compile_tree.py` | modify: compile without writing `.pyc` (D5); test in `tests/test_verify_py_compile.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| B-04 | `skills/mass-standardizer/scripts/generate_manifest.py` | modify: add `--check` (exit 0 on match, exit 2 on drift, `skills/manifest_skills.json` bytes unchanged) (D5); test in `tests/test_mass_standardizer.py` | medium | `skill_architect` | sonnet | medium | ⏳ |
+| B-05 | `Makefile` | modify: after B-03 and B-04, `verify` uses both no-write modes | low | `implementer_agent` | sonnet | medium | ⏳ |
+| C-01 | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` | create: RA-19 re-measurement for the current CLI (untested E16 members, subtrees inferred by containment, `Edit(/.git/modules/.agents/**)`, D-8), including the nucleus with the B-06 sandbox; `devops_agent` measures dispatched with `model: sonnet` (escalated from mechanical for high risk) and hands over literal output | high | `doc_orchestrator` | sonnet | medium | ⏳ |
+| C-02 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify: after C-01 and A-02, `F-055-N1` closed if C-01 measures its vector with no agent-writable entry point, otherwise open citing the C-01 measurement; `F-116-N1` marked closed citing the A-01 commit and `F-116-N2` citing the A-02 commit | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+
+### Wave 5 — Regime
+
+| # | File | Operation | Risk | Assignee | Model | Effort | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| D-01 | `docs/decisions/ADR-0019-sandbox-regime.md` | create: after B-02 and C-01, decide RA-09, the gh row, D-12, the local DB route (KI-057-1) and hooks in the nucleus (D6, D12) | high | `doc_orchestrator` | sonnet | medium | ⏳ |
+| D-02 | `agents.md` | modify: after A-12 and D-01, amend RA-09 and section 2 graph_sync (D-10); `wc -c agents.md` at most 20000 after the change, new detail goes to `rules/project_topology.md` (D-03) | high | `rule_validator` | sonnet | medium | ⏳ |
+| D-03 | `rules/project_topology.md` | modify: after A-10 and D-01, section 4 gh row (D-3), D-1, D-4, cost of `git -C .agents fetch` (QA2-3) | medium | `rule_validator` | sonnet | medium | ⏳ |
+| D-04 | `claude/settings.hooks.json` | modify: after D-01, `sandbox` block local DB route (KI-057-1) only if ADR-0019 approves a measured route, otherwise RECORD | high | `implementer_agent` | sonnet | medium | ⏳ |
+| E-01b | `claude/settings.hooks.json` | modify: after E-01, D-01 and D-04 (same file as D-04, serial), the SessionEnd command resolves its path in nucleus and host if ADR-0019 approves hooks in the nucleus (D13), otherwise RECORD and manual `suspend` stays documented | medium | `implementer_agent` | sonnet | medium | ⏳ |
+
+### Wave 6 — Hardening, roles and Sprint 058 residues
+
+| # | File | Operation | Risk | Assignee | Model | Effort | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| E-02 | `claude/mcp.json` | modify: remote GitHub MCP server with OAuth, no token in a file | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| E-03 | `.github/workflows/ci.yml` | modify: pin `actions/checkout`, `actions/setup-python`, `errata-ai/vale-action` by SHA | low | `implementer_agent` | sonnet | medium | ⏳ |
+| F-01 | `docs/decisions/ADR-0020-owner-writer-dispatch.md` | create: C-7, when the owner writes a trivial artifact without a dispatch (amends ADR-0017) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
+| F-02 | `config/artifact_registry.json` | modify: after F-01, if ADR-0020 is approved register the owner-writes exception with the condition the ADR sets and `check_role_artifact.py` exit 0; otherwise RECORD with no change | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| I-01 | `scripts/check_absolute_paths.py` | modify: fix( KI-058-1, also scan the index and untracked files; new paired test `tests/test_check_absolute_paths.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
+| I-02 | `scripts/upstream_outbox.py` | modify: fix( KI-058-4, `read_text_file` goes through `read_regular_bytes` so a FIFO exits 2; paired test with a FIFO in `tests/test_upstream_outbox.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
+| I-03 | `scripts/upstream_outbox.py` | modify: after I-02, fix( KI-058-5 a, `deltas` exits 2 on a missing `--rules` directory; paired test in `tests/test_upstream_outbox.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
+| I-04 | `scripts/upstream_outbox.py` | modify: after I-03, fix( KI-058-5 b, `export --out` to a missing directory exits 2 with a message; paired test in `tests/test_upstream_outbox.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
+| I-05 | `scripts/upstream_outbox.py` | modify: after I-04, fix( KI-058-5 c, `PIN_PATTERN` accepts ASCII digits only; paired test with non-ASCII digits in `tests/test_upstream_outbox.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
+| I-06 | `hooks/on_commit.py` | modify: fix( KI-058-5 d, an uppercase `FIX:` subject is treated as `fix(`; paired test in `tests/test_on_commit.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
+| I-07 | `scripts/check_fix_reproduces.py` | modify: fix( KI-058-5 d, same uppercase `FIX:` case in the reproduction check; paired test in `tests/test_check_fix_reproduces.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
+
+### Close
+
+| # | File | Operation | Risk | Assignee | Model | Effort | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| Z-01 | `CHANGELOG.md` | modify: add the sprint entry under `[Unreleased]`, citing `host:F-116-N1` and `host:F-116-N2` | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| Z-02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify: close or re-route KI-056-1, KI-056-6, KI-057-1, KI-057-2, KI-058-1, KI-058-3, KI-058-4, KI-058-5; keep KI-058-2 and the conditional Out of scope items with their unblock condition; add new KI-059-n | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+
+## Jurisdiction check (serial or concurrent)
+
+Same structural subject claimed by more than one unit. "Serial" means the plan's `after` chain or the wave order prevents concurrency; D11 batches run only inside a wave and only from Wave 3.
+
+| Subject | Units | Verdict |
+| :--- | :--- | :--- |
+| `scripts/session_cost.py` | A-01 (Wave 1), A-02 (Wave 3, after A-01) | Serial. |
+| `scripts/check_task_scope.py` | G-01 (Wave 2), H-02 (Wave 3, after G-01 and H-01) | Serial. |
+| `scripts/upstream_outbox.py` | I-02, I-03, I-04, I-05 | Serial by explicit `after` chain I-02 to I-05. |
+| `agents.md` | A-12 (Wave 1), D-02 (Wave 5, after A-12) | Serial. |
+| `rules/project_topology.md` | A-10 (Wave 1), D-03 (Wave 5, after A-10) | Serial. |
+| `workflows/pipeline_workflow.md` | G-02 (Wave 2), A-04 (Wave 3, after G-02) | Serial. |
+| `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | A-05 (Wave 1), C-02 (Wave 4) | Serial by wave order; F-4 moved the closing marks to C-02. |
+| `TOKEN_ECONOMY_STUDY.md` | A-00, A-06 (after A-00) | Serial. |
+| `claude/settings.hooks.json` | D-04, E-01b (after D-04) | Serial after F-1 resolution. |
+| `scripts/session_state.py` | E-01, E-01c (after E-01) | Serial. |
+| `workflows/close_workflow.md` | B-07 (Wave 2), H-03 (Wave 3, after B-07) | Serial. |
+
+## Rule audit findings
+
+Severity per `rules/qa_and_testing.md` section 4 (S0-S3). Class per the same file (`instructing` or `testifying`).
+
+| ID | Severity | Class | Evidence | Concrete plan change |
+| :--- | :--- | :--- | :--- | :--- |
+| F-1 | S2 | instructing | `IMPLEMENTATION_PLAN.md:149` makes D-04 modify `claude/settings.json`, and `:44` cites `claude/settings.json:45`. `claude/` holds only `mcp.json` and `settings.hooks.json` (Glob). `claude/settings.hooks.json:45` holds `autoAllowBashIfSandboxed` and `:124-129` holds the `SessionEnd` command that E-01b (`IMPLEMENTATION_PLAN.md:150`) edits. D-04 and E-01b are therefore one structural subject, both after D-01 only, both `parallel` in `agent_assignment.md:86-87`. `jurisdictional_lock` and `no_interference` (`agents.md §2`) forbid concurrent claim; D11 batching would place them in one batch. | Change D-04 target to `claude/settings.hooks.json`; add `after E-01b` to D-04 (or the reverse) and set both to `sequential` in `agent_assignment.md`; correct the `:44` citation. |
+| F-2 | S2 | instructing | D11 (`IMPLEMENTATION_PLAN.md:83`) dispatches each unit with `isolation: "worktree"` and the orchestrator "integra los commits". `scripts/branch_sovereignty.py:141-142` audits every local branch except the base and the checked-out one, and `:238-241` calls a branch integrated only when `git cherry <base> <branch>` shows no `+` against `main`; sprint commits are never on `main` before deployment, so any leftover worktree branch is reported unintegrated and the close seal exits 2 (`:293-296`). `hooks/on_commit.py:1011-1014` also returns `None` for a branch that is not `ai-sprint/N`, so commits made on a worktree branch skip the `task_scope.md` guard. Abort criterion 6 (`:288-289`) covers only a git conflict. | Add to G-02 Operation: each worktree branch is deleted after its commits are integrated onto `ai-sprint/059`, and `branch_sovereignty.py audit` is run before close. Add the leftover-branch case to abort criterion 6. |
+| F-3 | S2 | instructing | `RA-16` (`agents.md §7`) requires a declared, verifiable invoker. The Mechanisms table (`IMPLEMENTATION_PLAN.md:192`) gives `scripts/prompt_count.py` the invoker `PROMPT_MEASUREMENT.md` (a frozen sprint record) plus an advisory in `close_workflow.md` "decidir en B-01", and `:190` leaves the recalibration in `close_workflow.md` "decidir en H-01". Work has no unit that modifies `workflows/close_workflow.md` or `config/invocation_exceptions.json`. | Decide now: add a unit modifying `workflows/close_workflow.md` (advisory step naming `prompt_count.py`, and the `unit_cost_estimates.json` recalibration), or add a unit for a typed exception in `config/invocation_exceptions.json`. B-01 declares `invoked_by:` accordingly. |
+| F-4 | S2 | instructing | A-05 (`IMPLEMENTATION_PLAN.md:100`) is Wave 1 and must "marcar F-116-N1/N2 al aterrizar", but F-116-N1 lands with A-01 (`:106`, Wave 1) and F-116-N2 lands with A-02 and A-04 (`:126`, `:130`, Wave 3). The marking cannot happen in Wave 1 and no later unit does it; C-02 (`:140`) touches the same file for `F-055-N1` only, and Z-02 (`:173`) does not touch it. | Limit A-05 to the triage verdicts; add the `F-116-N1`/`F-116-N2` landed marking to C-02 (Wave 4, after A-04). |
+| F-5 | S2 | instructing | E-01 (`IMPLEMENTATION_PLAN.md:117`) bundles three subjects in one `modify` of `scripts/session_state.py`: the KI-057-2 fix, the sealed-sprint lock release (a second defect with no paired test named; only `tests/test_session_end_hook.py` is named), and a write to `SPRINT_LOG.md`. It also depends on "los puntos 3-5 de la propuesta E", an artifact that `Grep` finds only in the plan itself (`:51`, `:117`). `agents.md §1 unambiguous_action` forbids an undefined referent and a step whose decision is hidden ("implementar como unidad nueva o descartar con motivo"). | Split E-01 into one unit per defect, each with its named paired test (`fix(` unit, `rules/qa_and_testing.md`); move the `SPRINT_LOG.md` entry to the orchestrator's log duty; replace "propuesta E" with the file and line where points 3-5 are written, or list them. |
+| F-6 | S2 | instructing | D-02 (`IMPLEMENTATION_PLAN.md:147`) re-edits `agents.md` in Wave 5 but its Operation carries no byte cap; the cap exists only in A-12 (`:104`) and in the "Hecho cuando" line (`:59`), and `make verify` does not measure `agents.md` size (no Makefile step references it). The 20,000-byte result can regress silently after A-12. | Add "at most 20,000 bytes (`wc -c agents.md`)" to D-02, and add a size assertion to a test or to `make verify` as the deterministic check. |
+| F-7 | S3 | testifying | A-12 target is constrained by content that must stay in `agents.md`: `tests/test_cursor_phase1.py:48-51` asserts `RA-18` and `CURSOR_PHASE1_NO_PLAN_MODE` in `agents.md`; `tests/test_gate_row_wording.py:108-114` requires an `EMITTED` line (RECORD with class and severity) in `agents.md`; `agents.md §0` Command paths row says it is kept there because the file is always loaded. None conflicts with the 20,000-byte target, but the plan names none of them. | Add the three retention constraints to A-12 Operation so the trim does not rediscover them through `make verify`. |
+| F-8 | S2 | instructing | The `agents.md §4 feedback_upstream` row declares itself the canonical statement and requires a grep of `§3 jurisdiction` and `workflows/extract_workflow.md` on every patch (`RA-14`). A-11 (`IMPLEMENTATION_PLAN.md:103`) moves its transport, channels, triage and closure to `docs/guides/SELF_IMPROVEMENT_GUIDE.md`, and the term is cited in 16 files (Grep count: `workflows/close_workflow.md`, `workflows/pipeline_workflow.md`, `workflows/extract_workflow.md`, `config/upstream_intake.json`, `scripts/upstream_outbox.py` among them). No Work unit updates those citations. | Add the `RA-14` grep for `feedback_upstream` as a done-criterion of A-12, and either name the citing files as units or state that the row keeps the pointer text they depend on. |
+| F-9 | S2 | instructing | B-06 (`IMPLEMENTATION_PLAN.md:116`, Wave 2) enables `autoAllowBashIfSandboxed` in the nucleus (`claude/settings.hooks.json:45` shows the block) before C-01 (`:139`, Wave 4) re-measures `RA-19` including that nucleus sandbox. D12 (`:84`) admits the nucleus has no write-deny on `scripts/` and `hooks/`. Abort criterion 1 (`:276-278`) stops only wave 5 changes and does not revert B-06; criterion 5 (`:286-287`) reverts B-06 only on a `make verify` or Phase 6 failure. `RA-19` (`agents.md §7`) bars asserting a boundary without a measured enumeration. | Add to abort criterion 1: if C-01 finds an agent-writable unsandboxed entry point, B-06 is reverted. Keep the B-06 Operation free of any "boundary" wording. D-04 and E-01b (conditional on ADR-0019) need no change for `RA-19`. |
+| F-10 | S2 | instructing | Tests are not named by file in G-01 (`IMPLEMENTATION_PLAN.md:112`), H-02 (`:129`), B-03 (`:136`), B-06 (`:116`) and I-01..I-07 (`:160-166`: "paired test en `tests/`"). `agents.md §1 unambiguous_action` requires the target by name, and `no_interference` cannot be applied to G-01 and H-02, which probably write the same test file. | Name each test file in the Operation (for example the existing test of `check_task_scope.py` for G-01 and H-02, `tests/test_upstream_outbox.py` for I-02..I-05). |
+| F-11 | S2 | instructing | F-02 (`IMPLEMENTATION_PLAN.md:159`) says "modify, tras F-01, solo si se aprueba": no operation is stated and, unlike D-04 and E-01b (`:149-150`), no `RECORD` branch. C-02 (`:140`) says "estado de F-055-N1": no operation or done-criterion. `unambiguous_action` requires operation, target and done-criterion. | State F-02's change (which registry entry) and add "otherwise RECORD"; rewrite C-02 as the exact status value written. |
+| F-12 | S2 | instructing | B-04 (`IMPLEMENTATION_PLAN.md:137`) adds `--check` to `skills/mass-standardizer/scripts/generate_manifest.py` with no test, and the Tests table (`:214-223`) has no row for it, though B-05 relies on it inside `make verify`. `rules/qa_and_testing.md` section 4 treats an edge case without a test as S2. | Add a named test to B-04 and a Tests row (manifest unchanged and exit 0 on match, exit 2 on drift, file bytes untouched). |
+| F-13 | S3 | testifying | Z-01 (`IMPLEMENTATION_PLAN.md:172`) does not say the entry cites `host:F-116-N1` and `host:F-116-N2`, which `agents.md §4 feedback_upstream` (Closure) requires for a nucleus `CHANGELOG.md` entry that ships a finding. | Add the `host:<id>` citations to Z-01 Operation. |
+| F-14 | S3 | testifying | C-01 is `high` risk (`IMPLEMENTATION_PLAN.md:139`) and its measurements run on `devops_agent`, tier `mechanical` (`config/model_tiers.json:85` basis: "a wrong answer fails at the next command"), but an incomplete `RA-19` enumeration does not fail at the next command. | Record in `SPRINT_LOG.md` that C-01 measurements are re-checked at the Phase 7 gate, or run the measuring step on an `author` profile. |
+
+## Resolution of the findings
+
+Applied to `IMPLEMENTATION_PLAN.md` (and mirrored in the Work tables above and in `agent_assignment.md`) before Phase 5. Plan Work units: 44 → 47 (B-07, E-01c, H-03 added).
+
+| ID | Resolution |
+| :--- | :--- |
+| F-1 | D-04 targets `claude/settings.hooks.json`; E-01b runs after D-04; both `sequential`; P4 citation corrected to `claude/settings.hooks.json:45`. |
+| F-2 | G-02 Operation: each worktree and its branch are removed after integration, and `check_task_scope.py` re-runs on `ai-sprint/[ID]` before the next batch. |
+| F-3 | New units B-07 (`close_workflow.md` advisory running `prompt_count.py`) and H-03 (`close_workflow.md` advisory recalibration); Mechanisms table names both invokers. |
+| F-4 | A-05 limited to triage verdicts; C-02 marks `F-116-N1` (A-01) and `F-116-N2` (A-02) closed. |
+| F-5 | E-01 split into E-01 (`KI-057-2`, `tests/test_session_end_hook.py`) and E-01c (sealed-sprint lock release, `tests/test_session_state.py`). The "proposal E points 3-5" decision is removed from E-01; its source is not in the repository and the human decides its destination at Phase 5. |
+| F-6 | D-02 carries `wc -c agents.md` ≤ 20000; the plan Verification row `wc -c agents.md` measures it at close. |
+| F-7 | A-12 Operation names the three pinned strings and the `grep -n "agents.md" tests/*.py` pre-check. |
+| F-8 | A-12 Operation carries the `RA-14` grep for every moved term, with citations updated in the same commit. |
+| F-9 | Abort criterion 1 reverts B-06 when the entry point C-01 finds is opened by its `sandbox` block. |
+| F-10 | Each test file named: G-01/H-02 `tests/test_check_task_scope.py`, B-03 `tests/test_verify_py_compile.py`, B-06 `tests/test_install_nucleus_sandbox.py`, I-01 `tests/test_check_absolute_paths.py`, I-02..I-05 `tests/test_upstream_outbox.py`, I-06 `tests/test_on_commit.py`, I-07 `tests/test_check_fix_reproduces.py`. |
+| F-11 | F-02 states the registry change and a `RECORD` branch; C-02 states each status value. |
+| F-12 | B-04 names `tests/test_mass_standardizer.py`; a Tests row was added with its observed base. |
+| F-13 | Z-01 cites `host:F-116-N1` and `host:F-116-N2`. |
+| F-14 | C-01 measurements dispatched with `model: sonnet` (escalated from `mechanical`). |

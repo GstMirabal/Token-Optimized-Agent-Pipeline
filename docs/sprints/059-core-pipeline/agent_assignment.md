@@ -1,0 +1,133 @@
+# Agent Assignment — Sprint 059 (efficiency-and-sandbox-regime)
+
+Source: `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` (`## Work`).
+Phase 4.1 of `workflows/pipeline_workflow.md`. This file is the staffing
+authority: it may overwrite the plan's `Assignee (proposed)` column. A Work row
+is not closed until it appears here.
+
+Mode: **claude-code**, `delegation_mode: native` — the
+`Assignee` column names which profile's ruleset governs each write.
+
+## Scope of this artifact (Phase 4.1 only)
+
+| Owns | Does **not** own |
+| :--- | :--- |
+| Which ruleset governs each unit | Cursor model / effort (`task_scope.md`) |
+| Agent-forge destination on units that create agents | `tier_escalation` proposals |
+
+`Destination` is **required** on every unit that **creates** an agent profile.
+Values: `host:.claude/agents/` (default), `profile:<path>`, `nucleus:PR`.
+Units that do not create a profile use `N/A`.
+
+No unit of this sprint creates an agent profile: A-08 modifies the existing
+`agents/qa_agent.md`. Every `Destination` cell is `N/A`.
+
+Mode `parallel` marks a unit that `scripts/check_task_scope.py` may place in a
+parallel batch once G-01 lands (plan D11, from Wave 3 onward). Waves 1 and 2
+run `sequential`, because the batch calculator does not exist before G-01.
+
+---
+
+## Staffing
+
+### Wave 1 — cost levers
+
+| # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| A-05 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-09 | `rules/code_craft.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| A-10 | `rules/project_topology.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| A-11 | `docs/guides/SELF_IMPROVEMENT_GUIDE.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-12 | `agents.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| A-08 | `agents/qa_agent.md` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| A-01 | `scripts/session_cost.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+
+### Wave 2 — pace and autonomy
+
+| # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| G-01 | `scripts/check_task_scope.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| G-02 | `workflows/pipeline_workflow.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
+| B-01 | `scripts/prompt_count.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| B-07 | `workflows/close_workflow.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
+| B-02 | `docs/sprints/059-core-pipeline/PROMPT_MEASUREMENT.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| B-06 | `scripts/install.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| E-01 | `scripts/session_state.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| E-01c | `scripts/session_state.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+
+### Wave 3 — in-session token economy
+
+| # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| A-00 | `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | create | parallel | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-06 | `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-07 | `docs/decisions/ADR-0018-in-session-token-economy.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-02 | `scripts/session_cost.py` | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| A-03 | `rules/token_economy.md` | modify | parallel | `rule_validator` | N/A | `agents/rule_validator.md` |
+| H-01 | `config/unit_cost_estimates.json` | create | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| H-02 | `scripts/check_task_scope.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| H-03 | `workflows/close_workflow.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
+| A-04 | `workflows/pipeline_workflow.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
+
+### Wave 4 — sandbox measurement
+
+| # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| B-03 | `scripts/py_compile_tree.py` | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| B-04 | `skills/mass-standardizer/scripts/generate_manifest.py` | modify | parallel | `skill_architect` | N/A | `agents/skill_architect.md` |
+| B-05 | `Makefile` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| C-01 | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| C-02 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+
+### Wave 5 — regime
+
+| # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| D-01 | `docs/decisions/ADR-0019-sandbox-regime.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| D-02 | `agents.md` | modify | parallel | `rule_validator` | N/A | `agents/rule_validator.md` |
+| D-03 | `rules/project_topology.md` | modify | parallel | `rule_validator` | N/A | `agents/rule_validator.md` |
+| D-04 | `claude/settings.hooks.json` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| E-01b | `claude/settings.hooks.json` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+
+### Wave 6 — hardening, roles and Sprint 058 residues
+
+| # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| E-02 | `claude/mcp.json` | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| E-03 | `.github/workflows/ci.yml` | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| F-01 | `docs/decisions/ADR-0020-owner-writer-dispatch.md` | create | parallel | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| F-02 | `config/artifact_registry.json` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| I-01 | `scripts/check_absolute_paths.py` | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| I-02 | `scripts/upstream_outbox.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| I-03 | `scripts/upstream_outbox.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| I-04 | `scripts/upstream_outbox.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| I-05 | `scripts/upstream_outbox.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| I-06 | `hooks/on_commit.py` | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| I-07 | `scripts/check_fix_reproduces.py` | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+
+### Close
+
+| # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| Z-01 | `CHANGELOG.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| Z-02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+
+## Disagreements with the plan
+
+Every overwrite below follows one cause: the proposed assignee declares no
+`Write`/`Edit` tool in its `agents/<role>.md` frontmatter, so it cannot perform
+the `create`/`modify` the row assigns it, and `scripts/check_task_scope.py`
+(`_capability_findings`) exits 2 on that row. The proposed role keeps its
+function as owner or measurer and hands literal output to the single writer, so
+each file has exactly one writer.
+
+| # | Plan proposal | Assignee here | Reason |
+| :--- | :--- | :--- | :--- |
+| A-00 | `token_economy_agent` | `doc_orchestrator` | `agents/token_economy_agent.md` declares `Read, Glob, Grep, Bash`. `token_economy_agent` runs the measurements (`session_cost.py --json`, transcript-to-commit cost attribution) with `Bash` and returns literal output; `doc_orchestrator` writes the study. |
+| A-07 | `principal_agent` (owner) / `doc_orchestrator` (writer) | `doc_orchestrator` | Plan already names `doc_orchestrator` as writer (`ADR-0017`); `principal_agent` declares no `Write`/`Edit`. The Assignee cell carries the writer. |
+| H-01 | `token_economy_agent` | `implementer_agent` | Same tool gap as A-00. `token_economy_agent` supplies each figure with its A-00 source; `implementer_agent` writes the JSON, as it writes `config/model_tiers.json` in A-08. |
+| C-01 | `devops_agent` | `doc_orchestrator` | `agents/devops_agent.md` declares `Read, Glob, Grep, Bash`. `devops_agent` runs the `RA-19` measurements with `Bash` and returns literal output; `doc_orchestrator` writes `SANDBOX_ENUMERATION.md` (Sprint 058 `D-02` precedent). Any secret-needing or `gh` command is prepared for the human (`RA-09`). |
+| D-01 | `principal_agent` (owner) / `doc_orchestrator` (writer) | `doc_orchestrator` | As A-07. |
+| F-01 | `principal_agent` (owner) / `doc_orchestrator` (writer) | `doc_orchestrator` | As A-07. |
+
+All other rows: the plan proposal stands. B-07, E-01c and H-03 were added to the plan by the Phase 4.3 resolutions (F-3, F-5); D-04 targets `claude/settings.hooks.json` and runs before E-01b on the same file (F-1).

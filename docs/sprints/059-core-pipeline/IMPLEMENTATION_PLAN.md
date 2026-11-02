@@ -41,7 +41,7 @@ abarata y acelera todo lo que viene después.
 | P1 | `agents.md` se carga en cada petición, también en cada subagente | `wc -c agents.md` → 53.907 bytes (~12k tokens); 14 filas suman 25.736 bytes, casi todo historia y precedentes |
 | P2 | `qa-agent` corre en `opus` y es la primera recomendación de ahorro de `/usage` | `agents/qa_agent.md:5` `model: opus`; despachado en 13 sesiones de un host y 10 del núcleo (`grep -rl '"subagent_type":"qa-agent"'` sobre los transcripts) |
 | P3 | Phase 6 ejecuta las unidades de una en una aunque `jurisdictional_lock` ya garantiza archivos disjuntos | `workflows/pipeline_workflow.md` Phase 6 no nombra paralelismo; `task_scope.md` no tiene columna de dependencias |
-| P4 | Autorizaciones de Bash constantes en el núcleo: el núcleo no tiene la plantilla de sandbox con `autoAllowBashIfSandboxed` que sí reciben los hosts | `.claude/` del núcleo solo tiene `settings.local.json` con 7 permisos sueltos; `claude/settings.json:45` tiene `autoAllowBashIfSandboxed: true` solo para hosts; `scripts/install.py` `install_nucleus_bridge` no instala sandbox |
+| P4 | Autorizaciones de Bash constantes en el núcleo: el núcleo no tiene la plantilla de sandbox con `autoAllowBashIfSandboxed` que sí reciben los hosts | `.claude/` del núcleo solo tiene `settings.local.json` con 7 permisos sueltos; `claude/settings.hooks.json:45` tiene `autoAllowBashIfSandboxed: true` solo para hosts; `scripts/install.py` `install_nucleus_bridge` no instala sandbox |
 | P5 | `/clear` no suspende la sesión en el núcleo: el hook `SessionEnd` ejecuta `.agents/scripts/session_end_hook.py`, ruta que solo existe en un host | `claude/settings.hooks.json:129` |
 | P6 | La cota §3.1 se mide contra una baseline 0 en un tercio de las sesiones y nadie la mide mientras la sesión corre (`F-116-N1`, `F-116-N2`, `KI-058-3`); el ecosistema token-saver solo mide al arrancar | sesión previa `7204cadc` a **9.2×** sin señal (`python3 -I scripts/session_cost.py --from-anchor --json`, exit 0) |
 | P7 | Régimen de sandbox: `KI-056-1` (absorbe D-1, D-3, D-12, `KI-054-5`), `KI-056-6` (absorbe D-8), `F-055-N1`, `KI-057-1` (TCP a `127.0.0.1` denegado), D-4, D-10 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md:2137-2151`, `docs/roadmaps/core/pipeline/021-030-program-queue.md:380-395` |
@@ -97,11 +97,11 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11).
 
 | # | File | Operation | Risk | Assignee (proposed) | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| A-05 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify — veredictos de triage de esta Context; marcar `F-116-N1`/`N2` al aterrizar | low | `doc_orchestrator` | ⏳ |
+| A-05 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify — veredictos de triage de esta Context (`F-116-N1`, `F-116-N2`: `accept` con su comando y exit); el cierre de ambos lo marca C-02 | low | `doc_orchestrator` | ⏳ |
 | A-09 | `rules/code_craft.md` | modify — recibe medición e historia de `linter_command` (Python, JS/TS), `max_indentation`, `max_lines_per_func`, `fail_closed_claims`, `exception_handling` (D10) | medium | `rule_validator` | ⏳ |
 | A-10 | `rules/project_topology.md` | modify — recibe historia y precedentes de `RA-09`, `RA-19`, `jurisdiction` (D10) | medium | `rule_validator` | ⏳ |
 | A-11 | `docs/guides/SELF_IMPROVEMENT_GUIDE.md` | modify — recibe transporte, canales, triage y cierre de `feedback_upstream` (D10) | low | `doc_orchestrator` | ⏳ |
-| A-12 | `agents.md` | modify — tras A-09, A-10, A-11: filas recortadas a regla + puntero, ≤ 20.000 bytes; `make verify` exit 0 | high | `rule_validator` | ⏳ |
+| A-12 | `agents.md` | modify — tras A-09, A-10, A-11: filas recortadas a regla + puntero, ≤ 20.000 bytes; `make verify` exit 0. Antes de recortar, `grep -n "agents.md" tests/*.py` lista las cadenas que un test fija en `agents.md` (p. ej. `RA-18` en `tests/test_cursor_phase1.py`, la línea `EMITTED` de `tests/test_gate_row_wording.py`, la fila `Command paths`) y cada una se conserva. `RA-14`: por cada término cuyo detalle se mueve (`feedback_upstream`, `jurisdiction`, `RA-09`, `RA-19`, `linter_command`, `max_indentation`, `max_lines_per_func`, `fail_closed_claims`, `exception_handling`), `grep -rn "<término>" agents.md rules/ workflows/ docs/guides/ docs/standards/ scripts/ hooks/ tests/` y cada cita que apunte al texto movido se actualiza al nuevo destino en el mismo commit | high | `rule_validator` | ⏳ |
 | A-08 | `agents/qa_agent.md` | modify — `model: sonnet`, `tier: author` (D9); companion obligatorio `config/model_tiers.json` (mover `qa_agent` a `author.profiles`; añadir al `basis` de `gate` la prueba y su criterio de vuelta), porque `scripts/check_model_tiers.py` exige que coincidan | medium | `implementer_agent` | ⏳ |
 | A-01 | `scripts/session_cost.py` | modify — `fix(`: baseline D1 en `cycle_summary`; paired test `tests/test_session_cost.py` (nuevo) con un turno `cache_read` 0 / `cache_creation` > 0 | medium | `implementer_agent` | ⏳ |
 
@@ -109,12 +109,14 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11).
 
 | # | File | Operation | Risk | Assignee (proposed) | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| G-01 | `scripts/check_task_scope.py` | modify — columna `Depends on` y subcomando que imprime los lotes paralelos (dependencias aterrizadas, archivos disjuntos, máximo 4); tests en `tests/` | medium | `implementer_agent` | ⏳ |
-| G-02 | `workflows/pipeline_workflow.md` | modify — tras G-01: Phase 6 despacha cada lote en paralelo con `isolation: "worktree"` e integra en orden; Phase 7 sigue en serie por wave (D11) | medium | `orchestrator` | ⏳ |
+| G-01 | `scripts/check_task_scope.py` | modify — columna `Depends on` y subcomando que imprime los lotes paralelos (dependencias aterrizadas, archivos disjuntos, máximo 4); tests en `tests/test_check_task_scope.py` | medium | `implementer_agent` | ⏳ |
+| G-02 | `workflows/pipeline_workflow.md` | modify — tras G-01: Phase 6 despacha cada lote en paralelo con `isolation: "worktree"` e integra en orden; Phase 7 sigue en serie por wave (D11). Tras integrar cada lote, el orchestrator borra cada worktree y su rama (`git worktree remove <path>`, `git branch -D <rama>`) antes del lote siguiente, porque `scripts/branch_sovereignty.py` niega el sello de cierre con una rama sin integrar; y re-ejecuta sobre `ai-sprint/[ID]` las comprobaciones de `hooks/on_commit.py` que el commit en el worktree no vio (`python3 scripts/check_task_scope.py --sprint-dir <dir>`), exit 0 antes del lote siguiente | medium | `orchestrator` | ⏳ |
 | B-01 | `scripts/prompt_count.py` | create — cuenta autorizaciones por sesión desde transcripts, `--json`; test `tests/test_prompt_count.py` | medium | `implementer_agent` | ⏳ |
 | B-02 | `docs/sprints/059-core-pipeline/PROMPT_MEASUREMENT.md` | create — tras B-01: recuento base de una sesión real de núcleo y una de host (genericizada, `RA-15`); re-medición tras B-06 | low | `doc_orchestrator` | ⏳ |
-| B-06 | `scripts/install.py` | modify — tras B-02: `install_nucleus_bridge` instala el bloque `sandbox` con `autoAllowBashIfSandboxed: true`, sin hooks (D12); test en `tests/` | high | `implementer_agent` | ⏳ |
-| E-01 | `scripts/session_state.py` | modify — `fix(`: `suspend` desde `SessionEnd` solo actúa si el `session_id` del hook coincide con el del anchor (`KI-057-2`); test `tests/test_session_end_hook.py`. Reproducir primero; si no se reproduce, `RECORD`. Cubre además el hueco medido en Phase 1: entre sprints (sprint sellado, sesión `IN_PROGRESS`) `suspend` imprime "Sprint is sealed — nothing was suspended", exit 0, y deja el lock tomado, así que el boot siguiente sale 2 y exige `--takeover`; `suspend` debe liberar el lock de la sesión sin tocar el sprint sellado. Registra además en `SPRINT_LOG.md` la decisión sobre los puntos 3-5 de la propuesta E (implementar como unidad nueva o descartar con motivo) | medium | `implementer_agent` | ⏳ |
+| B-07 | `workflows/close_workflow.md` | modify — tras B-01: paso advisory que corre `python3 scripts/prompt_count.py --session <id> --json` sobre la sesión que cierra e imprime el recuento; es el invocador `RA-16` de B-01 | low | `orchestrator` | ⏳ |
+| B-06 | `scripts/install.py` | modify — tras B-02: `install_nucleus_bridge` instala el bloque `sandbox` con `autoAllowBashIfSandboxed: true`, sin hooks y sin `excludedCommands` (D12); test nuevo `tests/test_install_nucleus_sandbox.py` | high | `implementer_agent` | ⏳ |
+| E-01 | `scripts/session_state.py` | modify — `fix(`: `suspend` desde `SessionEnd` solo actúa si el `session_id` del hook coincide con el del anchor (`KI-057-2`); paired test `tests/test_session_end_hook.py`. Reproducir primero; si no se reproduce, `RECORD` | medium | `implementer_agent` | ⏳ |
+| E-01c | `scripts/session_state.py` | modify — tras E-01: `fix(` del hueco medido en Phase 1: entre sprints (sprint sellado, sesión `IN_PROGRESS`) `suspend` imprime "Sprint is sealed — nothing was suspended", exit 0, y deja el lock tomado, así que el boot siguiente sale 2 y exige `--takeover`; `suspend` libera el lock de la sesión sin tocar el sprint sellado; paired test en `tests/test_session_state.py` | medium | `implementer_agent` | ⏳ |
 
 ### Wave 3 — Token economy en sesión (estudio, debate, decisión)
 
@@ -126,28 +128,29 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11).
 | A-02 | `scripts/session_cost.py` | modify — tras A-01, A-07: `feat(` flag `--bound` (`OK`/`SOFT`/`HARD`, exit 0, D3) o la forma que fije ADR-0018; test en `tests/test_session_cost.py` | medium | `implementer_agent` | ⏳ |
 | A-03 | `rules/token_economy.md` | modify — tras A-07: §3.1 nueva unidad (D1), invocador en sesión y el presupuesto por unidad con puntos de suspend planificados (D14) | low | `rule_validator` | ⏳ |
 | H-01 | `config/unit_cost_estimates.json` | create — tras A-07: tabla de estimación por tipo de unidad y riesgo, con la fuente de cada cifra (A-00) y su `measured_at` | low | `token_economy_agent` | ⏳ |
-| H-02 | `scripts/check_task_scope.py` | modify — tras G-01, H-01: columnas `Est. cost` y `Suspend after`; acumula el coste en orden y sale 2 si el acumulado proyecta el ciclo por encima de soft (5×) sin un `Suspend after: yes` previo (D14); tests en `tests/` | medium | `implementer_agent` | ⏳ |
+| H-02 | `scripts/check_task_scope.py` | modify — tras G-01, H-01: columnas `Est. cost` y `Suspend after`; acumula el coste en orden y sale 2 si el acumulado proyecta el ciclo por encima de soft (5×) sin un `Suspend after: yes` previo (D14); tests en `tests/test_check_task_scope.py` | medium | `implementer_agent` | ⏳ |
+| H-03 | `workflows/close_workflow.md` | modify — tras H-01, B-07: paso advisory que compara el coste medido de cada unidad del sprint (`session_cost.py --json`) con su `Est. cost` e imprime la diferencia; es el invocador `RA-16` de la recalibración de `config/unit_cost_estimates.json`, que `token_economy_agent` aplica en el sprint siguiente | low | `orchestrator` | ⏳ |
 | A-04 | `workflows/pipeline_workflow.md` | modify — tras G-02, A-02, H-02: Phase 4.3 rellena `Est. cost`/`Suspend after`; Phase 6 corre la medición en cada unidad (invocador `RA-16` de A-02), compara lo medido con `Est. cost` y ejecuta `session_state.py suspend` en cada `Suspend after: yes` | low | `orchestrator` | ⏳ |
 
 ### Wave 4 — Medición del sandbox
 
 | # | File | Operation | Risk | Assignee (proposed) | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| B-03 | `scripts/py_compile_tree.py` | modify — compilar sin escribir `.pyc` (D5); test en `tests/` | medium | `implementer_agent` | ⏳ |
-| B-04 | `skills/mass-standardizer/scripts/generate_manifest.py` | modify — modo `--check` que compara sin reescribir `skills/manifest_skills.json` (D5) | medium | `skill_architect` | ⏳ |
+| B-03 | `scripts/py_compile_tree.py` | modify — compilar sin escribir `.pyc` (D5); test en `tests/test_verify_py_compile.py` | medium | `implementer_agent` | ⏳ |
+| B-04 | `skills/mass-standardizer/scripts/generate_manifest.py` | modify — modo `--check` que compara sin reescribir `skills/manifest_skills.json` (D5): exit 0 si coincide, exit 2 si difiere, y el archivo queda con el mismo hash; test en `tests/test_mass_standardizer.py` | medium | `skill_architect` | ⏳ |
 | B-05 | `Makefile` | modify — tras B-03, B-04: `verify` usa ambos modos sin escritura | low | `implementer_agent` | ⏳ |
-| C-01 | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` | create — re-medición `RA-19` para el CLI actual: miembros `E16` sin probar, subárboles inferidos por contención, `Edit(/.git/modules/.agents/**)`, D-8; incluye el núcleo con el sandbox de B-06 | high | `devops_agent` | ⏳ |
-| C-02 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify — tras C-01: estado de `F-055-N1` | low | `doc_orchestrator` | ⏳ |
+| C-01 | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` | create — re-medición `RA-19` para el CLI actual: miembros `E16` sin probar, subárboles inferidos por contención, `Edit(/.git/modules/.agents/**)`, D-8; incluye el núcleo con el sandbox de B-06. `devops_agent` mide con `model: sonnet` (escalado desde `mechanical` por riesgo high) y entrega la salida literal; `doc_orchestrator` escribe | high | `devops_agent` | ⏳ |
+| C-02 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify — tras C-01, A-02: `F-055-N1` pasa a cerrado si C-01 mide su vector sin punto escribible por el agente, o queda abierto con la medida de C-01 citada; `F-116-N1` se marca cerrado citando el commit de A-01 y `F-116-N2` citando el de A-02 | low | `doc_orchestrator` | ⏳ |
 
 ### Wave 5 — Régimen (decisiones con las medidas en la mano)
 
 | # | File | Operation | Risk | Assignee (proposed) | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | D-01 | `docs/decisions/ADR-0019-sandbox-regime.md` | create — tras B-02, C-01: `RA-09`, fila `gh`, D-12, ruta BD (`KI-057-1`) y hooks en el núcleo (D6, D12) | high | `principal_agent` (owner) / `doc_orchestrator` (writer) | ⏳ |
-| D-02 | `agents.md` | modify — tras A-12, D-01: `RA-09` y `§2 graph_sync` (D-10) | high | `rule_validator` | ⏳ |
+| D-02 | `agents.md` | modify — tras A-12, D-01: `RA-09` y `§2 graph_sync` (D-10); `wc -c agents.md` ≤ 20000 tras el cambio, y el detalle nuevo va a `rules/project_topology.md` (D-03), no a `agents.md` | high | `rule_validator` | ⏳ |
 | D-03 | `rules/project_topology.md` | modify — tras A-10, D-01: §4 fila `gh` (D-3), D-1, D-4, coste de `git -C .agents fetch` (QA2-3) | medium | `rule_validator` | ⏳ |
-| D-04 | `claude/settings.json` | modify — tras D-01: solo si ADR-0019 aprueba una ruta medida para BD local; si no, `RECORD` | high | `implementer_agent` | ⏳ |
-| E-01b | `claude/settings.hooks.json` | modify — tras E-01, D-01: el comando `SessionEnd` resuelve la ruta en núcleo y en host, si ADR-0019 aprueba hooks en el núcleo (D13); si no, `RECORD` y `suspend` manual sigue documentado | medium | `implementer_agent` | ⏳ |
+| D-04 | `claude/settings.hooks.json` | modify — tras D-01: bloque `sandbox` (ruta BD local, `KI-057-1`) solo si ADR-0019 aprueba una ruta medida; si no, `RECORD` | high | `implementer_agent` | ⏳ |
+| E-01b | `claude/settings.hooks.json` | modify — tras E-01, D-01, D-04 (mismo archivo que D-04, en serie): el comando `SessionEnd` resuelve la ruta en núcleo y en host, si ADR-0019 aprueba hooks en el núcleo (D13); si no, `RECORD` y `suspend` manual sigue documentado | medium | `implementer_agent` | ⏳ |
 
 ### Wave 6 — Endurecimiento, roles y residuos del 058
 
@@ -156,20 +159,20 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11).
 | E-02 | `claude/mcp.json` | modify — servidor MCP de GitHub remoto con OAuth (sin token en archivo) | medium | `implementer_agent` | ⏳ |
 | E-03 | `.github/workflows/ci.yml` | modify — fijar `actions/checkout`, `actions/setup-python`, `errata-ai/vale-action` por SHA | low | `implementer_agent` | ⏳ |
 | F-01 | `docs/decisions/ADR-0020-owner-writer-dispatch.md` | create — C-7: cuándo el owner escribe un artefacto trivial sin dispatch (enmienda `ADR-0017`) | medium | `principal_agent` (owner) / `doc_orchestrator` (writer) | ⏳ |
-| F-02 | `config/artifact_registry.json` | modify — tras F-01, solo si se aprueba | medium | `implementer_agent` | ⏳ |
-| I-01 | `scripts/check_absolute_paths.py` | modify — `fix(` `KI-058-1`: escanear también el índice y los archivos sin trackear; paired test en `tests/` | low | `implementer_agent` | ⏳ |
-| I-02 | `scripts/upstream_outbox.py` | modify — `fix(` `KI-058-4`: `read_text_file` pasa por `read_regular_bytes`, así un FIFO sale 2 en vez de colgarse; paired test con un FIFO | low | `implementer_agent` | ⏳ |
-| I-03 | `scripts/upstream_outbox.py` | modify — tras I-02: `fix(` `KI-058-5` a: `deltas` sale 2 con un directorio `--rules` inexistente; paired test | low | `implementer_agent` | ⏳ |
-| I-04 | `scripts/upstream_outbox.py` | modify — tras I-03: `fix(` `KI-058-5` b: `export --out` a un directorio inexistente sale 2 con mensaje en vez de traceback; paired test | low | `implementer_agent` | ⏳ |
-| I-05 | `scripts/upstream_outbox.py` | modify — tras I-04: `fix(` `KI-058-5` c: `PIN_PATTERN` solo acepta dígitos ASCII (`[0-9]`); paired test con dígitos no ASCII | low | `implementer_agent` | ⏳ |
-| I-06 | `hooks/on_commit.py` | modify — `fix(` `KI-058-5` d: un asunto `FIX:` en mayúsculas se trata como `fix(`; paired test | low | `implementer_agent` | ⏳ |
-| I-07 | `scripts/check_fix_reproduces.py` | modify — `fix(` `KI-058-5` d: el mismo caso que I-06 en la reproducción; paired test | low | `implementer_agent` | ⏳ |
+| F-02 | `config/artifact_registry.json` | modify — tras F-01: si ADR-0020 se aprueba, registra la excepción owner-escribe con la condición que fije el ADR y `python3 scripts/check_role_artifact.py` exit 0; si no se aprueba, `RECORD` sin cambio | medium | `implementer_agent` | ⏳ |
+| I-01 | `scripts/check_absolute_paths.py` | modify — `fix(` `KI-058-1`: escanear también el índice y los archivos sin trackear; paired test nuevo `tests/test_check_absolute_paths.py` | low | `implementer_agent` | ⏳ |
+| I-02 | `scripts/upstream_outbox.py` | modify — `fix(` `KI-058-4`: `read_text_file` pasa por `read_regular_bytes`, así un FIFO sale 2 en vez de colgarse; paired test con un FIFO en `tests/test_upstream_outbox.py` | low | `implementer_agent` | ⏳ |
+| I-03 | `scripts/upstream_outbox.py` | modify — tras I-02: `fix(` `KI-058-5` a: `deltas` sale 2 con un directorio `--rules` inexistente; paired test en `tests/test_upstream_outbox.py` | low | `implementer_agent` | ⏳ |
+| I-04 | `scripts/upstream_outbox.py` | modify — tras I-03: `fix(` `KI-058-5` b: `export --out` a un directorio inexistente sale 2 con mensaje en vez de traceback; paired test en `tests/test_upstream_outbox.py` | low | `implementer_agent` | ⏳ |
+| I-05 | `scripts/upstream_outbox.py` | modify — tras I-04: `fix(` `KI-058-5` c: `PIN_PATTERN` solo acepta dígitos ASCII (`[0-9]`); paired test con dígitos no ASCII en `tests/test_upstream_outbox.py` | low | `implementer_agent` | ⏳ |
+| I-06 | `hooks/on_commit.py` | modify — `fix(` `KI-058-5` d: un asunto `FIX:` en mayúsculas se trata como `fix(`; paired test en `tests/test_on_commit.py` | low | `implementer_agent` | ⏳ |
+| I-07 | `scripts/check_fix_reproduces.py` | modify — `fix(` `KI-058-5` d: el mismo caso que I-06 en la reproducción; paired test en `tests/test_check_fix_reproduces.py` | low | `implementer_agent` | ⏳ |
 
 ### Cierre
 
 | # | File | Operation | Risk | Assignee (proposed) | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| Z-01 | `CHANGELOG.md` | modify — entrada `[Unreleased]` del sprint | low | `doc_orchestrator` | ⏳ |
+| Z-01 | `CHANGELOG.md` | modify — entrada `[Unreleased]` del sprint; cita `host:F-116-N1` y `host:F-116-N2` (`agents.md §4 feedback_upstream`, cierre) | low | `doc_orchestrator` | ⏳ |
 | Z-02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify — cerrar o re-enrutar `KI-056-1`, `KI-056-6`, `KI-057-1`, `KI-057-2`, `KI-058-1`, `KI-058-3`, `KI-058-4`, `KI-058-5`; `KI-058-2` y los condicionados de Out of scope quedan con su condición de desbloqueo; nuevos `KI-059-n` | low | `doc_orchestrator` | ⏳ |
 
 ---
@@ -187,9 +190,9 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11).
 | Mechanism | Deterministic or agent judgment | Invoker (`RA-16`) |
 | :--- | :--- | :--- |
 | Cálculo de lotes paralelos (`check_task_scope.py`, G-01) | script | `workflows/pipeline_workflow.md` Phase 6 (G-02) |
-| Presupuesto por unidad y puntos de suspend (`check_task_scope.py` con `config/unit_cost_estimates.json`, H-02) | script | `workflows/pipeline_workflow.md` Phase 4.3 (A-04); recalibración de la tabla en `workflows/close_workflow.md` con lo medido en el sprint (decidir en H-01) |
+| Presupuesto por unidad y puntos de suspend (`check_task_scope.py` con `config/unit_cost_estimates.json`, H-02) | script | `workflows/pipeline_workflow.md` Phase 4.3 (A-04); recalibración de la tabla: paso advisory en `workflows/close_workflow.md` (H-03) |
 | Medición en sesión de la cota §3.1 (`session_cost.py --bound` o lo que fije ADR-0018) | script | `workflows/pipeline_workflow.md` Phase 6 (A-04) |
-| Recuento de autorizaciones (`scripts/prompt_count.py`) | script | `PROMPT_MEASUREMENT.md` y advisory en `workflows/close_workflow.md` (decidir en B-01; si no, excepción tipada en `config/invocation_exceptions.json`) |
+| Recuento de autorizaciones (`scripts/prompt_count.py`) | script | advisory en `workflows/close_workflow.md` (B-07); `PROMPT_MEASUREMENT.md` registra la medida, no la invoca |
 | Comprobación del manifiesto sin escritura (`generate_manifest.py --check`) | script | `Makefile` `verify` (B-05) |
 
 ---
@@ -199,9 +202,9 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11).
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 44 | Count of rows in Work tables |
+| Work units | 47 | Count of rows in Work tables |
 | Subagents dispatched | lotes de hasta 4 en paralelo desde la wave 3 (D11), más QA + Tester por wave | `agent_assignment.md` |
-| Prior session ratio | **9.2×** (ciclo 2; ciclo 1 4.6×) — supera soft (5×). Coste restante declarado: 44 unidades en 6 waves más cierre, una wave por sesión, `suspend` entre waves | `python3 scripts/session_cost.py --from-anchor --json` |
+| Prior session ratio | **9.2×** (ciclo 2; ciclo 1 4.6×) — supera soft (5×). Coste restante declarado: 47 unidades en 6 waves más cierre, una wave por sesión, `suspend` entre waves | `python3 scripts/session_cost.py --from-anchor --json` |
 
 Soft (5×) / hard (15×) thresholds force an update to this section before new
 work continues — they are not observational-only once a measurable Claude
@@ -220,6 +223,8 @@ transcript exists for this tool.
 | `session_cost.py --bound` imprime `HARD` y sale 0 en un ciclo de 16× | **Yes** — el flag no existe | `unverified`: flag nuevo (A-02) |
 | `scripts/py_compile_tree.py` no crea `__pycache__` | **Yes** — escribe `.pyc` | `unverified`: se mide al abrir la wave 4 con `find` antes/después |
 | `tests/test_session_end_hook.py`: `SessionEnd` de otra sesión no suspende | **Yes** según `KI-057-2` | `unverified`: `KI-057-2` dice "not reproducible as specified (W13)"; E-01 reproduce primero o se cierra como `RECORD` |
+| `tests/test_session_state.py`: `suspend` con sprint sellado y sesión `IN_PROGRESS` libera el lock (E-01c) | **Yes** — deja el lock tomado | `unverified`: observado en Phase 1 (el boot siguiente salió 2 y exigió `--takeover`); el test se escribe y se ve fallar al abrir la wave 2 |
+| `tests/test_mass_standardizer.py`: `generate_manifest.py --check` sale 2 ante un manifiesto distinto y no reescribe el archivo (B-04) | **Yes** — el flag no existe | `grep -c -- '--check' skills/mass-standardizer/scripts/generate_manifest.py` → 0, exit 1 |
 | Paired tests de I-01..I-07 (`KI-058-1`, `KI-058-4`, `KI-058-5` a-d) | **Yes** — cada uno es un defecto registrado | `unverified`: cada test se escribe y se ve fallar en el padre al abrir la wave 6; `scripts/check_fix_reproduces.py` lo exige en Gate 1 |
 | Suite completa `make verify` | **No** — regresión a proteger | `make verify` → exit 0 en `08c669c` |
 
@@ -275,7 +280,9 @@ transcript exists for this tool.
 
 1. Si C-01 mide un punto de entrada sin sandbox escribible por el agente que no
    estaba en `SANDBOX_ENUMERATION.md` (056), la wave 5 no cambia `RA-09`/`RA-19` ni
-   instala hooks en el núcleo: la fila pasa a `KI-059-n` y el resto sigue.
+   instala hooks en el núcleo: la fila pasa a `KI-059-n` y el resto sigue. Si ese
+   punto lo abre el bloque `sandbox` que instaló B-06 (adelantado a la wave 2 antes
+   de esta medición), B-06 se revierte en el mismo paso.
 2. Si B-02 no puede contar autorizaciones desde transcripts, ninguna regla se relaja
    por "menos autorizaciones" y el instrumento se re-planifica con el humano.
 3. Si el debate de A-06 no cierra una decisión en la sesión de la wave 3, A-02..A-04
