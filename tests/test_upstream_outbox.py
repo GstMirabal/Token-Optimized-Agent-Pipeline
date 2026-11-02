@@ -9,6 +9,7 @@ from __future__ import annotations
 import copy
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -258,10 +259,9 @@ def test_intake_reports_a_fifo_outbox_and_lists_the_other_host(tmp_path: Path) -
         pytest.fail(f"intake did not finish within {READ_TIMEOUT} s on a FIFO outbox")
     assert result.returncode == 2
     assert "Traceback" not in result.stderr
-    assert result.stdout.splitlines()[1:] == [
-        "- bad: outbox absent or malformed",
-        "- ok: H-7 | drafted | A | scripts/check_gate_log.py",
-    ]
+    lines = result.stdout.splitlines()
+    assert re.fullmatch(r"- bad: outbox unreadable or unprocessable \(\w+\)", lines[1])
+    assert lines[2:] == ["- ok: H-7 | drafted | A | scripts/check_gate_log.py"]
 
 
 # QA Gate 1 round 3, QA3-1: every decode-time failure is a malformed outbox.

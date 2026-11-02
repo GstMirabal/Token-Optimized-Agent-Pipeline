@@ -8,7 +8,9 @@ from __future__ import annotations
 
 import copy
 import json
+import re
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -31,6 +33,10 @@ ENTRY: dict[str, Any] = {
     "recurs": None,
     "status": "drafted",
 }
+
+
+# Neutral label (QA5 note O5): it names the exception type, never the host.
+UNPROCESSABLE = r"- {name}: outbox unreadable or unprocessable \(\w+\)"
 
 
 def _entry(**changes: Any) -> dict[str, Any]:
@@ -166,7 +172,7 @@ def test_absent_outbox_is_unhealthy_and_reported(tmp_path: Path) -> None:
     (root / ".upstream_hosts.json").write_text(json.dumps(hosts), encoding="utf-8")
     lines, healthy = upstream_intake.intake_lines(root)
     assert not healthy
-    assert "- h1: outbox absent or malformed" in lines
+    assert any(re.fullmatch(UNPROCESSABLE.format(name="h1"), line) for line in lines)
 
 
 # QA Gate 1 round 3, QA3-1: an undecodable outbox is reported, the others listed.
@@ -192,8 +198,8 @@ def test_undecodable_outbox_is_reported_and_other_hosts_listed(
     (root / ".upstream_hosts.json").write_text(json.dumps(hosts), encoding="utf-8")
     lines, healthy = upstream_intake.intake_lines(root)
     assert not healthy
-    assert lines[1:] == [
-        "- h1: outbox absent or malformed",
+    assert re.fullmatch(UNPROCESSABLE.format(name="h1"), lines[1])
+    assert lines[2:] == [
         "- h2: H-7 | drafted | A | scripts/check_gate_log.py",
     ]
 
@@ -303,11 +309,11 @@ def _two_hosts(tmp_path: Path, bad_outbox: str) -> Path:
     return root
 
 
-def _assert_bad_reported_ok_listed(code: int, out: str, err: str) -> None:
+def _assert_bad_reported_ok_listed(code: int, out: str, err: str, kind: str) -> None:
     assert code == 2
     assert "Traceback" not in out + err
     assert out.splitlines()[1:] == [
-        "- bad: outbox absent or malformed",
+        f"- bad: outbox unreadable or unprocessable ({kind})",
         "- ok: H-7 | drafted | A | scripts/check_gate_log.py",
     ]
 
@@ -332,10 +338,12 @@ def test_any_exception_from_one_host_reports_it_and_lists_the_others(
         return real(*args)
 
     monkeypatch.setattr(upstream_intake, stage, faulty)
+    # The fault is injected in this process, so run the host's work here too.
+    monkeypatch.setattr(upstream_intake, "run_host", upstream_intake.host_work)
     monkeypatch.setattr(upstream_intake, "agents_root", lambda: root)
     code = upstream_intake.main()
     captured = capsys.readouterr()
-    _assert_bad_reported_ok_listed(code, captured.out, captured.err)
+    _assert_bad_reported_ok_listed(code, captured.out, captured.err, fault.__name__)
 
 
 def test_unresolvable_home_in_one_outbox_path_lists_the_others(
@@ -345,7 +353,7 @@ def test_unresolvable_home_in_one_outbox_path_lists_the_others(
     monkeypatch.setattr(upstream_intake, "agents_root", lambda: root)
     code = upstream_intake.main()
     captured = capsys.readouterr()
-    _assert_bad_reported_ok_listed(code, captured.out, captured.err)
+    _assert_bad_reported_ok_listed(code, captured.out, captured.err, "RuntimeError")
 
 
 # --- QA Gate 1 round 5: the registry read sits behind the same boundary ---
@@ -373,3 +381,82 @@ def test_any_exception_from_load_hosts_exits_2_without_traceback(
     assert captured.out.splitlines() == [
         f"intake queue (channel A): .upstream_hosts.json unreadable ({fault.__name__})"
     ]
+
+
+# --- QA Gate 1 round 5, QA5-1: each host runs under a wall-clock budget ---
+# Third member of the QA3-1 / QA4-1 family. The budget is cause-independent, so
+# the tests make the child hang by causes the code does not enumerate: a busy
+# loop, a sleep, and the real input (a quadratic regex on free text).
+BUDGET = 1.0
+# Unbounded, the scan of this field takes several seconds (quadratic); sized so
+# a tree without the budget fails the elapsed assertion in bounded time.
+QA5_1_BYTES = 100_000
+MARGIN = 6.0  # child start-up and kill, on a loaded machine
+HANG_CHILDREN = {
+    "busy-loop": ["-c", "while True: pass"],
+    "sleep": ["-c", "import time; time.sleep(600)"],
+}
+
+
+def _assert_timed_out_and_ok_listed(
+    root: Path, monkeypatch: pytest.MonkeyPatch, margin: float = MARGIN
+) -> None:
+    # ``raising=False``: on a tree without the budget this still runs the real
+    # (unbounded) path, so the elapsed-time assertion below is what fails.
+    monkeypatch.setattr(upstream_intake, "HOST_BUDGET_SECONDS", BUDGET, raising=False)
+    started = time.monotonic()
+    lines, healthy = upstream_intake.intake_lines(root)
+    elapsed = time.monotonic() - started
+    assert elapsed < BUDGET + margin, f"host took {elapsed:.1f} s, budget {BUDGET} s + {margin} s"
+    assert lines[1:] == [
+        "- bad: outbox timed out",
+        "- ok: H-7 | drafted | A | scripts/check_gate_log.py",
+    ]
+    assert not healthy
+
+
+@pytest.mark.parametrize("cause", HANG_CHILDREN)
+def test_host_that_hangs_for_any_cause_times_out_and_the_others_are_listed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, cause: str
+) -> None:
+    bad = tmp_path / "bad.json"
+    bad.write_text(json.dumps({"entries": [_entry()]}), encoding="utf-8")
+    root = _two_hosts(tmp_path, str(bad))
+    real = upstream_intake.child_command
+
+    def command() -> list[str]:
+        # Only the first host hangs: it is the one whose stdin names "bad".
+        return [sys.executable, "-I", *HANG_CHILDREN[cause]]
+
+    calls = {"n": 0}
+
+    def alternating() -> list[str]:
+        calls["n"] += 1
+        return command() if calls["n"] == 1 else real()
+
+    monkeypatch.setattr(upstream_intake, "child_command", alternating)
+    _assert_timed_out_and_ok_listed(root, monkeypatch)
+
+
+def test_qa5_1_quadratic_email_scan_on_long_free_text_times_out(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Repro of QA5-1: free text with no ``@`` stalls the scan; 400 KB held the boot 91 s."""
+    bad = tmp_path / "bad.json"
+    bad.write_text(json.dumps({"entries": [_entry(defect="a" * QA5_1_BYTES)]}), encoding="utf-8")
+    root = _two_hosts(tmp_path, str(bad))
+    _assert_timed_out_and_ok_listed(root, monkeypatch, margin=3.0)
+
+
+@pytest.mark.parametrize("output", ["", "not json", "[]", '{"lines": "x"}', '{"lines": [1]}', '{"lines": [], "x": 1}'])
+def test_malformed_child_output_is_reported_without_echo(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], output: str
+) -> None:
+    root = _two_hosts(tmp_path, str(tmp_path / "x.json"))
+    emit = ["-c", f"import sys; print({output!r}); print('HOST-TEXT-MUST-NOT-PRINT', file=sys.stderr)"]
+    monkeypatch.setattr(upstream_intake, "child_command", lambda: [sys.executable, "-I", *emit])
+    lines, healthy = upstream_intake.intake_lines(root)
+    captured = capsys.readouterr()
+    assert not healthy
+    assert any(re.fullmatch(UNPROCESSABLE.format(name="bad"), line) for line in lines)
+    assert "HOST-TEXT-MUST-NOT-PRINT" not in "\n".join(lines) + captured.out + captured.err
