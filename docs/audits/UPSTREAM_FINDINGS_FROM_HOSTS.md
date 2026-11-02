@@ -2177,7 +2177,14 @@ assigned by the nucleus. Genericized per `RA-15`: no host name, paths or session
 - **Proposed direction (decided at triage):** take the baseline as the first turn's
   context size (`cache_read + cache_creation + input`), not `cache_read` alone. The
   host proposed the minimum non-zero `cache_read`.
-- **Verdict:** accept. **Where it stands:** Sprint 059 Phase 1 triage.
+- **Verdict:** accept (Sprint 059 Phase 1 triage, 2026-11-02), reproduced in the
+  nucleus: a loop of `python3 -I scripts/session_cost.py --session <id> --json` over
+  the 33 nucleus transcripts exited 0 per session and counted `sessions=33
+  first_turn_zero_cycle1=11`. Decision (plan Design `D1`): the cycle baseline is the
+  first turn's context size, `cache_read + cache_creation + input`; the host's
+  minimum non-zero `cache_read` was rejected because it discards the real start
+  turn. **Where it stands:** fix is Sprint 059 unit A-01; closure is marked by unit
+  C-02 citing the A-01 commit.
 
 ### - [ ] `F-116-N2` — the `rules/token_economy.md §3.1` bound has no in-session invoker
 
@@ -2192,8 +2199,17 @@ assigned by the nucleus. Genericized per `RA-15`: no host name, paths or session
 - **Open questions for triage:** hook or workflow step (a hook runs outside the
   sandbox, so the `RA-19` enumeration applies); block or warn at hard while
   calibration is n=1.
-- **Verdict:** accept. **Where it stands:** Sprint 059 Phase 1 triage, after
-  `F-116-N1` (a bound measured against a 0 baseline cannot fire).
+- **Verdict:** accept (Sprint 059 Phase 1 triage, 2026-11-02), reproduced in the
+  nucleus: `grep -rn -e session_cost -e session_probe hooks/` exited 1 with no
+  output. Answers to the open questions (human decisions of 2026-11-02, plan Design
+  `D2` and `D3`): the invoker is a Phase 6 workflow step, not a hook, because a hook
+  runs outside the sandbox and would reopen the `RA-19` enumeration; at hard (15×)
+  the measurement warns and exits 0 while calibration is n=1, and blocking at hard
+  is out of scope until n > 1. `D2` is provisional: `ADR-0018` (unit A-07) may
+  replace the method after the Sprint 059 token-economy study. **Where it stands:**
+  implementation is Sprint 059 unit A-02, invoked from
+  `workflows/pipeline_workflow.md` Phase 6 by unit A-04; closure is marked by unit
+  C-02 citing the A-02 commit.
 
 ## How to work this file
 
