@@ -90,6 +90,10 @@ Tracking of atomic goals achieved during the session. Work units: 48 (A 17, C 9,
     - `[x]` QA4-2: `0959e47` (`fix(upstream-outbox)`): `deltas` skips a non-string `id`; `acc25ed` states the advisory exit 2 in `workflows/close_workflow.md`. QA4-3: `acc25ed` (`agents/principal_agent.md`, `workflows/reconciliation_workflow.md`: more than 3). QA4-4: `f4843ca` (`fix(upstream-outbox)`): the duplicate-key check is linear (32,000 keys 5.56 s -> 0.003 s).
     - `[x]` `check_remediation_chain.py --range f0b11f8..HEAD`: `chains: 1` (`bba11b5` -> `3f627b2` -> `5f7606a` -> `d702700`), exit 0. The bounded read was not extended to `read_text_file` (`8b751ed`): that would open a second chain (A-1 stop). Recorded as `KI-058-4`.
     - `[x]` Accepted host findings `F-116-N1` and `F-116-N2` (human direction 2026-11-01), recorded in `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` after the nucleus reproduced both; routed to Sprint 059 Phase 1. Not Sprint 058 scope.
+    - `[x]` Round 5 escalated to `workflows/remediation_workflow.md` again (Phase 0, fifth consecutive REJECTED of the block). The human chose the route on 2026-11-02: a per-host wall-clock budget that does not depend on the cause, not a fix of the `email` pattern and not a field-length cap. Phase 1: `git stash push -u -m "remediation-2026-11-02"` printed `No local changes to save`, and `git restore . && git clean -fd` changed nothing. Phase 2 `error_mining`: `scripts/upstream_intake.py:241-242` bounded each host by exception but not by time, so a host whose processing does not end held every other host and the `/start` boot.
+    - `[x]` Phase 2 `family_check` (QA5-1): `6e6e024` (`fix(upstream-intake)`). Each host runs in a `python -I` child process killed after `HOST_BUDGET_SECONDS` (5.0). A host over the budget prints `- <name>: outbox timed out`, and the other hosts are still listed. The test makes the child hang three ways: a busy loop, a sleep, and the real QA5-1 input, 100,000 bytes with no `@`. On the parent `0b4e7b5`, `Repro:` fails with an assertion (`host took 5.9 s, budget 1.0 s + 3.0 s`). The `email` pattern is unchanged. Hosts are processed one after another, so N hung hosts cost up to N x 5 s.
+    - `[x]` The round 5 S3 notes were lost with the suspended conversation. The human directed that they be re-observed, and on 2026-11-02 an observation-only `qa_agent` pass over `e7bfaac..1082ef4` (no verdict) found six, O1-O6. O5 (the boundary blamed the host for a fault in nucleus code) is closed in `6e6e024`: the label is now `outbox unreadable or unprocessable (<ExcType>)`. O2, O3 and O4 (docstrings of `cmd_aged`, `read_regular_bytes` and `read_text_file`; O4 points to `KI-058-4`) are closed in `9860d87`. O6 had already been fixed in `0b4e7b5`. O1 (`deltas` exits 0 on a missing `--rules` directory) is left as recorded in round 3: it sits on `0959e47` lines, and changing them could open a second chain.
+    - `[x]` `check_remediation_chain.py --range f0b11f8..HEAD`: `chains: 1`, now ending in `6e6e024`, exit 0.
 
 ---
 
@@ -174,6 +178,11 @@ Filled by the remediator before re-sending a REJECTED round to its gate (`rules/
 | QA Agent (Gate 1) | 4 | `make verify` | 0 |
 | QA Agent (Gate 1) | 4 | `python3 scripts/check_task_scope.py --sprint-dir docs/sprints/058-core-pipeline` | 0 |
 | QA Agent (Gate 1) | 4 | `venv_skillopt/bin/python -m pytest -q tests/` | 0 |
+| QA Agent (Gate 1) | 5 | `python3 scripts/check_fix_reproduces.py --range f0b11f8..HEAD` | 0 |
+| QA Agent (Gate 1) | 5 | `python3 scripts/check_remediation_chain.py --range f0b11f8..HEAD` | 0 |
+| QA Agent (Gate 1) | 5 | `make verify` | 0 |
+| QA Agent (Gate 1) | 5 | `python3 scripts/check_task_scope.py --sprint-dir docs/sprints/058-core-pipeline` | 0 |
+| QA Agent (Gate 1) | 5 | `venv_skillopt/bin/python -m pytest -q tests/` | 0 |
 
 ---
 
@@ -195,6 +204,6 @@ Measured by `principal_agent` per numbered item of the plan's `## Abort criterio
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Locked. Plan APPROVED (`02de746`), Phase 5 passed.
-**Next Phase**: blocked (`TERMINAL_REMEDIATION_LOOP`, `remediation_workflow.md` Phase 3) and unblocked the same day, 2026-11-01: the human decided to resume and directed the lead to run `python3 scripts/session_state.py unblock` (exit 0, status OPEN). QA Gate 1 round 5 (over `e7bfaac..HEAD`) REJECTED (charter, S2): the fifth consecutive REJECTED of the channel A intake block triggers `remediation_workflow.md` Phase 0 again. Session suspended on human direction. Next session: remediate QA5-1 (a processing-time bound for the intake scan, without listing causes, or a narrower claim; `fail_closed_claims`) and the S3 notes QA5-2..QA5-4, then QA Gate 1 round 6 (fresh agent), then Tester Gate 2, on `ai-sprint/058`.
+**Next Phase**: blocked (`TERMINAL_REMEDIATION_LOOP`, `remediation_workflow.md` Phase 3) and unblocked the same day, 2026-11-01: the human decided to resume and directed the lead to run `python3 scripts/session_state.py unblock` (exit 0, status OPEN). QA Gate 1 round 5 (over `e7bfaac..HEAD`) REJECTED (charter, S2): the fifth consecutive REJECTED of the channel A intake block triggers `remediation_workflow.md` Phase 0 again. Session suspended on human direction. Session #67 (2026-11-02) remediated QA5-1 with a per-host wall-clock budget (`6e6e024`) and the re-observed S3 notes (`6e6e024`, `9860d87`). Next: QA Gate 1 round 6 (fresh agent) over `0b4e7b5..HEAD`, then Tester Gate 2, on `ai-sprint/058`.
 
 *Certified under conventional commit standard: feat(scope): message #058*
