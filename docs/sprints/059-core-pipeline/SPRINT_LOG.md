@@ -17,7 +17,7 @@
 ---
 
 ## 🏁 Sprint Progression
-Tracking of atomic goals achieved during the session. Work units: 48 in six waves plus close. Execution order: Wave 1 to Wave 6, then close; one wave per session, `session_state.py suspend` between waves (plan `## Cost`).
+Tracking of atomic goals achieved during the session. Work units: 49 in six waves plus close. Execution order: Wave 1 to Wave 6, then close; one wave per session, `session_state.py suspend` between waves (plan `## Cost`).
 
 - [x] **Phase 1 (Planning)**: plan drafted and committed.
     - `[x]` Intake triage: channel A empty, channel B empty, `F-116-N1` and `F-116-N2` accepted with reproduction (plan `## Context`).
@@ -41,7 +41,7 @@ Tracking of atomic goals achieved during the session. Work units: 48 in six wave
     - `[x]` A-11 committed at `72ac88b`; A-13 at `a014f4f`; A-01 at `ef490cd`. Moved text compared to `agents.md` by script: identical.
     - `[x]` Deviation: unit A-13 (`docs/guides/RULE_PRECEDENTS_GUIDE.md`) added before A-12, human decision 2026-11-02 (plan Design D15); work units 47 → 48.
     - `[x]` Deviation (plan D16): the orchestrator dispatched A-11, A-13, A-08 and A-01 together on its reading of a human question; no rule allowed it. Human decision 2026-11-04: keep the work once checked, return to the approved order.
-    - `[ ]` A-08 held uncommitted: it contradicts `ADR-0003` (see KI-059-3); human decision pending.
+    - `[ ]` A-08 held uncommitted: it contradicts `ADR-0003` (KI-059-3). Human decision 2026-11-04: unit A-14 creates the superseding `ADR-0021` first (plan D17), then A-08 commits; work units 48 → 49.
 
 ---
 
@@ -52,7 +52,7 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | :--- | :--- | :--- |
 | A-12's 20000-byte target was set without measuring how many rows it forces to trim; 9 planned destinations covered about half the needed reduction | Measure the row-cap projection at Phase 4.3 for any size target; A-13 added as the missing destination | KI-059-1 |
 | Dispatched a batch that no rule allowed, on a question read as an order (plan D16) | Work kept after unit-by-unit checks; order restored. A human question about the method is not a change to it: answer it, then amend the plan if the human decides | KI-059-2 |
-| Plan D9 and A-08 move `qa_agent` off the `gate` tier, but `ADR-0003` requires a superseding ADR; neither the plan nor the Phase 4 audit named it, and A-08 edited the test that pins that list | A-08 held uncommitted, human decides | KI-059-3 |
+| Plan D9 and A-08 move `qa_agent` off the `gate` tier, but `ADR-0003` requires a superseding ADR; neither the plan nor the Phase 4 audit named it, and A-08 edited the test that pins that list | A-14 added (plan D17): `ADR-0021` supersedes that clause before A-08 commits. Check every plan tier move against `docs/decisions/` at Phase 4.3 | KI-059-3 |
 | A-01's agent also moved `segment_cycles` to context size. Over 35 transcripts cycles fall from 86 to 37 and 17 sessions change; `ratio` None falls from 11 to 0 with `cycle_summary` alone. `F-116-N1` names this defect, the plan Operation does not | Reverted to the plan's scope; route to A-00 and ADR-0018 (Wave 3). C-02 cannot mark `F-116-N1` fully closed until this is decided | KI-059-4 |
 
 ---
