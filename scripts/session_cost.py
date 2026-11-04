@@ -97,6 +97,24 @@ def read_turns(transcript: Path) -> tuple[list[dict], int]:
     return turns, skipped
 
 
+def context_size(turn: dict) -> int:
+    """Tokens in the window on one turn: `cache_read + cache_creation + input`.
+
+    `cache_read` alone is the cached part only. A cold-cache turn writes the
+    window instead of reading it (`cache_read` 0), so the window size of every
+    turn is the sum of the three input-side fields (`F-116-N1`).
+
+    Args:
+        turn: a turn as returned by `read_turns`.
+
+    Returns:
+        int: input-side tokens of the turn.
+    """
+    return (turn["cache_read_input_tokens"]
+            + turn["cache_creation_input_tokens"]
+            + turn["input_tokens"])
+
+
 def segment_cycles(turns: list[dict]) -> list[list[dict]]:
     """Split turns into context cycles at each window reset.
 
@@ -123,9 +141,12 @@ def segment_cycles(turns: list[dict]) -> list[list[dict]]:
 
 
 def cycle_summary(cycle: list[dict]) -> dict:
-    """First turn, peak, ratio and totals for one context cycle."""
-    reads = [turn["cache_read_input_tokens"] for turn in cycle]
-    first, peak = reads[0], max(reads)
+    """First turn, peak, ratio and totals for one context cycle.
+
+    `first_turn` and `peak` are context sizes (`context_size`), one measure.
+    """
+    sizes = [context_size(turn) for turn in cycle]
+    first, peak = sizes[0], max(sizes)
     return {
         "messages": len(cycle),
         "first_turn": first,
