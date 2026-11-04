@@ -76,15 +76,15 @@ Host-root `AGENTS.md` that is a tracked symlink into `.agents/agents.md` is **ou
 
 ### three_file_standard
 
-**Executable skills** (they ship a `/scripts/` folder) MUST adhere to the full Three-File Standard: 1. `README.md`, 2. `SKILL.md`, 3. `/scripts/` with `__init__.py`. **Knowledge skills** (pure guidance, no scripts) only require a `SKILL.md` with valid `name`/`description` frontmatter — padding them with empty scaffolding is PROHIBITED noise.
+Moved to `rules/skills_and_integrations.md` (D18).
 
 ### topological_order
 
-Skills flat inside `skills/`. Sub-layers (`core/`, `local/`) PROHIBITED. Illustrative project-family packs live under `profiles/[name]/` inside the submodule (e.g. `profiles/example-project/`). **Production profiles are never committed to the public nucleus** (`RA-15`): they live at a **host-controlled path** — convention `<host-root>/.agents-profile/` or a private directory the host names — and are linked via `scripts/install.py --profile-path <path>` (Sprint 028). The legacy `--profile <name>` flag resolves only `profiles/<name>` inside the submodule.
+Moved to `rules/skills_and_integrations.md` (D18).
 
 ### enforcement
 
-The official auditor for Three-File-Standard adherence is `skills/topology-monitor/scripts/legacy_app_auditor.py` (`workflows/audit_workflow.md` `skill_standard_check`, `Makefile` `verify`). `mass-standardizer` regenerates `skills/manifest_skills.json` — it is the manifest generator, not the adherence auditor.
+Moved to `rules/skills_and_integrations.md` (D18).
 
 ### secret_sovereignty
 
@@ -189,3 +189,25 @@ All dependencies requiring build scripts MUST be explicitly whitelisted in `only
 ### config_file
 
 **`.npmrc` does NOT carry these settings.** Measured with pnpm 11.23.0: `minimum-release-age=1440` and `ignore-scripts=true` written in `.npmrc` both return `undefined` from `pnpm config get`, so a project that followed the earlier wording of this section had the 24-hour floor **off** with no error. The same keys in `pnpm-workspace.yaml` return `1440` and `true`. A host whose `.npmrc` still holds them MUST move them; leaving them there is harmless but enforces nothing (`F-115-N1`, Sprint 054).
+
+## Text outside the rule rows
+
+### Preamble of agents.md
+
+This is the governance ruleset of the Token-Optimized Agent Pipeline (`.agents`). It dictates in an absolute and transversal manner the behavior of subagents, code quality, and topological design.
+
+### feedback_upstream (routing part of the row)
+
+**Canonical statement of the learning flow.** `§3 jurisdiction` and `workflows/extract_workflow.md` both point here *and* carry a compressed restatement of the framework-class path — grep both on every patch to this row (`RA-14`). `§3 strict_rule` is the prohibition this flow routes around, not a pointer to it. Learning is a LIVING three-tier flow, never a dead end. Each candidate carries a `routing_class` (`extract_workflow.md` Phase 2 — `host` \| `profile` \| `nucleus` \| `discard`): **host-class** findings stay in the host's `memory_index.json`; **project-family-class** findings route to `profiles/[name]/` (rules/skills/docs) — for a real project, the host-controlled profile path installed with `scripts/install.py --profile-path`, never `profiles/` inside the public nucleus (`RA-15`); **framework-class** findings (would improve every host) MUST become a nucleus contribution — a rule-amendment proposal or fix PR to the `.agents` repo.
+
+### Core vs. Auxiliary
+
+**Core vs. Auxiliary.** The 8 roles above are the *Core Pipeline Roles* (mandatory in every Planning → Sprint Closeout cycle). `governance_learner`, `doc_orchestrator`, `topology_mapper`, `git_sync_agent`, `token_economy_agent`, and `implementer_agent` (see `agents/*.md`) are **Auxiliary Agents** — invoked as needed (knowledge distillation, documentation, topology, upstream sync, **code/test authorship**) but not a mandatory stop on every pipeline pass. **Project-specific specialists** (e.g. `backend_identity_specialist`, `frontend_ux_hardener`) live in `profiles/[name]/agents/` and only join the pipeline when their profile is installed. Their absence from this table is intentional, not an omission.
+
+### Onboarding order note
+
+Steps 2 and 3 are frequently confused because they are adjacent: `standardization` migrates *artifacts*, `revdoc` documents *code*. Different objects, and until Phase 019 no document declared which ran first.
+
+### Execution pipeline note
+
+The normative 8-phase pipeline (Planning → Sprint Closeout) is defined **exclusively** in `workflows/pipeline_workflow.md`, loaded on demand via `/agents:pipeline`. It is not duplicated here to keep the always-loaded governance ruleset lean and drift-free. Non-negotiables enforced at this level: the Approval Gate (Phase 5) is a single attended human authorization — never wrapped in an unattended `/loop` — and all execution happens on `ai-sprint/[ID]` (RA-12).
