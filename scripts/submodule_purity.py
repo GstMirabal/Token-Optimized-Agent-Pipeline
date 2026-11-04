@@ -36,8 +36,8 @@ plus `.agent_state/` are gitignored precisely because the anchor is meant to
 live at the HOST root, not the submodule. A buggy submodule-mode session that
 resolves its root wrong (the F-BOOT-2 class of bug) can write its anchor
 straight into `.agents/` and this check would report "clean" while missing it —
-the same blindness `agents.md §5 mandatory_topology` documents for
-`docs/sprints/`. The `--ignored` flag runs a second, narrowly-scoped scan for
+the same blindness `docs/guides/RULE_PRECEDENTS_GUIDE.md` (`agents.md §5
+mandatory_topology`) documents for `docs/sprints/`. The `--ignored` flag runs a second, narrowly-scoped scan for
 exactly those two paths, never the trees that are legitimately transient
 (`venv_skillopt/`, `graphify-out/`, `memory/`): widening it would turn a
 precise contamination check into an allowlist audit, which is not this script's
