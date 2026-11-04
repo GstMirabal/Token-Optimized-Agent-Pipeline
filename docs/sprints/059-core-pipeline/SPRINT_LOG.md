@@ -38,6 +38,7 @@ Tracking of atomic goals achieved during the session. Work units: 48 in six wave
     - `[x]` A-05 committed at `1dbe533`.
     - `[x]` A-09 committed at `0c7a9b2`.
     - `[x]` A-10 committed at `a694ffe`.
+    - `[x]` A-11 committed at `72ac88b`; A-13 at `a014f4f`; A-01 at `ef490cd`. Moved text compared to `agents.md` by script: identical.
     - `[x]` Deviation: unit A-13 (`docs/guides/RULE_PRECEDENTS_GUIDE.md`) added before A-12, human decision 2026-11-02 (plan Design D15); work units 47 → 48.
     - `[x]` Deviation (plan D16): the orchestrator dispatched A-11, A-13, A-08 and A-01 together on its reading of a human question; no rule allowed it. Human decision 2026-11-04: keep the work once checked, return to the approved order.
     - `[ ]` A-08 held uncommitted: it contradicts `ADR-0003` (see KI-059-3); human decision pending.
