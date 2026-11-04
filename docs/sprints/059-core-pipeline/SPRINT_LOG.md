@@ -40,6 +40,7 @@ Tracking of atomic goals achieved during the session. Work units: 52 in six wave
     - `[x]` A-10 committed at `a694ffe`.
     - `[x]` A-11 committed at `72ac88b`; A-13 at `a014f4f`; A-01 at `ef490cd`. Moved text compared to `agents.md` by script: identical.
     - `[x]` A-15 committed at `18b692e`; A-16 at `9b8db89`; A-17 at `d133bc2`; A-12 at `d6f5756` (`wc -c agents.md` 19970, `make verify` exit 0, 1531 passed).
+    - `[ ]` Suspended 2026-11-04 with five uncommitted paths in the tree, on purpose. A-14 (`docs/decisions/ADR-0021-qa-agent-tier-trial.md`, `docs/guides/MODEL_TIER_TRIAL_GUIDE.md`) is written and NOT checked: its author added an unrequested sentence on a trial row in Consequences, left its reproduce commands untested, and omitted the `Last Audit` fields. A-08 (`agents/qa_agent.md`, `config/model_tiers.json`, `tests/test_agent_profile_census.py`) is held until A-14 commits; its `make verify` ran with the tree at 1531 passed.
     - `[x]` Deviation: unit A-13 (`docs/guides/RULE_PRECEDENTS_GUIDE.md`) added before A-12, human decision 2026-11-02 (plan Design D15); work units 47 → 48.
     - `[x]` Deviation (plan D16): the orchestrator dispatched A-11, A-13, A-08 and A-01 together on its reading of a human question; no rule allowed it. Human decision 2026-11-04: keep the work once checked, return to the approved order.
     - `[ ]` A-08 held uncommitted: it contradicts `ADR-0003` (KI-059-3). Human decision 2026-11-04: unit A-14 creates the superseding `ADR-0021` first (plan D17), then A-08 commits; work units 48 → 49.
@@ -165,6 +166,6 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase**: Phase 6 Execution, Wave 1 (A-05, A-09, A-10, A-11, A-12, A-08, A-01).
+**Next Phase**: Phase 6 Execution, Wave 1: check and commit A-14, commit A-08, then Phase 7 gates for Wave 1, measuring the plan's Abort Criteria table at that boundary; then `session_state.py suspend`.
 
 *Certified under conventional commit standard: feat(scope): message #059*
