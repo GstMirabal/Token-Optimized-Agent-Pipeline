@@ -110,7 +110,7 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 
 ## Jurisdiction check (serial or concurrent)
 
-Same structural subject claimed by more than one unit. "Serial" means the plan's `after` chain or the wave order prevents concurrency; D11 batches run only inside a wave and only from Wave 3, except the hand-declared Wave 1 batch of plan D16 (A-11, A-13, A-08, A-01; disjoint subjects).
+Same structural subject claimed by more than one unit. "Serial" means the plan's `after` chain or the wave order prevents concurrency; D11 batches run only inside a wave and only from Wave 3. Plan D16 records one deviation in Wave 1 (A-11, A-13, A-08, A-01 dispatched together; disjoint subjects); it is no precedent.
 
 | Subject | Units | Verdict |
 | :--- | :--- | :--- |

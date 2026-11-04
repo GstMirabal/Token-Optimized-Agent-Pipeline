@@ -39,7 +39,8 @@ Tracking of atomic goals achieved during the session. Work units: 48 in six wave
     - `[x]` A-09 committed at `0c7a9b2`.
     - `[x]` A-10 committed at `a694ffe`.
     - `[x]` Deviation: unit A-13 (`docs/guides/RULE_PRECEDENTS_GUIDE.md`) added before A-12, human decision 2026-11-02 (plan Design D15); work units 47 → 48.
-    - `[x]` Deviation: A-11, A-13, A-08 and A-01 run as one hand-declared parallel batch, human decision 2026-11-04 (plan Design D16).
+    - `[x]` Deviation (plan D16): the orchestrator dispatched A-11, A-13, A-08 and A-01 together on its reading of a human question; no rule allowed it. Human decision 2026-11-04: keep the work once checked, return to the approved order.
+    - `[ ]` A-08 held uncommitted: it contradicts `ADR-0003` (see KI-059-3); human decision pending.
 
 ---
 
@@ -49,6 +50,9 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | Friction Point | Resolution / Workaround | KI ID |
 | :--- | :--- | :--- |
 | A-12's 20000-byte target was set without measuring how many rows it forces to trim; 9 planned destinations covered about half the needed reduction | Measure the row-cap projection at Phase 4.3 for any size target; A-13 added as the missing destination | KI-059-1 |
+| Dispatched a batch that no rule allowed, on a question read as an order (plan D16) | Work kept after unit-by-unit checks; order restored. A human question about the method is not a change to it: answer it, then amend the plan if the human decides | KI-059-2 |
+| Plan D9 and A-08 move `qa_agent` off the `gate` tier, but `ADR-0003` requires a superseding ADR; neither the plan nor the Phase 4 audit named it, and A-08 edited the test that pins that list | A-08 held uncommitted, human decides | KI-059-3 |
+| A-01's agent also moved `segment_cycles` to context size. Over 35 transcripts cycles fall from 86 to 37 and 17 sessions change; `ratio` None falls from 11 to 0 with `cycle_summary` alone. `F-116-N1` names this defect, the plan Operation does not | Reverted to the plan's scope; route to A-00 and ADR-0018 (Wave 3). C-02 cannot mark `F-116-N1` fully closed until this is decided | KI-059-4 |
 
 ---
 

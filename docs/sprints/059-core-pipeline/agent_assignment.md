@@ -25,8 +25,8 @@ No unit of this sprint creates an agent profile: A-08 modifies the existing
 Mode `parallel` marks a unit that `scripts/check_task_scope.py` may place in a
 parallel batch once G-01 lands (plan D11, from Wave 3 onward). Waves 1 and 2
 run `sequential`, because the batch calculator does not exist before G-01.
-Exception (plan D16): A-11, A-13, A-08 and A-01 of Wave 1 run as one hand-declared
-batch; their files are disjoint and none depends on another. A-12 stays `sequential`.
+Recorded deviation (plan D16): A-11, A-13, A-08 and A-01 were dispatched together
+without a rule allowing it. The declared mode stays `sequential` and this is no precedent.
 
 ---
 
@@ -39,11 +39,11 @@ batch; their files are disjoint and none depends on another. A-12 stays `sequent
 | A-05 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | A-09 | `rules/code_craft.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
 | A-10 | `rules/project_topology.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
-| A-11 | `docs/guides/SELF_IMPROVEMENT_GUIDE.md` | modify | parallel | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
-| A-13 | `docs/guides/RULE_PRECEDENTS_GUIDE.md` | create | parallel | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-11 | `docs/guides/SELF_IMPROVEMENT_GUIDE.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-13 | `docs/guides/RULE_PRECEDENTS_GUIDE.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | A-12 | `agents.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
-| A-08 | `agents/qa_agent.md` | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
-| A-01 | `scripts/session_cost.py` | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| A-08 | `agents/qa_agent.md` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| A-01 | `scripts/session_cost.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 
 ### Wave 2 — pace and autonomy
 
