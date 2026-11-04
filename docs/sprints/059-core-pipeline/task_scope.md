@@ -29,9 +29,9 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| A-05 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify: record the triage verdicts of the plan Context (`F-116-N1`, `F-116-N2`: accept, with command and exit); C-02 marks both closed | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-09 | `rules/code_craft.md` | modify: receive the measurement and history of linter_command, max_indentation, max_lines_per_func, fail_closed_claims, exception_handling moved out of agents.md (D10) | medium | `rule_validator` | sonnet | medium | ⏳ |
-| A-10 | `rules/project_topology.md` | modify: receive the history and precedents of RA-09, RA-19, jurisdiction moved out of agents.md (D10) | medium | `rule_validator` | sonnet | medium | ⏳ |
+| A-05 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify: record the triage verdicts of the plan Context (`F-116-N1`, `F-116-N2`: accept, with command and exit); C-02 marks both closed | low | `doc_orchestrator` | sonnet | medium | ✅ `1dbe533` |
+| A-09 | `rules/code_craft.md` | modify: receive the measurement and history of linter_command, max_indentation, max_lines_per_func, fail_closed_claims, exception_handling moved out of agents.md (D10) | medium | `rule_validator` | sonnet | medium | ✅ `0c7a9b2` |
+| A-10 | `rules/project_topology.md` | modify: receive the history and precedents of RA-09, RA-19, jurisdiction moved out of agents.md (D10) | medium | `rule_validator` | sonnet | medium | ✅ `a694ffe` |
 | A-11 | `docs/guides/SELF_IMPROVEMENT_GUIDE.md` | modify: receive the transport, channels, triage and closure of feedback_upstream moved out of agents.md (D10) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 | A-13 | `docs/guides/RULE_PRECEDENTS_GUIDE.md` | create: receive the history, measurement and precedents of every agents.md row that A-12 trims and that A-09, A-10 and A-11 do not receive, indexed by section and rule key, moved verbatim (D10, D15) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
 | A-12 | `agents.md` | modify: after A-09, A-10, A-11 and A-13, trim rows to rule plus pointer, at most 20000 bytes, `make verify` exit 0; keep every string a test pins in `agents.md` (`grep -n "agents.md" tests/*.py`: `RA-18` in `tests/test_cursor_phase1.py`, the `EMITTED` line of `tests/test_gate_row_wording.py`, the `Command paths` row); RA-14 grep of each moved term and every citation updated in the same commit | high | `rule_validator` | sonnet | medium | ⏳ |
@@ -110,7 +110,7 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 
 ## Jurisdiction check (serial or concurrent)
 
-Same structural subject claimed by more than one unit. "Serial" means the plan's `after` chain or the wave order prevents concurrency; D11 batches run only inside a wave and only from Wave 3.
+Same structural subject claimed by more than one unit. "Serial" means the plan's `after` chain or the wave order prevents concurrency; D11 batches run only inside a wave and only from Wave 3, except the hand-declared Wave 1 batch of plan D16 (A-11, A-13, A-08, A-01; disjoint subjects).
 
 | Subject | Units | Verdict |
 | :--- | :--- | :--- |

@@ -27,7 +27,7 @@ Tracking of atomic goals achieved during the session. Work units: 48 in six wave
     - `[x]` `current_sprint` written by `scripts/session_state.py open-sprint` (`id` 59, `path` `docs/sprints/059-core-pipeline`, `branch` `ai-sprint/059`).
     - `[x]` Branch `ai-sprint/059` created from `main` at `08c669c`.
     - `[x]` `SPRINT_LOG.md` instantiated from `docs/standards/templates/SPRINT_LOG_TEMPLATE.md` (session #68).
-- [ ] **Phase 4 (Assignment and Rule Audit)**: artifacts written and checked.
+- [x] **Phase 4 (Assignment and Rule Audit)**: artifacts written and checked.
     - `[x]` `agent_assignment.md` written; six overwrites of `Assignee (proposed)` (A-00, A-07, H-01, C-01, D-01, F-01), all for a missing `Write`/`Edit` tool.
     - `[x]` `skill_assignment.md` written; ladder terminates at P1, no skill forged.
     - `[x]` `task_scope.md` written by `rule_validator` (fresh subagent); `check_task_scope.py`, `check_forge_ladder.py` and `audit_plan.py` exit 0.
@@ -36,7 +36,10 @@ Tracking of atomic goals achieved during the session. Work units: 48 in six wave
 - [x] **Phase 5 (Approval Gate)**: Human OK («Aprobado») on 2026-11-02 over the plan at `65c86d3`.
 - [ ] **Phase 6 (Execution), Wave 1**: in progress.
     - `[x]` A-05 committed at `1dbe533`.
+    - `[x]` A-09 committed at `0c7a9b2`.
+    - `[x]` A-10 committed at `a694ffe`.
     - `[x]` Deviation: unit A-13 (`docs/guides/RULE_PRECEDENTS_GUIDE.md`) added before A-12, human decision 2026-11-02 (plan Design D15); work units 47 → 48.
+    - `[x]` Deviation: A-11, A-13, A-08 and A-01 run as one hand-declared parallel batch, human decision 2026-11-04 (plan Design D16).
 
 ---
 
