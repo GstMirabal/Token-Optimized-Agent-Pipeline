@@ -23,7 +23,7 @@ Declared escalations: none. No Work row is assigned to a `mechanical` profile, s
 
 ## Work
 
-Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from the plan. `after X` in Operation is the plan's dependency; G-01 and H-02 add the `Depends on`, `Est. cost` and `Suspend after` columns later, so they are not written here. Execution order is the plan's: Wave 1 to Wave 6, then Close. The tables hold 49 units (Wave 1: 9, Wave 2: 8, Wave 3: 9, Wave 4: 5, Wave 5: 5, Wave 6: 11, Close: 2). Rows D-04, E-01b and F-02 are conditional on an ADR decision (see findings F-1 and F-8).
+Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from the plan. `after X` in Operation is the plan's dependency; G-01 and H-02 add the `Depends on`, `Est. cost` and `Suspend after` columns later, so they are not written here. Execution order is the plan's: Wave 1 to Wave 6, then Close. The tables hold 52 units (Wave 1: 12, Wave 2: 8, Wave 3: 9, Wave 4: 5, Wave 5: 5, Wave 6: 11, Close: 2). Rows D-04, E-01b and F-02 are conditional on an ADR decision (see findings F-1 and F-8).
 
 ### Wave 1 — Cost levers
 
@@ -34,7 +34,10 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | A-10 | `rules/project_topology.md` | modify: receive the history and precedents of RA-09, RA-19, jurisdiction moved out of agents.md (D10) | medium | `rule_validator` | sonnet | medium | ✅ `a694ffe` |
 | A-11 | `docs/guides/SELF_IMPROVEMENT_GUIDE.md` | modify: receive the transport, channels, triage and closure of feedback_upstream moved out of agents.md (D10) | low | `doc_orchestrator` | sonnet | medium | ✅ `72ac88b` |
 | A-13 | `docs/guides/RULE_PRECEDENTS_GUIDE.md` | create: receive the history, measurement and precedents of every agents.md row that A-12 trims and that A-09, A-10 and A-11 do not receive, indexed by section and rule key, moved verbatim (D10, D15) | medium | `doc_orchestrator` | sonnet | medium | ✅ `a014f4f` |
-| A-12 | `agents.md` | modify: after A-09, A-10, A-11 and A-13, trim rows to rule plus pointer, at most 20000 bytes, `make verify` exit 0; keep every string a test pins in `agents.md` (`grep -n "agents.md" tests/*.py`: `RA-18` in `tests/test_cursor_phase1.py`, the `EMITTED` line of `tests/test_gate_row_wording.py`, the `Command paths` row); RA-14 grep of each moved term and every citation updated in the same commit | high | `rule_validator` | sonnet | medium | ⏳ |
+| A-15 | `rules/skills_and_integrations.md` | modify: receive verbatim `three_file_standard`, `topological_order`, `enforcement` from `docs/guides/RULE_PRECEDENTS_GUIDE.md` (D18); companion: the guide keeps a pointer in their place | low | `rule_validator` | sonnet | medium | ⏳ |
+| A-16 | `rules/qa_and_testing.md` | modify: receive verbatim `local_testing` from `docs/guides/RULE_PRECEDENTS_GUIDE.md` (D18); companion: the guide keeps a pointer in its place | low | `rule_validator` | sonnet | medium | ⏳ |
+| A-17 | `rules/project_topology.md` | modify: receive verbatim `min_release_age`, `only_built_deps`, `config_file` from `docs/guides/RULE_PRECEDENTS_GUIDE.md` (D18); companion: the guide keeps a pointer and `config/rule_triggers.json` adds `pnpm-workspace.yaml`, `package.json`, `.npmrc` to that file's `globs` | low | `rule_validator` | sonnet | medium | ⏳ |
+| A-12 | `agents.md` | modify: after A-09, A-10, A-11, A-13, A-15, A-16 and A-17, with the D18 allocation, trim rows to rule plus pointer, at most 20000 bytes, `make verify` exit 0; keep every string a test pins in `agents.md` (`grep -n "agents.md" tests/*.py`: `RA-18` in `tests/test_cursor_phase1.py`, the `EMITTED` line of `tests/test_gate_row_wording.py`, the `Command paths` row); RA-14 grep of each moved term and every citation updated in the same commit | high | `rule_validator` | sonnet | medium | ⏳ |
 | A-14 | `docs/decisions/ADR-0021-qa-agent-tier-trial.md` | create: after A-12, supersede the `ADR-0003` clause for `qa_agent` only, for the D9 trial, with the abort criterion 4 return condition (D17); `ADR-0003` is not edited; mandatory companion `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` (`:19`, `:140`) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
 | A-08 | `agents/qa_agent.md` | modify: after A-14, set model sonnet and tier author (D9); mandatory companion `config/model_tiers.json` (move qa_agent to author.profiles, add the trial and its return criterion to the gate basis); mandatory companion `tests/test_agent_profile_census.py` (pins the gate list, keeps `qa_agent` without `Write`/`Edit`) | medium | `implementer_agent` | sonnet | medium | ⏳ |
 | A-01 | `scripts/session_cost.py` | modify: fix( cycle_summary baseline D1; paired test `tests/test_session_cost.py` (new) with a turn of cache_read 0 and cache_creation above 0 | medium | `implementer_agent` | sonnet | medium | ✅ `ef490cd` |
@@ -150,7 +153,7 @@ Severity per `rules/qa_and_testing.md` section 4 (S0-S3). Class per the same fil
 
 ## Resolution of the findings
 
-Applied to `IMPLEMENTATION_PLAN.md` (and mirrored in the Work tables above and in `agent_assignment.md`) before Phase 5. Plan Work units: 44 → 47 (B-07, E-01c, H-03 added). Phase 6 Wave 1 added A-13 (plan D15): 47 → 48, and A-14 (plan D17): 48 → 49.
+Applied to `IMPLEMENTATION_PLAN.md` (and mirrored in the Work tables above and in `agent_assignment.md`) before Phase 5. Plan Work units: 44 → 47 (B-07, E-01c, H-03 added). Phase 6 Wave 1 added A-13 (plan D15): 47 → 48, A-14 (plan D17): 48 → 49, and A-15, A-16, A-17 (plan D18): 49 → 52.
 
 | ID | Resolution |
 | :--- | :--- |

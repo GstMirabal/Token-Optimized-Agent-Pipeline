@@ -41,6 +41,9 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | A-10 | `rules/project_topology.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
 | A-11 | `docs/guides/SELF_IMPROVEMENT_GUIDE.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | A-13 | `docs/guides/RULE_PRECEDENTS_GUIDE.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-15 | `rules/skills_and_integrations.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| A-16 | `rules/qa_and_testing.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| A-17 | `rules/project_topology.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
 | A-12 | `agents.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
 | A-14 | `docs/decisions/ADR-0021-qa-agent-tier-trial.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | A-08 | `agents/qa_agent.md` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
