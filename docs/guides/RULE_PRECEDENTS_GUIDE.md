@@ -92,7 +92,7 @@ See `RA-09: SECRET_SOVEREIGNTY` (canonical — adds the human-run `scripts/with_
 
 ### local_testing
 
-Isolate the test database. Default: overwrite native URLs to instantiate in RAM (`sqlite:///:memory:`). A host whose fidelity requirement cannot be met by SQLite (engine-specific column types, extensions, or query behaviour) MUST declare the deviation in a host ADR naming the required engine and the isolation mechanism it substitutes (an ephemeral database/schema per test run, torn down after) — never a shared or persistent database. Running tests against a real, shared, or persistent database without that ADR is PROHIBITED (`ADR-0016`, closes upstream `ADR-0006`).
+Moved to `rules/qa_and_testing.md` (D18).
 
 ## §5 Central Base (Project Master Index)
 

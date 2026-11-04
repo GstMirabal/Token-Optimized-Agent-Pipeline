@@ -145,3 +145,11 @@ claims a browser case as passed without pasted output.
 Step 2 runs agent-written commands in the human's shell with the human's full environment: see the "After a sandboxed agent session" row in `rules/project_topology.md` section 4.
 
 Redact any secret value in the pasted output before recording it (`RA-09`).
+
+## 7. Test database rule of agents.md (detail)
+
+`agents.md §3` keeps the rule in brief and this section keeps the full text, moved in Sprint 059 (D18).
+
+### local_testing
+
+Isolate the test database. Default: overwrite native URLs to instantiate in RAM (`sqlite:///:memory:`). A host whose fidelity requirement cannot be met by SQLite (engine-specific column types, extensions, or query behaviour) MUST declare the deviation in a host ADR naming the required engine and the isolation mechanism it substitutes (an ephemeral database/schema per test run, torn down after) — never a shared or persistent database. Running tests against a real, shared, or persistent database without that ADR is PROHIBITED (`ADR-0016`, closes upstream `ADR-0006`).
