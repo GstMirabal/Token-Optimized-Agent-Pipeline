@@ -55,7 +55,7 @@ with `<bool>` replaced by the real value. No HTTP in `make verify`.
 
 | Unit | Skill / tool | Destination | P1–P4 trail |
 | :--- | :--- | :--- | :--- |
-| A-09, A-10, A-11, A-12, D-02, D-03 | `omni-context-minimizer` (`skills/omni-context-minimizer/scripts/omni_minimizer.py`) for the skeleton of `agents.md` and each receiving file before partial reads (`agents.md §2 ast_skeleton`); `wc -c` and `make verify` per row (plan D10) | N/A | P1 hit |
+| A-09, A-10, A-11, A-13, A-12, D-02, D-03 | `omni-context-minimizer` (`skills/omni-context-minimizer/scripts/omni_minimizer.py`) for the skeleton of `agents.md` and each receiving file before partial reads (`agents.md §2 ast_skeleton`); `wc -c` and `make verify` per row (plan D10) | N/A | P1 hit |
 | A-05, A-11, B-02, A-00, A-06, A-07, C-01, C-02, D-01, F-01, Z-01, Z-02 | none — Markdown edits by `doc_orchestrator`; ADRs from `docs/standards/templates/ADR_TEMPLATE.md` | N/A | P1: no tool needed |
 | A-08 | none — frontmatter edit; `scripts/check_model_tiers.py` verifies the companion `config/model_tiers.json` | N/A | P1: no tool needed |
 | A-01, A-02 | `scripts/session_cost.py` (the subject); `venv_skillopt/bin/python -m pytest` | N/A | P1: no tool needed |

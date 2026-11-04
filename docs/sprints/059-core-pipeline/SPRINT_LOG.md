@@ -9,7 +9,7 @@
 | :--- | :--- |
 | **Active Layer** | core-pipeline |
 | **Strategic Goal** | `efficiency-and-sandbox-regime`: cut the framework's own cost (`agents.md` ≤ 20000 bytes, `qa_agent` on `sonnet` as a trial, parallel Phase 6 batches, nucleus sandbox with `autoAllowBashIfSandboxed`), give the §3.1 bound a non-zero baseline and an in-session invoker, re-measure the `RA-19` enumeration and decide the sandbox regime, and close the Sprint 058 residues. |
-| **Intelligence State** | Phase 4 (Assignment and Rule Audit). Plan `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` status DRAFT, committed at `88d8a51`; `audit_plan.py` on it exit 0. |
+| **Intelligence State** | Phase 6 (Execution), Wave 1. Plan approved at `65c86d3`; deviation D15 (A-13) added in Phase 6. |
 | **Branch / Base** | `ai-sprint/059` created from `main` at `08c669c` (`v4.41.0`) |
 | **Session Tool / Delegation** | `claude-code` / `native` |
 | **Start Time** | 2026-11-02 |
@@ -17,7 +17,7 @@
 ---
 
 ## 🏁 Sprint Progression
-Tracking of atomic goals achieved during the session. Work units: 44 in six waves plus close. Execution order: Wave 1 to Wave 6, then close; one wave per session, `session_state.py suspend` between waves (plan `## Cost`).
+Tracking of atomic goals achieved during the session. Work units: 48 in six waves plus close. Execution order: Wave 1 to Wave 6, then close; one wave per session, `session_state.py suspend` between waves (plan `## Cost`).
 
 - [x] **Phase 1 (Planning)**: plan drafted and committed.
     - `[x]` Intake triage: channel A empty, channel B empty, `F-116-N1` and `F-116-N2` accepted with reproduction (plan `## Context`).
@@ -34,6 +34,9 @@ Tracking of atomic goals achieved during the session. Work units: 44 in six wave
     - `[x]` Phase 4.3 raised F-1..F-12 except F-7 (S2, instructing) and F-7, F-13, F-14 (S3, testifying); each one verified against the tree and resolved in the plan (`task_scope.md` `## Resolution of the findings`). Work units 44 → 47 (B-07, E-01c, H-03).
     - `[x]` "Proposal E points 3-5" (plan P11; source not in the repository): human decision at Phase 5, routed to a `KI-059-n` by Z-02.
 - [x] **Phase 5 (Approval Gate)**: Human OK («Aprobado») on 2026-11-02 over the plan at `65c86d3`.
+- [ ] **Phase 6 (Execution), Wave 1**: in progress.
+    - `[x]` A-05 committed at `1dbe533`.
+    - `[x]` Deviation: unit A-13 (`docs/guides/RULE_PRECEDENTS_GUIDE.md`) added before A-12, human decision 2026-11-02 (plan Design D15); work units 47 → 48.
 
 ---
 
@@ -42,6 +45,7 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 
 | Friction Point | Resolution / Workaround | KI ID |
 | :--- | :--- | :--- |
+| A-12's 20000-byte target was set without measuring how many rows it forces to trim; 9 planned destinations covered about half the needed reduction | Measure the row-cap projection at Phase 4.3 for any size target; A-13 added as the missing destination | KI-059-1 |
 
 ---
 

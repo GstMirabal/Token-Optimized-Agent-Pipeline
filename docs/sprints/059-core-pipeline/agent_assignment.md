@@ -38,6 +38,7 @@ run `sequential`, because the batch calculator does not exist before G-01.
 | A-09 | `rules/code_craft.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
 | A-10 | `rules/project_topology.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
 | A-11 | `docs/guides/SELF_IMPROVEMENT_GUIDE.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-13 | `docs/guides/RULE_PRECEDENTS_GUIDE.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | A-12 | `agents.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
 | A-08 | `agents/qa_agent.md` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | A-01 | `scripts/session_cost.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
