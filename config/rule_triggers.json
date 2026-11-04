@@ -53,7 +53,10 @@
         "docker-compose*.yml",
         "**/Dockerfile",
         "scripts/**",
-        "hooks/**"
+        "hooks/**",
+        "**/pnpm-workspace.yaml",
+        "**/package.json",
+        "**/.npmrc"
       ],
       "trigger_prose": "Running local commands, choosing interpreters/paths, or touching DB containers."
     },

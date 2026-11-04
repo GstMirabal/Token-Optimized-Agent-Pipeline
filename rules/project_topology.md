@@ -92,3 +92,19 @@ This is the single table of sandbox behaviour. Every other document references i
 - The current measured list is `docs/sprints/056-core-pipeline/SANDBOX_ENUMERATION.md`, and it is per Claude Code CLI version (it does not carry to another version without a re-run).
 - Default wording when no such enumeration exists: write-denies and the absence of exclusions REDUCE exposure; they are not a boundary.
 - Precedent: Sprint 055 QA Gate 1 rounds 1-4 (`SPRINT_LOG.md`), which triggered `remediation_workflow.md` Phase 0.
+
+## 6. Supply chain rules of agents.md (detail)
+
+`agents.md §8` keeps each rule in brief and this section keeps the full text, moved in Sprint 059 (D18).
+
+### min_release_age
+
+`minimumReleaseAge: 1440` (minutes, i.e. 24 hours) MUST be set in `pnpm-workspace.yaml` to avoid zero-day compromised packages. Verified by: `pnpm config get minimumReleaseAge` → `1440`.
+
+### only_built_deps
+
+All dependencies requiring build scripts MUST be explicitly whitelisted in `onlyBuiltDependencies` in `pnpm-workspace.yaml`. Verified by: `pnpm config get onlyBuiltDependencies` lists exactly the whitelisted packages.
+
+### config_file
+
+**`.npmrc` does NOT carry these settings.** Measured with pnpm 11.23.0: `minimum-release-age=1440` and `ignore-scripts=true` written in `.npmrc` both return `undefined` from `pnpm config get`, so a project that followed the earlier wording of this section had the 24-hour floor **off** with no error. The same keys in `pnpm-workspace.yaml` return `1440` and `true`. A host whose `.npmrc` still holds them MUST move them; leaving them there is harmless but enforces nothing (`F-115-N1`, Sprint 054).
