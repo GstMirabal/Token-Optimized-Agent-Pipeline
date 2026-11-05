@@ -17,7 +17,7 @@
 ---
 
 ## 🏁 Sprint Progression
-Tracking of atomic goals achieved during the session. Work units: 52 in six waves plus close. Execution order: Wave 1 to Wave 6, then close; one wave per session, `session_state.py suspend` between waves (plan `## Cost`).
+Tracking of atomic goals achieved during the session. Work units: 53 in six waves plus close. Execution order: Wave 1 to Wave 6, then close; one wave per session, `session_state.py suspend` between waves (plan `## Cost`).
 
 - [x] **Phase 1 (Planning)**: plan drafted and committed.
     - `[x]` Intake triage: channel A empty, channel B empty, `F-116-N1` and `F-116-N2` accepted with reproduction (plan `## Context`).
@@ -64,7 +64,7 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | `qa_agent` trial ended by abort criterion 4 after one wave (plan D20). One case says nothing general about `sonnet`: QA on `sonnet` also found real S2 defects in round 1 | A new trial needs a new ADR that covers `--resolve` under Cursor | KI-059-7 |
 | Host names reached the plan at `88d8a51` (QA Gate 1 round 3, S0 suspected); no instrument scans plans for them. The text is genericized, the names stay in this branch's unpushed history | Before the first push of `ai-sprint/059`, `RA-08` squash, then `git log -S'<name>'` on the branch to be pushed MUST print nothing for each host name this remediation removed from the plan (`git show` of the commit that removes them lists them) | KI-059-8 |
 | The 15x hard bound moved from about 371K to about 958K in session `7204cadc` when the baseline became context size (D1, D19), with no decision on whether 15 stays valid | A-00 and A-06 name it for a human decision, with the `agents.md` trim lowering `first` | KI-059-9 |
-| `read_turns` counts one API message once per transcript record, so token totals are 2.1 to 2.5 times too high; `ratio` and cuts are unaffected. A-00, H-01 and H-03 would calibrate on these totals | Human decides: unit before A-00 | KI-059-10 |
+| `read_turns` counts one API message once per transcript record, so token totals are 2.1 to 2.5 times too high; `ratio` and cuts are unaffected. A-00, H-01 and H-03 would calibrate on these totals | Human decision 2026-11-05 (plan D21): unit A-18 before A-00. `rules/token_economy.md` totals measured before it are suspect | KI-059-10 |
 | No session has run on the trimmed `agents.md`, so the saving is unmeasured | Measure the first-turn size at the next session's start | KI-059-11 |
 
 ---

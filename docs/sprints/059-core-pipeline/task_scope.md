@@ -23,7 +23,7 @@ Declared escalations: none. No Work row is assigned to a `mechanical` profile, s
 
 ## Work
 
-Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from the plan. `after X` in Operation is the plan's dependency; G-01 and H-02 add the `Depends on`, `Est. cost` and `Suspend after` columns later, so they are not written here. Execution order is the plan's: Wave 1 to Wave 6, then Close. The tables hold 52 units (Wave 1: 12, Wave 2: 8, Wave 3: 9, Wave 4: 5, Wave 5: 5, Wave 6: 11, Close: 2). Rows D-04, E-01b and F-02 are conditional on an ADR decision (see findings F-1 and F-8).
+Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from the plan. `after X` in Operation is the plan's dependency; G-01 and H-02 add the `Depends on`, `Est. cost` and `Suspend after` columns later, so they are not written here. Execution order is the plan's: Wave 1 to Wave 6, then Close. The tables hold 53 units (Wave 1: 12, Wave 2: 8, Wave 3: 10, Wave 4: 5, Wave 5: 5, Wave 6: 11, Close: 2). Rows D-04, E-01b and F-02 are conditional on an ADR decision (see findings F-1 and F-8).
 
 ### Wave 1 — Cost levers
 
@@ -59,6 +59,7 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| A-18 | `scripts/session_cost.py` | modify: after A-01, before A-00, fix( `read_turns` counts each `message.id` once (D21); paired test in `tests/test_session_cost.py`, which also adds the missing type hints; `ratio` and cuts do not change over the real transcripts | medium | `implementer_agent` | sonnet | medium | ⏳ |
 | A-00 | `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | create: D8 study with one table per piece and per mechanism with sources, context growth boot to close, real cost per unit for Sprints 056-058, 2-4 candidate methods (figures supplied by `token_economy_agent`) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
 | A-06 | `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | modify: after A-00, add a `Debate` section with options, objections and the human's decision | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 | A-07 | `docs/decisions/ADR-0018-in-session-token-economy.md` | create: after A-06, the chosen method, confirming or replacing D2; leftovers go to KI-059-n | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
@@ -118,7 +119,7 @@ Same structural subject claimed by more than one unit. "Serial" means the plan's
 
 | Subject | Units | Verdict |
 | :--- | :--- | :--- |
-| `scripts/session_cost.py` | A-01 (Wave 1), A-02 (Wave 3, after A-01) | Serial. |
+| `scripts/session_cost.py` | A-01 (Wave 1), A-18 (Wave 3, before A-00), A-02 (Wave 3, after A-01 and A-07) | Serial. |
 | `scripts/check_task_scope.py` | G-01 (Wave 2), H-02 (Wave 3, after G-01 and H-01) | Serial. |
 | `scripts/upstream_outbox.py` | I-02, I-03, I-04, I-05 | Serial by explicit `after` chain I-02 to I-05. |
 | `agents.md` | A-12 (Wave 1), D-02 (Wave 5, after A-12) | Serial. |
@@ -153,7 +154,7 @@ Severity per `rules/qa_and_testing.md` section 4 (S0-S3). Class per the same fil
 
 ## Resolution of the findings
 
-Applied to `IMPLEMENTATION_PLAN.md` (and mirrored in the Work tables above and in `agent_assignment.md`) before Phase 5. Plan Work units: 44 → 47 (B-07, E-01c, H-03 added). Phase 6 Wave 1 added A-13 (plan D15): 47 → 48, A-14 (plan D17): 48 → 49, and A-15, A-16, A-17 (plan D18): 49 → 52.
+Applied to `IMPLEMENTATION_PLAN.md` (and mirrored in the Work tables above and in `agent_assignment.md`) before Phase 5. Plan Work units: 44 → 47 (B-07, E-01c, H-03 added). Phase 6 Wave 1 added A-13 (plan D15): 47 → 48, A-14 (plan D17): 48 → 49, A-15, A-16, A-17 (plan D18): 49 → 52, and A-18 (plan D21): 52 → 53.
 
 | ID | Resolution |
 | :--- | :--- |

@@ -66,6 +66,7 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 
 | # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| A-18 | `scripts/session_cost.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | A-00 | `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | create | parallel | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | A-06 | `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | A-07 | `docs/decisions/ADR-0018-in-session-token-economy.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
