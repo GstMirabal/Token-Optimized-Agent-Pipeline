@@ -40,10 +40,10 @@ Tracking of atomic goals achieved during the session. Work units: 52 in six wave
     - `[x]` A-10 committed at `a694ffe`.
     - `[x]` A-11 committed at `72ac88b`; A-13 at `a014f4f`; A-01 at `ef490cd`. Moved text compared to `agents.md` by script: identical.
     - `[x]` A-15 committed at `18b692e`; A-16 at `9b8db89`; A-17 at `d133bc2`; A-12 at `d6f5756` (`wc -c agents.md` 19970, `make verify` exit 0, 1531 passed).
-    - `[ ]` Suspended 2026-11-04 with five uncommitted paths in the tree, on purpose. A-14 (`docs/decisions/ADR-0021-qa-agent-tier-trial.md`, `docs/guides/MODEL_TIER_TRIAL_GUIDE.md`) is written and NOT checked: its author added an unrequested sentence on a trial row in Consequences, left its reproduce commands untested, and omitted the `Last Audit` fields. A-08 (`agents/qa_agent.md`, `config/model_tiers.json`, `tests/test_agent_profile_census.py`) is held until A-14 commits; its `make verify` ran with the tree at 1531 passed.
+    - `[x]` A-14 checked and corrected (a fact that A-08 would falsify; an open-ended trial) and committed at `ed96115`; A-08 at `80518b4`. Wave 1 units all committed.
     - `[x]` Deviation: unit A-13 (`docs/guides/RULE_PRECEDENTS_GUIDE.md`) added before A-12, human decision 2026-11-02 (plan Design D15); work units 47 → 48.
     - `[x]` Deviation (plan D16): the orchestrator dispatched A-11, A-13, A-08 and A-01 together on its reading of a human question; no rule allowed it. Human decision 2026-11-04: keep the work once checked, return to the approved order.
-    - `[ ]` A-08 held uncommitted: it contradicts `ADR-0003` (KI-059-3). Human decision 2026-11-04: unit A-14 creates the superseding `ADR-0021` first (plan D17), then A-08 commits; work units 48 → 49.
+    - `[x]` A-08 was held uncommitted: it contradicts `ADR-0003` (KI-059-3). Human decision 2026-11-04: unit A-14 creates the superseding `ADR-0021` first (plan D17), then A-08 commits; work units 48 → 49.
     - `[x]` Human decision 2026-11-04 (plan D18): `agents.md` allocated by risk; A-15, A-16, A-17 added before the A-12 commit; work units 49 → 52.
 
 ---
