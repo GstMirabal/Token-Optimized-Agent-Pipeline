@@ -133,6 +133,9 @@ Example (do not uncomment):
 | QA Agent (Gate 1) | 2 | `python3 scripts/check_fix_reproduces.py --range 08c669c..HEAD` | 0 |
 | QA Agent (Gate 1) | 2 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 0 |
 | QA Agent (Gate 1) | 2 | `make verify` | 0 |
+| QA Agent (Gate 1) | 3 | `python3 scripts/check_fix_reproduces.py --range 08c669c..HEAD` | 0 |
+| QA Agent (Gate 1) | 3 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 0 |
+| QA Agent (Gate 1) | 3 | `make verify` | 0 |
 | Tester Agent (Gate 2) | 1 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider` | 0 |
 | Tester Agent (Gate 2) | 1 | `make verify` | 0 |
 
