@@ -64,8 +64,7 @@ def run_census(paths: list[Path] | None = None) -> list[str]:
     profiles_by_stem = {path.stem: path for path in paths}
     gate_profiles = load_gate_profiles()
 
-    # qa_agent left the gate tier in Sprint 059 (plan D9) but stays read-only.
-    for stem in [*gate_profiles, "qa_agent"]:
+    for stem in gate_profiles:
         path = profiles_by_stem.get(stem)
         if path is None:
             problems.append(f"{stem}: listed in tiers.gate.profiles but no agents/{stem}.md")
@@ -105,12 +104,12 @@ def test_agent_profile_count_is_fourteen() -> None:
 
 def test_gate_profiles_loaded_from_model_tiers() -> None:
     gate = load_gate_profiles()
-    assert gate == ["tester_agent", "principal_agent"]
+    assert gate == ["qa_agent", "tester_agent", "principal_agent"]
 
 
 def test_gate_profiles_have_no_write_or_edit() -> None:
     profiles_by_stem = {path.stem: path for path in agent_paths()}
-    for stem in [*load_gate_profiles(), "qa_agent"]:
+    for stem in load_gate_profiles():
         path = profiles_by_stem[stem]
         tools_line = _parse_frontmatter(path).get("tools", "")
         assert not WRITE_OR_EDIT_ITEM.search(tools_line), (
