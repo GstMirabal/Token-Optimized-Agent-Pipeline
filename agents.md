@@ -1,6 +1,6 @@
 # .agents Global Context & Governance Rules
 
-Governance ruleset of the Token-Optimized Agent Pipeline (`.agents`). Rows keep the rule and a pointer; history and precedents: `docs/guides/RULE_PRECEDENTS_GUIDE.md` (on demand). In a row, `(precedents)` means that file, under the row's key.
+Rows keep the rule and a pointer; history and precedents: `docs/guides/RULE_PRECEDENTS_GUIDE.md` (on demand). In a row, `(precedents)` means that file, under the row's key.
 
 ## 0. Documentation Entry Point
 
@@ -17,7 +17,7 @@ Governance ruleset of the Token-Optimized Agent Pipeline (`.agents`). Rows keep 
 | **Command paths** | Declared once here for both forms of a framework command a document names. **Host:** `.agents/` is a git submodule; run from the host root as `python3 .agents/scripts/<name>.py` (likewise `.agents/hooks/`, `make -f .agents/Makefile <target>`). **Nucleus:** this repository is `.agents`; run `python3 scripts/<name>.py` and `make <target>` (`scripts/_mode.py` decides the mode; `.git` is a real directory in the nucleus). A document that writes the bare nucleus form means the host form when run in a host. |
 
 ### Rule Contexts (lazy-load index)
-Domain rules live in `rules/` and are loaded **on demand** at these triggers — never preloaded (token economy). The machine-readable mirror of this table is `config/rule_triggers.json`; check `(e)` in `scripts/verify_references.py` keeps both in sync.
+Domain rules in `rules/` load **on demand** at these triggers, never preloaded. Mirror: `config/rule_triggers.json` (`verify_references.py` check `(e)`).
 
 | Rule file | Load when… |
 | :--- | :--- |
@@ -25,7 +25,7 @@ Domain rules live in `rules/` and are loaded **on demand** at these triggers —
 | `rules/loop_governance.md` | Before wrapping any phase in `/loop` or `/schedule`, or authoring an unattended routine. |
 | `rules/token_economy.md` | Authoring/auditing a plan or `task_scope`, measuring session cost, or changing model tiers / token-economy instruments (not every source edit). |
 | `rules/qa_and_testing.md` | Writing/running tests, entering the Quality Gate, or after 3 consecutive failures. |
-| `rules/project_topology.md` | Running local commands, choosing interpreters/paths, or touching DB containers. |
+| `rules/project_topology.md` | Running local commands, choosing interpreters/paths, installing packages, or touching DB containers. |
 | `rules/skills_and_integrations.md` | Searching, registering, or forging skills/tools. |
 | `rules/frontend_modular_standard.md` | Touching `frontend/src/modules/`. |
 | `rules/django_backend_standard.md` | Writing or modifying Django code — models, views, serializers, `signals.py`, app layout, or DRF endpoints. |
@@ -38,9 +38,9 @@ Domain rules live in `rules/` and are loaded **on demand** at these triggers —
 | Category | Rule (Key) | Value / Constraint (Value) |
 | :--- | :--- | :--- |
 | **Python** | `naming_convention` | `snake_case` (vars/funcs), `PascalCase` (classes) |
-| **Python** | `linter_command` | `ruff check .` (Reject if exit code > 0); `make verify` runs it. `mypy`/`bandit`/`radon` are not gated. Detail: `rules/code_craft.md §8`. |
+| **Python** | `linter_command` | `ruff check .` (Reject if exit code > 0); `make verify` runs it. `rules/code_craft.md §8`. |
 | **JS/TS** | `naming_convention` | `camelCase` |
-| **JS/TS** | `linter_command` | `pnpm run lint` (Reject if exit code > 0); judged at the QA gate, NOT run by `make verify`. Detail: `rules/code_craft.md §8`. |
+| **JS/TS** | `linter_command` | `pnpm run lint` (Reject if exit code > 0); judged at the QA gate, NOT run by `make verify`. `rules/code_craft.md §8`. |
 | **Documentation**| `python_style` | Google Style (`Args:`, `Returns:`) |
 | **Documentation**| `js_ts_style` | JSDoc (`@param`, `@returns`) |
 | **Types** | `requirement` | Mandatory type hints on all args and return values |
@@ -54,7 +54,7 @@ Domain rules live in `rules/` and are loaded **on demand** at these triggers —
 | **Language** | `user_chat` | Spanish strictly confined to human-agent chat and Implementation Plans. |
 | **Language** | `technical_clarity` | Avoid redundant greetings. Prioritize Markdown Tables. Restrict Mermaid/ASCII. |
 | **Language** | `restrictions` | Define explicitly what is prohibited. Avoid vague positive actions. |
-| **Language** | `unambiguous_action` | Steps MUST run without interpretation. PROHIBITED: deictics, vague verbs, unproven adjectives, unitless numbers, hidden-actor passive. |
+| **Language** | `unambiguous_action` | EVERY instruction (plan step, task, commit message, rule) MUST state its operation, its target by name and its done-criterion. PROHIBITED: deictics (`here`), verbs hiding the operation (`align`, `review`), unproven adjectives (`clean`), unitless magnitudes, hidden-actor passive. |
 
 ## 2. Autonomy, Efficiency, and Execution
 
@@ -82,7 +82,7 @@ Domain rules live in `rules/` and are loaded **on demand** at these triggers —
 | **Environment** | `no_globals` | Cap or reject global injections in the main OS binary. |
 | **Environment** | `dependencies` | Force explicit prefix syntax by invoking commands through isolated local dev environment. |
 | **Infrastructure**| `three_file_standard` | Skills with `scripts/` MUST have `README.md`, `SKILL.md`, `scripts/__init__.py`; others only `SKILL.md`; padding PROHIBITED. `rules/skills_and_integrations.md §4`. |
-| **Infrastructure**| `topological_order`| Skills flat in `skills/` (sub-layers PROHIBITED). Production profiles never enter the nucleus (`RA-15`): `install.py --profile-path`. Same §4. |
+| **Infrastructure**| `topological_order`| Skills flat in `skills/` (sub-layers PROHIBITED). Production profiles never enter the nucleus (`RA-15`): `install.py --profile-path`. `rules/skills_and_integrations.md §4`. |
 | **Infrastructure**| `enforcement` | Auditor: `skills/topology-monitor/scripts/legacy_app_auditor.py`; `mass-standardizer` only regenerates `skills/manifest_skills.json`. |
 | **Infrastructure**| `secret_sovereignty`| See `RA-09: SECRET_SOVEREIGNTY` (canonical). BANNED from reading `.env` into memory or printing a value from it. |
 | **QA Framework** | `local_testing` | Isolate the test DB, default `sqlite:///:memory:`; another engine MUST have a host ADR (`ADR-0016`); shared or persistent DBs PROHIBITED. `rules/qa_and_testing.md §7`. |
@@ -97,13 +97,13 @@ Domain rules live in `rules/` and are loaded **on demand** at these triggers —
 | **Feedback Loop** | `definitive_amnesia` | Temporary logs are permanently deleted the moment the fix is applied. |
 | **Index Routing** | `index_files` | Parse exclusively `memory_index.json` locally. |
 | **Index Routing** | `single_line_breakdown`| Reject JSON insertions that break the 1-sentence limit without a carriage return. |
-| **Feedback Loop** | `feedback_upstream` | Grep `§3 jurisdiction`, `workflows/extract_workflow.md` on patches (`RA-14`). `routing_class`: `host` \| `profile` \| `nucleus` \| `discard`. host-class: local; **project-family-class** findings route to `profiles/[name]/` (rules/skills/docs); framework-class MUST become a nucleus contribution. `docs/guides/SELF_IMPROVEMENT_GUIDE.md`; (precedents) |
+| **Feedback Loop** | `feedback_upstream` | `routing_class`: `host` \| `profile` \| `nucleus` \| `discard`. host-class: local; **project-family-class** findings route to `profiles/[name]/` (rules/skills/docs), a real project's at `--profile-path`, never in the nucleus (`RA-15`); framework-class MUST become a nucleus contribution. `docs/guides/SELF_IMPROVEMENT_GUIDE.md`; (precedents) |
 
 ## 5. Central Base (Project Master Index)
 
 | Category | Rule (Key) | Value / Constraint (Value) |
 | :--- | :--- | :--- |
-| **Initialization** | `mandatory_topology` | Reject init if `/docs/` missing. Canonical sprint path (never restated elsewhere): `docs/sprints/[Sprint_ID]-[Stack]-[Layer]/`. |
+| **Initialization** | `mandatory_topology` | Reject init if `/docs/` missing. Canonical sprint path: `docs/sprints/[Sprint_ID]-[Stack]-[Layer]/`. |
 | **Initialization** | `legacy_onboarding` | If mature project: Execute **Full Reverse Engineering** and generate Walkthroughs. |
 | **Nucleus Guard** | `nucleus_neutrality` | Automatic structural scaffolding PROHIBITED if workspace is `.agents` core. |
 | **Traceability** | `state_anchor` | Context MUST be extracted from `docs/active_state.json` (Zero Coordinate). |
@@ -131,7 +131,7 @@ The pipeline operates under a rigid sequential process. Role usurpation is stric
 
 ### 🚀 The Execution Pipeline
 
-**Onboarding order (canonical, declared once).** On a repository the framework has not handled before, three protocols run before the pipeline, in this order. Every other document that mentions onboarding **references this list and never restates it** (`RA-14`):
+**Onboarding order (canonical, declared once).** Three protocols run before the pipeline on a new repository. Other documents **reference this list, never restate it** (`RA-14`):
 
 | # | Protocol | Owns | Why here |
 | :--- | :--- | :--- | :--- |
@@ -148,16 +148,16 @@ The normative 8-phase pipeline (Planning → Sprint Closeout) is defined **exclu
 | :--- | :--- | :--- |
 | **Amendment** | `RA-01: ENVIRONMENT_VIOLATION`| On a tooling failure, MUST try one scoped fix in the isolated environment (`§3 dependencies`) before escalating, unless human-only. |
 | **Amendment** | `RA-02: LAZY_SIGNAL_PARADIGM` | See `rules/django_backend_standard.md §2 Signal Registration`. |
-| **Amendment** | `RA-03: HOTFIX_FLAT` | Branch MUST be `hotfix/[H-ID]`, never `fix/`, `feat/`, `chore/` or an IDE prefix; `docs/hotfixes/[H-ID]-[Layer].md` before the first substantive commit; suffix `#[H-ID]`, no hyphen. |
+| **Amendment** | `RA-03: HOTFIX_FLAT` | For CRITICAL/HIGH defects outside the sprint pipeline: branch MUST be `hotfix/[H-ID]`, never `fix/`, `feat/`, `chore/` or an IDE prefix (rename before the first substantive commit); `docs/hotfixes/[H-ID]-[Layer].md` before that commit; suffix `#[H-ID]`, no hyphen; next id follows the highest `docs/hotfixes/H-*.md`. Sanctioned exception to `RA-06`. |
 | **Amendment** | `RA-04: FULL_DEPLOYMENT` | **Retired Sprint 046** (superseded by `RA-12`). Tombstone: `RA-05`..`RA-19` are **never renumbered**. |
 | **Amendment** | `RA-05: SPRINT_CLOSEOUT` | Mandatory update of Blueprints, Global Roadmap, Walkthroughs, and Ledger before closing. |
 | **Amendment** | `RA-06: IDENTITY_NAMING` | Standard Option B: All docs must be named `[MODULE]_[TYPE].md` (e.g. `USERS_BLUEPRINT.md`). |
 | **Amendment** | `RA-07: ARCHIVE_PURGE` | Prohibited to keep empty `archive/` folders. Purge immediately if found. |
 | **Amendment** | `RA-08: COMMIT_SQUASH` | Mandatory atomic local commits; mandatory squash & push only during Sprint Closeout. |
-| **Amendment** | `RA-09: SECRET_SOVEREIGNTY`| Never read `.env` into context or print a value from it; the agent prepares secret and `gh` commands, the human runs them. **No `sandbox.excludedCommands` entry may exist.** Write-denies are not a boundary (`RA-19`). `rules/project_topology.md §5`. |
+| **Amendment** | `RA-09: SECRET_SOVEREIGNTY`| Never read `.env` into context or print a value from it; the agent prepares secret commands, and `gh` under the sandbox, for the human to run. **No `sandbox.excludedCommands` entry may exist.** Write-denies are not a boundary (`RA-19`). `rules/project_topology.md §5`. |
 | **Amendment** | `RA-10: SUPPLY_CHAIN_SHIELD`| See `§8 Supply Chain Security` (canonical). |
-| **Amendment** | `RA-11: HOOK_BLOCKING_SEMANTICS`| Claude Code `PreToolUse` hooks only block a tool call on exit code `2` (stderr fed back to the model); exit `1` is a non-blocking warning. Every hook in `hooks/` that must halt execution MUST `sys.exit(2)`, never `1`. |
-| **Amendment** | `RA-12: BRANCH_DISCIPLINE`| Sprint branch `ai-sprint/[ID]`; direct commits or pushes to `main` PROHIBITED; only `deployment_workflow.md` Phase 1 merges; an IDE prefix is not valid. (precedents) |
+| **Amendment** | `RA-11: HOOK_BLOCKING_SEMANTICS`| `PreToolUse` hooks block only on exit `2`; exit `1` only warns. A hook in `hooks/` that must halt MUST `sys.exit(2)`, never `1`. (precedents) |
+| **Amendment** | `RA-12: BRANCH_DISCIPLINE`| Sprint branch `ai-sprint/[ID]`; direct commits or pushes to `main` PROHIBITED; only `deployment_workflow.md` Phase 1 merges; an IDE prefix is not valid: rename before the first substantive commit. (precedents) |
 | **Amendment** | `RA-13: SEQUENTIAL_GATES`| A gate and its irreversible action MUST be separate invocations, result OBSERVED first; chaining (`sleep && merge`) voids it. |
 | **Amendment** | `RA-14: PATCH_PROPAGATION`| A patch MUST be followed by a grep of its term across the sprint artifact set; headline metrics MUST be `grep`-reproducible. |
 | **Amendment** | `RA-15: HOST_CONTENT_GENERICIZATION`| MUST genericize host-identifying strings (name, paths, logic) in any `feedback_upstream` contribution. |

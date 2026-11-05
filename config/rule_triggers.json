@@ -58,7 +58,7 @@
         "**/package.json",
         "**/.npmrc"
       ],
-      "trigger_prose": "Running local commands, choosing interpreters/paths, or touching DB containers."
+      "trigger_prose": "Running local commands, choosing interpreters/paths, installing packages, or touching DB containers."
     },
     {
       "path": "rules/skills_and_integrations.md",

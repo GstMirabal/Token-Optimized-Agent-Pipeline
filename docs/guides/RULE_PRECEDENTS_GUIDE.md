@@ -211,3 +211,11 @@ Steps 2 and 3 are frequently confused because they are adjacent: `standardizatio
 ### Execution pipeline note
 
 The normative 8-phase pipeline (Planning → Sprint Closeout) is defined **exclusively** in `workflows/pipeline_workflow.md`, loaded on demand via `/agents:pipeline`. It is not duplicated here to keep the always-loaded governance ruleset lean and drift-free. Non-negotiables enforced at this level: the Approval Gate (Phase 5) is a single attended human authorization — never wrapped in an unattended `/loop` — and all execution happens on `ai-sprint/[ID]` (RA-12).
+
+### Rule Contexts note
+
+Domain rules live in `rules/` and are loaded **on demand** at these triggers — never preloaded (token economy). The machine-readable mirror of this table is `config/rule_triggers.json`; check `(e)` in `scripts/verify_references.py` keeps both in sync.
+
+### Onboarding order preamble
+
+**Onboarding order (canonical, declared once).** On a repository the framework has not handled before, three protocols run before the pipeline, in this order. Every other document that mentions onboarding **references this list and never restates it** (`RA-14`):
