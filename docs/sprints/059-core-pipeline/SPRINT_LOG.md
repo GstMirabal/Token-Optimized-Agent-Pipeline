@@ -116,6 +116,9 @@ Example (do not uncomment):
 
 | Gate | Round | Command | Exit |
 | :--- | :--- | :--- | :--- |
+| QA Agent (Gate 1) | 1 | `python3 scripts/check_fix_reproduces.py --range 08c669c..HEAD` | 0 |
+| QA Agent (Gate 1) | 1 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 0 |
+| QA Agent (Gate 1) | 1 | `make verify` | 0 |
 
 ---
 
