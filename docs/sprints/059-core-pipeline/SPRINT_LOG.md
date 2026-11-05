@@ -144,7 +144,7 @@ Example (do not uncomment):
 | 5 | `grep -n autoAllowBashIfSandboxed scripts/install.py` | 1 | Wave 1 boundary: B-06 not applied (Wave 2), nothing to revert. |
 | 6 | `git worktree list` | 0 | Wave 1 boundary: one worktree; the D16 batch used none and produced no git conflict. No D11 batch has run. |
 | 7 | `test -f docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | 1 | Wave 1 boundary: A-00 has not run (Wave 3). |
-| 8 | `grep -c 'REJECTED \| instructing' docs/sprints/059-core-pipeline/SPRINT_LOG.md` | 1 | Wave 1 boundary: no gate row yet, so no consecutive REJECTED. |
+| 8 | `python3 scripts/check_gate_log.py --current-sprint` | 0 | Wave 1 boundary: the Quality Gate table has no data rows, so no consecutive REJECTED. |
 
 ---
 
