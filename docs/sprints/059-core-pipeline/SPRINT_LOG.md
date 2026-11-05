@@ -137,6 +137,14 @@ Example (do not uncomment):
 
 | Criterion | Command | Exit | Observation |
 | :--- | :--- | :--- | :--- |
+| 1 | `test -f docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` | 1 | Wave 1 boundary: C-01 has not run (Wave 4), so nothing to act on yet. |
+| 2 | `test -f docs/sprints/059-core-pipeline/PROMPT_MEASUREMENT.md` | 1 | Wave 1 boundary: B-02 has not run (Wave 2); no rule relaxed. |
+| 3 | `test -f docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | 1 | Wave 1 boundary: the A-06 debate has not run (Wave 3). |
+| 4 | `grep -n '^model:' agents/qa_agent.md` | 0 | Wave 1 boundary: `model: sonnet`, trial starts with this gate; no later gate has run. |
+| 5 | `grep -n autoAllowBashIfSandboxed scripts/install.py` | 1 | Wave 1 boundary: B-06 not applied (Wave 2), nothing to revert. |
+| 6 | `git worktree list` | 0 | Wave 1 boundary: one worktree; the D16 batch used none and produced no git conflict. No D11 batch has run. |
+| 7 | `test -f docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | 1 | Wave 1 boundary: A-00 has not run (Wave 3). |
+| 8 | `grep -c 'REJECTED \| instructing' docs/sprints/059-core-pipeline/SPRINT_LOG.md` | 1 | Wave 1 boundary: no gate row yet, so no consecutive REJECTED. |
 
 ---
 
