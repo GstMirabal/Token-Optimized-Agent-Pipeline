@@ -30,7 +30,7 @@ Full-dumping a file >200 lines is PROHIBITED (`agents.md §2 token_saver`). Skip
 
 ### 3.1 The session bound — binding, and measured per context cycle
 
-**Unit: the ratio of a turn's `cache_read` against the first turn of the current context cycle**, never of the session. Self-calibrating per project — a large repository starts with more base context, but "10× your first turn" means the same everywhere, and nothing is configured per host.
+**Unit: the ratio of a turn's context size (`cache_read + cache_creation + input`) against the first turn of the current context cycle**, never of the session. Self-calibrating per project — a large repository starts with more base context, but "10× your first turn" means the same everywhere, and nothing is configured per host.
 
 | Threshold | Trigger | Action |
 | :--- | :--- | :--- |
@@ -45,7 +45,7 @@ when a Claude transcript exists for this tool — the prior cycle ratio from
 always runs. Structural plan wastes are rejected by
 `skills/token-saver-auditor/scripts/audit_plan.py` (exit `2`).
 
-**Why the cycle and not the session.** A session is a **sawtooth**: compaction rebuilds the window from a summary and `cache_read` collapses back to the start-up cost. Measured over one full session of this repository — four cycles, peaks of 849K, 995K, 361K and 631K against reset points of **22,174 tokens, identical three times** — a ratio taken against the session's first turn would collapse at the first reset and never fire again.
+**Why the cycle and not the session.** A session is a **sawtooth**: compaction rebuilds the window from a summary and the context size collapses back to the start-up cost. Measured over one full session of this repository — four cycles, peaks of 849K, 995K, 361K and 631K against reset points of **22,174 tokens, identical three times** — a ratio taken against the session's first turn would collapse at the first reset and never fire again.
 
 **Compaction is not a cost control, and this rule exists because of that.** Those four resets happened and the session still spent 423M `cache_read`. Cycle 2 is the proof: **113 messages cost 99.5M**, nearly matching a 414-message cycle, because it climbed to 995K. **Cost tracks peak height, not message count** — cost is the area under the sawtooth, and compaction only resets the x axis.
 

@@ -68,7 +68,7 @@ Domain rules in `rules/` load **on demand** at these triggers, never preloaded. 
 | **WIP Safety** | `pre_shielding` | Abort if `git status --porcelain` returns unresolved differences. |
 | **WIP Safety** | `destructive_flags` | Reject massive modifications/deletions unless the human grants explicit approval (via chat or Claude Code's permission prompt). |
 | **WIP Safety** | `graph_sync` | Run `venv_skillopt/bin/python -m graphify update .` at quality check or commit, never the bare `graphify` (`rules/graphify.md`). |
-| **Isolation** | `jurisdictional_lock` | A task claims **exactly one file as its structural subject** in `task_scope.md`; no concurrent task may claim it. A `fix(` commit MAY stage its paired test unless `Repro: manual`. (precedents) |
+| **Isolation** | `jurisdictional_lock` | A task claims **exactly one file as its structural subject** in `task_scope.md`; no concurrent task may claim it. A commit also stages files the subject's rules require, e.g. a `fix(`'s paired test unless `Repro: manual`. (precedents) |
 | **Isolation** | `no_interference` | Abort if `task_scope.md` shows the target file listed by another subtask in progress. |
 
 ## 3. Architecture and Topology of the Project
@@ -127,7 +127,7 @@ The pipeline operates under a rigid sequential process. Role usurpation is stric
 | **Subagent Roles** | `tester_agent` | Test Verifier. Ensures logic stability and zero regression. |
 
 > [!NOTE]
-> The 8 roles above are the *Core Pipeline Roles* (mandatory in every Planning → Sprint Closeout cycle). `governance_learner`, `doc_orchestrator`, `topology_mapper`, `git_sync_agent`, `token_economy_agent` and `implementer_agent` (`agents/*.md`) are **Auxiliary Agents**, invoked as needed. Project specialists live in `profiles/[name]/agents/` and join only when their profile is installed.
+> The 8 roles above are the *Core Pipeline Roles* (mandatory in every Planning → Sprint Closeout cycle). `governance_learner`, `doc_orchestrator`, `topology_mapper`, `git_sync_agent`, `token_economy_agent` and `implementer_agent` are **Auxiliary Agents**, invoked as needed. Project specialists (`profiles/[name]/agents/`) join only when their profile is installed.
 
 ### 🚀 The Execution Pipeline
 
