@@ -96,6 +96,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 
 | Gate | Round | Verdict | Class | Severity | Notes |
 | :--- | :--- | :--- | :--- | :--- | :--- |
+| QA Agent (Gate 1) | 1 | REJECTED | instructing | S2 | Range `08c669c..HEAD`, on `sonnet` (`ADR-0021` trial). 5 findings: `feedback_upstream` and `RA-09` contradict other rules; D18 unmet for `unambiguous_action`, `RA-03`, `RA-12`; S3 stale pointers and sprint staleness. Also: `globs` reach only `cursor_adapter`, so A-17's trigger has no effect in Claude Code. |
 
 ### Remediation notes
 
