@@ -16,10 +16,10 @@ derived ledger, that evidence base is `make model-ledger` /
 
 - `config/model_tiers.json` and `scripts/detect_new_models.py` are current
   (`make verify` includes `--check`).
-- ADR-0003: `tester_agent` and `principal_agent` stay at the `gate` tier — a
-  trial must not move them. `qa_agent` is on the Sprint 059 trial of ADR-0021,
-  which needed its own superseding ADR: a trial still cannot move a gate-tier
-  profile without one.
+- ADR-0003: `qa_agent`, `tester_agent`, and `principal_agent` stay at the
+  `gate` tier — a trial must not move them without a superseding ADR. ADR-0021
+  was one, for `qa_agent` in Sprint 059; its return criterion fired and the move
+  was reverted, so a new trial needs a new ADR.
 - ADR-0004: no model-selector agent; defaults stay in the static map.
 - **Ledger (from Sprint 037 onward):** `scripts/model_ledger.py` exists and
   `make model-ledger` regenerates `docs/audits/MODEL_LEDGER.md` from gate

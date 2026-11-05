@@ -56,8 +56,8 @@ borraron en WhatsApp-Chat-Extractor, Django-Users-App y Django-Pro-Template: 0
 sesiones con `/agents:` en sus transcripts. Cryptobot (24 sesiones) y el núcleo (19)
 los conservan.
 
-**Hecho cuando**: `agents.md` ≤ 20.000 bytes; `qa_agent` en `sonnet` con criterio de
-vuelta; Phase 6 despacha lotes paralelos calculados por script; el núcleo trabaja con
+**Hecho cuando**: `agents.md` ≤ 20.000 bytes; prueba de `qa_agent` en `sonnet` ejecutada y
+revertida por su criterio de vuelta (D20); Phase 6 despacha lotes paralelos calculados por script; el núcleo trabaja con
 sandbox y `autoAllowBashIfSandboxed`, con un recuento de autorizaciones antes y
 después; la cota §3.1 tiene baseline no nula y un invocador en sesión decidido por
 ADR; la enumeración `RA-19` está re-medida; cada ítem restante está entregado o
@@ -263,7 +263,7 @@ transcript exists for this tool.
 | :--- | :--- |
 | `agents.md` | recortado a índice de reglas (D10); `RA-09`, `graph_sync` según ADR-0019 |
 | `rules/code_craft.md`, `rules/project_topology.md`, `docs/guides/SELF_IMPROVEMENT_GUIDE.md` | reciben el detalle movido desde `agents.md`; §4 de `project_topology.md` según ADR-0019 |
-| `agents/qa_agent.md`, `config/model_tiers.json` | `qa_agent` a `sonnet` / tier `author` (prueba D9) |
+| `agents/qa_agent.md`, `config/model_tiers.json` | sin cambio neto: la prueba D9 se revirtió (D20) |
 | `workflows/pipeline_workflow.md` | Phase 6: lotes paralelos (D11) y paso de medición |
 | `rules/token_economy.md` | §3.1 unidad y invocador |
 | `docs/guides/RULE_PRECEDENTS_GUIDE.md` | nuevo: historia y precedentes de las filas de `agents.md` sin otro destino (A-13) |
