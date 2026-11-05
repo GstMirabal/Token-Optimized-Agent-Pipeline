@@ -99,6 +99,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | QA Agent (Gate 1) | 1 | REJECTED | instructing | S2 | Range `08c669c..HEAD`, on `sonnet` (`ADR-0021` trial). 5 findings: `feedback_upstream` and `RA-09` contradict other rules; D18 unmet for `unambiguous_action`, `RA-03`, `RA-12`; S3 stale pointers and sprint staleness. Also: `globs` reach only `cursor_adapter`, so A-17's trigger has no effect in Claude Code. |
 | QA Agent (Gate 1) | 2 | RECORD | testifying | S3 | Range `08c669c..32dfbe4`, on `sonnet`. Round 1 S2 findings resolved. 4 S3 notes (KI-059-6). The gate emitted `APPROVED` with class `testifying`; `rules/qa_and_testing.md §4` makes S3 and `testifying` a `RECORD`, so it is transcribed as `RECORD`. |
+| Tester Agent (Gate 2) | 1 | REJECTED | charter | S1 | Range `08c669c..c6c7987`, 1531 passed. Baseline on context size with cuts on `cache_read`: 50 of 52 cuts over 35 transcripts are not collapses, and the ratio that feeds the hard bound falls (synthetic 20x reads 2.5x). 3 more: `--resolve` alternatives diverge under Cursor (S2), hard bound and cut field untested (S2), census wording (S3). |
 
 ### Remediation notes
 
