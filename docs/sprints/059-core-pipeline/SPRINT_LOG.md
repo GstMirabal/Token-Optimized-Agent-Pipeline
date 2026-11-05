@@ -8,7 +8,7 @@
 | Parameter | Value |
 | :--- | :--- |
 | **Active Layer** | core-pipeline |
-| **Strategic Goal** | `efficiency-and-sandbox-regime`: cut the framework's own cost (`agents.md` ≤ 20000 bytes, `qa_agent` on `sonnet` as a trial, parallel Phase 6 batches, nucleus sandbox with `autoAllowBashIfSandboxed`), give the §3.1 bound a non-zero baseline and an in-session invoker, re-measure the `RA-19` enumeration and decide the sandbox regime, and close the Sprint 058 residues. |
+| **Strategic Goal** | `efficiency-and-sandbox-regime`: cut the framework's own cost (`agents.md` ≤ 20000 bytes, parallel Phase 6 batches, nucleus sandbox with `autoAllowBashIfSandboxed`), give the §3.1 bound a non-zero baseline and an in-session invoker, re-measure the `RA-19` enumeration and decide the sandbox regime, and close the Sprint 058 residues. |
 | **Intelligence State** | Phase 6 (Execution), Wave 1. Plan approved at `65c86d3`; deviation D15 (A-13) added in Phase 6. |
 | **Branch / Base** | `ai-sprint/059` created from `main` at `08c669c` (`v4.41.0`) |
 | **Session Tool / Delegation** | `claude-code` / `native` |
@@ -41,6 +41,7 @@ Tracking of atomic goals achieved during the session. Work units: 52 in six wave
     - `[x]` A-11 committed at `72ac88b`; A-13 at `a014f4f`; A-01 at `ef490cd`. Moved text compared to `agents.md` by script: identical.
     - `[x]` A-15 committed at `18b692e`; A-16 at `9b8db89`; A-17 at `d133bc2`; A-12 at `d6f5756` (`wc -c agents.md` 19970, `make verify` exit 0, 1531 passed).
     - `[x]` A-14 checked and corrected (a fact that A-08 would falsify; an open-ended trial) and committed at `ed96115`; A-08 at `80518b4`. Wave 1 units all committed.
+    - `[x]` Human decisions 2026-11-05 after Tester Gate 2 round 1: restore `segment_cycles` in A-01 (plan D19); revert A-08 under abort criterion 4 (plan D20).
     - `[x]` Deviation: unit A-13 (`docs/guides/RULE_PRECEDENTS_GUIDE.md`) added before A-12, human decision 2026-11-02 (plan Design D15); work units 47 → 48.
     - `[x]` Deviation (plan D16): the orchestrator dispatched A-11, A-13, A-08 and A-01 together on its reading of a human question; no rule allowed it. Human decision 2026-11-04: keep the work once checked, return to the approved order.
     - `[x]` A-08 was held uncommitted: it contradicts `ADR-0003` (KI-059-3). Human decision 2026-11-04: unit A-14 creates the superseding `ADR-0021` first (plan D17), then A-08 commits; work units 48 → 49.
@@ -56,9 +57,10 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | A-12's 20000-byte target was set without measuring how many rows it forces to trim; 9 planned destinations covered about half the needed reduction | Measure the row-cap projection at Phase 4.3 for any size target; A-13 added as the missing destination | KI-059-1 |
 | Dispatched a batch that no rule allowed, on a question read as an order (plan D16) | Work kept after unit-by-unit checks; order restored. A human question about the method is not a change to it: answer it, then amend the plan if the human decides | KI-059-2 |
 | Plan D9 and A-08 move `qa_agent` off the `gate` tier, but `ADR-0003` requires a superseding ADR; neither the plan nor the Phase 4 audit named it, and A-08 edited the test that pins that list | A-14 added (plan D17): `ADR-0021` supersedes that clause before A-08 commits. Check every plan tier move against `docs/decisions/` at Phase 4.3 | KI-059-3 |
-| A-01's agent also moved `segment_cycles` to context size. Over 35 transcripts cycles fall from 86 to 37 and 17 sessions change; `ratio` None falls from 11 to 0 with `cycle_summary` alone. `F-116-N1` names this defect, the plan Operation does not | Reverted to the plan's scope; route to A-00 and ADR-0018 (Wave 3). C-02 cannot mark `F-116-N1` fully closed until this is decided | KI-059-4 |
+| A-01's agent also moved `segment_cycles` to context size. Over 35 transcripts cycles fall from 86 to 37 and 17 sessions change; `ratio` None falls from 11 to 0 with `cycle_summary` alone. `F-116-N1` names this defect, the plan Operation does not | First reverted to the plan's literal scope on the orchestrator's recommendation, and the gate prompt told QA not to report it. Tester Gate 2 found that revert to be an S1. Restored (plan D19). A gate is never told what not to report | KI-059-4 |
 | Rules with no blocking script found in `hooks/` or `scripts/check_*`: `ephemeral` (`TODO`/`FIXME`), `RA-03` branch name, `RA-12` direct commit to `main` (only the push is blocked), `§8` pnpm settings. A trigger reduces the risk of missing them, it does not enforce them | Out of this sprint's scope; Z-02 routes scripts for them to the program queue | KI-059-5 |
 | QA Gate 1 round 2 S3 notes: `config/invocation_exceptions.json:60,80` and `scripts/detect_drift.py:328`, `tests/test_detect_drift.py:459` cite text no longer in `agents.md`; `agents.md` `Why here` cells are terse and `Risk-free` overclaims; the `devops_agent` row lost the framework-root scope | Recorded, not blocking; agents.md has 23 bytes of margin, so Z-02 routes them | KI-059-6 |
+| `qa_agent` trial ended by abort criterion 4 after one wave (plan D20). One case says nothing general about `sonnet`: QA on `sonnet` also found real S2 defects in round 1 | A new trial needs a new ADR that covers `--resolve` under Cursor | KI-059-7 |
 
 ---
 
@@ -148,6 +150,7 @@ Example (do not uncomment):
 | 2 | `test -f docs/sprints/059-core-pipeline/PROMPT_MEASUREMENT.md` | 1 | Wave 1 boundary: B-02 has not run (Wave 2); no rule relaxed. |
 | 3 | `test -f docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | 1 | Wave 1 boundary: the A-06 debate has not run (Wave 3). |
 | 4 | `grep -n '^model:' agents/qa_agent.md` | 0 | Wave 1 boundary: `model: sonnet`, trial starts with this gate; no later gate has run. |
+| 4 | `python3 -I scripts/audit_cursor_models.py --resolve qa_agent` | 0 | Tester Gate 2 round 1: differs from `--resolve gate`; criterion fired, A-08 reverted (plan D20). |
 | 5 | `grep -n autoAllowBashIfSandboxed scripts/install.py` | 1 | Wave 1 boundary: B-06 not applied (Wave 2), nothing to revert. |
 | 6 | `git worktree list` | 0 | Wave 1 boundary: one worktree; the D16 batch used none and produced no git conflict. No D11 batch has run. |
 | 7 | `test -f docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | 1 | Wave 1 boundary: A-00 has not run (Wave 3). |
