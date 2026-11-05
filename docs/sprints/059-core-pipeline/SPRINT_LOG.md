@@ -41,6 +41,7 @@ Tracking of atomic goals achieved during the session. Work units: 52 in six wave
     - `[x]` A-11 committed at `72ac88b`; A-13 at `a014f4f`; A-01 at `ef490cd`. Moved text compared to `agents.md` by script: identical.
     - `[x]` A-15 committed at `18b692e`; A-16 at `9b8db89`; A-17 at `d133bc2`; A-12 at `d6f5756` (`wc -c agents.md` 19970, `make verify` exit 0, 1531 passed).
     - `[x]` A-14 checked and corrected (a fact that A-08 would falsify; an open-ended trial) and committed at `ed96115`; A-08 at `80518b4`. Wave 1 units all committed.
+    - `[x]` Remediation of Tester Gate 2 round 1: A-08 reverted at `8e8a566`; A-01 extended at `919d4f2` (35 transcripts: 37 cycles, 0 None, 5 above 5x, 0 above 15x; `make verify` exit 0).
     - `[x]` Human decisions 2026-11-05 after Tester Gate 2 round 1: restore `segment_cycles` in A-01 (plan D19); revert A-08 under abort criterion 4 (plan D20).
     - `[x]` Deviation: unit A-13 (`docs/guides/RULE_PRECEDENTS_GUIDE.md`) added before A-12, human decision 2026-11-02 (plan Design D15); work units 47 → 48.
     - `[x]` Deviation (plan D16): the orchestrator dispatched A-11, A-13, A-08 and A-01 together on its reading of a human question; no rule allowed it. Human decision 2026-11-04: keep the work once checked, return to the approved order.
@@ -124,6 +125,11 @@ Example (do not uncomment):
 | QA Agent (Gate 1) | 1 | `python3 scripts/check_fix_reproduces.py --range 08c669c..HEAD` | 0 |
 | QA Agent (Gate 1) | 1 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 0 |
 | QA Agent (Gate 1) | 1 | `make verify` | 0 |
+| QA Agent (Gate 1) | 2 | `python3 scripts/check_fix_reproduces.py --range 08c669c..HEAD` | 0 |
+| QA Agent (Gate 1) | 2 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 0 |
+| QA Agent (Gate 1) | 2 | `make verify` | 0 |
+| Tester Agent (Gate 2) | 1 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider` | 0 |
+| Tester Agent (Gate 2) | 1 | `make verify` | 0 |
 
 ---
 
