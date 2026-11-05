@@ -62,3 +62,54 @@ def test_compaction_collapse_still_opens_a_cycle() -> None:
     turns = [make_turn(read=300_000, creation=1_000),
              make_turn(read=0, creation=22_000)]
     assert len(sc.segment_cycles(turns)) == 2
+
+
+def test_cold_turn_with_an_unchanged_window_does_not_open_a_cycle() -> None:
+    turns = [make_turn(read=200_000, creation=1_000),
+             make_turn(read=0, creation=201_000),
+             make_turn(read=201_000, creation=500)]
+    assert len(sc.segment_cycles(turns)) == 1
+
+
+def test_growth_with_one_cache_expiry_keeps_one_cycle_above_hard_ratio(
+        tmp_path: Path) -> None:
+    import json
+
+    import session_probe as spr
+    turns = [make_turn(read=20_000, creation=1_000),
+             make_turn(read=150_000, creation=5_000),
+             make_turn(read=0, creation=160_000),
+             make_turn(read=165_000, creation=5_000),
+             make_turn(read=420_000)]
+    transcript = tmp_path / "x.jsonl"
+    transcript.write_text("\n".join(json.dumps({"message": {"model": "m", "usage": {
+        "input_tokens": t["input_tokens"], "output_tokens": 1,
+        "cache_read_input_tokens": t["cache_read_input_tokens"],
+        "cache_creation_input_tokens": t["cache_creation_input_tokens"]}}})
+        for t in turns))
+    result = sc.measure(transcript)
+    assert len(result["cycles"]) == 1
+    assert result["cycles"][0]["ratio"] > spr.HARD_RATIO
+
+
+def _probe_with(monkeypatch, ratio: float | None):
+    import session_probe as spr
+    cycle = {"messages": 3, "first_turn": 10_000, "peak": 10_000,
+             "ratio": ratio}
+    monkeypatch.setattr(spr.session_cost, "measure_previous", lambda *a, **k: {
+        "measurable": True, "session": "abcdef123456", "cycles": [cycle]})
+    return spr, spr.probe_cost({})
+
+
+def test_probe_cost_names_a_cycle_above_the_hard_ratio(monkeypatch) -> None:
+    import session_probe as spr
+    message = _probe_with(monkeypatch, spr.HARD_RATIO + 0.1)[1]
+    assert message is not None
+    assert "cycle 1" in message
+    assert "abcdef12" in message
+
+
+def test_probe_cost_is_silent_at_or_below_the_hard_ratio(monkeypatch) -> None:
+    import session_probe as spr
+    assert _probe_with(monkeypatch, float(spr.HARD_RATIO))[1] is None
+    assert _probe_with(monkeypatch, 1.0)[1] is None

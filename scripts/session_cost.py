@@ -50,8 +50,9 @@ from pathlib import Path
 
 PROJECTS = Path.home() / ".claude" / "projects"
 
-# A context reset shows as a collapse in cache_read: the window was rebuilt from
-# a summary. Both bounds matter — the floor keeps ordinary small turns early in a
+# A context reset shows as a collapse in context size (`context_size`): the window
+# was rebuilt from a summary. A cache expiry zeroes cache_read but leaves the
+# window unchanged, so it is not a reset. Both bounds matter — the floor keeps ordinary small turns early in a
 # cycle from registering as resets, and the ratio keeps normal variation out.
 RESET_FLOOR = 100_000
 RESET_RATIO = 0.5
@@ -118,7 +119,9 @@ def context_size(turn: dict) -> int:
 def segment_cycles(turns: list[dict]) -> list[list[dict]]:
     """Split turns into context cycles at each window reset.
 
-    Compaction rebuilds the window from a summary, so `cache_read` collapses.
+    Compaction rebuilds the window from a summary, so the context size
+    (`context_size`) collapses. A cache expiry zeroes `cache_read` while the
+    window stays the same, so it never cuts.
     Measuring a bound against the *session's* first turn would therefore stop
     firing after the first reset; the cycle is the unit that keeps meaning.
 
@@ -132,8 +135,8 @@ def segment_cycles(turns: list[dict]) -> list[list[dict]]:
         return []
     cuts = [0]
     for index in range(1, len(turns)):
-        previous = turns[index - 1]["cache_read_input_tokens"]
-        current = turns[index]["cache_read_input_tokens"]
+        previous = context_size(turns[index - 1])
+        current = context_size(turns[index])
         if previous > RESET_FLOOR and current < previous * RESET_RATIO:
             cuts.append(index)
     cuts.append(len(turns))
