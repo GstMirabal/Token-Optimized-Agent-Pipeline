@@ -40,11 +40,10 @@
         "effort": "max"
       },
       "profiles": [
-        "qa_agent",
         "tester_agent",
         "principal_agent"
       ],
-      "basis": "Adversarial review and planning. Across four consecutive host sprints every central defect was found by a gate and nothing else, several after surviving their author's own verification. Cheapening the reviewer is the first thing a budget attacks and the last thing that helps."
+      "basis": "Adversarial review and planning. Across four consecutive host sprints every central defect was found by a gate and nothing else, several after surviving their author's own verification. Cheapening the reviewer is the first thing a budget attacks and the last thing that helps. Exception: `qa_agent` runs on the author tier as a Sprint 059 trial (plan D9); if a later gate finds a defect that QA Gate 1 on `sonnet` should have seen, the change is reverted and `qa_agent` returns to `opus` (plan abort criterion 4). `tester_agent` and `principal_agent` stay on `gate`."
     },
     "author": {
       "claude_code": {
@@ -64,7 +63,8 @@
         "agent_orchestrator",
         "governance_learner",
         "token_economy_agent",
-        "implementer_agent"
+        "implementer_agent",
+        "qa_agent"
       ],
       "basis": "Structured authorship against a stated rule; downstream gates catch their errors."
     },
