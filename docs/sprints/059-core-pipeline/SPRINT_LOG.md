@@ -58,6 +58,7 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | Plan D9 and A-08 move `qa_agent` off the `gate` tier, but `ADR-0003` requires a superseding ADR; neither the plan nor the Phase 4 audit named it, and A-08 edited the test that pins that list | A-14 added (plan D17): `ADR-0021` supersedes that clause before A-08 commits. Check every plan tier move against `docs/decisions/` at Phase 4.3 | KI-059-3 |
 | A-01's agent also moved `segment_cycles` to context size. Over 35 transcripts cycles fall from 86 to 37 and 17 sessions change; `ratio` None falls from 11 to 0 with `cycle_summary` alone. `F-116-N1` names this defect, the plan Operation does not | Reverted to the plan's scope; route to A-00 and ADR-0018 (Wave 3). C-02 cannot mark `F-116-N1` fully closed until this is decided | KI-059-4 |
 | Rules with no blocking script found in `hooks/` or `scripts/check_*`: `ephemeral` (`TODO`/`FIXME`), `RA-03` branch name, `RA-12` direct commit to `main` (only the push is blocked), `§8` pnpm settings. A trigger reduces the risk of missing them, it does not enforce them | Out of this sprint's scope; Z-02 routes scripts for them to the program queue | KI-059-5 |
+| QA Gate 1 round 2 S3 notes: `config/invocation_exceptions.json:60,80` and `scripts/detect_drift.py:328`, `tests/test_detect_drift.py:459` cite text no longer in `agents.md`; `agents.md` `Why here` cells are terse and `Risk-free` overclaims; the `devops_agent` row lost the framework-root scope | Recorded, not blocking; agents.md has 23 bytes of margin, so Z-02 routes them | KI-059-6 |
 
 ---
 
@@ -97,6 +98,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 | Gate | Round | Verdict | Class | Severity | Notes |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | QA Agent (Gate 1) | 1 | REJECTED | instructing | S2 | Range `08c669c..HEAD`, on `sonnet` (`ADR-0021` trial). 5 findings: `feedback_upstream` and `RA-09` contradict other rules; D18 unmet for `unambiguous_action`, `RA-03`, `RA-12`; S3 stale pointers and sprint staleness. Also: `globs` reach only `cursor_adapter`, so A-17's trigger has no effect in Claude Code. |
+| QA Agent (Gate 1) | 2 | RECORD | testifying | S3 | Range `08c669c..32dfbe4`, on `sonnet`. Round 1 S2 findings resolved. 4 S3 notes (KI-059-6). The gate emitted `APPROVED` with class `testifying`; `rules/qa_and_testing.md §4` makes S3 and `testifying` a `RECORD`, so it is transcribed as `RECORD`. |
 
 ### Remediation notes
 
