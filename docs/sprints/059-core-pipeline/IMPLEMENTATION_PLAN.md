@@ -31,7 +31,7 @@ abarata y acelera todo lo que viene después.
 | :--- | :--- | :--- | :--- |
 | A | vacío: no hay `.upstream_hosts.json` registrado | `python3 scripts/session_start.py --boot --tool claude-code --session-id <id>` | 0 |
 | B | vacío: ningún issue `host-finding` abierto | `gh issue list --label host-finding --state open` (sin sandbox: `HTTPS_PROXY` sin definir) | 0 |
-| `F-116-N1` | **accept** (reproducido) — 11 de 33 transcripts del núcleo tienen `first_turn` = 0 en el ciclo 1, así que `ratio` es `None` | bucle de `python3 -I scripts/session_cost.py --session <id> --json` sobre `~/.claude/projects/-Users-gstmirabal-Developer--agents/*.jsonl` | 0 por sesión; recuento `sessions=33 first_turn_zero_cycle1=11` |
+| `F-116-N1` | **accept** (reproducido) — 11 de 33 transcripts del núcleo tienen `first_turn` = 0 en el ciclo 1, así que `ratio` es `None` | bucle de `python3 -I scripts/session_cost.py --session <id> --json` sobre `~/.claude/projects/<proyecto del núcleo>/*.jsonl` | 0 por sesión; recuento `sessions=33 first_turn_zero_cycle1=11` |
 | `F-116-N2` | **accept** (reproducido) — ningún hook invoca `session_cost.py` ni `session_probe.py` | `grep -rn -e session_cost -e session_probe hooks/` | 1 (sin salida) |
 
 **Problemas medidos, agrupados por lo que cuestan.**
@@ -43,7 +43,7 @@ abarata y acelera todo lo que viene después.
 | P3 | Phase 6 ejecuta las unidades de una en una aunque `jurisdictional_lock` ya garantiza archivos disjuntos | `workflows/pipeline_workflow.md` Phase 6 no nombra paralelismo; `task_scope.md` no tiene columna de dependencias |
 | P4 | Autorizaciones de Bash constantes en el núcleo: el núcleo no tiene la plantilla de sandbox con `autoAllowBashIfSandboxed` que sí reciben los hosts | `.claude/` del núcleo solo tiene `settings.local.json` con 7 permisos sueltos; `claude/settings.hooks.json:45` tiene `autoAllowBashIfSandboxed: true` solo para hosts; `scripts/install.py` `install_nucleus_bridge` no instala sandbox |
 | P5 | `/clear` no suspende la sesión en el núcleo: el hook `SessionEnd` ejecuta `.agents/scripts/session_end_hook.py`, ruta que solo existe en un host | `claude/settings.hooks.json:129` |
-| P6 | La cota §3.1 se mide contra una baseline 0 en un tercio de las sesiones y nadie la mide mientras la sesión corre (`F-116-N1`, `F-116-N2`, `KI-058-3`); el ecosistema token-saver solo mide al arrancar | sesión previa `7204cadc` a **9.2×** sin señal (`python3 -I scripts/session_cost.py --from-anchor --json`, exit 0) |
+| P6 | La cota §3.1 se mide contra una baseline 0 en un tercio de las sesiones y nadie la mide mientras la sesión corre (`F-116-N1`, `F-116-N2`, `KI-058-3`); el ecosistema token-saver solo mide al arrancar | sesión previa `7204cadc` a **9.2×** (3.6× con D19) sin señal (`python3 -I scripts/session_cost.py --from-anchor --json`, exit 0) |
 | P7 | Régimen de sandbox: `KI-056-1` (absorbe D-1, D-3, D-12, `KI-054-5`), `KI-056-6` (absorbe D-8), `F-055-N1`, `KI-057-1` (TCP a `127.0.0.1` denegado), D-4, D-10 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md:2137-2151`, `docs/roadmaps/core/pipeline/021-030-program-queue.md:380-395` |
 | P8 | `KI-057-2`: `SessionEnd` puede suspender otra sesión | `docs/roadmaps/core/pipeline/021-030-program-queue.md:396` |
 | P9 | MCP de GitHub remoto con OAuth; actions de `ci.yml` con tags móviles | `.github/workflows/ci.yml:24`, `:28`, `:39` (`@v4`, `@v5`, `@v2`) |
@@ -52,8 +52,8 @@ abarata y acelera todo lo que viene después.
 
 **Hecho en Phase 1, fuera de los repositorios.** Los symlinks
 `.claude/commands/agents/` (ignorados por git, recreables con `install.py`) se
-borraron en WhatsApp-Chat-Extractor, Django-Users-App y Django-Pro-Template: 0
-sesiones con `/agents:` en sus transcripts. Cryptobot (24 sesiones) y el núcleo (19)
+borraron en tres hosts del mantenedor: 0
+sesiones con `/agents:` en sus transcripts. Otro host (24 sesiones) y el núcleo (19)
 los conservan.
 
 **Hecho cuando**: `agents.md` ≤ 20.000 bytes; prueba de `qa_agent` en `sonnet` ejecutada y
@@ -137,7 +137,7 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | A-06 | `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | modify — tras A-00: sección `Debate` con opciones, objeciones y decisión del humano | low | `doc_orchestrator` | ⏳ |
 | A-07 | `docs/decisions/ADR-0018-in-session-token-economy.md` | create — tras A-06: método elegido; confirma o sustituye D2; lo que no entra pasa a `KI-059-n` | medium | `principal_agent` (owner) / `doc_orchestrator` (writer) | ⏳ |
 | A-02 | `scripts/session_cost.py` | modify — tras A-01, A-07: `feat(` flag `--bound` (`OK`/`SOFT`/`HARD`, exit 0, D3) o la forma que fije ADR-0018; test en `tests/test_session_cost.py` | medium | `implementer_agent` | ⏳ |
-| A-03 | `rules/token_economy.md` | modify — tras A-07: §3.1 nueva unidad (D1), invocador en sesión y el presupuesto por unidad con puntos de suspend planificados (D14) | low | `rule_validator` | ⏳ |
+| A-03 | `rules/token_economy.md` | modify — tras A-07: §3.1 invocador en sesión (la unidad de D1 y D19 ya se corrigió en la remediación de QA Gate 1 ronda 3) y el presupuesto por unidad con puntos de suspend planificados (D14) | low | `rule_validator` | ⏳ |
 | H-01 | `config/unit_cost_estimates.json` | create — tras A-07: tabla de estimación por tipo de unidad y riesgo, con la fuente de cada cifra (A-00) y su `measured_at` | low | `token_economy_agent` | ⏳ |
 | H-02 | `scripts/check_task_scope.py` | modify — tras G-01, H-01: columnas `Est. cost` y `Suspend after`; acumula el coste en orden y sale 2 si el acumulado proyecta el ciclo por encima de soft (5×) sin un `Suspend after: yes` previo (D14); tests en `tests/test_check_task_scope.py` | medium | `implementer_agent` | ⏳ |
 | H-03 | `workflows/close_workflow.md` | modify — tras H-01, B-07: paso advisory que compara el coste medido de cada unidad del sprint (`session_cost.py --json`) con su `Est. cost` e imprime la diferencia; es el invocador `RA-16` de la recalibración de `config/unit_cost_estimates.json`, que `token_economy_agent` aplica en el sprint siguiente | low | `orchestrator` | ⏳ |
@@ -151,7 +151,7 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | B-04 | `skills/mass-standardizer/scripts/generate_manifest.py` | modify — modo `--check` que compara sin reescribir `skills/manifest_skills.json` (D5): exit 0 si coincide, exit 2 si difiere, y el archivo queda con el mismo hash; test en `tests/test_mass_standardizer.py` | medium | `skill_architect` | ⏳ |
 | B-05 | `Makefile` | modify — tras B-03, B-04: `verify` usa ambos modos sin escritura | low | `implementer_agent` | ⏳ |
 | C-01 | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` | create — re-medición `RA-19` para el CLI actual: miembros `E16` sin probar, subárboles inferidos por contención, `Edit(/.git/modules/.agents/**)`, D-8; incluye el núcleo con el sandbox de B-06. `devops_agent` mide con `model: sonnet` (escalado desde `mechanical` por riesgo high) y entrega la salida literal; `doc_orchestrator` escribe | high | `devops_agent` | ⏳ |
-| C-02 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify — tras C-01, A-02: `F-055-N1` pasa a cerrado si C-01 mide su vector sin punto escribible por el agente, o queda abierto con la medida de C-01 citada; `F-116-N1` se marca cerrado citando el commit de A-01 y `F-116-N2` citando el de A-02 | low | `doc_orchestrator` | ⏳ |
+| C-02 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify — tras C-01, A-02: `F-055-N1` pasa a cerrado si C-01 mide su vector sin punto escribible por el agente, o queda abierto con la medida de C-01 citada; `F-116-N1` se marca cerrado citando los commits de A-01 (`ef490cd`, `919d4f2`) y `F-116-N2` citando el de A-02 | low | `doc_orchestrator` | ⏳ |
 
 ### Wave 5 — Régimen (decisiones con las medidas en la mano)
 
@@ -215,8 +215,8 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
 | Work units | 52 | Count of rows in Work tables |
 | Subagents dispatched | lotes de hasta 4 en paralelo desde la wave 3 (D11), más QA + Tester por wave | `agent_assignment.md` |
-| Session ratio (2026-11-05) | **5.3×** esta sesión, medido con el corte de D19 — supera soft (5×). Quedan 40 unidades en 5 waves más cierre; delegación `native`; tras los gates de la wave 1, `suspend` | `python3 -I scripts/session_cost.py --from-anchor --json` |
-| Prior session ratio | **9.2×** (ciclo 2; ciclo 1 4.6×), cifra inflada por `F-116-N1`: medida con D19 es 3.6×; entonces superaba soft (5×). Coste restante declarado: 52 unidades en 6 waves más cierre, una wave por sesión, `suspend` entre waves | `python3 scripts/session_cost.py --from-anchor --json` |
+| Session ratio (2026-11-05) | **5.4×** esta sesión, medido con el corte de D19 — supera soft (5×). Quedan 40 unidades en 5 waves más cierre; delegación `native`; tras los gates de la wave 1, `suspend` | `python3 -I scripts/session_cost.py --session 9679503b-5e2c-4a1a-b3dd-a42dacd42cd6 --json` |
+| Prior session ratio | **9.2×** (ciclo 2; ciclo 1 4.6×), de `session_cost.py` en `08c669c` sobre la sesión `7204cadc`, cifra inflada por `F-116-N1`; medida con D19 es 3.6× (`--session 7204cadc-d44b-4226-a000-597c17b52b33`); entonces superaba soft (5×). Coste restante declarado: 52 unidades en 6 waves más cierre, una wave por sesión, `suspend` entre waves | `python3 scripts/session_cost.py --from-anchor --json` |
 
 Soft (5×) / hard (15×) thresholds force an update to this section before new
 work continues — they are not observational-only once a measurable Claude

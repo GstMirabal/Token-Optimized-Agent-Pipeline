@@ -9,7 +9,7 @@
 | :--- | :--- |
 | **Active Layer** | core-pipeline |
 | **Strategic Goal** | `efficiency-and-sandbox-regime`: cut the framework's own cost (`agents.md` ≤ 20000 bytes, parallel Phase 6 batches, nucleus sandbox with `autoAllowBashIfSandboxed`), give the §3.1 bound a non-zero baseline and an in-session invoker, re-measure the `RA-19` enumeration and decide the sandbox regime, and close the Sprint 058 residues. |
-| **Intelligence State** | Phase 6 (Execution), Wave 1. Plan approved at `65c86d3`; deviation D15 (A-13) added in Phase 6. |
+| **Intelligence State** | Phase 7 (Quality Gate), Wave 1. Plan approved at `65c86d3`; Phase 6 deviations and decisions: D15 to D20. |
 | **Branch / Base** | `ai-sprint/059` created from `main` at `08c669c` (`v4.41.0`) |
 | **Session Tool / Delegation** | `claude-code` / `native` |
 | **Start Time** | 2026-11-02 |
@@ -62,6 +62,10 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | Rules with no blocking script found in `hooks/` or `scripts/check_*`: `ephemeral` (`TODO`/`FIXME`), `RA-03` branch name, `RA-12` direct commit to `main` (only the push is blocked), `§8` pnpm settings. A trigger reduces the risk of missing them, it does not enforce them | Out of this sprint's scope; Z-02 routes scripts for them to the program queue | KI-059-5 |
 | QA Gate 1 round 2 S3 notes: `config/invocation_exceptions.json:60,80` and `scripts/detect_drift.py:328`, `tests/test_detect_drift.py:459` cite text no longer in `agents.md`; `agents.md` `Why here` cells are terse and `Risk-free` overclaims; the `devops_agent` row lost the framework-root scope | Recorded, not blocking; agents.md has 23 bytes of margin, so Z-02 routes them | KI-059-6 |
 | `qa_agent` trial ended by abort criterion 4 after one wave (plan D20). One case says nothing general about `sonnet`: QA on `sonnet` also found real S2 defects in round 1 | A new trial needs a new ADR that covers `--resolve` under Cursor | KI-059-7 |
+| Host names reached the plan at `88d8a51` (QA Gate 1 round 3, S0 suspected); no instrument scans plans for them. The text is genericized, the names stay in this branch's unpushed history | Before the first push of `ai-sprint/059`, `RA-08` squash, then `git log -S'<name>'` on the branch to be pushed MUST print nothing for each host name this remediation removed from the plan (`git show` of the commit that removes them lists them) | KI-059-8 |
+| The 15x hard bound moved from about 371K to about 958K in session `7204cadc` when the baseline became context size (D1, D19), with no decision on whether 15 stays valid | A-00 and A-06 name it for a human decision, with the `agents.md` trim lowering `first` | KI-059-9 |
+| `read_turns` counts one API message once per transcript record, so token totals are 2.1 to 2.5 times too high; `ratio` and cuts are unaffected. A-00, H-01 and H-03 would calibrate on these totals | Human decides: unit before A-00 | KI-059-10 |
+| No session has run on the trimmed `agents.md`, so the saving is unmeasured | Measure the first-turn size at the next session's start | KI-059-11 |
 
 ---
 
@@ -102,6 +106,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | QA Agent (Gate 1) | 1 | REJECTED | instructing | S2 | Range `08c669c..HEAD`, on `sonnet` (`ADR-0021` trial). 5 findings: `feedback_upstream` and `RA-09` contradict other rules; D18 unmet for `unambiguous_action`, `RA-03`, `RA-12`; S3 stale pointers and sprint staleness. Also: `globs` reach only `cursor_adapter`, so A-17's trigger has no effect in Claude Code. |
 | QA Agent (Gate 1) | 2 | RECORD | testifying | S3 | Range `08c669c..32dfbe4`, on `sonnet`. Round 1 S2 findings resolved. 4 S3 notes (KI-059-6). The gate emitted `APPROVED` with class `testifying`; `rules/qa_and_testing.md §4` makes S3 and `testifying` a `RECORD`, so it is transcribed as `RECORD`. |
+| QA Agent (Gate 1) | 3 | REJECTED | charter | S0 | escape: suspected host data in the plan (`RA-15`) and `rules/token_economy.md §3.1` naming a unit the instrument no longer measures, both on material earlier rounds reviewed. Range `08c669c..0138287`, on `opus`. 13 findings, 5 S2 included. Revert of A-08 complete; `919d4f2` correct (cuts match real compactions). |
 | Tester Agent (Gate 2) | 1 | REJECTED | charter | S1 | Range `08c669c..c6c7987`, 1531 passed. Baseline on context size with cuts on `cache_read`: 50 of 52 cuts over 35 transcripts are not collapses, and the ratio that feeds the hard bound falls (synthetic 20x reads 2.5x). 3 more: `--resolve` alternatives diverge under Cursor (S2), hard bound and cut field untested (S2), census wording (S3). |
 
 ### Remediation notes
@@ -190,6 +195,6 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase**: Phase 6 Execution, Wave 1: check and commit A-14, commit A-08, then Phase 7 gates for Wave 1, measuring the plan's Abort Criteria table at that boundary; then `session_state.py suspend`.
+**Next Phase**: Phase 7 for Wave 1 until both gates sign off; then `session_state.py suspend`.
 
 *Certified under conventional commit standard: feat(scope): message #059*

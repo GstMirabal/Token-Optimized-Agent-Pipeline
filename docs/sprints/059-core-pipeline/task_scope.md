@@ -19,7 +19,7 @@ Model and Effort are transcribed from each assignee's `agents/<role>.md` frontma
 | `token_economy_agent` (measures for A-00 and H-01; owns no row) | sonnet | author | medium |
 | `devops_agent` (measures for C-01; owns no row) | haiku | mechanical | low |
 
-Declared escalations: none. No Work row is assigned to a `mechanical` profile, so the mechanical-at-high-risk check of `check_task_scope.py` does not apply. High-risk rows stay on the `author` tier: the adversarial check on them is the Phase 7 gate (`tier: gate`), not the author. Plan abort criterion 4 may move `qa_agent` back to `opus`; that is a gate profile and owns no row here.
+Declared escalations: none. No Work row is assigned to a `mechanical` profile, so the mechanical-at-high-risk check of `check_task_scope.py` does not apply. High-risk rows stay on the `author` tier: the adversarial check on them is the Phase 7 gate (`tier: gate`), not the author. Plan D20 returned `qa_agent` to `opus` under abort criterion 4; it is a gate profile and owns no row here.
 
 ## Work
 
@@ -63,7 +63,7 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | A-06 | `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | modify: after A-00, add a `Debate` section with options, objections and the human's decision | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 | A-07 | `docs/decisions/ADR-0018-in-session-token-economy.md` | create: after A-06, the chosen method, confirming or replacing D2; leftovers go to KI-059-n | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
 | A-02 | `scripts/session_cost.py` | modify: after A-01 and A-07, feat( flag `--bound` (OK, SOFT, HARD, exit 0, D3) or the form ADR-0018 sets; test in `tests/test_session_cost.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| A-03 | `rules/token_economy.md` | modify: after A-07, section 3.1 new unit (D1), in-session invoker and the per-unit budget with planned suspend points (D14) | low | `rule_validator` | sonnet | medium | ⏳ |
+| A-03 | `rules/token_economy.md` | modify: after A-07, section 3.1 in-session invoker (the D1 and D19 unit was corrected in the QA Gate 1 round 3 remediation) and the per-unit budget with planned suspend points (D14) | low | `rule_validator` | sonnet | medium | ⏳ |
 | H-01 | `config/unit_cost_estimates.json` | create: after A-07, estimate table by unit type and risk with the A-00 source and `measured_at` per figure (figures supplied by `token_economy_agent`) | low | `implementer_agent` | sonnet | medium | ⏳ |
 | H-02 | `scripts/check_task_scope.py` | modify: after G-01 and H-01, add `Est. cost` and `Suspend after` columns; accumulate cost in order and exit 2 when the cumulative projection passes soft (5x) with no earlier `Suspend after: yes` (D14); tests in `tests/test_check_task_scope.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
 | H-03 | `workflows/close_workflow.md` | modify: after H-01 and B-07, advisory step comparing each unit's measured cost (`session_cost.py --json`) with its `Est. cost`; RA-16 invoker of the `config/unit_cost_estimates.json` recalibration | low | `orchestrator` | sonnet | medium | ⏳ |
@@ -77,7 +77,7 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | B-04 | `skills/mass-standardizer/scripts/generate_manifest.py` | modify: add `--check` (exit 0 on match, exit 2 on drift, `skills/manifest_skills.json` bytes unchanged) (D5); test in `tests/test_mass_standardizer.py` | medium | `skill_architect` | sonnet | medium | ⏳ |
 | B-05 | `Makefile` | modify: after B-03 and B-04, `verify` uses both no-write modes | low | `implementer_agent` | sonnet | medium | ⏳ |
 | C-01 | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` | create: RA-19 re-measurement for the current CLI (untested E16 members, subtrees inferred by containment, `Edit(/.git/modules/.agents/**)`, D-8), including the nucleus with the B-06 sandbox; `devops_agent` measures dispatched with `model: sonnet` (escalated from mechanical for high risk) and hands over literal output | high | `doc_orchestrator` | sonnet | medium | ⏳ |
-| C-02 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify: after C-01 and A-02, `F-055-N1` closed if C-01 measures its vector with no agent-writable entry point, otherwise open citing the C-01 measurement; `F-116-N1` marked closed citing the A-01 commit and `F-116-N2` citing the A-02 commit | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| C-02 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify: after C-01 and A-02, `F-055-N1` closed if C-01 measures its vector with no agent-writable entry point, otherwise open citing the C-01 measurement; `F-116-N1` marked closed citing the A-01 commits (`ef490cd`, `919d4f2`) and `F-116-N2` citing the A-02 commit | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 
 ### Wave 5 — Regime
 
