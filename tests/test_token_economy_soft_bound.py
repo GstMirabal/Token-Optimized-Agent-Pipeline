@@ -22,19 +22,18 @@ RULE_FILE = ROOT / "rules" / "token_economy.md"
 REVIEWED_SOFT_ROW = (
     "| **Soft** | turn > **5×** the cycle's first | Declare remaining cost in "
     "the plan's **Cost** section (work units left, delegation mode). "
-    "`probe_cost` in `session_probe.py` reports only the hard bound, so no "
-    "instrument surfaces a soft breach; the agent reads it with "
-    "`session_cost.py --json` |"
+    "`probe_cost` in `scripts/session_probe.py` reports only the hard bound, "
+    "so no instrument surfaces a soft breach; the agent reads it with "
+    "`scripts/session_cost.py --json` |"
 )
 REVIEWED_CALIBRATION = (
     "**Calibration that does not destroy its own data.** A binding hard "
     "threshold means the sprint always closes at the bound and the natural "
     "close is never observed. So the soft threshold **does not stop work**: "
     "the agent updates the plan's **Cost** section and continues, and no "
-    "instrument records the breach. At the hard one the agent writes "
-    "`forced: true` by hand, plus whether `task_scope.md` still held "
-    "unfinished work. A forced close with pending work is the \"too tight\" "
-    "signal; one on a complete sprint is not."
+    "instrument records the breach. The hard close is read from "
+    "`task_scope.md`: a hard close with unfinished work there is the \"too "
+    "tight\" signal; one on a complete sprint is not."
 )
 
 STALE_HINT = (
@@ -93,7 +92,9 @@ def test_soft_bound_claim_matches_reviewed_copy(
     check_claim(RULE_FILE.read_text(encoding="utf-8"), prefix, reviewed)
 
 
-def test_probe_cost_is_silent_on_a_soft_breach(monkeypatch) -> None:
+def test_probe_cost_is_silent_on_a_soft_breach(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """A cycle at ratio 6 (soft, not hard) yields no probe_cost finding."""
     import session_probe as spr
 
