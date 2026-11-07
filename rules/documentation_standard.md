@@ -144,8 +144,6 @@ paid by whoever reads the document next.
 | The closing entry names the artifact that closed it, the date, and the command that re-measures | A reader verifies instead of trusting |
 | Superseded prose is **annotated in place, never deleted** | The record of what was true when it was written survives beside the correction |
 
-For a sprint's records, `scripts/check_log_append_only.py` checks part of the last row above: KI rows and sentences after `error_mining` in `SPRINT_LOG.md`, and superseded decision rows of `IMPLEMENTATION_PLAN.md`. It covers nothing else, and it does not see reordered words or a changed meaning. A commit that must delete carries the trailer `Log-Rewrite: <reason>`. `make verify` runs it for sprint ids >= 60.
-
 ### A claim of conduct names the instrument that performs it
 
 **A sentence saying that a bound, gate or check acts ("records", "surfaces", "stops", "rejects") names the script, test or hook that performs the act**, and a `grep` of that name finds it. Where no instrument performs the act, the correction is to delete the claim or to state that nothing performs it; rewording the claim into another description of the same unperformed act is PROHIBITED. When a review finds the same claim wrong a second time, the next edit MUST delete it or narrow it to what a named instrument performs.
