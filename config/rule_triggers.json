@@ -101,9 +101,10 @@
         "docs/**",
         "architecture/**",
         "roadmaps/**",
-        "walkthroughs/**"
+        "walkthroughs/**",
+        "rules/*.md"
       ],
-      "trigger_prose": "Creating/updating any document under `docs/`, authoring an ADR, or running `docs-freshness-check`."
+      "trigger_prose": "Editing any document under `docs/` or `rules/`, authoring an ADR, or running `docs-freshness-check`."
     },
     {
       "path": "rules/LEGACY_RULE_CONCORDANCE.md",
