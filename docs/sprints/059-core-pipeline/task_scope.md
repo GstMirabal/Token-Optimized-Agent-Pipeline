@@ -75,8 +75,8 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | A-50 | `tests/test_check_log_append_only.py` | create: D34: throwaway git repositories for each zone, the trailer, its limits and the errors | low | `implementer_agent` | sonnet | medium | ✅ `3368dc5` |
 | A-51 | `Makefile` | modify: D34: `verify` runs `check_log_append_only.py --current-sprint` | low | `implementer_agent` | sonnet | medium | ✅ `de239b7` |
 | A-52 | `rules/documentation_standard.md` | modify: D34: name the instrument and its limits beside the `annotated in place` row | low | `rule_validator` | sonnet | medium | ✅ `d40183d` |
-| A-53 | `scripts/check_log_append_only.py` | modify: D35: `fix(` with paired `tests/test_check_log_append_only.py`: `--current-sprint` root as in `check_gate_log.py`; `--sprint-dir` resolved from the git root; exit 2 on a missing directory, an empty range base or an absent record by hand; `Repro:` fails on the parent | low | `implementer_agent` | sonnet | medium | ⏳ |
-| A-54 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify: D35: mark D23 and D26 as narrowed by D32 (R9-3) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-53 | `scripts/check_log_append_only.py` | modify: D35: `fix(` with paired `tests/test_check_log_append_only.py`: `--current-sprint` root as in `check_gate_log.py`; `--sprint-dir` resolved from the git root; exit 2 on a missing directory, an empty range base or an absent record by hand; `Repro:` fails on the parent | low | `implementer_agent` | sonnet | medium | ✅ `f273f93` |
+| A-54 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify: D35: mark D23 and D26 as narrowed by D32 (R9-3) | low | `doc_orchestrator` | sonnet | medium | ✅ `822c047` |
 
 ### Wave 2 — Pace and autonomy
 
