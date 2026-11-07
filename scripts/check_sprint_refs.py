@@ -12,7 +12,7 @@ nothing else:
 | Gate findings ``R<round>-<n>`` | the ``ID`` column of ``### Gate findings`` | the four artifacts, from the first round the table covers |
 
 It also checks two limits: every Design row from the first covered decision on
-contains ``**Check**:``, and every Quality Gate ``Notes`` cell from the first
+has a non-empty ``Check`` column or contains ``**Check**:``, and every Quality Gate ``Notes`` cell from the first
 covered round on holds at most 400 characters. It does not detect a copied fact
 that carries no id, such as a unit count written out in prose. Sprints before
 059 are skipped.
@@ -119,10 +119,22 @@ def cited(texts: dict[str, str], pattern: re.Pattern[str]) -> set[str]:
     return {match.group(0) for text in texts.values() for match in pattern.finditer(text)}
 
 
+def design_table(plan: str) -> list[tuple[list[str], list[str]]]:
+    """(header, row) of each ``## Design`` table row whose ID is ``D<n>``."""
+    body = section(plan, "## Design", "## Work")
+    return [(header, row) for header, rows in tables(body) if header[:1] == ["ID"] for row in rows if DECISION.fullmatch(row[0])]
+
+
 def design_rows(plan: str) -> list[list[str]]:
     """Data rows of the plan's ``## Design`` table whose ID is ``D<n>``."""
-    body = section(plan, "## Design", "## Work")
-    return [row for header, rows in tables(body) if header[:1] == ["ID"] for row in rows if DECISION.fullmatch(row[0])]
+    return [row for _, row in design_table(plan)]
+
+
+def _has_check(header: list[str], row: list[str]) -> bool:
+    """A non-empty ``Check`` column, or ``**Check**:`` anywhere in the row."""
+    if "Check" in header and len(row) > header.index("Check") and row[header.index("Check")]:
+        return True
+    return "**Check**:" in " | ".join(row)
 
 
 def id_findings(texts: dict[str, str], sprint: int) -> list[str]:
@@ -143,12 +155,12 @@ def id_findings(texts: dict[str, str], sprint: int) -> list[str]:
 
 
 def _check_findings(plan: str, sprint: int) -> list[str]:
-    """Design rows from the first covered decision on need ``**Check**:``."""
+    """Design rows from the first covered decision on need a check."""
     first = CHECK_FROM_DECISION.get(sprint, 0)
     return [
-        f"Design row {row[0]} has no **Check**:"
-        for row in design_rows(plan)
-        if int(row[0][1:]) >= first and "**Check**:" not in " | ".join(row)
+        f"Design row {row[0]} has no **Check**: and no Check column value"
+        for header, row in design_table(plan)
+        if int(row[0][1:]) >= first and not _has_check(header, row)
     ]
 
 

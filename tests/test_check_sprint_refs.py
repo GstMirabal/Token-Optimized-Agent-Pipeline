@@ -124,3 +124,14 @@ def test_a_plan_without_a_design_table_exits_2(tmp_path: Path) -> None:
 def test_a_missing_sprint_dir_exits_2(tmp_path: Path) -> None:
     assert _run("--sprint-dir", str(tmp_path / "060-typo")).returncode == 2
 
+
+
+def test_a_check_column_counts_as_the_check(tmp_path: Path) -> None:
+    """The plan template writes the check in its own Design column (plan D37 M-08)."""
+    plan = PLAN.replace("| ID | Decision | Rejected |\n| :--- | :--- | :--- |", "| ID | Decision | Rejected | Check |\n| :--- | :--- | :--- | :--- |")
+    filled = plan.replace("| D0 | Order. **Check**: `true` → exit 0 | none |", "| D0 | Order. | none | `true` → exit 0 |")
+    empty = plan.replace("| D0 | Order. **Check**: `true` → exit 0 | none |", "| D0 | Order. | none |  |")
+    assert _run("--sprint-dir", str(_sprint(tmp_path, IMPLEMENTATION_PLAN_md=filled))).returncode == 0
+    other = tmp_path / "second"
+    other.mkdir()
+    assert _run("--sprint-dir", str(_sprint(other, IMPLEMENTATION_PLAN_md=empty))).returncode == 2
