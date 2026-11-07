@@ -15,7 +15,8 @@ carrying `input_tokens`, `output_tokens`, `cache_read_input_tokens` and
 **A session is a sawtooth, and that is the whole point of this script.** An
 earlier measurement of this repository reported cost growing monotonically with
 message position — quartiles of 7/15/23/54%. Re-measured over a full session the
-quartiles are 157K/681K/245K/485K, because compaction resets the context window.
+quartiles are 157K/681K/245K/485K (Sprint 021, unit not recorded), because
+compaction resets the context window.
 The first measurement covered only the first cycle, at a scope never declared.
 
 So the unit is the **context cycle**, not the session: cost is the area under the
