@@ -43,7 +43,7 @@ abarata y acelera todo lo que viene después.
 | P3 | Phase 6 ejecuta las unidades de una en una aunque `jurisdictional_lock` ya garantiza archivos disjuntos | `workflows/pipeline_workflow.md` Phase 6 no nombra paralelismo; `task_scope.md` no tiene columna de dependencias |
 | P4 | Autorizaciones de Bash constantes en el núcleo: el núcleo no tiene la plantilla de sandbox con `autoAllowBashIfSandboxed` que sí reciben los hosts | `.claude/` del núcleo solo tiene `settings.local.json` con 7 permisos sueltos; `claude/settings.hooks.json:45` tiene `autoAllowBashIfSandboxed: true` solo para hosts; `scripts/install.py` `install_nucleus_bridge` no instala sandbox |
 | P5 | `/clear` no suspende la sesión en el núcleo: el hook `SessionEnd` ejecuta `.agents/scripts/session_end_hook.py`, ruta que solo existe en un host | `claude/settings.hooks.json:129` |
-| P6 | La cota §3.1 se mide contra una baseline 0 en 11 de 33 sesiones (medido en `ef490cd` con `session_cost.py` de `a014f4f`) y nadie la mide mientras la sesión corre (`F-116-N1`, `F-116-N2`, `KI-058-3`); el ecosistema token-saver solo mide al arrancar | sesión `7204cadc` a **9.2×** con `session_cost.py` de `08c669c` y 3.6× con el de `919d4f2` (D19), sin señal (`python3 -I scripts/session_cost.py --session 7204cadc-d44b-4226-a000-597c17b52b33 --json`, exit 0, da la cifra de `919d4f2`; la de `08c669c` sale de `git show 08c669c:scripts/session_cost.py`) |
+| P6 | La cota §3.1 se mide contra una baseline 0 en 11 de 33 sesiones (cifra del plan desde `88d8a51`, con el `session_cost.py` de `08c669c`, igual al de `a014f4f`; `ef490cd` la repite) y nadie la mide mientras la sesión corre (`F-116-N1`, `F-116-N2`, `KI-058-3`); el ecosistema token-saver solo mide al arrancar | sesión `7204cadc` a **9.2×** con `session_cost.py` de `08c669c` y 3.6× con el de `919d4f2` (D19), sin señal (`python3 -I scripts/session_cost.py --session 7204cadc-d44b-4226-a000-597c17b52b33 --json`, exit 0, da la cifra de `919d4f2`; la de `08c669c` sale de `git show 08c669c:scripts/session_cost.py`) |
 | P7 | Régimen de sandbox: `KI-056-1` (absorbe D-1, D-3, D-12, `KI-054-5`), `KI-056-6` (absorbe D-8), `F-055-N1`, `KI-057-1` (TCP a `127.0.0.1` denegado), D-4, D-10 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md:2137-2151`, `docs/roadmaps/core/pipeline/021-030-program-queue.md:380-395` |
 | P8 | `KI-057-2`: `SessionEnd` puede suspender otra sesión | `docs/roadmaps/core/pipeline/021-030-program-queue.md:396` |
 | P9 | MCP de GitHub remoto con OAuth; actions de `ci.yml` con tags móviles | `.github/workflows/ci.yml:24`, `:28`, `:39` (`@v4`, `@v5`, `@v2`) |
@@ -91,6 +91,8 @@ enrutado con destino nombrado.
 | D19 | **`segment_cycles` también mide tamaño de contexto** (decisión humana 2026-11-05, tras Tester Gate 2 ronda 1, S1): con baseline en contexto y cortes en `cache_read`, 50 de 52 cortes sobre 35 transcripts no son colapsos y el ratio que alimenta el límite duro cae (un 20× sintético se lee 2,5×). A-01 se amplía a `segment_cycles`, con tests de `probe_cost` y del campo de corte. Cierra `KI-059-4` | Mantener el corte en `cache_read` (decisión del 2026-11-04, ya rectificada): apaga el límite duro |
 | D20 | **La prueba D9 termina: se revierte A-08** (decisión humana 2026-11-05): dispara el abort 4 porque `pipeline_workflow.md:25` presenta `--resolve gate` y `--resolve qa_agent` como equivalentes, A-08 los hizo divergir y QA Gate 1 en `sonnet` tenía esa línea en su procedimiento. `qa_agent` vuelve a `opus` y al tier `gate`; `ADR-0021` queda cumplido por su propio criterio de vuelta, sin edición. Volver a probar exige un ADR nuevo que cubra Cursor | Mantener la prueba: exige sostener que F2 no era algo que QA debía ver |
 | D21 | **Totales de `session_cost.py` sin duplicados antes del estudio** (decisión humana 2026-11-05, tras QA Gate 1 ronda 3, F4): `read_turns` cuenta cada mensaje de la API una vez por registro del transcript, así que los totales salen altos por un factor de 1,66 a 2,51 (mediana 2,17; 20 transcripts cerrados de la sesión principal, 2026-11-07; comando en `KI-059-10` de `SPRINT_LOG.md`); `ratio` y cortes no cambian. A-18 deduplica por `message.id` antes de A-00, porque A-00, H-01 y H-03 calibran sobre esos totales | Corregirlo solo en el análisis de A-00: el script seguiría dando cifras falsas a cualquier otro uso |
+| D22 | **El nombre de host sale del árbol ahora** (decisión humana 2026-11-07, tras QA Gate 1 ronda 5, F3): A-19 a A-24 lo genericizan en los 6 archivos históricos, con anotación en cada sitio; la historia pública sigue en Sprint 060 (`KI-059-12`) | Dejarlo hasta el 060: contradice la decisión del 2026-11-05 y mantiene un S0 que bloquea merge y deploy |
+| D23 | **Texto soft de §3.1 con check determinista** (decisión humana 2026-11-07, tras QA Gate 1 ronda 5, F1, segunda ocurrencia de la familia de N3; `family_check`): manda la fila soft, el agente actualiza Cost y ningún instrumento lo registra; A-25 fija ese texto por igualdad contra copia revisada | Solo reescribir el texto: rechaza el juicio de QA sin medir y deja la familia sin check |
 
 ---
 
@@ -116,6 +118,13 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | A-14 | `docs/decisions/ADR-0021-qa-agent-tier-trial.md` | create — tras A-12: sustituye la cláusula de `ADR-0003` solo para `qa_agent` durante la prueba D9, con el criterio de vuelta del abort 4 (D17); `ADR-0003` no se edita; companion obligatorio `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` (`:19`, que repite la regla, y `:140`) | medium | `doc_orchestrator` | ✅ `ed96115` |
 | A-08 | `agents/qa_agent.md` | modify — tras A-14: `model: sonnet`, `tier: author` (D9); companion obligatorio `config/model_tiers.json` (mover `qa_agent` a `author.profiles`; añadir al `basis` de `gate` la prueba y su criterio de vuelta), porque `scripts/check_model_tiers.py` exige que coincidan; companion `tests/test_agent_profile_census.py` (fija la lista `gate` y mantiene a `qa_agent` sin `Write`/`Edit`) | medium | `implementer_agent` | ✅ `80518b4`, reverted `8e8a566` (D20) |
 | A-01 | `scripts/session_cost.py` | modify — `fix(`: baseline D1 en `cycle_summary` y cortes en `segment_cycles` por tamaño de contexto (D19); paired test `tests/test_session_cost.py` (nuevo) con un turno `cache_read` 0 / `cache_creation` > 0 | medium | `implementer_agent` | ✅ `ef490cd`, `919d4f2` |
+| A-19 | `CHANGELOG.md` | modify — D22: reemplaza el nombre de host por `a host project`, con anotación en el sitio; `git grep -c -i` del nombre sobre el archivo → 0 | low | `doc_orchestrator` | ⏳ |
+| A-20 | `docs/roadmaps/core/pipeline/014-identity-branding-hardening.md` | modify — D22: igual que A-19 | low | `doc_orchestrator` | ⏳ |
+| A-21 | `docs/roadmaps/core/pipeline/015-terminology-and-nomenclature-hardening.md` | modify — D22: igual que A-19 | low | `doc_orchestrator` | ⏳ |
+| A-22 | `docs/roadmaps/core/pipeline/016-folder-topology-migration.md` | modify — D22: igual que A-19 | low | `doc_orchestrator` | ⏳ |
+| A-23 | `docs/roadmaps/core/pipeline/017-pre-publication-hardening.md` | modify — D22: igual que A-19 | low | `doc_orchestrator` | ⏳ |
+| A-24 | `docs/sprints/023-core-pipeline/task_scope.md` | modify — D22: igual que A-19 | low | `doc_orchestrator` | ⏳ |
+| A-25 | `tests/test_token_economy_soft_bound.py` | create — D23: igualdad contra copia revisada de la fila soft y de la frase de calibración de `rules/token_economy.md §3.1`, y `probe_cost` devuelve `None` con un ciclo a 6×; falla con el texto de `d192075` (N3) y con el de `7779e7f` (F1) | low | `implementer_agent` | ⏳ |
 
 ### Wave 2 — Ritmo y autonomía (aceleran el resto del sprint)
 
@@ -186,7 +195,7 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | # | File | Operation | Risk | Assignee (proposed) | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | Z-01 | `CHANGELOG.md` | modify — entrada `[Unreleased]` del sprint; cita `host:F-116-N1` y `host:F-116-N2` (`agents.md §4 feedback_upstream`, cierre) | low | `doc_orchestrator` | ⏳ |
-| Z-02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify — cerrar o re-enrutar `KI-056-1`, `KI-056-6`, `KI-057-1`, `KI-057-2`, `KI-058-1`, `KI-058-3`, `KI-058-4`, `KI-058-5`; `KI-058-2` y los condicionados de Out of scope quedan con su condición de desbloqueo; nuevos `KI-059-n`, incluido uno para los puntos 3-5 de la propuesta E (P11); enruta o cierra con evidencia los `KI-059-n` abiertos del `SPRINT_LOG.md`: `KI-059-1`, `KI-059-3`, `KI-059-5`, `KI-059-6`, `KI-059-7`, `KI-059-11` y `KI-059-12` | low | `doc_orchestrator` | ⏳ |
+| Z-02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify — cerrar o re-enrutar `KI-056-1`, `KI-056-6`, `KI-057-1`, `KI-057-2`, `KI-058-1`, `KI-058-3`, `KI-058-4`, `KI-058-5`; `KI-058-2` y los condicionados de Out of scope quedan con su condición de desbloqueo; nuevos `KI-059-n`, incluido uno para los puntos 3-5 de la propuesta E (P11); enruta o cierra con evidencia los `KI-059-n` abiertos del `SPRINT_LOG.md`: `KI-059-1`, `KI-059-3`, `KI-059-5`, `KI-059-6`, `KI-059-7`, `KI-059-11`, `KI-059-12` y `KI-059-13` | low | `doc_orchestrator` | ⏳ |
 
 ---
 
@@ -215,7 +224,7 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 53 | Count of rows in Work tables |
+| Work units | 60 | Count of rows in Work tables |
 | Subagents dispatched | lotes de hasta 4 en paralelo desde la wave 3 (D11), más QA + Tester por wave | `agent_assignment.md` |
 | Session ratio (2026-11-05) | **6.1×** sesión `9679503b`, ciclo único, medida completa con `session_cost.py` de `919d4f2` (corte de D19; durante la sesión se leyó 5.4× y 5.9×) — supera soft (5×). Quedan 41 unidades en 5 waves más cierre; delegación `native`; tras los gates de la wave 1, `suspend` | `python3 -I scripts/session_cost.py --session 9679503b-5e2c-4a1a-b3dd-a42dacd42cd6 --json` |
 | Prior session ratio | **9.2×** (ciclo 2; ciclo 1 4.6×), de `session_cost.py` en `08c669c` sobre la sesión `7204cadc`, cifra inflada por `F-116-N1`; con el `session_cost.py` de `919d4f2` (D19) es 3.6×; entonces superaba soft (5×). Coste restante declarado: 53 unidades en 6 waves más cierre, una wave por sesión, `suspend` entre waves | `python3 -I scripts/session_cost.py --session 7204cadc-d44b-4226-a000-597c17b52b33 --json` da la cifra de `919d4f2`; la de `08c669c` sale de `git show 08c669c:scripts/session_cost.py` |
@@ -240,6 +249,7 @@ transcript exists for this tool.
 | `tests/test_session_state.py`: `suspend` con sprint sellado y sesión `IN_PROGRESS` libera el lock (E-01c) | **Yes** — deja el lock tomado | `unverified`: observado en Phase 1 (el boot siguiente salió 2 y exigió `--takeover`); el test se escribe y se ve fallar al abrir la wave 2 |
 | `tests/test_mass_standardizer.py`: `generate_manifest.py --check` sale 2 ante un manifiesto distinto y no reescribe el archivo (B-04) | **Yes** — el flag no existe | `grep -c -- '--check' skills/mass-standardizer/scripts/generate_manifest.py` → 0, exit 1 |
 | Paired tests de I-01..I-07 (`KI-058-1`, `KI-058-4`, `KI-058-5` a-d) | **Yes** — cada uno es un defecto registrado | `unverified`: cada test se escribe y se ve fallar en el padre al abrir la wave 6; `scripts/check_fix_reproduces.py` lo exige en Gate 1 |
+| `tests/test_token_economy_soft_bound.py` (A-25) | **Yes** — segunda ocurrencia de la familia de N3 (D23) | el test se ve fallar con el texto de `d192075` y con el de `7779e7f` |
 | Suite completa `make verify` | **No** — regresión a proteger | `make verify` → exit 0 en `08c669c` |
 
 ---
@@ -269,6 +279,8 @@ transcript exists for this tool.
 | `agents/qa_agent.md`, `config/model_tiers.json` | sin cambio neto: la prueba D9 se revirtió (D20) |
 | `workflows/pipeline_workflow.md` | Phase 6: lotes paralelos (D11) y paso de medición |
 | `rules/token_economy.md` | §3.1 unidad y invocador |
+| `CHANGELOG.md`, roadmaps 014 a 017, `docs/sprints/023-core-pipeline/task_scope.md` | nombre de host genericizado con anotación (D22) |
+| `tests/test_token_economy_soft_bound.py` | nuevo: fija el texto soft de §3.1 (D23) |
 | `docs/guides/RULE_PRECEDENTS_GUIDE.md` | nuevo: historia y precedentes de las filas de `agents.md` sin otro destino (A-13) |
 | `docs/decisions/ADR-0021-qa-agent-tier-trial.md`, `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` | nuevo ADR de la prueba D9 y su cita en la guía (A-14) |
 | `rules/skills_and_integrations.md`, `rules/qa_and_testing.md`, `config/rule_triggers.json` | reciben reglas de una tarea concreta desde la guía de precedentes (A-15, A-16, A-17) |

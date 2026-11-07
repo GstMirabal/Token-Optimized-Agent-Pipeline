@@ -48,6 +48,13 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | A-14 | `docs/decisions/ADR-0021-qa-agent-tier-trial.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | A-08 | `agents/qa_agent.md` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | A-01 | `scripts/session_cost.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| A-19 | `CHANGELOG.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-20 | `docs/roadmaps/core/pipeline/014-identity-branding-hardening.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-21 | `docs/roadmaps/core/pipeline/015-terminology-and-nomenclature-hardening.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-22 | `docs/roadmaps/core/pipeline/016-folder-topology-migration.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-23 | `docs/roadmaps/core/pipeline/017-pre-publication-hardening.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-24 | `docs/sprints/023-core-pipeline/task_scope.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-25 | `tests/test_token_economy_soft_bound.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 
 ### Wave 2 — pace and autonomy
 

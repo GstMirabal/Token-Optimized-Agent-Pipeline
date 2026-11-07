@@ -41,6 +41,13 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | A-14 | `docs/decisions/ADR-0021-qa-agent-tier-trial.md` | create: after A-12, supersede the `ADR-0003` clause for `qa_agent` only, for the D9 trial, with the abort criterion 4 return condition (D17); `ADR-0003` is not edited; mandatory companion `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` (`:19`, `:140`) | medium | `doc_orchestrator` | sonnet | medium | ✅ `ed96115` |
 | A-08 | `agents/qa_agent.md` | modify: after A-14, set model sonnet and tier author (D9); mandatory companion `config/model_tiers.json` (move qa_agent to author.profiles, add the trial and its return criterion to the gate basis); mandatory companion `tests/test_agent_profile_census.py` (pins the gate list, keeps `qa_agent` without `Write`/`Edit`) | medium | `implementer_agent` | sonnet | medium | ✅ `80518b4`, reverted `8e8a566` (D20) |
 | A-01 | `scripts/session_cost.py` | modify: fix( cycle_summary baseline D1 and segment_cycles cuts on context size (D19); paired test `tests/test_session_cost.py` (new) with a turn of cache_read 0 and cache_creation above 0 | medium | `implementer_agent` | sonnet | medium | ✅ `ef490cd`, `919d4f2` |
+| A-19 | `CHANGELOG.md` | modify: D22, replace the host name with `a host project`, annotated in place; `git grep -c -i` of the name over the file gives 0 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-20 | `docs/roadmaps/core/pipeline/014-identity-branding-hardening.md` | modify: D22, same as A-19 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-21 | `docs/roadmaps/core/pipeline/015-terminology-and-nomenclature-hardening.md` | modify: D22, same as A-19 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-22 | `docs/roadmaps/core/pipeline/016-folder-topology-migration.md` | modify: D22, same as A-19 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-23 | `docs/roadmaps/core/pipeline/017-pre-publication-hardening.md` | modify: D22, same as A-19 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-24 | `docs/sprints/023-core-pipeline/task_scope.md` | modify: D22, same as A-19 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-25 | `tests/test_token_economy_soft_bound.py` | create: D23, equality against a reviewed copy of the soft row and the calibration sentence of `rules/token_economy.md` §3.1, and `probe_cost` returns None for a cycle at 6x; fails with the text of `d192075` (N3) and of `7779e7f` (F1) | low | `implementer_agent` | sonnet | medium | ⏳ |
 
 ### Wave 2 — Pace and autonomy
 
@@ -111,7 +118,7 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | Z-01 | `CHANGELOG.md` | modify: add the sprint entry under `[Unreleased]`, citing `host:F-116-N1` and `host:F-116-N2` | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| Z-02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify: close or re-route KI-056-1, KI-056-6, KI-057-1, KI-057-2, KI-058-1, KI-058-3, KI-058-4, KI-058-5; keep KI-058-2 and the conditional Out of scope items with their unblock condition; add new KI-059-n; route or close with evidence the open KI-059-n of `SPRINT_LOG.md`: KI-059-1, KI-059-3, KI-059-5, KI-059-6, KI-059-7, KI-059-11 and KI-059-12 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| Z-02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify: close or re-route KI-056-1, KI-056-6, KI-057-1, KI-057-2, KI-058-1, KI-058-3, KI-058-4, KI-058-5; keep KI-058-2 and the conditional Out of scope items with their unblock condition; add new KI-059-n, including one for proposal E points 3-5 (P11); route or close with evidence the open KI-059-n of `SPRINT_LOG.md`: KI-059-1, KI-059-3, KI-059-5, KI-059-6, KI-059-7, KI-059-11, KI-059-12 and KI-059-13 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 
 ## Jurisdiction check (serial or concurrent)
 
@@ -120,6 +127,7 @@ Same structural subject claimed by more than one unit. "Serial" means the plan's
 | Subject | Units | Verdict |
 | :--- | :--- | :--- |
 | `scripts/session_cost.py` | A-01 (Wave 1), A-18 (Wave 3, before A-00), A-02 (Wave 3, after A-01 and A-07) | Serial. |
+| `CHANGELOG.md` | A-19 (Wave 1), Z-01 (Close) | Serial. |
 | `scripts/check_task_scope.py` | G-01 (Wave 2), H-02 (Wave 3, after G-01 and H-01) | Serial. |
 | `scripts/upstream_outbox.py` | I-02, I-03, I-04, I-05 | Serial by explicit `after` chain I-02 to I-05. |
 | `agents.md` | A-12 (Wave 1), D-02 (Wave 5, after A-12) | Serial. |
@@ -154,7 +162,7 @@ Severity per `rules/qa_and_testing.md` section 4 (S0-S3). Class per the same fil
 
 ## Resolution of the findings
 
-Applied to `IMPLEMENTATION_PLAN.md` (and mirrored in the Work tables above and in `agent_assignment.md`) before Phase 5. Plan Work units: 44 → 47 (B-07, E-01c, H-03 added). Phase 6 Wave 1 added A-13 (plan D15): 47 → 48, A-14 (plan D17): 48 → 49, A-15, A-16, A-17 (plan D18): 49 → 52, and A-18 (plan D21): 52 → 53.
+Applied to `IMPLEMENTATION_PLAN.md` (and mirrored in the Work tables above and in `agent_assignment.md`) before Phase 5. Plan Work units: 44 → 47 (B-07, E-01c, H-03 added). Phase 6 Wave 1 added A-13 (plan D15): 47 → 48, A-14 (plan D17): 48 → 49, A-15, A-16, A-17 (plan D18): 49 → 52, and A-18 (plan D21): 52 → 53. After QA Gate 1 round 5, A-19 to A-24 (plan D22) and A-25 (plan D23): 53 → 60.
 
 | ID | Resolution |
 | :--- | :--- |
@@ -162,7 +170,7 @@ Applied to `IMPLEMENTATION_PLAN.md` (and mirrored in the Work tables above and i
 | F-2 | G-02 Operation: each worktree and its branch are removed after integration, and `check_task_scope.py` re-runs on `ai-sprint/[ID]` before the next batch. |
 | F-3 | New units B-07 (`close_workflow.md` advisory running `prompt_count.py`) and H-03 (`close_workflow.md` advisory recalibration); Mechanisms table names both invokers. |
 | F-4 | A-05 limited to triage verdicts; C-02 marks `F-116-N1` (A-01) and `F-116-N2` (A-02) closed. |
-| F-5 | E-01 split into E-01 (`KI-057-2`, `tests/test_session_end_hook.py`) and E-01c (sealed-sprint lock release, `tests/test_session_state.py`). The "proposal E points 3-5" decision is removed from E-01; its source is not in the repository and the human decides its destination at Phase 5. |
+| F-5 | E-01 split into E-01 (`KI-057-2`, `tests/test_session_end_hook.py`) and E-01c (sealed-sprint lock release, `tests/test_session_state.py`). The "proposal E points 3-5" decision is removed from E-01; its source is not in the repository and the human decides its destination at Phase 5 (decided at Phase 5: Z-02 routes it, plan P11). |
 | F-6 | D-02 carries `wc -c agents.md` ≤ 20000; the plan Verification row `wc -c agents.md` measures it at close. |
 | F-7 | A-12 Operation names the three pinned strings and the `grep -n "agents.md" tests/*.py` pre-check. |
 | F-8 | A-12 Operation carries the `RA-14` grep for every moved term, with citations updated in the same commit. |
