@@ -20,7 +20,7 @@ Refactorizar el protocolo de cierre de sesión (`knowledge_extractor.md`) para t
 ### M2: Semantic Indexing & Domain Categorization
 - [x] Automate the population of `ki_index.json`.
 - [x] **M2.1: Domain Creation Lock:** Enforce mandatory user authorization before creating new knowledge subdirectories.
-- [x] Enforce domain-based path injection (e.g., `knowledge/crypto/`).
+- [x] Enforce domain-based path injection (e.g., `knowledge/<domain>/`). [host domain genericized, Sprint 059]
 - [x] Standardize the description format for 1-line semantic summaries.
 
 ### M3: The Absolute Purge & Forensic Execution (Evolutionary Governance)
