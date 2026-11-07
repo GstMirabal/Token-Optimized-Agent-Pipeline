@@ -85,6 +85,22 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | A-53 | `scripts/check_log_append_only.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | A-54 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 
+### Wave 1b — method (plan D37)
+
+| # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| M-01 | `scripts/_current_sprint.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| M-02 | `scripts/check_task_scope.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| M-03 | `scripts/check_gate_log.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| M-04 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify | sequential | `skill_architect` | N/A | `agents/skill_architect.md` |
+| M-05 | `tests/test_current_sprint_matrix.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| M-06 | `scripts/check_sprint_refs.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| M-07 | `Makefile` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| M-08 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| M-09 | `docs/standards/templates/SPRINT_LOG_TEMPLATE.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| M-10 | `docs/standards/templates/AGENT_ASSIGNMENT_TEMPLATE.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| M-11 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
+
 ### Wave 2 — pace and autonomy
 
 | # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
@@ -148,9 +164,9 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | I-05 | `scripts/upstream_outbox.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | I-06 | `hooks/on_commit.py` | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | I-07 | `scripts/check_fix_reproduces.py` | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
-| I-08 | `scripts/check_task_scope.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
-| I-09 | `scripts/check_gate_log.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
-| I-10 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify | sequential | `skill_architect` | N/A | `agents/skill_architect.md` |
+| I-08 | `scripts/check_task_scope.py` | modify (replaced by M-02, D37) | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| I-09 | `scripts/check_gate_log.py` | modify (replaced by M-03, D37) | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| I-10 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify (replaced by M-04, D37) | sequential | `skill_architect` | N/A | `agents/skill_architect.md` |
 
 ### Close
 

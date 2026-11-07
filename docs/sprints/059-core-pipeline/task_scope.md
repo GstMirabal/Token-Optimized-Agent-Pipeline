@@ -78,6 +78,24 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | A-53 | `scripts/check_log_append_only.py` | modify: D35: `fix(` with paired `tests/test_check_log_append_only.py`: `--current-sprint` root as in `check_gate_log.py`; `--sprint-dir` resolved from the git root; exit 2 on a missing directory, an empty range base or an absent record by hand; `Repro:` fails on the parent | low | `implementer_agent` | sonnet | medium | ✅ `f273f93`, reverted `873fb1e` (D35) |
 | A-54 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify: D35: mark D23 and D26 as narrowed by D32 (R9-3) | low | `doc_orchestrator` | sonnet | medium | ✅ `822c047` |
 
+### Wave 1b — Method (plan D37)
+
+Under plan D37 rule B the Operation of these rows is the plan's row of the same id; this table holds tier and status only. Runs after the Wave 1 gates and before Wave 2.
+
+| # | File | Operation | Risk | Assignee | Model | Effort | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| M-01 | `scripts/_current_sprint.py` | create: plan M-01 (D37) | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| M-02 | `scripts/check_task_scope.py` | modify: plan M-02 (D37) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| M-03 | `scripts/check_gate_log.py` | modify: plan M-03 (D37) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| M-04 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify: plan M-04 (D37) | low | `skill_architect` | sonnet | medium | ⏳ |
+| M-05 | `tests/test_current_sprint_matrix.py` | create: plan M-05 (D37) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| M-06 | `scripts/check_sprint_refs.py` | create: plan M-06 (D37) | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| M-07 | `Makefile` | modify: plan M-07 (D37) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| M-08 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify: plan M-08 (D37) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| M-09 | `docs/standards/templates/SPRINT_LOG_TEMPLATE.md` | modify: plan M-09 (D37) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| M-10 | `docs/standards/templates/AGENT_ASSIGNMENT_TEMPLATE.md` | modify: plan M-10 (D37) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| M-11 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify: plan M-11 (D37) | low | `orchestrator` | sonnet | medium | ⏳ |
+
 ### Wave 2 — Pace and autonomy
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
@@ -141,9 +159,9 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | I-05 | `scripts/upstream_outbox.py` | modify: after I-04, fix( KI-058-5 c, `PIN_PATTERN` accepts ASCII digits only; paired test with non-ASCII digits in `tests/test_upstream_outbox.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
 | I-06 | `hooks/on_commit.py` | modify: fix( KI-058-5 d, an uppercase `FIX:` subject is treated as `fix(`; paired test in `tests/test_on_commit.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
 | I-07 | `scripts/check_fix_reproduces.py` | modify: fix( KI-058-5 d, same uppercase `FIX:` case in the reproduction check; paired test in `tests/test_check_fix_reproduces.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
-| I-08 | `scripts/check_task_scope.py` | modify: fix( D36: `--current-sprint` exits 2 when the anchor names a sprint whose directory is missing; `current_sprint_dir` separates that case from an absent anchor; paired test in `tests/test_check_task_scope.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
-| I-09 | `scripts/check_gate_log.py` | modify: after I-08: fix( D36: exit 2 on a missing `--sprint-dir` and on the I-08 case under `--current-sprint`; paired test in `tests/test_check_gate_log.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
-| I-10 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify: after I-08: fix( D36: the I-08 case under `--current-sprint` exits 2; paired test beside the `audit_plan.py` tests | low | `skill_architect` | sonnet | medium | ⏳ |
+| I-08 | `scripts/check_task_scope.py` | modify: fix( D36: `--current-sprint` exits 2 when the anchor names a sprint whose directory is missing; `current_sprint_dir` separates that case from an absent anchor; paired test in `tests/test_check_task_scope.py` | low | `implementer_agent` | sonnet | medium | replaced by M-02 (D37) |
+| I-09 | `scripts/check_gate_log.py` | modify: after I-08: fix( D36: exit 2 on a missing `--sprint-dir` and on the I-08 case under `--current-sprint`; paired test in `tests/test_check_gate_log.py` | low | `implementer_agent` | sonnet | medium | replaced by M-03 (D37) |
+| I-10 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify: after I-08: fix( D36: the I-08 case under `--current-sprint` exits 2; paired test beside the `audit_plan.py` tests | low | `skill_architect` | sonnet | medium | replaced by M-04 (D37) |
 
 ### Close
 
@@ -160,7 +178,7 @@ Same structural subject claimed by more than one unit. "Serial" means the plan's
 | :--- | :--- | :--- |
 | `scripts/session_cost.py` | A-01 (Wave 1), A-18 (Wave 3, before A-00), A-02 (Wave 3, after A-01 and A-07) | Serial. |
 | `CHANGELOG.md` | A-19, A-26 (Wave 1), Z-01 (Close) | Serial. |
-| `scripts/check_task_scope.py` | G-01 (Wave 2), H-02 (Wave 3, after G-01 and H-01), I-08 (Wave 6) | Serial. |
+| `scripts/check_task_scope.py` | M-02 (Wave 1b), G-01 (Wave 2), H-02 (Wave 3, after G-01 and H-01); I-08 (Wave 6) replaced by M-02 (D37) | Serial. |
 | `scripts/upstream_outbox.py` | I-02, I-03, I-04, I-05 | Serial by explicit `after` chain I-02 to I-05. |
 | `agents.md` | A-12, A-36, A-39 (Wave 1), D-02 (Wave 5, after A-12) | Serial. |
 | `rules/qa_and_testing.md` | A-16, A-32 (Wave 1) | Serial. |
@@ -168,7 +186,7 @@ Same structural subject claimed by more than one unit. "Serial" means the plan's
 | `docs/guides/RULE_PRECEDENTS_GUIDE.md` | A-13, A-45 (Wave 1) | Serial. |
 | `rules/documentation_standard.md` | A-37, A-52 (Wave 1) | Serial. |
 | `tests/test_profile_references.py` | A-31, A-48 (Wave 1) | Serial. |
-| `Makefile` | A-51 (Wave 1), B-05 (Wave 2) | Serial. |
+| `Makefile` | A-51 (Wave 1), M-07 (Wave 1b), B-05 (Wave 2) | Serial. |
 | `scripts/check_log_append_only.py` | A-49, A-53 (Wave 1) | Serial. |
 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | A-47, A-54 (Wave 1) | Serial. |
 | `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | A-00, A-06 (Wave 3) | Serial. |
@@ -203,7 +221,7 @@ Severity per `rules/qa_and_testing.md` section 4 (S0-S3). Class per the same fil
 
 ## Resolution of the findings
 
-Applied to `IMPLEMENTATION_PLAN.md` (and mirrored in the Work tables above and in `agent_assignment.md`) before Phase 5. Plan Work units: 44 → 47 (B-07, E-01c, H-03 added). Phase 6 Wave 1 added A-13 (plan D15): 47 → 48, A-14 (plan D17): 48 → 49, A-15, A-16, A-17 (plan D18): 49 → 52, and A-18 (plan D21): 52 → 53. After QA Gate 1 round 5, A-19 to A-24 (plan D22) and A-25 (plan D23): 53 → 60. After QA Gate 1 round 6, A-26 to A-37 (plan D24 to D26): 60 → 72, and A-38, A-39 (plan D28): 72 → 74. After QA Gate 1 round 7, A-40 to A-45 (plan D29): 74 → 80. After QA Gate 1 round 8, A-46 to A-52 (plan D33, D34): 80 → 87. After QA Gate 1 round 9, A-53, A-54 (plan D35): 87 → 89. After QA Gate 1 round 11, I-08 to I-10 (plan D36): 89 → 92, an estimate fixed at the opening of Wave 6.
+Applied to `IMPLEMENTATION_PLAN.md` (and mirrored in the Work tables above and in `agent_assignment.md`) before Phase 5. Plan Work units: 44 → 47 (B-07, E-01c, H-03 added). Phase 6 Wave 1 added A-13 (plan D15): 47 → 48, A-14 (plan D17): 48 → 49, A-15, A-16, A-17 (plan D18): 49 → 52, and A-18 (plan D21): 52 → 53. After QA Gate 1 round 5, A-19 to A-24 (plan D22) and A-25 (plan D23): 53 → 60. After QA Gate 1 round 6, A-26 to A-37 (plan D24 to D26): 60 → 72, and A-38, A-39 (plan D28): 72 → 74. After QA Gate 1 round 7, A-40 to A-45 (plan D29): 74 → 80. After QA Gate 1 round 8, A-46 to A-52 (plan D33, D34): 80 → 87. After QA Gate 1 round 9, A-53, A-54 (plan D35): 87 → 89. After QA Gate 1 round 11, I-08 to I-10 (plan D36): 89 → 92, an estimate fixed at the opening of Wave 6. After QA Gate 1 round 12, M-01 to M-11 (plan D37): 92 → 103; I-08 to I-10 stay counted as replaced.
 
 | ID | Resolution |
 | :--- | :--- |
