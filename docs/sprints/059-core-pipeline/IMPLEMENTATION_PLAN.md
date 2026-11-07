@@ -156,13 +156,13 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | A-43 | `skills/mcp-registry/README.md` | modify — D29: reemplaza el ejemplo de dominio de la línea 5 | low | `doc_orchestrator` | ✅ `f4d20dd` |
 | A-44 | `profiles/example-project/mcp/registry.json` | modify — D29: reemplaza el ejemplo de dominio de la línea 7 | low | `doc_orchestrator` | ✅ `66a4438` |
 | A-45 | `docs/guides/RULE_PRECEDENTS_GUIDE.md` | modify — D29: reemplaza los roles heredados de un host en la línea 205 | low | `doc_orchestrator` | ✅ `699eac3` |
-| A-46 | `docs/standards/templates/HOTFIX_TEMPLATE.md` | modify — D33: línea 25 (N1): enruta por `constitutional_escalation` y enlaza el destino asignado, sin fijar `RA-XX` | low | `doc_orchestrator` | ⏳ |
-| A-47 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify — D33: anota las filas de D23 y D25 en Documentary impact (N2), marca D24 (N3) y quita la cifra de la fila de coste de sesión de `7a037351` (N5) | low | `doc_orchestrator` | ⏳ |
-| A-48 | `tests/test_profile_references.py` | modify — D33: docstring (N4): reduce lo afirmado a lo que el test comprueba y declara los archivos omitidos; sin cambio de lógica | low | `implementer_agent` | ⏳ |
-| A-49 | `scripts/check_log_append_only.py` | create — D34: falla (exit 2) en `10c88f4` (N3), `1dbb43e` (F6) y `60383e3` (D24); exit 0 en `60383e3..HEAD` tras A-47 | low | `implementer_agent` | ⏳ |
-| A-50 | `tests/test_check_log_append_only.py` | create — D34: repositorios git desechables para cada zona, el trailer, sus límites y los errores | low | `implementer_agent` | ⏳ |
-| A-51 | `Makefile` | modify — D34: `verify` ejecuta `check_log_append_only.py --current-sprint` | low | `implementer_agent` | ⏳ |
-| A-52 | `rules/documentation_standard.md` | modify — D34: nombra el instrumento y sus límites junto a la fila `annotated in place` | low | `rule_validator` | ⏳ |
+| A-46 | `docs/standards/templates/HOTFIX_TEMPLATE.md` | modify — D33: línea 25 (N1): enruta por `constitutional_escalation` y enlaza el destino asignado, sin fijar `RA-XX` | low | `doc_orchestrator` | ✅ `05a6dab` |
+| A-47 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify — D33: anota las filas de D23 y D25 en Documentary impact (N2), marca D24 (N3) y quita la cifra de la fila de coste de sesión de `7a037351` (N5) | low | `doc_orchestrator` | ✅ `1473570` |
+| A-48 | `tests/test_profile_references.py` | modify — D33: docstring (N4): reduce lo afirmado a lo que el test comprueba y declara los archivos omitidos; sin cambio de lógica | low | `implementer_agent` | ✅ `8923501` |
+| A-49 | `scripts/check_log_append_only.py` | create — D34: falla (exit 2) en `10c88f4` (N3), `1dbb43e` (F6) y `60383e3` (D24); exit 0 en `60383e3..HEAD` tras A-47 | low | `implementer_agent` | ✅ `251717d` |
+| A-50 | `tests/test_check_log_append_only.py` | create — D34: repositorios git desechables para cada zona, el trailer, sus límites y los errores | low | `implementer_agent` | ✅ `3368dc5` |
+| A-51 | `Makefile` | modify — D34: `verify` ejecuta `check_log_append_only.py --current-sprint` | low | `implementer_agent` | ✅ `de239b7` |
+| A-52 | `rules/documentation_standard.md` | modify — D34: nombra el instrumento y sus límites junto a la fila `annotated in place` | low | `rule_validator` | ✅ `d40183d` |
 
 ### Wave 2 — Ritmo y autonomía (aceleran el resto del sprint)
 
@@ -326,7 +326,7 @@ transcript exists for this tool.
 | `tests/test_token_economy_soft_bound.py` | nuevo: fija el texto soft de §3.1 (D23); reducido por D32 a la conducta de `probe_cost`, sin copia de texto |
 | Roadmaps 008 y 018, `skills/skillopt/data/scenarios.json`, `skills/mcp-registry/README.md`, `profiles/example-project/mcp/registry.json`, `docs/guides/RULE_PRECEDENTS_GUIDE.md` | dominio y roles genericizados (D29) |
 | `tests/test_profile_references.py`, `workflows/reverse_documentation_workflow.md` | nuevo check de referencias a perfiles; dominio genericizado (D24) |
-| `scripts/check_log_append_only.py`, `tests/test_check_log_append_only.py`, `Makefile`, `rules/documentation_standard.md`, `docs/standards/templates/HOTFIX_TEMPLATE.md` | nuevo check de registros sin borrado (D34); destino de la escalada en la plantilla (D33) |
+| `scripts/check_log_append_only.py`, `tests/test_check_log_append_only.py`, `Makefile`, `README.md`, `rules/documentation_standard.md`, `docs/standards/templates/HOTFIX_TEMPLATE.md` | nuevo check de registros sin borrado (D34), con el contador de scripts que exige `check_readme_counts.py`; destino de la escalada en la plantilla (D33) |
 | `config/rule_triggers.json` | carga `rules/documentation_standard.md` al editar `rules/*.md` (D28) |
 | `rules/qa_and_testing.md`, `agents/governance_learner.md`, `agents/rule_validator.md`, `workflows/remediation_workflow.md`, `rules/documentation_standard.md` | momento de `RA-19` (D25; sustituida por D30: la repetición solo tras un S0 que toque sandbox o ejecución) y destino del aprendizaje (D26) |
 | `docs/guides/RULE_PRECEDENTS_GUIDE.md` | nuevo: historia y precedentes de las filas de `agents.md` sin otro destino (A-13) |
