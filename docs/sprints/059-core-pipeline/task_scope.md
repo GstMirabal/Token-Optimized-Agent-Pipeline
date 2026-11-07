@@ -84,18 +84,18 @@ Operation: the plan row of the same id (plan D37).
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| M-01 | `scripts/_current_sprint.py` | create: plan M-01 (D37) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| M-02 | `scripts/check_task_scope.py` | modify: plan M-02 (D37) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| M-03 | `scripts/check_gate_log.py` | modify: plan M-03 (D37) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| M-04 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify: plan M-04 (D37) | low | `skill_architect` | sonnet | medium | ⏳ |
-| M-12 | `scripts/loop_guard.py` | modify: plan M-12 (D37) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| M-05 | `tests/test_current_sprint_matrix.py` | create: plan M-05 (D37) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| M-06 | `scripts/check_sprint_refs.py` | create: plan M-06 (D37) | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| M-07 | `Makefile` | modify: plan M-07 (D37) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| M-08 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify: plan M-08 (D37) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| M-09 | `docs/standards/templates/SPRINT_LOG_TEMPLATE.md` | modify: plan M-09 (D37) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| M-10 | `docs/standards/templates/AGENT_ASSIGNMENT_TEMPLATE.md` | modify: plan M-10 (D37) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| M-11 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify: plan M-11 (D37) | low | `orchestrator` | sonnet | medium | ⏳ |
+| M-01 | `scripts/_current_sprint.py` | create: plan M-01 (D37) | medium | `implementer_agent` | sonnet | medium | ✅ `62bbce8` |
+| M-02 | `scripts/check_task_scope.py` | modify: plan M-02 (D37) | low | `implementer_agent` | sonnet | medium | ✅ `80c5184` |
+| M-03 | `scripts/check_gate_log.py` | modify: plan M-03 (D37) | low | `implementer_agent` | sonnet | medium | ✅ `7c9115c` |
+| M-04 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify: plan M-04 (D37) | low | `skill_architect` | sonnet | medium | ✅ `e393405` |
+| M-12 | `scripts/loop_guard.py` | modify: plan M-12 (D37) | low | `implementer_agent` | sonnet | medium | ✅ `d74a969` |
+| M-05 | `tests/test_current_sprint_matrix.py` | create: plan M-05 (D37) | low | `implementer_agent` | sonnet | medium | ✅ `74eb9d7` |
+| M-06 | `scripts/check_sprint_refs.py` | create: plan M-06 (D37) | medium | `implementer_agent` | sonnet | medium | ✅ `e15d86e`, `cc4f009` |
+| M-07 | `Makefile` | modify: plan M-07 (D37) | low | `implementer_agent` | sonnet | medium | ✅ `a97991d` |
+| M-08 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify: plan M-08 (D37) | low | `doc_orchestrator` | sonnet | medium | ✅ `1196fea` |
+| M-09 | `docs/standards/templates/SPRINT_LOG_TEMPLATE.md` | modify: plan M-09 (D37) | low | `doc_orchestrator` | sonnet | medium | ✅ `2979326` |
+| M-10 | `docs/standards/templates/AGENT_ASSIGNMENT_TEMPLATE.md` | modify: plan M-10 (D37) | low | `doc_orchestrator` | sonnet | medium | ✅ `0e1cf6c` |
+| M-11 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify: plan M-11 (D37) | low | `orchestrator` | sonnet | medium | ✅ `d988528` |
 
 ### Wave 2 — Pace and autonomy
 

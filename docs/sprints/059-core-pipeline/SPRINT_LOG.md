@@ -45,6 +45,7 @@ Tracking of atomic goals achieved during the session. Work units and execution o
     - `[x]` Human re-plan 2026-11-07 after the deadlock of QA Gate 1 round 11 (plan D36): the Z-02 rows stop enumerating ids; units I-08 to I-10 added to Wave 6; work units 89 → 92, an estimate; `session_state.py unblock` run after it.
     - `[x]` Human re-plan 2026-11-07 after the deadlock of QA Gate 1 round 12 (plan D37): method for the sprint artifacts (one home per fact, a check per claim, a cap on gate notes); Wave 1b units M-01 to M-11 replace I-08 to I-10; work units 92 → 103; `session_state.py unblock` run after it.
     - `[x]` Human re-plan 2026-11-07 after the deadlock of QA Gate 1 round 13 (plan D37 reduced): Wave 1b runs before the gates re-run; unit M-12; work units 103 → 104; `session_state.py unblock` run after it.
+- [x] **Phase 6 (Execution), Wave 1b**: M-01 to M-12 committed; status in `task_scope.md`.
     - `[x]` A-05 committed at `1dbe533`.
     - `[x]` A-09 committed at `0c7a9b2`.
     - `[x]` A-10 committed at `a694ffe`.
