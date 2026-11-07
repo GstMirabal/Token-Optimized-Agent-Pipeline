@@ -30,7 +30,7 @@ Domain rules in `rules/` load **on demand** at these triggers, never preloaded. 
 | `rules/frontend_modular_standard.md` | Touching `frontend/src/modules/`. |
 | `rules/django_backend_standard.md` | Writing or modifying Django code — models, views, serializers, `signals.py`, app layout, or DRF endpoints. |
 | `rules/graphify.md` | Querying or rebuilding the knowledge graph. |
-| `rules/documentation_standard.md` | Creating/updating any document under `docs/`, authoring an ADR, or running `docs-freshness-check`. |
+| `rules/documentation_standard.md` | Editing any document under `docs/` or `rules/`, authoring an ADR, or running `docs-freshness-check`. |
 | `rules/LEGACY_RULE_CONCORDANCE.md` | Encountering a numbered `Rule NN` citation in any document. |
 
 ## 1. Code, Dialect, and Style
