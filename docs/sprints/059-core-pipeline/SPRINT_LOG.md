@@ -17,7 +17,7 @@
 ---
 
 ## 🏁 Sprint Progression
-Tracking of atomic goals achieved during the session. Work units: 80 in six waves plus close. Execution order: Wave 1 to Wave 6, then close; one wave per session, `session_state.py suspend` between waves (plan `## Cost`).
+Tracking of atomic goals achieved during the session. Work units: 87 in six waves plus close. Execution order: Wave 1 to Wave 6, then close; one wave per session, `session_state.py suspend` between waves (plan `## Cost`).
 
 - [x] **Phase 1 (Planning)**: plan drafted and committed.
     - `[x]` Intake triage: channel A empty, channel B empty, `F-116-N1` and `F-116-N2` accepted with reproduction (plan `## Context`).
@@ -34,11 +34,12 @@ Tracking of atomic goals achieved during the session. Work units: 80 in six wave
     - `[x]` Phase 4.3 raised F-1..F-12 except F-7 (S2, instructing) and F-7, F-13, F-14 (S3, testifying); each one verified against the tree and resolved in the plan (`task_scope.md` `## Resolution of the findings`). Work units 44 → 47 (B-07, E-01c, H-03).
     - `[x]` "Proposal E points 3-5" (plan P11; source not in the repository): human decision at Phase 5, routed to a `KI-059-n` by Z-02.
 - [x] **Phase 5 (Approval Gate)**: Human OK («Aprobado») on 2026-11-02 over the plan at `65c86d3`.
-- [x] **Phase 6 (Execution), Wave 1**: all units committed, A-19 to A-45 (plan D22 to D32) included.
+- [x] **Phase 6 (Execution), Wave 1**: all units committed, A-19 to A-52 (plan D22 to D34) included.
     - `[x]` Human decision 2026-11-05 after QA Gate 1 round 3 (plan D21): unit A-18 before A-00; work units 52 → 53.
     - `[x]` Human decisions 2026-11-07 after QA Gate 1 round 5 (plan D22, D23): units A-19 to A-25; work units 53 → 60.
     - `[x]` Human re-plan 2026-11-07 after the deadlock of QA Gate 1 round 6 (plan D24 to D28): units A-26 to A-39; work units 60 → 74; `session_state.py unblock` run after it.
     - `[x]` Human re-plan 2026-11-07 after the deadlock of QA Gate 1 round 7 (plan D29 to D32): one host-data inventory, units A-40 to A-45; work units 74 → 80; `session_state.py unblock` run after it. Convergence rule 1 applies to the gate from round 8 on.
+    - `[x]` Human re-plan 2026-11-07 after the deadlock of QA Gate 1 round 8 (plan D33, D34): N1 to N5 fixed, `scripts/check_log_append_only.py` added for the N3 family, units A-46 to A-52; work units 80 → 87; `session_state.py unblock` run after it.
     - `[x]` A-05 committed at `1dbe533`.
     - `[x]` A-09 committed at `0c7a9b2`.
     - `[x]` A-10 committed at `a694ffe`.
@@ -72,7 +73,7 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | When this row was opened, no session had run on the trimmed `agents.md`. Six sessions before it started at 63629 to 64031 tokens of context; the trim removed 33914 bytes, about 8500 tokens at 4 bytes per token (estimate), but moved 10307 bytes to `rules/code_craft.md` and 6840 to `rules/project_topology.md` | At the next session's first turn, `python3 -I scripts/session_cost.py --session <id> --json`: `first_turn` near 55500 confirms the saving; near 64000 refutes it. Whether rules are still obeyed needs later gates, not this figure. **Measured 2026-11-07, session `7a037351-d2f6-4ff2-8ca0-1e6a82e612cc`: `first_turn` 51720, below 55500, so the criterion confirms a saving.** Two limits: the drop of about 12300 tokens exceeds the 8500 estimate and Claude Code also moved from 2.1.314 to 2.1.319 between these sessions, so one measurement does not separate the two causes; and this is the first turn only, since the moved bytes return when their rule loads | KI-059-11 |
 | Host data predates this sprint on public `main` (6 files name one host, one of them calling it a private repository; another host's name is in its history), and no instrument scans for host names | Human decision 2026-11-05: Z-02 routes a review of public history and a host-name scanner to Sprint 060; no rewrite in this sprint. Human decision 2026-11-07 (plan D22): A-19 to A-24 remove the name from the current tree; public history stays with Z-02 | KI-059-12 |
 | Transcripts on disk for this project: 21, the oldest from 2026-10-08, against the 35 cited on 2026-11-05 (QA Gate 1 round 5). Age-based deletion is inferred, not measured, and A-00 needs the Sprint 056-058 transcripts | Abort criterion 7 covers a short A-00; A-00 states which sessions it could read | KI-059-13 |
-| `tests/test_profile_references.py` covers only `profiles/<slug>` references and its docstring lists the shapes it does not detect; a host term outside the one-time inventory of plan D29 stays undetected. Round 7 S3 notes F7 to F14 are recorded, not remediated (`rules/qa_and_testing.md` §4 rule 1). The inventory's term list stays outside the repository (`RA-15`). Plan D31: `origin/main` still holds the host name in 11 commits and the profile slug in 6, reachable from 58 tags | Z-02 routes them with the Sprint 060 scanner; plan D31 decides public history after the merge | KI-059-14 |
+| Earlier text of this row, annotated (restored after QA Gate 1 round 8, N3; plan D29 supersedes its first sentence for `scenarios.json` and `RULE_PRECEDENTS_GUIDE.md`): Domain wording judged in the D24 pass and kept: `skills/skillopt/data/scenarios.json:58-59` is a dataset that names no project, in Spanish, and `docs/guides/RULE_PRECEDENTS_GUIDE.md:205` gives generic role examples. `tests/test_profile_references.py` does not detect bare names. Current text: `tests/test_profile_references.py` covers only `profiles/<slug>` references and its docstring lists the shapes it does not detect; since A-48 (plan D33) that docstring claims only the shapes it lists, and states the files it skips; a host term outside the one-time inventory of plan D29 stays undetected. Round 7 S3 notes F7 to F14 are recorded, not remediated (`rules/qa_and_testing.md` §4 rule 1). The inventory's term list stays outside the repository (`RA-15`). Plan D31: `origin/main` still holds the host name in 11 commits and the profile slug in 6, reachable from 58 tags | Earlier resolution: Z-02 routes it with the Sprint 060 scanner. Current: Z-02 routes them with the Sprint 060 scanner; plan D31 decides public history after the merge | KI-059-14 |
 
 ---
 
@@ -160,6 +161,14 @@ Example (do not uncomment):
 | QA Agent (Gate 1) | 7 | `python3 scripts/check_fix_reproduces.py --range 08c669c..HEAD` | 0 |
 | QA Agent (Gate 1) | 7 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 0 |
 | QA Agent (Gate 1) | 7 | `make verify` | 0 |
+| QA Agent (Gate 1) | 8 | `python3 scripts/check_fix_reproduces.py --range 08c669c..HEAD` | 0 |
+| QA Agent (Gate 1) | 8 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 0 |
+| QA Agent (Gate 1) | 8 | `make verify` | 0 |
+| QA Agent (Gate 1) | 8 | `venv_skillopt/bin/python -m ruff check .` | 0 |
+| QA Agent (Gate 1) | 8 | `make quality-audit` | 0 |
+| QA Agent (Gate 1) | 8 | `python3 scripts/check_gate_log.py --sprint-dir docs/sprints/059-core-pipeline` | 0 |
+| QA Agent (Gate 1) | 8 | `python3 scripts/check_role_artifact.py --role "QA Agent" --sprint-dir docs/sprints/059-core-pipeline` | 0 |
+| QA Agent (Gate 1) | 8 | `python3 scripts/check_log_append_only.py --sprint-dir docs/sprints/059-core-pipeline --range 60383e3..HEAD` | 0 |
 | Tester Agent (Gate 2) | 1 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider` | 0 |
 | Tester Agent (Gate 2) | 1 | `make verify` | 0 |
 
@@ -224,7 +233,13 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase (2026-11-07, after QA Gate 1 round 8)**: the sprint is BLOCKED (`TERMINAL_REMEDIATION_LOOP`). Step 2 of the handoff below applies: no patch; the human decides how to resume, with findings N1 to N5 of round 8 on the table. The block is lifted only by `session_state.py unblock` after that decision. The handoff below stays as written and is superseded from its step 2 on.
+**Next Phase (current)**: Phase 7, Wave 1. The deadlock of QA Gate 1 round 8 was re-planned with the human and remediated (plan D33, D34); the block was lifted with `session_state.py unblock`. In order:
+1. QA Gate 1 round 9 under convergence rule 1: the diff `60383e3..HEAD` and the fix of each S0, S1 and S2 of round 8.
+2. If it rejects, no patch: re-plan with the human, with the finding on the table.
+3. Tester Gate 2 round 2, a fresh agent, under the same rule.
+4. `session_state.py suspend`, then Wave 2, in series.
+
+**Next Phase (2026-11-07, after QA Gate 1 round 8, superseded by the line above)**: the sprint is BLOCKED (`TERMINAL_REMEDIATION_LOOP`). Step 2 of the handoff below applies: no patch; the human decides how to resume, with findings N1 to N5 of round 8 on the table. The block is lifted only by `session_state.py unblock` after that decision. The handoff below stays as written and is superseded from its step 2 on.
 
 **Next Phase (earlier handoff)**: Phase 7, Wave 1. The deadlock of QA Gate 1 round 7 was re-planned with the human and remediated (plan D29 to D32); the block was lifted with `session_state.py unblock`. In order, in a new session:
 1. QA Gate 1 round 8 under convergence rule 1 (`rules/qa_and_testing.md` §4): the diff `1dbb43e..HEAD` and the fix of each S0, S1 and S2 of round 7. A fresh agent; it reports what it finds, and a new S0 anywhere carries `escape`.
@@ -234,6 +249,6 @@ Closing the session state and certifying traceability.
 
 Before editing a claim, run the command that verifies it; with no instrument, delete it (plan D32).
 
-Deadlock record (`workflows/remediation_workflow.md` Phase 2 `error_mining`). Round 6 origin, restored here because `1dbb43e` removed it: `rules/token_economy.md` §3.1 kept being rewritten to describe bound conduct that no instrument performs instead of dropping the claim, and plan D22 checked one named string where the rule covers a property. Round 7 origin: the remediation of that same `rules/token_economy.md` line rewrote the claim a further time, against the rule A-37 added, and plan D24 listed domain sites by line where a phrase search over the tree was needed. `negative_ki` for round 6: A-37, with `fail_closed_claims` cited. `negative_ki` for round 7: none added; the same A-37 and `fail_closed_claims` cover it. Round 8 origin: plan D32 recorded a disposition for `skills/compliance-checker` only, so `docs/standards/templates/HOTFIX_TEMPLATE.md:25`, the third location of round 7 F3, was left with no fix, KI or discard. `negative_ki` for round 8: none added; `RA-14` already requires the grep across the sprint artifacts that would have caught it and the stale plan rows of N2. `family_check` for round 8: N3, N4 and N5 are second occurrences of the round 7 F6, F4 and F5 families; no check was written, because the human decides the resumption first.
+Deadlock record (`workflows/remediation_workflow.md` Phase 2 `error_mining`). Round 6 origin, restored here because `1dbb43e` removed it: `rules/token_economy.md` §3.1 kept being rewritten to describe bound conduct that no instrument performs instead of dropping the claim, and plan D22 checked one named string where the rule covers a property. Round 7 origin: the remediation of that same `rules/token_economy.md` line rewrote the claim a further time, against the rule A-37 added, and plan D24 listed domain sites by line where a phrase search over the tree was needed. `negative_ki` for round 6: A-37, with `fail_closed_claims` cited. `negative_ki` for round 7: none added; the same A-37 and `fail_closed_claims` cover it. Round 8 origin: plan D32 recorded a disposition for `skills/compliance-checker` only, so `docs/standards/templates/HOTFIX_TEMPLATE.md:25`, the third location of round 7 F3, was left with no fix, KI or discard. `negative_ki` for round 8: none added; `RA-14` already requires the grep across the sprint artifacts that would have caught it and the stale plan rows of N2. `family_check` for round 8: N3, N4 and N5 are second occurrences of the round 7 F6, F4 and F5 families; no check was written, because the human decides the resumption first. Human decision 2026-11-07 (plan D33, D34): the N3 family got `scripts/check_log_append_only.py`; N4 and N5 narrowed their claims.
 
 *Certified under conventional commit standard: feat(scope): message #059*
