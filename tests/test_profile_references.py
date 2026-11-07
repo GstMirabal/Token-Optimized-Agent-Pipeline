@@ -7,7 +7,17 @@ slash, followed by a token. The token is one of:
   repository's `profiles/` directory (exact-case match);
 * a placeholder form from `PLACEHOLDER_FORMS`, or no token at all (the bare
   directory name), which `BARE_TERMINATORS` bounds;
-* anything else: reported as unclassified. The test fails closed.
+* a slug directly followed by a placeholder form, a bare directory name
+  followed by a character outside `BARE_TERMINATORS`, or a form outside
+  `PLACEHOLDER_FORMS`: reported as unclassified or unreviewed.
+
+Not detected (measured with `scan_text`): text that follows a placeholder
+form or a real slug is not examined. A bare `*`, `<name>` or `[name]` form
+followed by letters (as in a glob suffix or a name suffix) returns no
+finding; a bare directory name followed by a dot returns no finding; and a
+real slug followed by `/../` plus a name returns no finding, because only
+the slug is judged. The same shape with a slug that is not a real directory
+is reported for that slug, not for the traversal.
 
 Every tracked file is scanned, documents of already-removed profiles
 included: a stale reference there fails like any other. Tracked files come
