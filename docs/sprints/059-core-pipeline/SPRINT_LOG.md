@@ -9,7 +9,7 @@
 | :--- | :--- |
 | **Active Layer** | core-pipeline |
 | **Strategic Goal** | `efficiency-and-sandbox-regime`: cut the framework's own cost (`agents.md` ≤ 20000 bytes, parallel Phase 6 batches, nucleus sandbox with `autoAllowBashIfSandboxed`), give the §3.1 bound a non-zero baseline and an in-session invoker, re-measure the `RA-19` enumeration and decide the sandbox regime, and close the Sprint 058 residues. |
-| **Intelligence State** | Phase 7 (Quality Gate), Wave 1. Plan approved at `65c86d3`; Phase 6 deviations and decisions: D15 to D21. |
+| **Intelligence State** | Phase 7 (Quality Gate), Wave 1. Plan approved at `65c86d3`; Phase 6 deviations and decisions: D15 to D28. |
 | **Branch / Base** | `ai-sprint/059` created from `main` at `08c669c` (`v4.41.0`) |
 | **Session Tool / Delegation** | `claude-code` / `native` |
 | **Start Time** | 2026-11-02 |
@@ -17,7 +17,7 @@
 ---
 
 ## 🏁 Sprint Progression
-Tracking of atomic goals achieved during the session. Work units: 60 in six waves plus close. Execution order: Wave 1 to Wave 6, then close; one wave per session, `session_state.py suspend` between waves (plan `## Cost`).
+Tracking of atomic goals achieved during the session. Work units: 74 in six waves plus close. Execution order: Wave 1 to Wave 6, then close; one wave per session, `session_state.py suspend` between waves (plan `## Cost`).
 
 - [x] **Phase 1 (Planning)**: plan drafted and committed.
     - `[x]` Intake triage: channel A empty, channel B empty, `F-116-N1` and `F-116-N2` accepted with reproduction (plan `## Context`).
@@ -34,9 +34,10 @@ Tracking of atomic goals achieved during the session. Work units: 60 in six wave
     - `[x]` Phase 4.3 raised F-1..F-12 except F-7 (S2, instructing) and F-7, F-13, F-14 (S3, testifying); each one verified against the tree and resolved in the plan (`task_scope.md` `## Resolution of the findings`). Work units 44 → 47 (B-07, E-01c, H-03).
     - `[x]` "Proposal E points 3-5" (plan P11; source not in the repository): human decision at Phase 5, routed to a `KI-059-n` by Z-02.
 - [x] **Phase 5 (Approval Gate)**: Human OK («Aprobado») on 2026-11-02 over the plan at `65c86d3`.
-- [x] **Phase 6 (Execution), Wave 1**: all units committed, A-19 to A-25 (plan D22, D23) included.
+- [x] **Phase 6 (Execution), Wave 1**: all units committed, A-19 to A-39 (plan D22 to D28) included.
     - `[x]` Human decision 2026-11-05 after QA Gate 1 round 3 (plan D21): unit A-18 before A-00; work units 52 → 53.
     - `[x]` Human decisions 2026-11-07 after QA Gate 1 round 5 (plan D22, D23): units A-19 to A-25; work units 53 → 60.
+    - `[x]` Human re-plan 2026-11-07 after the deadlock of QA Gate 1 round 6 (plan D24 to D28): units A-26 to A-39; work units 60 → 74; `session_state.py unblock` run after it.
     - `[x]` A-05 committed at `1dbe533`.
     - `[x]` A-09 committed at `0c7a9b2`.
     - `[x]` A-10 committed at `a694ffe`.
@@ -70,6 +71,7 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | When this row was opened, no session had run on the trimmed `agents.md`. Six sessions before it started at 63629 to 64031 tokens of context; the trim removed 33914 bytes, about 8500 tokens at 4 bytes per token (estimate), but moved 10307 bytes to `rules/code_craft.md` and 6840 to `rules/project_topology.md` | At the next session's first turn, `python3 -I scripts/session_cost.py --session <id> --json`: `first_turn` near 55500 confirms the saving; near 64000 refutes it. Whether rules are still obeyed needs later gates, not this figure. **Measured 2026-11-07, session `7a037351-d2f6-4ff2-8ca0-1e6a82e612cc`: `first_turn` 51720, below 55500, so the criterion confirms a saving.** Two limits: the drop of about 12300 tokens exceeds the 8500 estimate and Claude Code also moved from 2.1.314 to 2.1.319 between these sessions, so one measurement does not separate the two causes; and this is the first turn only, since the moved bytes return when their rule loads | KI-059-11 |
 | Host data predates this sprint on public `main` (6 files name one host, one of them calling it a private repository; another host's name is in its history), and no instrument scans for host names | Human decision 2026-11-05: Z-02 routes a review of public history and a host-name scanner to Sprint 060; no rewrite in this sprint. Human decision 2026-11-07 (plan D22): A-19 to A-24 remove the name from the current tree; public history stays with Z-02 | KI-059-12 |
 | Transcripts on disk for this project: 21, the oldest from 2026-10-08, against the 35 cited on 2026-11-05 (QA Gate 1 round 5). Age-based deletion is inferred, not measured, and A-00 needs the Sprint 056-058 transcripts | Abort criterion 7 covers a short A-00; A-00 states which sessions it could read | KI-059-13 |
+| Domain wording judged in the D24 pass and kept: `skills/skillopt/data/scenarios.json:58-59` is a dataset that names no project, in Spanish, and `docs/guides/RULE_PRECEDENTS_GUIDE.md:205` gives generic role examples. `tests/test_profile_references.py` does not detect bare names | Z-02 routes it with the Sprint 060 scanner | KI-059-14 |
 
 ---
 
@@ -149,6 +151,9 @@ Example (do not uncomment):
 | QA Agent (Gate 1) | 5 | `python3 scripts/check_fix_reproduces.py --range 08c669c..HEAD` | 0 |
 | QA Agent (Gate 1) | 5 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 0 |
 | QA Agent (Gate 1) | 5 | `make verify` | 0 |
+| QA Agent (Gate 1) | 6 | `python3 scripts/check_fix_reproduces.py --range 08c669c..HEAD` | 0 |
+| QA Agent (Gate 1) | 6 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 0 |
+| QA Agent (Gate 1) | 6 | `make verify` | 0 |
 | Tester Agent (Gate 2) | 1 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider` | 0 |
 | Tester Agent (Gate 2) | 1 | `make verify` | 0 |
 
@@ -211,6 +216,8 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase**: BLOCKED, `TERMINAL_REMEDIATION_LOOP`, 2026-11-07. QA Gate 1 round 6 REJECTED, unremediated: second `remediation-regression` label and four consecutive `REJECTED` (`workflows/remediation_workflow.md` Phase 0, abort criterion 8). The tree was clean, so `state_nuke` had nothing to remove and no commit changed. `error_mining` origin: `rules/token_economy.md` §3.1 kept being rewritten to describe bound conduct that no instrument performs instead of dropping the claim, and plan D22 checked one named string where the rule covers a property. `negative_ki` is pending: `agents.md` has 7 bytes of margin. No patch until the human re-plans these two blocks; then `session_state.py unblock`, QA Gate 1 round 7, Tester Gate 2 round 2, `suspend`, and Wave 2 in series, with batches out until the plan's unit allows them (human decision 2026-11-07: no amendment to D11).
+**Next Phase**: Phase 7, Wave 1. Deadlock of QA Gate 1 round 6 re-planned with the human and remediated (plan D24 to D28); the block was lifted with `session_state.py unblock`. The `RA-19` re-run owed by the S0 findings of rounds 3, 4 and 6 stays open until C-01 (plan D25). In order:
+1. QA Gate 1 round 7 and Tester Gate 2 round 2, each a fresh agent, with no finding excluded.
+2. `session_state.py suspend`, then Wave 2, in series; batches stay out until the plan's unit allows them (human decision 2026-11-07: no amendment to D11).
 
 *Certified under conventional commit standard: feat(scope): message #059*
