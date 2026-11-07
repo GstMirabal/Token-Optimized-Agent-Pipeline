@@ -67,6 +67,8 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | A-35 | `workflows/remediation_workflow.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
 | A-36 | `agents.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
 | A-37 | `rules/documentation_standard.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| A-38 | `config/rule_triggers.json` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| A-39 | `agents.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
 
 ### Wave 2 — pace and autonomy
 

@@ -97,6 +97,7 @@ enrutado con destino nombrado.
 | D25 | **`RA-19` tras S0 sin aplazamiento abierto** (decisión humana 2026-11-07): C-01 salda las rondas 3, 4 y 6; sigue en la wave 4 porque mide el sandbox de B-06. Una fila de Verification lo exige, de modo que `check_plan_closure.py` no deja cerrar sin ella; A-32 fija el momento en la regla. Retirar el nombre del árbol no lo retira de la historia pública (`KI-059-12`, Sprint 060). El S0 queda abierto en cuanto a `RA-19` hasta C-01 | Adelantar C-01: saldría incompleta y habría que repetirla; aplazar sin más: se puede olvidar, y ya se saltó tres veces |
 | D26 | **El aprendizaje va donde corresponde, sin agente nuevo** (decisión humana 2026-11-07): `governance_learner` decide el destino con una tabla (test o script si se puede comprobar; `rules/` si tiene contexto; `agents.md` solo si aplica en cada sesión y nada lo cubre; solo citar si ya está cubierto) y `rule_validator` lo audita (A-33 a A-36, A-37) | Agente nuevo: suma coste fijo y conserva las instrucciones contradictorias |
 | D27 | **Se retira la instrucción `forced: true`** (decisión humana 2026-11-07, QA Gate 1 ronda 6, F2): nada la lee. La señal "too tight" se lee de `task_scope.md`; la calibración sigue en A-00, A-06 y A-03; la copia de A-25 se actualiza | Definir un destino para el campo: añade un mecanismo que nadie consume |
+| D28 | **La regla nueva se carga donde ocurrió el fallo** (decisión humana 2026-11-07, hueco de A-37 confirmado por `rule_validator`): A-38 añade `rules/*.md` a los globs de `rules/documentation_standard.md` y A-39 ajusta su fila de `agents.md` §0 con +2 bytes | Enrutarlo por Z-02: la regla no se cargaría al editar `rules/` |
 
 ---
 
@@ -141,6 +142,8 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | A-35 | `workflows/remediation_workflow.md` | modify — D26: `negative_ki` enruta por la tabla de `governance_learner` en vez de inyectar en `agents.md` | low | `rule_validator` | ⏳ |
 | A-36 | `agents.md` | modify — D26: `constitutional_escalation` enruta por `governance_learner`; `wc -c agents.md` ≤ 20000 | low | `rule_validator` | ⏳ |
 | A-37 | `rules/documentation_standard.md` | modify — D26: `negative_ki` de este bloqueo: no describir una conducta que ningún instrumento realiza; si la tabla da otro destino, se enmienda esta fila antes de escribir | low | `rule_validator` | ⏳ |
+| A-38 | `config/rule_triggers.json` | modify — D28: añade `rules/*.md` a los globs de `rules/documentation_standard.md` | low | `rule_validator` | ⏳ |
+| A-39 | `agents.md` | modify — D28: fila §0 de `rules/documentation_standard.md`: `Editing any document under docs/ or rules/`; `wc -c agents.md` ≤ 20000 | low | `rule_validator` | ⏳ |
 
 ### Wave 2 — Ritmo y autonomía (aceleran el resto del sprint)
 
@@ -240,7 +243,7 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 72 | Count of rows in Work tables |
+| Work units | 74 | Count of rows in Work tables |
 | Subagents dispatched | lotes de hasta 4 en paralelo desde la wave 3 (D11), más QA + Tester por wave | `agent_assignment.md` |
 | Session ratio (2026-11-05) | **6.1×** sesión `9679503b`, ciclo único, medida completa con `session_cost.py` de `919d4f2` (corte de D19; durante la sesión se leyó 5.4× y 5.9×) — supera soft (5×). Quedan 41 unidades en 5 waves más cierre; delegación `native`; tras los gates de la wave 1, `suspend` | `python3 -I scripts/session_cost.py --session 9679503b-5e2c-4a1a-b3dd-a42dacd42cd6 --json` |
 | Prior session ratio | **9.2×** (ciclo 2; ciclo 1 4.6×), de `session_cost.py` en `08c669c` sobre la sesión `7204cadc`, cifra inflada por `F-116-N1`; con el `session_cost.py` de `919d4f2` (D19) es 3.6×; entonces superaba soft (5×). Coste restante declarado: 53 unidades en 6 waves más cierre, una wave por sesión, `suspend` entre waves | `python3 -I scripts/session_cost.py --session 7204cadc-d44b-4226-a000-597c17b52b33 --json` da la cifra de `919d4f2`; la de `08c669c` sale de `git show 08c669c:scripts/session_cost.py` |
@@ -300,6 +303,7 @@ transcript exists for this tool.
 | `CHANGELOG.md`, roadmaps 014 a 017, `docs/sprints/023-core-pipeline/task_scope.md` | nombre de host genericizado con anotación (D22) |
 | `tests/test_token_economy_soft_bound.py` | nuevo: fija el texto soft de §3.1 (D23) |
 | `tests/test_profile_references.py`, `workflows/reverse_documentation_workflow.md` | nuevo check de referencias a perfiles; dominio genericizado (D24) |
+| `config/rule_triggers.json` | carga `rules/documentation_standard.md` al editar `rules/*.md` (D28) |
 | `rules/qa_and_testing.md`, `agents/governance_learner.md`, `agents/rule_validator.md`, `workflows/remediation_workflow.md`, `rules/documentation_standard.md` | momento de `RA-19` (D25) y destino del aprendizaje (D26) |
 | `docs/guides/RULE_PRECEDENTS_GUIDE.md` | nuevo: historia y precedentes de las filas de `agents.md` sin otro destino (A-13) |
 | `docs/decisions/ADR-0021-qa-agent-tier-trial.md`, `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` | nuevo ADR de la prueba D9 y su cita en la guía (A-14) |

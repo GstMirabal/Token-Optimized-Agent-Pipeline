@@ -60,6 +60,8 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | A-35 | `workflows/remediation_workflow.md` | modify: D26: `negative_ki` routes by the `governance_learner` table instead of injecting into `agents.md` | low | `rule_validator` | sonnet | medium | ⏳ |
 | A-36 | `agents.md` | modify: D26: `constitutional_escalation` routes through `governance_learner`; `wc -c agents.md` at most 20000 | low | `rule_validator` | sonnet | medium | ⏳ |
 | A-37 | `rules/documentation_standard.md` | modify: D26: `negative_ki` of this deadlock: do not describe conduct no instrument performs; if the table gives another destination, amend this row before writing | low | `rule_validator` | sonnet | medium | ⏳ |
+| A-38 | `config/rule_triggers.json` | modify: D28: add `rules/*.md` to the globs of `rules/documentation_standard.md` | low | `rule_validator` | sonnet | medium | ⏳ |
+| A-39 | `agents.md` | modify: D28: section 0 row of `rules/documentation_standard.md`: `Editing any document under docs/ or rules/`; `wc -c agents.md` at most 20000 | low | `rule_validator` | sonnet | medium | ⏳ |
 
 ### Wave 2 — Pace and autonomy
 
@@ -142,7 +144,7 @@ Same structural subject claimed by more than one unit. "Serial" means the plan's
 | `CHANGELOG.md` | A-19, A-26 (Wave 1), Z-01 (Close) | Serial. |
 | `scripts/check_task_scope.py` | G-01 (Wave 2), H-02 (Wave 3, after G-01 and H-01) | Serial. |
 | `scripts/upstream_outbox.py` | I-02, I-03, I-04, I-05 | Serial by explicit `after` chain I-02 to I-05. |
-| `agents.md` | A-12, A-36 (Wave 1), D-02 (Wave 5, after A-12) | Serial. |
+| `agents.md` | A-12, A-36, A-39 (Wave 1), D-02 (Wave 5, after A-12) | Serial. |
 | `rules/qa_and_testing.md` | A-16, A-32 (Wave 1) | Serial. |
 | Roadmaps 015, 016 and 017 | A-21 and A-27, A-22 and A-28, A-23 and A-29 (Wave 1) | Serial. |
 | `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | A-00, A-06 (Wave 3) | Serial. |
@@ -177,7 +179,7 @@ Severity per `rules/qa_and_testing.md` section 4 (S0-S3). Class per the same fil
 
 ## Resolution of the findings
 
-Applied to `IMPLEMENTATION_PLAN.md` (and mirrored in the Work tables above and in `agent_assignment.md`) before Phase 5. Plan Work units: 44 → 47 (B-07, E-01c, H-03 added). Phase 6 Wave 1 added A-13 (plan D15): 47 → 48, A-14 (plan D17): 48 → 49, A-15, A-16, A-17 (plan D18): 49 → 52, and A-18 (plan D21): 52 → 53. After QA Gate 1 round 5, A-19 to A-24 (plan D22) and A-25 (plan D23): 53 → 60. After QA Gate 1 round 6, A-26 to A-37 (plan D24 to D26): 60 → 72.
+Applied to `IMPLEMENTATION_PLAN.md` (and mirrored in the Work tables above and in `agent_assignment.md`) before Phase 5. Plan Work units: 44 → 47 (B-07, E-01c, H-03 added). Phase 6 Wave 1 added A-13 (plan D15): 47 → 48, A-14 (plan D17): 48 → 49, A-15, A-16, A-17 (plan D18): 49 → 52, and A-18 (plan D21): 52 → 53. After QA Gate 1 round 5, A-19 to A-24 (plan D22) and A-25 (plan D23): 53 → 60. After QA Gate 1 round 6, A-26 to A-37 (plan D24 to D26): 60 → 72, and A-38, A-39 (plan D28): 72 → 74.
 
 | ID | Resolution |
 | :--- | :--- |
