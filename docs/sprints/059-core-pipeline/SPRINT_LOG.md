@@ -17,7 +17,7 @@
 ---
 
 ## 🏁 Sprint Progression
-Tracking of atomic goals achieved during the session. Work units: 53 in six waves plus close. Execution order: Wave 1 to Wave 6, then close; one wave per session, `session_state.py suspend` between waves (plan `## Cost`).
+Tracking of atomic goals achieved during the session. Work units: 60 in six waves plus close. Execution order: Wave 1 to Wave 6, then close; one wave per session, `session_state.py suspend` between waves (plan `## Cost`).
 
 - [x] **Phase 1 (Planning)**: plan drafted and committed.
     - `[x]` Intake triage: channel A empty, channel B empty, `F-116-N1` and `F-116-N2` accepted with reproduction (plan `## Context`).
@@ -34,7 +34,9 @@ Tracking of atomic goals achieved during the session. Work units: 53 in six wave
     - `[x]` Phase 4.3 raised F-1..F-12 except F-7 (S2, instructing) and F-7, F-13, F-14 (S3, testifying); each one verified against the tree and resolved in the plan (`task_scope.md` `## Resolution of the findings`). Work units 44 → 47 (B-07, E-01c, H-03).
     - `[x]` "Proposal E points 3-5" (plan P11; source not in the repository): human decision at Phase 5, routed to a `KI-059-n` by Z-02.
 - [x] **Phase 5 (Approval Gate)**: Human OK («Aprobado») on 2026-11-02 over the plan at `65c86d3`.
-- [ ] **Phase 6 (Execution), Wave 1**: in progress.
+- [x] **Phase 6 (Execution), Wave 1**: all units committed, A-19 to A-25 (plan D22, D23) included.
+    - `[x]` Human decision 2026-11-05 after QA Gate 1 round 3 (plan D21): unit A-18 before A-00; work units 52 → 53.
+    - `[x]` Human decisions 2026-11-07 after QA Gate 1 round 5 (plan D22, D23): units A-19 to A-25; work units 53 → 60.
     - `[x]` A-05 committed at `1dbe533`.
     - `[x]` A-09 committed at `0c7a9b2`.
     - `[x]` A-10 committed at `a694ffe`.
@@ -62,11 +64,12 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | Rules with no blocking script found in `hooks/` or `scripts/check_*`: `ephemeral` (`TODO`/`FIXME`), `RA-03` branch name, `RA-12` direct commit to `main` (only the push is blocked), `§8` pnpm settings. A trigger reduces the risk of missing them, it does not enforce them | Out of this sprint's scope; Z-02 routes scripts for them to the program queue | KI-059-5 |
 | QA Gate 1 round 2 S3 notes: `config/invocation_exceptions.json:60,80` and `scripts/detect_drift.py:328`, `tests/test_detect_drift.py:459` cite text no longer in `agents.md`; `agents.md` `Why here` cells are terse and `Risk-free` overclaims; the `devops_agent` row lost the framework-root scope | Recorded, not blocking; agents.md had 23 bytes of margin then and has 7 now (`wc -c agents.md`: 19993 of 20000), so Z-02 routes them | KI-059-6 |
 | `qa_agent` trial ended by abort criterion 4 after one wave (plan D20). One case says nothing general about `sonnet`: QA on `sonnet` also found real S2 defects in round 1 | A new trial needs a new ADR that covers `--resolve` under Cursor | KI-059-7 |
-| Host names reached the plan at `88d8a51` (QA Gate 1 round 3, S0 suspected); no instrument scans plans for them | Human decision 2026-11-05: no other project's name stays in the tree (`git grep` clean at `d2dbd29`); this branch's unpushed history is accepted as is, with no rewrite and no check due before push | KI-059-8 |
+| Host names reached the plan at `88d8a51` (QA Gate 1 round 3, S0 suspected); no instrument scans plans for them | Human decision 2026-11-05: no other project's name stays in the tree (`git grep` at `d2dbd29` was clean for three of the four names removed at `af220fe`; the fourth stayed in 6 historical files, measured by QA Gate 1 round 5, and A-19 to A-24 remove it, plan D22); this branch's unpushed history is accepted as is, with no rewrite and no check due before push | KI-059-8 |
 | The 15x hard bound moved from about 371K to about 958K in session `7204cadc` when the baseline became context size (D1, D19), with no decision on whether 15 stays valid | A-00 and A-06 name it for a human decision, with the `agents.md` trim lowering `first` | KI-059-9 |
 | `read_turns` counts one API message once per transcript record, so token totals are too high by a factor of 1.66 to 2.51, median 2.17, over the 20 closed main-session transcripts on disk on 2026-11-07, with the sum of the four usage fields: `python3 -I -c "import glob,json,os,statistics as st;S=lambda m:sum(m['usage'].get(k) or 0 for k in('input_tokens','output_tokens','cache_read_input_tokens','cache_creation_input_tokens'));M=lambda p:[m for m in(json.loads(l).get('message') for l in open(p)) if isinstance(m,dict) and m.get('usage') and m.get('model')!='<synthetic>'];R=lambda ms:sum(map(S,ms))/sum(map(S,{m['id']:m for m in reversed(ms)}.values()));live=json.load(open('docs/active_state.json'))['session_id'];v=sorted(R(M(p)) for p in glob.glob(os.path.expanduser('~/.claude/projects/*-agents/*.jsonl')) if live not in p and M(p));print(len(v),round(v[0],2),round(st.median(v),2),round(v[-1],2))"`. Earlier readings, annotated: this row said 2.1 to 2.5, and QA Gate 1 round 4 read 1.64 to 2.5 on its own transcript set; neither set is reproducible. `ratio` and cuts are unaffected. A-00, H-01 and H-03 would calibrate on these totals | Human decision 2026-11-05 (plan D21): unit A-18 before A-00. `rules/token_economy.md` totals measured before it are suspect | KI-059-10 |
-| No session has run on the trimmed `agents.md`, so the saving is unmeasured. Six sessions before it started at 63629 to 64031 tokens of context; the trim removed 33914 bytes, about 8500 tokens at 4 bytes per token (estimate), but moved 10307 bytes to `rules/code_craft.md` and 6840 to `rules/project_topology.md` | At the next session's first turn, `python3 -I scripts/session_cost.py --session <id> --json`: `first_turn` near 55500 confirms the saving; near 64000 refutes it. Whether rules are still obeyed needs later gates, not this figure. **Measured 2026-11-07, session `7a037351-d2f6-4ff2-8ca0-1e6a82e612cc`: `first_turn` 51720, below 55500, so the criterion confirms a saving.** Two limits: the drop of about 12300 tokens exceeds the 8500 estimate and Claude Code also moved from 2.1.314 to 2.1.319 between these sessions, so one measurement does not separate the two causes; and this is the first turn only, since the moved bytes return when their rule loads | KI-059-11 |
-| Host data predates this sprint on public `main` (6 files name one host, one of them calling it a private repository; another host's name is in its history), and no instrument scans for host names | Human decision 2026-11-05: Z-02 routes a review of public history and a host-name scanner to Sprint 060; no rewrite in this sprint | KI-059-12 |
+| When this row was opened, no session had run on the trimmed `agents.md`. Six sessions before it started at 63629 to 64031 tokens of context; the trim removed 33914 bytes, about 8500 tokens at 4 bytes per token (estimate), but moved 10307 bytes to `rules/code_craft.md` and 6840 to `rules/project_topology.md` | At the next session's first turn, `python3 -I scripts/session_cost.py --session <id> --json`: `first_turn` near 55500 confirms the saving; near 64000 refutes it. Whether rules are still obeyed needs later gates, not this figure. **Measured 2026-11-07, session `7a037351-d2f6-4ff2-8ca0-1e6a82e612cc`: `first_turn` 51720, below 55500, so the criterion confirms a saving.** Two limits: the drop of about 12300 tokens exceeds the 8500 estimate and Claude Code also moved from 2.1.314 to 2.1.319 between these sessions, so one measurement does not separate the two causes; and this is the first turn only, since the moved bytes return when their rule loads | KI-059-11 |
+| Host data predates this sprint on public `main` (6 files name one host, one of them calling it a private repository; another host's name is in its history), and no instrument scans for host names | Human decision 2026-11-05: Z-02 routes a review of public history and a host-name scanner to Sprint 060; no rewrite in this sprint. Human decision 2026-11-07 (plan D22): A-19 to A-24 remove the name from the current tree; public history stays with Z-02 | KI-059-12 |
+| Transcripts on disk for this project: 21, the oldest from 2026-10-08, against the 35 cited on 2026-11-05 (QA Gate 1 round 5). Age-based deletion is inferred, not measured, and A-00 needs the Sprint 056-058 transcripts | Abort criterion 7 covers a short A-00; A-00 states which sessions it could read | KI-059-13 |
 
 ---
 
@@ -142,6 +145,9 @@ Example (do not uncomment):
 | QA Agent (Gate 1) | 4 | `python3 scripts/check_fix_reproduces.py --range 08c669c..HEAD` | 0 |
 | QA Agent (Gate 1) | 4 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 0 |
 | QA Agent (Gate 1) | 4 | `make verify` | 0 |
+| QA Agent (Gate 1) | 5 | `python3 scripts/check_fix_reproduces.py --range 08c669c..HEAD` | 0 |
+| QA Agent (Gate 1) | 5 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 0 |
+| QA Agent (Gate 1) | 5 | `make verify` | 0 |
 | Tester Agent (Gate 2) | 1 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider` | 0 |
 | Tester Agent (Gate 2) | 1 | `make verify` | 0 |
 
@@ -204,8 +210,8 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase**: Phase 7, Wave 1. QA Gate 1 round 4 remediated at `bdf4cf7`, `9716f28`, `b4d2c7a` and `b0a4433` and in this log; KI-059-11 measured. One more `remediation-regression` label stops this block. In order:
-1. QA Gate 1 round 5 and Tester Gate 2 round 2, each a fresh agent, with no finding excluded.
+**Next Phase**: Phase 7, Wave 1. QA Gate 1 round 5 remediated, with units A-19 to A-25; KI-059-11 measured. One more `remediation-regression` label stops this block, and one more consecutive `REJECTED` (rounds 3, 4 and 5 so far) reaches `workflows/remediation_workflow.md` Phase 0. In order:
+1. QA Gate 1 round 6 and Tester Gate 2 round 2, each a fresh agent, with no finding excluded.
 2. `session_state.py suspend`, then Wave 2, in series; batches stay out until the plan's unit allows them (human decision 2026-11-07: no amendment to D11).
 
 *Certified under conventional commit standard: feat(scope): message #059*
