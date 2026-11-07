@@ -199,3 +199,10 @@ def test_current_sprint_stops_when_the_named_directory_has_no_task_scope(repo):
     assert _cli(repo, "start", "--max-iterations", "3", "--success", "x",
                 "--current-sprint") == 2
     assert _cli(repo, "check", "--current-sprint") == 2
+
+
+def test_check_with_a_missing_sprint_dir_exits_2(repo):
+    """Plan D37 M-12 (R13-1): a mistyped `--sprint-dir` hashed as "" and the
+    armed loop advanced, exit 0, instead of stopping on a file that is not there."""
+    lg.start(5, "tests pass")
+    assert _cli(repo, "check", "--sprint-dir", "docs/sprints/059-typo") == 2
