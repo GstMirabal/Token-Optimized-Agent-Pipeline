@@ -68,13 +68,13 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | A-43 | `skills/mcp-registry/README.md` | modify: D29: replace the domain example on line 5 | low | `doc_orchestrator` | sonnet | medium | ✅ `f4d20dd` |
 | A-44 | `profiles/example-project/mcp/registry.json` | modify: D29: replace the domain example on line 7 | low | `doc_orchestrator` | sonnet | medium | ✅ `66a4438` |
 | A-45 | `docs/guides/RULE_PRECEDENTS_GUIDE.md` | modify: D29: replace the roles inherited from a host on line 205 | low | `doc_orchestrator` | sonnet | medium | ✅ `699eac3` |
-| A-46 | `docs/standards/templates/HOTFIX_TEMPLATE.md` | modify: D33: route through `constitutional_escalation` on line 25 and link the assigned destination, no fixed `RA-XX` (N1) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-47 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify: D33: annotate the D23 and D25 Documentary impact rows (N2), mark D24 (N3), remove the figure from the `7a037351` session cost row (N5) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-48 | `tests/test_profile_references.py` | modify: D33: docstring (N4): narrow the claim to what the test checks and state the skipped files; no logic change | low | `implementer_agent` | sonnet | medium | ⏳ |
-| A-49 | `scripts/check_log_append_only.py` | create: D34: exit 2 at `10c88f4` (N3), `1dbb43e` (F6) and `60383e3` (D24); exit 0 on `60383e3..HEAD` after A-47 | low | `implementer_agent` | sonnet | medium | ⏳ |
-| A-50 | `tests/test_check_log_append_only.py` | create: D34: throwaway git repositories for each zone, the trailer, its limits and the errors | low | `implementer_agent` | sonnet | medium | ⏳ |
-| A-51 | `Makefile` | modify: D34: `verify` runs `check_log_append_only.py --current-sprint` | low | `implementer_agent` | sonnet | medium | ⏳ |
-| A-52 | `rules/documentation_standard.md` | modify: D34: name the instrument and its limits beside the `annotated in place` row | low | `rule_validator` | sonnet | medium | ⏳ |
+| A-46 | `docs/standards/templates/HOTFIX_TEMPLATE.md` | modify: D33: route through `constitutional_escalation` on line 25 and link the assigned destination, no fixed `RA-XX` (N1) | low | `doc_orchestrator` | sonnet | medium | ✅ `05a6dab` |
+| A-47 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify: D33: annotate the D23 and D25 Documentary impact rows (N2), mark D24 (N3), remove the figure from the `7a037351` session cost row (N5) | low | `doc_orchestrator` | sonnet | medium | ✅ `1473570` |
+| A-48 | `tests/test_profile_references.py` | modify: D33: docstring (N4): narrow the claim to what the test checks and state the skipped files; no logic change | low | `implementer_agent` | sonnet | medium | ✅ `8923501` |
+| A-49 | `scripts/check_log_append_only.py` | create: D34: exit 2 at `10c88f4` (N3), `1dbb43e` (F6) and `60383e3` (D24); exit 0 on `60383e3..HEAD` after A-47 | low | `implementer_agent` | sonnet | medium | ✅ `251717d` |
+| A-50 | `tests/test_check_log_append_only.py` | create: D34: throwaway git repositories for each zone, the trailer, its limits and the errors | low | `implementer_agent` | sonnet | medium | ✅ `3368dc5` |
+| A-51 | `Makefile` | modify: D34: `verify` runs `check_log_append_only.py --current-sprint` | low | `implementer_agent` | sonnet | medium | ✅ `de239b7` |
+| A-52 | `rules/documentation_standard.md` | modify: D34: name the instrument and its limits beside the `annotated in place` row | low | `rule_validator` | sonnet | medium | ✅ `d40183d` |
 
 ### Wave 2 — Pace and autonomy
 
