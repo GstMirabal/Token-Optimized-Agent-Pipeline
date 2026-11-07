@@ -158,7 +158,7 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 1. Deadlock Term | `state_nuke` | ambiguous |
 | 2. Extraction | `error_mining` | write |
 | 2. Extraction | `family_check` | write |
-| 2. Extraction | `negative_ki` | ambiguous |
+| 2. Extraction | `negative_ki` | verify |
 | 3. Rollback | `roadmap_tag` | write |
 | 3. Rollback | `session_lock` | ambiguous |
 
