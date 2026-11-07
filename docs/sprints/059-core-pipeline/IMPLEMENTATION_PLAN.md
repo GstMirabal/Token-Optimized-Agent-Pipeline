@@ -130,20 +130,20 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | A-23 | `docs/roadmaps/core/pipeline/017-pre-publication-hardening.md` | modify — D22: igual que A-19 | low | `doc_orchestrator` | ✅ `b6adb90` |
 | A-24 | `docs/sprints/023-core-pipeline/task_scope.md` | modify — D22: igual que A-19 | low | `doc_orchestrator` | ✅ `ff69f15` |
 | A-25 | `tests/test_token_economy_soft_bound.py` | create — D23: igualdad contra copia revisada de la fila soft y de la frase de calibración de `rules/token_economy.md §3.1`, y `probe_cost` devuelve `None` con un ciclo a 6×; falla con el texto de `d192075` (N3) y con el de `7779e7f` (F1) | low | `implementer_agent` | ✅ `1e1deda` |
-| A-26 | `CHANGELOG.md` | modify — D24: reemplaza el slug del perfil en las líneas 800, 811 y 934 y el dominio de la 764, con anotación | low | `doc_orchestrator` | ⏳ |
-| A-27 | `docs/roadmaps/core/pipeline/015-terminology-and-nomenclature-hardening.md` | modify — D24: reemplaza el slug de la línea 52, con anotación | low | `doc_orchestrator` | ⏳ |
-| A-28 | `docs/roadmaps/core/pipeline/016-folder-topology-migration.md` | modify — D24: reemplaza el slug de la línea 33 y deja legibles las líneas 33 y 38 (F6 de la ronda 6) | low | `doc_orchestrator` | ⏳ |
-| A-29 | `docs/roadmaps/core/pipeline/017-pre-publication-hardening.md` | modify — D24: reemplaza el slug de las líneas 21, 29, 39 y 48, con anotación | low | `doc_orchestrator` | ⏳ |
-| A-30 | `workflows/reverse_documentation_workflow.md` | modify — D24: reemplaza el dominio de negocio de la línea 28 por una descripción genérica | low | `doc_orchestrator` | ⏳ |
-| A-31 | `tests/test_profile_references.py` | create — D24: toda referencia `profiles/<slug>` trackeada resuelve a un directorio real o a un marcador revisado; falla en `d06c939` por cada uno de los 4 archivos; declara que no detecta nombres sueltos | low | `implementer_agent` | ⏳ |
-| A-32 | `rules/qa_and_testing.md` | modify — D25: la repetición de `RA-19` tras un S0 ocurre antes del merge del sprint que lo remedia | low | `rule_validator` | ⏳ |
-| A-33 | `agents/governance_learner.md` | modify — D26: tabla de destinos del aprendizaje; quita el destino fijo `agents.md` Section 7 | low | `rule_validator` | ⏳ |
-| A-34 | `agents/rule_validator.md` | modify — D26: audita el destino que da `governance_learner`; quita el destino fijo `agents.md` | low | `rule_validator` | ⏳ |
-| A-35 | `workflows/remediation_workflow.md` | modify — D26: `negative_ki` enruta por la tabla de `governance_learner` en vez de inyectar en `agents.md` | low | `rule_validator` | ⏳ |
-| A-36 | `agents.md` | modify — D26: `constitutional_escalation` enruta por `governance_learner`; `wc -c agents.md` ≤ 20000 | low | `rule_validator` | ⏳ |
-| A-37 | `rules/documentation_standard.md` | modify — D26: `negative_ki` de este bloqueo: no describir una conducta que ningún instrumento realiza; si la tabla da otro destino, se enmienda esta fila antes de escribir | low | `rule_validator` | ⏳ |
-| A-38 | `config/rule_triggers.json` | modify — D28: añade `rules/*.md` a los globs de `rules/documentation_standard.md` | low | `rule_validator` | ⏳ |
-| A-39 | `agents.md` | modify — D28: fila §0 de `rules/documentation_standard.md`: `Editing any document under docs/ or rules/`; `wc -c agents.md` ≤ 20000 | low | `rule_validator` | ⏳ |
+| A-26 | `CHANGELOG.md` | modify — D24: reemplaza el slug del perfil en las líneas 800, 811 y 934 y el dominio de la 764, con anotación | low | `doc_orchestrator` | ✅ `4e34b49` |
+| A-27 | `docs/roadmaps/core/pipeline/015-terminology-and-nomenclature-hardening.md` | modify — D24: reemplaza el slug de la línea 52, con anotación | low | `doc_orchestrator` | ✅ `59e6950` |
+| A-28 | `docs/roadmaps/core/pipeline/016-folder-topology-migration.md` | modify — D24: reemplaza el slug de la línea 33 y deja legibles las líneas 33 y 38 (F6 de la ronda 6) | low | `doc_orchestrator` | ✅ `271ee11` |
+| A-29 | `docs/roadmaps/core/pipeline/017-pre-publication-hardening.md` | modify — D24: reemplaza el slug de las líneas 21, 29, 39 y 48, con anotación | low | `doc_orchestrator` | ✅ `fe48d2f` |
+| A-30 | `workflows/reverse_documentation_workflow.md` | modify — D24: reemplaza el dominio de negocio de la línea 28 por una descripción genérica | low | `doc_orchestrator` | ✅ `af55026` |
+| A-31 | `tests/test_profile_references.py` | create — D24: toda referencia `profiles/<slug>` trackeada resuelve a un directorio real o a un marcador revisado; falla en `d06c939` por cada uno de los 4 archivos; declara que no detecta nombres sueltos | low | `implementer_agent` | ✅ `dbe243a` |
+| A-32 | `rules/qa_and_testing.md` | modify — D25: la repetición de `RA-19` tras un S0 ocurre antes del merge del sprint que lo remedia | low | `rule_validator` | ✅ `9382b80` |
+| A-33 | `agents/governance_learner.md` | modify — D26: tabla de destinos del aprendizaje; quita el destino fijo `agents.md` Section 7 | low | `rule_validator` | ✅ `2d0d39b` |
+| A-34 | `agents/rule_validator.md` | modify — D26: audita el destino que da `governance_learner`; quita el destino fijo `agents.md` | low | `rule_validator` | ✅ `24de04e` |
+| A-35 | `workflows/remediation_workflow.md` | modify — D26: `negative_ki` enruta por la tabla de `governance_learner` en vez de inyectar en `agents.md` | low | `rule_validator` | ✅ `f052ea9` |
+| A-36 | `agents.md` | modify — D26: `constitutional_escalation` enruta por `governance_learner`; `wc -c agents.md` ≤ 20000 | low | `rule_validator` | ✅ `dc53642` |
+| A-37 | `rules/documentation_standard.md` | modify — D26: `negative_ki` de este bloqueo: no describir una conducta que ningún instrumento realiza; si la tabla da otro destino, se enmienda esta fila antes de escribir | low | `rule_validator` | ✅ `d6b388c` |
+| A-38 | `config/rule_triggers.json` | modify — D28: añade `rules/*.md` a los globs de `rules/documentation_standard.md` | low | `rule_validator` | ✅ `408ad02` |
+| A-39 | `agents.md` | modify — D28: fila §0 de `rules/documentation_standard.md`: `Editing any document under docs/ or rules/`; `wc -c agents.md` ≤ 20000 | low | `rule_validator` | ✅ `de19dad` |
 
 ### Wave 2 — Ritmo y autonomía (aceleran el resto del sprint)
 
