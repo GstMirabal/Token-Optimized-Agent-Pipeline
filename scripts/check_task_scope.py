@@ -19,20 +19,21 @@ profile with no ``Write``/``Edit`` tool cannot ``create``/``modify``/``delete`` 
 file. Sprints 030 and 031 recorded such rows as executed successfully.
 
 Exit codes:
-    0 — pass, or skip (historical columns / non-canonical dir / no anchor)
-    2 — shape, undeclared mechanical-high row, incapable assignee, or a
+    0 — pass, or skip (historical columns / non-canonical dir / no anchor or
+        no ``current_sprint`` block)
+    2 — an anchor that names no existing sprint directory, shape, undeclared mechanical-high row, incapable assignee, or a
         canonical sprint directory holding no task_scope.md at all (RA-11)
 """
 
 from __future__ import annotations
 
 import argparse
-import json
 import re
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _current_sprint import CurrentSprintError, current_sprint_dir, project_root
 from _md_table import split_cells
 from _root import agents_root
 
@@ -62,48 +63,6 @@ def sprint_id_from_dir(sprint_dir: Path) -> int | None:
     if len(name) >= 3 and name[:3].isdigit() and name[3:4] == "-":
         return int(name.split("-", 1)[0])
     return None
-
-
-def current_sprint_dir(root: Path) -> Path | None:
-    """Canonical sprint directory for the anchor's ``current_sprint.id``.
-
-    Accepts the id as a string or an integer. It required ``int`` until Sprint
-    051, while every other reader of the same field — ``session_start.py:102``,
-    ``check_role_artifact.py:154``, ``persist_session_context.py:33`` — takes it
-    untyped, and real anchors carry the zero-padded string form (``"051"``,
-    ``"112"``) because that is what the canonical directory name uses.
-
-    The consequence was not a crash. This function returns ``None`` for an
-    unusable id and both callers read ``None`` as *no current sprint, skip* — so
-    ``check_task_scope.py --current-sprint`` and ``check_gate_log.py
-    --current-sprint``, two steps of ``make verify``, printed ``[OK] … (skip)``
-    and exited ``0`` in every repository whose anchor used the string form. A
-    gate that fails open reports success for work it never looked at, which is
-    the `PR #28` shape this corpus keeps naming (`F-051-R2`).
-
-    Args:
-        root: repository root holding ``docs/active_state.json``.
-
-    Returns:
-        Path | None: the sprint directory, or None when the anchor names no
-        usable sprint — the one case where skipping is correct.
-    """
-    anchor = root / "docs" / "active_state.json"
-    if not anchor.is_file():
-        return None
-    try:
-        data = json.loads(anchor.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        return None
-    raw = (data.get("current_sprint") or {}).get("id")
-    if isinstance(raw, bool) or not isinstance(raw, (int, str)):
-        return None
-    text = str(raw).strip()
-    if not text.isdigit():
-        return None
-    matches = sorted((root / "docs" / "sprints").glob(f"{int(text):03d}-*"))
-    dirs = [path for path in matches if path.is_dir()]
-    return dirs[0] if dirs else None
 
 
 def _cells(line: str) -> list[str]:
@@ -315,9 +274,12 @@ def main() -> int:
     parser.add_argument("--sprint-dir", type=Path, help="Canonical sprint directory")
     parser.add_argument("--current-sprint", action="store_true")
     args = parser.parse_args()
-    root = agents_root() if (Path.cwd() / "scripts" / "check_task_scope.py").is_file() else Path.cwd()
     if args.current_sprint:
-        target = current_sprint_dir(root)
+        try:
+            target = current_sprint_dir(project_root())
+        except CurrentSprintError as exc:
+            print(f"❌ check_task_scope: {exc}", file=sys.stderr)
+            return 2
         if target is None:
             print("[OK] check_task_scope: no current sprint directory (skip)")
             return 0

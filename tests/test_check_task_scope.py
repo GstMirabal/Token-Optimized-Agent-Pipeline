@@ -10,6 +10,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 REPO = Path(__file__).resolve().parent.parent
 CHECK = REPO / "scripts" / "check_task_scope.py"
 
@@ -220,17 +222,42 @@ def test_an_integer_id_still_resolves(tmp_path: Path) -> None:
     assert cts.current_sprint_dir(tmp_path) == expected
 
 
-def test_a_non_numeric_id_is_the_one_case_where_skipping_is_right(
-    tmp_path: Path,
-) -> None:
-    """An unusable id is not a silent pass for a real sprint — there is none."""
+def test_a_non_numeric_id_raises(tmp_path: Path) -> None:
+    """An unusable id is an error, never a skip (plan D37 M-02)."""
     import check_task_scope as cts
 
     _anchor(tmp_path, "not-a-sprint")
-    assert cts.current_sprint_dir(tmp_path) is None
+    with pytest.raises(cts.CurrentSprintError):
+        cts.current_sprint_dir(tmp_path)
     _anchor2 = tmp_path / "docs" / "active_state.json"
     _anchor2.write_text(json.dumps({"current_sprint": {"id": True}}), encoding="utf-8")
-    assert cts.current_sprint_dir(tmp_path) is None
+    with pytest.raises(cts.CurrentSprintError):
+        cts.current_sprint_dir(tmp_path)
+
+
+# --- Plan D37 M-02: no silent skip from a subdirectory or on a missing directory ---
+
+
+def _git_repo_with_anchor(root: Path, anchor_text: str) -> Path:
+    """A fixture repository: `.git`, an anchor, and no sprint directory."""
+    (root / ".git").mkdir()
+    (root / "docs" / "sprints").mkdir(parents=True)
+    (root / "docs" / "active_state.json").write_text(anchor_text, encoding="utf-8")
+    return root
+
+
+def test_current_sprint_from_a_subdirectory_exits_2_on_a_missing_directory(
+    tmp_path: Path,
+) -> None:
+    root = _git_repo_with_anchor(tmp_path, json.dumps({"current_sprint": {"id": "059"}}))
+    result = _run("--current-sprint", cwd=root / "docs")
+    assert result.returncode == 2, result.stdout
+
+
+def test_current_sprint_exits_2_on_a_truncated_anchor(tmp_path: Path) -> None:
+    root = _git_repo_with_anchor(tmp_path, '{"current_sprint": {"id": 59')
+    result = _run("--current-sprint", cwd=root)
+    assert result.returncode == 2, result.stdout
 
 
 # --- B-3: a Markdown-escaped pipe inside a cell is not a column separator. ---
