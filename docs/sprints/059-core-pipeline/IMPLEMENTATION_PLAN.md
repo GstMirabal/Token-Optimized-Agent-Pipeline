@@ -164,8 +164,8 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | A-50 | `tests/test_check_log_append_only.py` | create — D34: repositorios git desechables para cada zona, el trailer, sus límites y los errores | low | `implementer_agent` | ✅ `3368dc5` |
 | A-51 | `Makefile` | modify — D34: `verify` ejecuta `check_log_append_only.py --current-sprint` | low | `implementer_agent` | ✅ `de239b7` |
 | A-52 | `rules/documentation_standard.md` | modify — D34: nombra el instrumento y sus límites junto a la fila `annotated in place` | low | `rule_validator` | ✅ `d40183d` |
-| A-53 | `scripts/check_log_append_only.py` | modify — D35: `fix(` con `tests/test_check_log_append_only.py` pareado: raíz de `--current-sprint` como `check_gate_log.py`; `--sprint-dir` resuelto desde la raíz de git; exit 2 ante directorio inexistente, base vacía o registro ausente a mano; `Repro:` falla en el padre | low | `implementer_agent` | ⏳ |
-| A-54 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify — D35: marca D23 y D26 como acotadas por D32 (R9-3) | low | `doc_orchestrator` | ⏳ |
+| A-53 | `scripts/check_log_append_only.py` | modify — D35: `fix(` con `tests/test_check_log_append_only.py` pareado: raíz de `--current-sprint` como `check_gate_log.py`; `--sprint-dir` resuelto desde la raíz de git; exit 2 ante directorio inexistente, base vacía o registro ausente a mano; `Repro:` falla en el padre | low | `implementer_agent` | ✅ `f273f93` |
+| A-54 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify — D35: marca D23 y D26 como acotadas por D32 (R9-3) | low | `doc_orchestrator` | ✅ `822c047` |
 
 ### Wave 2 — Ritmo y autonomía (aceleran el resto del sprint)
 
