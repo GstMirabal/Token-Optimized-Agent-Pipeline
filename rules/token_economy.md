@@ -34,7 +34,7 @@ Full-dumping a file >200 lines is PROHIBITED (`agents.md §2 token_saver`). Skip
 
 | Threshold | Trigger | Action |
 | :--- | :--- | :--- |
-| **Soft** | turn > **5×** the cycle's first | Declare remaining cost in the plan's **Cost** section (work units left, delegation mode). `session_probe.py` surfaces the breach at the next start. Calibration may still record-only while the baseline builds |
+| **Soft** | turn > **5×** the cycle's first | Declare remaining cost in the plan's **Cost** section (work units left, delegation mode). `probe_cost` in `session_probe.py` reports only the hard bound, so no instrument surfaces a soft breach. Calibration may still record-only while the baseline builds |
 | **Hard** | turn > **15×** the cycle's first | No new work starts. Sprint complete → close it; sprint open → **suspend** (`session_state.py suspend`) and continue in a fresh session. Declare Cost before the next claim |
 
 **Portable Cost half (Cursor and Claude).** Every Implementation Plan from Sprint
@@ -45,15 +45,15 @@ when a Claude transcript exists for this tool — the prior cycle ratio from
 always runs. Structural plan wastes are rejected by
 `skills/token-saver-auditor/scripts/audit_plan.py` (exit `2`).
 
-**Why the cycle and not the session.** A session is a **sawtooth**: compaction rebuilds the window from a summary and the context size collapses back to the start-up cost. Measured over one full session of this repository — four cycles, peaks of 849K, 995K, 361K and 631K against reset points of **22,174 tokens, identical three times** — a ratio taken against the session's first turn would collapse at the first reset and never fire again.
+**Why the cycle and not the session.** A session is a **sawtooth**: compaction rebuilds the window from a summary and the context size collapses back to the start-up cost. Measured on `cache_read`, the unit of Sprint 021, over one full session of this repository — four cycles, `cache_read` peaks of 849K, 995K, 361K and 631K against `cache_read` reset points of **22,174 tokens, identical three times** — a ratio taken against the session's first turn would collapse at the first reset and never fire again.
 
 **Compaction is not a cost control, and this rule exists because of that.** Those four resets happened and the session still spent 423M `cache_read`. Cycle 2 is the proof: **113 messages cost 99.5M**, nearly matching a 414-message cycle, because it climbed to 995K. **Cost tracks peak height, not message count** — cost is the area under the sawtooth, and compaction only resets the x axis.
 
-**Break-even is an observed constant, not an estimate.** Restarting costs ~22K, measured identically three times. The hard threshold would have fired in **3 of those 4 cycles**.
+**Break-even was observed, not estimated.** Restarting cost ~22K of `cache_read`, identical three times in that session; it is not a context-size figure. On that `cache_read`, the hard threshold would have fired in **3 of those 4 cycles**.
 
 **Calibration that does not destroy its own data.** A binding hard threshold means the sprint always closes at the bound and the natural close is never observed. So the soft threshold **records and does not act** while the distribution builds, and the hard one records `forced: true` plus whether `task_scope.md` still held unfinished work. A forced close with pending work is the "too tight" signal; one on a complete sprint is not.
 
-**Provenance: n=1**, and of one kind — intensive planning, many reads, little code execution. A file-editing sprint will have a different curve. `scripts/session_cost.py --json` is the reproducing command; a figure without it is memory, not evidence.
+**Provenance: n=1**, and of one kind — intensive planning, many reads, little code execution. A file-editing sprint will have a different curve. `scripts/session_cost.py --json` is the reproducing command for the context-size ratio; a figure without a command is memory, not evidence. The Sprint 021 figures above are recorded in `docs/sprints/021-core-pipeline/IMPLEMENTATION_PLAN.md`, and their totals are suspect until A-18 (`KI-059-10`).
 
 ## 4. Tool-Result Economics
 
