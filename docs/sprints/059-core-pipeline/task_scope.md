@@ -47,14 +47,14 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | A-22 | `docs/roadmaps/core/pipeline/016-folder-topology-migration.md` | modify: D22, same as A-19 | low | `doc_orchestrator` | sonnet | medium | ✅ `f72983e` |
 | A-23 | `docs/roadmaps/core/pipeline/017-pre-publication-hardening.md` | modify: D22, same as A-19 | low | `doc_orchestrator` | sonnet | medium | ✅ `b6adb90` |
 | A-24 | `docs/sprints/023-core-pipeline/task_scope.md` | modify: D22, same as A-19 | low | `doc_orchestrator` | sonnet | medium | ✅ `ff69f15` |
-| A-25 | `tests/test_token_economy_soft_bound.py` | create: D23, equality against a reviewed copy of the soft row and the calibration sentence of `rules/token_economy.md` §3.1, and `probe_cost` returns None for a cycle at 6x; fails with the text of `d192075` (N3) and of `7779e7f` (F1) | low | `implementer_agent` | sonnet | medium | ✅ `1e1deda` |
+| A-25 | `tests/test_token_economy_soft_bound.py` | create: D23, equality against a reviewed copy of the soft row and the calibration sentence of `rules/token_economy.md` §3.1, and `probe_cost` returns None for a cycle at 6x; fails with the text of `d192075` (N3) and of `7779e7f` (F1) | low | `implementer_agent` | sonnet | medium | ✅ `1e1deda`, reduced `d059aac` (D32) |
 | A-26 | `CHANGELOG.md` | modify: D24: replace the profile slug on lines 800, 811 and 934 and the business domain on line 764, annotated | low | `doc_orchestrator` | sonnet | medium | ✅ `4e34b49` |
 | A-27 | `docs/roadmaps/core/pipeline/015-terminology-and-nomenclature-hardening.md` | modify: D24: replace the profile slug on line 52, annotated | low | `doc_orchestrator` | sonnet | medium | ✅ `59e6950` |
 | A-28 | `docs/roadmaps/core/pipeline/016-folder-topology-migration.md` | modify: D24: replace the profile slug on line 33 and make lines 33 and 38 readable (round 6 F6) | low | `doc_orchestrator` | sonnet | medium | ✅ `271ee11` |
 | A-29 | `docs/roadmaps/core/pipeline/017-pre-publication-hardening.md` | modify: D24: replace the profile slug on lines 21, 29, 39 and 48, annotated | low | `doc_orchestrator` | sonnet | medium | ✅ `fe48d2f` |
 | A-30 | `workflows/reverse_documentation_workflow.md` | modify: D24: replace the business domain on line 28 with a generic description | low | `doc_orchestrator` | sonnet | medium | ✅ `af55026` |
 | A-31 | `tests/test_profile_references.py` | create: D24: every tracked `profiles/<slug>` reference resolves to a real directory or a reviewed placeholder; fails at `d06c939` for each of the 4 files; states that it does not detect bare names | low | `implementer_agent` | sonnet | medium | ✅ `dbe243a` |
-| A-32 | `rules/qa_and_testing.md` | modify: D25: the `RA-19` re-run after an S0 happens before the merge of the sprint that remediates it | low | `rule_validator` | sonnet | medium | ✅ `9382b80` |
+| A-32 | `rules/qa_and_testing.md` | modify: D25: the `RA-19` re-run after an S0 happens before the merge of the sprint that remediates it | low | `rule_validator` | sonnet | medium | ✅ `9382b80`, replaced `022924f` (D30) |
 | A-33 | `agents/governance_learner.md` | modify: D26: learning destination table; remove the fixed `agents.md` Section 7 destination | low | `rule_validator` | sonnet | medium | ✅ `2d0d39b` |
 | A-34 | `agents/rule_validator.md` | modify: D26: audit the destination `governance_learner` gives; remove the fixed `agents.md` destination | low | `rule_validator` | sonnet | medium | ✅ `24de04e` |
 | A-35 | `workflows/remediation_workflow.md` | modify: D26: `negative_ki` routes by the `governance_learner` table instead of injecting into `agents.md` | low | `rule_validator` | sonnet | medium | ✅ `f052ea9` |
@@ -62,12 +62,12 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | A-37 | `rules/documentation_standard.md` | modify: D26: `negative_ki` of this deadlock: do not describe conduct no instrument performs; if the table gives another destination, amend this row before writing | low | `rule_validator` | sonnet | medium | ✅ `d6b388c` |
 | A-38 | `config/rule_triggers.json` | modify: D28: add `rules/*.md` to the globs of `rules/documentation_standard.md` | low | `rule_validator` | sonnet | medium | ✅ `408ad02` |
 | A-39 | `agents.md` | modify: D28: section 0 row of `rules/documentation_standard.md`: `Editing any document under docs/ or rules/`; `wc -c agents.md` at most 20000 | low | `rule_validator` | sonnet | medium | ✅ `de19dad` |
-| A-40 | `docs/roadmaps/core/pipeline/018-post-publication-field-hardening.md` | modify: D29: replace the business domain on line 36, annotated | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-41 | `skills/skillopt/data/scenarios.json` | modify: D29: replace the business domain on lines 58 and 59 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-42 | `docs/roadmaps/core/pipeline/008-session-close-governance.md` | modify: D29: replace the domain on line 23, annotated | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-43 | `skills/mcp-registry/README.md` | modify: D29: replace the domain example on line 5 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-44 | `profiles/example-project/mcp/registry.json` | modify: D29: replace the domain example on line 7 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-45 | `docs/guides/RULE_PRECEDENTS_GUIDE.md` | modify: D29: replace the roles inherited from a host on line 205 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-40 | `docs/roadmaps/core/pipeline/018-post-publication-field-hardening.md` | modify: D29: replace the business domain on line 36, annotated | low | `doc_orchestrator` | sonnet | medium | ✅ `6256efd` |
+| A-41 | `skills/skillopt/data/scenarios.json` | modify: D29: replace the business domain on lines 58 and 59 | low | `doc_orchestrator` | sonnet | medium | ✅ `e6f27cb` |
+| A-42 | `docs/roadmaps/core/pipeline/008-session-close-governance.md` | modify: D29: replace the domain on line 23, annotated | low | `doc_orchestrator` | sonnet | medium | ✅ `4bdcc49` |
+| A-43 | `skills/mcp-registry/README.md` | modify: D29: replace the domain example on line 5 | low | `doc_orchestrator` | sonnet | medium | ✅ `f4d20dd` |
+| A-44 | `profiles/example-project/mcp/registry.json` | modify: D29: replace the domain example on line 7 | low | `doc_orchestrator` | sonnet | medium | ✅ `66a4438` |
+| A-45 | `docs/guides/RULE_PRECEDENTS_GUIDE.md` | modify: D29: replace the roles inherited from a host on line 205 | low | `doc_orchestrator` | sonnet | medium | ✅ `699eac3` |
 
 ### Wave 2 — Pace and autonomy
 
