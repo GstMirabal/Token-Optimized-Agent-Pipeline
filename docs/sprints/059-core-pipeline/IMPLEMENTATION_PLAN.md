@@ -118,13 +118,13 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | A-14 | `docs/decisions/ADR-0021-qa-agent-tier-trial.md` | create — tras A-12: sustituye la cláusula de `ADR-0003` solo para `qa_agent` durante la prueba D9, con el criterio de vuelta del abort 4 (D17); `ADR-0003` no se edita; companion obligatorio `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` (`:19`, que repite la regla, y `:140`) | medium | `doc_orchestrator` | ✅ `ed96115` |
 | A-08 | `agents/qa_agent.md` | modify — tras A-14: `model: sonnet`, `tier: author` (D9); companion obligatorio `config/model_tiers.json` (mover `qa_agent` a `author.profiles`; añadir al `basis` de `gate` la prueba y su criterio de vuelta), porque `scripts/check_model_tiers.py` exige que coincidan; companion `tests/test_agent_profile_census.py` (fija la lista `gate` y mantiene a `qa_agent` sin `Write`/`Edit`) | medium | `implementer_agent` | ✅ `80518b4`, reverted `8e8a566` (D20) |
 | A-01 | `scripts/session_cost.py` | modify — `fix(`: baseline D1 en `cycle_summary` y cortes en `segment_cycles` por tamaño de contexto (D19); paired test `tests/test_session_cost.py` (nuevo) con un turno `cache_read` 0 / `cache_creation` > 0 | medium | `implementer_agent` | ✅ `ef490cd`, `919d4f2` |
-| A-19 | `CHANGELOG.md` | modify — D22: reemplaza el nombre de host por `a host project`, con anotación en el sitio; `git grep -c -i` del nombre sobre el archivo → 0 | low | `doc_orchestrator` | ⏳ |
-| A-20 | `docs/roadmaps/core/pipeline/014-identity-branding-hardening.md` | modify — D22: igual que A-19 | low | `doc_orchestrator` | ⏳ |
-| A-21 | `docs/roadmaps/core/pipeline/015-terminology-and-nomenclature-hardening.md` | modify — D22: igual que A-19 | low | `doc_orchestrator` | ⏳ |
-| A-22 | `docs/roadmaps/core/pipeline/016-folder-topology-migration.md` | modify — D22: igual que A-19 | low | `doc_orchestrator` | ⏳ |
-| A-23 | `docs/roadmaps/core/pipeline/017-pre-publication-hardening.md` | modify — D22: igual que A-19 | low | `doc_orchestrator` | ⏳ |
-| A-24 | `docs/sprints/023-core-pipeline/task_scope.md` | modify — D22: igual que A-19 | low | `doc_orchestrator` | ⏳ |
-| A-25 | `tests/test_token_economy_soft_bound.py` | create — D23: igualdad contra copia revisada de la fila soft y de la frase de calibración de `rules/token_economy.md §3.1`, y `probe_cost` devuelve `None` con un ciclo a 6×; falla con el texto de `d192075` (N3) y con el de `7779e7f` (F1) | low | `implementer_agent` | ⏳ |
+| A-19 | `CHANGELOG.md` | modify — D22: reemplaza el nombre de host por `a host project`, con anotación en el sitio; `git grep -c -i` del nombre sobre el archivo → 0 | low | `doc_orchestrator` | ✅ `4fb09a9` |
+| A-20 | `docs/roadmaps/core/pipeline/014-identity-branding-hardening.md` | modify — D22: igual que A-19 | low | `doc_orchestrator` | ✅ `28242ff` |
+| A-21 | `docs/roadmaps/core/pipeline/015-terminology-and-nomenclature-hardening.md` | modify — D22: igual que A-19 | low | `doc_orchestrator` | ✅ `a3c5a14` |
+| A-22 | `docs/roadmaps/core/pipeline/016-folder-topology-migration.md` | modify — D22: igual que A-19 | low | `doc_orchestrator` | ✅ `f72983e` |
+| A-23 | `docs/roadmaps/core/pipeline/017-pre-publication-hardening.md` | modify — D22: igual que A-19 | low | `doc_orchestrator` | ✅ `b6adb90` |
+| A-24 | `docs/sprints/023-core-pipeline/task_scope.md` | modify — D22: igual que A-19 | low | `doc_orchestrator` | ✅ `ff69f15` |
+| A-25 | `tests/test_token_economy_soft_bound.py` | create — D23: igualdad contra copia revisada de la fila soft y de la frase de calibración de `rules/token_economy.md §3.1`, y `probe_cost` devuelve `None` con un ciclo a 6×; falla con el texto de `d192075` (N3) y con el de `7779e7f` (F1) | low | `implementer_agent` | ✅ `1e1deda` |
 
 ### Wave 2 — Ritmo y autonomía (aceleran el resto del sprint)
 
