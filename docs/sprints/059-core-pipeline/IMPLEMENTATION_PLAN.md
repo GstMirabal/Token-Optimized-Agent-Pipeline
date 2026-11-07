@@ -104,6 +104,7 @@ enrutado con destino nombrado.
 | D32 | **Remediar quitando** (decisión humana 2026-11-07): antes de tocar una afirmación se ejecuta el comando que la comprueba; sin instrumento, se borra. Sustituye a D27 en esto: el párrafo de calibración de `rules/token_economy.md` se borra entero, y A-25 se reduce a la conducta de `probe_cost` a 6×, sin copia de texto. D26 no cubre las enmiendas `RA-XX` de `skills/compliance-checker`, que son un destino legítimo | Otra reescritura de la misma línea: es la causa del bloqueo |
 | D33 | **Remediación de la ronda 8** (decisión humana 2026-11-07, tras QA Gate 1 ronda 8, N1 a N5): N1 se corrige en `HOTFIX_TEMPLATE.md:25` (A-46); N2, N3 y N5 se corrigen en este plan y en `SPRINT_LOG.md` (A-47); N4 reduce lo que afirma el docstring (A-48). Las notas S3 N6 a N8 solo se registran | Descartar N1 o enrutar N2 a N5 como KI: deja una instrucción contradicha y arrastra deuda por una corrección mínima |
 | D34 | **Check determinista de la familia de N3** (decisión humana 2026-11-07; convergencia, regla 3): `scripts/check_log_append_only.py` (A-49 a A-51) rechaza palabras perdidas en filas KI, frases perdidas tras `error_mining` y filas de decisión sustituidas sin marca. Excepción declarada: trailer `Log-Rewrite: <motivo>`. `make verify` lo aplica desde el Sprint 060; en el 059, QA lo ejecuta sobre `60383e3..HEAD`. Límites: solo esas zonas; no ve palabras reordenadas ni cambios de sentido; el patrón de sustitución depende de la redacción en español | Enrutarlo a Z-02: aplaza un check que la regla exige y que se midió viable |
+| D35 | **Remediación de la ronda 9** (decisión humana 2026-11-07, tras QA Gate 1 ronda 9, R9-1 a R9-3): A-53 corrige en un commit `fix(` con test pareado la raíz de `--current-sprint` y la resolución de `--sprint-dir`, y falla con exit 2 ante un directorio inexistente, una base de rango vacía o un registro ausente pasados a mano; A-54 marca D23 y D26. Las notas S3 R9-N1 a R9-N3 solo se registran. Límite decidido por adelantado: otro S0 o S1 en este script en la ronda 10 lo retira (revierte A-49 a A-53 y el contador del README) y envía el check a Z-02, sin otra ronda de arreglos | Retirar el check ahora: incumple la regla 3 por dos defectos con corrección conocida |
 
 ---
 
@@ -163,6 +164,8 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | A-50 | `tests/test_check_log_append_only.py` | create — D34: repositorios git desechables para cada zona, el trailer, sus límites y los errores | low | `implementer_agent` | ✅ `3368dc5` |
 | A-51 | `Makefile` | modify — D34: `verify` ejecuta `check_log_append_only.py --current-sprint` | low | `implementer_agent` | ✅ `de239b7` |
 | A-52 | `rules/documentation_standard.md` | modify — D34: nombra el instrumento y sus límites junto a la fila `annotated in place` | low | `rule_validator` | ✅ `d40183d` |
+| A-53 | `scripts/check_log_append_only.py` | modify — D35: `fix(` con `tests/test_check_log_append_only.py` pareado: raíz de `--current-sprint` como `check_gate_log.py`; `--sprint-dir` resuelto desde la raíz de git; exit 2 ante directorio inexistente, base vacía o registro ausente a mano; `Repro:` falla en el padre | low | `implementer_agent` | ⏳ |
+| A-54 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify — D35: marca D23 y D26 como acotadas por D32 (R9-3) | low | `doc_orchestrator` | ⏳ |
 
 ### Wave 2 — Ritmo y autonomía (aceleran el resto del sprint)
 
@@ -263,7 +266,7 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 87 | Count of rows in Work tables |
+| Work units | 89 | Count of rows in Work tables |
 | Subagents dispatched | lotes de hasta 4 en paralelo desde la wave 3 (D11), más QA + Tester por wave | `agent_assignment.md` |
 | Session ratio (2026-11-07) | Sesión `7a037351`, ciclo único, `session_cost.py` de `919d4f2` — supera soft (5×). Quedan 41 unidades en 5 waves más cierre y los gates de la wave 1; delegación `native`; `suspend` antes de QA Gate 1 ronda 8 | `python3 -I scripts/session_cost.py --session 7a037351-d2f6-4ff2-8ca0-1e6a82e612cc --json` |
 | Session ratio (2026-11-05) | **6.1×** sesión `9679503b`, ciclo único, medida completa con `session_cost.py` de `919d4f2` (corte de D19; durante la sesión se leyó 5.4× y 5.9×) — supera soft (5×). Quedan 41 unidades en 5 waves más cierre; delegación `native`; tras los gates de la wave 1, `suspend` | `python3 -I scripts/session_cost.py --session 9679503b-5e2c-4a1a-b3dd-a42dacd42cd6 --json` |
