@@ -69,6 +69,16 @@ Example (do not uncomment — Phase 7 writes the real rows):
 | Gate | Round | Verdict | Class | Severity | Notes |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 
+The Notes cell holds at most 400 characters: commands and exits, finding ids,
+counts. Each S0-S2 finding gets one row below, whose `Check` is the command that
+reproduces it; `scripts/check_sprint_refs.py` exits 2 on a longer Notes cell or a
+cited finding id with no row.
+
+### Gate findings
+
+| Round | ID | Severity | File:line | Check |
+| :--- | :--- | :--- | :--- | :--- |
+
 ### Remediation notes
 
 The remediator fills this table before re-sending a REJECTED round to its gate, one
@@ -139,5 +149,7 @@ Closing the session state and certifying traceability.
 
 **Strategic Lock**: {{LOCK_STATE}}
 **Next Phase**: {{NEXT_OBJECTIVE}}
+
+<!-- A superseded Next Phase stays, reduced to one line naming what superseded it. -->
 
 *Certified under conventional commit standard: feat(scope): message #{{SPRINT_ID}}*
