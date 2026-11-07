@@ -23,7 +23,7 @@ Declared escalations: none. No Work row is assigned to a `mechanical` profile, s
 
 ## Work
 
-Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from the plan. `after X` in Operation is the plan's dependency; G-01 and H-02 add the `Depends on`, `Est. cost` and `Suspend after` columns later, so they are not written here. Execution order is the plan's: Wave 1 to Wave 6, then Close. The tables hold 53 units (Wave 1: 12, Wave 2: 8, Wave 3: 10, Wave 4: 5, Wave 5: 5, Wave 6: 11, Close: 2). Rows D-04, E-01b and F-02 are conditional on an ADR decision (see findings F-1 and F-8).
+Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from the plan. `after X` in Operation is the plan's dependency; G-01 and H-02 add the `Depends on`, `Est. cost` and `Suspend after` columns later, so they are not written here. Execution order and unit count: the plan's `## Work` and `## Cost`. Rows D-04, E-01b and F-02 are conditional on an ADR decision (see findings F-1 and F-8).
 
 ### Wave 1 — Cost levers
 
@@ -80,7 +80,7 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 
 ### Wave 1b — Method (plan D37)
 
-Under plan D37 rule B the Operation of these rows is the plan's row of the same id; this table holds tier and status only. Runs after the Wave 1 gates and before Wave 2.
+Operation: the plan row of the same id (plan D37).
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -88,6 +88,7 @@ Under plan D37 rule B the Operation of these rows is the plan's row of the same 
 | M-02 | `scripts/check_task_scope.py` | modify: plan M-02 (D37) | low | `implementer_agent` | sonnet | medium | ⏳ |
 | M-03 | `scripts/check_gate_log.py` | modify: plan M-03 (D37) | low | `implementer_agent` | sonnet | medium | ⏳ |
 | M-04 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify: plan M-04 (D37) | low | `skill_architect` | sonnet | medium | ⏳ |
+| M-12 | `scripts/loop_guard.py` | modify: plan M-12 (D37) | low | `implementer_agent` | sonnet | medium | ⏳ |
 | M-05 | `tests/test_current_sprint_matrix.py` | create: plan M-05 (D37) | low | `implementer_agent` | sonnet | medium | ⏳ |
 | M-06 | `scripts/check_sprint_refs.py` | create: plan M-06 (D37) | medium | `implementer_agent` | sonnet | medium | ⏳ |
 | M-07 | `Makefile` | modify: plan M-07 (D37) | low | `implementer_agent` | sonnet | medium | ⏳ |
@@ -221,7 +222,7 @@ Severity per `rules/qa_and_testing.md` section 4 (S0-S3). Class per the same fil
 
 ## Resolution of the findings
 
-Applied to `IMPLEMENTATION_PLAN.md` (and mirrored in the Work tables above and in `agent_assignment.md`) before Phase 5. Plan Work units: 44 → 47 (B-07, E-01c, H-03 added). Phase 6 Wave 1 added A-13 (plan D15): 47 → 48, A-14 (plan D17): 48 → 49, A-15, A-16, A-17 (plan D18): 49 → 52, and A-18 (plan D21): 52 → 53. After QA Gate 1 round 5, A-19 to A-24 (plan D22) and A-25 (plan D23): 53 → 60. After QA Gate 1 round 6, A-26 to A-37 (plan D24 to D26): 60 → 72, and A-38, A-39 (plan D28): 72 → 74. After QA Gate 1 round 7, A-40 to A-45 (plan D29): 74 → 80. After QA Gate 1 round 8, A-46 to A-52 (plan D33, D34): 80 → 87. After QA Gate 1 round 9, A-53, A-54 (plan D35): 87 → 89. After QA Gate 1 round 11, I-08 to I-10 (plan D36): 89 → 92, an estimate fixed at the opening of Wave 6. After QA Gate 1 round 12, M-01 to M-11 (plan D37): 92 → 103; I-08 to I-10 stay counted as replaced.
+Applied to `IMPLEMENTATION_PLAN.md` (and mirrored in the Work tables above and in `agent_assignment.md`) before Phase 5. Plan Work units: 44 → 47 (B-07, E-01c, H-03 added). Phase 6 Wave 1 added A-13 (plan D15): 47 → 48, A-14 (plan D17): 48 → 49, A-15, A-16, A-17 (plan D18): 49 → 52, and A-18 (plan D21): 52 → 53. After QA Gate 1 round 5, A-19 to A-24 (plan D22) and A-25 (plan D23): 53 → 60. After QA Gate 1 round 6, A-26 to A-37 (plan D24 to D26): 60 → 72, and A-38, A-39 (plan D28): 72 → 74. After QA Gate 1 round 7, A-40 to A-45 (plan D29): 74 → 80. After QA Gate 1 round 8, A-46 to A-52 (plan D33, D34): 80 → 87. After QA Gate 1 round 9, A-53, A-54 (plan D35): 87 → 89. After QA Gate 1 round 11, I-08 to I-10 (plan D36): 89 → 92, an estimate fixed at the opening of Wave 6. After QA Gate 1 round 12, M-01 to M-11 (plan D37): 92 → 103; I-08 to I-10 stay counted as replaced. After QA Gate 1 round 13, M-12: 103 → 104.
 
 | ID | Resolution |
 | :--- | :--- |

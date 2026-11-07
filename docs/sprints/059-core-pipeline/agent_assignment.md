@@ -93,6 +93,7 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | M-02 | `scripts/check_task_scope.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | M-03 | `scripts/check_gate_log.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | M-04 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify | sequential | `skill_architect` | N/A | `agents/skill_architect.md` |
+| M-12 | `scripts/loop_guard.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | M-05 | `tests/test_current_sprint_matrix.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | M-06 | `scripts/check_sprint_refs.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | M-07 | `Makefile` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
