@@ -185,7 +185,7 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | M-07 | `Makefile` | modify — tras M-06: `verify` ejecuta `python3 scripts/check_sprint_refs.py --current-sprint` (invocador `RA-16`) | low | `implementer_agent` |
 | M-08 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify — Design con columna `Check`; tablas Work sin Status; regla B en el encabezado | low | `doc_orchestrator` |
 | M-09 | `docs/standards/templates/SPRINT_LOG_TEMPLATE.md` | modify — tabla Gate findings (`Round`, `ID`, `Severity`, `File:line`, `Check`); tope de 400 caracteres en Notes; un "Next Phase" sustituido ocupa una línea | low | `doc_orchestrator` |
-| M-10 | `docs/standards/templates/AGENT_ASSIGNMENT_TEMPLATE.md` | modify — las filas citan el id de la unidad y no copian File ni Operation | low | `doc_orchestrator` |
+| M-10 | `docs/standards/templates/AGENT_ASSIGNMENT_TEMPLATE.md` | modify — Operation lleva solo el verbo, no el texto del plan; Target y el verbo se quedan porque los lee `scripts/check_forge_ladder.py:159-160` | low | `doc_orchestrator` |
 | M-11 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — añade la tabla Gate findings (`Round`, `ID`, `Severity`, `File:line`, `Check`) | low | `orchestrator` |
 
 ### Wave 2 — Ritmo y autonomía (aceleran el resto del sprint)
