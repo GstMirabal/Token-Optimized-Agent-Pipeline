@@ -75,6 +75,13 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | A-43 | `skills/mcp-registry/README.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | A-44 | `profiles/example-project/mcp/registry.json` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | A-45 | `docs/guides/RULE_PRECEDENTS_GUIDE.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-46 | `docs/standards/templates/HOTFIX_TEMPLATE.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-47 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-48 | `tests/test_profile_references.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| A-49 | `scripts/check_log_append_only.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| A-50 | `tests/test_check_log_append_only.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| A-51 | `Makefile` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| A-52 | `rules/documentation_standard.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
 
 ### Wave 2 — pace and autonomy
 

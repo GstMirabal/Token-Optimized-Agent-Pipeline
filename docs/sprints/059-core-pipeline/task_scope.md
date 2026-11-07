@@ -68,6 +68,13 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | A-43 | `skills/mcp-registry/README.md` | modify: D29: replace the domain example on line 5 | low | `doc_orchestrator` | sonnet | medium | ✅ `f4d20dd` |
 | A-44 | `profiles/example-project/mcp/registry.json` | modify: D29: replace the domain example on line 7 | low | `doc_orchestrator` | sonnet | medium | ✅ `66a4438` |
 | A-45 | `docs/guides/RULE_PRECEDENTS_GUIDE.md` | modify: D29: replace the roles inherited from a host on line 205 | low | `doc_orchestrator` | sonnet | medium | ✅ `699eac3` |
+| A-46 | `docs/standards/templates/HOTFIX_TEMPLATE.md` | modify: D33: route through `constitutional_escalation` on line 25 and link the assigned destination, no fixed `RA-XX` (N1) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-47 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify: D33: annotate the D23 and D25 Documentary impact rows (N2), mark D24 (N3), remove the figure from the `7a037351` session cost row (N5) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-48 | `tests/test_profile_references.py` | modify: D33: docstring (N4): narrow the claim to what the test checks and state the skipped files; no logic change | low | `implementer_agent` | sonnet | medium | ⏳ |
+| A-49 | `scripts/check_log_append_only.py` | create: D34: exit 2 at `10c88f4` (N3), `1dbb43e` (F6) and `60383e3` (D24); exit 0 on `60383e3..HEAD` after A-47 | low | `implementer_agent` | sonnet | medium | ⏳ |
+| A-50 | `tests/test_check_log_append_only.py` | create: D34: throwaway git repositories for each zone, the trailer, its limits and the errors | low | `implementer_agent` | sonnet | medium | ⏳ |
+| A-51 | `Makefile` | modify: D34: `verify` runs `check_log_append_only.py --current-sprint` | low | `implementer_agent` | sonnet | medium | ⏳ |
+| A-52 | `rules/documentation_standard.md` | modify: D34: name the instrument and its limits beside the `annotated in place` row | low | `rule_validator` | sonnet | medium | ⏳ |
 
 ### Wave 2 — Pace and autonomy
 
@@ -154,6 +161,9 @@ Same structural subject claimed by more than one unit. "Serial" means the plan's
 | `rules/qa_and_testing.md` | A-16, A-32 (Wave 1) | Serial. |
 | Roadmaps 015, 016 and 017 | A-21 and A-27, A-22 and A-28, A-23 and A-29 (Wave 1) | Serial. |
 | `docs/guides/RULE_PRECEDENTS_GUIDE.md` | A-13, A-45 (Wave 1) | Serial. |
+| `rules/documentation_standard.md` | A-37, A-52 (Wave 1) | Serial. |
+| `tests/test_profile_references.py` | A-31, A-48 (Wave 1) | Serial. |
+| `Makefile` | A-51 (Wave 1), B-05 (Wave 2) | Serial. |
 | `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | A-00, A-06 (Wave 3) | Serial. |
 | `rules/project_topology.md` | A-10 (Wave 1), D-03 (Wave 5, after A-10) | Serial. |
 | `workflows/pipeline_workflow.md` | G-02 (Wave 2), A-04 (Wave 3, after G-02) | Serial. |
@@ -186,7 +196,7 @@ Severity per `rules/qa_and_testing.md` section 4 (S0-S3). Class per the same fil
 
 ## Resolution of the findings
 
-Applied to `IMPLEMENTATION_PLAN.md` (and mirrored in the Work tables above and in `agent_assignment.md`) before Phase 5. Plan Work units: 44 → 47 (B-07, E-01c, H-03 added). Phase 6 Wave 1 added A-13 (plan D15): 47 → 48, A-14 (plan D17): 48 → 49, A-15, A-16, A-17 (plan D18): 49 → 52, and A-18 (plan D21): 52 → 53. After QA Gate 1 round 5, A-19 to A-24 (plan D22) and A-25 (plan D23): 53 → 60. After QA Gate 1 round 6, A-26 to A-37 (plan D24 to D26): 60 → 72, and A-38, A-39 (plan D28): 72 → 74. After QA Gate 1 round 7, A-40 to A-45 (plan D29): 74 → 80.
+Applied to `IMPLEMENTATION_PLAN.md` (and mirrored in the Work tables above and in `agent_assignment.md`) before Phase 5. Plan Work units: 44 → 47 (B-07, E-01c, H-03 added). Phase 6 Wave 1 added A-13 (plan D15): 47 → 48, A-14 (plan D17): 48 → 49, A-15, A-16, A-17 (plan D18): 49 → 52, and A-18 (plan D21): 52 → 53. After QA Gate 1 round 5, A-19 to A-24 (plan D22) and A-25 (plan D23): 53 → 60. After QA Gate 1 round 6, A-26 to A-37 (plan D24 to D26): 60 → 72, and A-38, A-39 (plan D28): 72 → 74. After QA Gate 1 round 7, A-40 to A-45 (plan D29): 74 → 80. After QA Gate 1 round 8, A-46 to A-52 (plan D33, D34): 80 → 87.
 
 | ID | Resolution |
 | :--- | :--- |
