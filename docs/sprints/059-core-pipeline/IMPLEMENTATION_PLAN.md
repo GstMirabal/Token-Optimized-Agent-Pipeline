@@ -133,14 +133,14 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | A-22 | `docs/roadmaps/core/pipeline/016-folder-topology-migration.md` | modify — D22: igual que A-19 | low | `doc_orchestrator` | ✅ `f72983e` |
 | A-23 | `docs/roadmaps/core/pipeline/017-pre-publication-hardening.md` | modify — D22: igual que A-19 | low | `doc_orchestrator` | ✅ `b6adb90` |
 | A-24 | `docs/sprints/023-core-pipeline/task_scope.md` | modify — D22: igual que A-19 | low | `doc_orchestrator` | ✅ `ff69f15` |
-| A-25 | `tests/test_token_economy_soft_bound.py` | create — D23: igualdad contra copia revisada de la fila soft y de la frase de calibración de `rules/token_economy.md §3.1`, y `probe_cost` devuelve `None` con un ciclo a 6×; falla con el texto de `d192075` (N3) y con el de `7779e7f` (F1) | low | `implementer_agent` | ✅ `1e1deda` |
+| A-25 | `tests/test_token_economy_soft_bound.py` | create — D23: igualdad contra copia revisada de la fila soft y de la frase de calibración de `rules/token_economy.md §3.1`, y `probe_cost` devuelve `None` con un ciclo a 6×; falla con el texto de `d192075` (N3) y con el de `7779e7f` (F1) | low | `implementer_agent` | ✅ `1e1deda`, reducida `d059aac` (D32) |
 | A-26 | `CHANGELOG.md` | modify — D24: reemplaza el slug del perfil en las líneas 800, 811 y 934 y el dominio de la 764, con anotación | low | `doc_orchestrator` | ✅ `4e34b49` |
 | A-27 | `docs/roadmaps/core/pipeline/015-terminology-and-nomenclature-hardening.md` | modify — D24: reemplaza el slug de la línea 52, con anotación | low | `doc_orchestrator` | ✅ `59e6950` |
 | A-28 | `docs/roadmaps/core/pipeline/016-folder-topology-migration.md` | modify — D24: reemplaza el slug de la línea 33 y deja legibles las líneas 33 y 38 (F6 de la ronda 6) | low | `doc_orchestrator` | ✅ `271ee11` |
 | A-29 | `docs/roadmaps/core/pipeline/017-pre-publication-hardening.md` | modify — D24: reemplaza el slug de las líneas 21, 29, 39 y 48, con anotación | low | `doc_orchestrator` | ✅ `fe48d2f` |
 | A-30 | `workflows/reverse_documentation_workflow.md` | modify — D24: reemplaza el dominio de negocio de la línea 28 por una descripción genérica | low | `doc_orchestrator` | ✅ `af55026` |
 | A-31 | `tests/test_profile_references.py` | create — D24: toda referencia `profiles/<slug>` trackeada resuelve a un directorio real o a un marcador revisado; falla en `d06c939` por cada uno de los 4 archivos; declara que no detecta nombres sueltos | low | `implementer_agent` | ✅ `dbe243a` |
-| A-32 | `rules/qa_and_testing.md` | modify — D25: la repetición de `RA-19` tras un S0 ocurre antes del merge del sprint que lo remedia | low | `rule_validator` | ✅ `9382b80` |
+| A-32 | `rules/qa_and_testing.md` | modify — D25: la repetición de `RA-19` tras un S0 ocurre antes del merge del sprint que lo remedia | low | `rule_validator` | ✅ `9382b80`, sustituida `022924f` (D30) |
 | A-33 | `agents/governance_learner.md` | modify — D26: tabla de destinos del aprendizaje; quita el destino fijo `agents.md` Section 7 | low | `rule_validator` | ✅ `2d0d39b` |
 | A-34 | `agents/rule_validator.md` | modify — D26: audita el destino que da `governance_learner`; quita el destino fijo `agents.md` | low | `rule_validator` | ✅ `24de04e` |
 | A-35 | `workflows/remediation_workflow.md` | modify — D26: `negative_ki` enruta por la tabla de `governance_learner` en vez de inyectar en `agents.md` | low | `rule_validator` | ✅ `f052ea9` |
@@ -148,12 +148,12 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | A-37 | `rules/documentation_standard.md` | modify — D26: `negative_ki` de este bloqueo: no describir una conducta que ningún instrumento realiza; si la tabla da otro destino, se enmienda esta fila antes de escribir | low | `rule_validator` | ✅ `d6b388c` |
 | A-38 | `config/rule_triggers.json` | modify — D28: añade `rules/*.md` a los globs de `rules/documentation_standard.md` | low | `rule_validator` | ✅ `408ad02` |
 | A-39 | `agents.md` | modify — D28: fila §0 de `rules/documentation_standard.md`: `Editing any document under docs/ or rules/`; `wc -c agents.md` ≤ 20000 | low | `rule_validator` | ✅ `de19dad` |
-| A-40 | `docs/roadmaps/core/pipeline/018-post-publication-field-hardening.md` | modify — D29: reemplaza el dominio de negocio de la línea 36, con anotación | low | `doc_orchestrator` | ⏳ |
-| A-41 | `skills/skillopt/data/scenarios.json` | modify — D29: reemplaza el dominio de negocio de las líneas 58 y 59 | low | `doc_orchestrator` | ⏳ |
-| A-42 | `docs/roadmaps/core/pipeline/008-session-close-governance.md` | modify — D29: reemplaza el dominio de la línea 23, con anotación | low | `doc_orchestrator` | ⏳ |
-| A-43 | `skills/mcp-registry/README.md` | modify — D29: reemplaza el ejemplo de dominio de la línea 5 | low | `doc_orchestrator` | ⏳ |
-| A-44 | `profiles/example-project/mcp/registry.json` | modify — D29: reemplaza el ejemplo de dominio de la línea 7 | low | `doc_orchestrator` | ⏳ |
-| A-45 | `docs/guides/RULE_PRECEDENTS_GUIDE.md` | modify — D29: reemplaza los roles heredados de un host en la línea 205 | low | `doc_orchestrator` | ⏳ |
+| A-40 | `docs/roadmaps/core/pipeline/018-post-publication-field-hardening.md` | modify — D29: reemplaza el dominio de negocio de la línea 36, con anotación | low | `doc_orchestrator` | ✅ `6256efd` |
+| A-41 | `skills/skillopt/data/scenarios.json` | modify — D29: reemplaza el dominio de negocio de las líneas 58 y 59 | low | `doc_orchestrator` | ✅ `e6f27cb` |
+| A-42 | `docs/roadmaps/core/pipeline/008-session-close-governance.md` | modify — D29: reemplaza el dominio de la línea 23, con anotación | low | `doc_orchestrator` | ✅ `4bdcc49` |
+| A-43 | `skills/mcp-registry/README.md` | modify — D29: reemplaza el ejemplo de dominio de la línea 5 | low | `doc_orchestrator` | ✅ `f4d20dd` |
+| A-44 | `profiles/example-project/mcp/registry.json` | modify — D29: reemplaza el ejemplo de dominio de la línea 7 | low | `doc_orchestrator` | ✅ `66a4438` |
+| A-45 | `docs/guides/RULE_PRECEDENTS_GUIDE.md` | modify — D29: reemplaza los roles heredados de un host en la línea 205 | low | `doc_orchestrator` | ✅ `699eac3` |
 
 ### Wave 2 — Ritmo y autonomía (aceleran el resto del sprint)
 
@@ -255,6 +255,7 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
 | Work units | 80 | Count of rows in Work tables |
 | Subagents dispatched | lotes de hasta 4 en paralelo desde la wave 3 (D11), más QA + Tester por wave | `agent_assignment.md` |
+| Session ratio (2026-11-07) | **6.1×** sesión `7a037351`, ciclo único, `session_cost.py` de `919d4f2` — supera soft (5×). Quedan 41 unidades en 5 waves más cierre y los gates de la wave 1; delegación `native`; `suspend` antes de QA Gate 1 ronda 8 | `python3 -I scripts/session_cost.py --session 7a037351-d2f6-4ff2-8ca0-1e6a82e612cc --json` |
 | Session ratio (2026-11-05) | **6.1×** sesión `9679503b`, ciclo único, medida completa con `session_cost.py` de `919d4f2` (corte de D19; durante la sesión se leyó 5.4× y 5.9×) — supera soft (5×). Quedan 41 unidades en 5 waves más cierre; delegación `native`; tras los gates de la wave 1, `suspend` | `python3 -I scripts/session_cost.py --session 9679503b-5e2c-4a1a-b3dd-a42dacd42cd6 --json` |
 | Prior session ratio | **9.2×** (ciclo 2; ciclo 1 4.6×), de `session_cost.py` en `08c669c` sobre la sesión `7204cadc`, cifra inflada por `F-116-N1`; con el `session_cost.py` de `919d4f2` (D19) es 3.6×; entonces superaba soft (5×). Coste restante declarado: 53 unidades en 6 waves más cierre, una wave por sesión, `suspend` entre waves | `python3 -I scripts/session_cost.py --session 7204cadc-d44b-4226-a000-597c17b52b33 --json` da la cifra de `919d4f2`; la de `08c669c` sale de `git show 08c669c:scripts/session_cost.py` |
 
