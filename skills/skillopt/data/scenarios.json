@@ -55,8 +55,8 @@
   },
   {
     "id": "scenario_10_double_venv_isolation",
-    "question": "Verificar cumplimiento de regla: Aislamiento total por doble venv. ¿Se permite instalar dependencias de optimización directamente en el entorno de trading principal?",
-    "ground_truth": "No cumple. Está estrictamente prohibido mezclar las dependencias de trading y optimización; se debe usar un venv secundario aislado.",
+    "question": "Verificar cumplimiento de regla: Aislamiento total por doble venv. ¿Se permite instalar dependencias de optimización directamente en el entorno de producción principal?",
+    "ground_truth": "No cumple. Está estrictamente prohibido mezclar las dependencias de producción y optimización; se debe usar un venv secundario aislado.",
     "task_type": "venv_isolation"
   }
 ]
