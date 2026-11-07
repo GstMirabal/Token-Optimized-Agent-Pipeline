@@ -14,13 +14,15 @@ Usage:
 Blast radius (R-5): a Work row whose File cell matches a ``shared_globs``
 pattern needs a Verification row whose Command contains ``full_suite_command``.
 Source: ``<cwd>/.agents-blast-radius.json`` when it exists (the host root is the
-current directory, as for ``--current-sprint``), which REPLACES the nucleus
+current directory), which REPLACES the nucleus
 ``config/blast_radius.json`` wholesale (resolved from this script, never merged).
 Neither file present: the check is skipped with a printed note.
 
 Exit codes:
-    0 — pass, or --current-sprint skipped (no plan, or sprint id < 30)
-    2 — structural waste found (RA-11), or a malformed blast-radius list
+    0 — pass, or --current-sprint skipped (no anchor or ``current_sprint``
+        block, no plan in the sprint directory, or sprint id < 30)
+    2 — structural waste found (RA-11), a malformed blast-radius list, a plan
+        path that does not exist, or an anchor naming no existing sprint directory
 """
 
 from __future__ import annotations
@@ -31,6 +33,9 @@ import json
 import re
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
+from _current_sprint import CurrentSprintError, current_sprint_dir, project_root
 
 COST_FROM_SPRINT = 30
 EMPTY = {"", "—", "-"}
@@ -47,21 +52,24 @@ def sprint_id_from_path(path: Path) -> int | None:
 
 
 def current_sprint_plan(root: Path) -> Path | None:
-    """IMPLEMENTATION_PLAN.md for ``current_sprint.id``, or None to skip."""
-    anchor = root / "docs" / "active_state.json"
-    if not anchor.is_file():
+    """IMPLEMENTATION_PLAN.md of the anchor's current sprint, or None to skip.
+
+    Args:
+        root: Repository root holding ``docs/active_state.json``.
+
+    Returns:
+        Path | None: The plan; None when there is no anchor or ``current_sprint``
+            block, the sprint id is below ``COST_FROM_SPRINT``, or the sprint
+            directory holds no plan yet.
+
+    Raises:
+        CurrentSprintError: The anchor names no existing sprint directory.
+    """
+    sprint_dir = current_sprint_dir(root)
+    if sprint_dir is None or sprint_id_from_path(sprint_dir) < COST_FROM_SPRINT:
         return None
-    try:
-        data = json.loads(anchor.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        return None
-    sprint_id = data.get("current_sprint", {}).get("id")
-    if not isinstance(sprint_id, int):
-        return None
-    if sprint_id < COST_FROM_SPRINT:
-        return None
-    matches = sorted((root / "docs" / "sprints").glob(f"{sprint_id:03d}-*/IMPLEMENTATION_PLAN.md"))
-    return matches[0] if matches else None
+    plan = sprint_dir / "IMPLEMENTATION_PLAN.md"
+    return plan if plan.is_file() else None
 
 
 def _has_heading(text: str, title: str) -> bool:
@@ -384,8 +392,8 @@ def collect_findings(text: str, cwd: Path | None = None) -> list[str]:
 def audit(path: Path) -> int:
     """Print findings for one file. Returns the process exit code."""
     if not path.is_file():
-        print(f"⚠️  No plan at {path}; skip.", file=sys.stderr)
-        return 0
+        print(f"❌ audit_plan: no plan at {path}", file=sys.stderr)
+        return 2
     try:
         findings = collect_findings(path.read_text(encoding="utf-8"))
     except ValueError as error:
@@ -410,7 +418,11 @@ def main() -> int:
     )
     args = parser.parse_args()
     if args.current_sprint:
-        target = current_sprint_plan(Path.cwd())
+        try:
+            target = current_sprint_plan(project_root())
+        except CurrentSprintError as exc:
+            print(f"❌ audit_plan: {exc}", file=sys.stderr)
+            return 2
         if target is None:
             print("[OK] audit_plan: no current-sprint plan to audit (skip)")
             return 0

@@ -304,3 +304,47 @@ def test_sprint_058_plan_exits_0() -> None:
     target = REPO / "docs" / "sprints" / "058-core-pipeline" / "IMPLEMENTATION_PLAN.md"
     result = _run(target)
     assert result.returncode == 0, result.stderr
+
+
+# --- Plan D37 M-04: no silent skip on a string id, a subdirectory or a missing path ---
+
+
+def _current_sprint_run(cwd: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(AUDIT), "--current-sprint"],
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+def _anchored_repo(root: Path, sprint_id: object, plan: str | None) -> Path:
+    """A fixture repository whose anchor names `sprint_id`; `plan` None: no sprint dir."""
+    (root / ".git").mkdir()
+    (root / "docs" / "sprints").mkdir(parents=True)
+    (root / "docs" / "active_state.json").write_text(
+        json.dumps({"current_sprint": {"id": sprint_id}}), encoding="utf-8"
+    )
+    if plan is not None:
+        sprint = root / "docs" / "sprints" / "059-core-x"
+        sprint.mkdir()
+        (sprint / "IMPLEMENTATION_PLAN.md").write_text(plan, encoding="utf-8")
+    return root
+
+
+def test_current_sprint_with_a_string_id_audits_the_plan(tmp_path: Path) -> None:
+    root = _anchored_repo(tmp_path, "059", "# empty plan\n")
+    assert _current_sprint_run(root).returncode == 2
+
+
+def test_current_sprint_from_a_subdirectory_exits_2_on_a_missing_directory(
+    tmp_path: Path,
+) -> None:
+    root = _anchored_repo(tmp_path, 59, None)
+    assert _current_sprint_run(root / "docs").returncode == 2
+
+
+def test_missing_plan_path_exits_2(tmp_path: Path) -> None:
+    result = _run(tmp_path / "docs" / "sprints" / "059-typo" / "IMPLEMENTATION_PLAN.md")
+    assert result.returncode == 2
