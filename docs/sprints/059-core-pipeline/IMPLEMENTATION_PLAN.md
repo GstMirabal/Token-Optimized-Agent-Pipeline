@@ -105,6 +105,7 @@ enrutado con destino nombrado.
 | D33 | **Remediación de la ronda 8** (decisión humana 2026-11-07, tras QA Gate 1 ronda 8, N1 a N5): N1 se corrige en `HOTFIX_TEMPLATE.md:25` (A-46); N2, N3 y N5 se corrigen en este plan y en `SPRINT_LOG.md` (A-47); N4 reduce lo que afirma el docstring (A-48). Las notas S3 N6 a N8 solo se registran | Descartar N1 o enrutar N2 a N5 como KI: deja una instrucción contradicha y arrastra deuda por una corrección mínima |
 | D34 | **Sustituida por D35** (check retirado tras QA Gate 1 ronda 10; `KI-059-15`). **Check determinista de la familia de N3** (decisión humana 2026-11-07; convergencia, regla 3): `scripts/check_log_append_only.py` (A-49 a A-51) rechaza palabras perdidas en filas KI, frases perdidas tras `error_mining` y filas de decisión sustituidas sin marca. Excepción declarada: trailer `Log-Rewrite: <motivo>`. `make verify` lo aplica desde el Sprint 060; en el 059, QA lo ejecuta sobre `60383e3..HEAD`. Límites: solo esas zonas; no ve palabras reordenadas ni cambios de sentido; el patrón de sustitución depende de la redacción en español | Enrutarlo a Z-02: aplaza un check que la regla exige y que se midió viable |
 | D35 | **Remediación de la ronda 9** (decisión humana 2026-11-07, tras QA Gate 1 ronda 9, R9-1 a R9-3): A-53 corrige en un commit `fix(` con test pareado la raíz de `--current-sprint` y la resolución de `--sprint-dir`, y falla con exit 2 ante un directorio inexistente, una base de rango vacía o un registro ausente pasados a mano; A-54 marca D23 y D26. Las notas S3 R9-N1 a R9-N3 solo se registran. Límite decidido por adelantado: otro S0 o S1 en este script en la ronda 10 lo retira (revierte A-49 a A-53 y el contador del README) y envía el check a Z-02, sin otra ronda de arreglos. **Aplicado el 2026-11-07**: la ronda 10 reportó R10-1 y R10-2 (S1); revertidos con `873fb1e`, `f328923`, `a4493b8`, `51016e2`, `2c55575` y `120860b`; la regla 3 queda sin cumplir para esta familia por decisión humana (`KI-059-15`) | Retirar el check ahora: incumple la regla 3 por dos defectos con corrección conocida |
+| D36 | **Remediación de la ronda 11** (decisión humana 2026-11-07, tras QA Gate 1 ronda 11, R11-1 y su medición): Z-02 deja de enumerar IDs y remite a la tabla KI de `SPRINT_LOG.md`, lo que reduce la afirmación (regla 3) sin mecanismo nuevo. Los saltos en silencio de los checks anteriores al sprint se corrigen antes del merge en I-08 a I-10, no en Z-02. Un clon sin anchor sigue omitiendo, porque el anchor no se versiona. El número de unidades es una estimación y se fija al abrir la wave 6 | Dejarlos en Z-02: el merge llevaría un gate que pasa en silencio (S1). Corregirlos en la wave 1: añade código al bloque que no converge |
 
 ---
 
@@ -230,13 +231,16 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | I-05 | `scripts/upstream_outbox.py` | modify — tras I-04: `fix(` `KI-058-5` c: `PIN_PATTERN` solo acepta dígitos ASCII (`[0-9]`); paired test con dígitos no ASCII en `tests/test_upstream_outbox.py` | low | `implementer_agent` | ⏳ |
 | I-06 | `hooks/on_commit.py` | modify — `fix(` `KI-058-5` d: un asunto `FIX:` en mayúsculas se trata como `fix(`; paired test en `tests/test_on_commit.py` | low | `implementer_agent` | ⏳ |
 | I-07 | `scripts/check_fix_reproduces.py` | modify — `fix(` `KI-058-5` d: el mismo caso que I-06 en la reproducción; paired test en `tests/test_check_fix_reproduces.py` | low | `implementer_agent` | ⏳ |
+| I-08 | `scripts/check_task_scope.py` | modify — `fix(` D36: `--current-sprint` sale 2 cuando el anchor nombra un sprint cuyo directorio falta; `current_sprint_dir` distingue ese caso de la ausencia de anchor; paired test en `tests/test_check_task_scope.py` | low | `implementer_agent` | ⏳ |
+| I-09 | `scripts/check_gate_log.py` | modify — tras I-08: `fix(` D36: sale 2 con un `--sprint-dir` inexistente y con el caso de I-08 en `--current-sprint`; paired test en `tests/test_check_gate_log.py` | low | `implementer_agent` | ⏳ |
+| I-10 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify — tras I-08: `fix(` D36: el caso de I-08 en `--current-sprint` sale 2; paired test junto a los de `audit_plan.py` | low | `skill_architect` | ⏳ |
 
 ### Cierre
 
 | # | File | Operation | Risk | Assignee (proposed) | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | Z-01 | `CHANGELOG.md` | modify — entrada `[Unreleased]` del sprint; cita `host:F-116-N1` y `host:F-116-N2` (`agents.md §4 feedback_upstream`, cierre) | low | `doc_orchestrator` | ⏳ |
-| Z-02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify — cerrar o re-enrutar `KI-056-1`, `KI-056-6`, `KI-057-1`, `KI-057-2`, `KI-058-1`, `KI-058-3`, `KI-058-4`, `KI-058-5`; `KI-058-2` y los condicionados de Out of scope quedan con su condición de desbloqueo; nuevos `KI-059-n`, incluido uno para los puntos 3-5 de la propuesta E (P11); enruta o cierra con evidencia los `KI-059-n` abiertos del `SPRINT_LOG.md`: `KI-059-1`, `KI-059-3`, `KI-059-5`, `KI-059-6`, `KI-059-7`, `KI-059-11`, `KI-059-12`, `KI-059-13` y `KI-059-14` | low | `doc_orchestrator` | ⏳ |
+| Z-02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify — cerrar o re-enrutar `KI-056-1`, `KI-056-6`, `KI-057-1`, `KI-057-2`, `KI-058-1`, `KI-058-3`, `KI-058-4`, `KI-058-5`; `KI-058-2` y los condicionados de Out of scope quedan con su condición de desbloqueo; nuevos `KI-059-n`, incluido uno para los puntos 3-5 de la propuesta E (P11); enruta o cierra con evidencia cada fila `KI-059-n` de la tabla de `SPRINT_LOG.md` que siga abierta; esa tabla es la lista (D36) | low | `doc_orchestrator` | ⏳ |
 
 ---
 
@@ -266,7 +270,7 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 89 | Count of rows in Work tables |
+| Work units | 92 | Count of rows in Work tables |
 | Subagents dispatched | lotes de hasta 4 en paralelo desde la wave 3 (D11), más QA + Tester por wave | `agent_assignment.md` |
 | Session ratio (2026-11-07) | Sesión `7a037351`, ciclo único, `session_cost.py` de `919d4f2` — supera soft (5×). Quedan 41 unidades en 5 waves más cierre y los gates de la wave 1; delegación `native`; `suspend` antes de QA Gate 1 ronda 8 | `python3 -I scripts/session_cost.py --session 7a037351-d2f6-4ff2-8ca0-1e6a82e612cc --json` |
 | Session ratio (2026-11-05) | **6.1×** sesión `9679503b`, ciclo único, medida completa con `session_cost.py` de `919d4f2` (corte de D19; durante la sesión se leyó 5.4× y 5.9×) — supera soft (5×). Quedan 41 unidades en 5 waves más cierre; delegación `native`; tras los gates de la wave 1, `suspend` | `python3 -I scripts/session_cost.py --session 9679503b-5e2c-4a1a-b3dd-a42dacd42cd6 --json` |
@@ -292,6 +296,7 @@ transcript exists for this tool.
 | `tests/test_session_state.py`: `suspend` con sprint sellado y sesión `IN_PROGRESS` libera el lock (E-01c) | **Yes** — deja el lock tomado | `unverified`: observado en Phase 1 (el boot siguiente salió 2 y exigió `--takeover`); el test se escribe y se ve fallar al abrir la wave 2 |
 | `tests/test_mass_standardizer.py`: `generate_manifest.py --check` sale 2 ante un manifiesto distinto y no reescribe el archivo (B-04) | **Yes** — el flag no existe | `grep -c -- '--check' skills/mass-standardizer/scripts/generate_manifest.py` → 0, exit 1 |
 | Paired tests de I-01..I-07 (`KI-058-1`, `KI-058-4`, `KI-058-5` a-d) | **Yes** — cada uno es un defecto registrado | `unverified`: cada test se escribe y se ve fallar en el padre al abrir la wave 6; `scripts/check_fix_reproduces.py` lo exige en Gate 1 |
+| Paired tests de I-08..I-10 (D36) | **Yes** — medido en QA Gate 1 ronda 11 | `python3 scripts/check_gate_log.py --sprint-dir docs/sprints/059-typo` → exit 0 con `(skip)`; cada test se ve fallar en el padre |
 | `tests/test_token_economy_soft_bound.py` (A-25) | **Yes** — segunda ocurrencia de la familia de N3 (D23) | tras D32 cubre la conducta de `probe_cost` a 6× y a 16×; sin copia de texto |
 | `tests/test_profile_references.py` (A-31) | **Yes** — familia de datos de host (D24) | el test se ve fallar en `d06c939` por cada uno de los 4 archivos |
 | Retirado por D35: `tests/test_check_log_append_only.py` (A-50) | **Yes** — segunda ocurrencia de la familia de F6 (D34) | `unverified`: el check no existe todavía; A-49 lo ve fallar en `10c88f4`, `1dbb43e` y `60383e3` |

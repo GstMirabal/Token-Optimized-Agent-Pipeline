@@ -148,6 +148,9 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | I-05 | `scripts/upstream_outbox.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | I-06 | `hooks/on_commit.py` | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | I-07 | `scripts/check_fix_reproduces.py` | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| I-08 | `scripts/check_task_scope.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| I-09 | `scripts/check_gate_log.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| I-10 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify | sequential | `skill_architect` | N/A | `agents/skill_architect.md` |
 
 ### Close
 
