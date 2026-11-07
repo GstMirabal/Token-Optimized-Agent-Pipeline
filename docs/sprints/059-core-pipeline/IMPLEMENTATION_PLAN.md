@@ -103,8 +103,8 @@ enrutado con destino nombrado.
 | D31 | **Historia pública, decisión aparte tras el merge** (decisión humana 2026-11-07): reescribirla cambia los SHA de 58 tags, rompe los pines de submódulo de los hosts y no garantiza que GitHub deje de servir commits antiguos por SHA. Se decide con el humano presente, a partir del inventario de D29 | Reescribir en este sprint: mezcla una operación irreversible con una rama abierta |
 | D32 | **Remediar quitando** (decisión humana 2026-11-07): antes de tocar una afirmación se ejecuta el comando que la comprueba; sin instrumento, se borra. Sustituye a D27 en esto: el párrafo de calibración de `rules/token_economy.md` se borra entero, y A-25 se reduce a la conducta de `probe_cost` a 6×, sin copia de texto. D26 no cubre las enmiendas `RA-XX` de `skills/compliance-checker`, que son un destino legítimo | Otra reescritura de la misma línea: es la causa del bloqueo |
 | D33 | **Remediación de la ronda 8** (decisión humana 2026-11-07, tras QA Gate 1 ronda 8, N1 a N5): N1 se corrige en `HOTFIX_TEMPLATE.md:25` (A-46); N2, N3 y N5 se corrigen en este plan y en `SPRINT_LOG.md` (A-47); N4 reduce lo que afirma el docstring (A-48). Las notas S3 N6 a N8 solo se registran | Descartar N1 o enrutar N2 a N5 como KI: deja una instrucción contradicha y arrastra deuda por una corrección mínima |
-| D34 | **Check determinista de la familia de N3** (decisión humana 2026-11-07; convergencia, regla 3): `scripts/check_log_append_only.py` (A-49 a A-51) rechaza palabras perdidas en filas KI, frases perdidas tras `error_mining` y filas de decisión sustituidas sin marca. Excepción declarada: trailer `Log-Rewrite: <motivo>`. `make verify` lo aplica desde el Sprint 060; en el 059, QA lo ejecuta sobre `60383e3..HEAD`. Límites: solo esas zonas; no ve palabras reordenadas ni cambios de sentido; el patrón de sustitución depende de la redacción en español | Enrutarlo a Z-02: aplaza un check que la regla exige y que se midió viable |
-| D35 | **Remediación de la ronda 9** (decisión humana 2026-11-07, tras QA Gate 1 ronda 9, R9-1 a R9-3): A-53 corrige en un commit `fix(` con test pareado la raíz de `--current-sprint` y la resolución de `--sprint-dir`, y falla con exit 2 ante un directorio inexistente, una base de rango vacía o un registro ausente pasados a mano; A-54 marca D23 y D26. Las notas S3 R9-N1 a R9-N3 solo se registran. Límite decidido por adelantado: otro S0 o S1 en este script en la ronda 10 lo retira (revierte A-49 a A-53 y el contador del README) y envía el check a Z-02, sin otra ronda de arreglos | Retirar el check ahora: incumple la regla 3 por dos defectos con corrección conocida |
+| D34 | **Sustituida por D35** (check retirado tras QA Gate 1 ronda 10; `KI-059-15`). **Check determinista de la familia de N3** (decisión humana 2026-11-07; convergencia, regla 3): `scripts/check_log_append_only.py` (A-49 a A-51) rechaza palabras perdidas en filas KI, frases perdidas tras `error_mining` y filas de decisión sustituidas sin marca. Excepción declarada: trailer `Log-Rewrite: <motivo>`. `make verify` lo aplica desde el Sprint 060; en el 059, QA lo ejecuta sobre `60383e3..HEAD`. Límites: solo esas zonas; no ve palabras reordenadas ni cambios de sentido; el patrón de sustitución depende de la redacción en español | Enrutarlo a Z-02: aplaza un check que la regla exige y que se midió viable |
+| D35 | **Remediación de la ronda 9** (decisión humana 2026-11-07, tras QA Gate 1 ronda 9, R9-1 a R9-3): A-53 corrige en un commit `fix(` con test pareado la raíz de `--current-sprint` y la resolución de `--sprint-dir`, y falla con exit 2 ante un directorio inexistente, una base de rango vacía o un registro ausente pasados a mano; A-54 marca D23 y D26. Las notas S3 R9-N1 a R9-N3 solo se registran. Límite decidido por adelantado: otro S0 o S1 en este script en la ronda 10 lo retira (revierte A-49 a A-53 y el contador del README) y envía el check a Z-02, sin otra ronda de arreglos. **Aplicado el 2026-11-07**: la ronda 10 reportó R10-1 y R10-2 (S1); revertidos con `873fb1e`, `f328923`, `a4493b8`, `51016e2`, `2c55575` y `120860b`; la regla 3 queda sin cumplir para esta familia por decisión humana (`KI-059-15`) | Retirar el check ahora: incumple la regla 3 por dos defectos con corrección conocida |
 
 ---
 
@@ -160,11 +160,11 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | A-46 | `docs/standards/templates/HOTFIX_TEMPLATE.md` | modify — D33: línea 25 (N1): enruta por `constitutional_escalation` y enlaza el destino asignado, sin fijar `RA-XX` | low | `doc_orchestrator` | ✅ `05a6dab` |
 | A-47 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify — D33: anota las filas de D23 y D25 en Documentary impact (N2), marca D24 (N3) y quita la cifra de la fila de coste de sesión de `7a037351` (N5) | low | `doc_orchestrator` | ✅ `1473570` |
 | A-48 | `tests/test_profile_references.py` | modify — D33: docstring (N4): reduce lo afirmado a lo que el test comprueba y declara los archivos omitidos; sin cambio de lógica | low | `implementer_agent` | ✅ `8923501` |
-| A-49 | `scripts/check_log_append_only.py` | create — D34: falla (exit 2) en `10c88f4` (N3), `1dbb43e` (F6) y `60383e3` (D24); exit 0 en `60383e3..HEAD` tras A-47 | low | `implementer_agent` | ✅ `251717d` |
-| A-50 | `tests/test_check_log_append_only.py` | create — D34: repositorios git desechables para cada zona, el trailer, sus límites y los errores | low | `implementer_agent` | ✅ `3368dc5` |
-| A-51 | `Makefile` | modify — D34: `verify` ejecuta `check_log_append_only.py --current-sprint` | low | `implementer_agent` | ✅ `de239b7` |
-| A-52 | `rules/documentation_standard.md` | modify — D34: nombra el instrumento y sus límites junto a la fila `annotated in place` | low | `rule_validator` | ✅ `d40183d` |
-| A-53 | `scripts/check_log_append_only.py` | modify — D35: `fix(` con `tests/test_check_log_append_only.py` pareado: raíz de `--current-sprint` como `check_gate_log.py`; `--sprint-dir` resuelto desde la raíz de git; exit 2 ante directorio inexistente, base vacía o registro ausente a mano; `Repro:` falla en el padre | low | `implementer_agent` | ✅ `f273f93` |
+| A-49 | `scripts/check_log_append_only.py` | create — D34: falla (exit 2) en `10c88f4` (N3), `1dbb43e` (F6) y `60383e3` (D24); exit 0 en `60383e3..HEAD` tras A-47 | low | `implementer_agent` | ✅ `251717d`, revertida `120860b` (D35) |
+| A-50 | `tests/test_check_log_append_only.py` | create — D34: repositorios git desechables para cada zona, el trailer, sus límites y los errores | low | `implementer_agent` | ✅ `3368dc5`, revertida `2c55575` (D35) |
+| A-51 | `Makefile` | modify — D34: `verify` ejecuta `check_log_append_only.py --current-sprint` | low | `implementer_agent` | ✅ `de239b7`, revertida `a4493b8` (D35) |
+| A-52 | `rules/documentation_standard.md` | modify — D34: nombra el instrumento y sus límites junto a la fila `annotated in place` | low | `rule_validator` | ✅ `d40183d`, revertida `f328923` (D35) |
+| A-53 | `scripts/check_log_append_only.py` | modify — D35: `fix(` con `tests/test_check_log_append_only.py` pareado: raíz de `--current-sprint` como `check_gate_log.py`; `--sprint-dir` resuelto desde la raíz de git; exit 2 ante directorio inexistente, base vacía o registro ausente a mano; `Repro:` falla en el padre | low | `implementer_agent` | ✅ `f273f93`, revertida `873fb1e` (D35) |
 | A-54 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify — D35: marca D23 y D26 como acotadas por D32 (R9-3) | low | `doc_orchestrator` | ✅ `822c047` |
 
 ### Wave 2 — Ritmo y autonomía (aceleran el resto del sprint)
@@ -257,7 +257,7 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | Medición en sesión de la cota §3.1 (`session_cost.py --bound` o lo que fije ADR-0018) | script | `workflows/pipeline_workflow.md` Phase 6 (A-04) |
 | Recuento de autorizaciones (`scripts/prompt_count.py`) | script | advisory en `workflows/close_workflow.md` (B-07); `PROMPT_MEASUREMENT.md` registra la medida, no la invoca |
 | Comprobación del manifiesto sin escritura (`generate_manifest.py --check`) | script | `Makefile` `verify` (B-05) |
-| Registros de sprint sin borrado (`scripts/check_log_append_only.py`, D34) | script | `Makefile` `verify` (A-51); QA Gate 1 en el Sprint 059 |
+| Retirado por D35: registros de sprint sin borrado (`scripts/check_log_append_only.py`, D34) | script | `Makefile` `verify` (A-51); QA Gate 1 en el Sprint 059 |
 
 ---
 
@@ -294,7 +294,7 @@ transcript exists for this tool.
 | Paired tests de I-01..I-07 (`KI-058-1`, `KI-058-4`, `KI-058-5` a-d) | **Yes** — cada uno es un defecto registrado | `unverified`: cada test se escribe y se ve fallar en el padre al abrir la wave 6; `scripts/check_fix_reproduces.py` lo exige en Gate 1 |
 | `tests/test_token_economy_soft_bound.py` (A-25) | **Yes** — segunda ocurrencia de la familia de N3 (D23) | tras D32 cubre la conducta de `probe_cost` a 6× y a 16×; sin copia de texto |
 | `tests/test_profile_references.py` (A-31) | **Yes** — familia de datos de host (D24) | el test se ve fallar en `d06c939` por cada uno de los 4 archivos |
-| `tests/test_check_log_append_only.py` (A-50) | **Yes** — segunda ocurrencia de la familia de F6 (D34) | `unverified`: el check no existe todavía; A-49 lo ve fallar en `10c88f4`, `1dbb43e` y `60383e3` |
+| Retirado por D35: `tests/test_check_log_append_only.py` (A-50) | **Yes** — segunda ocurrencia de la familia de F6 (D34) | `unverified`: el check no existe todavía; A-49 lo ve fallar en `10c88f4`, `1dbb43e` y `60383e3` |
 | Suite completa `make verify` | **No** — regresión a proteger | `make verify` → exit 0 en `08c669c` |
 
 ---
@@ -312,7 +312,7 @@ transcript exists for this tool.
 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider` | exit 0 | exit 0 en `08c669c`; 1527 passed | n/a |
 | `python3 skills/token-saver-auditor/scripts/audit_plan.py docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | exit 0 | run at close: se ejecuta sobre el borrador antes de Phase 5 | n/a |
 | `grep -n "@v[0-9]" .github/workflows/ci.yml` | sin salida tras E-03 | exit 0, líneas 24, 28, 39 | la propia corrida de base es el control positivo |
-| `python3 scripts/check_log_append_only.py --sprint-dir docs/sprints/059-core-pipeline --range 60383e3..HEAD` | exit 0 tras A-47 (D34) | `unverified`: el check no existe todavía (A-49) | el mismo comando con `--range 10c88f4^..10c88f4` → exit 2 |
+| Retirada por D35, el script ya no existe: `python3 scripts/check_log_append_only.py --sprint-dir docs/sprints/059-core-pipeline --range 60383e3..HEAD` | exit 0 tras A-47 (D34) | `unverified`: el check no existe todavía (A-49) | el mismo comando con `--range 10c88f4^..10c88f4` → exit 2 |
 
 ---
 
@@ -329,7 +329,7 @@ transcript exists for this tool.
 | `tests/test_token_economy_soft_bound.py` | nuevo: fija el texto soft de §3.1 (D23); reducido por D32 a la conducta de `probe_cost`, sin copia de texto |
 | Roadmaps 008 y 018, `skills/skillopt/data/scenarios.json`, `skills/mcp-registry/README.md`, `profiles/example-project/mcp/registry.json`, `docs/guides/RULE_PRECEDENTS_GUIDE.md` | dominio y roles genericizados (D29) |
 | `tests/test_profile_references.py`, `workflows/reverse_documentation_workflow.md` | nuevo check de referencias a perfiles; dominio genericizado (D24) |
-| `scripts/check_log_append_only.py`, `tests/test_check_log_append_only.py`, `Makefile`, `README.md`, `rules/documentation_standard.md`, `docs/standards/templates/HOTFIX_TEMPLATE.md` | nuevo check de registros sin borrado (D34), con el contador de scripts que exige `check_readme_counts.py`; destino de la escalada en la plantilla (D33) |
+| `scripts/check_log_append_only.py`, `tests/test_check_log_append_only.py`, `Makefile`, `README.md`, `rules/documentation_standard.md`, `docs/standards/templates/HOTFIX_TEMPLATE.md` | retirado por D35, sin cambio neto salvo `HOTFIX_TEMPLATE.md`: nuevo check de registros sin borrado (D34), con el contador de scripts que exige `check_readme_counts.py`; destino de la escalada en la plantilla (D33) |
 | `config/rule_triggers.json` | carga `rules/documentation_standard.md` al editar `rules/*.md` (D28) |
 | `rules/qa_and_testing.md`, `agents/governance_learner.md`, `agents/rule_validator.md`, `workflows/remediation_workflow.md`, `rules/documentation_standard.md` | momento de `RA-19` (D25; sustituida por D30: la repetición solo tras un S0 que toque sandbox o ejecución) y destino del aprendizaje (D26) |
 | `docs/guides/RULE_PRECEDENTS_GUIDE.md` | nuevo: historia y precedentes de las filas de `agents.md` sin otro destino (A-13) |
