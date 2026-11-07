@@ -48,6 +48,18 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | A-23 | `docs/roadmaps/core/pipeline/017-pre-publication-hardening.md` | modify: D22, same as A-19 | low | `doc_orchestrator` | sonnet | medium | ✅ `b6adb90` |
 | A-24 | `docs/sprints/023-core-pipeline/task_scope.md` | modify: D22, same as A-19 | low | `doc_orchestrator` | sonnet | medium | ✅ `ff69f15` |
 | A-25 | `tests/test_token_economy_soft_bound.py` | create: D23, equality against a reviewed copy of the soft row and the calibration sentence of `rules/token_economy.md` §3.1, and `probe_cost` returns None for a cycle at 6x; fails with the text of `d192075` (N3) and of `7779e7f` (F1) | low | `implementer_agent` | sonnet | medium | ✅ `1e1deda` |
+| A-26 | `CHANGELOG.md` | modify: D24: replace the profile slug on lines 800, 811 and 934 and the business domain on line 764, annotated | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-27 | `docs/roadmaps/core/pipeline/015-terminology-and-nomenclature-hardening.md` | modify: D24: replace the profile slug on line 52, annotated | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-28 | `docs/roadmaps/core/pipeline/016-folder-topology-migration.md` | modify: D24: replace the profile slug on line 33 and make lines 33 and 38 readable (round 6 F6) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-29 | `docs/roadmaps/core/pipeline/017-pre-publication-hardening.md` | modify: D24: replace the profile slug on lines 21, 29, 39 and 48, annotated | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-30 | `workflows/reverse_documentation_workflow.md` | modify: D24: replace the business domain on line 28 with a generic description | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-31 | `tests/test_profile_references.py` | create: D24: every tracked `profiles/<slug>` reference resolves to a real directory or a reviewed placeholder; fails at `d06c939` for each of the 4 files; states that it does not detect bare names | low | `implementer_agent` | sonnet | medium | ⏳ |
+| A-32 | `rules/qa_and_testing.md` | modify: D25: the `RA-19` re-run after an S0 happens before the merge of the sprint that remediates it | low | `rule_validator` | sonnet | medium | ⏳ |
+| A-33 | `agents/governance_learner.md` | modify: D26: learning destination table; remove the fixed `agents.md` Section 7 destination | low | `rule_validator` | sonnet | medium | ⏳ |
+| A-34 | `agents/rule_validator.md` | modify: D26: audit the destination `governance_learner` gives; remove the fixed `agents.md` destination | low | `rule_validator` | sonnet | medium | ⏳ |
+| A-35 | `workflows/remediation_workflow.md` | modify: D26: `negative_ki` routes by the `governance_learner` table instead of injecting into `agents.md` | low | `rule_validator` | sonnet | medium | ⏳ |
+| A-36 | `agents.md` | modify: D26: `constitutional_escalation` routes through `governance_learner`; `wc -c agents.md` at most 20000 | low | `rule_validator` | sonnet | medium | ⏳ |
+| A-37 | `rules/documentation_standard.md` | modify: D26: `negative_ki` of this deadlock: do not describe conduct no instrument performs; if the table gives another destination, amend this row before writing | low | `rule_validator` | sonnet | medium | ⏳ |
 
 ### Wave 2 — Pace and autonomy
 
@@ -84,7 +96,7 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | B-03 | `scripts/py_compile_tree.py` | modify: compile without writing `.pyc` (D5); test in `tests/test_verify_py_compile.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
 | B-04 | `skills/mass-standardizer/scripts/generate_manifest.py` | modify: add `--check` (exit 0 on match, exit 2 on drift, `skills/manifest_skills.json` bytes unchanged) (D5); test in `tests/test_mass_standardizer.py` | medium | `skill_architect` | sonnet | medium | ⏳ |
 | B-05 | `Makefile` | modify: after B-03 and B-04, `verify` uses both no-write modes | low | `implementer_agent` | sonnet | medium | ⏳ |
-| C-01 | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` | create: RA-19 re-measurement for the current CLI (untested E16 members, subtrees inferred by containment, `Edit(/.git/modules/.agents/**)`, D-8), including the nucleus with the B-06 sandbox; `devops_agent` measures dispatched with `model: sonnet` (escalated from mechanical for high risk) and hands over literal output | high | `doc_orchestrator` | sonnet | medium | ⏳ |
+| C-01 | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` | create: discharge the S0 findings of QA Gate 1 "round 3, round 4, round 6" (D25); RA-19 re-measurement for the current CLI (untested E16 members, subtrees inferred by containment, `Edit(/.git/modules/.agents/**)`, D-8), including the nucleus with the B-06 sandbox; `devops_agent` measures dispatched with `model: sonnet` (escalated from mechanical for high risk) and hands over literal output | high | `doc_orchestrator` | sonnet | medium | ⏳ |
 | C-02 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify: after C-01 and A-02, `F-055-N1` closed if C-01 measures its vector with no agent-writable entry point, otherwise open citing the C-01 measurement; `F-116-N1` marked closed citing the A-01 commits (`ef490cd`, `919d4f2`) and `F-116-N2` citing the A-02 commit | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 
 ### Wave 5 — Regime
@@ -118,7 +130,7 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | Z-01 | `CHANGELOG.md` | modify: add the sprint entry under `[Unreleased]`, citing `host:F-116-N1` and `host:F-116-N2` | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| Z-02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify: close or re-route KI-056-1, KI-056-6, KI-057-1, KI-057-2, KI-058-1, KI-058-3, KI-058-4, KI-058-5; keep KI-058-2 and the conditional Out of scope items with their unblock condition; add new KI-059-n, including one for proposal E points 3-5 (P11); route or close with evidence the open KI-059-n of `SPRINT_LOG.md`: KI-059-1, KI-059-3, KI-059-5, KI-059-6, KI-059-7, KI-059-11, KI-059-12 and KI-059-13 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| Z-02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify: close or re-route KI-056-1, KI-056-6, KI-057-1, KI-057-2, KI-058-1, KI-058-3, KI-058-4, KI-058-5; keep KI-058-2 and the conditional Out of scope items with their unblock condition; add new KI-059-n, including one for proposal E points 3-5 (P11); route or close with evidence the open KI-059-n of `SPRINT_LOG.md`: KI-059-1, KI-059-3, KI-059-5, KI-059-6, KI-059-7, KI-059-11, KI-059-12, KI-059-13 and KI-059-14 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 
 ## Jurisdiction check (serial or concurrent)
 
@@ -127,10 +139,13 @@ Same structural subject claimed by more than one unit. "Serial" means the plan's
 | Subject | Units | Verdict |
 | :--- | :--- | :--- |
 | `scripts/session_cost.py` | A-01 (Wave 1), A-18 (Wave 3, before A-00), A-02 (Wave 3, after A-01 and A-07) | Serial. |
-| `CHANGELOG.md` | A-19 (Wave 1), Z-01 (Close) | Serial. |
+| `CHANGELOG.md` | A-19, A-26 (Wave 1), Z-01 (Close) | Serial. |
 | `scripts/check_task_scope.py` | G-01 (Wave 2), H-02 (Wave 3, after G-01 and H-01) | Serial. |
 | `scripts/upstream_outbox.py` | I-02, I-03, I-04, I-05 | Serial by explicit `after` chain I-02 to I-05. |
-| `agents.md` | A-12 (Wave 1), D-02 (Wave 5, after A-12) | Serial. |
+| `agents.md` | A-12, A-36 (Wave 1), D-02 (Wave 5, after A-12) | Serial. |
+| `rules/qa_and_testing.md` | A-16, A-32 (Wave 1) | Serial. |
+| Roadmaps 015, 016 and 017 | A-21 and A-27, A-22 and A-28, A-23 and A-29 (Wave 1) | Serial. |
+| `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | A-00, A-06 (Wave 3) | Serial. |
 | `rules/project_topology.md` | A-10 (Wave 1), D-03 (Wave 5, after A-10) | Serial. |
 | `workflows/pipeline_workflow.md` | G-02 (Wave 2), A-04 (Wave 3, after G-02) | Serial. |
 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | A-05 (Wave 1), C-02 (Wave 4) | Serial by wave order; F-4 moved the closing marks to C-02. |
@@ -162,7 +177,7 @@ Severity per `rules/qa_and_testing.md` section 4 (S0-S3). Class per the same fil
 
 ## Resolution of the findings
 
-Applied to `IMPLEMENTATION_PLAN.md` (and mirrored in the Work tables above and in `agent_assignment.md`) before Phase 5. Plan Work units: 44 → 47 (B-07, E-01c, H-03 added). Phase 6 Wave 1 added A-13 (plan D15): 47 → 48, A-14 (plan D17): 48 → 49, A-15, A-16, A-17 (plan D18): 49 → 52, and A-18 (plan D21): 52 → 53. After QA Gate 1 round 5, A-19 to A-24 (plan D22) and A-25 (plan D23): 53 → 60.
+Applied to `IMPLEMENTATION_PLAN.md` (and mirrored in the Work tables above and in `agent_assignment.md`) before Phase 5. Plan Work units: 44 → 47 (B-07, E-01c, H-03 added). Phase 6 Wave 1 added A-13 (plan D15): 47 → 48, A-14 (plan D17): 48 → 49, A-15, A-16, A-17 (plan D18): 49 → 52, and A-18 (plan D21): 52 → 53. After QA Gate 1 round 5, A-19 to A-24 (plan D22) and A-25 (plan D23): 53 → 60. After QA Gate 1 round 6, A-26 to A-37 (plan D24 to D26): 60 → 72.
 
 | ID | Resolution |
 | :--- | :--- |

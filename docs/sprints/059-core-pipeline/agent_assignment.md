@@ -55,6 +55,18 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | A-23 | `docs/roadmaps/core/pipeline/017-pre-publication-hardening.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | A-24 | `docs/sprints/023-core-pipeline/task_scope.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | A-25 | `tests/test_token_economy_soft_bound.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| A-26 | `CHANGELOG.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-27 | `docs/roadmaps/core/pipeline/015-terminology-and-nomenclature-hardening.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-28 | `docs/roadmaps/core/pipeline/016-folder-topology-migration.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-29 | `docs/roadmaps/core/pipeline/017-pre-publication-hardening.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-30 | `workflows/reverse_documentation_workflow.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-31 | `tests/test_profile_references.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| A-32 | `rules/qa_and_testing.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| A-33 | `agents/governance_learner.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| A-34 | `agents/rule_validator.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| A-35 | `workflows/remediation_workflow.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| A-36 | `agents.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| A-37 | `rules/documentation_standard.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
 
 ### Wave 2 — pace and autonomy
 

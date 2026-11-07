@@ -93,6 +93,10 @@ enrutado con destino nombrado.
 | D21 | **Totales de `session_cost.py` sin duplicados antes del estudio** (decisión humana 2026-11-05, tras QA Gate 1 ronda 3, F4): `read_turns` cuenta cada mensaje de la API una vez por registro del transcript, así que los totales salen altos por un factor de 1,66 a 2,51 (mediana 2,17; 20 transcripts cerrados de la sesión principal, 2026-11-07; comando en `KI-059-10` de `SPRINT_LOG.md`); `ratio` y cortes no cambian. A-18 deduplica por `message.id` antes de A-00, porque A-00, H-01 y H-03 calibran sobre esos totales | Corregirlo solo en el análisis de A-00: el script seguiría dando cifras falsas a cualquier otro uso |
 | D22 | **El nombre de host sale del árbol ahora** (decisión humana 2026-11-07, tras QA Gate 1 ronda 5, F3): A-19 a A-24 lo genericizan en los 6 archivos históricos, con anotación en cada sitio; la historia pública sigue en Sprint 060 (`KI-059-12`) | Dejarlo hasta el 060: contradice la decisión del 2026-11-05 y mantiene un S0 que bloquea merge y deploy |
 | D23 | **Texto soft de §3.1 con check determinista** (decisión humana 2026-11-07, tras QA Gate 1 ronda 5, F1, segunda ocurrencia de la familia de N3; `family_check`): manda la fila soft, el agente actualiza Cost y ningún instrumento lo registra; A-25 fija ese texto por igualdad contra copia revisada | Solo reescribir el texto: rechaza el juicio de QA sin medir y deja la familia sin check |
+| D24 | **Datos de host como propiedad, no como lista de nombres** (decisión humana 2026-11-07, tras QA Gate 1 ronda 6, F1): A-26 a A-30 retiran el slug del perfil y el dominio de negocio; A-31 fija la propiedad por `profiles/<slug>` sin guardar nombres de host en el repositorio y declara su límite: los nombres sueltos siguen en el escáner de Sprint 060 (`KI-059-12`). `skills/skillopt/data/scenarios.json:58-59` no nombra proyecto y es un dataset: se mantiene y se enruta como `KI-059-14` | Otra lista de nombres: es la comprobación de subconjunto que falló en D22 (`fail_closed_claims`) |
+| D25 | **`RA-19` tras S0 sin aplazamiento abierto** (decisión humana 2026-11-07): C-01 salda las rondas 3, 4 y 6; sigue en la wave 4 porque mide el sandbox de B-06. Una fila de Verification lo exige, de modo que `check_plan_closure.py` no deja cerrar sin ella; A-32 fija el momento en la regla. Retirar el nombre del árbol no lo retira de la historia pública (`KI-059-12`, Sprint 060). El S0 queda abierto en cuanto a `RA-19` hasta C-01 | Adelantar C-01: saldría incompleta y habría que repetirla; aplazar sin más: se puede olvidar, y ya se saltó tres veces |
+| D26 | **El aprendizaje va donde corresponde, sin agente nuevo** (decisión humana 2026-11-07): `governance_learner` decide el destino con una tabla (test o script si se puede comprobar; `rules/` si tiene contexto; `agents.md` solo si aplica en cada sesión y nada lo cubre; solo citar si ya está cubierto) y `rule_validator` lo audita (A-33 a A-36, A-37) | Agente nuevo: suma coste fijo y conserva las instrucciones contradictorias |
+| D27 | **Se retira la instrucción `forced: true`** (decisión humana 2026-11-07, QA Gate 1 ronda 6, F2): nada la lee. La señal "too tight" se lee de `task_scope.md`; la calibración sigue en A-00, A-06 y A-03; la copia de A-25 se actualiza | Definir un destino para el campo: añade un mecanismo que nadie consume |
 
 ---
 
@@ -125,6 +129,18 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | A-23 | `docs/roadmaps/core/pipeline/017-pre-publication-hardening.md` | modify — D22: igual que A-19 | low | `doc_orchestrator` | ✅ `b6adb90` |
 | A-24 | `docs/sprints/023-core-pipeline/task_scope.md` | modify — D22: igual que A-19 | low | `doc_orchestrator` | ✅ `ff69f15` |
 | A-25 | `tests/test_token_economy_soft_bound.py` | create — D23: igualdad contra copia revisada de la fila soft y de la frase de calibración de `rules/token_economy.md §3.1`, y `probe_cost` devuelve `None` con un ciclo a 6×; falla con el texto de `d192075` (N3) y con el de `7779e7f` (F1) | low | `implementer_agent` | ✅ `1e1deda` |
+| A-26 | `CHANGELOG.md` | modify — D24: reemplaza el slug del perfil en las líneas 800, 811 y 934 y el dominio de la 764, con anotación | low | `doc_orchestrator` | ⏳ |
+| A-27 | `docs/roadmaps/core/pipeline/015-terminology-and-nomenclature-hardening.md` | modify — D24: reemplaza el slug de la línea 52, con anotación | low | `doc_orchestrator` | ⏳ |
+| A-28 | `docs/roadmaps/core/pipeline/016-folder-topology-migration.md` | modify — D24: reemplaza el slug de la línea 33 y deja legibles las líneas 33 y 38 (F6 de la ronda 6) | low | `doc_orchestrator` | ⏳ |
+| A-29 | `docs/roadmaps/core/pipeline/017-pre-publication-hardening.md` | modify — D24: reemplaza el slug de las líneas 21, 29, 39 y 48, con anotación | low | `doc_orchestrator` | ⏳ |
+| A-30 | `workflows/reverse_documentation_workflow.md` | modify — D24: reemplaza el dominio de negocio de la línea 28 por una descripción genérica | low | `doc_orchestrator` | ⏳ |
+| A-31 | `tests/test_profile_references.py` | create — D24: toda referencia `profiles/<slug>` trackeada resuelve a un directorio real o a un marcador revisado; falla en `d06c939` por cada uno de los 4 archivos; declara que no detecta nombres sueltos | low | `implementer_agent` | ⏳ |
+| A-32 | `rules/qa_and_testing.md` | modify — D25: la repetición de `RA-19` tras un S0 ocurre antes del merge del sprint que lo remedia | low | `rule_validator` | ⏳ |
+| A-33 | `agents/governance_learner.md` | modify — D26: tabla de destinos del aprendizaje; quita el destino fijo `agents.md` Section 7 | low | `rule_validator` | ⏳ |
+| A-34 | `agents/rule_validator.md` | modify — D26: audita el destino que da `governance_learner`; quita el destino fijo `agents.md` | low | `rule_validator` | ⏳ |
+| A-35 | `workflows/remediation_workflow.md` | modify — D26: `negative_ki` enruta por la tabla de `governance_learner` en vez de inyectar en `agents.md` | low | `rule_validator` | ⏳ |
+| A-36 | `agents.md` | modify — D26: `constitutional_escalation` enruta por `governance_learner`; `wc -c agents.md` ≤ 20000 | low | `rule_validator` | ⏳ |
+| A-37 | `rules/documentation_standard.md` | modify — D26: `negative_ki` de este bloqueo: no describir una conducta que ningún instrumento realiza; si la tabla da otro destino, se enmienda esta fila antes de escribir | low | `rule_validator` | ⏳ |
 
 ### Wave 2 — Ritmo y autonomía (aceleran el resto del sprint)
 
@@ -161,7 +177,7 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | B-03 | `scripts/py_compile_tree.py` | modify — compilar sin escribir `.pyc` (D5); test en `tests/test_verify_py_compile.py` | medium | `implementer_agent` | ⏳ |
 | B-04 | `skills/mass-standardizer/scripts/generate_manifest.py` | modify — modo `--check` que compara sin reescribir `skills/manifest_skills.json` (D5): exit 0 si coincide, exit 2 si difiere, y el archivo queda con el mismo hash; test en `tests/test_mass_standardizer.py` | medium | `skill_architect` | ⏳ |
 | B-05 | `Makefile` | modify — tras B-03, B-04: `verify` usa ambos modos sin escritura | low | `implementer_agent` | ⏳ |
-| C-01 | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` | create — re-medición `RA-19` para el CLI actual: miembros `E16` sin probar, subárboles inferidos por contención, `Edit(/.git/modules/.agents/**)`, D-8; incluye el núcleo con el sandbox de B-06. `devops_agent` mide con `model: sonnet` (escalado desde `mechanical` por riesgo high) y entrega la salida literal; `doc_orchestrator` escribe | high | `devops_agent` | ⏳ |
+| C-01 | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` | create — salda los S0 de QA Gate 1: "round 3, round 4, round 6" (D25); re-medición `RA-19` para el CLI actual: miembros `E16` sin probar, subárboles inferidos por contención, `Edit(/.git/modules/.agents/**)`, D-8; incluye el núcleo con el sandbox de B-06. `devops_agent` mide con `model: sonnet` (escalado desde `mechanical` por riesgo high) y entrega la salida literal; `doc_orchestrator` escribe | high | `devops_agent` | ⏳ |
 | C-02 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify — tras C-01, A-02: `F-055-N1` pasa a cerrado si C-01 mide su vector sin punto escribible por el agente, o queda abierto con la medida de C-01 citada; `F-116-N1` se marca cerrado citando los commits de A-01 (`ef490cd`, `919d4f2`) y `F-116-N2` citando el de A-02 | low | `doc_orchestrator` | ⏳ |
 
 ### Wave 5 — Régimen (decisiones con las medidas en la mano)
@@ -195,7 +211,7 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | # | File | Operation | Risk | Assignee (proposed) | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | Z-01 | `CHANGELOG.md` | modify — entrada `[Unreleased]` del sprint; cita `host:F-116-N1` y `host:F-116-N2` (`agents.md §4 feedback_upstream`, cierre) | low | `doc_orchestrator` | ⏳ |
-| Z-02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify — cerrar o re-enrutar `KI-056-1`, `KI-056-6`, `KI-057-1`, `KI-057-2`, `KI-058-1`, `KI-058-3`, `KI-058-4`, `KI-058-5`; `KI-058-2` y los condicionados de Out of scope quedan con su condición de desbloqueo; nuevos `KI-059-n`, incluido uno para los puntos 3-5 de la propuesta E (P11); enruta o cierra con evidencia los `KI-059-n` abiertos del `SPRINT_LOG.md`: `KI-059-1`, `KI-059-3`, `KI-059-5`, `KI-059-6`, `KI-059-7`, `KI-059-11`, `KI-059-12` y `KI-059-13` | low | `doc_orchestrator` | ⏳ |
+| Z-02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify — cerrar o re-enrutar `KI-056-1`, `KI-056-6`, `KI-057-1`, `KI-057-2`, `KI-058-1`, `KI-058-3`, `KI-058-4`, `KI-058-5`; `KI-058-2` y los condicionados de Out of scope quedan con su condición de desbloqueo; nuevos `KI-059-n`, incluido uno para los puntos 3-5 de la propuesta E (P11); enruta o cierra con evidencia los `KI-059-n` abiertos del `SPRINT_LOG.md`: `KI-059-1`, `KI-059-3`, `KI-059-5`, `KI-059-6`, `KI-059-7`, `KI-059-11`, `KI-059-12`, `KI-059-13` y `KI-059-14` | low | `doc_orchestrator` | ⏳ |
 
 ---
 
@@ -224,7 +240,7 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 60 | Count of rows in Work tables |
+| Work units | 72 | Count of rows in Work tables |
 | Subagents dispatched | lotes de hasta 4 en paralelo desde la wave 3 (D11), más QA + Tester por wave | `agent_assignment.md` |
 | Session ratio (2026-11-05) | **6.1×** sesión `9679503b`, ciclo único, medida completa con `session_cost.py` de `919d4f2` (corte de D19; durante la sesión se leyó 5.4× y 5.9×) — supera soft (5×). Quedan 41 unidades en 5 waves más cierre; delegación `native`; tras los gates de la wave 1, `suspend` | `python3 -I scripts/session_cost.py --session 9679503b-5e2c-4a1a-b3dd-a42dacd42cd6 --json` |
 | Prior session ratio | **9.2×** (ciclo 2; ciclo 1 4.6×), de `session_cost.py` en `08c669c` sobre la sesión `7204cadc`, cifra inflada por `F-116-N1`; con el `session_cost.py` de `919d4f2` (D19) es 3.6×; entonces superaba soft (5×). Coste restante declarado: 53 unidades en 6 waves más cierre, una wave por sesión, `suspend` entre waves | `python3 -I scripts/session_cost.py --session 7204cadc-d44b-4226-a000-597c17b52b33 --json` da la cifra de `919d4f2`; la de `08c669c` sale de `git show 08c669c:scripts/session_cost.py` |
@@ -250,6 +266,7 @@ transcript exists for this tool.
 | `tests/test_mass_standardizer.py`: `generate_manifest.py --check` sale 2 ante un manifiesto distinto y no reescribe el archivo (B-04) | **Yes** — el flag no existe | `grep -c -- '--check' skills/mass-standardizer/scripts/generate_manifest.py` → 0, exit 1 |
 | Paired tests de I-01..I-07 (`KI-058-1`, `KI-058-4`, `KI-058-5` a-d) | **Yes** — cada uno es un defecto registrado | `unverified`: cada test se escribe y se ve fallar en el padre al abrir la wave 6; `scripts/check_fix_reproduces.py` lo exige en Gate 1 |
 | `tests/test_token_economy_soft_bound.py` (A-25) | **Yes** — segunda ocurrencia de la familia de N3 (D23) | el test se ve fallar con el texto de `d192075` y con el de `7779e7f` |
+| `tests/test_profile_references.py` (A-31) | **Yes** — familia de datos de host (D24) | el test se ve fallar en `d06c939` por cada uno de los 4 archivos |
 | Suite completa `make verify` | **No** — regresión a proteger | `make verify` → exit 0 en `08c669c` |
 
 ---
@@ -259,6 +276,7 @@ transcript exists for this tool.
 | Command | Expected | Dry run | Positive control |
 | :--- | :--- | :--- | :--- |
 | `wc -c agents.md` | ≤ 20000 | exit 0; 53907 | la propia corrida de base es el control positivo |
+| `grep -E 'round 3.*round 4.*round 6' docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` | exit 0: C-01 salda los S0 de las rondas 3, 4 y 6 (D25) | exit 2: el archivo aún no existe | la propia corrida de base es el control positivo |
 | `grep -n "^model:" agents/qa_agent.md` | `model: opus` (D20: prueba revertida) | exit 0; `model: opus` | la propia corrida de base es el control positivo |
 | `python3 -I scripts/session_cost.py --from-anchor --json` | exit 0, todos los `ratio` numéricos | exit 0; ratios 4.6 y 9.2 (esta sesión no tiene ciclo frío) | bucle sobre los 33 transcripts: 11 con `first_turn` 0 |
 | `grep -rn -e session_cost -e session_probe hooks/` | sin salida (D2: el invocador es un workflow, no un hook) | exit 1, sin salida | `grep -n -e session_cost -e session_probe scripts/session_start.py` → líneas 444, 679, exit 0 |
@@ -281,6 +299,8 @@ transcript exists for this tool.
 | `rules/token_economy.md` | §3.1 unidad y invocador |
 | `CHANGELOG.md`, roadmaps 014 a 017, `docs/sprints/023-core-pipeline/task_scope.md` | nombre de host genericizado con anotación (D22) |
 | `tests/test_token_economy_soft_bound.py` | nuevo: fija el texto soft de §3.1 (D23) |
+| `tests/test_profile_references.py`, `workflows/reverse_documentation_workflow.md` | nuevo check de referencias a perfiles; dominio genericizado (D24) |
+| `rules/qa_and_testing.md`, `agents/governance_learner.md`, `agents/rule_validator.md`, `workflows/remediation_workflow.md`, `rules/documentation_standard.md` | momento de `RA-19` (D25) y destino del aprendizaje (D26) |
 | `docs/guides/RULE_PRECEDENTS_GUIDE.md` | nuevo: historia y precedentes de las filas de `agents.md` sin otro destino (A-13) |
 | `docs/decisions/ADR-0021-qa-agent-tier-trial.md`, `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` | nuevo ADR de la prueba D9 y su cita en la guía (A-14) |
 | `rules/skills_and_integrations.md`, `rules/qa_and_testing.md`, `config/rule_triggers.json` | reciben reglas de una tarea concreta desde la guía de precedentes (A-15, A-16, A-17) |
