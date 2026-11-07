@@ -27,6 +27,10 @@ One table per wave. Shape is mandatory:
 
 `# | Target | Operation | Mode | Assignee | Destination | Ruleset file`
 
+Target is the plan row's File and Operation holds only its verb
+(`create`, `modify`, `delete`): `scripts/check_forge_ladder.py` reads both. The
+plan's Operation text is not copied here; the unit id cites it.
+
 | # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | {{ID}} | `{{PATH}}` | create/modify/delete | sequential / ruleset | `{{ROLE}}` | {{DESTINATION}} | `agents/{{ROLE}}.md` |
