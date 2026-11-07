@@ -19,8 +19,12 @@ Waiver: a commit that must delete (host data under `RA-15`, a false figure)
 carries the trailer `Log-Rewrite: <reason>`. Its losses are printed and do not
 fail. An empty reason waives nothing. Zone 3 has no waiver.
 
-A record absent at the range end is reported and skipped: a log deleted inside
+A record absent at the range end: with `--sprint-dir` it exits 2, so a path that
+names nothing cannot pass. With `--current-sprint` it is reported and skipped,
+because a sprint just opened may hold no committed record; a log deleted inside
 the range still fails zones 1 and 2, because the deleting commit is compared.
+`--sprint-dir` must name an existing directory inside the repository; it may be
+relative to the working directory or absolute.
 
 invoked_by: Makefile `verify` target (`--current-sprint`), which applies it to
 sprint ids >= 60 (`ENFORCED_FROM`). Sprint 059 QA Gate 1 passes `--range` by hand.
@@ -147,13 +151,14 @@ def _commit_failures(root: Path, commit: str, log_path: str) -> list[str]:
     return [f"{short} {loss}" for loss in losses]
 
 
-def check(root: Path, sprint_dir: str, rng: str) -> int:
+def check(root: Path, sprint_dir: str, rng: str, require_records: bool = False) -> int:
     """Run the three zones over `rng`.
 
     Args:
         root: repository root.
         sprint_dir: sprint directory relative to `root`, with forward slashes.
         rng: a `<base>..<end>` git range.
+        require_records: count a record absent at the range end as a violation.
 
     Returns:
         int: 0 when clean, 2 on any unwaived loss or unmarked decision row.
@@ -163,11 +168,20 @@ def check(root: Path, sprint_dir: str, rng: str) -> int:
     commits = _git(root, "rev-list", "--reverse", rng, "--", log_path).split()
     failures = [f for c in commits for f in _commit_failures(root, c, log_path)]
     plan = _blob(root, end, f"{sprint_dir}/{PLAN_NAME}")
-    if plan is None:
-        print(f"check_log_append_only: no {PLAN_NAME} at {end} (zone 3 skipped)")
     failures.extend(unmarked_decisions(plan or ""))
-    if _blob(root, end, log_path) is None and not commits:
-        print(f"check_log_append_only: no {LOG_NAME} at {end} (zones 1 and 2 skipped)")
+    absent = [
+        (name, zones)
+        for name, zones, text in (
+            (PLAN_NAME, "zone 3", plan),
+            (LOG_NAME, "zones 1 and 2", _blob(root, end, log_path)),
+        )
+        if text is None
+    ]
+    for name, zones in absent:
+        if require_records:
+            failures.append(f"no {name} at {end}")
+        else:
+            print(f"check_log_append_only: no {name} at {end} ({zones} skipped)")
     for failure in failures:
         print(f"VIOLATION {failure}")
     print(f"check_log_append_only: {len(commits)} log commit(s), {len(failures)} violation(s)")
@@ -185,24 +199,40 @@ def _current_sprint_target(root: Path) -> tuple[str, str] | None:
     return target.resolve().relative_to(root.resolve()).as_posix(), f"{base}..HEAD"
 
 
+def _repo_relative(sprint_dir: str) -> tuple[Path, str]:
+    """Return the repository root and `sprint_dir` relative to it.
+
+    Raises:
+        ValueError: the directory does not exist or lies outside the repository.
+    """
+    top = Path(_git(Path.cwd(), "rev-parse", "--show-toplevel").strip()).resolve()
+    target = Path(sprint_dir).resolve()
+    if not target.is_dir():
+        raise ValueError(f"no such sprint directory: {sprint_dir}")
+    return top, target.relative_to(top).as_posix()
+
+
 def _dispatch(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
     """Run the mode the arguments select."""
     if args.current_sprint:
-        root = agents_root()
+        here = Path.cwd()
+        root = agents_root() if (here / "scripts" / "check_log_append_only.py").is_file() else here
         found = _current_sprint_target(root)
         if found is None:
             print(f"[OK] check_log_append_only: no sprint >= {ENFORCED_FROM} (skip)")
             return 0
         return check(root, *found)
-    if not args.sprint_dir or not args.rng or ".." not in args.rng or "..." in args.rng:
+    base, dots, _ = (args.rng or "").partition("..")
+    if not args.sprint_dir or not base or not dots or "..." in args.rng:
         parser.error("--current-sprint, or --sprint-dir with --range <base>..<end>")
-    return check(Path.cwd(), args.sprint_dir.rstrip("/"), args.rng)
+    root, sprint_dir = _repo_relative(args.sprint_dir)
+    return check(root, sprint_dir, args.rng, require_records=True)
 
 
 def main() -> int:
     """Parse arguments and run the check; git and anchor failures exit 2."""
     parser = argparse.ArgumentParser(description=__doc__.split("\n", 1)[0])
-    parser.add_argument("--sprint-dir", help="Sprint directory, relative to the working directory")
+    parser.add_argument("--sprint-dir", help="Existing sprint directory, relative to the working directory or absolute")
     parser.add_argument("--range", dest="rng", help="<base>..<end>")
     parser.add_argument("--current-sprint", action="store_true")
     args = parser.parse_args()
