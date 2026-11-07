@@ -19,7 +19,7 @@ Audit and harden this repo before flipping it from private to public: purge busi
 ### Investigation (3 parallel Explore agents)
 - Full `git log --all` (185 commits, stash included) audited for secrets. One real GitHub PAT found, confined to a local-only `git stash` entry (never pushed) from an auto-generated "GitHub Desktop" stash, distinct from the token currently active in the (now-removed) `.env`.
 - `profiles/crypto-django/` identified as a real, identifiable production trading-bot blueprint (Django app inventory, business thresholds, KYC/vault handling, Polymarket integration) — present since commit `bb8e30d`, in all 10 tags `v3.0.0`-`v4.1.0`.
-- `skills/skillopt/data/scenarios.json` found to leak a real macOS username and real host project folder name (`Cryptobot`, a casing variant the case-insensitive Phase 015 sweep still missed) in a training-scenario example path.
+- `skills/skillopt/data/scenarios.json` found to leak a real macOS username and real host project folder name (`a host project`, a casing variant the case-insensitive Phase 015 sweep still missed) in a training-scenario example path. [host name genericized, Sprint 059]
 - License audit: `frontend-design`/`skill-creator` are Apache-2.0 (undisclosed at the repo's MIT-only root); `django-expert-3rd` is properly MIT-attributed; 11 other vendored skills lack verifiable provenance.
 
 ### Remediation
