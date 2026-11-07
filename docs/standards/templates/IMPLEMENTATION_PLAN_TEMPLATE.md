@@ -30,7 +30,16 @@ The decisions that shape the work, with the reason each was chosen over what it
 replaced. Record rejected alternatives here rather than in a session transcript:
 this document is the only thing that survives the session.
 
-{{DESIGN}}
+Each fact of the sprint lives in one artifact, and the others cite its id: a
+decision here, a unit's status in `task_scope.md`, a `KI` in the `SPRINT_LOG.md`
+KI table, a gate finding in its Gate findings table. `scripts/check_sprint_refs.py`
+exits 2 when a cited id has no home. A decision that states what something does
+or covers carries, in `Check`, the command that verifies it and the exit expected;
+a statement with no command is not written.
+
+| ID | Decision | Rejected alternative and why | Check |
+| :--- | :--- | :--- | :--- |
+| D0 | {{DECISION}} | {{REJECTED}} | `{{COMMAND}}` → exit {{EXIT}} |
 
 ---
 
@@ -52,9 +61,11 @@ overwrite this proposal. A Work row is not closed until `agent_assignment.md`
 records it. Do not rename columns on existing `task_scope.md` files to match
 this heading.
 
-| # | File | Operation | Risk | Assignee (proposed) | Status |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| {{ID}} | `{{PATH}}` | create/modify/delete | low/medium/high | `{{ROLE}}` | ⏳ |
+A unit's status lives in `task_scope.md`; this table does not repeat it.
+
+| # | File | Operation | Risk | Assignee (proposed) |
+| :--- | :--- | :--- | :--- | :--- |
+| {{ID}} | `{{PATH}}` | create/modify/delete | low/medium/high | `{{ROLE}}` |
 
 ---
 
