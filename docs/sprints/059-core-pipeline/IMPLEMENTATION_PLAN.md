@@ -339,7 +339,7 @@ transcript exists for this tool.
 | `grep -rn -e session_cost -e session_probe hooks/` | sin salida (D2: el invocador es un workflow, no un hook) | exit 1, sin salida | `grep -n -e session_cost -e session_probe scripts/session_start.py` → líneas 444, 679, exit 0 |
 | `grep -n "isolation" workflows/pipeline_workflow.md` | una línea en Phase 6 (G-02) | exit 1 (aún no existe) | n/a: la salida esperada no es vacía |
 | `make verify` | exit 0 | exit 0 en `08c669c` | n/a |
-| `python3 scripts/check_sprint_refs.py --current-sprint` | exit 0 tras M-11 | `unverified`: el script no existe (M-06) | el mismo comando sobre un fixture con un `KI-059-99` citado y ausente → exit 2 |
+| `python3 scripts/check_sprint_refs.py --current-sprint` | exit 0 tras M-11 | `unverified`: el script no existe (M-06) | el mismo comando sobre un fixture que cita un KI del sprint ausente de su tabla → exit 2 (`tests/test_check_sprint_refs.py`) |
 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider` | exit 0 | exit 0 en `08c669c`; 1527 passed | n/a |
 | `python3 skills/token-saver-auditor/scripts/audit_plan.py docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | exit 0 | run at close: se ejecuta sobre el borrador antes de Phase 5 | n/a |
 | `grep -n "@v[0-9]" .github/workflows/ci.yml` | sin salida tras E-03 | exit 0, líneas 24, 28, 39 | la propia corrida de base es el control positivo |
