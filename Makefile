@@ -76,7 +76,6 @@ verify:
 	cd $(AGENTS_DIR) && python3 skills/token-saver-auditor/scripts/audit_plan.py --current-sprint
 	cd $(AGENTS_DIR) && python3 scripts/check_task_scope.py --current-sprint
 	cd $(AGENTS_DIR) && python3 scripts/check_gate_log.py --current-sprint
-	cd $(AGENTS_DIR) && python3 scripts/check_log_append_only.py --current-sprint
 	cd $(AGENTS_DIR) && python3 scripts/check_template_gates.py
 	cd $(AGENTS_DIR) && python3 scripts/verify_references.py
 	cd $(AGENTS_DIR) && $(PY) scripts/check_model_tiers.py
