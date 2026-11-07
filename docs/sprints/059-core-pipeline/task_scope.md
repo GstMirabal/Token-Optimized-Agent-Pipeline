@@ -41,13 +41,13 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | A-14 | `docs/decisions/ADR-0021-qa-agent-tier-trial.md` | create: after A-12, supersede the `ADR-0003` clause for `qa_agent` only, for the D9 trial, with the abort criterion 4 return condition (D17); `ADR-0003` is not edited; mandatory companion `docs/guides/MODEL_TIER_TRIAL_GUIDE.md` (`:19`, `:140`) | medium | `doc_orchestrator` | sonnet | medium | ✅ `ed96115` |
 | A-08 | `agents/qa_agent.md` | modify: after A-14, set model sonnet and tier author (D9); mandatory companion `config/model_tiers.json` (move qa_agent to author.profiles, add the trial and its return criterion to the gate basis); mandatory companion `tests/test_agent_profile_census.py` (pins the gate list, keeps `qa_agent` without `Write`/`Edit`) | medium | `implementer_agent` | sonnet | medium | ✅ `80518b4`, reverted `8e8a566` (D20) |
 | A-01 | `scripts/session_cost.py` | modify: fix( cycle_summary baseline D1 and segment_cycles cuts on context size (D19); paired test `tests/test_session_cost.py` (new) with a turn of cache_read 0 and cache_creation above 0 | medium | `implementer_agent` | sonnet | medium | ✅ `ef490cd`, `919d4f2` |
-| A-19 | `CHANGELOG.md` | modify: D22, replace the host name with `a host project`, annotated in place; `git grep -c -i` of the name over the file gives 0 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-20 | `docs/roadmaps/core/pipeline/014-identity-branding-hardening.md` | modify: D22, same as A-19 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-21 | `docs/roadmaps/core/pipeline/015-terminology-and-nomenclature-hardening.md` | modify: D22, same as A-19 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-22 | `docs/roadmaps/core/pipeline/016-folder-topology-migration.md` | modify: D22, same as A-19 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-23 | `docs/roadmaps/core/pipeline/017-pre-publication-hardening.md` | modify: D22, same as A-19 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-24 | `docs/sprints/023-core-pipeline/task_scope.md` | modify: D22, same as A-19 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-25 | `tests/test_token_economy_soft_bound.py` | create: D23, equality against a reviewed copy of the soft row and the calibration sentence of `rules/token_economy.md` §3.1, and `probe_cost` returns None for a cycle at 6x; fails with the text of `d192075` (N3) and of `7779e7f` (F1) | low | `implementer_agent` | sonnet | medium | ⏳ |
+| A-19 | `CHANGELOG.md` | modify: D22, replace the host name with `a host project`, annotated in place; `git grep -c -i` of the name over the file gives 0 | low | `doc_orchestrator` | sonnet | medium | ✅ `4fb09a9` |
+| A-20 | `docs/roadmaps/core/pipeline/014-identity-branding-hardening.md` | modify: D22, same as A-19 | low | `doc_orchestrator` | sonnet | medium | ✅ `28242ff` |
+| A-21 | `docs/roadmaps/core/pipeline/015-terminology-and-nomenclature-hardening.md` | modify: D22, same as A-19 | low | `doc_orchestrator` | sonnet | medium | ✅ `a3c5a14` |
+| A-22 | `docs/roadmaps/core/pipeline/016-folder-topology-migration.md` | modify: D22, same as A-19 | low | `doc_orchestrator` | sonnet | medium | ✅ `f72983e` |
+| A-23 | `docs/roadmaps/core/pipeline/017-pre-publication-hardening.md` | modify: D22, same as A-19 | low | `doc_orchestrator` | sonnet | medium | ✅ `b6adb90` |
+| A-24 | `docs/sprints/023-core-pipeline/task_scope.md` | modify: D22, same as A-19 | low | `doc_orchestrator` | sonnet | medium | ✅ `ff69f15` |
+| A-25 | `tests/test_token_economy_soft_bound.py` | create: D23, equality against a reviewed copy of the soft row and the calibration sentence of `rules/token_economy.md` §3.1, and `probe_cost` returns None for a cycle at 6x; fails with the text of `d192075` (N3) and of `7779e7f` (F1) | low | `implementer_agent` | sonnet | medium | ✅ `1e1deda` |
 
 ### Wave 2 — Pace and autonomy
 
