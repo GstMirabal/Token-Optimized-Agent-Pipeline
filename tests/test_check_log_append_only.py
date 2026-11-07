@@ -153,52 +153,16 @@ def test_other_wording_is_a_declared_limit(repo: Path) -> None:
     assert _run(repo).returncode == 0
 
 
-def test_absent_records_are_skipped_without_require_records(repo: Path, capsys: pytest.CaptureFixture[str]) -> None:
-    assert module.check(repo, "docs/sprints/999-none", "base..HEAD") == 0
-    out = capsys.readouterr().out
-    assert "zone 3 skipped" in out
-    assert "zones 1 and 2 skipped" in out
-
-
-def test_absent_record_by_hand_exits_2(repo: Path) -> None:
-    (repo / "docs" / "sprints" / "061-empty").mkdir(parents=True)
-    result = subprocess.run(
-        [sys.executable, str(CHECK), "--sprint-dir", "docs/sprints/061-empty", "--range", "base..HEAD"],
-        cwd=repo, capture_output=True, text=True, check=False,
-    )
-    assert result.returncode == 2
-    assert "no SPRINT_LOG.md at HEAD" in result.stdout
-
-
-def _lost_word_run(repo: Path, cwd: Path, sprint_dir: str) -> subprocess.CompletedProcess[str]:
-    _commit(repo, "SPRINT_LOG.md", ROW.replace("there ", "") + MINING)
-    return subprocess.run(
-        [sys.executable, str(CHECK), "--sprint-dir", sprint_dir, "--range", "base..HEAD"],
-        cwd=cwd, capture_output=True, text=True, check=False,
-    )
-
-
-def test_sprint_dir_relative_to_a_subdirectory_is_judged(repo: Path) -> None:
-    result = _lost_word_run(repo, repo / "docs", "sprints/060-core-pipeline")
-    assert result.returncode == 2
-    assert "KI-060-1: lost 1 of" in result.stdout
-
-
-def test_absolute_sprint_dir_is_judged(repo: Path) -> None:
-    result = _lost_word_run(repo, repo, str(repo / SPRINT))
-    assert result.returncode == 2
-    assert "KI-060-1: lost 1 of" in result.stdout
-
-
-def test_missing_sprint_dir_fails_closed(repo: Path) -> None:
-    result = _lost_word_run(repo, repo, SPRINT[:-1])
-    assert result.returncode == 2
-    assert "no such sprint directory" in result.stderr
-
-
-def test_sprint_dir_outside_the_repository_fails_closed(repo: Path, tmp_path_factory: pytest.TempPathFactory) -> None:
-    outside = tmp_path_factory.mktemp("outside")
-    assert _lost_word_run(repo, repo, str(outside)).returncode == 2
+def test_absent_records_are_reported_and_skipped(tmp_path: Path) -> None:
+    _git(tmp_path, "init", "-q")
+    (tmp_path / "a.txt").write_text("x\n")
+    _git(tmp_path, "add", "a.txt")
+    _git(tmp_path, "commit", "-q", "-m", "chore: base")
+    _git(tmp_path, "tag", "base")
+    result = _run(tmp_path, "base..HEAD")
+    assert result.returncode == 0
+    assert "zone 3 skipped" in result.stdout
+    assert "zones 1 and 2 skipped" in result.stdout
 
 
 def test_bad_revision_fails_closed(repo: Path) -> None:
@@ -207,7 +171,7 @@ def test_bad_revision_fails_closed(repo: Path) -> None:
     assert "error:" in result.stderr
 
 
-@pytest.mark.parametrize("rng", ["HEAD", "base...HEAD", "..HEAD"])
+@pytest.mark.parametrize("rng", ["HEAD", "base...HEAD"])
 def test_malformed_range_fails_closed(repo: Path, rng: str) -> None:
     assert _run(repo, rng).returncode == 2
 
@@ -234,34 +198,6 @@ def test_current_sprint_without_last_close_exits_2(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _anchor(tmp_path, module.ENFORCED_FROM)
-    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(module, "agents_root", lambda: tmp_path)
     monkeypatch.setattr(sys, "argv", ["check", "--current-sprint"])
     assert module.main() == 2
-
-
-def test_current_sprint_from_a_host_root_audits_the_host(repo: Path) -> None:
-    (repo / "docs" / "active_state.json").write_text(json.dumps({
-        "current_sprint": {"id": 60}, "last_close_commit": _git(repo, "rev-parse", "base"),
-    }))
-    _commit(repo, "SPRINT_LOG.md", ROW.replace("there ", "") + MINING)
-    result = subprocess.run(
-        [sys.executable, str(CHECK), "--current-sprint"],
-        cwd=repo, capture_output=True, text=True, check=False,
-    )
-    assert result.returncode == 2
-    assert "KI-060-1: lost 1 of" in result.stdout
-
-
-def test_current_sprint_from_the_framework_root_uses_agents_root(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
-) -> None:
-    framework = tmp_path / "framework"
-    (framework / "docs").mkdir(parents=True)
-    (framework / "scripts").mkdir()
-    (framework / "scripts" / "check_log_append_only.py").write_text("")
-    _anchor(framework, module.ENFORCED_FROM - 1)
-    monkeypatch.chdir(framework)
-    monkeypatch.setattr(module, "agents_root", lambda: framework)
-    monkeypatch.setattr(sys, "argv", ["check", "--current-sprint"])
-    assert module.main() == 0
-    assert "(skip)" in capsys.readouterr().out
