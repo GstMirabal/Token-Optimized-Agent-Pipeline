@@ -211,8 +211,6 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase**: Phase 7, Wave 1. QA Gate 1 round 5 remediated, with units A-19 to A-25; KI-059-11 measured. One more `remediation-regression` label stops this block, and one more consecutive `REJECTED` (rounds 3, 4 and 5 so far) reaches `workflows/remediation_workflow.md` Phase 0. In order:
-1. QA Gate 1 round 6 and Tester Gate 2 round 2, each a fresh agent, with no finding excluded.
-2. `session_state.py suspend`, then Wave 2, in series; batches stay out until the plan's unit allows them (human decision 2026-11-07: no amendment to D11).
+**Next Phase**: BLOCKED, `TERMINAL_REMEDIATION_LOOP`, 2026-11-07. QA Gate 1 round 6 REJECTED, unremediated: second `remediation-regression` label and four consecutive `REJECTED` (`workflows/remediation_workflow.md` Phase 0, abort criterion 8). The tree was clean, so `state_nuke` had nothing to remove and no commit changed. `error_mining` origin: `rules/token_economy.md` §3.1 kept being rewritten to describe bound conduct that no instrument performs instead of dropping the claim, and plan D22 checked one named string where the rule covers a property. `negative_ki` is pending: `agents.md` has 7 bytes of margin. No patch until the human re-plans these two blocks; then `session_state.py unblock`, QA Gate 1 round 7, Tester Gate 2 round 2, `suspend`, and Wave 2 in series, with batches out until the plan's unit allows them (human decision 2026-11-07: no amendment to D11).
 
 *Certified under conventional commit standard: feat(scope): message #059*
