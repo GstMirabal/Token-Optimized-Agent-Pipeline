@@ -69,6 +69,12 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | A-37 | `rules/documentation_standard.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
 | A-38 | `config/rule_triggers.json` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
 | A-39 | `agents.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| A-40 | `docs/roadmaps/core/pipeline/018-post-publication-field-hardening.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-41 | `skills/skillopt/data/scenarios.json` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-42 | `docs/roadmaps/core/pipeline/008-session-close-governance.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-43 | `skills/mcp-registry/README.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-44 | `profiles/example-project/mcp/registry.json` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-45 | `docs/guides/RULE_PRECEDENTS_GUIDE.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 
 ### Wave 2 — pace and autonomy
 

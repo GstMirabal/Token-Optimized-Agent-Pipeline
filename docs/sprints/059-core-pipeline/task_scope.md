@@ -62,6 +62,12 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | A-37 | `rules/documentation_standard.md` | modify: D26: `negative_ki` of this deadlock: do not describe conduct no instrument performs; if the table gives another destination, amend this row before writing | low | `rule_validator` | sonnet | medium | ✅ `d6b388c` |
 | A-38 | `config/rule_triggers.json` | modify: D28: add `rules/*.md` to the globs of `rules/documentation_standard.md` | low | `rule_validator` | sonnet | medium | ✅ `408ad02` |
 | A-39 | `agents.md` | modify: D28: section 0 row of `rules/documentation_standard.md`: `Editing any document under docs/ or rules/`; `wc -c agents.md` at most 20000 | low | `rule_validator` | sonnet | medium | ✅ `de19dad` |
+| A-40 | `docs/roadmaps/core/pipeline/018-post-publication-field-hardening.md` | modify: D29: replace the business domain on line 36, annotated | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-41 | `skills/skillopt/data/scenarios.json` | modify: D29: replace the business domain on lines 58 and 59 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-42 | `docs/roadmaps/core/pipeline/008-session-close-governance.md` | modify: D29: replace the domain on line 23, annotated | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-43 | `skills/mcp-registry/README.md` | modify: D29: replace the domain example on line 5 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-44 | `profiles/example-project/mcp/registry.json` | modify: D29: replace the domain example on line 7 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-45 | `docs/guides/RULE_PRECEDENTS_GUIDE.md` | modify: D29: replace the roles inherited from a host on line 205 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 
 ### Wave 2 — Pace and autonomy
 
@@ -98,7 +104,7 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | B-03 | `scripts/py_compile_tree.py` | modify: compile without writing `.pyc` (D5); test in `tests/test_verify_py_compile.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
 | B-04 | `skills/mass-standardizer/scripts/generate_manifest.py` | modify: add `--check` (exit 0 on match, exit 2 on drift, `skills/manifest_skills.json` bytes unchanged) (D5); test in `tests/test_mass_standardizer.py` | medium | `skill_architect` | sonnet | medium | ⏳ |
 | B-05 | `Makefile` | modify: after B-03 and B-04, `verify` uses both no-write modes | low | `implementer_agent` | sonnet | medium | ⏳ |
-| C-01 | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` | create: discharge the S0 findings of QA Gate 1 "round 3, round 4, round 6" (D25); RA-19 re-measurement for the current CLI (untested E16 members, subtrees inferred by containment, `Edit(/.git/modules/.agents/**)`, D-8), including the nucleus with the B-06 sandbox; `devops_agent` measures dispatched with `model: sonnet` (escalated from mechanical for high risk) and hands over literal output | high | `doc_orchestrator` | sonnet | medium | ⏳ |
+| C-01 | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` | create: RA-19 re-measurement for the current CLI (untested E16 members, subtrees inferred by containment, `Edit(/.git/modules/.agents/**)`, D-8), including the nucleus with the B-06 sandbox; `devops_agent` measures dispatched with `model: sonnet` (escalated from mechanical for high risk) and hands over literal output | high | `doc_orchestrator` | sonnet | medium | ⏳ |
 | C-02 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify: after C-01 and A-02, `F-055-N1` closed if C-01 measures its vector with no agent-writable entry point, otherwise open citing the C-01 measurement; `F-116-N1` marked closed citing the A-01 commits (`ef490cd`, `919d4f2`) and `F-116-N2` citing the A-02 commit | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 
 ### Wave 5 — Regime
@@ -147,6 +153,7 @@ Same structural subject claimed by more than one unit. "Serial" means the plan's
 | `agents.md` | A-12, A-36, A-39 (Wave 1), D-02 (Wave 5, after A-12) | Serial. |
 | `rules/qa_and_testing.md` | A-16, A-32 (Wave 1) | Serial. |
 | Roadmaps 015, 016 and 017 | A-21 and A-27, A-22 and A-28, A-23 and A-29 (Wave 1) | Serial. |
+| `docs/guides/RULE_PRECEDENTS_GUIDE.md` | A-13, A-45 (Wave 1) | Serial. |
 | `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | A-00, A-06 (Wave 3) | Serial. |
 | `rules/project_topology.md` | A-10 (Wave 1), D-03 (Wave 5, after A-10) | Serial. |
 | `workflows/pipeline_workflow.md` | G-02 (Wave 2), A-04 (Wave 3, after G-02) | Serial. |
@@ -179,7 +186,7 @@ Severity per `rules/qa_and_testing.md` section 4 (S0-S3). Class per the same fil
 
 ## Resolution of the findings
 
-Applied to `IMPLEMENTATION_PLAN.md` (and mirrored in the Work tables above and in `agent_assignment.md`) before Phase 5. Plan Work units: 44 → 47 (B-07, E-01c, H-03 added). Phase 6 Wave 1 added A-13 (plan D15): 47 → 48, A-14 (plan D17): 48 → 49, A-15, A-16, A-17 (plan D18): 49 → 52, and A-18 (plan D21): 52 → 53. After QA Gate 1 round 5, A-19 to A-24 (plan D22) and A-25 (plan D23): 53 → 60. After QA Gate 1 round 6, A-26 to A-37 (plan D24 to D26): 60 → 72, and A-38, A-39 (plan D28): 72 → 74.
+Applied to `IMPLEMENTATION_PLAN.md` (and mirrored in the Work tables above and in `agent_assignment.md`) before Phase 5. Plan Work units: 44 → 47 (B-07, E-01c, H-03 added). Phase 6 Wave 1 added A-13 (plan D15): 47 → 48, A-14 (plan D17): 48 → 49, A-15, A-16, A-17 (plan D18): 49 → 52, and A-18 (plan D21): 52 → 53. After QA Gate 1 round 5, A-19 to A-24 (plan D22) and A-25 (plan D23): 53 → 60. After QA Gate 1 round 6, A-26 to A-37 (plan D24 to D26): 60 → 72, and A-38, A-39 (plan D28): 72 → 74. After QA Gate 1 round 7, A-40 to A-45 (plan D29): 74 → 80.
 
 | ID | Resolution |
 | :--- | :--- |
