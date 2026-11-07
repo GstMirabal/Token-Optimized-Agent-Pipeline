@@ -104,6 +104,20 @@ def classify(line: str, match: re.Match[str], real: set[str]) -> str | None:
     return f"unclassified token {match.group(0) + after!r}"
 
 
+def scan_line(line: str, real: set[str]) -> list[str]:
+    """Collect the reasons for the disallowed references on one line.
+
+    Args:
+        line: one line of text.
+        real: names of the real profile directories.
+
+    Returns:
+        list[str]: one reason per disallowed reference, in order of appearance.
+    """
+    reasons = (classify(line, match, real) for match in REFERENCE_RE.finditer(line))
+    return [reason for reason in reasons if reason]
+
+
 def scan_text(text: str, real: set[str]) -> list[tuple[int, str]]:
     """Find disallowed references in a text.
 
@@ -116,10 +130,7 @@ def scan_text(text: str, real: set[str]) -> list[tuple[int, str]]:
     """
     found: list[tuple[int, str]] = []
     for number, line in enumerate(text.splitlines(), 1):
-        for match in REFERENCE_RE.finditer(line):
-            reason = classify(line, match, real)
-            if reason:
-                found.append((number, reason))
+        found.extend((number, reason) for reason in scan_line(line, real))
     return found
 
 
