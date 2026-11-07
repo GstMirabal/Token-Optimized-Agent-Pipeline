@@ -36,8 +36,10 @@ Output: after the verdict line, `escape rows: <N>` (advisory; never changes
 the exit code).
 
 Exit codes:
-    0 — pass, skip (historical / no file / no rows)
-    2 — vocabulary or class mismatch (RA-17; exit-code-2 blocking per RA-11 semantics)
+    0 — pass, skip (historical / no file / no rows / no anchor or no
+        ``current_sprint`` block)
+    2 — a missing ``--sprint-dir``, an anchor that names no existing sprint
+        directory, vocabulary or class mismatch (RA-17; exit-code-2 blocking per RA-11 semantics)
 """
 
 from __future__ import annotations
@@ -48,9 +50,9 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _current_sprint import CurrentSprintError, current_sprint_dir, project_root
 from _md_table import split_cells
-from _root import agents_root
-from check_task_scope import current_sprint_dir, sprint_id_from_dir
+from check_task_scope import sprint_id_from_dir
 
 SKIP_BEFORE = 31
 NOTES_FROM = 58
@@ -343,15 +345,21 @@ def main() -> int:
     parser.add_argument("--sprint-dir", type=Path, help="Canonical sprint directory")
     parser.add_argument("--current-sprint", action="store_true")
     args = parser.parse_args()
-    root = agents_root() if (Path.cwd() / "scripts" / "check_gate_log.py").is_file() else Path.cwd()
     if args.current_sprint:
-        target = current_sprint_dir(root)
+        try:
+            target = current_sprint_dir(project_root())
+        except CurrentSprintError as exc:
+            print(f"❌ check_gate_log: {exc}", file=sys.stderr)
+            return 2
         if target is None:
             print("[OK] check_gate_log: no current sprint directory (skip)")
             return 0
         return check(target)
     if args.sprint_dir is None:
         parser.error("--sprint-dir or --current-sprint is required")
+    if not args.sprint_dir.is_dir():
+        print(f"❌ check_gate_log: --sprint-dir {args.sprint_dir} is not a directory", file=sys.stderr)
+        return 2
     return check(args.sprint_dir)
 
 

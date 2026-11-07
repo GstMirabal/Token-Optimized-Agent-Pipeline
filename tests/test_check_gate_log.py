@@ -362,3 +362,23 @@ def test_round_one_only_passes(tmp_path: Path) -> None:
 
 def test_historical_log_without_notes_is_not_examined(tmp_path: Path) -> None:
     assert _notes_exit(tmp_path, "057-core-pipeline") == 0
+
+
+# --- Plan D37 M-03: a missing --sprint-dir and an unresolved anchor exit 2 ---
+
+
+def test_missing_sprint_dir_exits_2(tmp_path: Path) -> None:
+    result = _run("--sprint-dir", str(tmp_path / "docs" / "sprints" / "059-typo"))
+    assert result.returncode == 2, result.stdout
+
+
+def test_current_sprint_from_a_subdirectory_exits_2_on_a_missing_directory(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / ".git").mkdir()
+    (tmp_path / "docs" / "sprints").mkdir(parents=True)
+    (tmp_path / "docs" / "active_state.json").write_text(
+        '{"current_sprint": {"id": "059"}}', encoding="utf-8"
+    )
+    result = _run("--current-sprint", cwd=tmp_path / "docs")
+    assert result.returncode == 2, result.stdout + result.stderr
