@@ -25,7 +25,7 @@ system. Both fail quietly.
 The order is also load-bearing in a way that is easy to miss: **writing a
 contract forces reading each entry point end to end**, and that is where
 defects invisible to a module-level reading surface. In the sprint that
-produced this workflow, both capital-risk findings in a trading relay came out
+produced this workflow, both high-risk findings in a production service came out
 of writing its API contract — neither was visible in a blueprint.
 
 ## Execution Flow
