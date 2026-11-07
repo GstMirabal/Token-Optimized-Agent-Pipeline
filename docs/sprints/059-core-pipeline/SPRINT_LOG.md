@@ -17,7 +17,7 @@
 ---
 
 ## 🏁 Sprint Progression
-Tracking of atomic goals achieved during the session. Work units: 87 in six waves plus close. Execution order: Wave 1 to Wave 6, then close; one wave per session, `session_state.py suspend` between waves (plan `## Cost`).
+Tracking of atomic goals achieved during the session. Work units: 89 in six waves plus close. Execution order: Wave 1 to Wave 6, then close; one wave per session, `session_state.py suspend` between waves (plan `## Cost`).
 
 - [x] **Phase 1 (Planning)**: plan drafted and committed.
     - `[x]` Intake triage: channel A empty, channel B empty, `F-116-N1` and `F-116-N2` accepted with reproduction (plan `## Context`).
@@ -34,12 +34,13 @@ Tracking of atomic goals achieved during the session. Work units: 87 in six wave
     - `[x]` Phase 4.3 raised F-1..F-12 except F-7 (S2, instructing) and F-7, F-13, F-14 (S3, testifying); each one verified against the tree and resolved in the plan (`task_scope.md` `## Resolution of the findings`). Work units 44 → 47 (B-07, E-01c, H-03).
     - `[x]` "Proposal E points 3-5" (plan P11; source not in the repository): human decision at Phase 5, routed to a `KI-059-n` by Z-02.
 - [x] **Phase 5 (Approval Gate)**: Human OK («Aprobado») on 2026-11-02 over the plan at `65c86d3`.
-- [x] **Phase 6 (Execution), Wave 1**: all units committed, A-19 to A-52 (plan D22 to D34) included.
+- [x] **Phase 6 (Execution), Wave 1**: all units committed, A-19 to A-54 (plan D22 to D35) included.
     - `[x]` Human decision 2026-11-05 after QA Gate 1 round 3 (plan D21): unit A-18 before A-00; work units 52 → 53.
     - `[x]` Human decisions 2026-11-07 after QA Gate 1 round 5 (plan D22, D23): units A-19 to A-25; work units 53 → 60.
     - `[x]` Human re-plan 2026-11-07 after the deadlock of QA Gate 1 round 6 (plan D24 to D28): units A-26 to A-39; work units 60 → 74; `session_state.py unblock` run after it.
     - `[x]` Human re-plan 2026-11-07 after the deadlock of QA Gate 1 round 7 (plan D29 to D32): one host-data inventory, units A-40 to A-45; work units 74 → 80; `session_state.py unblock` run after it. Convergence rule 1 applies to the gate from round 8 on.
     - `[x]` Human re-plan 2026-11-07 after the deadlock of QA Gate 1 round 8 (plan D33, D34): N1 to N5 fixed, `scripts/check_log_append_only.py` added for the N3 family, units A-46 to A-52; work units 80 → 87; `session_state.py unblock` run after it.
+    - `[x]` Human re-plan 2026-11-07 after the deadlock of QA Gate 1 round 9 (plan D35): R9-1 to R9-3 fixed, units A-53, A-54; work units 87 → 89; `session_state.py unblock` run after it. Decided stop: another S0 or S1 in `scripts/check_log_append_only.py` at round 10 withdraws the check to Z-02.
     - `[x]` A-05 committed at `1dbe533`.
     - `[x]` A-09 committed at `0c7a9b2`.
     - `[x]` A-10 committed at `a694ffe`.
@@ -170,6 +171,14 @@ Example (do not uncomment):
 | QA Agent (Gate 1) | 8 | `python3 scripts/check_gate_log.py --sprint-dir docs/sprints/059-core-pipeline` | 0 |
 | QA Agent (Gate 1) | 8 | `python3 scripts/check_role_artifact.py --role "QA Agent" --sprint-dir docs/sprints/059-core-pipeline` | 0 |
 | QA Agent (Gate 1) | 8 | `python3 scripts/check_log_append_only.py --sprint-dir docs/sprints/059-core-pipeline --range 60383e3..HEAD` | 0 |
+| QA Agent (Gate 1) | 9 | `python3 scripts/check_fix_reproduces.py --range 08c669c..HEAD` | 0 |
+| QA Agent (Gate 1) | 9 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 0 |
+| QA Agent (Gate 1) | 9 | `make verify` | 0 |
+| QA Agent (Gate 1) | 9 | `venv_skillopt/bin/python -m ruff check .` | 0 |
+| QA Agent (Gate 1) | 9 | `make quality-audit` | 0 |
+| QA Agent (Gate 1) | 9 | `python3 scripts/check_gate_log.py --sprint-dir docs/sprints/059-core-pipeline` | 0 |
+| QA Agent (Gate 1) | 9 | `python3 scripts/check_role_artifact.py --role "QA Agent" --sprint-dir docs/sprints/059-core-pipeline` | 0 |
+| QA Agent (Gate 1) | 9 | `python3 scripts/check_log_append_only.py --sprint-dir docs/sprints/059-core-pipeline --range 60383e3..HEAD` | 0 |
 | Tester Agent (Gate 2) | 1 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider` | 0 |
 | Tester Agent (Gate 2) | 1 | `make verify` | 0 |
 
@@ -235,7 +244,13 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase (current, 2026-11-07, after QA Gate 1 round 9)**: the sprint is BLOCKED (`TERMINAL_REMEDIATION_LOOP`). Step 2 of the handoff below applies: no patch; the human decides how to resume, with R9-1 to R9-3 on the table. The block is lifted only by `session_state.py unblock` after that decision.
+**Next Phase (current)**: Phase 7, Wave 1. The deadlock of QA Gate 1 round 9 was re-planned with the human and remediated (plan D35); the block was lifted with `session_state.py unblock`. In order:
+1. QA Gate 1 round 10 under convergence rule 1: the diff `4b34cf9..HEAD` and the fix of each S0, S1 and S2 of round 9.
+2. If it reports another S0 or S1 in `scripts/check_log_append_only.py`: no further fix round; revert A-49 to A-53 and the README count, and route the check to Z-02 (plan D35). Any other rejection: no patch, re-plan with the human.
+3. Tester Gate 2 round 2, a fresh agent, under the same rule.
+4. `session_state.py suspend`, then Wave 2, in series.
+
+**Next Phase (2026-11-07, after QA Gate 1 round 9, superseded by the line above)**: the sprint is BLOCKED (`TERMINAL_REMEDIATION_LOOP`). Step 2 of the handoff below applies: no patch; the human decides how to resume, with R9-1 to R9-3 on the table. The block is lifted only by `session_state.py unblock` after that decision.
 
 **Next Phase (after QA Gate 1 round 8, superseded by the line above from its step 2 on)**: Phase 7, Wave 1. The deadlock of QA Gate 1 round 8 was re-planned with the human and remediated (plan D33, D34); the block was lifted with `session_state.py unblock`. In order:
 1. QA Gate 1 round 9 under convergence rule 1: the diff `60383e3..HEAD` and the fix of each S0, S1 and S2 of round 8.
