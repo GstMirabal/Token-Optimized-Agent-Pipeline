@@ -41,6 +41,7 @@ Tracking of atomic goals achieved during the session. Work units: 89 in six wave
     - `[x]` Human re-plan 2026-11-07 after the deadlock of QA Gate 1 round 7 (plan D29 to D32): one host-data inventory, units A-40 to A-45; work units 74 → 80; `session_state.py unblock` run after it. Convergence rule 1 applies to the gate from round 8 on.
     - `[x]` Human re-plan 2026-11-07 after the deadlock of QA Gate 1 round 8 (plan D33, D34): N1 to N5 fixed, `scripts/check_log_append_only.py` added for the N3 family, units A-46 to A-52; work units 80 → 87; `session_state.py unblock` run after it.
     - `[x]` Human re-plan 2026-11-07 after the deadlock of QA Gate 1 round 9 (plan D35): R9-1 to R9-3 fixed, units A-53, A-54; work units 87 → 89; `session_state.py unblock` run after it. Decided stop: another S0 or S1 in `scripts/check_log_append_only.py` at round 10 withdraws the check to Z-02.
+    - `[x]` Plan D35 stop applied 2026-11-07 after QA Gate 1 round 10: A-49 to A-53 and the README count reverted (`873fb1e` to `120860b`); `KI-059-15` routes the check to Z-02; work units stay 89, with those five rows naming their reverts. `session_state.py block` and `unblock` run under the decision taken in advance.
     - `[x]` A-05 committed at `1dbe533`.
     - `[x]` A-09 committed at `0c7a9b2`.
     - `[x]` A-10 committed at `a694ffe`.
@@ -181,6 +182,13 @@ Example (do not uncomment):
 | QA Agent (Gate 1) | 9 | `python3 scripts/check_gate_log.py --sprint-dir docs/sprints/059-core-pipeline` | 0 |
 | QA Agent (Gate 1) | 9 | `python3 scripts/check_role_artifact.py --role "QA Agent" --sprint-dir docs/sprints/059-core-pipeline` | 0 |
 | QA Agent (Gate 1) | 9 | `python3 scripts/check_log_append_only.py --sprint-dir docs/sprints/059-core-pipeline --range 60383e3..HEAD` | 0 |
+| QA Agent (Gate 1) | 10 | `python3 scripts/check_fix_reproduces.py --range 08c669c..HEAD` | 0 |
+| QA Agent (Gate 1) | 10 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 0 |
+| QA Agent (Gate 1) | 10 | `make verify` | 0 |
+| QA Agent (Gate 1) | 10 | `venv_skillopt/bin/python -m ruff check .` | 0 |
+| QA Agent (Gate 1) | 10 | `make quality-audit` | 0 |
+| QA Agent (Gate 1) | 10 | `python3 scripts/check_gate_log.py --sprint-dir docs/sprints/059-core-pipeline` | 0 |
+| QA Agent (Gate 1) | 10 | `python3 scripts/check_role_artifact.py --role "QA Agent" --sprint-dir docs/sprints/059-core-pipeline` | 0 |
 | Tester Agent (Gate 2) | 1 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider` | 0 |
 | Tester Agent (Gate 2) | 1 | `make verify` | 0 |
 
