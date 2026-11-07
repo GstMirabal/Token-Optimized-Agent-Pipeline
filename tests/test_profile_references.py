@@ -11,18 +11,14 @@ slash, followed by a token. The token is one of:
   followed by a character outside `BARE_TERMINATORS`, or a form outside
   `PLACEHOLDER_FORMS`: reported as unclassified or unreviewed.
 
-Not detected (measured with `scan_text`): text that follows a placeholder
-form or a real slug is not examined. A bare `*`, `<name>` or `[name]` form
-followed by letters (as in a glob suffix or a name suffix) returns no
-finding; a bare directory name followed by a dot returns no finding; and a
-real slug followed by `/../` plus a name returns no finding, because only
-the slug is judged. The same shape with a slug that is not a real directory
-is reported for that slug, not for the traversal.
+Claim: only the shapes listed above. Text that follows a placeholder form or a real slug is not examined, and
+any other shape may return no finding, so a clean run does not prove that no
+stale reference exists.
 
-Every tracked file is scanned, documents of already-removed profiles
-included: a stale reference there fails like any other. Tracked files come
-from `git ls-files` at the repository root; git missing or erroring fails the
-test, it never skips.
+Scanned files: those from `git ls-files` at the repository root, documents of
+already-removed profiles included, except files holding a NUL byte and tracked
+files deleted from the working tree, which are skipped. Git missing or erroring
+fails the test, it never skips.
 
 Limit: this test checks references that carry the directory prefix. It does
 NOT detect a host's bare name written without that prefix; that stays with
