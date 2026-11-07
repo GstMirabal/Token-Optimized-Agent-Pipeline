@@ -20,9 +20,10 @@ The first measurement covered only the first cycle, at a scope never declared.
 
 So the unit is the **context cycle**, not the session: cost is the area under the
 sawtooth, and compaction resets the x axis without reducing that area. Measured
-across four cycles of one session — peaks of 849K, 995K, 361K and 631K against a
-reset point of ~22K — the cycle that cost most per message was the *shortest*:
-113 messages reached 995K and spent 99.5M, nearly matching a 414-message cycle.
+on `cache_read` (Sprint 021) across four cycles of one session — `cache_read`
+peaks of 849K, 995K, 361K and 631K against a `cache_read` reset point of ~22K —
+the cycle that cost most per message was the *shortest*: 113 messages reached
+995K and spent 99.5M of `cache_read`, nearly matching a 414-message cycle.
 **Cost tracks peak height, not message count.**
 
 Reported in tokens, never in currency. The per-family price ratio belongs to
