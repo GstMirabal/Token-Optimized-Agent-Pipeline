@@ -60,8 +60,8 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | A-18 | `scripts/session_cost.py` | modify: after A-01, before A-00, fix( `read_turns` counts each `message.id` once (D21); paired test in `tests/test_session_cost.py`, which also adds the missing type hints; `ratio` and cuts do not change over the real transcripts | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| A-00 | `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | create: D8 study with one table per piece and per mechanism with sources, context growth boot to close, real cost per unit for Sprints 056-058, 2-4 candidate methods (figures supplied by `token_economy_agent`) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-06 | `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | modify: after A-00, add a `Debate` section with options, objections and the human's decision | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-00 | `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | create: D8 study with one table per piece and per mechanism with sources, context growth boot to close, real cost per unit for Sprints 056-058, whether the 15x hard bound stays valid with the baseline on context size (KI-059-9), 2-4 candidate methods (figures supplied by `token_economy_agent`) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
+| A-06 | `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | modify: after A-00, add a `Debate` section with options, objections and the human's decision, including the one on the 15x hard bound (KI-059-9) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 | A-07 | `docs/decisions/ADR-0018-in-session-token-economy.md` | create: after A-06, the chosen method, confirming or replacing D2; leftovers go to KI-059-n | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
 | A-02 | `scripts/session_cost.py` | modify: after A-01 and A-07, feat( flag `--bound` (OK, SOFT, HARD, exit 0, D3) or the form ADR-0018 sets; test in `tests/test_session_cost.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
 | A-03 | `rules/token_economy.md` | modify: after A-07, section 3.1 in-session invoker (the D1 and D19 unit was corrected in the QA Gate 1 round 3 remediation) and the per-unit budget with planned suspend points (D14) | low | `rule_validator` | sonnet | medium | ⏳ |
@@ -111,7 +111,7 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | Z-01 | `CHANGELOG.md` | modify: add the sprint entry under `[Unreleased]`, citing `host:F-116-N1` and `host:F-116-N2` | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| Z-02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify: close or re-route KI-056-1, KI-056-6, KI-057-1, KI-057-2, KI-058-1, KI-058-3, KI-058-4, KI-058-5; keep KI-058-2 and the conditional Out of scope items with their unblock condition; add new KI-059-n | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| Z-02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify: close or re-route KI-056-1, KI-056-6, KI-057-1, KI-057-2, KI-058-1, KI-058-3, KI-058-4, KI-058-5; keep KI-058-2 and the conditional Out of scope items with their unblock condition; add new KI-059-n; route or close with evidence the open KI-059-n of `SPRINT_LOG.md`: KI-059-1, KI-059-3, KI-059-5, KI-059-6, KI-059-7, KI-059-11 and KI-059-12 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
 
 ## Jurisdiction check (serial or concurrent)
 
