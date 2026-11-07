@@ -9,7 +9,7 @@
 | :--- | :--- |
 | **Active Layer** | core-pipeline |
 | **Strategic Goal** | `efficiency-and-sandbox-regime`: cut the framework's own cost (`agents.md` ≤ 20000 bytes, parallel Phase 6 batches, nucleus sandbox with `autoAllowBashIfSandboxed`), give the §3.1 bound a non-zero baseline and an in-session invoker, re-measure the `RA-19` enumeration and decide the sandbox regime, and close the Sprint 058 residues. |
-| **Intelligence State** | Phase 7 (Quality Gate), Wave 1. Plan approved at `65c86d3`; Phase 6 deviations and decisions: D15 to D20. |
+| **Intelligence State** | Phase 7 (Quality Gate), Wave 1. Plan approved at `65c86d3`; Phase 6 deviations and decisions: D15 to D21. |
 | **Branch / Base** | `ai-sprint/059` created from `main` at `08c669c` (`v4.41.0`) |
 | **Session Tool / Delegation** | `claude-code` / `native` |
 | **Start Time** | 2026-11-02 |
@@ -60,12 +60,12 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | Plan D9 and A-08 move `qa_agent` off the `gate` tier, but `ADR-0003` requires a superseding ADR; neither the plan nor the Phase 4 audit named it, and A-08 edited the test that pins that list | A-14 added (plan D17): `ADR-0021` supersedes that clause before A-08 commits. Check every plan tier move against `docs/decisions/` at Phase 4.3 | KI-059-3 |
 | A-01's agent also moved `segment_cycles` to context size. Over 35 transcripts cycles fall from 86 to 37 and 17 sessions change; `ratio` None falls from 11 to 0 with `cycle_summary` alone. `F-116-N1` names this defect, the plan Operation does not | First reverted to the plan's literal scope on the orchestrator's recommendation, and the gate prompt told QA not to report it. Tester Gate 2 found that revert to be an S1. Restored (plan D19). A gate is never told what not to report | KI-059-4 |
 | Rules with no blocking script found in `hooks/` or `scripts/check_*`: `ephemeral` (`TODO`/`FIXME`), `RA-03` branch name, `RA-12` direct commit to `main` (only the push is blocked), `§8` pnpm settings. A trigger reduces the risk of missing them, it does not enforce them | Out of this sprint's scope; Z-02 routes scripts for them to the program queue | KI-059-5 |
-| QA Gate 1 round 2 S3 notes: `config/invocation_exceptions.json:60,80` and `scripts/detect_drift.py:328`, `tests/test_detect_drift.py:459` cite text no longer in `agents.md`; `agents.md` `Why here` cells are terse and `Risk-free` overclaims; the `devops_agent` row lost the framework-root scope | Recorded, not blocking; agents.md has 23 bytes of margin, so Z-02 routes them | KI-059-6 |
+| QA Gate 1 round 2 S3 notes: `config/invocation_exceptions.json:60,80` and `scripts/detect_drift.py:328`, `tests/test_detect_drift.py:459` cite text no longer in `agents.md`; `agents.md` `Why here` cells are terse and `Risk-free` overclaims; the `devops_agent` row lost the framework-root scope | Recorded, not blocking; agents.md had 23 bytes of margin then and has 7 now (`wc -c agents.md`: 19993 of 20000), so Z-02 routes them | KI-059-6 |
 | `qa_agent` trial ended by abort criterion 4 after one wave (plan D20). One case says nothing general about `sonnet`: QA on `sonnet` also found real S2 defects in round 1 | A new trial needs a new ADR that covers `--resolve` under Cursor | KI-059-7 |
 | Host names reached the plan at `88d8a51` (QA Gate 1 round 3, S0 suspected); no instrument scans plans for them | Human decision 2026-11-05: no other project's name stays in the tree (`git grep` clean at `d2dbd29`); this branch's unpushed history is accepted as is, with no rewrite and no check due before push | KI-059-8 |
 | The 15x hard bound moved from about 371K to about 958K in session `7204cadc` when the baseline became context size (D1, D19), with no decision on whether 15 stays valid | A-00 and A-06 name it for a human decision, with the `agents.md` trim lowering `first` | KI-059-9 |
-| `read_turns` counts one API message once per transcript record, so token totals are 2.1 to 2.5 times too high; `ratio` and cuts are unaffected. A-00, H-01 and H-03 would calibrate on these totals | Human decision 2026-11-05 (plan D21): unit A-18 before A-00. `rules/token_economy.md` totals measured before it are suspect | KI-059-10 |
-| No session has run on the trimmed `agents.md`, so the saving is unmeasured. Six sessions before it started at 63629 to 64031 tokens of context; the trim removed 33914 bytes, about 8500 tokens at 4 bytes per token (estimate), but moved 10307 bytes to `rules/code_craft.md` and 6840 to `rules/project_topology.md` | At the next session's first turn, `python3 -I scripts/session_cost.py --session <id> --json`: `first_turn` near 55500 confirms the saving; near 64000 refutes it. Whether rules are still obeyed needs later gates, not this figure | KI-059-11 |
+| `read_turns` counts one API message once per transcript record, so token totals are too high by a factor of 1.66 to 2.51, median 2.17, over the 20 closed main-session transcripts on disk on 2026-11-07, with the sum of the four usage fields: `python3 -I -c "import glob,json,os,statistics as st;S=lambda m:sum(m['usage'].get(k) or 0 for k in('input_tokens','output_tokens','cache_read_input_tokens','cache_creation_input_tokens'));M=lambda p:[m for m in(json.loads(l).get('message') for l in open(p)) if isinstance(m,dict) and m.get('usage') and m.get('model')!='<synthetic>'];R=lambda ms:sum(map(S,ms))/sum(map(S,{m['id']:m for m in reversed(ms)}.values()));live=json.load(open('docs/active_state.json'))['session_id'];v=sorted(R(M(p)) for p in glob.glob(os.path.expanduser('~/.claude/projects/*-agents/*.jsonl')) if live not in p and M(p));print(len(v),round(v[0],2),round(st.median(v),2),round(v[-1],2))"`. Earlier readings, annotated: this row said 2.1 to 2.5, and QA Gate 1 round 4 read 1.64 to 2.5 on its own transcript set; neither set is reproducible. `ratio` and cuts are unaffected. A-00, H-01 and H-03 would calibrate on these totals | Human decision 2026-11-05 (plan D21): unit A-18 before A-00. `rules/token_economy.md` totals measured before it are suspect | KI-059-10 |
+| No session has run on the trimmed `agents.md`, so the saving is unmeasured. Six sessions before it started at 63629 to 64031 tokens of context; the trim removed 33914 bytes, about 8500 tokens at 4 bytes per token (estimate), but moved 10307 bytes to `rules/code_craft.md` and 6840 to `rules/project_topology.md` | At the next session's first turn, `python3 -I scripts/session_cost.py --session <id> --json`: `first_turn` near 55500 confirms the saving; near 64000 refutes it. Whether rules are still obeyed needs later gates, not this figure. **Measured 2026-11-07, session `7a037351-d2f6-4ff2-8ca0-1e6a82e612cc`: `first_turn` 51720, below 55500, so the criterion confirms a saving.** Two limits: the drop of about 12300 tokens exceeds the 8500 estimate and Claude Code also moved from 2.1.314 to 2.1.319 between these sessions, so one measurement does not separate the two causes; and this is the first turn only, since the moved bytes return when their rule loads | KI-059-11 |
 | Host data predates this sprint on public `main` (6 files name one host, one of them calling it a private repository; another host's name is in its history), and no instrument scans for host names | Human decision 2026-11-05: Z-02 routes a review of public history and a host-name scanner to Sprint 060; no rewrite in this sprint | KI-059-12 |
 
 ---
@@ -138,6 +138,9 @@ Example (do not uncomment):
 | QA Agent (Gate 1) | 3 | `python3 scripts/check_fix_reproduces.py --range 08c669c..HEAD` | 0 |
 | QA Agent (Gate 1) | 3 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 0 |
 | QA Agent (Gate 1) | 3 | `make verify` | 0 |
+| QA Agent (Gate 1) | 4 | `python3 scripts/check_fix_reproduces.py --range 08c669c..HEAD` | 0 |
+| QA Agent (Gate 1) | 4 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 0 |
+| QA Agent (Gate 1) | 4 | `make verify` | 0 |
 | Tester Agent (Gate 2) | 1 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider` | 0 |
 | Tester Agent (Gate 2) | 1 | `make verify` | 0 |
 
@@ -200,16 +203,8 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase**: Phase 7, Wave 1. Suspended 2026-11-05 at session ratio 5.9x, with QA Gate 1 round 4 REJECTED and not yet remediated. In order:
-1. Measure KI-059-11 at the first turn.
-2. Remediate QA round 4, slowly, and measure each claim before writing it. One more `remediation-regression` label stops this block:
-   - N3: `rules/token_economy.md:37` soft row claims `session_probe.py` surfaces the breach; it reports only the hard bound. Narrow the claim.
-   - N4: `rules/token_economy.md:48,52` and `scripts/session_cost.py:22-26`: figures were measured on `cache_read`; label them so, and do not restate them as context size.
-   - N5: name KI-059-9 in the A-00 and A-06 rows, and KI-059-6, KI-059-12 and the other open KIs in Z-02.
-   - N6: the overcount factor in this log and plan D21 is 1.64 to 2.5, not 2.1 to 2.5.
-   - N7: plan Cost rows and P6: each figure names its session and script version, or the claim is narrowed.
-   - S3: this log's state line says D15 to D20 (D21 exists); plan D21 sits before D13; `agents.md` margin is 7 bytes.
-3. Fill `Remediation notes` for QA round 4, then QA Gate 1 round 5 and Tester Gate 2 round 2, each a fresh agent, with no finding excluded.
-4. `session_state.py suspend`, then Wave 2.
+**Next Phase**: Phase 7, Wave 1. QA Gate 1 round 4 remediated at `bdf4cf7`, `9716f28`, `b4d2c7a` and `b0a4433` and in this log; KI-059-11 measured. One more `remediation-regression` label stops this block. In order:
+1. QA Gate 1 round 5 and Tester Gate 2 round 2, each a fresh agent, with no finding excluded.
+2. `session_state.py suspend`, then Wave 2, in series; batches stay out until the plan's unit allows them (human decision 2026-11-07: no amendment to D11).
 
 *Certified under conventional commit standard: feat(scope): message #059*
