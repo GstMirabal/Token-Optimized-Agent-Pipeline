@@ -93,7 +93,7 @@ Domain rules in `rules/` load **on demand** at these triggers, never preloaded. 
 | :--- | :--- | :--- |
 | **Amnesia** | `zero_tolerance` | Zero-Tolerance Accumulation. Bug resolutions MUST be immediately injected. |
 | **Amnesia** | `ephemeral_memory` | The `memory` directory is strictly ephemeral. MUST be emptied upon sprint closure. |
-| **Feedback Loop** | `constitutional_escalation`| Systemic improvements MUST be formally indexed into `agents.md` before purging logs. |
+| **Feedback Loop** | `constitutional_escalation`| Systemic improvements: routed by `governance_learner`, audited before purging logs. |
 | **Feedback Loop** | `definitive_amnesia` | Temporary logs are permanently deleted the moment the fix is applied. |
 | **Index Routing** | `index_files` | Parse exclusively `memory_index.json` locally. |
 | **Index Routing** | `single_line_breakdown`| Reject JSON insertions that break the 1-sentence limit without a carriage return. |
