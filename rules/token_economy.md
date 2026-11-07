@@ -34,7 +34,7 @@ Full-dumping a file >200 lines is PROHIBITED (`agents.md §2 token_saver`). Skip
 
 | Threshold | Trigger | Action |
 | :--- | :--- | :--- |
-| **Soft** | turn > **5×** the cycle's first | Declare remaining cost in the plan's **Cost** section (work units left, delegation mode). `probe_cost` in `session_probe.py` reports only the hard bound, so no instrument surfaces a soft breach; the agent reads it with `session_cost.py --json` |
+| **Soft** | turn > **5×** the cycle's first | Declare remaining cost in the plan's **Cost** section (work units left, delegation mode). `probe_cost` in `scripts/session_probe.py` reports only the hard bound, so no instrument surfaces a soft breach; the agent reads it with `scripts/session_cost.py --json` |
 | **Hard** | turn > **15×** the cycle's first | No new work starts. Sprint complete → close it; sprint open → **suspend** (`session_state.py suspend`) and continue in a fresh session. Declare Cost before the next claim |
 
 **Portable Cost half (Cursor and Claude).** Every Implementation Plan from Sprint
@@ -51,9 +51,9 @@ always runs. Structural plan wastes are rejected by
 
 **Break-even was observed, not estimated.** Restarting cost ~22K of `cache_read`, identical three times in that session; it is not a context-size figure. On that `cache_read`, the hard threshold would have fired in **3 of those 4 cycles**.
 
-**Calibration that does not destroy its own data.** A binding hard threshold means the sprint always closes at the bound and the natural close is never observed. So the soft threshold **does not stop work**: the agent updates the plan's **Cost** section and continues, and no instrument records the breach. At the hard one the agent writes `forced: true` by hand, plus whether `task_scope.md` still held unfinished work. A forced close with pending work is the "too tight" signal; one on a complete sprint is not.
+**Calibration that does not destroy its own data.** A binding hard threshold means the sprint always closes at the bound and the natural close is never observed. So the soft threshold **does not stop work**: the agent updates the plan's **Cost** section and continues, and no instrument records the breach. The hard close is read from `task_scope.md`: a hard close with unfinished work there is the "too tight" signal; one on a complete sprint is not.
 
-**Provenance: n=1**, and of one kind — intensive planning, many reads, little code execution. A file-editing sprint will have a different curve. `scripts/session_cost.py --json` is the reproducing command for the context-size ratio; a figure without a command is memory, not evidence. The Sprint 021 figures above are recorded in `docs/sprints/021-core-pipeline/IMPLEMENTATION_PLAN.md`, and their totals may overcount, if the script of that date already counted transcript records rather than API messages; no transcript on disk can re-measure them.
+**Provenance: n=1**, and of one kind — intensive planning, many reads, little code execution. A file-editing sprint will have a different curve. `scripts/session_cost.py --json` is the reproducing command for the context-size ratio; a figure without a command is memory, not evidence. The Sprint 021 figures above are recorded in `docs/sprints/021-core-pipeline/IMPLEMENTATION_PLAN.md`, and their totals may overcount: the script of that date (`git show 1b3be58:scripts/session_cost.py`) has `read_turns` append one turn per transcript record, with no `message.id` deduplication, and only the shape of that date's transcripts stays unknown; no transcript on disk can re-measure them.
 
 ## 4. Tool-Result Economics
 
