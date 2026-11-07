@@ -133,6 +133,16 @@ Example (do not uncomment — Phase 7 writes the real rows):
 | QA Agent (Gate 1) | 13 | REJECTED | instructing | S2 | Range 01c0083..6043e7d plus the R12 fixes. All 9 commands exit 0; make verify 1540 passed. R12-2 and R12-1 assigned to Wave 1b; R12-3 fixed. R13-1 (S2, instructing), R13-2 (S2, instructing), R13-3 (S2, testifying); 3 S3. Detail: deadlock record, round 13. Rule 3: R13-1 and R13-3 are further occurrences of the round 8 N2 family. Rounds 3 to 13 are consecutive REJECTED. |
 | Tester Agent (Gate 2) | 1 | REJECTED | charter | S1 | Range `08c669c..c6c7987`, 1531 passed. Baseline on context size with cuts on `cache_read`: 50 of 52 cuts over 35 transcripts are not collapses, and the ratio that feeds the hard bound falls (synthetic 20x reads 2.5x). 3 more: `--resolve` alternatives diverge under Cursor (S2), hard bound and cut field untested (S2), census wording (S3). |
 
+### Gate findings
+
+One row per S0-S2 finding from QA Gate 1 round 13 on (plan D37). Check: the command that reproduces it.
+
+| Round | ID | Severity | File:line | Check |
+| :--- | :--- | :--- | :--- | :--- |
+| 13 | R13-1 | S2 | `scripts/loop_guard.py:112-114` | in a fixture repository with an armed loop: `python3 scripts/loop_guard.py check --sprint-dir docs/sprints/059-typo` → exit 0 |
+| 13 | R13-2 | S2 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` M-11 | `grep -c "^### Gate findings" docs/sprints/059-core-pipeline/SPRINT_LOG.md` → 0 at `3af48b5` |
+| 13 | R13-3 | S2 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md:20` | `git show 3af48b5:docs/sprints/059-core-pipeline/SPRINT_LOG.md \| grep -c "Work units: 92"` → 1 |
+
 ### Remediation notes
 
 The remediator fills this table before re-sending a REJECTED round to its gate, one
