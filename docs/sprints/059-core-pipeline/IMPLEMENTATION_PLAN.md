@@ -213,7 +213,7 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | B-09 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — R17-2: transcribe QA Gate 1 ronda 17 y sus hallazgos, añade las notas de remediación de la ronda 16 con comandos y exit codes, y actualiza `Next Phase` | low | `orchestrator` | ✅ `0cbf261` |
 | M-22 | `scripts/check_task_scope.py` | modify — `fix(` R17-1: un `Status` desconocido hace que `--batches` termine con exit distinto de 0; paired test en `tests/test_check_task_scope.py` | low | `implementer_agent` | ✅ `639fd05` |
 | M-23 | `scripts/install.py` | modify — S3 de la ronda 17: el docstring de `install_nucleus` incluye el bloque `sandbox` en el contenido del self-bridge | low | `implementer_agent` | ✅ `104467f` |
-| B-10 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — R18-2: transcribe QA Gate 1 ronda 18, la decisión A-1 y las notas de remediación de la ronda 17 con exit codes desde la base de la rama | low | `orchestrator` | ⏳ |
+| B-10 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — R18-2: transcribe QA Gate 1 ronda 18, la decisión A-1 y las notas de remediación de la ronda 17 con exit codes desde la base de la rama | low | `orchestrator` | ✅ `1b99872` |
 | M-24 | `scripts/check_task_scope.py` | modify — `fix(` R18-3: elimina de la auditoría la comprobación de `Status` y su texto; `--batches` sigue rechazando un `Status` desconocido; paired test en `tests/test_check_task_scope.py` | low | `implementer_agent` | ⏳ |
 
 ### Wave 3 — Token economy en sesión (estudio, debate, decisión)
