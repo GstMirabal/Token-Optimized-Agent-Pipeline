@@ -110,6 +110,7 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 
 | # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| M-17 | `scripts/_current_sprint.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | G-01 | `scripts/check_task_scope.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | G-02 | `workflows/pipeline_workflow.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
 | B-01 | `scripts/prompt_count.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |

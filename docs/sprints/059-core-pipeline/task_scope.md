@@ -105,6 +105,7 @@ Operation: the plan row of the same id (plan D37).
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| M-17 | `scripts/_current_sprint.py` | modify: plan M-17 | low | `implementer_agent` | sonnet | medium | ⏳ |
 | G-01 | `scripts/check_task_scope.py` | modify: add the `Depends on` column and a subcommand printing parallel batches (dependencies landed, disjoint files, at most 4); tests in `tests/test_check_task_scope.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
 | G-02 | `workflows/pipeline_workflow.md` | modify: after G-01, Phase 6 dispatches each batch in parallel with `isolation: "worktree"` and integrates in table order; after each batch the orchestrator removes every worktree and its branch (`git worktree remove`, `git branch -D`) and re-runs `check_task_scope.py` on `ai-sprint/[ID]`, exit 0, before the next batch; Phase 7 stays serial per wave (D11) | medium | `orchestrator` | sonnet | medium | ⏳ |
 | B-01 | `scripts/prompt_count.py` | create: count authorizations per session from transcripts, `--json`; test `tests/test_prompt_count.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |

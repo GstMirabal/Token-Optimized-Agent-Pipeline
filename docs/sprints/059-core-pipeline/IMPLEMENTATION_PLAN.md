@@ -196,6 +196,7 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 
 | # | File | Operation | Risk | Assignee (proposed) | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
+| M-17 | `scripts/_current_sprint.py` | modify — `fix(` T2-1: más de un directorio para el número del sprint lanza `CurrentSprintError`; paired test en `tests/test_current_sprint.py` | low | `implementer_agent` | ⏳ |
 | G-01 | `scripts/check_task_scope.py` | modify — columna `Depends on` y subcomando que imprime los lotes paralelos (dependencias aterrizadas, archivos disjuntos, máximo 4); tests en `tests/test_check_task_scope.py` | medium | `implementer_agent` | ⏳ |
 | G-02 | `workflows/pipeline_workflow.md` | modify — tras G-01: Phase 6 despacha cada lote en paralelo con `isolation: "worktree"` e integra en orden; Phase 7 sigue en serie por wave (D11). Tras integrar cada lote, el orchestrator borra cada worktree y su rama (`git worktree remove <path>`, `git branch -D <rama>`) antes del lote siguiente, porque `scripts/branch_sovereignty.py` niega el sello de cierre con una rama sin integrar; y re-ejecuta sobre `ai-sprint/[ID]` las comprobaciones de `hooks/on_commit.py` que el commit en el worktree no vio (`python3 scripts/check_task_scope.py --sprint-dir <dir>`), exit 0 antes del lote siguiente | medium | `orchestrator` | ⏳ |
 | B-01 | `scripts/prompt_count.py` | create — cuenta autorizaciones por sesión desde transcripts, `--json`; test `tests/test_prompt_count.py` | medium | `implementer_agent` | ⏳ |
@@ -296,7 +297,7 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 108 (D37: 92 + 16 de la wave 1b; I-08 a I-10 siguen contadas como sustituidas) | Count of rows in Work tables |
+| Work units | 109 (D37: 92 + 16 de la wave 1b + M-17; I-08 a I-10 siguen contadas como sustituidas) | Count of rows in Work tables |
 | Subagents dispatched | lotes de hasta 4 en paralelo desde la wave 3 (D11), más QA + Tester por wave | `agent_assignment.md` |
 | Session ratio (2026-11-08, QA rondas 12 y 13, wave 1b) | Sesión `e9a7a9bf`, ciclo único: 5.4× durante la sesión, sobre soft (5×); `suspend` antes de QA Gate 1 ronda 14 | `python3 -I scripts/session_cost.py --session e9a7a9bf-bf5b-4800-bd46-edd6c8fc46c5 --json` |
 | Session ratio (2026-11-07, QA rondas 8 a 11) | Sesión `93b61aea`, ciclo único: lectura de 5.0× durante la sesión, en soft (5×); el valor final lo da el comando. Quedan 44 unidades en 5 waves más cierre y los gates de la wave 1; delegación `native`; `suspend` antes de QA Gate 1 ronda 12 | `python3 -I scripts/session_cost.py --session 93b61aea-d168-4293-97f5-340681b5c33a --json` |
