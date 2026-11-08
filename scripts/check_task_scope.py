@@ -219,6 +219,7 @@ class Unit(NamedTuple):
     committed: bool
     deps: tuple[str, ...]
     has_column: bool
+    table: int = 0
 
 
 def _parse_deps(cell: str) -> tuple[str, ...]:
@@ -227,7 +228,7 @@ def _parse_deps(cell: str) -> tuple[str, ...]:
     return tuple(part for part in parts if part and part != "-")
 
 
-def _row_unit(header: list[str], row: list[str]) -> Unit | None:
+def _row_unit(header: list[str], row: list[str], table: int) -> Unit | None:
     unit_id = _col(header, row, "#")
     if not unit_id:
         return None
@@ -237,12 +238,20 @@ def _row_unit(header: list[str], row: list[str]) -> Unit | None:
         "\u2705" in _col(header, row, "Status"),
         _parse_deps(_col(header, row, "Depends on")),
         "Depends on" in header,
+        table,
     )
 
 
 def work_units(tables: list[tuple[list[str], list[list[str]]]]) -> list[Unit]:
-    """Units of every Work table, in table order, rows without an id skipped."""
-    parsed = (_row_unit(header, row) for header, rows in tables for row in rows)
+    """Units of every Work table, in table order, rows without an id skipped.
+
+    Each unit records the index of its table; ``schedule`` treats it as a wave.
+    """
+    parsed = (
+        _row_unit(header, row, number)
+        for number, (header, rows) in enumerate(tables)
+        for row in rows
+    )
     return [unit for unit in parsed if unit is not None]
 
 
@@ -313,13 +322,19 @@ def schedule(units: list[Unit]) -> tuple[list[list[str]], list[str]]:
 
     Returns:
         tuple[list[list[str]], list[str]]: Batches in dispatch order; each batch
-        treats the earlier ones as landed. The second item is empty on success.
+        treats the earlier ones as landed and holds units of one table only: a
+        table is a barrier, so the earliest table with a pending unit is placed
+        entirely before the next one starts. The second item is empty on success.
     """
     landed = {unit.id for unit in units if unit.committed}
     remaining = [unit for unit in units if not unit.committed]
     batches: list[list[str]] = []
     while remaining:
-        ready = [unit for unit in remaining if landed.issuperset(unit.deps)]
+        wave = remaining[0].table
+        ready = [
+            unit for unit in remaining
+            if unit.table == wave and landed.issuperset(unit.deps)
+        ]
         batch = _fill_batch(ready)
         if not batch:
             return batches, [unit.id for unit in remaining]

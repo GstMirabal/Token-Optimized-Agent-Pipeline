@@ -412,3 +412,27 @@ def test_batches_without_task_scope_exits_2(tmp_path: Path) -> None:
     sprint = tmp_path / "docs" / "sprints" / "030-core-pipeline"
     sprint.mkdir(parents=True)
     assert _batches(sprint).returncode == 2
+
+
+def test_batches_never_mix_units_of_different_tables(tmp_path: Path) -> None:
+    """Each Work table is a wave barrier: the Phase 7 gate runs between waves."""
+    row = "| {} | `{}` | run | low | `implementer_agent` | sonnet | medium | - | ⏳ |\n"
+    body = (
+        "# Task Scope\n\n### Wave 1\n\n" + DEP_HEAD + row.format("A", "a.py")
+        + row.format("B", "b.py") + "\n### Wave 2\n\n" + DEP_HEAD
+        + row.format("C", "c.py") + row.format("D", "d.py")
+    )
+    result = _batches(_scope(tmp_path, body))
+    assert result.returncode == 0
+    assert result.stdout == "batch 1: A B\nbatch 2: C D\n"
+
+
+def test_dependency_on_a_later_table_is_unschedulable(tmp_path: Path) -> None:
+    row = "| {} | `{}` | run | low | `implementer_agent` | sonnet | medium | {} | ⏳ |\n"
+    body = (
+        "# Task Scope\n\n" + DEP_HEAD + row.format("A", "a.py", "C") + "\n"
+        + DEP_HEAD + row.format("C", "c.py", "-")
+    )
+    result = _batches(_scope(tmp_path, body))
+    assert result.returncode == 2
+    assert "cannot be scheduled" in result.stderr
