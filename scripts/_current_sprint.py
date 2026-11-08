@@ -100,7 +100,7 @@ def current_sprint_dir(root: Path) -> Path | None:
 
     Raises:
         CurrentSprintError: The anchor is unreadable, its id is unusable, or no
-            ``docs/sprints/NNN-*`` directory exists for it.
+            ``docs/sprints/NNN-*`` directory exists for it, or more than one does.
     """
     anchor = root / ANCHOR
     if not anchor.is_file():
@@ -115,4 +115,9 @@ def current_sprint_dir(root: Path) -> Path | None:
     dirs = [path for path in matches if path.is_dir()]
     if not dirs:
         raise CurrentSprintError(f"{anchor} names sprint {number:03d}, which has no directory")
+    if len(dirs) > 1:
+        names = ", ".join(path.name for path in dirs)
+        raise CurrentSprintError(
+            f"{anchor} names sprint {number:03d}, which has more than one directory: {names}"
+        )
     return dirs[0]

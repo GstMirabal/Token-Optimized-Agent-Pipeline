@@ -61,6 +61,13 @@ def test_missing_sprint_directory_raises(tmp_path: Path) -> None:
         current_sprint_dir(root)
 
 
+def test_more_than_one_directory_for_a_number_raises(tmp_path: Path) -> None:
+    root = _repo(tmp_path, json.dumps({"current_sprint": {"id": 59}}), sprint_dir="059-aaa")
+    (root / "docs" / "sprints" / "059-core-x").mkdir()
+    with pytest.raises(CurrentSprintError, match=r"059.*059-aaa.*059-core-x"):
+        current_sprint_dir(root)
+
+
 def test_project_root_climbs_to_the_git_ancestor(tmp_path: Path) -> None:
     root = _repo(tmp_path, None)
     assert project_root(root / "docs" / "sprints") == root.resolve()
