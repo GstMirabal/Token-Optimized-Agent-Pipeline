@@ -60,8 +60,9 @@ MUTATING_OPERATIONS = (
 def sprint_id_from_dir(sprint_dir: Path) -> int | None:
     """Leading digits of ``030-core-pipeline`` → 30."""
     name = sprint_dir.name
-    if len(name) >= 3 and name[:3].isdigit() and name[3:4] == "-":
-        return int(name.split("-", 1)[0])
+    prefix, separator, _ = name.partition("-")
+    if separator and len(prefix) >= 3 and prefix.isascii() and prefix.isdigit():
+        return int(prefix)
     return None
 
 

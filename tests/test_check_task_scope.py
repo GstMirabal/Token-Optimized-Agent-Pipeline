@@ -285,3 +285,13 @@ def test_escaped_pipe_in_a_cell_does_not_shift_columns(tmp_path: Path) -> None:
     result = _run("--sprint-dir", str(sprint))
     assert result.returncode == 2
     assert "Write/Edit" in result.stderr
+
+
+def test_sprint_id_from_dir_accepts_a_prefix_of_three_or_more_digits() -> None:
+    """A four-digit id returned None, so `check` skipped a real sprint and exited 0."""
+    from check_task_scope import sprint_id_from_dir
+
+    assert sprint_id_from_dir(Path("1059-core-x")) == 1059
+    assert sprint_id_from_dir(Path("059-core-x")) == 59
+    assert sprint_id_from_dir(Path("12-core-x")) is None
+    assert sprint_id_from_dir(Path("core-x")) is None
