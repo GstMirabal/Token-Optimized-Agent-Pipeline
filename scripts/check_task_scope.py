@@ -18,9 +18,12 @@ Usage:
 An optional ``Depends on`` column in a Work table lists, per unit, ``-`` or an
 empty cell (none) or comma-separated unit ids from the ``#`` column. When the
 column is present the check refuses an id naming no unit, a unit depending on
-itself, and a dependency cycle. ``--batches`` prints the remaining order, one
-``batch N: id id`` line per batch of at most ``MAX_BATCH`` units whose
-dependencies landed and whose ``File`` cells differ (plan D11 of Sprint 059).
+itself, and a dependency cycle. ``--batches`` prints the remaining order of the
+units whose Status is the pending mark, one ``batch N: id id`` line per batch of
+at most ``MAX_BATCH`` units whose dependencies landed (a dependency on a
+non-pending unit counts as landed) and whose ``File`` cells differ (plan D11 of
+Sprint 059). ``--batches`` refuses, with exit 2 and no batch, a unit whose Status
+is missing (no Status column, or an empty cell); the audit does not.
 
 Also refuses a row whose assignee cannot perform the operation it is given: a
 profile with no ``Write``/``Edit`` tool cannot ``create``/``modify``/``delete`` a
@@ -212,14 +215,22 @@ def _capability_findings(
 
 
 class Unit(NamedTuple):
-    """One Work row: id, claimed file, committed flag, declared dependencies."""
+    """One Work row: id, claimed file, dependencies, wave and Status text.
+
+    ``pending`` is true only when the Status cell holds the pending mark.
+    """
 
     id: str
     file: str
-    committed: bool
     deps: tuple[str, ...]
     has_column: bool
     table: int = 0
+    status: str = ""
+
+    @property
+    def pending(self) -> bool:
+        """True when the Status cell holds the pending mark."""
+        return "\u23f3" in self.status
 
 
 def _parse_deps(cell: str) -> tuple[str, ...]:
@@ -235,10 +246,10 @@ def _row_unit(header: list[str], row: list[str], table: int) -> Unit | None:
     return Unit(
         unit_id,
         _col(header, row, "File"),
-        "\u2705" in _col(header, row, "Status"),
         _parse_deps(_col(header, row, "Depends on")),
         "Depends on" in header,
         table,
+        _col(header, row, "Status").strip(),
     )
 
 
@@ -317,6 +328,10 @@ def _fill_batch(ready: list[Unit]) -> list[Unit]:
 def schedule(units: list[Unit]) -> tuple[list[list[str]], list[str]]:
     """Batches of pending unit ids, and the ids that could not be scheduled.
 
+    Only units whose Status holds the pending mark are scheduled. A unit with any
+    other Status (committed, ``replaced``, ``RECORD``) counts as landed for the
+    dependencies of pending units and never appears in a batch.
+
     Args:
         units: Work units in table order.
 
@@ -326,8 +341,8 @@ def schedule(units: list[Unit]) -> tuple[list[list[str]], list[str]]:
         table is a barrier, so the earliest table with a pending unit is placed
         entirely before the next one starts. The second item is empty on success.
     """
-    landed = {unit.id for unit in units if unit.committed}
-    remaining = [unit for unit in units if not unit.committed]
+    landed = {unit.id for unit in units if not unit.pending}
+    remaining = [unit for unit in units if unit.pending]
     batches: list[list[str]] = []
     while remaining:
         wave = remaining[0].table
@@ -421,7 +436,9 @@ def print_batches(sprint_dir: Path) -> int:
         print(f"❌ check_task_scope: no task_scope.md under {sprint_dir}", file=sys.stderr)
         return 2
     units = work_units(work_tables(path.read_text(encoding="utf-8")))
-    findings = dependency_findings(units)
+    findings = dependency_findings(units) + [
+        f"Unit {unit.id}: Status is missing or empty." for unit in units if not unit.status
+    ]
     batches, stuck = ([], []) if findings else schedule(units)
     if stuck:
         findings.append("Pending units cannot be scheduled: " + ", ".join(stuck) + ".")

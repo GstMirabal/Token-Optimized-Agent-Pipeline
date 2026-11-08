@@ -436,3 +436,60 @@ def test_dependency_on_a_later_table_is_unschedulable(tmp_path: Path) -> None:
     result = _batches(_scope(tmp_path, body))
     assert result.returncode == 2
     assert "cannot be scheduled" in result.stderr
+
+
+def test_a_replaced_unit_is_never_scheduled(tmp_path: Path) -> None:
+    """Only the pending mark schedules a unit; replaced and RECORD rows stay out."""
+    sprint = _dep_scope(
+        tmp_path,
+        [
+            ("A", "a.py", "-", "replaced by B (D37)"),
+            ("B", "b.py", "-", "RECORD"),
+            ("C", "c.py", "-", "⏳"),
+        ],
+    )
+    result = _batches(sprint)
+    assert (result.returncode, result.stdout) == (0, "batch 1: C\n")
+
+
+def test_only_non_pending_units_print_no_pending_units(tmp_path: Path) -> None:
+    sprint = _dep_scope(tmp_path, [("A", "a.py", "-", "replaced by B (D37)")])
+    result = _batches(sprint)
+    assert (result.returncode, result.stdout) == (0, "no pending units\n")
+
+
+def test_a_pending_unit_depending_on_a_finished_unit_is_scheduled(
+    tmp_path: Path,
+) -> None:
+    sprint = _dep_scope(
+        tmp_path,
+        [
+            ("A", "a.py", "-", "✅ abc1234"),
+            ("R", "r.py", "-", "replaced by A (D37)"),
+            ("B", "b.py", "A, R", "⏳"),
+        ],
+    )
+    result = _batches(sprint)
+    assert (result.returncode, result.stdout) == (0, "batch 1: B\n")
+
+
+def test_batches_refuse_a_unit_with_no_status_column(tmp_path: Path) -> None:
+    head = "| # | File | Operation | Risk | Assignee | Model | Effort |\n" + "| :--- " * 7 + "|\n"
+    body = "# Task Scope\n\n" + head + (
+        "| A | `a.py` | run | low | `implementer_agent` | sonnet | medium |\n"
+    )
+    sprint = _scope(tmp_path, body)
+    assert _run("--sprint-dir", str(sprint)).returncode == 0
+    result = _batches(sprint)
+    assert result.returncode == 2
+    assert result.stdout == ""
+    assert "A" in result.stderr and "Status" in result.stderr
+
+
+def test_batches_refuse_a_unit_with_an_empty_status_cell(tmp_path: Path) -> None:
+    sprint = _dep_scope(tmp_path, [("A", "a.py", "-", ""), ("B", "b.py", "-", "⏳")])
+    assert _run("--sprint-dir", str(sprint)).returncode == 0
+    result = _batches(sprint)
+    assert result.returncode == 2
+    assert result.stdout == ""
+    assert "Unit A: Status is missing" in result.stderr
