@@ -27,6 +27,11 @@ Counted keys:
 - `decisions_other_source`: decisions with any other `source`.
 - `tool_uses_without_decision`: `tool_use` ids with no recorded decision.
 
+The count for a session covers its main `<uid>.jsonl` and every
+`<uid>/subagents/*.jsonl` transcript; a session with no `subagents/` directory
+counts the main file alone, and an unreadable subagent file exits 2 like the
+main one.
+
 A `message.id` repeats across the records one API response is split into, so
 tool uses are keyed by `tool_use` block id and decisions by `tool_use_id`.
 
@@ -158,7 +163,12 @@ def count_records(records: list[dict], session: str) -> dict:
 
 
 def count_transcript(transcript: Path) -> dict:
-    """Read one transcript file and count it.
+    """Read a session's main transcript and its subagent transcripts, count them.
+
+    The records of `<session>/subagents/*.jsonl` (sorted by name) follow those
+    of the main file and are counted together. Ids are set and dict keys, so a
+    tool use or decision present in both the main and a subagent transcript
+    counts once; for a repeated decision the later file wins.
 
     Args:
         transcript: path to a `<session-uid>.jsonl` file.
@@ -167,10 +177,15 @@ def count_transcript(transcript: Path) -> dict:
         dict: as `count_records`.
 
     Raises:
-        OSError: the file cannot be read.
+        OSError: the main file or a subagent transcript cannot be read.
     """
-    text = transcript.read_text(encoding="utf-8", errors="replace")
-    return count_records(parse_records(text), transcript.stem)
+    paths = [transcript]
+    paths += sorted((transcript.parent / transcript.stem / "subagents").glob("*.jsonl"))
+    records: list[dict] = []
+    for path in paths:
+        text = path.read_text(encoding="utf-8", errors="replace")
+        records += parse_records(text)
+    return count_records(records, transcript.stem)
 
 
 def render(result: dict) -> None:

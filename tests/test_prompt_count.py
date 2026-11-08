@@ -90,3 +90,49 @@ def test_json_output(tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
     monkeypatch.setattr(session_cost, "PROJECTS", tmp_path)
     assert pc.main(["--session", "ok", "--project", str(tmp_path), "--json"]) == 0
     assert json.loads(capsys.readouterr().out)["tool_use_total"] == 1
+
+
+def approved(use_id: str) -> list[dict]:
+    """A tool_use plus a user_temporary decision for it."""
+    return [tool_use(f"m-{use_id}", use_id),
+            tool_result(use_id, {"decision": "accept", "source": "user_temporary"})]
+
+
+def test_subagent_transcripts_are_summed(tmp_path: Path) -> None:
+    main = write(tmp_path / "abc.jsonl", approved("t1"))
+    subagents = tmp_path / "abc" / "subagents"
+    subagents.mkdir(parents=True)
+    write(subagents / "agent-a.jsonl", approved("t2") + approved("t3"))
+    write(subagents / "agent-b.jsonl", approved("t4"))
+    result = pc.count_transcript(main)
+    assert result["tool_use_total"] == 4
+    assert result["decisions_user_approved"] == 4
+    assert result["tool_uses_without_decision"] == 0
+
+
+def test_tool_use_seen_in_main_and_subagent_counts_once(tmp_path: Path) -> None:
+    main = write(tmp_path / "abc.jsonl", approved("t1"))
+    subagents = tmp_path / "abc" / "subagents"
+    subagents.mkdir(parents=True)
+    write(subagents / "agent-a.jsonl", approved("t1") + approved("t2"))
+    result = pc.count_transcript(main)
+    assert result["tool_use_total"] == 2
+    assert result["decisions_user_approved"] == 2
+
+
+def test_session_without_subagents_directory_is_unchanged(tmp_path: Path) -> None:
+    main = write(tmp_path / "abc.jsonl", approved("t1"))
+    (tmp_path / "abc").mkdir()  # a session directory with no subagents/ inside
+    result = pc.count_transcript(main)
+    assert result["tool_use_total"] == 1
+    assert result["decisions_user_approved"] == 1
+
+
+def test_unreadable_subagent_transcript_exits_2(tmp_path: Path,
+                                                monkeypatch: pytest.MonkeyPatch) -> None:
+    directory = tmp_path / session_cost.project_slug(tmp_path)
+    directory.mkdir()
+    write(directory / "abc.jsonl", approved("t1"))
+    (directory / "abc" / "subagents" / "bad.jsonl").mkdir(parents=True)
+    monkeypatch.setattr(session_cost, "PROJECTS", tmp_path)
+    assert pc.main(["--session", "abc", "--project", str(tmp_path)]) == 2
