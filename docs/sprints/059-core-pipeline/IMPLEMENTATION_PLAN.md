@@ -175,7 +175,7 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 
 | # | File | Operation | Risk | Assignee (proposed) |
 | :--- | :--- | :--- | :--- | :--- |
-| M-01 | `scripts/_current_sprint.py` | create — resolver de `--current-sprint`: la raíz es el ancestro más cercano del cwd con `.git`, o el cwd si no hay ninguno; acepta el id entero o en texto con ceros; omite solo cuando falta `docs/active_state.json` o su bloque `current_sprint`; devuelve un error que el llamador convierte en exit 2 con anchor ilegible o truncado, id ausente o de otro tipo, o directorio inexistente; la conducta de referencia es `scripts/loop_guard.py:220-240`; test `tests/test_current_sprint.py` | medium | `implementer_agent` |
+| M-01 | `scripts/_current_sprint.py` | create — resolver de `--current-sprint`: la raíz es el ancestro más cercano del cwd con `.git`, o el cwd si no hay ninguno; acepta el id entero o en texto con ceros; omite solo cuando falta `docs/active_state.json` o su bloque `current_sprint`; devuelve un error que el llamador convierte en exit 2 con anchor ilegible o truncado, id ausente o de otro tipo, o directorio inexistente; test `tests/test_current_sprint.py` | medium | `implementer_agent` |
 | M-02 | `scripts/check_task_scope.py` | modify — tras M-01: `fix(` `current_sprint_dir` usa M-01; paired test en `tests/test_check_task_scope.py` | low | `implementer_agent` |
 | M-03 | `scripts/check_gate_log.py` | modify — tras M-01: `fix(` usa M-01 y sale 2 con un `--sprint-dir` inexistente; paired test en `tests/test_check_gate_log.py` | low | `implementer_agent` |
 | M-04 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify — tras M-01: `fix(` R12-2: usa M-01 y sale 2 con una ruta de plan inexistente; paired test en `tests/test_token_saver_auditor.py` | low | `skill_architect` |
@@ -190,7 +190,7 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | M-13 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify — `fix(` R14-1: el id sale solo del directorio del sprint; paired test: caso `numbered_parent` en `tests/test_current_sprint_matrix.py` | low | `skill_architect` |
 | M-14 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify — R14-2: la fila M-01 enuncia la raíz y las omisiones de `scripts/_current_sprint.py` | low | `orchestrator` |
 | M-15 | `scripts/_current_sprint.py` | modify — R14-3: retira `scripts/loop_guard.py` de `invoked_by:` | low | `implementer_agent` |
-| M-16 | `scripts/check_task_scope.py` | modify — `fix(`: `sprint_id_from_dir` acepta un id de cualquier longitud; paired test en `tests/test_check_task_scope.py` | low | `implementer_agent` |
+| M-16 | `scripts/check_task_scope.py` | modify — `fix(`: `sprint_id_from_dir` acepta un prefijo de 3 o más dígitos; paired test en `tests/test_check_task_scope.py` | low | `implementer_agent` |
 
 ### Wave 2 — Ritmo y autonomía (aceleran el resto del sprint)
 

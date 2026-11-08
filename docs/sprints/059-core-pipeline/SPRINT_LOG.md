@@ -45,7 +45,7 @@ Tracking of atomic goals achieved during the session. Work units and execution o
     - `[x]` Human re-plan 2026-11-07 after the deadlock of QA Gate 1 round 11 (plan D36): the Z-02 rows stop enumerating ids; units I-08 to I-10 added to Wave 6; work units 89 → 92, an estimate; `session_state.py unblock` run after it.
     - `[x]` Human re-plan 2026-11-07 after the deadlock of QA Gate 1 round 12 (plan D37): method for the sprint artifacts (one home per fact, a check per claim, a cap on gate notes); Wave 1b units M-01 to M-11 replace I-08 to I-10; work units 92 → 103; `session_state.py unblock` run after it.
     - `[x]` Human re-plan 2026-11-07 after the deadlock of QA Gate 1 round 13 (plan D37 reduced): Wave 1b runs before the gates re-run; unit M-12; work units 103 → 104; `session_state.py unblock` run after it.
-- [x] **Phase 6 (Execution), Wave 1b**: M-01 to M-12 committed; status in `task_scope.md`.
+- [x] **Phase 6 (Execution), Wave 1b**: units committed; status in `task_scope.md`.
     - `[x]` A-05 committed at `1dbe533`.
     - `[x]` A-09 committed at `0c7a9b2`.
     - `[x]` A-10 committed at `a694ffe`.
@@ -133,6 +133,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 | QA Agent (Gate 1) | 12 | REJECTED | charter | S1 | escape: R12-2 sits on skills/token-saver-auditor/scripts/audit_plan.py, which round 11 measured only on the deleted-directory fixture without varying the id type. Range e8f06df..7ff9bb3 plus the fix of R11-1. check_fix_reproduces.py exit 0 (3 fix commits, 0 violations); check_remediation_chain.py exit 0 (chains: 0); make verify exit 0, 1540 passed; ruff exit 0; quality-audit exit 0 (169 files, 0 violations); check_gate_log exit 0; check_role_artifact exit 0. R11-1 fixed: IMPLEMENTATION_PLAN.md:243 and task_scope.md:153 refer to the KI table and enumerate no KI-059 id. R12-2 (S1, charter): audit_plan.py:58-59 skips a string anchor id such as "059"; on a fixture plan with no required sections, id 59 exits 2 and id "059" prints [OK] (skip) and exits 0. The nucleus anchor holds an integer, so nucleus make verify is not affected. remediation-regression: R12-1 (S2, testifying): plan D36 and KI-059-15 move the sibling skips to I-08 to I-10 with one declared exception, but those units leave three cases: a subdirectory cwd skips in all three checks, audit_plan.py exits 0 on a mistyped plan path, and a truncated anchor skips. R12-3 (S2, instructing): I-10 does not name its paired test file, tests/test_token_saver_auditor.py, against the Phase 4 F-10 resolution. 3 findings and 3 S3 notes: 0 S0, 1 S1, 2 S2, 3 S3. Convergence rule 3 applies: R12-1 is the third occurrence of the family of round 8 N2 and R11-1; R12-2 is the third occurrence of the silent-pass family of rounds 9 and 10. Rounds 3 to 12 are consecutive REJECTED. |
 | QA Agent (Gate 1) | 13 | REJECTED | instructing | S2 | Range 01c0083..6043e7d plus the R12 fixes. All 9 commands exit 0; make verify 1540 passed. R12-2 and R12-1 assigned to Wave 1b; R12-3 fixed. R13-1 (S2, instructing), R13-2 (S2, instructing), R13-3 (S2, testifying); 3 S3. Detail: deadlock record, round 13. Rule 3: R13-1 and R13-3 are further occurrences of the round 8 N2 family. Rounds 3 to 13 are consecutive REJECTED. |
 | QA Agent (Gate 1) | 14 | REJECTED | charter | S1 | Range 3af48b5..fc377e3 plus R13 fixes. check_fix_reproduces exit 0; chains: 0; make verify 1602 passed; ruff, quality-audit exit 0. R13-1/2/3 closed. R14-1 (S1, charter), R14-2, R14-3 (S2, instructing); 3 S3. Rule 3: R14-1 is the silent-pass family. Rounds 3 to 14 consecutive REJECTED. |
+| QA Agent (Gate 1) | 15 | RECORD | testifying | S2 | Range fc377e3..HEAD plus R14 fixes. check_fix_reproduces exit 0; 1 chain, exit 0; make verify 1613 passed; ruff, quality-audit exit 0. R14-1/2/3 closed. R15-1, R15-2 (S2, testifying); 4 S3. First round since round 2 not REJECTED. |
 | Tester Agent (Gate 2) | 1 | REJECTED | charter | S1 | Range `08c669c..c6c7987`, 1531 passed. Baseline on context size with cuts on `cache_read`: 50 of 52 cuts over 35 transcripts are not collapses, and the ratio that feeds the hard bound falls (synthetic 20x reads 2.5x). 3 more: `--resolve` alternatives diverge under Cursor (S2), hard bound and cut field untested (S2), census wording (S3). |
 
 ### Gate findings
@@ -147,6 +148,8 @@ One row per S0-S2 finding from QA Gate 1 round 13 on (plan D37). Check: the comm
 | 14 | R14-1 | S1 | `skills/token-saver-auditor/scripts/audit_plan.py:69` | repository under `005-dir/`, anchor id 59, empty plan: `python3 skills/token-saver-auditor/scripts/audit_plan.py --current-sprint` → `(skip)`, exit 0 |
 | 14 | R14-2 | S2 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` M-01 | `grep -c "agents_root" scripts/_current_sprint.py` → 0 at `fc377e3` |
 | 14 | R14-3 | S2 | `scripts/_current_sprint.py:15-16` | `grep -c "_current_sprint" scripts/loop_guard.py` → 0 at `fc377e3` |
+| 15 | R15-1 | S2 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` M-01 | `git show 61bc129:docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md \| grep -c "la conducta de referencia es"` → 1 |
+| 15 | R15-2 | S2 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` Remediation notes | at `61bc129`, the round 14 Remediation notes hold 3 commands against 9 for round 13 |
 
 ### Remediation notes
 
@@ -236,6 +239,12 @@ Example (do not uncomment):
 | QA Agent (Gate 1) | 14 | `python3 scripts/check_fix_reproduces.py --range fc377e3..HEAD` | 0 |
 | QA Agent (Gate 1) | 14 | `python3 scripts/check_remediation_chain.py --range fc377e3..HEAD` | 0 |
 | QA Agent (Gate 1) | 14 | `make verify` | 0 |
+| QA Agent (Gate 1) | 14 | `venv_skillopt/bin/python -m ruff check .` | 0 |
+| QA Agent (Gate 1) | 14 | `make quality-audit` | 0 |
+| QA Agent (Gate 1) | 14 | `python3 scripts/check_gate_log.py --sprint-dir docs/sprints/059-core-pipeline` | 0 |
+| QA Agent (Gate 1) | 14 | `python3 scripts/check_role_artifact.py --role "QA Agent" --sprint-dir docs/sprints/059-core-pipeline` | 0 |
+| QA Agent (Gate 1) | 14 | `python3 scripts/check_task_scope.py --current-sprint` | 0 |
+| QA Agent (Gate 1) | 14 | `python3 skills/token-saver-auditor/scripts/audit_plan.py docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | 0 |
 | Tester Agent (Gate 2) | 1 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider` | 0 |
 | Tester Agent (Gate 2) | 1 | `make verify` | 0 |
 
@@ -305,7 +314,7 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase (current)**: QA Gate 1 round 15 on `fc377e3..HEAD` and the R14 fixes, then Tester Gate 2 round 2, both fresh agents.
+**Next Phase (current)**: Tester Gate 2 round 2, fresh agent. Then `session_state.py suspend` and Wave 2.
 
 **Next Phase (after QA Gate 1 round 13, superseded by the line above)**: Phase 6, Wave 1b, in the plan's order (plan D37). Then QA Gate 1 round 14 on `3af48b5..HEAD` and the R13 fixes, then Tester Gate 2 round 2, both fresh agents. On a rejection: no patch, re-plan with the human.
 
