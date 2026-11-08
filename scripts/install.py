@@ -404,12 +404,44 @@ def write_bridge_locks(target: str) -> None:
         print(f"🔒 Bridge installed at commit {commit[:12]}. Marked {lock_path}")
 
 
+NUCLEUS_SANDBOX_BLOCK: dict = {"sandbox": {"enabled": True, "autoAllowBashIfSandboxed": True}}
+
+
+def merge_nucleus_sandbox(root: Path) -> None:
+    """Merge the sandbox block into the nucleus `.claude/settings.json`.
+
+    Writes only `sandbox.enabled` and `sandbox.autoAllowBashIfSandboxed`
+    (D12): no hook and no `sandbox.excludedCommands`. Existing keys are kept,
+    retired exclusion entries are pruned by the shared merge, and a second run
+    changes nothing.
+
+    Args:
+        root: Nucleus root holding `.claude/settings.json`.
+
+    Raises:
+        SystemExit: Non-zero with a message when the file root or its
+            `sandbox` value is present and not an object; nothing is written.
+    """
+    dest = root / ".claude" / "settings.json"
+    data = json.loads(dest.read_text()) if dest.exists() else {}
+    if not isinstance(data, dict) or ("sandbox" in data and not isinstance(data["sandbox"], dict)):
+        raise SystemExit(f"🛑 {dest}: the root or its `sandbox` value is not a JSON object; "
+                         "refusing to overwrite it. Fix the file and re-run the installer.")
+    merged = merge(data, json.loads(json.dumps(NUCLEUS_SANDBOX_BLOCK)))
+    if not dest.exists() or merged != json.loads(dest.read_text()):
+        _write_json(dest, merged)
+        print(f"✅ Merged the sandbox block -> {dest}")
+    prune_rendered_exclusions(root)
+
+
 def install_nucleus_bridge() -> int:
     """Minimal self-bridge for the nucleus repo itself: commands + agents +
-    constitution import, so `/agents:*` works while developing the framework.
-    No hooks (paths are host-relative), no skills links, no MCP, no scaffolding
-    — nucleus_neutrality governs structure, not tooling access."""
+    constitution import + the `sandbox` settings block, so `/agents:*` works
+    while developing the framework. No hooks (paths are host-relative), no
+    skills links, no MCP, no scaffolding — nucleus_neutrality governs
+    structure, not tooling access."""
     print(f"🧬 Nucleus detected — installing minimal self-bridge into {AGENTS_DIR / '.claude'} ...")
+    merge_nucleus_sandbox(AGENTS_DIR)
     for f in sorted((AGENTS_DIR / "commands").glob("*.md")):
         link_one(f"../../../commands/{f.name}",
                  AGENTS_DIR / ".claude" / "commands" / "agents" / f.name)
