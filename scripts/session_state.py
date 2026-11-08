@@ -46,7 +46,9 @@ Usage:
         # round 2). `open-sprint` also accepts the legacy `CLOSED` literal
         # written before Sprint 050 (SEALED_STATUSES, KI-052-2) and a
         # host-written `DEPLOYED` (F-114-N2, Sprint 054).
-    python3 scripts/session_state.py suspend   # ends the SESSION only
+    python3 scripts/session_state.py suspend [--hook-session-id <uid>]
+        # ends the SESSION only; with --hook-session-id (SessionEnd) acts
+        # only when it equals the anchor's session_id (KI-057-2)
     python3 scripts/session_state.py require-released [--branch <ref>] [--hotfix H-NNN]
         # deployment preflight: refuse SUSPENDED; tip must equal last_close_commit
         # (--hotfix: or be an RA-03 hotfix tip descending from it; D4, Sprint 057)
@@ -203,7 +205,7 @@ def derive_delegation_mode(tool: str, explicit_mode: str | None) -> str:
     return "sequential" if tool == "cursor" else "native"
 
 
-def suspend() -> int:
+def suspend(hook_session_id: str | None = None) -> int:
     """End the session without sealing the sprint.
 
     The counterpart `release()` did not have. `rules/token_economy.md §3.1` makes
@@ -219,10 +221,24 @@ def suspend() -> int:
     untouched: SessionEnd calls this after every session, and SUSPENDED over a
     sealed sprint makes it undeployable (`require-released`, B-9).
 
+    Args:
+        hook_session_id: The `session_id` the SessionEnd payload names, as
+            `session_end_hook.py` forwards it (`""` when the payload had no
+            usable id). `None` is a manual call and keeps the unconditional
+            behaviour. Otherwise the anchor is left untouched unless the id
+            is non-empty and equals the anchor's `session_id`: a session that
+            ends is not the holder of the lock when the ids differ, and an
+            id that is absent proves nothing (KI-057-2).
+
     Returns:
         int: 0 — suspending is never refused; the work is preserved, not judged.
     """
     state = load_state()
+    holder = state.get("session_id")
+    if hook_session_id is not None and (not hook_session_id or hook_session_id != holder):
+        print(f"SessionEnd of session {hook_session_id or '(no id in payload)'} is not the "
+              f"lock holder {holder or '(none)'} — nothing was suspended; anchor left unchanged.")
+        return 0
     if _sprint_is_sealed((state.get("current_sprint") or {}).get("status")):
         print("Sprint is sealed — nothing was suspended; anchor left unchanged.")
         return 0
@@ -991,6 +1007,20 @@ def _add_require_released_subparser(sub: argparse._SubParsersAction) -> None:
     )
 
 
+def _add_suspend_subparser(sub: argparse._SubParsersAction) -> None:
+    """Register `suspend` and its `--hook-session-id` flag.
+
+    Args:
+        sub: Subparsers action from `parser.add_subparsers()`.
+    """
+    suspend_parser = sub.add_parser("suspend", help="End the SESSION with the sprint still open.")
+    suspend_parser.add_argument(
+        "--hook-session-id", default=None,
+        help="Set by session_end_hook.py: the SessionEnd payload's session_id ('' when "
+             "absent). Suspends only when it equals the anchor's session_id.",
+    )
+
+
 def _add_other_subparsers(sub: argparse._SubParsersAction) -> None:
     """Register every subcommand but `claim` (which `_add_claim_subparser` owns).
 
@@ -998,7 +1028,7 @@ def _add_other_subparsers(sub: argparse._SubParsersAction) -> None:
         sub: Subparsers action from `parser.add_subparsers()`.
     """
     sub.add_parser("release", help="Seal the SPRINT at close.")
-    sub.add_parser("suspend", help="End the SESSION with the sprint still open.")
+    _add_suspend_subparser(sub)
     block_parser = sub.add_parser(
         "block",
         help="Write current_sprint.status BLOCKED and blocked_reason (terminal remediation).",
@@ -1077,7 +1107,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             args.entry_point,
         )
     if args.command == "suspend":
-        return suspend()
+        return suspend(args.hook_session_id)
     if args.command == "block":
         return block(args.reason)
     if args.command == "unblock":
