@@ -114,7 +114,7 @@ Operation: the plan row of the same id (plan D37).
 | B-06 | `scripts/install.py` | modify: after B-02, `install_nucleus_bridge` installs the `sandbox` block with `autoAllowBashIfSandboxed: true`, no hooks and no `excludedCommands` (D12); new test `tests/test_install_nucleus_sandbox.py` | high | `implementer_agent` | sonnet | medium | B-02 | ✅ `92fddf8` |
 | E-01 | `scripts/session_state.py` | modify: fix( SessionEnd `suspend` acts only when the hook session_id matches the anchor (KI-057-2); paired test `tests/test_session_end_hook.py`; reproduce first or RECORD | medium | `implementer_agent` | sonnet | medium | - | ✅ `c10f8bd` |
 | E-01c | `scripts/session_state.py` | modify: after E-01, fix( `suspend` between sprints (sealed sprint, session `IN_PROGRESS`) releases the session lock without touching the sealed sprint; paired test in `tests/test_session_state.py` | medium | `implementer_agent` | sonnet | medium | E-01 | ✅ `3a3136b` |
-| M-18 | `scripts/check_task_scope.py` | modify: plan M-18 | low | `implementer_agent` | sonnet | medium | - | ⏳ |
+| M-18 | `scripts/check_task_scope.py` | modify: plan M-18 | low | `implementer_agent` | sonnet | medium | - | ✅ `c5fbf5f` |
 | M-19 | `scripts/prompt_count.py` | modify: plan M-19 | medium | `implementer_agent` | sonnet | medium | - | ⏳ |
 | M-20 | `scripts/prompt_count.py` | modify: plan M-20 | low | `implementer_agent` | sonnet | medium | M-19 | ⏳ |
 | M-21 | `docs/plans/README.md` | modify: plan M-21 | low | `doc_orchestrator` | sonnet | medium | - | ⏳ |
