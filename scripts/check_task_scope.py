@@ -23,7 +23,11 @@ units whose Status is the pending mark, one ``batch N: id id`` line per batch of
 at most ``MAX_BATCH`` units whose dependencies landed (a dependency on a
 non-pending unit counts as landed) and whose ``File`` cells differ (plan D11 of
 Sprint 059). ``--batches`` refuses, with exit 2 and no batch, a unit whose Status
-is missing (no Status column, or an empty cell); the audit does not.
+is missing (no Status column, or an empty cell) or unrecognised; the audit does not
+refuse a missing one. A Status is recognised as the pending mark (a prefix such as
+``⏳ M1`` counts), a check mark and a short SHA, ``replaced`` or ``RECORD``. The audit
+checks that only in tables with a ``Depends on`` column, since earlier sprints wrote
+free-form Status text.
 
 Also refuses a row whose assignee cannot perform the operation it is given: a
 profile with no ``Write``/``Edit`` tool cannot ``create``/``modify``/``delete`` a
@@ -54,6 +58,7 @@ MECHANICAL_PROFILES = frozenset({"devops_agent", "git_sync_agent", "topology_map
 MECHANICAL_MODELS = frozenset({"haiku", "composer-2.5", "composer-2"})
 WORK_KEYS = ("File", "Operation", "Risk", "Assignee")
 MAX_BATCH = 4
+COMMITTED_STATUS = re.compile(r"^\u2705\s+`?[0-9a-f]{7,40}\b")
 WRITE_TOOLS = frozenset({"Write", "Edit"})
 # Matched as substrings: real tables write "modify/create", "create + delete"
 # and "modify (hito 2 gate)", so equality missed most of them. Deliberately
@@ -232,6 +237,15 @@ class Unit(NamedTuple):
         """True when the Status cell holds the pending mark."""
         return "\u23f3" in self.status
 
+    @property
+    def recognised(self) -> bool:
+        """True when the Status is the pending mark, committed, replaced or RECORD."""
+        return bool(
+            self.pending
+            or COMMITTED_STATUS.match(self.status)
+            or self.status.startswith(("replaced", "RECORD"))
+        )
+
 
 def _parse_deps(cell: str) -> tuple[str, ...]:
     """Unit ids of a ``Depends on`` cell; ``-`` and empty mean none."""
@@ -311,6 +325,16 @@ def dependency_findings(units: list[Unit]) -> list[str]:
     return findings
 
 
+def status_findings(units: list[Unit]) -> list[str]:
+    """One finding per unit whose non-empty Status is not a recognised form."""
+    return [
+        f"Unit {unit.id}: unrecognised Status {unit.status!r} (expected the pending "
+        "mark, a check mark and a short SHA, 'replaced' or 'RECORD')."
+        for unit in units
+        if unit.status and not unit.recognised
+    ]
+
+
 def _fill_batch(ready: list[Unit]) -> list[Unit]:
     """First units of ``ready`` (table order) with distinct files, up to MAX_BATCH."""
     batch: list[Unit] = []
@@ -328,9 +352,11 @@ def _fill_batch(ready: list[Unit]) -> list[Unit]:
 def schedule(units: list[Unit]) -> tuple[list[list[str]], list[str]]:
     """Batches of pending unit ids, and the ids that could not be scheduled.
 
-    Only units whose Status holds the pending mark are scheduled. A unit with any
-    other Status (committed, ``replaced``, ``RECORD``) counts as landed for the
-    dependencies of pending units and never appears in a batch.
+    Only units whose Status holds the pending mark are scheduled. A unit whose
+    Status is a recognised non-pending form (committed with a short SHA,
+    ``replaced``, ``RECORD``) counts as landed for the dependencies of pending
+    units and never appears in a batch. Callers MUST reject an unrecognised Status
+    first (``status_findings``); this function does not.
 
     Args:
         units: Work units in table order.
@@ -367,7 +393,10 @@ def collect_findings(
     tables = work_tables(text)
     if not tables:
         return []
-    findings = dependency_findings(work_units(tables))
+    units = work_units(tables)
+    findings = dependency_findings(units)
+    if any(unit.has_column for unit in units):
+        findings.extend(status_findings(units))
     if not requires_model_columns(sprint_id, text):
         return findings
     resolved_root = root if root is not None else agents_root()
@@ -438,7 +467,7 @@ def print_batches(sprint_dir: Path) -> int:
     units = work_units(work_tables(path.read_text(encoding="utf-8")))
     findings = dependency_findings(units) + [
         f"Unit {unit.id}: Status is missing or empty." for unit in units if not unit.status
-    ]
+    ] + status_findings(units)
     batches, stuck = ([], []) if findings else schedule(units)
     if stuck:
         findings.append("Pending units cannot be scheduled: " + ", ".join(stuck) + ".")
