@@ -212,7 +212,7 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | B-08 | `docs/sprints/059-core-pipeline/PROMPT_MEASUREMENT.md` | modify — tras M-20, B-06: R16-3: rehace la línea base con M-19 y M-20; el instalador del núcleo se ejecuta sobre este checkout (decisión humana 2026-11-08) y una sesión real bajo sandbox rellena `Re-measurement after B-06` | medium | `doc_orchestrator` | ✅ `9e55888` |
 | B-09 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — R17-2: transcribe QA Gate 1 ronda 17 y sus hallazgos, añade las notas de remediación de la ronda 16 con comandos y exit codes, y actualiza `Next Phase` | low | `orchestrator` | ✅ `0cbf261` |
 | M-22 | `scripts/check_task_scope.py` | modify — `fix(` R17-1: un `Status` desconocido hace que `--batches` y la auditoría terminen con exit distinto de 0; paired test en `tests/test_check_task_scope.py` | low | `implementer_agent` | ✅ `639fd05` |
-| M-23 | `scripts/install.py` | modify — S3 de la ronda 17: el docstring de `install_nucleus` incluye el bloque `sandbox` en el contenido del self-bridge | low | `implementer_agent` | ⏳ |
+| M-23 | `scripts/install.py` | modify — S3 de la ronda 17: el docstring de `install_nucleus` incluye el bloque `sandbox` en el contenido del self-bridge | low | `implementer_agent` | ✅ `104467f` |
 
 ### Wave 3 — Token economy en sesión (estudio, debate, decisión)
 
