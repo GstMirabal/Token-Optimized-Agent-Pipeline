@@ -23,11 +23,7 @@ units whose Status is the pending mark, one ``batch N: id id`` line per batch of
 at most ``MAX_BATCH`` units whose dependencies landed (a dependency on a
 non-pending unit counts as landed) and whose ``File`` cells differ (plan D11 of
 Sprint 059). ``--batches`` refuses, with exit 2 and no batch, a unit whose Status
-is missing (no Status column, or an empty cell) or unrecognised; the audit does not
-refuse a missing one. A Status is recognised as the pending mark (a prefix such as
-``⏳ M1`` counts), a check mark and a short SHA, ``replaced`` or ``RECORD``. The audit
-checks that only in tables with a ``Depends on`` column, since earlier sprints wrote
-free-form Status text.
+is missing (no Status column, or an empty cell) or unrecognised; the audit does not.
 
 Also refuses a row whose assignee cannot perform the operation it is given: a
 profile with no ``Write``/``Edit`` tool cannot ``create``/``modify``/``delete`` a
@@ -355,8 +351,7 @@ def schedule(units: list[Unit]) -> tuple[list[list[str]], list[str]]:
     Only units whose Status holds the pending mark are scheduled. A unit whose
     Status is a recognised non-pending form (committed with a short SHA,
     ``replaced``, ``RECORD``) counts as landed for the dependencies of pending
-    units and never appears in a batch. Callers MUST reject an unrecognised Status
-    first (``status_findings``); this function does not.
+    units and never appears in a batch.
 
     Args:
         units: Work units in table order.
@@ -393,10 +388,7 @@ def collect_findings(
     tables = work_tables(text)
     if not tables:
         return []
-    units = work_units(tables)
-    findings = dependency_findings(units)
-    if any(unit.has_column for unit in units):
-        findings.extend(status_findings(units))
+    findings = dependency_findings(work_units(tables))
     if not requires_model_columns(sprint_id, text):
         return findings
     resolved_root = root if root is not None else agents_root()

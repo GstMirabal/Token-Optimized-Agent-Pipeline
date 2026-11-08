@@ -495,15 +495,15 @@ def test_batches_refuse_a_unit_with_an_empty_status_cell(tmp_path: Path) -> None
     assert "Unit A: Status is missing" in result.stderr
 
 
-def test_an_unrecognised_status_fails_the_audit_and_batches(tmp_path: Path) -> None:
+def test_an_unrecognised_status_fails_batches_only(tmp_path: Path) -> None:
     sprint = _dep_scope(
         tmp_path, [("A", "a.py", "-", "in progress"), ("B", "b.py", "A", "⏳")]
     )
-    for args in ((), ("--batches",)):
-        result = _run("--sprint-dir", str(sprint), *args)
-        assert result.returncode == 2
-        assert result.stdout == ""
-        assert "Unit A" in result.stderr and "in progress" in result.stderr
+    assert _run("--sprint-dir", str(sprint)).returncode == 0
+    result = _batches(sprint)
+    assert result.returncode == 2
+    assert result.stdout == ""
+    assert "Unit A" in result.stderr and "in progress" in result.stderr
 
 
 def test_recognised_status_forms_pass_the_audit_and_batches(tmp_path: Path) -> None:
