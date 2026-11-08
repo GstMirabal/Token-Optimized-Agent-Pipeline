@@ -295,3 +295,120 @@ def test_sprint_id_from_dir_accepts_a_prefix_of_three_or_more_digits() -> None:
     assert sprint_id_from_dir(Path("059-core-x")) == 59
     assert sprint_id_from_dir(Path("12-core-x")) is None
     assert sprint_id_from_dir(Path("core-x")) is None
+
+
+# --- G-01: the optional `Depends on` column and the parallel batches (D11). ---
+
+DEP_HEAD = (
+    "| # | File | Operation | Risk | Assignee | Model | Effort | Depends on | Status |\n"
+    "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n"
+)
+PLAIN_HEAD = (
+    "| # | File | Operation | Risk | Assignee | Model | Effort | Status |\n"
+    "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n"
+)
+
+
+def _dep_scope(tmp_path: Path, rows: list[tuple[str, str, str, str]]) -> Path:
+    """Sprint with one Work table; rows are (id, file, depends on, status)."""
+    body = "# Task Scope\n\n" + DEP_HEAD + "".join(
+        f"| {uid} | `{file}` | run | low | `implementer_agent` | sonnet | medium "
+        f"| {deps} | {status} |\n"
+        for uid, file, deps, status in rows
+    )
+    return _scope(tmp_path, body)
+
+
+def _batches(sprint: Path) -> subprocess.CompletedProcess[str]:
+    return _run("--sprint-dir", str(sprint), "--batches")
+
+
+def test_table_without_depends_on_stays_valid_and_keeps_table_order(
+    tmp_path: Path,
+) -> None:
+    body = "# Task Scope\n\n" + PLAIN_HEAD + (
+        "| A | `a.py` | run | low | `implementer_agent` | sonnet | medium | ⏳ |\n"
+        "| B | `b.py` | run | low | `implementer_agent` | sonnet | medium | ⏳ |\n"
+    )
+    sprint = _scope(tmp_path, body)
+    assert _run("--sprint-dir", str(sprint)).returncode == 0
+    result = _batches(sprint)
+    assert result.returncode == 0
+    assert result.stdout == "batch 1: A B\n"
+
+
+def test_unknown_dependency_id_exits_2(tmp_path: Path) -> None:
+    sprint = _dep_scope(tmp_path, [("A", "a.py", "Z", "⏳")])
+    for args in ((), ("--batches",)):
+        result = _run("--sprint-dir", str(sprint), *args)
+        assert result.returncode == 2
+        assert "'Z'" in result.stderr
+
+
+def test_self_dependency_exits_2(tmp_path: Path) -> None:
+    sprint = _dep_scope(tmp_path, [("A", "a.py", "A", "⏳")])
+    result = _run("--sprint-dir", str(sprint))
+    assert result.returncode == 2
+    assert "depends on itself" in result.stderr
+
+
+def test_dependency_cycle_exits_2(tmp_path: Path) -> None:
+    sprint = _dep_scope(
+        tmp_path,
+        [("A", "a.py", "B", "⏳"), ("B", "b.py", "A", "⏳"), ("C", "c.py", "-", "⏳")],
+    )
+    for args in ((), ("--batches",)):
+        result = _run("--sprint-dir", str(sprint), *args)
+        assert result.returncode == 2
+        assert "cycle" in result.stderr
+        assert "A, B" in result.stderr
+        assert "C" not in result.stderr.split("cycle", 1)[1]
+
+
+def test_same_file_units_are_split_across_batches(tmp_path: Path) -> None:
+    sprint = _dep_scope(
+        tmp_path,
+        [("A", "x.py", "-", "⏳"), ("B", "x.py", "", "⏳"), ("C", "y.py", "-", "⏳")],
+    )
+    assert _batches(sprint).stdout == "batch 1: A C\nbatch 2: B\n"
+
+
+def test_a_batch_holds_at_most_four_units(tmp_path: Path) -> None:
+    rows = [(f"U{n}", f"f{n}.py", "-", "⏳") for n in range(1, 7)]
+    sprint = _dep_scope(tmp_path, rows)
+    assert _batches(sprint).stdout == "batch 1: U1 U2 U3 U4\nbatch 2: U5 U6\n"
+
+
+def test_committed_dependency_releases_a_unit(tmp_path: Path) -> None:
+    sprint = _dep_scope(
+        tmp_path, [("A", "a.py", "-", "✅ abc1234"), ("B", "b.py", "A", "⏳")]
+    )
+    assert _batches(sprint).stdout == "batch 1: B\n"
+
+
+def test_pending_dependency_holds_a_unit_to_a_later_batch(tmp_path: Path) -> None:
+    sprint = _dep_scope(
+        tmp_path,
+        [("A", "a.py", "B", "⏳"), ("B", "b.py", "-", "⏳"), ("C", "c.py", "A, B", "⏳")],
+    )
+    assert _batches(sprint).stdout == "batch 1: B\nbatch 2: A\nbatch 3: C\n"
+
+
+def test_batches_are_deterministic(tmp_path: Path) -> None:
+    rows = [(f"U{n}", f"f{n % 3}.py", "-" if n < 4 else f"U{n - 3}", "⏳") for n in range(1, 9)]
+    sprint = _dep_scope(tmp_path, rows)
+    first = _batches(sprint)
+    assert first.returncode == 0
+    assert all(_batches(sprint).stdout == first.stdout for _ in range(3))
+
+
+def test_everything_committed_prints_no_pending_units(tmp_path: Path) -> None:
+    sprint = _dep_scope(tmp_path, [("A", "a.py", "-", "✅ abc1234")])
+    result = _batches(sprint)
+    assert (result.returncode, result.stdout) == (0, "no pending units\n")
+
+
+def test_batches_without_task_scope_exits_2(tmp_path: Path) -> None:
+    sprint = tmp_path / "docs" / "sprints" / "030-core-pipeline"
+    sprint.mkdir(parents=True)
+    assert _batches(sprint).returncode == 2
