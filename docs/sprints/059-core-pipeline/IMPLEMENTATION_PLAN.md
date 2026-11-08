@@ -210,6 +210,9 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | M-20 | `scripts/prompt_count.py` | modify — tras M-19: `fix(` R16-4: parte el JSONL solo por `\n`; paired test en `tests/test_prompt_count.py` | low | `implementer_agent` | ✅ `10c8e1a` |
 | M-21 | `docs/plans/README.md` | modify — R16-5: declara que el self-bridge escribe `.claude/settings.json` con el bloque `sandbox`, y lo mismo en `docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md` | low | `doc_orchestrator` | ✅ `e6caffc` |
 | B-08 | `docs/sprints/059-core-pipeline/PROMPT_MEASUREMENT.md` | modify — tras M-20, B-06: R16-3: rehace la línea base con M-19 y M-20; el instalador del núcleo se ejecuta sobre este checkout (decisión humana 2026-11-08) y una sesión real bajo sandbox rellena `Re-measurement after B-06` | medium | `doc_orchestrator` | ✅ `9e55888` |
+| B-09 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — R17-2: transcribe QA Gate 1 ronda 17 y sus hallazgos, añade las notas de remediación de la ronda 16 con comandos y exit codes, y actualiza `Next Phase` | low | `orchestrator` | ⏳ |
+| M-22 | `scripts/check_task_scope.py` | modify — `fix(` R17-1: un `Status` desconocido hace que `--batches` y la auditoría terminen con exit distinto de 0; paired test en `tests/test_check_task_scope.py` | low | `implementer_agent` | ⏳ |
+| M-23 | `scripts/install.py` | modify — S3 de la ronda 17: el docstring de `install_nucleus` incluye el bloque `sandbox` en el contenido del self-bridge | low | `implementer_agent` | ⏳ |
 
 ### Wave 3 — Token economy en sesión (estudio, debate, decisión)
 
@@ -302,7 +305,7 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 114 (D37: 92 + 16 de la wave 1b + M-17 + M-18 a M-21 y B-08; I-08 a I-10 siguen contadas como sustituidas) | Count of rows in Work tables |
+| Work units | 117 (D37: 92 + 16 de la wave 1b + M-17 + M-18 a M-21 y B-08 + B-09, M-22 y M-23; I-08 a I-10 siguen contadas como sustituidas) | Count of rows in Work tables |
 | Subagents dispatched | lotes de hasta 4 en paralelo desde la wave 3 (D11), más QA + Tester por wave | `agent_assignment.md` |
 | Session ratio (2026-11-08, QA rondas 12 y 13, wave 1b) | Sesión `e9a7a9bf`, ciclo único: 5.4× durante la sesión, sobre soft (5×); `suspend` antes de QA Gate 1 ronda 14 | `python3 -I scripts/session_cost.py --session e9a7a9bf-bf5b-4800-bd46-edd6c8fc46c5 --json` |
 | Session ratio (2026-11-07, QA rondas 8 a 11) | Sesión `93b61aea`, ciclo único: lectura de 5.0× durante la sesión, en soft (5×); el valor final lo da el comando. Quedan 44 unidades en 5 waves más cierre y los gates de la wave 1; delegación `native`; `suspend` antes de QA Gate 1 ronda 12 | `python3 -I scripts/session_cost.py --session 93b61aea-d168-4293-97f5-340681b5c33a --json` |

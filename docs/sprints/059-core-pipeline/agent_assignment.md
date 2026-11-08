@@ -124,6 +124,9 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | M-20 | `scripts/prompt_count.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | M-21 | `docs/plans/README.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | B-08 | `docs/sprints/059-core-pipeline/PROMPT_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| B-09 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
+| M-22 | `scripts/check_task_scope.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| M-23 | `scripts/install.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 
 ### Wave 3 — in-session token economy
 

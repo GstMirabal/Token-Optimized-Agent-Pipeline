@@ -119,6 +119,9 @@ Operation: the plan row of the same id (plan D37).
 | M-20 | `scripts/prompt_count.py` | modify: plan M-20 | low | `implementer_agent` | sonnet | medium | M-19 | ✅ `10c8e1a` |
 | M-21 | `docs/plans/README.md` | modify: plan M-21 | low | `doc_orchestrator` | sonnet | medium | - | ✅ `e6caffc` |
 | B-08 | `docs/sprints/059-core-pipeline/PROMPT_MEASUREMENT.md` | modify: plan B-08 | medium | `doc_orchestrator` | sonnet | medium | M-20, B-06 | ✅ `9e55888` |
+| B-09 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify: plan B-09 | low | `orchestrator` | sonnet | medium | - | ⏳ |
+| M-22 | `scripts/check_task_scope.py` | modify: plan M-22 | low | `implementer_agent` | sonnet | medium | - | ⏳ |
+| M-23 | `scripts/install.py` | modify: plan M-23 | low | `implementer_agent` | sonnet | medium | - | ⏳ |
 
 ### Wave 3 — In-session token economy
 
