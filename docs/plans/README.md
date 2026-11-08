@@ -49,12 +49,15 @@ extracted from whatever lands here, deliberately, before Phase 5 approves it.
   written before it was approved; that is held by the Phase 5 precondition in
   `pipeline_workflow.md`, an attended human step.
 - **In nucleus mode `plansDirectory` never applies.** The conclusion is unchanged and
-  still measured — this repository has no `.claude/settings.json`, and `C0`'s own plan
-  was drafted under `~/.claude/plans/` — but **the reason recorded here was wrong**, and
+  still measured — the self-bridge's `.claude/settings.json` carries no
+  `plansDirectory`, and `C0`'s own plan was drafted under `~/.claude/plans/` — but
+  **the reason recorded here was wrong**, and
   Sprint `023` `C6` corrected it. `nucleus_neutrality` does **not** prohibit installing
   the bridge: it prohibits *structural scaffolding* (`agents.md §5`), and
   `scripts/install.py` ships `install_nucleus_bridge()` for exactly this case.
-  What that self-bridge deliberately omits is hooks, skills, MCP and settings — so no
-  `.claude/settings.json` reaches the nucleus, and `plansDirectory`, which lives in that
-  file, never arrives. Absent by omission, not by prohibition. **Routing discharged by
-  `C6`.**
+  What that self-bridge deliberately omits is hooks, skills and MCP. It writes
+  `.claude/settings.json` with the `sandbox` block only (`sandbox.enabled` and
+  `sandbox.autoAllowBashIfSandboxed`, `merge_nucleus_sandbox()`), and
+  `plansDirectory` is not in that block; it ships in `claude/settings.hooks.json`,
+  which only the host install merges. Absent by omission, not by prohibition.
+  **Routing discharged by `C6`.**

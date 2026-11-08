@@ -102,7 +102,8 @@ If there's more than one valid path:
   bridge is refused (`agents.md §5 nucleus_neutrality`); run the installer's
   minimal self-bridge instead — `python3 scripts/install.py` — which links only
   `.claude/commands/agents/*` and `.claude/agents/*` (no hooks, skills, MCP, or
-  scaffolding), then restart the session.
+  scaffolding) and writes `.claude/settings.json` with the `sandbox` block, then
+  restart the session.
 
 ## 4. Verify it worked
 
