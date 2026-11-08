@@ -110,10 +110,15 @@ Operation: the plan row of the same id (plan D37).
 | G-02 | `workflows/pipeline_workflow.md` | modify: after G-01, Phase 6 dispatches each batch in parallel with `isolation: "worktree"` and integrates in table order; after each batch the orchestrator removes every worktree and its branch (`git worktree remove`, `git branch -D`) and re-runs `check_task_scope.py` on `ai-sprint/[ID]`, exit 0, before the next batch; Phase 7 stays serial per wave (D11) | medium | `orchestrator` | sonnet | medium | G-01 | ✅ `808d098` |
 | B-01 | `scripts/prompt_count.py` | create: count authorizations per session from transcripts, `--json`; test `tests/test_prompt_count.py` | medium | `implementer_agent` | sonnet | medium | - | ✅ `4952195` |
 | B-07 | `workflows/close_workflow.md` | modify: after B-01, advisory step running `python3 scripts/prompt_count.py --session <id> --json` on the closing session; RA-16 invoker of B-01 | low | `orchestrator` | sonnet | medium | B-01 | ✅ `2d40946` |
-| B-02 | `docs/sprints/059-core-pipeline/PROMPT_MEASUREMENT.md` | create: after B-01, baseline count for one real nucleus session and one genericized host session (RA-15); re-measure after B-06 | low | `doc_orchestrator` | sonnet | medium | B-01 | ✅ `7fc8ae5` |
+| B-02 | `docs/sprints/059-core-pipeline/PROMPT_MEASUREMENT.md` | create: after B-01, baseline count for one real nucleus session and one genericized host session (RA-15) | low | `doc_orchestrator` | sonnet | medium | B-01 | ✅ `7fc8ae5` |
 | B-06 | `scripts/install.py` | modify: after B-02, `install_nucleus_bridge` installs the `sandbox` block with `autoAllowBashIfSandboxed: true`, no hooks and no `excludedCommands` (D12); new test `tests/test_install_nucleus_sandbox.py` | high | `implementer_agent` | sonnet | medium | B-02 | ✅ `92fddf8` |
 | E-01 | `scripts/session_state.py` | modify: fix( SessionEnd `suspend` acts only when the hook session_id matches the anchor (KI-057-2); paired test `tests/test_session_end_hook.py`; reproduce first or RECORD | medium | `implementer_agent` | sonnet | medium | - | ✅ `c10f8bd` |
 | E-01c | `scripts/session_state.py` | modify: after E-01, fix( `suspend` between sprints (sealed sprint, session `IN_PROGRESS`) releases the session lock without touching the sealed sprint; paired test in `tests/test_session_state.py` | medium | `implementer_agent` | sonnet | medium | E-01 | ✅ `3a3136b` |
+| M-18 | `scripts/check_task_scope.py` | modify: plan M-18 | low | `implementer_agent` | sonnet | medium | - | ⏳ |
+| M-19 | `scripts/prompt_count.py` | modify: plan M-19 | medium | `implementer_agent` | sonnet | medium | - | ⏳ |
+| M-20 | `scripts/prompt_count.py` | modify: plan M-20 | low | `implementer_agent` | sonnet | medium | M-19 | ⏳ |
+| M-21 | `docs/plans/README.md` | modify: plan M-21 | low | `doc_orchestrator` | sonnet | medium | - | ⏳ |
+| B-08 | `docs/sprints/059-core-pipeline/PROMPT_MEASUREMENT.md` | modify: plan B-08 | medium | `doc_orchestrator` | sonnet | medium | M-20, B-06 | ⏳ |
 
 ### Wave 3 — In-session token economy
 

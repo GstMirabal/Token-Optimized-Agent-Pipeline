@@ -59,6 +59,7 @@ Tracking of atomic goals achieved during the session. Work units and execution o
     - `[x]` A-08 was held uncommitted: it contradicts `ADR-0003` (KI-059-3). Human decision 2026-11-04: unit A-14 creates the superseding `ADR-0021` first (plan D17), then A-08 commits; work units 48 → 49.
     - `[x]` Human decision 2026-11-04 (plan D18): `agents.md` allocated by risk; A-15, A-16, A-17 added before the A-12 commit; work units 49 → 52.
     - `[x]` Deviation (`RA-13`), 2026-11-08: the orchestrator chained `make verify` and the B-07 commit in one command; `2d40946` landed with `make verify` at exit 2 on a stale `WORKFLOWS_STEP_MAP_GUIDE.md`. Closed by `35301fc`, committed after `make verify` exit 0 was observed.
+    - `[x]` Human decisions 2026-11-08 after QA Gate 1 round 16: units M-18 to M-21 and B-08 added to Wave 2; the nucleus installer runs on this checkout so B-08 re-measures under the sandbox; B-02 narrowed to the baseline; work units 109 → 114.
 
 ---
 
@@ -327,7 +328,7 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase (current)**: Phase 7, Wave 2, QA Gate 1 round 16 REJECTED (R16-1 to R16-5). No patch: re-plan with the human.
+**Next Phase (current)**: Phase 6, Wave 2: M-18, M-19, M-20, M-21, then the nucleus installer on this checkout and B-08, then QA Gate 1 round 17 and Tester Gate 2 round 3, both fresh agents. On a rejection: no patch, re-plan with the human.
 
 **Next Phase (after QA Gate 1 round 13, superseded by the line above)**: Phase 6, Wave 1b, in the plan's order (plan D37). Then QA Gate 1 round 14 on `3af48b5..HEAD` and the R13 fixes, then Tester Gate 2 round 2, both fresh agents. On a rejection: no patch, re-plan with the human.
 
