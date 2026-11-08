@@ -43,14 +43,6 @@ HOST_BLAST_FILE = ".agents-blast-radius.json"
 NUCLEUS_BLAST_FILE = Path(__file__).resolve().parents[3] / "config" / "blast_radius.json"
 
 
-def sprint_id_from_path(path: Path) -> int | None:
-    """Leading ``NNN-`` directory under ``docs/sprints/``, if present."""
-    for part in path.parts:
-        if len(part) >= 3 and part[:3].isdigit() and part[3:4] == "-":
-            return int(part.split("-", 1)[0])
-    return None
-
-
 def current_sprint_plan(root: Path) -> Path | None:
     """IMPLEMENTATION_PLAN.md of the anchor's current sprint, or None to skip.
 
@@ -66,7 +58,10 @@ def current_sprint_plan(root: Path) -> Path | None:
         CurrentSprintError: The anchor names no existing sprint directory.
     """
     sprint_dir = current_sprint_dir(root)
-    if sprint_dir is None or sprint_id_from_path(sprint_dir) < COST_FROM_SPRINT:
+    if sprint_dir is None:
+        return None
+    match = re.match(r"(\d{3})-", sprint_dir.name)
+    if match is None or int(match.group(1)) < COST_FROM_SPRINT:
         return None
     plan = sprint_dir / "IMPLEMENTATION_PLAN.md"
     return plan if plan.is_file() else None
