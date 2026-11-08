@@ -219,7 +219,8 @@ def suspend(hook_session_id: str | None = None) -> int:
 
     A sprint already sealed by `release()` (``_sprint_is_sealed``) is left
     untouched: SessionEnd calls this after every session, and SUSPENDED over a
-    sealed sprint makes it undeployable (`require-released`, B-9).
+    sealed sprint makes it undeployable (`require-released`, B-9). The session
+    lock it holds is released, though (`_release_between_sprints`).
 
     Args:
         hook_session_id: The `session_id` the SessionEnd payload names, as
@@ -240,8 +241,7 @@ def suspend(hook_session_id: str | None = None) -> int:
               f"lock holder {holder or '(none)'} — nothing was suspended; anchor left unchanged.")
         return 0
     if _sprint_is_sealed((state.get("current_sprint") or {}).get("status")):
-        print("Sprint is sealed — nothing was suspended; anchor left unchanged.")
-        return 0
+        return _release_between_sprints(state)
     state.update({
         "status": SUSPENDED,
         "end_time": now(),
@@ -253,6 +253,29 @@ def suspend(hook_session_id: str | None = None) -> int:
     print(f"⏸️  Session suspended — the sprint stays open. Resume on "
           f"{pointer['branch']} at {(pointer['at'] or '?')[:7]}.")
     print("   `last_close_commit` deliberately untouched: only a sprint close seals it.")
+    return 0
+
+
+def _release_between_sprints(state: dict) -> int:
+    """Release the session lock over a sealed sprint, leaving the sprint alone.
+
+    Between sprints the sprint is sealed while the session is still
+    `IN_PROGRESS`; leaving that lock held makes the next boot exit 2 and
+    demand `--takeover`. Only the SESSION fields change: `current_sprint`,
+    `last_close_commit` and `resume_pointer` are not written.
+
+    Args:
+        state: The loaded anchor, whose `current_sprint` is sealed.
+
+    Returns:
+        int: 0 always.
+    """
+    if state.get("status") != IN_PROGRESS:
+        print("Sprint is sealed — nothing was suspended; anchor left unchanged.")
+        return 0
+    state.update({"status": CLOSED, "end_time": now(), "last_updated": now()})
+    save_state(state)
+    print("Sprint is sealed — session lock released; the sealed sprint is unchanged.")
     return 0
 
 
