@@ -136,3 +136,23 @@ def test_unreadable_subagent_transcript_exits_2(tmp_path: Path,
     (directory / "abc" / "subagents" / "bad.jsonl").mkdir(parents=True)
     monkeypatch.setattr(session_cost, "PROJECTS", tmp_path)
     assert pc.main(["--session", "abc", "--project", str(tmp_path)]) == 2
+
+
+@pytest.mark.parametrize("boundary", ["\u2028", "\u2029", "\u0085"])
+def test_raw_unicode_line_boundary_in_a_string_keeps_the_decision(
+        tmp_path: Path, boundary: str) -> None:
+    result_record = tool_result("t1", {"decision": "accept", "source": "user_temporary"})
+    result_record["message"]["content"][0]["content"] = f"before{boundary}after"
+    lines = [json.dumps(r, ensure_ascii=False) for r in
+             (tool_use("m1", "t1"), result_record)]
+    assert boundary in lines[1]
+    path = tmp_path / "s.jsonl"
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    result = pc.count_transcript(path)
+    assert result["decisions_user_approved"] == 1
+    assert result["tool_uses_without_decision"] == 0
+
+
+def test_crlf_and_blank_lines_do_not_break_records() -> None:
+    line = json.dumps(tool_use("m1", "t1"))
+    assert len(pc.parse_records(f"{line}\r\n\r\n   \n{line}\r\n")) == 2

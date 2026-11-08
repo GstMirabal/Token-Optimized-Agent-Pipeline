@@ -79,6 +79,11 @@ def _blocks(record: dict) -> list[dict]:
 def parse_records(text: str) -> list[dict]:
     """Parse JSONL text, skipping lines that are not JSON objects.
 
+    Lines split only on `\\n`: `str.splitlines` would also cut on U+2028,
+    U+2029 and U+0085, which JSON allows raw inside a string. A trailing
+    `\\r` from CRLF input is stripped before parsing. Blank lines are
+    ignored without a warning.
+
     Args:
         text: transcript file contents.
 
@@ -86,7 +91,10 @@ def parse_records(text: str) -> list[dict]:
         list: parsed records in file order.
     """
     records = []
-    for line in text.splitlines():
+    for line in text.split("\n"):
+        line = line.rstrip("\r")
+        if not line.strip(" \t"):
+            continue
         try:
             record = json.loads(line)
         except json.JSONDecodeError:
