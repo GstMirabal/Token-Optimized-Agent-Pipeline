@@ -58,6 +58,7 @@ Tracking of atomic goals achieved during the session. Work units and execution o
     - `[x]` Deviation (plan D16): the orchestrator dispatched A-11, A-13, A-08 and A-01 together on its reading of a human question; no rule allowed it. Human decision 2026-11-04: keep the work once checked, return to the approved order.
     - `[x]` A-08 was held uncommitted: it contradicts `ADR-0003` (KI-059-3). Human decision 2026-11-04: unit A-14 creates the superseding `ADR-0021` first (plan D17), then A-08 commits; work units 48 → 49.
     - `[x]` Human decision 2026-11-04 (plan D18): `agents.md` allocated by risk; A-15, A-16, A-17 added before the A-12 commit; work units 49 → 52.
+    - `[x]` Deviation (`RA-13`), 2026-11-08: the orchestrator chained `make verify` and the B-07 commit in one command; `2d40946` landed with `make verify` at exit 2 on a stale `WORKFLOWS_STEP_MAP_GUIDE.md`. Closed by `35301fc`, committed after `make verify` exit 0 was observed.
 
 ---
 
