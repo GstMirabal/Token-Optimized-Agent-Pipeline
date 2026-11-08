@@ -135,6 +135,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 | QA Agent (Gate 1) | 13 | REJECTED | instructing | S2 | Range 01c0083..6043e7d plus the R12 fixes. All 9 commands exit 0; make verify 1540 passed. R12-2 and R12-1 assigned to Wave 1b; R12-3 fixed. R13-1 (S2, instructing), R13-2 (S2, instructing), R13-3 (S2, testifying); 3 S3. Detail: deadlock record, round 13. Rule 3: R13-1 and R13-3 are further occurrences of the round 8 N2 family. Rounds 3 to 13 are consecutive REJECTED. |
 | QA Agent (Gate 1) | 14 | REJECTED | charter | S1 | Range 3af48b5..fc377e3 plus R13 fixes. check_fix_reproduces exit 0; chains: 0; make verify 1602 passed; ruff, quality-audit exit 0. R13-1/2/3 closed. R14-1 (S1, charter), R14-2, R14-3 (S2, instructing); 3 S3. Rule 3: R14-1 is the silent-pass family. Rounds 3 to 14 consecutive REJECTED. |
 | QA Agent (Gate 1) | 15 | RECORD | testifying | S2 | Range fc377e3..HEAD plus R14 fixes. check_fix_reproduces exit 0; 1 chain, exit 0; make verify 1613 passed; ruff, quality-audit exit 0. R14-1/2/3 closed. R15-1, R15-2 (S2, testifying); 4 S3. First round since round 2 not REJECTED. |
+| QA Agent (Gate 1) | 16 | REJECTED | charter | S1 | Range f1d193f..f8cfac3. `--batches` schedules replaced I-08..I-10 as pending (S1); prompt_count omits subagent transcripts, baseline 78 vs 99 (S1); B-02 re-measure undone, B-06 not applied (S2); splitlines drops U+2028 records (S2); RA-14 docs on self-bridge stale (S2). fix replay 0, chains 0, verify 0, quality-audit 0. |
 | Tester Agent (Gate 2) | 1 | REJECTED | charter | S1 | Range `08c669c..c6c7987`, 1531 passed. Baseline on context size with cuts on `cache_read`: 50 of 52 cuts over 35 transcripts are not collapses, and the ratio that feeds the hard bound falls (synthetic 20x reads 2.5x). 3 more: `--resolve` alternatives diverge under Cursor (S2), hard bound and cut field untested (S2), census wording (S3). |
 | Tester Agent (Gate 2) | 2 | RECORD | testifying | S2 | Range c6c7987..8b84259, 1613 passed, make verify exit 0, zero regression. Round 1 S0-S2 findings closed. T2-1 (S2, testifying); 3 S3. |
 
@@ -152,6 +153,11 @@ One row per S0-S2 finding from QA Gate 1 round 13 on (plan D37). Check: the comm
 | 14 | R14-3 | S2 | `scripts/_current_sprint.py:15-16` | `grep -c "_current_sprint" scripts/loop_guard.py` → 0 at `fc377e3` |
 | 15 | R15-1 | S2 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` M-01 | `git show 61bc129:docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md \| grep -c "la conducta de referencia es"` → 1 |
 | 15 | R15-2 | S2 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` Remediation notes | at `61bc129`, the round 14 Remediation notes hold 3 commands against 9 for round 13 |
+| 16 | R16-1 | S1 | `scripts/check_task_scope.py:238` | `python3 scripts/check_task_scope.py --sprint-dir docs/sprints/059-core-pipeline --batches` at `f8cfac3` → a batch lists I-08 I-09 I-10, Status `replaced` |
+| 16 | R16-2 | S1 | `scripts/prompt_count.py:201` | `python3 scripts/prompt_count.py --session e9a7a9bf-bf5b-4800-bd46-edd6c8fc46c5 --json` at `f8cfac3` → `decisions_user_approved` 78; its `subagents/*.jsonl` hold 21 more |
+| 16 | R16-3 | S2 | `docs/sprints/059-core-pipeline/PROMPT_MEASUREMENT.md:33` | `grep -c "pending B-06" docs/sprints/059-core-pipeline/PROMPT_MEASUREMENT.md` → 1 at `f8cfac3`; `ls .claude/settings.json` → exit 1 |
+| 16 | R16-4 | S2 | `scripts/prompt_count.py:84` | a `tool_result` with a raw U+2028 and `permissionDecision` at `f8cfac3` → `decisions_user_approved` 0, `tool_uses_without_decision` 1 |
+| 16 | R16-5 | S2 | `docs/plans/README.md:57` | `grep -n "settings" docs/plans/README.md` at `f8cfac3` states the self-bridge writes no `.claude/settings.json`; `scripts/install.py:444` writes it |
 | 2 | T2-1 | S2 | `scripts/_current_sprint.py:118` | fixture with `059-aaa` valid and the anchor `path` naming `059-core-x` invalid: `python3 scripts/check_gate_log.py --current-sprint` → exit 0 |
 
 ### Remediation notes
@@ -248,6 +254,10 @@ Example (do not uncomment):
 | QA Agent (Gate 1) | 14 | `python3 scripts/check_role_artifact.py --role "QA Agent" --sprint-dir docs/sprints/059-core-pipeline` | 0 |
 | QA Agent (Gate 1) | 14 | `python3 scripts/check_task_scope.py --current-sprint` | 0 |
 | QA Agent (Gate 1) | 14 | `python3 skills/token-saver-auditor/scripts/audit_plan.py docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | 0 |
+| QA Agent (Gate 1) | 15 | `python3 scripts/check_fix_reproduces.py --range 605d3f1..3a3136b` | 0 |
+| QA Agent (Gate 1) | 15 | `make verify` | 0 |
+| QA Agent (Gate 1) | 15 | `python3 scripts/check_task_scope.py --sprint-dir docs/sprints/059-core-pipeline` | 0 |
+| QA Agent (Gate 1) | 15 | `python3 scripts/check_sprint_refs.py --current-sprint` | 0 |
 | Tester Agent (Gate 2) | 1 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider` | 0 |
 | Tester Agent (Gate 2) | 1 | `make verify` | 0 |
 
@@ -317,7 +327,7 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase (current)**: Phase 7, Wave 2: QA Gate 1 round 16 on `f1d193f..HEAD`, then Tester Gate 2 round 3, both fresh agents. On a rejection: no patch, re-plan with the human.
+**Next Phase (current)**: Phase 7, Wave 2, QA Gate 1 round 16 REJECTED (R16-1 to R16-5). No patch: re-plan with the human.
 
 **Next Phase (after QA Gate 1 round 13, superseded by the line above)**: Phase 6, Wave 1b, in the plan's order (plan D37). Then QA Gate 1 round 14 on `3af48b5..HEAD` and the R13 fixes, then Tester Gate 2 round 2, both fresh agents. On a rejection: no patch, re-plan with the human.
 
