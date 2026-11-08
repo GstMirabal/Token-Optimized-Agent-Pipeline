@@ -712,8 +712,8 @@ def install_nucleus(args: argparse.Namespace, install_cursor_bridge) -> int:
 
     Nucleus mode (`agents.md §5 nucleus_neutrality`): the full host bridge is
     refused, but the minimal self-bridge (commands, agents, constitution
-    import) is installed so the framework's own workflows are invocable while
-    developing it.
+    import, and the `sandbox` block in `.claude/settings.json`) is installed
+    so the framework's own workflows are invocable while developing it.
 
     **Every target ends the same way** — git hooks, then the lock. Neither is
     Cursor-specific: the hooks are the secret scanner, the `#[Sprint_ID]`
