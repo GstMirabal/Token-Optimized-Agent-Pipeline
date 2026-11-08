@@ -13,7 +13,7 @@ reads the same anchor as one run from the repository root. With no such ancestor
 the working directory is the root, as before.
 
 invoked_by: scripts/check_task_scope.py, scripts/check_gate_log.py,
-skills/token-saver-auditor/scripts/audit_plan.py, scripts/loop_guard.py.
+skills/token-saver-auditor/scripts/audit_plan.py, scripts/check_sprint_refs.py.
 
 Usage:
     from _current_sprint import CurrentSprintError, current_sprint_dir, project_root
