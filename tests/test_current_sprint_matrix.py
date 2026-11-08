@@ -25,6 +25,7 @@ TYPO_DIR = "docs/sprints/059-typo"
 MISSING_PATH_ARGS = {"audit_plan.py": [f"{TYPO_DIR}/IMPLEMENTATION_PLAN.md"]}
 LOOP = {"iteration": 0, "max_iterations": 5, "success_condition": "tests pass"}
 SPRINT = "docs/sprints/059-core-x"
+FOUR_DIGIT_DIR = "docs/sprints/1059-core-x"
 BAD_LOG = (
     "| Gate | Round | Verdict | Class | Notes |\n| :--- | :--- | :--- | :--- | :--- |\n"
     "| QA Agent (Gate 1) | 1 | MAYBE | charter | x |\n"
@@ -37,21 +38,21 @@ def _scripts() -> list[Path]:
     return sorted(p for p in candidates if FLAG.search(p.read_text(encoding="utf-8")))
 
 
-def _fixture(root: Path, anchor: str, with_dir: bool) -> Path:
+def _fixture(root: Path, anchor: str, with_dir: bool, sprint_path: str = SPRINT) -> Path:
     """A repository whose anchor text is ``anchor``; ``with_dir`` adds a failing sprint."""
     (root / ".git").mkdir()
     (root / "docs" / "sprints").mkdir(parents=True)
     (root / "docs" / "active_state.json").write_text(anchor, encoding="utf-8")
     if with_dir:
-        sprint = root / SPRINT
+        sprint = root / sprint_path
         sprint.mkdir()
         (sprint / "IMPLEMENTATION_PLAN.md").write_text("# empty plan\n", encoding="utf-8")
         (sprint / "SPRINT_LOG.md").write_text(BAD_LOG, encoding="utf-8")
     return root
 
 
-def _anchor(sprint_id: object) -> str:
-    return json.dumps({"current_sprint": {"id": sprint_id, "path": SPRINT}, "loop": LOOP})
+def _anchor(sprint_id: object, path: str = SPRINT) -> str:
+    return json.dumps({"current_sprint": {"id": sprint_id, "path": path}, "loop": LOOP})
 
 
 CASES = {
@@ -61,6 +62,7 @@ CASES = {
     "truncated_anchor": ('{"current_sprint": {"id": 59', False, "", None),
     "missing_path": (_anchor(59), True, "", "missing"),
     "numbered_parent": (_anchor(59), True, "", None),
+    "four_digit_id": (_anchor(1059, FOUR_DIGIT_DIR), True, "", None),
 }
 
 
@@ -76,7 +78,8 @@ def test_no_script_exits_0_on_a_broken_target(tmp_path: Path, script: Path, case
     if case == "numbered_parent":
         tmp_path = tmp_path / "005-dir" / "repo"
         tmp_path.mkdir(parents=True)
-    root = _fixture(tmp_path, anchor, with_dir)
+    sprint_path = FOUR_DIGIT_DIR if case == "four_digit_id" else SPRINT
+    root = _fixture(tmp_path, anchor, with_dir, sprint_path)
     if mode == "missing":
         tail = MISSING_PATH_ARGS.get(script.name, ["--sprint-dir", TYPO_DIR])
     else:

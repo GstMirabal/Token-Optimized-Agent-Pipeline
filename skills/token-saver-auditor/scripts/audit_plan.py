@@ -60,8 +60,7 @@ def current_sprint_plan(root: Path) -> Path | None:
     sprint_dir = current_sprint_dir(root)
     if sprint_dir is None:
         return None
-    match = re.match(r"(\d{3})-", sprint_dir.name)
-    if match is None or int(match.group(1)) < COST_FROM_SPRINT:
+    if int(sprint_dir.name.split("-", 1)[0]) < COST_FROM_SPRINT:
         return None
     plan = sprint_dir / "IMPLEMENTATION_PLAN.md"
     return plan if plan.is_file() else None
