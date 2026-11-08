@@ -208,7 +208,7 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | M-18 | `scripts/check_task_scope.py` | modify — `fix(` R16-1: `--batches` programa solo unidades con estado `⏳`; paired test en `tests/test_check_task_scope.py` | low | `implementer_agent` | ✅ `c5fbf5f` |
 | M-19 | `scripts/prompt_count.py` | modify — `fix(` R16-2: suma `<session>/subagents/*.jsonl` al recuento de la sesión; paired test en `tests/test_prompt_count.py` | medium | `implementer_agent` | ✅ `d534c04` |
 | M-20 | `scripts/prompt_count.py` | modify — tras M-19: `fix(` R16-4: parte el JSONL solo por `\n`; paired test en `tests/test_prompt_count.py` | low | `implementer_agent` | ✅ `10c8e1a` |
-| M-21 | `docs/plans/README.md` | modify — R16-5: declara que el self-bridge escribe `.claude/settings.json` con el bloque `sandbox`, y lo mismo en `docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md` | low | `doc_orchestrator` | ⏳ |
+| M-21 | `docs/plans/README.md` | modify — R16-5: declara que el self-bridge escribe `.claude/settings.json` con el bloque `sandbox`, y lo mismo en `docs/guides/AGENTS_SLASH_COMMANDS_GUIDE.md` | low | `doc_orchestrator` | ✅ `e6caffc` |
 | B-08 | `docs/sprints/059-core-pipeline/PROMPT_MEASUREMENT.md` | modify — tras M-20, B-06: R16-3: rehace la línea base con M-19 y M-20; el instalador del núcleo se ejecuta sobre este checkout (decisión humana 2026-11-08) y una sesión real bajo sandbox rellena `Re-measurement after B-06` | medium | `doc_orchestrator` | ⏳ |
 
 ### Wave 3 — Token economy en sesión (estudio, debate, decisión)
