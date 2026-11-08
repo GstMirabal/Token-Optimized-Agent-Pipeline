@@ -190,7 +190,7 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | M-13 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify — `fix(` R14-1: el id sale solo del directorio del sprint; paired test: caso `numbered_parent` en `tests/test_current_sprint_matrix.py` | low | `skill_architect` |
 | M-14 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify — R14-2: la fila M-01 enuncia la raíz y las omisiones de `scripts/_current_sprint.py` | low | `orchestrator` |
 | M-15 | `scripts/_current_sprint.py` | modify — R14-3: retira `scripts/loop_guard.py` de `invoked_by:` | low | `implementer_agent` |
-| M-16 | `scripts/check_task_scope.py` | modify — `fix(`: `sprint_id_from_dir` acepta un id de cualquier longitud; paired test: caso `four_digit_id` en `tests/test_current_sprint_matrix.py` | low | `implementer_agent` |
+| M-16 | `scripts/check_task_scope.py` | modify — `fix(`: `sprint_id_from_dir` acepta un id de cualquier longitud; paired test en `tests/test_check_task_scope.py` | low | `implementer_agent` |
 
 ### Wave 2 — Ritmo y autonomía (aceleran el resto del sprint)
 

@@ -96,10 +96,10 @@ Operation: the plan row of the same id (plan D37).
 | M-09 | `docs/standards/templates/SPRINT_LOG_TEMPLATE.md` | modify: plan M-09 (D37) | low | `doc_orchestrator` | sonnet | medium | ✅ `2979326` |
 | M-10 | `docs/standards/templates/AGENT_ASSIGNMENT_TEMPLATE.md` | modify: plan M-10 (D37) | low | `doc_orchestrator` | sonnet | medium | ✅ `0e1cf6c` |
 | M-11 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify: plan M-11 (D37) | low | `orchestrator` | sonnet | medium | ✅ `d988528` |
-| M-13 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify: plan M-13 | low | `skill_architect` | sonnet | medium | ⏳ |
-| M-14 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify: plan M-14 | low | `orchestrator` | sonnet | medium | ⏳ |
-| M-15 | `scripts/_current_sprint.py` | modify: plan M-15 | low | `implementer_agent` | sonnet | medium | ⏳ |
-| M-16 | `scripts/check_task_scope.py` | modify: plan M-16 | low | `implementer_agent` | sonnet | medium | ⏳ |
+| M-13 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify: plan M-13 | low | `skill_architect` | sonnet | medium | ✅ `851a15d`, `1b84de0` |
+| M-14 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify: plan M-14 | low | `orchestrator` | sonnet | medium | ✅ `17171a8` |
+| M-15 | `scripts/_current_sprint.py` | modify: plan M-15 | low | `implementer_agent` | sonnet | medium | ✅ `e0185d8` |
+| M-16 | `scripts/check_task_scope.py` | modify: plan M-16 | low | `implementer_agent` | sonnet | medium | ✅ `4f4ce82` |
 
 ### Wave 2 — Pace and autonomy
 
