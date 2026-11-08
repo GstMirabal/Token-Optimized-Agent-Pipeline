@@ -2,7 +2,7 @@
 
 ## Instrument
 
-Command: `python3 scripts/prompt_count.py --session <id> [--project <path>] --json`, at commit `4952195`.
+Command: `python3 scripts/prompt_count.py --session <id> [--project <path>] --json`, at commit `10c8e1a`.
 
 | Output key | Meaning |
 | :--- | :--- |
@@ -21,8 +21,8 @@ Measured 2026-11-08.
 
 | Session type | Session | `tool_use_total` | `decisions_user_approved` | `decisions_user_approved_once` | `decisions_by_config` | `decisions_other_source` | `tool_uses_without_decision` |
 | :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Nucleus | `e9a7a9bf` | 145 | 78 | 78 | 66 | 0 | 1 |
-| Host (host project) | — | 55 | 6 | 6 | 49 | 0 | 0 |
+| Nucleus | `e9a7a9bf` | 178 | 99 | 99 | 78 | 0 | 1 |
+| Host (host project) | — | 156 | 25 | 25 | 131 | 0 | 0 |
 
 The two sessions differ in length and task, so the rows are not comparable as a rate between them.
 
@@ -30,4 +30,6 @@ The two sessions differ in length and task, so the rows are not comparable as a 
 
 | Session type | Session | `tool_use_total` | `decisions_user_approved` | `decisions_user_approved_once` | `decisions_by_config` | `decisions_other_source` | `tool_uses_without_decision` |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| pending B-06 | — | — | — | — | — | — | — |
+| Nucleus (under sandbox) | `a84488fd` | 10 | 6 | 6 | 3 | 0 | 1 |
+
+The session had 10 tool uses when measured, so the row is not usable as a rate against the baseline.
