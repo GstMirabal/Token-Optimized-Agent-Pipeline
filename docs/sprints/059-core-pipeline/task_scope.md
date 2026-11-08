@@ -103,78 +103,78 @@ Operation: the plan row of the same id (plan D37).
 
 ### Wave 2 — Pace and autonomy
 
-| # | File | Operation | Risk | Assignee | Model | Effort | Status |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| M-17 | `scripts/_current_sprint.py` | modify: plan M-17 | low | `implementer_agent` | sonnet | medium | ✅ `92bb5e7` |
-| G-01 | `scripts/check_task_scope.py` | modify: add the `Depends on` column and a subcommand printing parallel batches (dependencies landed, disjoint files, at most 4); tests in `tests/test_check_task_scope.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| G-02 | `workflows/pipeline_workflow.md` | modify: after G-01, Phase 6 dispatches each batch in parallel with `isolation: "worktree"` and integrates in table order; after each batch the orchestrator removes every worktree and its branch (`git worktree remove`, `git branch -D`) and re-runs `check_task_scope.py` on `ai-sprint/[ID]`, exit 0, before the next batch; Phase 7 stays serial per wave (D11) | medium | `orchestrator` | sonnet | medium | ⏳ |
-| B-01 | `scripts/prompt_count.py` | create: count authorizations per session from transcripts, `--json`; test `tests/test_prompt_count.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| B-07 | `workflows/close_workflow.md` | modify: after B-01, advisory step running `python3 scripts/prompt_count.py --session <id> --json` on the closing session; RA-16 invoker of B-01 | low | `orchestrator` | sonnet | medium | ⏳ |
-| B-02 | `docs/sprints/059-core-pipeline/PROMPT_MEASUREMENT.md` | create: after B-01, baseline count for one real nucleus session and one genericized host session (RA-15); re-measure after B-06 | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| B-06 | `scripts/install.py` | modify: after B-02, `install_nucleus_bridge` installs the `sandbox` block with `autoAllowBashIfSandboxed: true`, no hooks and no `excludedCommands` (D12); new test `tests/test_install_nucleus_sandbox.py` | high | `implementer_agent` | sonnet | medium | ⏳ |
-| E-01 | `scripts/session_state.py` | modify: fix( SessionEnd `suspend` acts only when the hook session_id matches the anchor (KI-057-2); paired test `tests/test_session_end_hook.py`; reproduce first or RECORD | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| E-01c | `scripts/session_state.py` | modify: after E-01, fix( `suspend` between sprints (sealed sprint, session `IN_PROGRESS`) releases the session lock without touching the sealed sprint; paired test in `tests/test_session_state.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| # | File | Operation | Risk | Assignee | Model | Effort | Depends on | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| M-17 | `scripts/_current_sprint.py` | modify: plan M-17 | low | `implementer_agent` | sonnet | medium | - | ✅ `92bb5e7` |
+| G-01 | `scripts/check_task_scope.py` | modify: add the `Depends on` column and a subcommand printing parallel batches (dependencies landed, disjoint files, at most 4); tests in `tests/test_check_task_scope.py` | medium | `implementer_agent` | sonnet | medium | - | ✅ `21080e9` |
+| G-02 | `workflows/pipeline_workflow.md` | modify: after G-01, Phase 6 dispatches each batch in parallel with `isolation: "worktree"` and integrates in table order; after each batch the orchestrator removes every worktree and its branch (`git worktree remove`, `git branch -D`) and re-runs `check_task_scope.py` on `ai-sprint/[ID]`, exit 0, before the next batch; Phase 7 stays serial per wave (D11) | medium | `orchestrator` | sonnet | medium | G-01 | ⏳ |
+| B-01 | `scripts/prompt_count.py` | create: count authorizations per session from transcripts, `--json`; test `tests/test_prompt_count.py` | medium | `implementer_agent` | sonnet | medium | - | ⏳ |
+| B-07 | `workflows/close_workflow.md` | modify: after B-01, advisory step running `python3 scripts/prompt_count.py --session <id> --json` on the closing session; RA-16 invoker of B-01 | low | `orchestrator` | sonnet | medium | B-01 | ⏳ |
+| B-02 | `docs/sprints/059-core-pipeline/PROMPT_MEASUREMENT.md` | create: after B-01, baseline count for one real nucleus session and one genericized host session (RA-15); re-measure after B-06 | low | `doc_orchestrator` | sonnet | medium | B-01 | ⏳ |
+| B-06 | `scripts/install.py` | modify: after B-02, `install_nucleus_bridge` installs the `sandbox` block with `autoAllowBashIfSandboxed: true`, no hooks and no `excludedCommands` (D12); new test `tests/test_install_nucleus_sandbox.py` | high | `implementer_agent` | sonnet | medium | B-02 | ⏳ |
+| E-01 | `scripts/session_state.py` | modify: fix( SessionEnd `suspend` acts only when the hook session_id matches the anchor (KI-057-2); paired test `tests/test_session_end_hook.py`; reproduce first or RECORD | medium | `implementer_agent` | sonnet | medium | - | ⏳ |
+| E-01c | `scripts/session_state.py` | modify: after E-01, fix( `suspend` between sprints (sealed sprint, session `IN_PROGRESS`) releases the session lock without touching the sealed sprint; paired test in `tests/test_session_state.py` | medium | `implementer_agent` | sonnet | medium | E-01 | ⏳ |
 
 ### Wave 3 — In-session token economy
 
-| # | File | Operation | Risk | Assignee | Model | Effort | Status |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| A-18 | `scripts/session_cost.py` | modify: after A-01, before A-00, fix( `read_turns` counts each `message.id` once (D21); paired test in `tests/test_session_cost.py`, which also adds the missing type hints; `ratio` and cuts do not change over the real transcripts | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| A-00 | `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | create: D8 study with one table per piece and per mechanism with sources, context growth boot to close, real cost per unit for Sprints 056-058, whether the 15x hard bound stays valid with the baseline on context size (KI-059-9), 2-4 candidate methods (figures supplied by `token_economy_agent`) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-06 | `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | modify: after A-00, add a `Debate` section with options, objections and the human's decision, including the one on the 15x hard bound (KI-059-9) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-07 | `docs/decisions/ADR-0018-in-session-token-economy.md` | create: after A-06, the chosen method, confirming or replacing D2; leftovers go to KI-059-n | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
-| A-02 | `scripts/session_cost.py` | modify: after A-01 and A-07, feat( flag `--bound` (OK, SOFT, HARD, exit 0, D3) or the form ADR-0018 sets; test in `tests/test_session_cost.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| A-03 | `rules/token_economy.md` | modify: after A-07, section 3.1 in-session invoker (the D1 and D19 unit was corrected in the QA Gate 1 round 3 remediation) and the per-unit budget with planned suspend points (D14) | low | `rule_validator` | sonnet | medium | ⏳ |
-| H-01 | `config/unit_cost_estimates.json` | create: after A-07, estimate table by unit type and risk with the A-00 source and `measured_at` per figure (figures supplied by `token_economy_agent`) | low | `implementer_agent` | sonnet | medium | ⏳ |
-| H-02 | `scripts/check_task_scope.py` | modify: after G-01 and H-01, add `Est. cost` and `Suspend after` columns; accumulate cost in order and exit 2 when the cumulative projection passes soft (5x) with no earlier `Suspend after: yes` (D14); tests in `tests/test_check_task_scope.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| H-03 | `workflows/close_workflow.md` | modify: after H-01 and B-07, advisory step comparing each unit's measured cost (`session_cost.py --json`) with its `Est. cost`; RA-16 invoker of the `config/unit_cost_estimates.json` recalibration | low | `orchestrator` | sonnet | medium | ⏳ |
-| A-04 | `workflows/pipeline_workflow.md` | modify: after G-02, A-02 and H-02, Phase 4.3 fills `Est. cost` and `Suspend after`; Phase 6 runs the measurement per unit (RA-16 invoker of A-02), compares it with `Est. cost`, and runs `session_state.py suspend` at each `Suspend after: yes` | low | `orchestrator` | sonnet | medium | ⏳ |
+| # | File | Operation | Risk | Assignee | Model | Effort | Depends on | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| A-18 | `scripts/session_cost.py` | modify: after A-01, before A-00, fix( `read_turns` counts each `message.id` once (D21); paired test in `tests/test_session_cost.py`, which also adds the missing type hints; `ratio` and cuts do not change over the real transcripts | medium | `implementer_agent` | sonnet | medium | A-01 | ⏳ |
+| A-00 | `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | create: D8 study with one table per piece and per mechanism with sources, context growth boot to close, real cost per unit for Sprints 056-058, whether the 15x hard bound stays valid with the baseline on context size (KI-059-9), 2-4 candidate methods (figures supplied by `token_economy_agent`) | medium | `doc_orchestrator` | sonnet | medium | A-18 | ⏳ |
+| A-06 | `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | modify: after A-00, add a `Debate` section with options, objections and the human's decision, including the one on the 15x hard bound (KI-059-9) | low | `doc_orchestrator` | sonnet | medium | A-00 | ⏳ |
+| A-07 | `docs/decisions/ADR-0018-in-session-token-economy.md` | create: after A-06, the chosen method, confirming or replacing D2; leftovers go to KI-059-n | medium | `doc_orchestrator` | sonnet | medium | A-06 | ⏳ |
+| A-02 | `scripts/session_cost.py` | modify: after A-01 and A-07, feat( flag `--bound` (OK, SOFT, HARD, exit 0, D3) or the form ADR-0018 sets; test in `tests/test_session_cost.py` | medium | `implementer_agent` | sonnet | medium | A-01, A-07 | ⏳ |
+| A-03 | `rules/token_economy.md` | modify: after A-07, section 3.1 in-session invoker (the D1 and D19 unit was corrected in the QA Gate 1 round 3 remediation) and the per-unit budget with planned suspend points (D14) | low | `rule_validator` | sonnet | medium | A-07 | ⏳ |
+| H-01 | `config/unit_cost_estimates.json` | create: after A-07, estimate table by unit type and risk with the A-00 source and `measured_at` per figure (figures supplied by `token_economy_agent`) | low | `implementer_agent` | sonnet | medium | A-07 | ⏳ |
+| H-02 | `scripts/check_task_scope.py` | modify: after G-01 and H-01, add `Est. cost` and `Suspend after` columns; accumulate cost in order and exit 2 when the cumulative projection passes soft (5x) with no earlier `Suspend after: yes` (D14); tests in `tests/test_check_task_scope.py` | medium | `implementer_agent` | sonnet | medium | G-01, H-01 | ⏳ |
+| H-03 | `workflows/close_workflow.md` | modify: after H-01 and B-07, advisory step comparing each unit's measured cost (`session_cost.py --json`) with its `Est. cost`; RA-16 invoker of the `config/unit_cost_estimates.json` recalibration | low | `orchestrator` | sonnet | medium | H-01, B-07 | ⏳ |
+| A-04 | `workflows/pipeline_workflow.md` | modify: after G-02, A-02 and H-02, Phase 4.3 fills `Est. cost` and `Suspend after`; Phase 6 runs the measurement per unit (RA-16 invoker of A-02), compares it with `Est. cost`, and runs `session_state.py suspend` at each `Suspend after: yes` | low | `orchestrator` | sonnet | medium | G-02, A-02, H-02 | ⏳ |
 
 ### Wave 4 — Sandbox measurement
 
-| # | File | Operation | Risk | Assignee | Model | Effort | Status |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| B-03 | `scripts/py_compile_tree.py` | modify: compile without writing `.pyc` (D5); test in `tests/test_verify_py_compile.py` | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| B-04 | `skills/mass-standardizer/scripts/generate_manifest.py` | modify: add `--check` (exit 0 on match, exit 2 on drift, `skills/manifest_skills.json` bytes unchanged) (D5); test in `tests/test_mass_standardizer.py` | medium | `skill_architect` | sonnet | medium | ⏳ |
-| B-05 | `Makefile` | modify: after B-03 and B-04, `verify` uses both no-write modes | low | `implementer_agent` | sonnet | medium | ⏳ |
-| C-01 | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` | create: RA-19 re-measurement for the current CLI (untested E16 members, subtrees inferred by containment, `Edit(/.git/modules/.agents/**)`, D-8), including the nucleus with the B-06 sandbox; `devops_agent` measures dispatched with `model: sonnet` (escalated from mechanical for high risk) and hands over literal output | high | `doc_orchestrator` | sonnet | medium | ⏳ |
-| C-02 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify: after C-01 and A-02, `F-055-N1` closed if C-01 measures its vector with no agent-writable entry point, otherwise open citing the C-01 measurement; `F-116-N1` marked closed citing the A-01 commits (`ef490cd`, `919d4f2`) and `F-116-N2` citing the A-02 commit | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| # | File | Operation | Risk | Assignee | Model | Effort | Depends on | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| B-03 | `scripts/py_compile_tree.py` | modify: compile without writing `.pyc` (D5); test in `tests/test_verify_py_compile.py` | medium | `implementer_agent` | sonnet | medium | - | ⏳ |
+| B-04 | `skills/mass-standardizer/scripts/generate_manifest.py` | modify: add `--check` (exit 0 on match, exit 2 on drift, `skills/manifest_skills.json` bytes unchanged) (D5); test in `tests/test_mass_standardizer.py` | medium | `skill_architect` | sonnet | medium | - | ⏳ |
+| B-05 | `Makefile` | modify: after B-03 and B-04, `verify` uses both no-write modes | low | `implementer_agent` | sonnet | medium | B-03, B-04 | ⏳ |
+| C-01 | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` | create: RA-19 re-measurement for the current CLI (untested E16 members, subtrees inferred by containment, `Edit(/.git/modules/.agents/**)`, D-8), including the nucleus with the B-06 sandbox; `devops_agent` measures dispatched with `model: sonnet` (escalated from mechanical for high risk) and hands over literal output | high | `doc_orchestrator` | sonnet | medium | - | ⏳ |
+| C-02 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify: after C-01 and A-02, `F-055-N1` closed if C-01 measures its vector with no agent-writable entry point, otherwise open citing the C-01 measurement; `F-116-N1` marked closed citing the A-01 commits (`ef490cd`, `919d4f2`) and `F-116-N2` citing the A-02 commit | low | `doc_orchestrator` | sonnet | medium | C-01, A-02 | ⏳ |
 
 ### Wave 5 — Regime
 
-| # | File | Operation | Risk | Assignee | Model | Effort | Status |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| D-01 | `docs/decisions/ADR-0019-sandbox-regime.md` | create: after B-02 and C-01, decide RA-09, the gh row, D-12, the local DB route (KI-057-1) and hooks in the nucleus (D6, D12) | high | `doc_orchestrator` | sonnet | medium | ⏳ |
-| D-02 | `agents.md` | modify: after A-12 and D-01, amend RA-09 and section 2 graph_sync (D-10); `wc -c agents.md` at most 20000 after the change, new detail goes to `rules/project_topology.md` (D-03) | high | `rule_validator` | sonnet | medium | ⏳ |
-| D-03 | `rules/project_topology.md` | modify: after A-10 and D-01, section 4 gh row (D-3), D-1, D-4, cost of `git -C .agents fetch` (QA2-3) | medium | `rule_validator` | sonnet | medium | ⏳ |
-| D-04 | `claude/settings.hooks.json` | modify: after D-01, `sandbox` block local DB route (KI-057-1) only if ADR-0019 approves a measured route, otherwise RECORD | high | `implementer_agent` | sonnet | medium | ⏳ |
-| E-01b | `claude/settings.hooks.json` | modify: after E-01, D-01 and D-04 (same file as D-04, serial), the SessionEnd command resolves its path in nucleus and host if ADR-0019 approves hooks in the nucleus (D13), otherwise RECORD and manual `suspend` stays documented | medium | `implementer_agent` | sonnet | medium | ⏳ |
+| # | File | Operation | Risk | Assignee | Model | Effort | Depends on | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| D-01 | `docs/decisions/ADR-0019-sandbox-regime.md` | create: after B-02 and C-01, decide RA-09, the gh row, D-12, the local DB route (KI-057-1) and hooks in the nucleus (D6, D12) | high | `doc_orchestrator` | sonnet | medium | B-02, C-01 | ⏳ |
+| D-02 | `agents.md` | modify: after A-12 and D-01, amend RA-09 and section 2 graph_sync (D-10); `wc -c agents.md` at most 20000 after the change, new detail goes to `rules/project_topology.md` (D-03) | high | `rule_validator` | sonnet | medium | A-12, D-01 | ⏳ |
+| D-03 | `rules/project_topology.md` | modify: after A-10 and D-01, section 4 gh row (D-3), D-1, D-4, cost of `git -C .agents fetch` (QA2-3) | medium | `rule_validator` | sonnet | medium | A-10, D-01 | ⏳ |
+| D-04 | `claude/settings.hooks.json` | modify: after D-01, `sandbox` block local DB route (KI-057-1) only if ADR-0019 approves a measured route, otherwise RECORD | high | `implementer_agent` | sonnet | medium | D-01 | ⏳ |
+| E-01b | `claude/settings.hooks.json` | modify: after E-01, D-01 and D-04 (same file as D-04, serial), the SessionEnd command resolves its path in nucleus and host if ADR-0019 approves hooks in the nucleus (D13), otherwise RECORD and manual `suspend` stays documented | medium | `implementer_agent` | sonnet | medium | E-01, D-01, D-04 | ⏳ |
 
 ### Wave 6 — Hardening, roles and Sprint 058 residues
 
-| # | File | Operation | Risk | Assignee | Model | Effort | Status |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| E-02 | `claude/mcp.json` | modify: remote GitHub MCP server with OAuth, no token in a file | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| E-03 | `.github/workflows/ci.yml` | modify: pin `actions/checkout`, `actions/setup-python`, `errata-ai/vale-action` by SHA | low | `implementer_agent` | sonnet | medium | ⏳ |
-| F-01 | `docs/decisions/ADR-0020-owner-writer-dispatch.md` | create: C-7, when the owner writes a trivial artifact without a dispatch (amends ADR-0017) | medium | `doc_orchestrator` | sonnet | medium | ⏳ |
-| F-02 | `config/artifact_registry.json` | modify: after F-01, if ADR-0020 is approved register the owner-writes exception with the condition the ADR sets and `check_role_artifact.py` exit 0; otherwise RECORD with no change | medium | `implementer_agent` | sonnet | medium | ⏳ |
-| I-01 | `scripts/check_absolute_paths.py` | modify: fix( KI-058-1, also scan the index and untracked files; new paired test `tests/test_check_absolute_paths.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
-| I-02 | `scripts/upstream_outbox.py` | modify: fix( KI-058-4, `read_text_file` goes through `read_regular_bytes` so a FIFO exits 2; paired test with a FIFO in `tests/test_upstream_outbox.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
-| I-03 | `scripts/upstream_outbox.py` | modify: after I-02, fix( KI-058-5 a, `deltas` exits 2 on a missing `--rules` directory; paired test in `tests/test_upstream_outbox.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
-| I-04 | `scripts/upstream_outbox.py` | modify: after I-03, fix( KI-058-5 b, `export --out` to a missing directory exits 2 with a message; paired test in `tests/test_upstream_outbox.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
-| I-05 | `scripts/upstream_outbox.py` | modify: after I-04, fix( KI-058-5 c, `PIN_PATTERN` accepts ASCII digits only; paired test with non-ASCII digits in `tests/test_upstream_outbox.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
-| I-06 | `hooks/on_commit.py` | modify: fix( KI-058-5 d, an uppercase `FIX:` subject is treated as `fix(`; paired test in `tests/test_on_commit.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
-| I-07 | `scripts/check_fix_reproduces.py` | modify: fix( KI-058-5 d, same uppercase `FIX:` case in the reproduction check; paired test in `tests/test_check_fix_reproduces.py` | low | `implementer_agent` | sonnet | medium | ⏳ |
-| I-08 | `scripts/check_task_scope.py` | modify: fix( D36: `--current-sprint` exits 2 when the anchor names a sprint whose directory is missing; `current_sprint_dir` separates that case from an absent anchor; paired test in `tests/test_check_task_scope.py` | low | `implementer_agent` | sonnet | medium | replaced by M-02 (D37) |
-| I-09 | `scripts/check_gate_log.py` | modify: after I-08: fix( D36: exit 2 on a missing `--sprint-dir` and on the I-08 case under `--current-sprint`; paired test in `tests/test_check_gate_log.py` | low | `implementer_agent` | sonnet | medium | replaced by M-03 (D37) |
-| I-10 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify: after I-08: fix( D36: the I-08 case under `--current-sprint` exits 2; paired test beside the `audit_plan.py` tests | low | `skill_architect` | sonnet | medium | replaced by M-04 (D37) |
+| # | File | Operation | Risk | Assignee | Model | Effort | Depends on | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| E-02 | `claude/mcp.json` | modify: remote GitHub MCP server with OAuth, no token in a file | medium | `implementer_agent` | sonnet | medium | - | ⏳ |
+| E-03 | `.github/workflows/ci.yml` | modify: pin `actions/checkout`, `actions/setup-python`, `errata-ai/vale-action` by SHA | low | `implementer_agent` | sonnet | medium | - | ⏳ |
+| F-01 | `docs/decisions/ADR-0020-owner-writer-dispatch.md` | create: C-7, when the owner writes a trivial artifact without a dispatch (amends ADR-0017) | medium | `doc_orchestrator` | sonnet | medium | - | ⏳ |
+| F-02 | `config/artifact_registry.json` | modify: after F-01, if ADR-0020 is approved register the owner-writes exception with the condition the ADR sets and `check_role_artifact.py` exit 0; otherwise RECORD with no change | medium | `implementer_agent` | sonnet | medium | F-01 | ⏳ |
+| I-01 | `scripts/check_absolute_paths.py` | modify: fix( KI-058-1, also scan the index and untracked files; new paired test `tests/test_check_absolute_paths.py` | low | `implementer_agent` | sonnet | medium | - | ⏳ |
+| I-02 | `scripts/upstream_outbox.py` | modify: fix( KI-058-4, `read_text_file` goes through `read_regular_bytes` so a FIFO exits 2; paired test with a FIFO in `tests/test_upstream_outbox.py` | low | `implementer_agent` | sonnet | medium | - | ⏳ |
+| I-03 | `scripts/upstream_outbox.py` | modify: after I-02, fix( KI-058-5 a, `deltas` exits 2 on a missing `--rules` directory; paired test in `tests/test_upstream_outbox.py` | low | `implementer_agent` | sonnet | medium | I-02 | ⏳ |
+| I-04 | `scripts/upstream_outbox.py` | modify: after I-03, fix( KI-058-5 b, `export --out` to a missing directory exits 2 with a message; paired test in `tests/test_upstream_outbox.py` | low | `implementer_agent` | sonnet | medium | I-03 | ⏳ |
+| I-05 | `scripts/upstream_outbox.py` | modify: after I-04, fix( KI-058-5 c, `PIN_PATTERN` accepts ASCII digits only; paired test with non-ASCII digits in `tests/test_upstream_outbox.py` | low | `implementer_agent` | sonnet | medium | I-04 | ⏳ |
+| I-06 | `hooks/on_commit.py` | modify: fix( KI-058-5 d, an uppercase `FIX:` subject is treated as `fix(`; paired test in `tests/test_on_commit.py` | low | `implementer_agent` | sonnet | medium | - | ⏳ |
+| I-07 | `scripts/check_fix_reproduces.py` | modify: fix( KI-058-5 d, same uppercase `FIX:` case in the reproduction check; paired test in `tests/test_check_fix_reproduces.py` | low | `implementer_agent` | sonnet | medium | - | ⏳ |
+| I-08 | `scripts/check_task_scope.py` | modify: fix( D36: `--current-sprint` exits 2 when the anchor names a sprint whose directory is missing; `current_sprint_dir` separates that case from an absent anchor; paired test in `tests/test_check_task_scope.py` | low | `implementer_agent` | sonnet | medium | - | replaced by M-02 (D37) |
+| I-09 | `scripts/check_gate_log.py` | modify: after I-08: fix( D36: exit 2 on a missing `--sprint-dir` and on the I-08 case under `--current-sprint`; paired test in `tests/test_check_gate_log.py` | low | `implementer_agent` | sonnet | medium | - | replaced by M-03 (D37) |
+| I-10 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify: after I-08: fix( D36: the I-08 case under `--current-sprint` exits 2; paired test beside the `audit_plan.py` tests | low | `skill_architect` | sonnet | medium | - | replaced by M-04 (D37) |
 
 ### Close
 
-| # | File | Operation | Risk | Assignee | Model | Effort | Status |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| Z-01 | `CHANGELOG.md` | modify: add the sprint entry under `[Unreleased]`, citing `host:F-116-N1` and `host:F-116-N2` | low | `doc_orchestrator` | sonnet | medium | ⏳ |
-| Z-02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify: close or re-route KI-056-1, KI-056-6, KI-057-1, KI-057-2, KI-058-1, KI-058-3, KI-058-4, KI-058-5; keep KI-058-2 and the conditional Out of scope items with their unblock condition; add new KI-059-n, including one for proposal E points 3-5 (P11); route or close with evidence each KI-059-n row of the `SPRINT_LOG.md` table that stays open; that table is the list (plan D36) | low | `doc_orchestrator` | sonnet | medium | ⏳ |
+| # | File | Operation | Risk | Assignee | Model | Effort | Depends on | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| Z-01 | `CHANGELOG.md` | modify: add the sprint entry under `[Unreleased]`, citing `host:F-116-N1` and `host:F-116-N2` | low | `doc_orchestrator` | sonnet | medium | - | ⏳ |
+| Z-02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify: close or re-route KI-056-1, KI-056-6, KI-057-1, KI-057-2, KI-058-1, KI-058-3, KI-058-4, KI-058-5; keep KI-058-2 and the conditional Out of scope items with their unblock condition; add new KI-059-n, including one for proposal E points 3-5 (P11); route or close with evidence each KI-059-n row of the `SPRINT_LOG.md` table that stays open; that table is the list (plan D36) | low | `doc_orchestrator` | sonnet | medium | - | ⏳ |
 
 ## Jurisdiction check (serial or concurrent)
 
