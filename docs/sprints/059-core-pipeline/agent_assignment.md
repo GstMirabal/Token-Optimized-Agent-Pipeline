@@ -104,6 +104,7 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | M-13 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify | sequential | `skill_architect` | N/A | `agents/skill_architect.md` |
 | M-14 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
 | M-15 | `scripts/_current_sprint.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| M-16 | `scripts/check_task_scope.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 
 ### Wave 2 — pace and autonomy
 

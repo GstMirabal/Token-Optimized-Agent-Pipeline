@@ -171,7 +171,7 @@ las unidades sin dependencia pendiente van en lotes paralelos (D11). La wave 1 r
 
 ### Wave 1b — Método: una casa por hecho y afirmaciones con comprobación (D37)
 
-Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04, M-12, M-05 a M-10, M-13 a M-15.
+Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04, M-12, M-05 a M-10, M-13 a M-16.
 
 | # | File | Operation | Risk | Assignee (proposed) |
 | :--- | :--- | :--- | :--- | :--- |
@@ -190,6 +190,7 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | M-13 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify — `fix(` R14-1: el id sale solo del directorio del sprint; paired test: caso `numbered_parent` en `tests/test_current_sprint_matrix.py` | low | `skill_architect` |
 | M-14 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify — R14-2: la fila M-01 enuncia la raíz y las omisiones de `scripts/_current_sprint.py` | low | `orchestrator` |
 | M-15 | `scripts/_current_sprint.py` | modify — R14-3: retira `scripts/loop_guard.py` de `invoked_by:` | low | `implementer_agent` |
+| M-16 | `scripts/check_task_scope.py` | modify — `fix(`: `sprint_id_from_dir` acepta un id de cualquier longitud; paired test: caso `four_digit_id` en `tests/test_current_sprint_matrix.py` | low | `implementer_agent` |
 
 ### Wave 2 — Ritmo y autonomía (aceleran el resto del sprint)
 
@@ -295,7 +296,7 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 107 (D37: 92 + 15 de la wave 1b; I-08 a I-10 siguen contadas como sustituidas) | Count of rows in Work tables |
+| Work units | 108 (D37: 92 + 16 de la wave 1b; I-08 a I-10 siguen contadas como sustituidas) | Count of rows in Work tables |
 | Subagents dispatched | lotes de hasta 4 en paralelo desde la wave 3 (D11), más QA + Tester por wave | `agent_assignment.md` |
 | Session ratio (2026-11-08, QA rondas 12 y 13, wave 1b) | Sesión `e9a7a9bf`, ciclo único: 5.4× durante la sesión, sobre soft (5×); `suspend` antes de QA Gate 1 ronda 14 | `python3 -I scripts/session_cost.py --session e9a7a9bf-bf5b-4800-bd46-edd6c8fc46c5 --json` |
 | Session ratio (2026-11-07, QA rondas 8 a 11) | Sesión `93b61aea`, ciclo único: lectura de 5.0× durante la sesión, en soft (5×); el valor final lo da el comando. Quedan 44 unidades en 5 waves más cierre y los gates de la wave 1; delegación `native`; `suspend` antes de QA Gate 1 ronda 12 | `python3 -I scripts/session_cost.py --session 93b61aea-d168-4293-97f5-340681b5c33a --json` |
