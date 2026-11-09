@@ -72,6 +72,13 @@ def project_slug(path: Path) -> str:
 def read_turns(transcript: Path) -> tuple[list[dict], int]:
     """Every usage-bearing turn in a transcript, and how many were synthetic.
 
+    Claude Code writes one API message across several records that share
+    `message.id`, so each id is counted once, from its first record, and turns
+    keep the order of first appearance. A record with no `id` has nothing to
+    deduplicate on and is counted once per record. Records of one id carried
+    identical usage in every transcript measured, so which one represents the
+    message does not change a total.
+
     Args:
         transcript: path to a `<session-uid>.jsonl` file.
 
@@ -80,6 +87,7 @@ def read_turns(transcript: Path) -> tuple[list[dict], int]:
             count of `<synthetic>` entries skipped).
     """
     turns, skipped = [], 0
+    seen: set[str] = set()
     for line in transcript.read_text(encoding="utf-8", errors="replace").splitlines():
         try:
             record = json.loads(line)
@@ -94,6 +102,11 @@ def read_turns(transcript: Path) -> tuple[list[dict], int]:
             # Not an API call: counting these inflates every total.
             skipped += 1
             continue
+        message_id = message.get("id")
+        if message_id in seen:
+            continue
+        if message_id:
+            seen.add(message_id)
         turn = {"model": model}
         turn.update({field: usage.get(field, 0) for field in FIELDS})
         turns.append(turn)
