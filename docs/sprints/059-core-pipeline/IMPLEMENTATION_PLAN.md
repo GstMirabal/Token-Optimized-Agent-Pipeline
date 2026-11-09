@@ -286,7 +286,7 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | K-03 | `tests/test_detect_drift.py` | modify — `KI-059-6`: el docstring de Gate 2 finding 1 deja de citar `agents.md §4 feedback_upstream` | low | `implementer_agent` | ⏳ |
 | K-04 | `agents.md` | modify — `KI-059-6`: `Risk-free` pasa a `Code-free` y la fila `devops_agent` nombra `root` `scripts/hooks/tests`; `wc -c agents.md` ≤ 20000 | low | `rule_validator` | ⏳ |
 | L-01 | `scripts/graph_update.py` | create — D39: ejecuta la reconstrucción AST de graphify en serie, con `--force` opcional; exit distinto de 0 si la reconstrucción falla o si graphify ya no expone `_PARALLEL_THRESHOLD` o `_rebuild_code`; paired test `tests/test_graph_update.py` | medium | `implementer_agent` | ⏳ |
-| L-02 | `Makefile` | modify — D39: `graphify-rebuild` invoca `scripts/graph_update.py --force`; companion: `tests/test_makefile_graphify.py` sigue exigiendo `-I` | low | `implementer_agent` | ⏳ |
+| L-02 | `Makefile` | modify — D39: `graphify-update` invoca `scripts/graph_update.py` y `graphify-rebuild` lo mismo con `--force`; companion: `tests/test_makefile_graphify.py` sigue exigiendo `-I` | low | `implementer_agent` | ⏳ |
 | L-03 | `rules/graphify.md` | modify — D39: la forma para agentes de `graphify update .` pasa a `scripts/graph_update.py`; el aviso `graph unavailable` queda solo para un exit distinto de 0 de ese script | low | `rule_validator` | ⏳ |
 | L-04 | `rules/project_topology.md` | modify — D39: la sección 4 añade la fila del fallo `SC_SEM_NSEMS_MAX` con su forma sancionada | low | `rule_validator` | ⏳ |
 | L-05 | `agents.md` | modify — D39: `graph_sync` nombra `scripts/graph_update.py`; `wc -c agents.md` ≤ 20000 | low | `rule_validator` | ⏳ |
