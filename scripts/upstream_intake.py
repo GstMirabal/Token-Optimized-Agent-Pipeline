@@ -268,7 +268,7 @@ def child_command() -> list[str]:
     Returns:
         list[str]: Isolated interpreter, this script and ``CHILD_FLAG``.
     """
-    return [sys.executable, "-I", str(Path(__file__).resolve()), CHILD_FLAG]
+    return [sys.executable, "-I", "-B", str(Path(__file__).resolve()), CHILD_FLAG]
 
 
 class ChildError(Exception):
