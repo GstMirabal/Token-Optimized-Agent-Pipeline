@@ -393,3 +393,94 @@ def test_the_skills_own_root_skill_md_is_not_mistaken_for_a_vendored_one(tmp_pat
     (skill / "SKILL.md").write_text(VENDORED_BODY)
 
     assert ms.vendored_skill_md(skill) is None
+
+
+GENERATOR = ROOT / "skills" / "mass-standardizer" / "scripts" / "generate_manifest.py"
+
+
+def make_library(tmp_path: Path) -> Path:
+    """A one-skill `skills/` library under `tmp_path`, with no manifest yet."""
+    skill = tmp_path / "skills" / "alpha"
+    skill.mkdir(parents=True)
+    (skill / "SKILL.md").write_text("---\nname: alpha\ndescription: First.\n---\n\n# Alpha\n")
+    return tmp_path
+
+
+def run_generator(cwd: Path, *args: str) -> subprocess.CompletedProcess:
+    """Runs generate_manifest.py as a subprocess with `cwd` as the library root."""
+    return subprocess.run([sys.executable, str(GENERATOR), *args], cwd=cwd,
+                          capture_output=True, text=True, check=False)
+
+
+def test_check_passes_after_a_normal_run_and_leaves_the_bytes(tmp_path):
+    lib = make_library(tmp_path)
+    assert run_generator(lib).returncode == 0
+    manifest = lib / "skills" / "manifest_skills.json"
+    before, mtime = manifest.read_bytes(), manifest.stat().st_mtime_ns
+
+    result = run_generator(lib, "--check")
+
+    assert result.returncode == 0
+    assert manifest.read_bytes() == before
+    assert manifest.stat().st_mtime_ns == mtime
+
+
+def test_check_detects_a_changed_description_and_a_rerun_clears_it(tmp_path):
+    lib = make_library(tmp_path)
+    run_generator(lib)
+    manifest = lib / "skills" / "manifest_skills.json"
+    before = manifest.read_bytes()
+    (lib / "skills" / "alpha" / "SKILL.md").write_text(
+        "---\nname: alpha\ndescription: Changed.\n---\n")
+
+    result = run_generator(lib, "--check")
+
+    assert result.returncode == 2
+    assert "manifest_skills.json" in result.stderr
+    assert "generate_manifest.py" in result.stderr
+    assert manifest.read_bytes() == before
+    assert run_generator(lib).returncode == 0
+    assert run_generator(lib, "--check").returncode == 0
+
+
+def test_check_is_byte_level_so_a_whitespace_edit_fails(tmp_path):
+    lib = make_library(tmp_path)
+    run_generator(lib)
+    manifest = lib / "skills" / "manifest_skills.json"
+    edited = manifest.read_bytes() + b"\n"
+    manifest.write_bytes(edited)
+
+    assert run_generator(lib, "--check").returncode == 2
+    assert manifest.read_bytes() == edited
+
+
+def test_check_with_no_manifest_exits_2_and_creates_nothing(tmp_path):
+    lib = make_library(tmp_path)
+
+    result = run_generator(lib, "--check")
+
+    assert result.returncode == 2
+    assert not (lib / "skills" / "manifest_skills.json").exists()
+
+
+def test_check_with_invalid_json_exits_2_without_a_traceback(tmp_path):
+    lib = make_library(tmp_path)
+    manifest = lib / "skills" / "manifest_skills.json"
+    manifest.write_bytes(b"{not json")
+
+    result = run_generator(lib, "--check")
+
+    assert result.returncode == 2
+    assert "Traceback" not in result.stderr
+    assert manifest.read_bytes() == b"{not json"
+
+
+def test_check_with_a_skill_lacking_frontmatter_exits_1(tmp_path):
+    lib = make_library(tmp_path)
+    run_generator(lib)
+    (lib / "skills" / "alpha" / "SKILL.md").write_text("# no frontmatter\n")
+
+    result = run_generator(lib, "--check")
+
+    assert result.returncode == 1
+    assert "missing name/description" in result.stderr
