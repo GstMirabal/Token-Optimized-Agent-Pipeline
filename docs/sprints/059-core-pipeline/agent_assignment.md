@@ -168,6 +168,7 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | B-03 | `scripts/py_compile_tree.py` | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | B-04 | `skills/mass-standardizer/scripts/generate_manifest.py` | modify | parallel | `skill_architect` | N/A | `agents/skill_architect.md` |
 | B-05 | `Makefile` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| B-16 | `Makefile` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | C-01 | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | C-02 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 

@@ -316,6 +316,8 @@ Example (do not uncomment):
 
 ---
 
+Bytecode written by `make verify` (plan D41, unit B-16), measured after B-05 at `921db7d`: with the 29 `__pycache__` directories purged, `make verify` exited 0 and wrote 138 `.pyc` files (78 `tests/`, 50 `scripts/`, 6 `hooks/`, 4 `skills/`), invisible to `git status` because git ignores them. A read-only copy of `scripts/_root.py` and `scripts/py_compile_tree.py` imported and ran with exit 0 and wrote 0 `.pyc`; the full `make verify` over a write-protected tree was not measured. Human decision 2026-11-09: export `PYTHONDONTWRITEBYTECODE=1` in `verify` instead of narrowing D5.
+
 ## 🛑 Abort Criteria
 
 `principal_agent` measures each numbered item of the plan's `## Abort criterion` at
