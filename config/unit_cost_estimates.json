@@ -1,0 +1,151 @@
+{
+  "unit": "fresh tokens",
+  "formula": "input + output + cache_creation",
+  "attribution_rule": "rule C (TOKEN_ECONOMY_STUDY.md section 6.4)",
+  "groups": {
+    "create/doc": {
+      "n": 4,
+      "estimate_fresh": 115354,
+      "min_fresh": 34705,
+      "max_fresh": 152885,
+      "source": "docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md section 6.5",
+      "measured_at": "2026-11-09"
+    },
+    "create/script": {
+      "n": 15,
+      "estimate_fresh": 17087,
+      "min_fresh": 1025,
+      "max_fresh": 150126,
+      "source": "docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md section 6.5",
+      "measured_at": "2026-11-09"
+    },
+    "modify/doc": {
+      "n": 33,
+      "estimate_fresh": 3753,
+      "min_fresh": 1005,
+      "max_fresh": 283578,
+      "source": "docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md section 6.5",
+      "measured_at": "2026-11-09"
+    },
+    "modify/rule": {
+      "n": 41,
+      "estimate_fresh": 4883,
+      "min_fresh": 676,
+      "max_fresh": 179498,
+      "source": "docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md section 6.5",
+      "measured_at": "2026-11-09"
+    },
+    "modify/script": {
+      "n": 87,
+      "estimate_fresh": 10101,
+      "min_fresh": 1005,
+      "max_fresh": 637749,
+      "source": "docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md section 6.5",
+      "measured_at": "2026-11-09"
+    },
+    "risk high": {
+      "n": 22,
+      "estimate_fresh": 54797,
+      "min_fresh": 1025,
+      "max_fresh": 210567,
+      "source": "docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md section 6.5",
+      "measured_at": "2026-11-09"
+    },
+    "risk medium": {
+      "n": 53,
+      "estimate_fresh": 10101,
+      "min_fresh": 676,
+      "max_fresh": 637749,
+      "source": "docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md section 6.5",
+      "measured_at": "2026-11-09"
+    },
+    "risk low": {
+      "n": 105,
+      "estimate_fresh": 4613,
+      "min_fresh": 676,
+      "max_fresh": 365769,
+      "source": "docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md section 6.5",
+      "measured_at": "2026-11-09"
+    },
+    "modify/script/high": {
+      "n": 13,
+      "estimate_fresh": 66204,
+      "min_fresh": 3894,
+      "max_fresh": 210567,
+      "source": "docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md section 6.5",
+      "measured_at": "2026-11-09"
+    },
+    "modify/script/medium": {
+      "n": 31,
+      "estimate_fresh": 10101,
+      "min_fresh": 1005,
+      "max_fresh": 637749,
+      "source": "docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md section 6.5",
+      "measured_at": "2026-11-09"
+    },
+    "modify/script/low": {
+      "n": 43,
+      "estimate_fresh": 4717,
+      "min_fresh": 1005,
+      "max_fresh": 365769,
+      "source": "docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md section 6.5",
+      "measured_at": "2026-11-09"
+    },
+    "modify/rule/high": {
+      "n": 3,
+      "estimate_fresh": 49477,
+      "min_fresh": 11953,
+      "max_fresh": 129877,
+      "source": "docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md section 6.5",
+      "measured_at": "2026-11-09"
+    },
+    "modify/rule/medium": {
+      "n": 14,
+      "estimate_fresh": 7867,
+      "min_fresh": 676,
+      "max_fresh": 142863,
+      "source": "docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md section 6.5",
+      "measured_at": "2026-11-09"
+    },
+    "modify/rule/low": {
+      "n": 24,
+      "estimate_fresh": 4037,
+      "min_fresh": 676,
+      "max_fresh": 179498,
+      "source": "docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md section 6.5",
+      "measured_at": "2026-11-09"
+    },
+    "modify/doc/low": {
+      "n": 31,
+      "estimate_fresh": 2798,
+      "min_fresh": 1005,
+      "max_fresh": 283578,
+      "source": "docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md section 6.5",
+      "measured_at": "2026-11-09"
+    },
+    "create/script/low": {
+      "n": 6,
+      "estimate_fresh": 26377,
+      "min_fresh": 6050,
+      "max_fresh": 123151,
+      "source": "docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md section 6.5",
+      "measured_at": "2026-11-09"
+    },
+    "create/script/medium": {
+      "n": 6,
+      "estimate_fresh": 33574,
+      "min_fresh": 3612,
+      "max_fresh": 150126,
+      "source": "docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md section 6.5",
+      "measured_at": "2026-11-09"
+    },
+    "create/script/high": {
+      "n": 3,
+      "estimate_fresh": 15109,
+      "min_fresh": 1025,
+      "max_fresh": 20113,
+      "source": "docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md section 6.5",
+      "measured_at": "2026-11-09"
+    }
+  }
+}
