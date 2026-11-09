@@ -11,7 +11,7 @@ This project has a graphify knowledge graph at graphify-out/.
 
 ## Deep mode and the provider key (Sprint 055)
 
-`graphify update .` is AST-only and needs no key. `graphify extract . --mode deep` calls an LLM provider and needs a key in the process environment. Sandbox behaviour for every command below is in the single table `rules/project_topology.md` section 4; this section does not restate it.
+The AST-only rebuild (`scripts/graph_update.py`, agent form in Rules below) needs no key. `graphify extract . --mode deep` calls an LLM provider and needs a key in the process environment. Sandbox behaviour for every command below is in the single table `rules/project_topology.md` section 4; this section does not restate it.
 
 | Item | Fact |
 | :--- | :--- |
@@ -28,5 +28,5 @@ Rules:
 - For codebase or architecture questions, when `graphify-out/graph.json` exists, first run `venv_skillopt/bin/python -m graphify query "<question>"` (CLI) or `query_graph` (MCP). Use `… -m graphify path "<A>" "<B>"` / `shortest_path` for relationships and `… -m graphify explain "<concept>"` / `get_node` for focused concepts. These return a scoped subgraph, usually much smaller than `GRAPH_REPORT.md` or raw grep output.
 - If graphify-out/wiki/index.md exists, navigate it instead of reading raw files
 - Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context
-- After modifying code files in this session, run `venv_skillopt/bin/python -m graphify update .` to keep the graph current (AST-only, no API cost). If `graphify update` exits non-zero or the harness sandbox denies it, report `⚠️ graph unavailable (sandbox/venv)` to the human and proceed without graph sovereignty for the session — do not silently fall back to recursive grep as though the graph were current.
+- After modifying code files in this session, run `venv_skillopt/bin/python -I scripts/graph_update.py` (host: `.agents/venv_skillopt/bin/python -I .agents/scripts/graph_update.py`; add `--force` for a full rebuild) to keep the graph current (AST-only, no API cost). If that script exits non-zero, report `⚠️ graph unavailable (sandbox/venv)` to the human and proceed without graph sovereignty for the session — do not silently fall back to recursive grep as though the graph were current.
 - **Known coverage gaps** (observed graphify 0.8.30, AST-only mode): `.yaml`/`.yml` files are never indexed (zero such nodes ever appear — not a bug in the repo, a language the extractor doesn't parse); isolated `.md`/empty-`__init__.py` nodes are normal (no cross-file link extraction for prose/empty files). One anomaly under active watch: `rules/token_economy.md` is silently skipped even after a full cache-less rebuild, while every sibling `rules/*.md` indexes fine — cause not isolated (not encoding, size, or syntax). Treat "absent from the graph" as inconclusive for these cases, not as "doesn't exist" — cross-check with `grep`/`git ls-files` before concluding a file is orphaned.
