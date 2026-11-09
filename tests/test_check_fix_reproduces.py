@@ -240,7 +240,7 @@ def test_script_runs_under_isolated_mode() -> None:
     """`python3 -I` drops the script directory from `sys.path` (QA1-6)."""
     script = Path(__file__).resolve().parent.parent / "scripts" / "check_fix_reproduces.py"
     result = subprocess.run(
-        [sys.executable, "-I", str(script), "--help"],
+        [sys.executable, "-I", "-B", str(script), "--help"],
         capture_output=True,
         text=True,
         check=False,
