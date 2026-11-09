@@ -180,7 +180,7 @@ READ_TIMEOUT = 10
 def _check_within_timeout(path: Path) -> subprocess.CompletedProcess[str]:
     try:
         return subprocess.run(
-            [sys.executable, "-I", str(SCRIPT), "check", str(path)],
+            [sys.executable, "-I", "-B", str(SCRIPT), "check", str(path)],
             capture_output=True, text=True, check=False, timeout=READ_TIMEOUT,
         )
     except subprocess.TimeoutExpired:
@@ -252,7 +252,7 @@ def test_intake_reports_a_fifo_outbox_and_lists_the_other_host(tmp_path: Path) -
     )
     try:
         result = subprocess.run(
-            [sys.executable, "-I", "-c", code],
+            [sys.executable, "-I", "-B", "-c", code],
             capture_output=True, text=True, check=False, timeout=READ_TIMEOUT,
         )
     except subprocess.TimeoutExpired:
@@ -278,7 +278,7 @@ def test_undecodable_outbox_exits_2_without_traceback(tmp_path: Path, raw: bytes
     path = tmp_path / "outbox.json"
     path.write_bytes(raw)
     result = subprocess.run(
-        [sys.executable, "-I", str(SCRIPT), "check", str(path)],
+        [sys.executable, "-I", "-B", str(SCRIPT), "check", str(path)],
         cwd=REPO,
         capture_output=True,
         text=True,
@@ -545,7 +545,7 @@ def test_every_read_fails_closed_without_traceback(tmp_path: Path, site: str) ->
         argv, named = _read_sites(tmp_path)[site]
         expected, marker = 2, str(named)
     result = subprocess.run(
-        [sys.executable, "-I", str(SCRIPT), *argv],
+        [sys.executable, "-I", "-B", str(SCRIPT), *argv],
         cwd=REPO,
         capture_output=True,
         text=True,
