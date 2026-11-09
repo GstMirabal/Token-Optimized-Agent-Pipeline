@@ -65,6 +65,8 @@ graphify-deep:
 # The only CI step deliberately NOT here is the Vale prose lint: it is a GitHub
 # Action, not a command. Anything requiring network or credentials stays out of
 # this target by the same rule.
+# PYTHONDONTWRITEBYTECODE keeps verify from writing .pyc files in the tree (plan D41).
+verify: export PYTHONDONTWRITEBYTECODE := 1
 verify:
 	cd $(AGENTS_DIR) && python3 skills/slash-commander/scripts/verify_commands.py
 	cd $(AGENTS_DIR) && python3 scripts/py_compile_tree.py
