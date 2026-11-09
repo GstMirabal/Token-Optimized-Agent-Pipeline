@@ -173,6 +173,7 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | B-18 | `tests/test_upstream_outbox.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | B-19 | `tests/test_upstream_intake.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | B-20 | `tests/test_check_fix_reproduces.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| B-21 | `Makefile` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | C-01 | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | C-02 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 
