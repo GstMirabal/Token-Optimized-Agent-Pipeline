@@ -88,7 +88,7 @@ verify:
 	cd $(AGENTS_DIR) && python3 scripts/check_manifest_parity.py
 	cd $(AGENTS_DIR) && python3 scripts/check_absolute_paths.py
 	cd $(AGENTS_DIR) && python3 skills/topology-monitor/scripts/legacy_app_auditor.py
-	cd $(AGENTS_DIR) && $(PY) -m ruff check .
+	cd $(AGENTS_DIR) && $(PY) -m ruff check --no-cache .
 	cd $(AGENTS_DIR) && $(PY) scripts/quality_audit.py .
 	cd $(AGENTS_DIR) && python3 skills/mass-standardizer/scripts/generate_manifest.py --check
 # A test must not leave the tracked tree changed. Once `C0.3` anchored
@@ -104,7 +104,7 @@ verify:
 # first version of this check compared against HEAD and failed on its own
 # author's unstaged edits.
 	cd $(AGENTS_DIR) && before=$$(git diff -- config/ hooks/ scripts/); \
-	  $(PY) -m pytest tests/ -q || exit 1; \
+	  $(PY) -m pytest -p no:cacheprovider tests/ -q || exit 1; \
 	  bash tests/test_installer.sh || exit 1; \
 	  after=$$(git diff -- config/ hooks/ scripts/); \
 	  if [ "$$before" != "$$after" ]; then \
