@@ -157,6 +157,7 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | A-03 | `rules/token_economy.md` | modify | parallel | `rule_validator` | N/A | `agents/rule_validator.md` |
 | H-01 | `config/unit_cost_estimates.json` | create | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | H-02 | `scripts/check_task_scope.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| H-04 | `scripts/unit_cost.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | H-03 | `workflows/close_workflow.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
 | A-04 | `workflows/pipeline_workflow.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
 
