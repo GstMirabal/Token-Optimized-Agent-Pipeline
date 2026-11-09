@@ -215,6 +215,8 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | M-23 | `scripts/install.py` | modify — S3 de la ronda 17: el docstring de `install_nucleus` incluye el bloque `sandbox` en el contenido del self-bridge | low | `implementer_agent` | ✅ `104467f` |
 | B-10 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — R18-2: transcribe QA Gate 1 ronda 18, la decisión A-1 y las notas de remediación de la ronda 17 con exit codes desde la base de la rama | low | `orchestrator` | ✅ `1b99872` |
 | M-24 | `scripts/check_task_scope.py` | modify — `fix(` R18-3: elimina de la auditoría la comprobación de `Status` y su texto; `--batches` sigue rechazando un `Status` desconocido; paired test en `tests/test_check_task_scope.py` | low | `implementer_agent` | ✅ `16b1dc6` |
+| B-11 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — transcribe QA Gate 1 ronda 19 (`RECORD`), sus exit codes y la decisión sobre R19-1 | low | `orchestrator` | ⏳ |
+| M-25 | `workflows/pipeline_workflow.md` | modify — R19-1: elimina de la fila 4.3 las dos referencias de línea a `scripts/check_task_scope.py`; quedan el archivo y `MODEL_FROM_SPRINT` | low | `orchestrator` | ⏳ |
 
 ### Wave 3 — Token economy en sesión (estudio, debate, decisión)
 
@@ -307,7 +309,7 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 119 (D37: 92 + 16 de la wave 1b + M-17 + M-18 a M-21 y B-08 + B-09, M-22 y M-23 + B-10 y M-24; I-08 a I-10 siguen contadas como sustituidas) | Count of rows in Work tables |
+| Work units | 121 (D37: 92 + 16 de la wave 1b + M-17 + M-18 a M-21 y B-08 + B-09, M-22 y M-23 + B-10 y M-24 + B-11 y M-25; I-08 a I-10 siguen contadas como sustituidas) | Count of rows in Work tables |
 | Subagents dispatched | lotes de hasta 4 en paralelo desde la wave 3 (D11), más QA + Tester por wave | `agent_assignment.md` |
 | Session ratio (2026-11-08, QA rondas 12 y 13, wave 1b) | Sesión `e9a7a9bf`, ciclo único: 5.4× durante la sesión, sobre soft (5×); `suspend` antes de QA Gate 1 ronda 14 | `python3 -I scripts/session_cost.py --session e9a7a9bf-bf5b-4800-bd46-edd6c8fc46c5 --json` |
 | Session ratio (2026-11-07, QA rondas 8 a 11) | Sesión `93b61aea`, ciclo único: lectura de 5.0× durante la sesión, en soft (5×); el valor final lo da el comando. Quedan 44 unidades en 5 waves más cierre y los gates de la wave 1; delegación `native`; `suspend` antes de QA Gate 1 ronda 12 | `python3 -I scripts/session_cost.py --session 93b61aea-d168-4293-97f5-340681b5c33a --json` |
