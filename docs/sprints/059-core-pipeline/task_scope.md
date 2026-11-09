@@ -201,31 +201,7 @@ Operation: the plan row of the same id (plan D37).
 
 ## Jurisdiction check (serial or concurrent)
 
-Same structural subject claimed by more than one unit. "Serial" means the plan's `after` chain or the wave order prevents concurrency; D11 batches run only inside a wave and only from Wave 3. Plan D16 records one deviation in Wave 1 (A-11, A-13, A-08, A-01 dispatched together; disjoint subjects); it is no precedent.
-
-| Subject | Units | Verdict |
-| :--- | :--- | :--- |
-| `scripts/session_cost.py` | A-01 (Wave 1), A-18 (Wave 3, before A-00), A-02 (Wave 3, after A-01 and A-07) | Serial. |
-| `CHANGELOG.md` | A-19, A-26 (Wave 1), Z-01 (Close) | Serial. |
-| `scripts/check_task_scope.py` | M-02 (Wave 1b), G-01 (Wave 2), H-02 (Wave 3, after G-01 and H-01); I-08 (Wave 6) replaced by M-02 (D37) | Serial. |
-| `scripts/upstream_outbox.py` | I-02, I-03, I-04, I-05 | Serial by explicit `after` chain I-02 to I-05. |
-| `agents.md` | A-12, A-36, A-39 (Wave 1), D-02 (Wave 5, after A-12) | Serial. |
-| `rules/qa_and_testing.md` | A-16, A-32 (Wave 1) | Serial. |
-| Roadmaps 015, 016 and 017 | A-21 and A-27, A-22 and A-28, A-23 and A-29 (Wave 1) | Serial. |
-| `docs/guides/RULE_PRECEDENTS_GUIDE.md` | A-13, A-45 (Wave 1) | Serial. |
-| `rules/documentation_standard.md` | A-37, A-52 (Wave 1) | Serial. |
-| `tests/test_profile_references.py` | A-31, A-48 (Wave 1) | Serial. |
-| `Makefile` | A-51 (Wave 1), M-07 (Wave 1b), B-05 (Wave 2) | Serial. |
-| `scripts/check_log_append_only.py` | A-49, A-53 (Wave 1) | Serial. |
-| `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | A-47, A-54 (Wave 1) | Serial. |
-| `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | A-00, A-06 (Wave 3) | Serial. |
-| `rules/project_topology.md` | A-10 (Wave 1), D-03 (Wave 5, after A-10) | Serial. |
-| `workflows/pipeline_workflow.md` | G-02, M-25 and M-26 (Wave 2), A-04 (Wave 3, after G-02) | Serial. |
-| `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | A-05 (Wave 1), C-02 (Wave 4) | Serial by wave order; F-4 moved the closing marks to C-02. |
-| `TOKEN_ECONOMY_STUDY.md` | A-00, A-06 (after A-00) | Serial. |
-| `claude/settings.hooks.json` | D-04, E-01b (after D-04) | Serial after F-1 resolution. |
-| `scripts/session_state.py` | E-01, E-01c (after E-01) | Serial. |
-| `workflows/close_workflow.md` | B-07 (Wave 2), H-03 (Wave 3, after B-07) | Serial. |
+`python3 scripts/check_task_scope.py --sprint-dir docs/sprints/059-core-pipeline --batches` puts no two units with the same `File` cell in one batch.
 
 ## Rule audit findings
 
