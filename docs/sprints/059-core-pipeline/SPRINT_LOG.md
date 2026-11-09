@@ -64,6 +64,7 @@ Tracking of atomic goals achieved during the session. Work units and execution o
     - `[x]` Human decisions 2026-11-08 after QA Gate 1 round 18 (A-1 stop, chain `c5fbf5f`, `639fd05`): block `scripts/check_task_scope.py` re-planned as M-24, a removal; no history rewrite; units B-10 and M-24 added; work units 117 → 119.
     - `[x]` Human decision 2026-11-09 after QA Gate 1 round 19: R19-1 closed by removal in unit M-25; units B-11 and M-25 added; work units 119 → 121. Chain 2 of the A-1 stop now has three commits (`c5fbf5f`, `639fd05`, `16b1dc6`).
     - `[x]` Human decision 2026-11-09 after Tester Gate 2 round 3 (A-1 re-plan): T3-1 fixed in unit M-27, a further `fix(` on `scripts/check_task_scope.py` and a fourth commit of chain 2; T3-2 closed by removal in unit M-26; units B-12, M-26 and M-27 added; work units 121 → 124. T3-3 and T3-4 (S3) noted only.
+    - `[x]` Human decision 2026-11-09 after QA Gate 1 round 20: R20-1 closed in unit B-13; work units 124 → 125.
 
 ---
 
@@ -144,6 +145,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 | QA Agent (Gate 1) | 17 | REJECTED | charter | S2 | Range f8cfac3..f70df84. Fix replay 0, 1 chain exit 0, verify 0, quality-audit 0. R16-1..5 closed. R17-1 (S2, charter): --batches treats an unknown Status as landed and schedules its dependents. R17-2 (S2, testifying): no round 16 Remediation notes; check_gate_log exits 2 on a round 17 row. 3 S3. |
 | QA Agent (Gate 1) | 18 | REJECTED | charter | S2 | Range f70df84..0c41e80; tools on 08c669c..HEAD. Fix replay 0 (19 OK). Chain exit 2: A-1 stop, second chain c5fbf5f>639fd05; re-plan with the human. verify 0, quality-audit 0. R17-1, R17-2 closed. R18-1 (S2, charter) A-1 stop. R18-2 (S2) R-4 notes omit the chain check. R18-3 (S2) docstring vs any() guard; any->all mutation survives. |
 | QA Agent (Gate 1) | 19 | RECORD | testifying | S2 | Range 0c41e80..db738ca; tools also on 08c669c..HEAD. Fix replay 0 (20 OK). Chain exit 2 from the base: same A-1 stop as R18-1, no third chain. verify 0 (1668 passed), quality-audit 0. R18-1 actioned; R18-2, R18-3 closed. R19-1 (S2, testifying) stale line citations in the pipeline workflow. |
+| QA Agent (Gate 1) | 20 | RECORD | testifying | S2 | Range 2c438d6..29c49a4; tools also on 08c669c..HEAD. Fix replay 0 (21 OK). Chain exit 2 from the base: same A-1 stop, chain 2 now four commits, no third chain. verify 0 (1670 passed), quality-audit 0. R19-1, T3-1, T3-2 closed. R20-1 (S2, testifying) T3-1 and T3-2 have no Gate findings row. |
 | Tester Agent (Gate 2) | 1 | REJECTED | charter | S1 | Range `08c669c..c6c7987`, 1531 passed. Baseline on context size with cuts on `cache_read`: 50 of 52 cuts over 35 transcripts are not collapses, and the ratio that feeds the hard bound falls (synthetic 20x reads 2.5x). 3 more: `--resolve` alternatives diverge under Cursor (S2), hard bound and cut field untested (S2), census wording (S3). |
 | Tester Agent (Gate 2) | 2 | RECORD | testifying | S2 | Range c6c7987..8b84259, 1613 passed, make verify exit 0, zero regression. Round 1 S0-S2 findings closed. T2-1 (S2, testifying); 3 S3. |
 | Tester Agent (Gate 2) | 3 | RECORD | testifying | S2 | Range 8b84259..2c438d6, 1668 passed, make verify exit 0, zero regression. T2-1 closed. T3-1 (S2) a repeated unit id drops rows from --batches with exit 0, `scripts/check_task_scope.py:380`. T3-2 (S2) false reason citing hooks/on_commit.py, `workflows/pipeline_workflow.md:24`. T3-3, T3-4 (S3) noted. |
@@ -174,6 +176,9 @@ One row per S0-S2 finding from QA Gate 1 round 13 on (plan D37). Check: the comm
 | 18 | R18-3 | S2 | `scripts/check_task_scope.py:398` | fixture with one table without `Depends on` (Status `shipped last week`) and one with it, `python3 scripts/check_task_scope.py --sprint-dir <fixture>` at `0c41e80` → exit 2; `any(` changed to `all(` in a copy → `38 passed` |
 | 19 | R19-1 | S2 | `workflows/pipeline_workflow.md:22` | `grep -n MODEL_FROM_SPRINT scripts/check_task_scope.py` at `db738ca` → lines 52 and 152; the workflow cell cites line 38 and line 119 |
 | 2 | T2-1 | S2 | `scripts/_current_sprint.py:118` | fixture with `059-aaa` valid and the anchor `path` naming `059-core-x` invalid: `python3 scripts/check_gate_log.py --current-sprint` → exit 0 |
+| 3 | T3-1 | S2 | `scripts/check_task_scope.py:380` | fixture with two pending rows of id `U-1`, `python3 scripts/check_task_scope.py --sprint-dir <fixture> --batches` at `2c438d6` → exit 0, one batch; replay `tests/test_check_task_scope.py::test_a_repeated_unit_id_fails_the_audit_and_batches` |
+| 3 | T3-2 | S2 | `workflows/pipeline_workflow.md:24` | `grep -n check_task_scope hooks/on_commit.py hooks/on_commit_msg.py` at `2c438d6` → exit 1, no match; the workflow cell states those hooks ran the check |
+| 20 | R20-1 | S2 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md:176` | `grep -n "T3-[12]" docs/sprints/059-core-pipeline/SPRINT_LOG.md` at `29c49a4` → lines 66 and 149 only, no Gate findings row |
 
 ### Remediation notes
 
@@ -293,6 +298,10 @@ Example (do not uncomment):
 | Tester Agent (Gate 2) | 2 | `make verify` | 0 |
 | Tester Agent (Gate 2) | 3 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider` | 0 |
 | Tester Agent (Gate 2) | 3 | `make verify` | 0 |
+| QA Agent (Gate 1) | 20 | `make verify` | 0 |
+| QA Agent (Gate 1) | 20 | `make quality-audit` | 0 |
+| QA Agent (Gate 1) | 20 | `python3 scripts/check_fix_reproduces.py --range 08c669c..HEAD` | 0 |
+| QA Agent (Gate 1) | 20 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 2 |
 | Tester Agent (Gate 2) | 1 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider` | 0 |
 | Tester Agent (Gate 2) | 1 | `make verify` | 0 |
 
@@ -362,7 +371,7 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase (current)**: Phase 7, Wave 2: QA Gate 1 round 20 on `2c438d6..HEAD` and Tester Gate 2 round 4, both fresh agents. On a rejection: no patch, re-plan with the human.
+**Next Phase (current)**: Phase 7, Wave 2: Tester Gate 2 round 4 on `2c438d6..HEAD`, a fresh agent. On a rejection: no patch, re-plan with the human.
 
 **Next Phase (after QA Gate 1 round 13, superseded by the line above)**: Phase 6, Wave 1b, in the plan's order (plan D37). Then QA Gate 1 round 14 on `3af48b5..HEAD` and the R13 fixes, then Tester Gate 2 round 2, both fresh agents. On a rejection: no patch, re-plan with the human.
 
