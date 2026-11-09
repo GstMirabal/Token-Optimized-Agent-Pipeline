@@ -183,3 +183,108 @@ def test_synthetic_records_are_skipped_and_counted_even_with_a_repeated_id(
     transcript = tmp_path / "x.jsonl"
     transcript.write_text(f"{synthetic}\n{synthetic}", encoding="utf-8")
     assert sc.read_turns(transcript) == ([], 2)
+
+
+def _bound_transcript(path: Path, contexts: list[int]) -> Path:
+    """Write a transcript with one turn per context size (all in `cache_read`).
+
+    Args:
+        path: file to write.
+        contexts: context size of each turn, in order.
+
+    Returns:
+        Path: the transcript written.
+    """
+    lines = [json.dumps({"message": {"id": f"m{index}", "model": "m", "usage": {
+        "input_tokens": 0, "output_tokens": 1, "cache_read_input_tokens": size,
+        "cache_creation_input_tokens": 0}}}) for index, size in enumerate(contexts)]
+    path.write_text("\n".join(lines), encoding="utf-8")
+    return path
+
+
+def _run_bound(tmp_path: Path, contexts: list[int],
+               capsys: pytest.CaptureFixture[str], *extra: str) -> tuple[int, str, str]:
+    _bound_transcript(tmp_path / "s1.jsonl", contexts)
+    code = sc.run_bound(tmp_path / "s1.jsonl", "--json" in extra)
+    captured = capsys.readouterr()
+    return code, captured.out, captured.err
+
+
+@pytest.mark.parametrize(("contexts", "status"), [
+    ([100_000, 120_000, 499_999], "OK"),
+    ([100_000, 500_000], "OK"),
+    ([100_000, 500_001], "SOFT"),
+    ([100_000, 549_999], "SOFT"),
+    ([100_000, 550_000], "HARD"),
+    ([100_000, 550_001], "HARD"),
+    ([200_000, 549_999], "OK"),
+    ([200_000, 550_000], "HARD"),
+])
+def test_bound_status_and_exit_zero(tmp_path: Path, capsys: pytest.CaptureFixture[str],
+                                    contexts: list[int], status: str) -> None:
+    code, out, err = _run_bound(tmp_path, contexts, capsys)
+    assert code == 0
+    assert err == ""
+    assert out.split()[0] == status
+    assert out.count("\n") == 1
+
+
+def test_bound_line_carries_context_first_turn_and_ratio(
+        tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    out = _run_bound(tmp_path, [100_000, 550_000], capsys)[1]
+    assert out.strip() == "HARD context=550000 first_turn=100000 ratio=5.5"
+
+
+def test_hard_wins_over_soft_and_holds_under_five_times(
+        tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    assert _run_bound(tmp_path, [50_000, 600_000], capsys)[1].startswith("HARD")
+    assert _run_bound(tmp_path, [300_000, 560_000], capsys)[1].startswith("HARD")
+
+
+def test_bound_measures_the_last_cycle_after_compaction(
+        tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    contexts = [20_000, 300_000, 25_000, 130_000]
+    out = _run_bound(tmp_path, contexts, capsys)[1]
+    assert out.strip() == "SOFT context=130000 first_turn=25000 ratio=5.2"
+
+
+def test_bound_json_has_the_same_fields(
+        tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    code, out, _ = _run_bound(tmp_path, [100_000, 550_000], capsys, "--json")
+    assert code == 0
+    assert json.loads(out) == {"status": "HARD", "context": 550_000,
+                               "first_turn": 100_000, "ratio": 5.5, "session": "s1"}
+
+
+def test_bound_is_non_zero_on_unmeasurable_transcripts(
+        tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    for contexts in ([], [0, 600_000]):
+        code, out, err = _run_bound(tmp_path, contexts, capsys)
+        assert code != 0
+        assert out == ""
+        assert len(err.strip().splitlines()) == 1
+
+
+def test_bound_main_exits_non_zero_on_a_missing_session(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+        capsys: pytest.CaptureFixture[str]) -> None:
+    monkeypatch.setattr(sc, "PROJECTS", tmp_path)
+    monkeypatch.setattr(sys, "argv", [
+        "session_cost.py", "--bound", "--session", "absent", "--project", str(tmp_path)])
+    assert sc.main() != 0
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert len(captured.err.strip().splitlines()) == 1
+
+
+def test_bound_main_reads_the_named_session(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+        capsys: pytest.CaptureFixture[str]) -> None:
+    directory = tmp_path / sc.project_slug(tmp_path)
+    directory.mkdir()
+    _bound_transcript(directory / "abc.jsonl", [100_000, 600_000])
+    monkeypatch.setattr(sc, "PROJECTS", tmp_path)
+    monkeypatch.setattr(sys, "argv", [
+        "session_cost.py", "--bound", "--session", "abc", "--project", str(tmp_path)])
+    assert sc.main() == 0
+    assert capsys.readouterr().out.startswith("HARD")

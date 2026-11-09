@@ -38,10 +38,18 @@ Usage:
     python3 scripts/session_cost.py                 # newest session, this project
     python3 scripts/session_cost.py --session <uid>
     python3 scripts/session_cost.py --json
+    python3 scripts/session_cost.py --bound [--session <uid>] [--json]
+
+`--bound` classifies the latest turn of the current cycle (the last one after
+any compaction) as `OK`, `SOFT` or `HARD` (ADR-0018 decisions 1 and 2). It only
+warns: the three statuses exit 0 (D3). Its Phase 6 invoker arrives in Sprint 059
+unit A-04; until then it is run by hand.
 
 Exit codes:
     0 — measured, or nothing measurable and said so
     1 — the named session does not exist
+    2 — `--bound` could not measure (unreadable or unmeasurable transcript);
+        never reported as `OK`
 """
 
 import argparse
@@ -58,6 +66,11 @@ PROJECTS = Path.home() / ".claude" / "projects"
 # cycle from registering as resets, and the ratio keeps normal variation out.
 RESET_FLOOR = 100_000
 RESET_RATIO = 0.5
+
+# ADR-0018 decision 1: absolute context size at which the bound is HARD.
+HARD_CONTEXT = 550_000
+# ADR-0018 decision 2: multiple of the cycle's first-turn context that is SOFT.
+SOFT_RATIO = 5
 
 SYNTHETIC = "<synthetic>"
 FIELDS = ("input_tokens", "output_tokens",
@@ -270,6 +283,66 @@ def render(result: dict) -> None:
           f"\n  compaction resets the axis without reducing it.")
 
 
+def bound_status(transcript: Path) -> dict:
+    """Classify the latest turn of the current cycle as OK, SOFT or HARD.
+
+    HARD is an absolute context size (`HARD_CONTEXT`), independent of the first
+    turn. SOFT applies when not HARD and the context exceeds `SOFT_RATIO` times
+    the first-turn context of the same cycle (strictly: exactly 5x is OK).
+
+    Args:
+        transcript: path to a `<session-uid>.jsonl` file.
+
+    Returns:
+        dict: `status`, `context`, `first_turn`, `ratio` and `session`.
+
+    Raises:
+        ValueError: the transcript has no usage data or a zero first-turn
+            context, so no ratio exists and no status may be claimed.
+        OSError: the transcript cannot be read.
+    """
+    turns, _ = read_turns(transcript)
+    cycles = segment_cycles(turns)
+    if not cycles:
+        raise ValueError("no usage data in this transcript")
+    cycle = cycles[-1]
+    first, latest = context_size(cycle[0]), context_size(cycle[-1])
+    if not first:
+        raise ValueError("the current cycle's first turn has no context")
+    if latest >= HARD_CONTEXT:
+        status = "HARD"
+    elif latest > SOFT_RATIO * first:
+        status = "SOFT"
+    else:
+        status = "OK"
+    return {"status": status, "context": latest, "first_turn": first,
+            "ratio": round(latest / first, 1), "session": transcript.stem}
+
+
+def run_bound(transcript: Path, as_json: bool) -> int:
+    """`--bound` mode: print one status line (or JSON) for the session.
+
+    Args:
+        transcript: path to the session transcript.
+        as_json: True to print the fields as JSON.
+
+    Returns:
+        int: 0 for OK, SOFT and HARD (the meter only warns); 2 when the session
+            cannot be measured, with one stderr line.
+    """
+    try:
+        result = bound_status(transcript)
+    except (OSError, ValueError) as error:
+        print(f"session_cost: cannot measure {transcript.stem}: {error}", file=sys.stderr)
+        return 2
+    if as_json:
+        print(json.dumps(result, indent=2))
+    else:
+        print(f"{result['status']} context={result['context']} "
+              f"first_turn={result['first_turn']} ratio={result['ratio']}")
+    return 0
+
+
 def find_transcript(session: str | None, project: Path) -> Path | None:
     """The named session's transcript, or the newest one for this project."""
     directory = PROJECTS / project_slug(project)
@@ -351,6 +424,8 @@ def main() -> int:
     parser.add_argument("--session", help="session UID; default is the newest")
     parser.add_argument("--project", type=Path, default=Path.cwd())
     parser.add_argument("--json", action="store_true", help="machine-readable output")
+    parser.add_argument("--bound", action="store_true",
+                        help="print OK, SOFT or HARD for the current cycle (exit 0)")
     parser.add_argument(
         "--from-anchor",
         action="store_true",
@@ -367,6 +442,9 @@ def main() -> int:
         target = args.session or f"any session for {args.project}"
         print(f"⚠️  No transcript found for {target}.", file=sys.stderr)
         return 1
+
+    if args.bound:
+        return run_bound(transcript, args.json)
 
     result = measure(transcript)
     _report_result(result, args.json)
