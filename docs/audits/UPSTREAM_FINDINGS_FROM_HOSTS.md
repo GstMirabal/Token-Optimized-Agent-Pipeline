@@ -2068,6 +2068,27 @@ agent-writable code) and host `CLAUDE.md` plus `.claude/rules/` (instruction tam
 host-owned instructions). Not every row is "not writable by the agent", so `RA-19`
 wording stands: write-denies reduce exposure; they are not a boundary.
 
+**Sprint 059 status (2026-11-09). Box stays unticked.** Units C-01 (`e4f435d`) and
+C-01b (`56b715f`) re-measured the vectors in
+`docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` (sections 4 and 6). Two CLI
+versions were measured and the verdicts differ: 2.1.119 (the driver binary) and 2.1.319
+(the parent harness and its sandbox). Existing `Q` rows above are not rewritten.
+
+| Vector | CLI 2.1.119 | CLI 2.1.319 | Cases (section) |
+| :--- | :--- | :--- | :--- |
+| Gitfile vector: `<dir>/.git` file, agent-made gitdir whose `config` sets `core.fsmonitor`, then `git add <dir>` | open; the unsandboxed trigger is measured: the CLI startup `git status` ran the planted command | open; the set-up succeeds (marker written by the sandboxed run); the unsandboxed trigger is `unmeasured` | `V119`, `P2`, `V319`, `B2.gitfile-in-subdir` (4.1, 6.5) |
+| Gitfile vector against the case `D` deny list | not closed by any `.git/*` entry: a path that is not under `.git` cannot be covered by a finite `.git/...` list; a glob deny is `unmeasured` | same | `D119`, `D319`, `VG.*` (6.6) |
+| `.git/modules/*`, `.git/worktrees/*` | open without a deny; closed by a `denyWrite` entry in the fixture; the `worktrees` entry makes `git worktree add` fail | same | `D119`, `D319`, `M4`, `M6` (4.1, 6.6) |
+| `.git/commondir` | open; unsandboxed triggers: the CLI startup `git status` and the `PreToolUse` hook's `git diff --cached` on a `git commit` call | refused in the real nucleus and in the 2.1.319 clone | `A1`, `A2`, `A5`, `B`, `C319` (4.1, 6.3, 6.4) |
+| `dangerouslyDisableSandbox` | refused | refused with `--permission-mode default`; ran unsandboxed with no human in a session that inherits the user's `permissions.defaultMode = "auto"`; `N319` and `N319b` differ only in `--permission-mode` | `N119`, `N319`, `N319b` (6.7) |
+
+Not measured: a 2.1.319 unsandboxed trigger of the gitfile vector, a glob `denyWrite`
+for it, and the interactive 2.1.319 behaviour with a human prompt (sections 6.5, 6.6,
+6.7). The block `B-06` is not shown to open any of these on 2.1.319, because no 2.1.319
+session ran without it (section 4.2). The gitfile vector is the content that no
+`denyWrite` entry of the case `D` list closes; with the `Q7` and host `CLAUDE.md` rows
+it keeps this finding open.
+
 **`Q` identifier correspondence** (requested by `PIPELINE_AUDIT_REPORT-055.md` `F2`).
 `Q6`, `Q8`, `Q9`, `Q10` are ids of the Sprint 055 `SPRINT_LOG` register, not rows of the
 table above:
@@ -2161,7 +2182,7 @@ host's "Message 4"; its "Message 3" (the replay counts a run that executed no te
 as `FAILS_AT_COMMIT`) has not been sent and is not triaged here. The ids are
 assigned by the nucleus. Genericized per `RA-15`: no host name, paths or session id.
 
-### - [ ] `F-116-N1` — `session_cost.py` takes a cold-cache turn as the cycle baseline, so the ratio is `None`
+### - [x] `F-116-N1` — `session_cost.py` takes a cold-cache turn as the cycle baseline, so the ratio is `None`
 
 - **Host evidence:** a 392-turn host session, 5 cycles, `first` = 0 in 4 of them,
   so no ratio could be computed even by hand.
@@ -2183,10 +2204,13 @@ assigned by the nucleus. Genericized per `RA-15`: no host name, paths or session
   first_turn_zero_cycle1=11`. Decision (plan Design `D1`): the cycle baseline is the
   first turn's context size, `cache_read + cache_creation + input`; the host's
   minimum non-zero `cache_read` was rejected because it discards the real start
-  turn. **Where it stands:** fix is Sprint 059 unit A-01; closure is marked by unit
-  C-02 citing the A-01 commit.
+  turn.
+- **Closed (Sprint 059, 2026-11-09):** unit A-01, commits `ef490cd`
+  (`fix(session_cost): take the cycle baseline from the first turn's context size`)
+  and `919d4f2` (`fix(session_cost): cut context cycles on context size, not
+  cache_read`).
 
-### - [ ] `F-116-N2` — the `rules/token_economy.md §3.1` bound has no in-session invoker
+### - [x] `F-116-N2` — the `rules/token_economy.md §3.1` bound has no in-session invoker
 
 - **Host evidence:** a host cycle climbed to 5.7× with no signal during the session.
   The human had to ask whether spend was being audited.
@@ -2206,10 +2230,14 @@ assigned by the nucleus. Genericized per `RA-15`: no host name, paths or session
   runs outside the sandbox and would reopen the `RA-19` enumeration; at hard (15×)
   the measurement warns and exits 0 while calibration is n=1, and blocking at hard
   is out of scope until n > 1. `D2` is provisional: `ADR-0018` (unit A-07) may
-  replace the method after the Sprint 059 token-economy study. **Where it stands:**
-  implementation is Sprint 059 unit A-02, invoked from
-  `workflows/pipeline_workflow.md` Phase 6 by unit A-04; closure is marked by unit
-  C-02 citing the A-02 commit.
+  replace the method after the Sprint 059 token-economy study.
+- **Closed (Sprint 059, 2026-11-09):** unit A-02, commits `5c5e0a3`
+  (`feat(scripts): add the --bound status to session_cost`) and `ad7cd48`
+  (`fix(scripts): report HARD in session_cost when the first turn measures zero`).
+  Invoker verified by `grep -n -e "--bound" workflows/pipeline_workflow.md
+  scripts/session_cost.py`: `workflows/pipeline_workflow.md:24` (Phase 6 row, "Cost
+  bound, per unit": `run python3 scripts/session_cost.py --bound`, declared as the
+  `RA-16` in-session invoker); the implementation is `scripts/session_cost.py:429`.
 
 ## How to work this file
 
