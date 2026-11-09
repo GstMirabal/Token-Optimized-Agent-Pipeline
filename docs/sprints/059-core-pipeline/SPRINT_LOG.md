@@ -67,6 +67,7 @@ Tracking of atomic goals achieved during the session. Work units and execution o
     - `[x]` Human decision 2026-11-09 after QA Gate 1 round 20: R20-1 closed in unit B-13; work units 124 → 125.
     - `[x]` Human decisions 2026-11-09 after Tester Gate 2 round 4: a claim about system behaviour with no instrument is removed; T4-1 closed by removing the table in unit B-15; live `file:line` citations removed in M-28 to M-32, the 3 citations in historical precedents kept; units B-14, B-15 and M-28 to M-32 added, work units 125 → 132; the Gate findings instrument and the audit of prose reasons moved to Sprint 060; no dedicated gate round: these units enter the range of the Wave 3 gates.
     - `[x]` Human decision 2026-11-09 after unit A-18 (plan D38): A-04 and C-01 extended, units K-01 to K-04 added to Wave 6; work units 132 → 136.
+    - `[x]` Human decision 2026-11-09 after unit A-00 (plan D39): `graphify update .` failed under the sandbox on `SC_SEM_NSEMS_MAX`; units L-01 to L-05 added to Wave 6; work units 136 → 141.
 
 ---
 

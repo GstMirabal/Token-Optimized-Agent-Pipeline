@@ -197,6 +197,11 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | K-02 | `scripts/detect_drift.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | K-03 | `tests/test_detect_drift.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | K-04 | `agents.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| L-01 | `scripts/graph_update.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| L-02 | `Makefile` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| L-03 | `rules/graphify.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| L-04 | `rules/project_topology.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| L-05 | `agents.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
 | I-08 | `scripts/check_task_scope.py` | modify (replaced by M-02, D37) | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | I-09 | `scripts/check_gate_log.py` | modify (replaced by M-03, D37) | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | I-10 | `skills/token-saver-auditor/scripts/audit_plan.py` | modify (replaced by M-04, D37) | sequential | `skill_architect` | N/A | `agents/skill_architect.md` |
