@@ -380,7 +380,9 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase (current)**: Phase 6, Wave 3, batch 2, unit A-00, in a new session: `token_economy_agent` produces the figures, then `doc_orchestrator` writes the study; the figures step of session `5d48524f` was stopped at suspend with no output. Every worktree dispatch runs `git merge --ff-only ai-sprint/059` and checks its base before the first edit (KI-059-16).
+**Next Phase (current)**: Phase 6, Wave 4, unit B-03, in a new session. Wave 3 closed at `bced56b`; `ADR-0018` holds the bounds. Every worktree dispatch runs `git merge --ff-only ai-sprint/059` and checks its base before the first edit (`workflows/pipeline_workflow.md` Phase 6).
+
+**Next Phase (superseded by the line above)**: Phase 6, Wave 3, batch 2, unit A-00, in a new session: `token_economy_agent` produces the figures, then `doc_orchestrator` writes the study; the figures step of session `5d48524f` was stopped at suspend with no output. Every worktree dispatch runs `git merge --ff-only ai-sprint/059` and checks its base before the first edit (KI-059-16).
 
 **Next Phase (superseded by the line above)**: `session_state.py suspend`, then Phase 6, Wave 3, in a new session. On a rejection: no patch, re-plan with the human.
 
