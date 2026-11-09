@@ -67,7 +67,7 @@ Domain rules in `rules/` load **on demand** at these triggers, never preloaded. 
 | **Context** | `graph_sovereignty`| Query `graphify-out/graph.json` via MCP or CLI before any full codebase research or recursive grep operations. |
 | **WIP Safety** | `pre_shielding` | Abort if `git status --porcelain` returns unresolved differences. |
 | **WIP Safety** | `destructive_flags` | Reject massive modifications/deletions unless the human grants explicit approval (via chat or Claude Code's permission prompt). |
-| **WIP Safety** | `graph_sync` | Run `venv_skillopt/bin/python -m graphify update .` at quality check or commit, never the bare `graphify` (`rules/graphify.md`). |
+| **WIP Safety** | `graph_sync` | Run `venv_skillopt/bin/python -I scripts/graph_update.py` at quality check or commit, never the bare `graphify` (`rules/graphify.md`). |
 | **Isolation** | `jurisdictional_lock` | A task claims **exactly one file as its structural subject** in `task_scope.md`; no concurrent task may claim it. A commit also stages files the subject's rules require, e.g. a `fix(`'s paired test unless `Repro: manual`. (precedents) |
 | **Isolation** | `no_interference` | Abort if `task_scope.md` shows the target file listed by another subtask in progress. |
 
