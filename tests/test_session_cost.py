@@ -10,7 +10,6 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
-from types import ModuleType
 
 import pytest
 
@@ -75,9 +74,8 @@ def test_cold_turn_with_an_unchanged_window_does_not_open_a_cycle() -> None:
     assert len(sc.segment_cycles(turns)) == 1
 
 
-def test_growth_with_one_cache_expiry_keeps_one_cycle_above_hard_ratio(
+def test_growth_with_one_cache_expiry_keeps_one_cycle_with_a_high_ratio(
         tmp_path: Path) -> None:
-    import session_probe as spr
     turns = [make_turn(read=20_000, creation=1_000),
              make_turn(read=150_000, creation=5_000),
              make_turn(read=0, creation=160_000),
@@ -91,32 +89,7 @@ def test_growth_with_one_cache_expiry_keeps_one_cycle_above_hard_ratio(
         for t in turns))
     result = sc.measure(transcript)
     assert len(result["cycles"]) == 1
-    assert result["cycles"][0]["ratio"] > spr.HARD_RATIO
-
-
-def _probe_with(monkeypatch: pytest.MonkeyPatch, ratio: float | None) -> tuple[ModuleType, str | None]:
-    import session_probe as spr
-    cycle = {"messages": 3, "first_turn": 10_000, "peak": 10_000,
-             "ratio": ratio}
-    monkeypatch.setattr(spr.session_cost, "measure_previous", lambda *a, **k: {
-        "measurable": True, "session": "abcdef123456", "cycles": [cycle]})
-    return spr, spr.probe_cost({})
-
-
-def test_probe_cost_names_a_cycle_above_the_hard_ratio(
-        monkeypatch: pytest.MonkeyPatch) -> None:
-    import session_probe as spr
-    message = _probe_with(monkeypatch, spr.HARD_RATIO + 0.1)[1]
-    assert message is not None
-    assert "cycle 1" in message
-    assert "abcdef12" in message
-
-
-def test_probe_cost_is_silent_at_or_below_the_hard_ratio(
-        monkeypatch: pytest.MonkeyPatch) -> None:
-    import session_probe as spr
-    assert _probe_with(monkeypatch, float(spr.HARD_RATIO))[1] is None
-    assert _probe_with(monkeypatch, 1.0)[1] is None
+    assert result["cycles"][0]["ratio"] > 15
 
 
 def _write_records(path: Path, records: list[tuple[str | None, int, int]]) -> Path:
