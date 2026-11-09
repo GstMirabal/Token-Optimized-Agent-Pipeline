@@ -258,7 +258,7 @@ def test_bound_json_has_the_same_fields(
 
 def test_bound_is_non_zero_on_unmeasurable_transcripts(
         tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
-    for contexts in ([], [0, 600_000]):
+    for contexts in ([], [0, 549_999]):
         code, out, err = _run_bound(tmp_path, contexts, capsys)
         assert code != 0
         assert out == ""
@@ -288,3 +288,19 @@ def test_bound_main_reads_the_named_session(
         "session_cost.py", "--bound", "--session", "abc", "--project", str(tmp_path)])
     assert sc.main() == 0
     assert capsys.readouterr().out.startswith("HARD")
+
+
+def test_bound_hard_with_a_zero_first_turn_prints_ratio_not_available(
+        tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    code, out, err = _run_bound(tmp_path, [0, 550_000], capsys)
+    assert code == 0
+    assert err == ""
+    assert out.strip() == "HARD context=550000 first_turn=0 ratio=n/a"
+
+
+def test_bound_hard_with_a_zero_first_turn_has_a_null_ratio_in_json(
+        tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    code, out, _ = _run_bound(tmp_path, [0, 550_000], capsys, "--json")
+    assert code == 0
+    assert json.loads(out) == {"status": "HARD", "context": 550_000,
+                               "first_turn": 0, "ratio": None, "session": "s1"}

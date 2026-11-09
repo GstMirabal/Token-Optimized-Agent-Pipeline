@@ -297,8 +297,9 @@ def bound_status(transcript: Path) -> dict:
         dict: `status`, `context`, `first_turn`, `ratio` and `session`.
 
     Raises:
-        ValueError: the transcript has no usage data or a zero first-turn
-            context, so no ratio exists and no status may be claimed.
+        ValueError: the transcript has no usage data, or the first-turn context
+            is zero while the latest is below `HARD_CONTEXT` (OK and SOFT cannot
+            be told apart). With a zero first turn at HARD, `ratio` is None.
         OSError: the transcript cannot be read.
     """
     turns, _ = read_turns(transcript)
@@ -307,7 +308,7 @@ def bound_status(transcript: Path) -> dict:
         raise ValueError("no usage data in this transcript")
     cycle = cycles[-1]
     first, latest = context_size(cycle[0]), context_size(cycle[-1])
-    if not first:
+    if not first and latest < HARD_CONTEXT:
         raise ValueError("the current cycle's first turn has no context")
     if latest >= HARD_CONTEXT:
         status = "HARD"
@@ -316,7 +317,8 @@ def bound_status(transcript: Path) -> dict:
     else:
         status = "OK"
     return {"status": status, "context": latest, "first_turn": first,
-            "ratio": round(latest / first, 1), "session": transcript.stem}
+            "ratio": round(latest / first, 1) if first else None,
+            "session": transcript.stem}
 
 
 def run_bound(transcript: Path, as_json: bool) -> int:
@@ -339,7 +341,7 @@ def run_bound(transcript: Path, as_json: bool) -> int:
         print(json.dumps(result, indent=2))
     else:
         print(f"{result['status']} context={result['context']} "
-              f"first_turn={result['first_turn']} ratio={result['ratio']}")
+              f"first_turn={result['first_turn']} ratio={result['ratio'] or 'n/a'}")
     return 0
 
 
