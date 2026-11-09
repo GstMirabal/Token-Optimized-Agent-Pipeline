@@ -376,7 +376,7 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase (current)**: Phase 6, Wave 2: B-15 and M-28 to M-32, then `session_state.py suspend` and Phase 6, Wave 3, in a new session. On a rejection: no patch, re-plan with the human.
+**Next Phase (current)**: `session_state.py suspend`, then Phase 6, Wave 3, in a new session. On a rejection: no patch, re-plan with the human.
 
 **Next Phase (after QA Gate 1 round 13, superseded by the line above)**: Phase 6, Wave 1b, in the plan's order (plan D37). Then QA Gate 1 round 14 on `3af48b5..HEAD` and the R13 fixes, then Tester Gate 2 round 2, both fresh agents. On a rejection: no patch, re-plan with the human.
 

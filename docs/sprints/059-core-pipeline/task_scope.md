@@ -130,13 +130,13 @@ Operation: the plan row of the same id (plan D37).
 | M-26 | `workflows/pipeline_workflow.md` | modify: plan M-26 | low | `orchestrator` | sonnet | medium | - | ✅ `74adc6e` |
 | M-27 | `scripts/check_task_scope.py` | modify: plan M-27 | low | `implementer_agent` | sonnet | medium | - | ✅ `39f243c` |
 | B-13 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify: plan B-13 | low | `orchestrator` | sonnet | medium | - | ✅ `40b0f1d` |
-| B-14 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify: plan B-14 | low | `orchestrator` | sonnet | medium | - | ⏳ |
-| B-15 | `docs/sprints/059-core-pipeline/task_scope.md` | modify: plan B-15 | low | `orchestrator` | sonnet | medium | - | ⏳ |
-| M-28 | `agents/rule_validator.md` | modify: plan M-28 | low | `rule_validator` | sonnet | medium | - | ⏳ |
-| M-29 | `rules/project_topology.md` | modify: plan M-29 | low | `rule_validator` | sonnet | medium | - | ⏳ |
-| M-30 | `rules/django_backend_standard.md` | modify: plan M-30 | low | `rule_validator` | sonnet | medium | - | ⏳ |
-| M-31 | `rules/code_craft.md` | modify: plan M-31 | low | `rule_validator` | sonnet | medium | - | ⏳ |
-| M-32 | `rules/graphify.md` | modify: plan M-32 | low | `rule_validator` | sonnet | medium | - | ⏳ |
+| B-14 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify: plan B-14 | low | `orchestrator` | sonnet | medium | - | ✅ `3fca54b` |
+| B-15 | `docs/sprints/059-core-pipeline/task_scope.md` | modify: plan B-15 | low | `orchestrator` | sonnet | medium | - | ✅ `32199c3` |
+| M-28 | `agents/rule_validator.md` | modify: plan M-28 | low | `rule_validator` | sonnet | medium | - | ✅ `72b9a98` |
+| M-29 | `rules/project_topology.md` | modify: plan M-29 | low | `rule_validator` | sonnet | medium | - | ✅ `445fc2c` |
+| M-30 | `rules/django_backend_standard.md` | modify: plan M-30 | low | `rule_validator` | sonnet | medium | - | ✅ `ce5adcb` |
+| M-31 | `rules/code_craft.md` | modify: plan M-31 | low | `rule_validator` | sonnet | medium | - | ✅ `3acb3bd` |
+| M-32 | `rules/graphify.md` | modify: plan M-32 | low | `rule_validator` | sonnet | medium | - | ✅ `3391032` |
 
 ### Wave 3 — In-session token economy
 
