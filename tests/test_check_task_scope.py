@@ -542,3 +542,27 @@ def test_recognised_status_forms_pass_the_audit_and_batches(tmp_path: Path) -> N
     assert _run("--sprint-dir", str(sprint)).returncode == 0
     result = _batches(sprint)
     assert (result.returncode, result.stdout) == (0, "batch 1: B\n")
+
+
+HEADINGS_ONLY = "# Task Scope\n\n## Units\n\nNo table yet.\n"
+HEADER_NO_ROWS = "# Task Scope\n\n" + PLAIN_HEAD
+
+
+@pytest.mark.parametrize("body", ["", "  \n\n\t\n", HEADINGS_ONLY, HEADER_NO_ROWS])
+@pytest.mark.parametrize("flags", [(), ("--batches",)])
+def test_an_empty_task_scope_fails_the_audit(
+    tmp_path: Path, body: str, flags: tuple[str, ...]
+) -> None:
+    """Zero-byte, whitespace-only, headings-only and header-only files fail both modes."""
+    sprint = _scope(tmp_path, body)
+    result = _run("--sprint-dir", str(sprint), *flags)
+    assert result.returncode == 2
+    assert "no work-unit rows" in result.stderr
+
+
+def test_an_empty_task_scope_fails_the_current_sprint_mode(tmp_path: Path) -> None:
+    """The collector that serves --current-sprint reports the absence too."""
+    from check_task_scope import collect_findings
+
+    assert any("no work-unit rows" in f for f in collect_findings("", 59))
+    assert any("no work-unit rows" in f for f in collect_findings(HEADINGS_ONLY, None))

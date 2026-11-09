@@ -35,7 +35,8 @@ file. Sprints 030 and 031 recorded such rows as executed successfully.
 Exit codes:
     0 — pass, or skip (historical columns / non-canonical dir / no anchor or
         no ``current_sprint`` block)
-    2 — a repeated unit id, a bad ``Depends on`` value, units ``--batches`` cannot schedule, an anchor that names no existing sprint directory, shape, undeclared mechanical-high row, incapable assignee, or a
+    2 — a task_scope.md with no work-unit rows (empty, blank or headings only),
+        a repeated unit id, a bad ``Depends on`` value, units ``--batches`` cannot schedule, an anchor that names no existing sprint directory, shape, undeclared mechanical-high row, incapable assignee, or a
         canonical sprint directory holding no task_scope.md at all (RA-11)
 """
 
@@ -58,6 +59,10 @@ MECHANICAL_PROFILES = frozenset({"devops_agent", "git_sync_agent", "topology_map
 MECHANICAL_MODELS = frozenset({"haiku", "composer-2.5", "composer-2"})
 WORK_KEYS = ("File", "Operation", "Risk", "Assignee")
 MAX_BATCH = 4
+NO_WORK_ROWS = (
+    "task_scope.md holds no work-unit rows: a zero-byte, blank or heading-only "
+    "file would disable jurisdictional_lock and no_interference while passing."
+)
 COMMITTED_STATUS = re.compile(r"^\u2705\s+`?[0-9a-f]{7,40}\b")
 WRITE_TOOLS = frozenset({"Write", "Edit"})
 # Matched as substrings: real tables write "modify/create", "create + delete"
@@ -396,9 +401,9 @@ def collect_findings(
 ) -> list[str]:
     """Dependency, shape, mechanical-high and capability findings. Empty means pass."""
     tables = work_tables(text)
-    if not tables:
-        return []
     units = work_units(tables)
+    if not units:
+        return [NO_WORK_ROWS]
     findings = duplicate_findings(units) + dependency_findings(units)
     if not requires_model_columns(sprint_id, text):
         return findings
@@ -468,7 +473,7 @@ def print_batches(sprint_dir: Path) -> int:
         print(f"❌ check_task_scope: no task_scope.md under {sprint_dir}", file=sys.stderr)
         return 2
     units = work_units(work_tables(path.read_text(encoding="utf-8")))
-    findings = duplicate_findings(units) + dependency_findings(units) + [
+    findings = ([] if units else [NO_WORK_ROWS]) + duplicate_findings(units) + dependency_findings(units) + [
         f"Unit {unit.id}: Status is missing or empty." for unit in units if not unit.status
     ] + status_findings(units)
     batches, stuck = ([], []) if findings else schedule(units)
