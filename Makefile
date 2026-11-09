@@ -88,8 +88,7 @@ verify:
 	cd $(AGENTS_DIR) && python3 skills/topology-monitor/scripts/legacy_app_auditor.py
 	cd $(AGENTS_DIR) && $(PY) -m ruff check .
 	cd $(AGENTS_DIR) && $(PY) scripts/quality_audit.py .
-	cd $(AGENTS_DIR) && python3 skills/mass-standardizer/scripts/generate_manifest.py \
-	  && git -C $(AGENTS_DIR) diff --exit-code skills/manifest_skills.json
+	cd $(AGENTS_DIR) && python3 skills/mass-standardizer/scripts/generate_manifest.py --check
 # A test must not leave the tracked tree changed. Once `C0.3` anchored
 # `branch_sovereignty.WAIVERS` to the framework root, a test that had been
 # writing into its own tmp_path started overwriting the real
