@@ -127,8 +127,8 @@ Operation: the plan row of the same id (plan D37).
 | B-11 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify: plan B-11 | low | `orchestrator` | sonnet | medium | - | ✅ `f6f5bb8` |
 | M-25 | `workflows/pipeline_workflow.md` | modify: plan M-25 | low | `orchestrator` | sonnet | medium | - | ✅ `18f5736` |
 | B-12 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify: plan B-12 | low | `orchestrator` | sonnet | medium | - | ✅ `f2e3188` |
-| M-26 | `workflows/pipeline_workflow.md` | modify: plan M-26 | low | `orchestrator` | sonnet | medium | - | ⏳ |
-| M-27 | `scripts/check_task_scope.py` | modify: plan M-27 | low | `implementer_agent` | sonnet | medium | - | ⏳ |
+| M-26 | `workflows/pipeline_workflow.md` | modify: plan M-26 | low | `orchestrator` | sonnet | medium | - | ✅ `74adc6e` |
+| M-27 | `scripts/check_task_scope.py` | modify: plan M-27 | low | `implementer_agent` | sonnet | medium | - | ✅ `39f243c` |
 
 ### Wave 3 — In-session token economy
 

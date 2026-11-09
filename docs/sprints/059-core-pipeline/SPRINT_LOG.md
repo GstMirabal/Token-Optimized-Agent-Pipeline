@@ -362,7 +362,7 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase (current)**: Phase 6, Wave 2: M-26 and M-27, then QA Gate 1 round 20 on `2c438d6..HEAD` and Tester Gate 2 round 4, both fresh agents. On a rejection: no patch, re-plan with the human.
+**Next Phase (current)**: Phase 7, Wave 2: QA Gate 1 round 20 on `2c438d6..HEAD` and Tester Gate 2 round 4, both fresh agents. On a rejection: no patch, re-plan with the human.
 
 **Next Phase (after QA Gate 1 round 13, superseded by the line above)**: Phase 6, Wave 1b, in the plan's order (plan D37). Then QA Gate 1 round 14 on `3af48b5..HEAD` and the R13 fixes, then Tester Gate 2 round 2, both fresh agents. On a rejection: no patch, re-plan with the human.
 

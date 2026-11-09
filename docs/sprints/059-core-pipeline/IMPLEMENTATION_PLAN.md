@@ -218,8 +218,8 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | B-11 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — transcribe QA Gate 1 ronda 19 (`RECORD`), sus exit codes y la decisión sobre R19-1 | low | `orchestrator` | ✅ `f6f5bb8` |
 | M-25 | `workflows/pipeline_workflow.md` | modify — R19-1: elimina de la fila 4.3 las dos referencias de línea a `scripts/check_task_scope.py`; quedan el archivo y `MODEL_FROM_SPRINT` | low | `orchestrator` | ✅ `18f5736` |
 | B-12 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — transcribe Tester Gate 2 ronda 3 (`RECORD`), sus exit codes y la replanificación A-1 de T3-1 | low | `orchestrator` | ✅ `f2e3188` |
-| M-26 | `workflows/pipeline_workflow.md` | modify — T3-2: elimina del paso (4) de Phase 6 el motivo falso que cita `hooks/on_commit.py`; el comando y su exit `0` no cambian | low | `orchestrator` | ⏳ |
-| M-27 | `scripts/check_task_scope.py` | modify — `fix(` T3-1: la auditoría y `--batches` terminan con exit 2 ante un id repetido en el `#` de las tablas Work; paired test en `tests/test_check_task_scope.py` | low | `implementer_agent` | ⏳ |
+| M-26 | `workflows/pipeline_workflow.md` | modify — T3-2: elimina del paso (4) de Phase 6 el motivo falso que cita `hooks/on_commit.py`; el comando y su exit `0` no cambian | low | `orchestrator` | ✅ `74adc6e` |
+| M-27 | `scripts/check_task_scope.py` | modify — `fix(` T3-1: la auditoría y `--batches` terminan con exit 2 ante un id repetido en el `#` de las tablas Work; paired test en `tests/test_check_task_scope.py` | low | `implementer_agent` | ✅ `39f243c` |
 
 ### Wave 3 — Token economy en sesión (estudio, debate, decisión)
 
