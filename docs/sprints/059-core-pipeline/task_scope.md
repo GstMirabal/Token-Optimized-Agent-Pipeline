@@ -160,7 +160,7 @@ Operation: the plan row of the same id (plan D37).
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Depends on | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| B-03 | `scripts/py_compile_tree.py` | modify: compile without writing `.pyc` (D5); test in `tests/test_verify_py_compile.py` | medium | `implementer_agent` | sonnet | medium | - | ⏳ |
+| B-03 | `scripts/py_compile_tree.py` | modify: compile without writing `.pyc` (D5); test in `tests/test_verify_py_compile.py` | medium | `implementer_agent` | sonnet | medium | - | ✅ `b31bdfb` |
 | B-04 | `skills/mass-standardizer/scripts/generate_manifest.py` | modify: add `--check` (exit 0 on match, exit 2 on drift, `skills/manifest_skills.json` bytes unchanged) (D5); test in `tests/test_mass_standardizer.py` | medium | `skill_architect` | sonnet | medium | - | ⏳ |
 | B-05 | `Makefile` | modify: after B-03 and B-04, `verify` uses both no-write modes | low | `implementer_agent` | sonnet | medium | B-03, B-04 | ⏳ |
 | C-01 | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` | create: RA-19 re-measurement for the current CLI (untested E16 members, subtrees inferred by containment, `Edit(/.git/modules/.agents/**)`, D-8), including the nucleus with the B-06 sandbox and whether `devops_agent` can run `gh` under the sandbox with no `excludedCommands` entry and no other out-of-sandbox path (`RA-09`, `RA-19`), using read-only `gh` commands and their literal output, plus whether Phase 6 step 4 `git worktree remove` and `git branch -D` work under the sandbox (KI-059-17, plan D38); `devops_agent` measures dispatched with `model: sonnet` (escalated from mechanical for high risk) and hands over literal output | high | `doc_orchestrator` | sonnet | medium | - | ⏳ |
