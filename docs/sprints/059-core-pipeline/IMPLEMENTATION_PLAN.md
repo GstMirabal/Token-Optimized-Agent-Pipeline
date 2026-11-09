@@ -220,7 +220,7 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | B-12 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — transcribe Tester Gate 2 ronda 3 (`RECORD`), sus exit codes y la replanificación A-1 de T3-1 | low | `orchestrator` | ✅ `f2e3188` |
 | M-26 | `workflows/pipeline_workflow.md` | modify — T3-2: elimina del paso (4) de Phase 6 el motivo falso que cita `hooks/on_commit.py`; el comando y su exit `0` no cambian | low | `orchestrator` | ✅ `74adc6e` |
 | M-27 | `scripts/check_task_scope.py` | modify — `fix(` T3-1: la auditoría y `--batches` terminan con exit 2 ante un id repetido en el `#` de las tablas Work; paired test en `tests/test_check_task_scope.py` | low | `implementer_agent` | ✅ `39f243c` |
-| B-13 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — R20-1: transcribe QA Gate 1 ronda 20 y añade las filas de hallazgos de T3-1, T3-2 y R20-1 | low | `orchestrator` | ⏳ |
+| B-13 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — R20-1: transcribe QA Gate 1 ronda 20 y añade las filas de hallazgos de T3-1, T3-2 y R20-1 | low | `orchestrator` | ✅ `40b0f1d` |
 
 ### Wave 3 — Token economy en sesión (estudio, debate, decisión)
 
