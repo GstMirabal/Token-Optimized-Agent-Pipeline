@@ -32,6 +32,16 @@ Also refuses a row whose assignee cannot perform the operation it is given: a
 profile with no ``Write``/``Edit`` tool cannot ``create``/``modify``/``delete`` a
 file. Sprints 030 and 031 recorded such rows as executed successfully.
 
+``Est. cost`` and ``Suspend after`` columns (plan decisions D14 and D40 of Sprint
+059) are required on every Work table from ``COST_FROM_SPRINT``, and checked on
+an earlier sprint whose Work table carries either of them. ``Est. cost`` is a
+non-negative integer of ``fresh`` tokens and ``Suspend after`` is ``yes`` or
+empty. In file row order the check sums ``Est. cost``; a unit is non-compliant
+when ``baseline_context + sum > 5 * baseline_context`` (equal passes), where
+``baseline_context`` is read from ``config/unit_cost_estimates.json`` and a
+missing or non-positive value is a finding. ``Suspend after: yes`` zeroes the
+sum after that unit is counted.
+
 Exit codes:
     0 — pass, or skip (historical columns / non-canonical dir / no anchor or
         no ``current_sprint`` block)
@@ -44,6 +54,7 @@ from __future__ import annotations
 
 import argparse
 import collections
+import json
 import re
 import sys
 from pathlib import Path
@@ -55,6 +66,10 @@ from _md_table import split_cells
 from _root import agents_root
 
 MODEL_FROM_SPRINT = 28
+COST_FROM_SPRINT = 60
+COST_COLUMNS = ("Est. cost", "Suspend after")
+SOFT_MULTIPLE = 5
+COST_CONFIG = "unit_cost_estimates.json"
 MECHANICAL_PROFILES = frozenset({"devops_agent", "git_sync_agent", "topology_mapper"})
 MECHANICAL_MODELS = frozenset({"haiku", "composer-2.5", "composer-2"})
 WORK_KEYS = ("File", "Operation", "Risk", "Assignee")
@@ -166,6 +181,15 @@ def requires_model_columns(sprint_id: int | None, text: str) -> bool:
     ):
         return True
     return "Model | Effort" in text or "Model \\| Effort" in text
+
+
+def requires_cost_columns(
+    sprint_id: int | None, tables: list[tuple[list[str], list[list[str]]]]
+) -> bool:
+    """True when the budget columns are required or claimed by a Work table."""
+    if sprint_id is not None and sprint_id >= COST_FROM_SPRINT:
+        return True
+    return any(name in header for header, _ in tables for name in COST_COLUMNS)
 
 
 def _col(header: list[str], row: list[str], name: str) -> str:
@@ -404,10 +428,12 @@ def collect_findings(
     units = work_units(tables)
     if not units:
         return [NO_WORK_ROWS]
+    resolved_root = root if root is not None else agents_root()
     findings = duplicate_findings(units) + dependency_findings(units)
+    if requires_cost_columns(sprint_id, tables):
+        findings += budget_findings(tables, resolved_root)
     if not requires_model_columns(sprint_id, text):
         return findings
-    resolved_root = root if root is not None else agents_root()
     for header, rows in tables:
         findings.extend(_capability_findings(header, rows, resolved_root))
         if "Model" not in header or "Effort" not in header:
@@ -417,6 +443,78 @@ def collect_findings(
             )
             continue
         findings.extend(_mechanical_high_findings(header, rows))
+    return findings
+
+
+def load_baseline(root: Path) -> tuple[int | None, str]:
+    """Read ``baseline_context`` from the unit cost estimates.
+
+    Args:
+        root: Framework root holding ``config/``.
+
+    Returns:
+        tuple[int | None, str]: The baseline and an empty string, or None and
+        the reason it is unusable.
+    """
+    path = root / "config" / COST_CONFIG
+    try:
+        value = json.loads(path.read_text(encoding="utf-8")).get("baseline_context")
+    except (OSError, ValueError, AttributeError) as exc:
+        return None, f"cannot read baseline_context from config/{COST_CONFIG}: {exc}"
+    if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+        return None, f"baseline_context in config/{COST_CONFIG} is not a positive integer."
+    return value, ""
+
+
+def _cost_cells_problem(unit: str, cost: str, suspend: str) -> str | None:
+    """Reason a unit's budget cells are malformed, or None."""
+    if not (cost.isascii() and cost.isdigit()):
+        return f"Unit {unit}: Est. cost {cost!r} is not a non-negative integer."
+    if suspend not in ("", "yes"):
+        return f"Unit {unit}: Suspend after {suspend!r} is neither 'yes' nor empty."
+    return None
+
+
+def _budget_rows(
+    tables: list[tuple[list[str], list[list[str]]]],
+) -> list[tuple[str, str, str]]:
+    """Unit id, Est. cost and Suspend after cells of every row, in file row order."""
+    return [
+        (_col(header, row, "#"), _col(header, row, "Est. cost").strip(),
+         _col(header, row, "Suspend after").strip())
+        for header, rows in tables for row in rows if _col(header, row, "#")
+    ]
+
+
+def budget_findings(
+    tables: list[tuple[list[str], list[list[str]]]], root: Path
+) -> list[str]:
+    """Missing budget columns, malformed cells and units past the soft bound."""
+    missing = [
+        f"Work table is missing {name} column (header: {' | '.join(header)})."
+        for header, _ in tables for name in COST_COLUMNS if name not in header
+    ]
+    if missing:
+        return missing
+    baseline, reason = load_baseline(root)
+    if baseline is None:
+        return [reason]
+    findings: list[str] = []
+    total = 0
+    for unit, cost, suspend in _budget_rows(tables):
+        problem = _cost_cells_problem(unit, cost, suspend)
+        if problem is not None:
+            findings.append(problem)
+            continue
+        total += int(cost)
+        if baseline + total > SOFT_MULTIPLE * baseline:
+            findings.append(
+                f"Unit {unit}: cumulative Est. cost {total} projects the cycle past "
+                f"{SOFT_MULTIPLE}x baseline_context {baseline} with no earlier "
+                "Suspend after: yes."
+            )
+        if suspend == "yes":
+            total = 0
     return findings
 
 

@@ -566,3 +566,150 @@ def test_an_empty_task_scope_fails_the_current_sprint_mode(tmp_path: Path) -> No
 
     assert any("no work-unit rows" in f for f in collect_findings("", 59))
     assert any("no work-unit rows" in f for f in collect_findings(HEADINGS_ONLY, None))
+
+
+# --- Per-unit budget columns (plan decisions D14 and D40) ---------------------
+
+BASELINE = 60612
+LIMIT = 4 * BASELINE  # baseline + sum == 5 * baseline
+
+
+def _budget_root(tmp_path: Path, baseline: object = BASELINE) -> Path:
+    config = tmp_path / "root" / "config"
+    config.mkdir(parents=True)
+    (config / "unit_cost_estimates.json").write_text(
+        json.dumps({"baseline_context": baseline}), encoding="utf-8"
+    )
+    return tmp_path / "root"
+
+
+def _budget_table(*units: tuple[str, object, str]) -> str:
+    rows = "\n".join(
+        f"| {unit} | `f{unit}.py` | read | low | `qa_agent` | sonnet | low "
+        f"| {cost} | {suspend} | ⏳ |"
+        for unit, cost, suspend in units
+    )
+    return (
+        "# Task Scope\n\n"
+        "| # | File | Operation | Risk | Assignee | Model | Effort "
+        "| Est. cost | Suspend after | Status |\n"
+        "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n"
+        f"{rows}\n"
+    )
+
+
+def _findings(tmp_path: Path, text: str, sprint_id: int = 60, **kwargs: object) -> list[str]:
+    import check_task_scope as module
+
+    return module.collect_findings(text, sprint_id, _budget_root(tmp_path, **kwargs))
+
+
+def test_a_budget_within_soft_passes(tmp_path: Path) -> None:
+    text = _budget_table(("A", 1000, ""), ("B", 2000, "yes"), ("C", 5, ""))
+    assert _findings(tmp_path, text) == []
+
+
+def test_a_budget_past_soft_without_a_suspend_point_fails(tmp_path: Path) -> None:
+    text = _budget_table(("A", LIMIT, ""), ("B", 1, ""))
+    findings = _findings(tmp_path, text)
+    assert len(findings) == 1
+    assert "Unit B" in findings[0]
+
+
+def test_a_budget_exactly_at_soft_passes(tmp_path: Path) -> None:
+    assert _findings(tmp_path, _budget_table(("A", LIMIT, ""))) == []
+
+
+def test_a_suspend_point_before_the_excess_resets_the_sum(tmp_path: Path) -> None:
+    text = _budget_table(("A", LIMIT, "yes"), ("B", LIMIT, ""))
+    assert _findings(tmp_path, text) == []
+
+
+def test_a_unit_past_soft_that_carries_the_suspend_point_still_fails(
+    tmp_path: Path,
+) -> None:
+    text = _budget_table(("A", LIMIT + 1, "yes"), ("B", 1, ""))
+    findings = _findings(tmp_path, text)
+    assert len(findings) == 1
+    assert "Unit A" in findings[0]
+
+
+@pytest.mark.parametrize("cost", ["abc", "-5", "1.5", "", "1,000"])
+def test_a_malformed_est_cost_is_a_finding(tmp_path: Path, cost: str) -> None:
+    findings = _findings(tmp_path, _budget_table(("A", cost, "")))
+    assert len(findings) == 1
+    assert "Est. cost" in findings[0]
+
+
+@pytest.mark.parametrize("suspend", ["no", "Yes", "true", "x"])
+def test_a_malformed_suspend_after_is_a_finding(tmp_path: Path, suspend: str) -> None:
+    findings = _findings(tmp_path, _budget_table(("A", 10, suspend)))
+    assert len(findings) == 1
+    assert "Suspend after" in findings[0]
+
+
+def test_a_sprint_from_the_gate_without_the_columns_is_a_finding(
+    tmp_path: Path,
+) -> None:
+    text = (
+        "| # | File | Operation | Risk | Assignee | Model | Effort | Status |\n"
+        "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n"
+        "| A | `a.py` | read | low | `qa_agent` | sonnet | low | ⏳ |\n"
+    )
+    findings = _findings(tmp_path, text)
+    assert any("Est. cost" in item for item in findings)
+    assert any("Suspend after" in item for item in findings)
+
+
+def test_an_earlier_sprint_without_the_columns_passes(tmp_path: Path) -> None:
+    assert _findings(tmp_path, SCOPE_NO_BUDGET, sprint_id=27) == []
+
+
+def test_an_earlier_sprint_that_carries_the_columns_is_checked(
+    tmp_path: Path,
+) -> None:
+    text = _budget_table(("A", LIMIT, ""), ("B", 1, ""))
+    assert len(_findings(tmp_path, text, sprint_id=59)) == 1
+
+
+@pytest.mark.parametrize("baseline", [0, -1, "60612", 1.5, True, None])
+def test_an_unusable_baseline_is_a_finding(tmp_path: Path, baseline: object) -> None:
+    findings = _findings(tmp_path, _budget_table(("A", 1, "")), baseline=baseline)
+    assert len(findings) == 1
+    assert "baseline_context" in findings[0]
+
+
+def test_a_missing_baseline_file_is_a_finding(tmp_path: Path) -> None:
+    import check_task_scope as module
+
+    root = tmp_path / "empty"
+    root.mkdir()
+    findings = module.collect_findings(_budget_table(("A", 1, "")), 60, root)
+    assert len(findings) == 1
+    assert "baseline_context" in findings[0]
+
+
+def test_the_cli_exits_2_past_soft_and_0_within_it(tmp_path: Path) -> None:
+    sprint = tmp_path / "docs" / "sprints" / "060-core-pipeline"
+    sprint.mkdir(parents=True)
+    (sprint / "task_scope.md").write_text(
+        _budget_table(("A", 100, "")), encoding="utf-8"
+    )
+    assert _run("--sprint-dir", str(sprint)).returncode == 0
+    (sprint / "task_scope.md").write_text(
+        _budget_table(("A", LIMIT + 1, "")), encoding="utf-8"
+    )
+    assert _run("--sprint-dir", str(sprint)).returncode == 2
+
+
+def test_the_baseline_ships_in_the_cost_estimates() -> None:
+    data = json.loads((REPO / "config" / "unit_cost_estimates.json").read_text("utf-8"))
+    assert data["baseline_context"] == BASELINE
+
+
+SCOPE_NO_BUDGET = """# Task Scope
+
+| # | File | Operation | Risk | Assignee | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| X | `a.py` | read | low | `qa_agent` | ⏳ |
+"""

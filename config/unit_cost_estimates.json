@@ -2,6 +2,9 @@
   "unit": "fresh tokens",
   "formula": "input + output + cache_creation",
   "attribution_rule": "rule C (TOKEN_ECONOMY_STUDY.md section 6.4)",
+  "baseline_context": 60612,
+  "baseline_source": "docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md section 4.2",
+  "baseline_measured_at": "2026-11-09",
   "groups": {
     "create/doc": {
       "n": 4,
