@@ -24,6 +24,9 @@ at most ``MAX_BATCH`` units whose dependencies landed (a dependency on a
 non-pending unit counts as landed) and whose ``File`` cells differ (plan D11 of
 Sprint 059). ``--batches`` refuses, with exit 2 and no batch, a unit whose Status
 is missing (no Status column, or an empty cell) or unrecognised; the audit does not.
+The audit and ``--batches`` both refuse an id repeated in the ``#`` column of the
+Work tables, with or without a ``Depends on`` column: ``schedule`` removes pending
+units by id, so a repeated row would never be dispatched.
 
 Also refuses a row whose assignee cannot perform the operation it is given: a
 profile with no ``Write``/``Edit`` tool cannot ``create``/``modify``/``delete`` a
@@ -32,13 +35,14 @@ file. Sprints 030 and 031 recorded such rows as executed successfully.
 Exit codes:
     0 — pass, or skip (historical columns / non-canonical dir / no anchor or
         no ``current_sprint`` block)
-    2 — a bad ``Depends on`` value, units ``--batches`` cannot schedule, an anchor that names no existing sprint directory, shape, undeclared mechanical-high row, incapable assignee, or a
+    2 — a repeated unit id, a bad ``Depends on`` value, units ``--batches`` cannot schedule, an anchor that names no existing sprint directory, shape, undeclared mechanical-high row, incapable assignee, or a
         canonical sprint directory holding no task_scope.md at all (RA-11)
 """
 
 from __future__ import annotations
 
 import argparse
+import collections
 import re
 import sys
 from pathlib import Path
@@ -321,6 +325,12 @@ def dependency_findings(units: list[Unit]) -> list[str]:
     return findings
 
 
+def duplicate_findings(units: list[Unit]) -> list[str]:
+    """One finding per id that more than one unit carries."""
+    counts = collections.Counter(unit.id for unit in units)
+    return [f"Unit {name}: id appears {count} times." for name, count in counts.items() if count > 1]
+
+
 def status_findings(units: list[Unit]) -> list[str]:
     """One finding per unit whose non-empty Status is not a recognised form."""
     return [
@@ -388,7 +398,8 @@ def collect_findings(
     tables = work_tables(text)
     if not tables:
         return []
-    findings = dependency_findings(work_units(tables))
+    units = work_units(tables)
+    findings = duplicate_findings(units) + dependency_findings(units)
     if not requires_model_columns(sprint_id, text):
         return findings
     resolved_root = root if root is not None else agents_root()
@@ -457,7 +468,7 @@ def print_batches(sprint_dir: Path) -> int:
         print(f"❌ check_task_scope: no task_scope.md under {sprint_dir}", file=sys.stderr)
         return 2
     units = work_units(work_tables(path.read_text(encoding="utf-8")))
-    findings = dependency_findings(units) + [
+    findings = duplicate_findings(units) + dependency_findings(units) + [
         f"Unit {unit.id}: Status is missing or empty." for unit in units if not unit.status
     ] + status_findings(units)
     batches, stuck = ([], []) if findings else schedule(units)

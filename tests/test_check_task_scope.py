@@ -495,6 +495,29 @@ def test_batches_refuse_a_unit_with_an_empty_status_cell(tmp_path: Path) -> None
     assert "Unit A: Status is missing" in result.stderr
 
 
+def test_a_repeated_unit_id_fails_the_audit_and_batches(tmp_path: Path) -> None:
+    sprint = _dep_scope(
+        tmp_path, [("U-1", "a.py", "-", "⏳"), ("U-1", "b.py", "-", "⏳")]
+    )
+    audit = _run("--sprint-dir", str(sprint))
+    assert audit.returncode == 2
+    assert "Unit U-1: id appears 2 times." in audit.stderr + audit.stdout
+    result = _batches(sprint)
+    assert result.returncode == 2
+    assert result.stdout == ""
+    assert "Unit U-1: id appears 2 times." in result.stderr
+
+
+def test_a_repeated_unit_id_fails_without_the_depends_on_column(
+    tmp_path: Path,
+) -> None:
+    row = "| U-1 | `{}` | run | low | `implementer_agent` | sonnet | medium | ⏳ |\n"
+    body = "# Task Scope\n\n" + PLAIN_HEAD + row.format("a.py") + row.format("b.py")
+    sprint = _scope(tmp_path, body)
+    assert _run("--sprint-dir", str(sprint)).returncode == 2
+    assert _batches(sprint).returncode == 2
+
+
 def test_an_unrecognised_status_fails_batches_only(tmp_path: Path) -> None:
     sprint = _dep_scope(
         tmp_path, [("A", "a.py", "-", "in progress"), ("B", "b.py", "A", "⏳")]
