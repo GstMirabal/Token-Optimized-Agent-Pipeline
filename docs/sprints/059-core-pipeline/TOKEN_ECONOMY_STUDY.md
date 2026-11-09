@@ -13,7 +13,7 @@
 | Data for | The A-06 debate and the H-01 estimate table (D14) |
 | Measurement date | 2026-11-09 |
 | Measured by | `token_economy_agent` |
-| Source of every figure | The measurement report of `token_economy_agent`; its scripts and literal outputs are in section 8 |
+| Source of every figure | The measurement report of `token_economy_agent`; its scripts and literal outputs are in section 9 |
 
 Conventions that apply to every section:
 
@@ -50,7 +50,7 @@ The "Sandbox" column follows the sandbox text in this session. It applies to Bas
 | `PreCompact` hook | The command is `persist_session_context.py`, which refreshes the mirror and prints the `task_scope.md` path. Output size not measured, because running it writes the mirror. | Outside (E4: `scripts/` is `denied (rule)`) | Deterministic | `claude/settings.hooks.json:104`; `scripts/persist_session_context.py` docstring. The nucleus `.claude/settings.json` has no `hooks` key, so it is host-only. No PreCompact event appears in the nucleus transcripts. |
 | `Stop` hook | In the nucleus transcripts: 432 `stop_hook_summary` records, all from user-level `~/.config/iterm2/cc-status`. Median 12 ms, max 177 ms, `hasOutput` false. The repo's `state_mirror.py` is not seen running. | Outside (E3) | Deterministic | `$TMPDIR` inline scan; `claude/settings.hooks.json` (Stop entry runs `state_mirror.py`). |
 | Subagents as context isolation | 270 subagent transcripts. First-turn context median 26,252 (min 15,501, max 30,327) against the main median of 60,612. Peak context median 42,133, max 175,947. Median 7.5 turns. They account for 23.1% of four-field tokens and 2,909 turns. 229 of those 2,909 (7.9%) are cold-cache turns, against 1 of 2,726 in main. | `unverified` for subagent Bash. E11 shows frontmatter `hooks:` run outside. | The decision to delegate is judgment. | `$TMPDIR/mech.py` and `cache.py` outputs. |
-| Progressive loading of skills and `rules/` | Always loaded: `instructions` attachment (`CLAUDE.md` + `agents.md` + memory), median 52,505 chars. `skill_listing` is 20,311 chars (42 skills, names and descriptions only). `agent_listing_delta` is 8,610 chars. A skill body (`invoked_skills` attachment) was 1,584 chars. Median first-turn context across the 27 closed sessions is 60,612 tokens. `rules/` load is by the `agents.md §0` index, which is a convention. | Not applicable | Skill listing is deterministic. Loading `rules/` depends on agent judgment. `config/rule_triggers.json` is checked by `verify_references.py` check (e), which checks the mirror, not the loading. | Attachment-size scan (inline, section 8); `agents.md §0`. |
+| Progressive loading of skills and `rules/` | Always loaded: `instructions` attachment (`CLAUDE.md` + `agents.md` + memory), median 52,505 chars. `skill_listing` is 20,311 chars (42 skills, names and descriptions only). `agent_listing_delta` is 8,610 chars. A skill body (`invoked_skills` attachment) was 1,584 chars. Median first-turn context across the 27 closed sessions is 60,612 tokens. `rules/` load is by the `agents.md §0` index, which is a convention. | Not applicable | Skill listing is deterministic. Loading `rules/` depends on agent judgment. `config/rule_triggers.json` is checked by `verify_references.py` check (e), which checks the mirror, not the loading. | Attachment-size scan (inline, section 9); `agents.md §0`. |
 | Prompt caching | `cache_read` is 94.14% of all four-field tokens. Main-session cache writes carry a 1h TTL (16,611,110 tokens) and subagent writes carry a 5m TTL (19,696,172 tokens). Price ratio is `unverified`: `config/model_tiers.json:10` states prices are deliberately absent. | Not applicable | Deterministic | `$TMPDIR/cache.py` and `mech.py` outputs. |
 
 ### 3.1 What `scripts/install.py` does today with `agents:*` commands
@@ -222,7 +222,7 @@ The small cells `create/doc/{high,low,medium}`, `modify/doc/{high,medium}` and `
 
 ### 6.6 Sensitivity to the rule
 
-Rule P and rule A numbers differ materially. Rule A (unit commits only as boundaries) attributes 42 fewer units than rule P. It gives larger medians, for example modify/rule max 14,294,365 and modify/script max 11,048,181, because it also absorbs non-unit work between units. The full outputs of all three rules are produced by `attribute.py` (section 8). Medians shift by up to about 2x between the rules, so any D14 estimate table must name its rule.
+Rule P and rule A numbers differ materially. Rule A (unit commits only as boundaries) attributes 42 fewer units than rule P. It gives larger medians, for example modify/rule max 14,294,365 and modify/script max 11,048,181, because it also absorbs non-unit work between units. The full outputs of all three rules are produced by `attribute.py` (section 9). Medians shift by up to about 2x between the rules, so any D14 estimate table must name its rule.
 
 ### 6.7 Limits of this attribution
 
@@ -233,7 +233,7 @@ Rule P and rule A numbers differ materially. Rule A (unit commits only as bounda
 | Commit time versus work time | Commits are original timestamps from preserved objects; whether the committer time equals work time is unverified |
 | Unreachable originals | The original commits are unreachable objects exposed to garbage collection (6.1) |
 | Scratchpad projects not read | The scratchpad project directories under `~/.claude/projects/` (5 directories named `-private-tmp-...-scratchpad-...`) were not read |
-| Rule C absorbs non-unit commit cost | In `rule_c` (section 8, `attribute.py`), a pending batch of units is assigned to the next commit that has turns (`if a and a[2]: if pending: ...`). The branch does not test whether that commit is a unit commit. When it is a non-unit commit, the batch is charged that commit's whole cost, split evenly across the batch's units, so that cost is not counted as `overhead` |
+| Rule C absorbs non-unit commit cost | In `rule_c` (section 9, `attribute.py`), a pending batch of units is assigned to the next commit that has turns (`if a and a[2]: if pending: ...`). The branch does not test whether that commit is a unit commit. When it is a non-unit commit, the batch is charged that commit's whole cost, split evenly across the batch's units, so that cost is not counted as `overhead` |
 | Even split | The even split inside a batch blurs per-unit differences (6.4) |
 | One unit unattributed | Unit `B7` of 056 has no interval under any rule (6.3) |
 
@@ -250,7 +250,41 @@ Four methods for in-session cost control. None is chosen here.
 | 3 | Delegate read-heavy work to subagents for context isolation | Subagents start at a median 26,252 tokens against 60,612 for main sessions, peak at a median 42,133, and take 23.1% of tokens | They run on a 5m cache TTL (against 1h for main), 7.9% of their turns are cold-cache against 1 of 2,726 in main, and in rule P 169 of 401 sprint-058 unit turns were already subagent turns, so the total is not obviously lower |
 | 4 | Cut the boot baseline | Every turn re-reads a median 60,612-token first-turn context, and `cache_read` is 94.14% of all tokens. The `instructions` attachment is a median 52,505 chars, the skill listing 20,311 chars (42 skills) and the agent listing 8,610 chars | A smaller baseline raises the ratio for the same growth, so the 5x and 15x triggers fire sooner (`KI-059-9`), and the progressive-loading convention for `rules/` is enforced only by agent judgment |
 
-## 8. Reproduction
+## 8. Debate
+
+Decisions taken by the human, GstMirabal, on 2026-11-09, in session `593ffb72`. Each table lists the options considered, the objection to each option taken from the figures of this study, and the decision.
+
+### 8.1 The 15x hard bound (KI-059-9)
+
+| Option | Objection from the study's figures |
+| :--- | :--- |
+| Replace with an absolute-token trigger | Any threshold is chosen from 27 sessions of one repository and cannot be validated |
+| Lower the multiple | 0 of 27 sessions reached 15x and 7 reached 5x; a multiple is relative to the first turn, so the `agents.md` trim (which lowers `first`) tightens it further, as `KI-059-9` notes |
+| Keep 15x | 0 of 27 sessions reached 15x; the absolute 15x value of 909,180 is 1.65 times the largest observed context (550,187) |
+
+| Item | Record |
+| :--- | :--- |
+| Decision | Replace the 15x bound with an absolute-token trigger |
+| Reason | 0 of 27 sessions reached 15x, and a relative bound moves when the `agents.md` trim lowers the first-turn context |
+| Numeric value of the trigger | Not decided |
+
+### 8.2 In-session cost control methods
+
+| # | Option (section 7) | Objection from the study's figures | Decision |
+| :--- | :--- | :--- | :--- |
+| 1 | Planned per-unit budget with suspend points (D14) | The spread inside each group is wide (low-risk `fresh` runs 676 to 365,769), and `total4` depends on context size at execution time | Adopted, estimated on `fresh` tokens instead of the four-field total |
+| 2 | Lower the hard bound, or add an absolute-token trigger | Any new threshold is chosen from n=27 sessions of one repository | Not adopted as a separate method; decision 8.1 covers the trigger |
+| 3 | Delegate read-heavy work to subagents for context isolation | 5m cache TTL (against 1h for main) and 7.9% cold-cache turns against 1 of 2,726 in main; the measured figures do not show a saving | Not adopted |
+| 4 | Cut the boot baseline | A smaller baseline raises the ratio for the same growth, so the 5x and 15x triggers fire sooner (`KI-059-9`) | Adopted |
+
+### 8.3 `agents:*` commands in `scripts/install.py`
+
+| Option | Objection from the study's figures | Decision |
+| :--- | :--- | :--- |
+| Keep installing all for every host | Reinstalling reverts any deletion of a command (section 3.1); the size objection does not apply: 13 command files, 3,835 bytes in total | Adopted |
+| Opt-in per host | Adds a mechanism for no appreciable saving over 3,835 bytes | Not adopted |
+
+## 9. Reproduction
 
 The scripts were run from the repository root with `python3 -I`. `$TMPDIR` is ephemeral, which is why the script text is kept in this file. Run each script as `python3 -I $TMPDIR/<name>.py`, in this order: `units.py`, then `attribute.py` (needs `units.json`), then `zero.py` (needs `perunit.json` from `attribute.py`). The others are independent. Shell commands for inline checks are quoted where used.
 
