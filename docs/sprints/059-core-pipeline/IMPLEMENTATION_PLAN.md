@@ -221,6 +221,13 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | M-26 | `workflows/pipeline_workflow.md` | modify — T3-2: elimina del paso (4) de Phase 6 el motivo falso que cita `hooks/on_commit.py`; el comando y su exit `0` no cambian | low | `orchestrator` | ✅ `74adc6e` |
 | M-27 | `scripts/check_task_scope.py` | modify — `fix(` T3-1: la auditoría y `--batches` terminan con exit 2 ante un id repetido en el `#` de las tablas Work; paired test en `tests/test_check_task_scope.py` | low | `implementer_agent` | ✅ `39f243c` |
 | B-13 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — R20-1: transcribe QA Gate 1 ronda 20 y añade las filas de hallazgos de T3-1, T3-2 y R20-1 | low | `orchestrator` | ✅ `40b0f1d` |
+| B-14 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — T4-1: transcribe Tester Gate 2 ronda 4 y la decisión sobre la prosa sin instrumento | low | `orchestrator` | ⏳ |
+| B-15 | `docs/sprints/059-core-pipeline/task_scope.md` | modify — T4-1: elimina la tabla de `## Jurisdiction check`; quedan el encabezado, que `scripts/check_sprint_refs.py` usa como fin de sección, y una línea con el comando `--batches` | low | `orchestrator` | ⏳ |
+| M-28 | `agents/rule_validator.md` | modify — elimina los números de línea de sus citas; quedan archivo y símbolo | low | `rule_validator` | ⏳ |
+| M-29 | `rules/project_topology.md` | modify — elimina los números de línea de sus citas; quedan archivo y símbolo | low | `rule_validator` | ⏳ |
+| M-30 | `rules/django_backend_standard.md` | modify — elimina los números de línea de sus citas; quedan archivo y símbolo | low | `rule_validator` | ⏳ |
+| M-31 | `rules/code_craft.md` | modify — elimina los números de línea de sus citas; quedan archivo y símbolo | low | `rule_validator` | ⏳ |
+| M-32 | `rules/graphify.md` | modify — elimina los números de línea de sus citas; quedan archivo y símbolo | low | `rule_validator` | ⏳ |
 
 ### Wave 3 — Token economy en sesión (estudio, debate, decisión)
 
@@ -313,7 +320,7 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 125 (D37: 92 + 16 de la wave 1b + M-17 + M-18 a M-21 y B-08 + B-09, M-22 y M-23 + B-10 y M-24 + B-11 y M-25 + B-12, M-26 y M-27 + B-13; I-08 a I-10 siguen contadas como sustituidas) | Count of rows in Work tables |
+| Work units | 132 (D37: 92 + 16 de la wave 1b + M-17 + M-18 a M-21 y B-08 + B-09, M-22 y M-23 + B-10 y M-24 + B-11 y M-25 + B-12, M-26 y M-27 + B-13 + B-14, B-15 y M-28 a M-32; I-08 a I-10 siguen contadas como sustituidas) | Count of rows in Work tables |
 | Subagents dispatched | lotes de hasta 4 en paralelo desde la wave 3 (D11), más QA + Tester por wave | `agent_assignment.md` |
 | Session ratio (2026-11-08, QA rondas 12 y 13, wave 1b) | Sesión `e9a7a9bf`, ciclo único: 5.4× durante la sesión, sobre soft (5×); `suspend` antes de QA Gate 1 ronda 14 | `python3 -I scripts/session_cost.py --session e9a7a9bf-bf5b-4800-bd46-edd6c8fc46c5 --json` |
 | Session ratio (2026-11-07, QA rondas 8 a 11) | Sesión `93b61aea`, ciclo único: lectura de 5.0× durante la sesión, en soft (5×); el valor final lo da el comando. Quedan 44 unidades en 5 waves más cierre y los gates de la wave 1; delegación `native`; `suspend` antes de QA Gate 1 ronda 12 | `python3 -I scripts/session_cost.py --session 93b61aea-d168-4293-97f5-340681b5c33a --json` |
@@ -406,6 +413,8 @@ transcript exists for this tool.
 | Bloquear en hard (exit 2) | Cuando la calibración de §3.1 tenga n > 1 (D3) |
 | `install.py` instala los comandos `agents:*` en todo host sin preguntar, así que el borrado de Phase 1 se revierte al reinstalar | Pregunta del estudio A-00 (comandos opt-in por host); si no se decide, `KI-059-n` |
 | Más de 4 subagentes en paralelo | Se reevalúa con la medición de integración de la wave 3; el límite vive en `/config` |
+| Instrumento para la tabla Gate findings: `scripts/check_gate_log.py` exige una fila por cada hallazgo S0-S2 (R20-1) | Sprint 060: decisión humana 2026-11-09, para no alargar las rondas de Wave 2 |
+| Auditoría de motivos en prosa en documentos normativos: cada motivo se verifica con un instrumento o se elimina | Sprint 060: decisión humana 2026-11-09; requiere medición previa |
 
 ---
 

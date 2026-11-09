@@ -135,6 +135,13 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | M-26 | `workflows/pipeline_workflow.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
 | M-27 | `scripts/check_task_scope.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | B-13 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
+| B-14 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
+| B-15 | `docs/sprints/059-core-pipeline/task_scope.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
+| M-28 | `agents/rule_validator.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| M-29 | `rules/project_topology.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| M-30 | `rules/django_backend_standard.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| M-31 | `rules/code_craft.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| M-32 | `rules/graphify.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
 
 ### Wave 3 — in-session token economy
 
