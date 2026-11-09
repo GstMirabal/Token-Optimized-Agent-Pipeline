@@ -266,7 +266,7 @@ Decisions taken by the human, GstMirabal, on 2026-11-09, in session `593ffb72`. 
 | :--- | :--- |
 | Decision | Replace the 15x bound with an absolute-token trigger |
 | Reason | 0 of 27 sessions reached 15x, and a relative bound moves when the `agents.md` trim lowers the first-turn context |
-| Numeric value of the trigger | Not decided |
+| Numeric value of the trigger | Not decided at this debate; decided afterwards as 550,000 tokens in `docs/decisions/ADR-0018-in-session-token-economy.md` |
 
 ### 8.2 In-session cost control methods
 

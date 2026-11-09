@@ -152,6 +152,7 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | A-06 | `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | A-07 | `docs/decisions/ADR-0018-in-session-token-economy.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | A-02 | `scripts/session_cost.py` | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| A-55 | `scripts/session_probe.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | A-03 | `rules/token_economy.md` | modify | parallel | `rule_validator` | N/A | `agents/rule_validator.md` |
 | H-01 | `config/unit_cost_estimates.json` | create | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | H-02 | `scripts/check_task_scope.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
