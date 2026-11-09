@@ -198,7 +198,7 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | M-17 | `scripts/_current_sprint.py` | modify — `fix(` T2-1: más de un directorio para el número del sprint lanza `CurrentSprintError`; paired test en `tests/test_current_sprint.py` | low | `implementer_agent` | ✅ `92bb5e7` |
 | G-01 | `scripts/check_task_scope.py` | modify — columna `Depends on` y subcomando que imprime los lotes paralelos (dependencias aterrizadas, archivos disjuntos, máximo 4); tests en `tests/test_check_task_scope.py` | medium | `implementer_agent` | ✅ `21080e9` |
-| G-02 | `workflows/pipeline_workflow.md` | modify — tras G-01: Phase 6 despacha cada lote en paralelo con `isolation: "worktree"` e integra en orden; Phase 7 sigue en serie por wave (D11). Tras integrar cada lote, el orchestrator borra cada worktree y su rama (`git worktree remove <path>`, `git branch -D <rama>`) antes del lote siguiente, porque `scripts/branch_sovereignty.py` niega el sello de cierre con una rama sin integrar; y re-ejecuta sobre `ai-sprint/[ID]` las comprobaciones de `hooks/on_commit.py` que el commit en el worktree no vio (`python3 scripts/check_task_scope.py --sprint-dir <dir>`), exit 0 antes del lote siguiente | medium | `orchestrator` | ✅ `808d098` |
+| G-02 | `workflows/pipeline_workflow.md` | modify — tras G-01: Phase 6 despacha cada lote en paralelo con `isolation: "worktree"` e integra en orden; Phase 7 sigue en serie por wave (D11). Tras integrar cada lote, el orchestrator borra cada worktree y su rama (`git worktree remove <path>`, `git branch -D <rama>`) antes del lote siguiente, porque `scripts/branch_sovereignty.py` niega el sello de cierre con una rama sin integrar; y re-ejecuta sobre `ai-sprint/[ID]` `python3 scripts/check_task_scope.py --sprint-dir <dir>`, exit 0 antes del lote siguiente | medium | `orchestrator` | ✅ `808d098` |
 | B-01 | `scripts/prompt_count.py` | create — cuenta autorizaciones por sesión desde transcripts, `--json`; test `tests/test_prompt_count.py` | medium | `implementer_agent` | ✅ `4952195` |
 | B-02 | `docs/sprints/059-core-pipeline/PROMPT_MEASUREMENT.md` | create — tras B-01: recuento base de una sesión real de núcleo y una de host (genericizada, `RA-15`) | low | `doc_orchestrator` | ✅ `7fc8ae5` |
 | B-07 | `workflows/close_workflow.md` | modify — tras B-01: paso advisory que corre `python3 scripts/prompt_count.py --session <id> --json` sobre la sesión que cierra e imprime el recuento; es el invocador `RA-16` de B-01 | low | `orchestrator` | ✅ `2d40946` |
@@ -217,6 +217,9 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | M-24 | `scripts/check_task_scope.py` | modify — `fix(` R18-3: elimina de la auditoría la comprobación de `Status` y su texto; `--batches` sigue rechazando un `Status` desconocido; paired test en `tests/test_check_task_scope.py` | low | `implementer_agent` | ✅ `16b1dc6` |
 | B-11 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — transcribe QA Gate 1 ronda 19 (`RECORD`), sus exit codes y la decisión sobre R19-1 | low | `orchestrator` | ✅ `f6f5bb8` |
 | M-25 | `workflows/pipeline_workflow.md` | modify — R19-1: elimina de la fila 4.3 las dos referencias de línea a `scripts/check_task_scope.py`; quedan el archivo y `MODEL_FROM_SPRINT` | low | `orchestrator` | ✅ `18f5736` |
+| B-12 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — transcribe Tester Gate 2 ronda 3 (`RECORD`), sus exit codes y la replanificación A-1 de T3-1 | low | `orchestrator` | ⏳ |
+| M-26 | `workflows/pipeline_workflow.md` | modify — T3-2: elimina del paso (4) de Phase 6 el motivo falso que cita `hooks/on_commit.py`; el comando y su exit `0` no cambian | low | `orchestrator` | ⏳ |
+| M-27 | `scripts/check_task_scope.py` | modify — `fix(` T3-1: la auditoría y `--batches` terminan con exit 2 ante un id repetido en el `#` de las tablas Work; paired test en `tests/test_check_task_scope.py` | low | `implementer_agent` | ⏳ |
 
 ### Wave 3 — Token economy en sesión (estudio, debate, decisión)
 
@@ -309,7 +312,7 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 121 (D37: 92 + 16 de la wave 1b + M-17 + M-18 a M-21 y B-08 + B-09, M-22 y M-23 + B-10 y M-24 + B-11 y M-25; I-08 a I-10 siguen contadas como sustituidas) | Count of rows in Work tables |
+| Work units | 124 (D37: 92 + 16 de la wave 1b + M-17 + M-18 a M-21 y B-08 + B-09, M-22 y M-23 + B-10 y M-24 + B-11 y M-25 + B-12, M-26 y M-27; I-08 a I-10 siguen contadas como sustituidas) | Count of rows in Work tables |
 | Subagents dispatched | lotes de hasta 4 en paralelo desde la wave 3 (D11), más QA + Tester por wave | `agent_assignment.md` |
 | Session ratio (2026-11-08, QA rondas 12 y 13, wave 1b) | Sesión `e9a7a9bf`, ciclo único: 5.4× durante la sesión, sobre soft (5×); `suspend` antes de QA Gate 1 ronda 14 | `python3 -I scripts/session_cost.py --session e9a7a9bf-bf5b-4800-bd46-edd6c8fc46c5 --json` |
 | Session ratio (2026-11-07, QA rondas 8 a 11) | Sesión `93b61aea`, ciclo único: lectura de 5.0× durante la sesión, en soft (5×); el valor final lo da el comando. Quedan 44 unidades en 5 waves más cierre y los gates de la wave 1; delegación `native`; `suspend` antes de QA Gate 1 ronda 12 | `python3 -I scripts/session_cost.py --session 93b61aea-d168-4293-97f5-340681b5c33a --json` |

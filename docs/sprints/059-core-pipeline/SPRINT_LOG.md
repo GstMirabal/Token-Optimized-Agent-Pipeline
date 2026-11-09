@@ -63,6 +63,7 @@ Tracking of atomic goals achieved during the session. Work units and execution o
     - `[x]` Human decisions 2026-11-08 after QA Gate 1 round 17: units B-09, M-22 and M-23 added to Wave 2; work units 114 → 117.
     - `[x]` Human decisions 2026-11-08 after QA Gate 1 round 18 (A-1 stop, chain `c5fbf5f`, `639fd05`): block `scripts/check_task_scope.py` re-planned as M-24, a removal; no history rewrite; units B-10 and M-24 added; work units 117 → 119.
     - `[x]` Human decision 2026-11-09 after QA Gate 1 round 19: R19-1 closed by removal in unit M-25; units B-11 and M-25 added; work units 119 → 121. Chain 2 of the A-1 stop now has three commits (`c5fbf5f`, `639fd05`, `16b1dc6`).
+    - `[x]` Human decision 2026-11-09 after Tester Gate 2 round 3 (A-1 re-plan): T3-1 fixed in unit M-27, a further `fix(` on `scripts/check_task_scope.py` and a fourth commit of chain 2; T3-2 closed by removal in unit M-26; units B-12, M-26 and M-27 added; work units 121 → 124. T3-3 and T3-4 (S3) noted only.
 
 ---
 
@@ -145,6 +146,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 | QA Agent (Gate 1) | 19 | RECORD | testifying | S2 | Range 0c41e80..db738ca; tools also on 08c669c..HEAD. Fix replay 0 (20 OK). Chain exit 2 from the base: same A-1 stop as R18-1, no third chain. verify 0 (1668 passed), quality-audit 0. R18-1 actioned; R18-2, R18-3 closed. R19-1 (S2, testifying) stale line citations in the pipeline workflow. |
 | Tester Agent (Gate 2) | 1 | REJECTED | charter | S1 | Range `08c669c..c6c7987`, 1531 passed. Baseline on context size with cuts on `cache_read`: 50 of 52 cuts over 35 transcripts are not collapses, and the ratio that feeds the hard bound falls (synthetic 20x reads 2.5x). 3 more: `--resolve` alternatives diverge under Cursor (S2), hard bound and cut field untested (S2), census wording (S3). |
 | Tester Agent (Gate 2) | 2 | RECORD | testifying | S2 | Range c6c7987..8b84259, 1613 passed, make verify exit 0, zero regression. Round 1 S0-S2 findings closed. T2-1 (S2, testifying); 3 S3. |
+| Tester Agent (Gate 2) | 3 | RECORD | testifying | S2 | Range 8b84259..2c438d6, 1668 passed, make verify exit 0, zero regression. T2-1 closed. T3-1 (S2) a repeated unit id drops rows from --batches with exit 0, `scripts/check_task_scope.py:380`. T3-2 (S2) false reason citing hooks/on_commit.py, `workflows/pipeline_workflow.md:24`. T3-3, T3-4 (S3) noted. |
 
 ### Gate findings
 
@@ -287,6 +289,10 @@ Example (do not uncomment):
 | QA Agent (Gate 1) | 19 | `make quality-audit` | 0 |
 | QA Agent (Gate 1) | 19 | `python3 scripts/check_fix_reproduces.py --range 08c669c..HEAD` | 0 |
 | QA Agent (Gate 1) | 19 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 2 |
+| Tester Agent (Gate 2) | 2 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider` | 0 |
+| Tester Agent (Gate 2) | 2 | `make verify` | 0 |
+| Tester Agent (Gate 2) | 3 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider` | 0 |
+| Tester Agent (Gate 2) | 3 | `make verify` | 0 |
 | Tester Agent (Gate 2) | 1 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider` | 0 |
 | Tester Agent (Gate 2) | 1 | `make verify` | 0 |
 
@@ -356,7 +362,7 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase (current)**: Phase 7, Wave 2: Tester Gate 2 round 3, a fresh agent. On a rejection: no patch, re-plan with the human.
+**Next Phase (current)**: Phase 6, Wave 2: M-26 and M-27, then QA Gate 1 round 20 on `2c438d6..HEAD` and Tester Gate 2 round 4, both fresh agents. On a rejection: no patch, re-plan with the human.
 
 **Next Phase (after QA Gate 1 round 13, superseded by the line above)**: Phase 6, Wave 1b, in the plan's order (plan D37). Then QA Gate 1 round 14 on `3af48b5..HEAD` and the R13 fixes, then Tester Gate 2 round 2, both fresh agents. On a rejection: no patch, re-plan with the human.
 

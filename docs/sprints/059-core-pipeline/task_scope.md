@@ -126,6 +126,9 @@ Operation: the plan row of the same id (plan D37).
 | M-24 | `scripts/check_task_scope.py` | modify: plan M-24 | low | `implementer_agent` | sonnet | medium | - | ✅ `16b1dc6` |
 | B-11 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify: plan B-11 | low | `orchestrator` | sonnet | medium | - | ✅ `f6f5bb8` |
 | M-25 | `workflows/pipeline_workflow.md` | modify: plan M-25 | low | `orchestrator` | sonnet | medium | - | ✅ `18f5736` |
+| B-12 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify: plan B-12 | low | `orchestrator` | sonnet | medium | - | ⏳ |
+| M-26 | `workflows/pipeline_workflow.md` | modify: plan M-26 | low | `orchestrator` | sonnet | medium | - | ⏳ |
+| M-27 | `scripts/check_task_scope.py` | modify: plan M-27 | low | `implementer_agent` | sonnet | medium | - | ⏳ |
 
 ### Wave 3 — In-session token economy
 
@@ -209,7 +212,7 @@ Same structural subject claimed by more than one unit. "Serial" means the plan's
 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | A-47, A-54 (Wave 1) | Serial. |
 | `docs/sprints/059-core-pipeline/TOKEN_ECONOMY_STUDY.md` | A-00, A-06 (Wave 3) | Serial. |
 | `rules/project_topology.md` | A-10 (Wave 1), D-03 (Wave 5, after A-10) | Serial. |
-| `workflows/pipeline_workflow.md` | G-02 and M-25 (Wave 2), A-04 (Wave 3, after G-02) | Serial. |
+| `workflows/pipeline_workflow.md` | G-02, M-25 and M-26 (Wave 2), A-04 (Wave 3, after G-02) | Serial. |
 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | A-05 (Wave 1), C-02 (Wave 4) | Serial by wave order; F-4 moved the closing marks to C-02. |
 | `TOKEN_ECONOMY_STUDY.md` | A-00, A-06 (after A-00) | Serial. |
 | `claude/settings.hooks.json` | D-04, E-01b (after D-04) | Serial after F-1 resolution. |
