@@ -11,6 +11,13 @@ nothing else:
 | ``KI-<NNN>-<n>`` of this sprint | the ``KI ID`` column of ``SPRINT_LOG.md`` | the four artifacts |
 | Gate findings ``R<round>-<n>`` | the ``ID`` column of ``### Gate findings`` | the four artifacts, from the first round the table covers |
 
+It also checks that a known-issue row (a ``SPRINT_LOG.md`` table row whose last
+cell is a ``KI-<sprint>-<n>`` id) which names a unit that ``task_scope.md`` marks
+``✅`` followed by backticked SHAs cites one of those SHAs (plan D45). A unit id
+is matched as a whole token (``C-01`` does not match ``C-01b``); a cited SHA of
+7 or more hex characters matches by prefix in either direction. A missing
+``task_scope.md`` or ``SPRINT_LOG.md`` is a finding, not a pass.
+
 It also checks two limits: every Design row from the first covered decision on
 has a non-empty ``Check`` column or contains ``**Check**:``, and every Quality Gate ``Notes`` cell from the first
 covered round on holds at most 400 characters. It does not detect a copied fact
@@ -52,6 +59,10 @@ NOTES_FROM_ROUND = {59: {"qa agent (gate 1)": 13, "tester agent (gate 2)": 2}}
 UNIT = re.compile(r"^\| ([A-Z]-\d{2}[a-z]?) \|", re.MULTILINE)
 DECISION = re.compile(r"\bD(\d+)\b")
 FINDING = re.compile(r"\bR(\d+)-\d+\b")
+UNIT_ID = re.compile(r"[A-Z]-\d{2}[a-z]?")
+KI_ID = re.compile(r"KI-\d+-\d+")
+SHA = re.compile(r"`([0-9a-f]{7,40})`")
+HEX_TOKEN = re.compile(r"\b[0-9a-f]{7,40}\b")
 
 
 def section(text: str, start: str, end: str) -> str:
@@ -190,18 +201,72 @@ def limit_findings(texts: dict[str, str], sprint: int) -> list[str]:
     return _check_findings(texts["IMPLEMENTATION_PLAN.md"], sprint) + _notes_findings(texts.get("SPRINT_LOG.md", ""), sprint)
 
 
+def _done_row(row: list[str], position: int) -> tuple[str, list[str]] | None:
+    """(unit id, SHAs) when ``row`` is a unit whose status cell holds ✅ and backticked SHAs."""
+    status = row[position] if len(row) > position else ""
+    unit = row[0].strip("`")
+    shas = SHA.findall(status) if "✅" in status else []
+    return (unit, shas) if shas and UNIT_ID.fullmatch(unit) else None
+
+
+def done_units(task_scope: str) -> dict[str, list[str]]:
+    """Unit id -> backticked SHAs, for each task_scope row whose status cell holds ✅ and SHAs."""
+    pairs = [
+        _done_row(row, header.index("Status"))
+        for header, rows in tables(task_scope)
+        if "Status" in header
+        for row in rows
+    ]
+    return dict(pair for pair in pairs if pair)
+
+
+def _cites(row_text: str, shas: list[str]) -> bool:
+    """True when ``row_text`` holds a hex token that prefixes, or is prefixed by, one of ``shas``."""
+    tokens = HEX_TOKEN.findall(row_text)
+    return any(sha.startswith(token) or token.startswith(sha) for token in tokens for sha in shas)
+
+
+def _ki_rows(log: str) -> list[list[str]]:
+    """Rows of every ``SPRINT_LOG.md`` table whose last cell is a ``KI-<sprint>-<n>`` id."""
+    return [row for _, rows in tables(log) for row in rows if KI_ID.fullmatch(row[-1].strip("`"))]
+
+
+def _row_findings(row: list[str], done: dict[str, list[str]]) -> list[str]:
+    """Findings for one KI row: each done unit it names without citing one of that unit's SHAs."""
+    text = " | ".join(row)
+    return [
+        f"{row[-1]} names unit {unit} (done) without its SHA: expected one of {', '.join(shas)}"
+        for unit, shas in sorted(done.items())
+        if re.search(rf"(?<![\w-]){re.escape(unit)}(?!\w)", text) and not _cites(text, shas)
+    ]
+
+
+def ki_sha_findings(texts: dict[str, str]) -> list[str]:
+    """A KI row that names a done unit must cite one of that unit's SHAs (plan D45)."""
+    missing = [name for name in ("task_scope.md", "SPRINT_LOG.md") if name not in texts]
+    if missing:
+        return [f"{name} is missing: the known-issue SHA check cannot run" for name in missing]
+    done = done_units(texts["task_scope.md"])
+    return [item for row in _ki_rows(texts["SPRINT_LOG.md"]) for item in _row_findings(row, done)]
+
+
 def check(sprint_dir: Path) -> int:
     """Audit one sprint directory. Returns the process exit code."""
     sprint = sprint_id_from_dir(sprint_dir)
     if sprint is not None and sprint < FROM_SPRINT:
         print(f"[OK] check_sprint_refs: sprint {sprint} predates {FROM_SPRINT} (skip)")
         return 0
-    texts = {name: (sprint_dir / name).read_text(encoding="utf-8") for name in ARTIFACTS if (sprint_dir / name).is_file()}
+    try:
+        texts = {name: (sprint_dir / name).read_text(encoding="utf-8") for name in ARTIFACTS if (sprint_dir / name).is_file()}
+    except (OSError, UnicodeDecodeError) as exc:
+        print(f"❌ check_sprint_refs: cannot read an artifact under {sprint_dir}: {exc}", file=sys.stderr)
+        return 2
     if "IMPLEMENTATION_PLAN.md" not in texts:
         print(f"[OK] check_sprint_refs: no IMPLEMENTATION_PLAN.md under {sprint_dir} yet (skip)")
         return 0
     number = sprint if sprint is not None else FROM_SPRINT
     findings = unit_findings(texts) + id_findings(texts, number) + limit_findings(texts, number)
+    findings += ki_sha_findings(texts)
     if not design_rows(texts["IMPLEMENTATION_PLAN.md"]):
         findings.append("IMPLEMENTATION_PLAN.md has no ## Design table with D<n> rows")
     if not findings:

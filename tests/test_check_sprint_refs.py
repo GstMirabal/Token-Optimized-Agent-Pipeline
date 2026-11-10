@@ -135,3 +135,44 @@ def test_a_check_column_counts_as_the_check(tmp_path: Path) -> None:
     other = tmp_path / "second"
     other.mkdir()
     assert _run("--sprint-dir", str(_sprint(other, IMPLEMENTATION_PLAN_md=empty))).returncode == 2
+
+
+SCOPE_DONE = (
+    "## Work\n\n| # | File | Status |\n| :--- | :--- | :--- |\n"
+    "| A-01 | `a.py` | ✅ `5c5e0a3`, `ad7cd48` |\n| A-01b | `b.py` | ⏳ |\n\n## Jurisdiction\n"
+)
+
+
+def _ki_sprint(tmp_path: Path, ki_text: str, scope: str = SCOPE_DONE) -> Path:
+    log = LOG.replace("| x | y | KI-060-1 |", f"| x | {ki_text} | KI-060-1 |")
+    plan = PLAN.replace("| A-01 | `a.py` | modify — D0 | low | `implementer_agent` |", "| A-01 | `a.py` | modify — D0 | low | `implementer_agent` |\n| A-01b | `b.py` | modify — D0 | low | `implementer_agent` |")
+    assign = ASSIGN.replace("| A-01 | `a.py` |", "| A-01 | `a.py` |\n| A-01b | `b.py` |")
+    return _sprint(tmp_path, task_scope_md=scope, SPRINT_LOG_md=log, IMPLEMENTATION_PLAN_md=plan, agent_assignment_md=assign)
+
+
+def test_a_ki_row_naming_a_done_unit_without_its_sha_exits_2(tmp_path: Path) -> None:
+    result = _run("--sprint-dir", str(_ki_sprint(tmp_path, "measured in A-01")))
+    assert result.returncode == 2
+    assert "KI-060-1 names unit A-01" in result.stderr
+    assert "5c5e0a3" in result.stderr
+
+
+def test_a_ki_row_citing_the_sha_passes(tmp_path: Path) -> None:
+    assert _run("--sprint-dir", str(_ki_sprint(tmp_path, "measured in A-01 at `ad7cd48`"))).returncode == 0
+
+
+def test_a_unit_id_matches_as_a_whole_token(tmp_path: Path) -> None:
+    """A-01b is not done, so naming it must not trip the check for A-01."""
+    result = _run("--sprint-dir", str(_ki_sprint(tmp_path, "see A-01b")))
+    assert result.returncode == 0, result.stderr
+
+
+def test_a_not_done_unit_named_without_sha_passes(tmp_path: Path) -> None:
+    scope = SCOPE_DONE.replace("✅ `5c5e0a3`, `ad7cd48`", "⏳")
+    assert _run("--sprint-dir", str(_ki_sprint(tmp_path, "pending A-01", scope))).returncode == 0
+
+
+def test_a_missing_task_scope_exits_2(tmp_path: Path) -> None:
+    sprint = _ki_sprint(tmp_path, "x")
+    (sprint / "task_scope.md").unlink()
+    assert _run("--sprint-dir", str(sprint)).returncode == 2
