@@ -179,6 +179,8 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | C-02 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | C-01c | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | C-03 | `scripts/session_cost.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| C-04 | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| C-05 | `scripts/check_sprint_refs.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 
 ### Wave 5 — regime
 
