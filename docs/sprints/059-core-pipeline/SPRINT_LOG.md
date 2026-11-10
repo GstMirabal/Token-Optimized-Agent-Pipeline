@@ -159,6 +159,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 | QA Agent (Gate 1) | 19 | RECORD | testifying | S2 | Range 0c41e80..db738ca; tools also on 08c669c..HEAD. Fix replay 0 (20 OK). Chain exit 2 from the base: same A-1 stop as R18-1, no third chain. verify 0 (1668 passed), quality-audit 0. R18-1 actioned; R18-2, R18-3 closed. R19-1 (S2, testifying) stale line citations in the pipeline workflow. |
 | QA Agent (Gate 1) | 20 | RECORD | testifying | S2 | Range 2c438d6..29c49a4; tools also on 08c669c..HEAD. Fix replay 0 (21 OK). Chain exit 2 from the base: same A-1 stop, chain 2 now four commits, no third chain. verify 0 (1670 passed), quality-audit 0. R19-1, T3-1, T3-2 closed. R20-1 (S2, testifying) T3-1 and T3-2 have no Gate findings row. |
 | QA Agent (Gate 1) | 21 | REJECTED | charter | S0 | Range c6c41fe..cd2ee05; tools on 08c669c..HEAD. Fix replay 0 (24 OK). Chain exit 2, chains: 3 (A-1 stop). verify 0 (1761 passed), quality-audit 0, ruff 0. R21-3 (S0) gitfile vector with no KI, B-06 on 2.1.319 unmeasured. R21-1, R21-2 (S2) A-1 stop patched. R21-4 (S2) 23 claude -p calls of 20. R21-5, R21-6 (S2) stale records. 5 S3. |
+| QA Agent (Gate 1) | 22 | REJECTED | charter | S2 | Range cd2ee05..548a2d3; tools on 08c669c..HEAD. Fix replay 0 (24 OK). Chain exit 2, chains: 3, unchanged (D44 freeze). verify 0 (1761 passed), quality-audit 0, ruff 0. R21-1, R21-2, R21-4, R21-5, R21-6 closed; R21-3 KI written, measure half open. R22-1 (S2) C-01c without-B-06 case not run, reason circular. R22-2 (S2) KI-059-18 row stale after C-01c. 1 S3. |
 | Tester Agent (Gate 2) | 1 | REJECTED | charter | S1 | Range `08c669c..c6c7987`, 1531 passed. Baseline on context size with cuts on `cache_read`: 50 of 52 cuts over 35 transcripts are not collapses, and the ratio that feeds the hard bound falls (synthetic 20x reads 2.5x). 3 more: `--resolve` alternatives diverge under Cursor (S2), hard bound and cut field untested (S2), census wording (S3). |
 | Tester Agent (Gate 2) | 2 | RECORD | testifying | S2 | Range c6c7987..8b84259, 1613 passed, make verify exit 0, zero regression. Round 1 S0-S2 findings closed. T2-1 (S2, testifying); 3 S3. |
 | Tester Agent (Gate 2) | 3 | RECORD | testifying | S2 | Range 8b84259..2c438d6, 1668 passed, make verify exit 0, zero regression. T2-1 closed. T3-1 (S2) a repeated unit id drops rows from --batches with exit 0, `scripts/check_task_scope.py:380`. T3-2 (S2) false reason citing hooks/on_commit.py, `workflows/pipeline_workflow.md:24`. T3-3, T3-4 (S3) noted. |
@@ -200,6 +201,8 @@ One row per S0-S2 finding from QA Gate 1 round 13 on (plan D37). Check: the comm
 | 21 | R21-4 | S2 | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` section 6.10 | the section states 23 `claude -p` calls against a maximum of 20. Class charter. Close: a recorded human decision accepting the 3 calls, or withdraw verdict G's reliance on `G2_*` |
 | 21 | R21-5 | S2 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` Progression and the KI-059-17 row | Progression stops at D39 at `cd2ee05`; the KI-059-17 row is stale. Class testifying. Close: Progression lines for D40-D43 and their units; KI-059-17 row updated with the C-01 result (not reproduced) |
 | 21 | R21-6 | S2 | `scripts/session_cost.py:45-46` | `grep -n "until then it is run by hand" scripts/session_cost.py` at `cd2ee05` matches. Class testifying. Close: delete the sentence |
+| 22 | R22-1 | S2 | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` section 7.6 and sections 4.2, 4.4; `task_scope.md` C-01c | charter. C-01c's done-criterion needs both with and without the B-06 block; 7.6 gives the without case the circular reason "no fixture ran without them", and 4.2 contradicts 4.4. Close: run the without-block case under a new human call budget, or a recorded human decision drops that half, with 7.6 stating the real cause and 4.2 and 4.4 agreeing. |
+| 22 | R22-2 | S2 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` KI-059-18 row | testifying. After 9489ce8 the row still says the 2.1.319 trigger "is not yet measured" and cites only sections 4 and 6. Same family as R21-5: convergence rule 3 (`rules/qa_and_testing.md` §4) requires a deterministic check. Close: update the row with the C-01c result citing sections 4.4 and 7, plus the deterministic check. |
 
 ### Remediation notes
 
@@ -332,6 +335,10 @@ Example (do not uncomment):
 | QA Agent (Gate 1) | 21 | `make verify` | 0 |
 | QA Agent (Gate 1) | 21 | `make quality-audit` | 0 |
 | QA Agent (Gate 1) | 21 | `venv_skillopt/bin/python -m ruff check --no-cache .` | 0 |
+| QA Agent (Gate 1) | 22 | `python3 scripts/check_fix_reproduces.py --range 08c669c..HEAD` | 0 |
+| QA Agent (Gate 1) | 22 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 2 |
+| QA Agent (Gate 1) | 22 | `make verify` | 0 |
+| QA Agent (Gate 1) | 22 | `make quality-audit` | 0 |
 
 ---
 
