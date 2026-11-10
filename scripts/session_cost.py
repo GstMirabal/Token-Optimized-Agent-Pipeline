@@ -42,8 +42,7 @@ Usage:
 
 `--bound` classifies the latest turn of the current cycle (the last one after
 any compaction) as `OK`, `SOFT` or `HARD` (ADR-0018 decisions 1 and 2). It only
-warns: the three statuses exit 0 (D3). Its Phase 6 invoker arrives in Sprint 059
-unit A-04; until then it is run by hand.
+warns: the three statuses exit 0 (D3).
 
 Exit codes:
     0 — measured, or nothing measurable and said so
