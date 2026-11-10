@@ -172,7 +172,11 @@ def test_a_not_done_unit_named_without_sha_passes(tmp_path: Path) -> None:
     assert _run("--sprint-dir", str(_ki_sprint(tmp_path, "pending A-01", scope))).returncode == 0
 
 
-def test_a_missing_task_scope_exits_2(tmp_path: Path) -> None:
+@pytest.mark.parametrize("missing", ["task_scope.md", "SPRINT_LOG.md"])
+def test_a_missing_ki_input_skips_the_ki_check_and_exits_0(tmp_path: Path, missing: str) -> None:
     sprint = _ki_sprint(tmp_path, "x")
-    (sprint / "task_scope.md").unlink()
-    assert _run("--sprint-dir", str(sprint)).returncode == 2
+    (sprint / missing).unlink()
+    result = _run("--sprint-dir", str(sprint))
+    assert result.returncode == 0, result.stderr
+    assert f"no {missing} under" in result.stdout
+    assert "(skip)" in result.stdout

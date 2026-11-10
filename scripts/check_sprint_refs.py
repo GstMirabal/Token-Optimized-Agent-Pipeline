@@ -16,7 +16,8 @@ cell is a ``KI-<sprint>-<n>`` id) which names a unit that ``task_scope.md`` mark
 ``✅`` followed by backticked SHAs cites one of those SHAs (plan D45). A unit id
 is matched as a whole token (``C-01`` does not match ``C-01b``); a cited SHA of
 7 or more hex characters matches by prefix in either direction. A missing
-``task_scope.md`` or ``SPRINT_LOG.md`` is a finding, not a pass.
+``task_scope.md`` or ``SPRINT_LOG.md`` skips this check with an ``[OK] ... (skip)``
+line, as a missing plan skips the whole script.
 
 It also checks two limits: every Design row from the first covered decision on
 has a non-empty ``Check`` column or contains ``**Check**:``, and every Quality Gate ``Notes`` cell from the first
@@ -32,7 +33,8 @@ Usage:
 
 Exit codes:
     0 — pass, or skip (no anchor or ``current_sprint`` block, sprint before 059,
-        no IMPLEMENTATION_PLAN.md yet)
+        no IMPLEMENTATION_PLAN.md yet; the known-issue SHA check alone skips when
+        ``task_scope.md`` or ``SPRINT_LOG.md`` is missing)
     2 — a finding, a missing ``--sprint-dir``, or an anchor naming no existing
         sprint directory
 """
@@ -241,11 +243,14 @@ def _row_findings(row: list[str], done: dict[str, list[str]]) -> list[str]:
     ]
 
 
+def _missing_ki_inputs(texts: dict[str, str]) -> list[str]:
+    return [name for name in ("task_scope.md", "SPRINT_LOG.md") if name not in texts]
+
+
 def ki_sha_findings(texts: dict[str, str]) -> list[str]:
     """A KI row that names a done unit must cite one of that unit's SHAs (plan D45)."""
-    missing = [name for name in ("task_scope.md", "SPRINT_LOG.md") if name not in texts]
-    if missing:
-        return [f"{name} is missing: the known-issue SHA check cannot run" for name in missing]
+    if _missing_ki_inputs(texts):
+        return []
     done = done_units(texts["task_scope.md"])
     return [item for row in _ki_rows(texts["SPRINT_LOG.md"]) for item in _row_findings(row, done)]
 
@@ -266,6 +271,8 @@ def check(sprint_dir: Path) -> int:
         return 0
     number = sprint if sprint is not None else FROM_SPRINT
     findings = unit_findings(texts) + id_findings(texts, number) + limit_findings(texts, number)
+    for name in _missing_ki_inputs(texts):
+        print(f"[OK] check_sprint_refs: no {name} under {sprint_dir} yet, known-issue SHA check (skip)")
     findings += ki_sha_findings(texts)
     if not design_rows(texts["IMPLEMENTATION_PLAN.md"]):
         findings.append("IMPLEMENTATION_PLAN.md has no ## Design table with D<n> rows")
