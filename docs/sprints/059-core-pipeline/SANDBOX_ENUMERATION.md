@@ -550,6 +550,18 @@ The block sets only `enabled` and `autoAllowBashIfSandboxed` (`.claude/settings.
 
 Per plan D43, the `KI-059-n` row holds only what `C-01b` measured as **not closable from the nucleus**: the gitfile vector, which no entry of the case `D` deny list closes (`VG.copy`, `VG.config`, `VG.gitfile`, `VG.add`, `VG.lsfiles`, `VG.status` all OK; `VG.marker` = 1 entry on both versions). A glob `denyWrite` for it is `unmeasured`. Entries measured as closed by a `denyWrite` entry (`D119`, `D319`) are not `KI-059-n` content. The principal assigns `n`.
 
+### 4.4 C-01c reading
+
+Evidence: section 7. The second question of abort criterion 1 is "is the point opened by the `sandbox` block B-06 installed".
+
+| Question | Answer | Cases |
+| :--- | :--- | :--- |
+| Does the B-06 block open the gitfile vector (execution outside the sandbox) on 2.1.319 | **No**, for the measured triggers: startup of a `claude -p` session, a `git commit` Bash call (rejected message and accepted message) and, in the host fixture, the `PreToolUse` hook on a `git commit` call. No marker entry carried an ancestor chain (an unsandboxed writer) in any of the seven sessions | `nuc_t1`, `nuc_t2`, `nuc_t2b`, `host_t1`, `host_t2` |
+| Consequence under plan D44 | B-06 is not reverted | `nuc_t1`, `nuc_t2`, `nuc_t2b`, `host_t1`, `host_t2` |
+| `KI-059-18` (gitfile vector) | Stays open. The set-up succeeds in both fixtures (`nuc_arm`, `host_arm`) and no `.git/*` deny entry closes it (section 4.3). Its unsandboxed triggers outside a headless `claude -p` session are `unmeasured` (section 7.6) | `nuc_arm`, `host_arm` |
+
+The 4.2 row for 2.1.319 ("not measured") is unchanged for the comparison without the B-06 block: no C-01c fixture ran without the keys `enabled` and `autoAllowBashIfSandboxed` (section 7.1, row "Configuration (ii)").
+
 ## 5. Unmeasured
 
 | Case | Reason |
@@ -860,3 +872,119 @@ Literal, at the end of the measurement:
 $ git status --porcelain      (empty)
 $ ls .git/commondir           ls: .git/commondir: No such file or directory
 ```
+
+## 7. C-01c
+
+### 7.1 Scope and set-up
+
+| Field | Value |
+| :--- | :--- |
+| Unit | `C-01c` (`docs/sprints/059-core-pipeline/task_scope.md`; decision D44 in `IMPLEMENTATION_PLAN.md`) |
+| Date / repository | 2026-11-10; nucleus branch `ai-sprint/059`, HEAD `0d43813` |
+| Measurer | `devops_01`; `claude -p` driver sessions, all with `--model sonnet` (reported `claude-sonnet-5-5`) |
+| Evidence | Measurement register of `devops_01` for `C-01c`. Every verdict below cites a case ID of that register |
+| Repository writes | None in the real nucleus. All writes are in fixtures under `<sp>` |
+| Path notation | As section 1.1. Fixtures: `<fx-nuc>` = `<sp>/c01c_nuc`, `<fx-host>` = `<sp>/c01c_host` |
+| Credentials | Proxy credentials appear as `REDACTED` |
+
+| Item | Value |
+| :--- | :--- |
+| Binary | 2.1.319 native binary of the VS Code extension (`INIT ver=2.1.319` in every session) |
+| Driver | `claude -p --allowedTools Bash --output-format stream-json --verbose --max-turns 14 --model sonnet`, one prompt file per session kind (`arm`, `t1`, `t2`, `t2b`) |
+| Configuration (i) | `<fx-nuc>`: copy of the 2.1.319 nucleus clone at `484fd9d`. `.claude/settings.json` = `{"sandbox": {"enabled": true, "autoAllowBashIfSandboxed": true}}` (the B-06 block only, as the real nucleus file). No `settings.local.json`. The clone's git hooks are present; its `commit-msg` hook rejects non-Conventional messages |
+| Configuration (ii) | `<fx-host>`: copy of the host fixture with the `.agents` submodule. `.claude/settings.json` = byte copy of `claude/settings.hooks.json` (`cmp` identical). It carries `sandbox.enabled`, `autoAllowBashIfSandboxed`, `filesystem.denyRead/allowRead/denyWrite ["./.agents","./.git/modules/.agents","./.env"]`, `credentials`, and the `hooks` key (`PreToolUse` Bash `on_commit.py`, `SessionStart` `on_init.py`). The leftover `settings.local.json` (`allowUnsandboxedCommands: false`) was removed. This block already contains the two B-06 keys, so no C-01c fixture ran without them |
+| Plant | The `V319` script of C-01b (`vector C`): copies `.git` to `c01b_gdir`, sets `core.fsmonitor` in `c01b_gdir/config` to `sh c01b_fsm.sh <marker> C`, writes `c01b_sub/.git` = `gitdir: <fx>/c01b_gdir`, then `git add c01b_sub` (gitlink `160000`) |
+| Arming | By the sandboxed agent in a previous session: `nuc_arm`, `host_arm`. Both show `VG.lsfiles` = `160000 ... c01b_sub` and `VG.marker` = 1. After each arming session the marker was moved aside and its absence verified; the gitfile and the `core.fsmonitor` line in `c01b_gdir/config` were verified present |
+| Marker writer | `c01b_fsm.sh` appends timestamp, pid, ppid and the ancestor chain (`ps`). `ps` is denied in the sandbox: an entry with an ancestor chain was written by an unsandboxed process; an entry with `/bin/ps: Operation not permitted` by a sandboxed one |
+| Marker location | Fixture root (writable by sandboxed and unsandboxed processes) |
+| Pre-case check | Before every session in both fixtures: no `core.fsmonitor` in `.git/config` (`grep -c` = 0), no `.git/commondir`, no `config.worktree`, global `core.fsmonitor` unset, no nested `.git` file, no `c01b_sub`, `c01b_gdir` or marker |
+
+### 7.2 Controls per session
+
+`SBX0` and `SBX1` as section 6.2. All seven sessions were sandboxed.
+
+| Session | `SBX0` (literal) | `SBX1` (literal) |
+| :--- | :--- | :--- |
+| `nuc_arm` | `http://REDACTED@127.0.0.1:62190` | `curl: (6) Could not resolve host: example.com` `[exit=6]` |
+| `nuc_t1` | `http://REDACTED@127.0.0.1:62684` | same, `[exit=6]` |
+| `nuc_t2` | `http://REDACTED@127.0.0.1:62874` | same, `[exit=6]` |
+| `nuc_t2b` | `http://REDACTED@127.0.0.1:63210` | same, `[exit=6]` |
+| `host_arm` | `http://REDACTED@127.0.0.1:51917` | same, `[exit=6]` |
+| `host_t1` | `http://REDACTED@127.0.0.1:61516` | same, `[exit=6]` |
+| `host_t2` | `http://REDACTED@127.0.0.1:52757` | same, `[exit=6]` |
+
+### 7.3 Results
+
+Triggers: `T1` = startup of a new `claude -p` session followed by 5 non-git Bash calls; `T2` = a Bash call `git commit --allow-empty -m "probe"`; `T3` = `git status --porcelain` run by the parent agent outside any driver session.
+
+| Configuration | T1 startup | T2 `git commit` | T3 parent `git status` (NOT an agent-session trigger) |
+| :--- | :--- | :--- | :--- |
+| (i) nucleus, B-06 block only | no marker (`nuc_t1`) | no marker (`nuc_t2`, `nuc_t2b`) | marker, 1 entry, writer: the sandboxed parent |
+| (ii) host, template block | no marker (`host_t1`) | no marker (`host_t2`) | marker, 1 entry, writer: the sandboxed parent |
+
+| Configuration | Case ID | Trigger | Marker | Writer process | Literal output |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| (i) | `nuc_arm` | set-up (sandboxed agent arms) | yes, 2 entries | sandboxed (`ps: Operation not permitted`); `ts` `1794289001` (probe's `git status`), `1794289005` (driver's `git status`) | marker saved after the session |
+| (i) | `nuc_t1` | T1, 5 non-git Bash calls (`ts` `1794289041` to `1794289047`) | **no** | none | marker file absent after the session; `RESULT success 6` |
+| (i) | `nuc_t2` | T2 | **no** | none | `Commit message must follow Conventional Commits ... #[Sprint_ID]` `[exit=1]`; the Bash call ran; marker absent |
+| (i) | `nuc_t2b` | T2 with message `chore(probe): c01c #059` | **no** | none | `[detached HEAD c264161]`, `create mode 160000 c01b_sub`, `[exit=0]`; marker absent |
+| (i) | T3 | `git status --porcelain` by the parent | yes, 1 entry | sandboxed parent (`ps: Operation not permitted`); `ts` `1794292057` | marker saved after the call. NOT an agent-session trigger; the parent is sandboxed, so this is not an unsandboxed human git |
+| (ii) | `host_arm` | set-up (sandboxed agent arms) | yes, 2 entries | sandboxed (`ps` denied); `ts` `1794289909`, `1794289914` | marker saved after the session |
+| (ii) | `host_t1` | T1, 5 non-git Bash calls (`ts` `1794292699` to `1794292708`); `SessionStart` hooks ran | **no** | none | `on_init.py` output `DEPLOYMENT_READY: PASSED`; marker absent; `RESULT success 6` |
+| (ii) | `host_t2` | T2 | **no** | none | `PreToolUse:Bash hook error: ... on_commit.py ... Commit message must follow Conventional Commits`; `permission_denials` lists the Bash call; marker absent |
+| (ii) | T3 | `git status --porcelain` by the parent | yes, 1 entry | sandboxed parent (`ps` denied); `ts` `1794293534` | marker saved after the call. NOT an agent-session trigger |
+
+In every session of both configurations the only marker entries were written by sandboxed processes (the agent's own `git status` after arming and the parent's `git status`). No entry with an ancestor chain was written in any of the seven sessions.
+
+### 7.4 Notes
+
+| Case | Note |
+| :--- | :--- |
+| `nuc_t2` | The clone's git `commit-msg` hook rejected the message `probe`; the commit did not happen. Redone as `nuc_t2b` with a Conventional message |
+| `nuc_t2b` | The commit completed inside the sandbox and added the gitlink (`create mode 160000 c01b_sub`); the nucleus clone has no `PreToolUse` hook |
+| `host_t2` | The `on_commit.py` `PreToolUse` hook blocked the Bash call on the commit message before git ran, so the hook's `git diff --cached` did not run |
+| T3 (both) | The vector executes under a plain `git status`; that git was the sandboxed parent. The writer is sandboxed, so T3 shows no execution outside the sandbox |
+
+### 7.5 Verdict
+
+| Statement | Cases |
+| :--- | :--- |
+| On 2.1.319 the B-06 block does not open the gitfile vector (no execution outside the sandbox) | `nuc_t1`, `nuc_t2`, `nuc_t2b`, `host_t1`, `host_t2` |
+| Scope: the triggers a headless `claude -p` session can drive (session startup, a `git commit` Bash call, the host `PreToolUse` hook with a rejected message). Not read beyond them | `nuc_t1`, `nuc_t2`, `nuc_t2b`, `host_t1`, `host_t2` |
+| The result is identical in configuration (i) and (ii). Configuration (ii) carries the B-06 keys, so the two configurations do not compare "with" and "without" the block | `nuc_t1`, `host_t1` |
+| Agrees with C-01b: no startup git in `claude -p` 2.1.319 | `A4`, `A6` |
+
+### 7.6 `unmeasured`
+
+| `unmeasured` case | Reason |
+| :--- | :--- |
+| Interactive (non `-p`) 2.1.319 startup git, both configurations | Cannot be driven headless |
+| T3 as an unsandboxed human git | T3 ran in the sandboxed parent; `dangerouslyDisableSandbox` was restricted to launching drivers and arming fixture copies |
+| IDE git (VS Code source control), both configurations | Not driven |
+| T2 on the host with a valid commit message (the hook's `git diff --cached`) | `host_t2` was blocked by the hook on the message; no call left (10 of 10). C-01b `A7` showed the hook's `git diff --cached` entries with a valid message, and `M1`, `M5` that `git diff --cached` does not run a gitlink's `core.fsmonitor`; not measured here |
+| Gitfile vector on 2.1.319 without the `enabled` and `autoAllowBashIfSandboxed` keys | No C-01c fixture ran without them (section 7.1) |
+| 2.1.119 | Out of scope of C-01c (C-01b `P2`) |
+| Real nucleus | Fixtures only; no write allowed |
+
+### 7.7 Cost and final state
+
+**`claude -p` cost: 10 of 10 calls.** Three calls failed on `API Error: Can't reach the API server (ENOTFOUND)` after 10 retries, with no Bash call run (DNS outage on the machine), and were re-run.
+
+| # | Session | Outcome |
+| :--- | :--- | :--- |
+| 1 | `nuc_arm` | ok |
+| 2 | `nuc_t1` | ok |
+| 3 | `nuc_t2` | ok (commit rejected by the git hook) |
+| 4 | `nuc_t2b` | ok |
+| 5 | `host_arm` (first) | failed, `ENOTFOUND`, no Bash call ran |
+| 6 | `host_arm` (retry) | ok |
+| 7 | `host_t1` (first) | failed, `ENOTFOUND`; `SessionStart` hooks ran, no Bash call ran; not counted as the T1 result |
+| 8 | `host_t1` (retry) | ok |
+| 9 | `host_t2` (first) | failed, `ENOTFOUND`, no Bash call ran |
+| 10 | `host_t2` (retry) | ok |
+
+| Final state | Value |
+| :--- | :--- |
+| Both fixtures disarmed | `core.fsmonitor` unset in `c01b_gdir/config`, `git rm --cached -f c01b_sub`, `c01b_sub`, `c01b_gdir` and markers deleted; `fsmonitor` lines in `.git/config` = 0 in both; `find` shows no `c01b_sub`, `c01b_gdir` or marker |
+| `<fx-nuc>` leftover | One probe commit `c264161` (`chore(probe): c01c #059`, detached HEAD) |
+| Real nucleus | `git status --porcelain` empty at the end of the measurement |
