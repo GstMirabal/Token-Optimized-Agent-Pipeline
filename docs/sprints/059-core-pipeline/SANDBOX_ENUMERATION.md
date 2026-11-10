@@ -544,7 +544,7 @@ The block sets only `enabled` and `autoAllowBashIfSandboxed` (`.claude/settings.
 | CLI | Answer | Cases |
 | :--- | :--- | :--- |
 | 2.1.119 | **No**, as C-01 recorded: the same `.git/commondir` path is creatable under the host template, which carries no B-06 block (`HX.commondir`, `HG.root`, `s4b`), and the nucleus trees are writable with or without the block (`NU.tree.*`, `NU.root`) | `s1`, `s2`, `s4b`, `s7` |
-| 2.1.319 | Every 2.1.319 session of the gitfile vector (`V319`), of case `E` and of case `B` ran with the B-06 block present. No 2.1.319 session ran without it, so the C-01 statement "the block does not open it" is **not measured** on 2.1.319. The one factor case `E` varied on 2.1.319 was the permission mode, not the block (`N319` versus `N319b`) | `V319`, `N319`, `N319b`, `B` |
+| 2.1.319 | Every 2.1.319 session of the gitfile vector (`V319`), of case `E` and of case `B` ran with the B-06 block present. **No** for the measured headless triggers `[C-04]`: with the block present no marker entry with an unsandboxed ancestor appeared (section 4.4). The without-block comparison was withdrawn (plan D45; cause in section 7.6). The one factor case `E` varied on 2.1.319 was the permission mode, not the block (`N319` versus `N319b`) | `V319`, `N319`, `N319b`, `B`, `nuc_t1`, `nuc_t2`, `nuc_t2b`, `host_t1`, `host_t2` |
 
 ### 4.3 Consequence under the plan
 
@@ -560,7 +560,7 @@ Evidence: section 7. The second question of abort criterion 1 is "is the point o
 | Consequence under plan D44 | B-06 is not reverted | `nuc_t1`, `nuc_t2`, `nuc_t2b`, `host_t1`, `host_t2` |
 | `KI-059-18` (gitfile vector) | Stays open. The set-up succeeds in both fixtures (`nuc_arm`, `host_arm`) and no `.git/*` deny entry closes it (section 4.3). Its unsandboxed triggers outside a headless `claude -p` session are `unmeasured` (section 7.6) | `nuc_arm`, `host_arm` |
 
-The 4.2 row for 2.1.319 ("not measured") is unchanged for the comparison without the B-06 block: no C-01c fixture ran without the keys `enabled` and `autoAllowBashIfSandboxed` (section 7.1, row "Configuration (ii)").
+Reading `[C-04]`: on 2.1.319 the B-06 block does not open the vector for the measured headless triggers, because with the block present no marker entry with an unsandboxed ancestor appeared (`nuc_t1`, `nuc_t2`, `nuc_t2b`, `host_t1`, `host_t2`). The without-block comparison was withdrawn (plan D45; cause in section 7.6), so it is not a limitation of this reading.
 
 ## 5. Unmeasured
 
@@ -951,7 +951,7 @@ In every session of both configurations the only marker entries were written by 
 | :--- | :--- |
 | On 2.1.319 the B-06 block does not open the gitfile vector (no execution outside the sandbox) | `nuc_t1`, `nuc_t2`, `nuc_t2b`, `host_t1`, `host_t2` |
 | Scope: the triggers a headless `claude -p` session can drive (session startup, a `git commit` Bash call, the host `PreToolUse` hook with a rejected message). Not read beyond them | `nuc_t1`, `nuc_t2`, `nuc_t2b`, `host_t1`, `host_t2` |
-| The result is identical in configuration (i) and (ii). Configuration (ii) carries the B-06 keys, so the two configurations do not compare "with" and "without" the block | `nuc_t1`, `host_t1` |
+| The result is identical in configuration (i) and (ii). Both configurations carry the B-06 block; the without-block comparison was withdrawn (plan D45, section 7.6) `[C-04]` | `nuc_t1`, `host_t1` |
 | Agrees with C-01b: no startup git in `claude -p` 2.1.319 | `A4`, `A6` |
 
 ### 7.6 `unmeasured`
@@ -962,7 +962,7 @@ In every session of both configurations the only marker entries were written by 
 | T3 as an unsandboxed human git | T3 ran in the sandboxed parent; `dangerouslyDisableSandbox` was restricted to launching drivers and arming fixture copies |
 | IDE git (VS Code source control), both configurations | Not driven |
 | T2 on the host with a valid commit message (the hook's `git diff --cached`) | `host_t2` was blocked by the hook on the message; no call left (10 of 10). C-01b `A7` showed the hook's `git diff --cached` entries with a valid message, and `M1`, `M5` that `git diff --cached` does not run a gitlink's `core.fsmonitor`; not measured here |
-| Gitfile vector on 2.1.319 without the `enabled` and `autoAllowBashIfSandboxed` keys | No C-01c fixture ran without them (section 7.1) |
+| Gitfile vector on 2.1.319 without the `enabled` and `autoAllowBashIfSandboxed` keys. Status: **withdrawn**, not `unmeasured` `[C-04]` | Without the B-06 block neither the nucleus project settings nor the user settings declare a sandbox (`~/.claude/settings.json` has `permissions.defaultMode = "auto"` and no `sandbox` key; C-01b case `E`, section 6.7), so a run without it would compare a sandbox against none and would not answer whether the block opens the vector. The half was withdrawn by human decision 2026-11-10 (plan D45) `[C-04]` |
 | 2.1.119 | Out of scope of C-01c (C-01b `P2`) |
 | Real nucleus | Fixtures only; no write allowed |
 
@@ -988,3 +988,12 @@ In every session of both configurations the only marker entries were written by 
 | Both fixtures disarmed | `core.fsmonitor` unset in `c01b_gdir/config`, `git rm --cached -f c01b_sub`, `c01b_sub`, `c01b_gdir` and markers deleted; `fsmonitor` lines in `.git/config` = 0 in both; `find` shows no `c01b_sub`, `c01b_gdir` or marker |
 | `<fx-nuc>` leftover | One probe commit `c264161` (`chore(probe): c01c #059`, detached HEAD) |
 | Real nucleus | `git status --porcelain` empty at the end of the measurement |
+
+#### Corrections by C-04
+
+| Location | What it said | What it says now |
+| :--- | :--- | :--- |
+| Section 7.6 row "Gitfile vector on 2.1.319 without the `enabled` and `autoAllowBashIfSandboxed` keys" | Listed as `unmeasured`, reason "No C-01c fixture ran without them (section 7.1)" (circular) | Status withdrawn; cause: without the B-06 block no sandbox is declared (C-01b case `E`, section 6.7), so the run would compare a sandbox against none; withdrawn by human decision 2026-11-10 (plan D45) |
+| Section 4.2 row 2.1.319 | The statement "the block does not open it" is "not measured" on 2.1.319 | No, for the measured headless triggers: with the block present no marker entry with an unsandboxed ancestor appeared (`nuc_t1`, `nuc_t2`, `nuc_t2b`, `host_t1`, `host_t2`); comparison withdrawn (plan D45) |
+| Section 4.4, paragraph after the table | The 4.2 row stays "not measured" for the comparison without the block | Same reading as 4.2; the without-block comparison is withdrawn (plan D45), not a limitation |
+| Section 7.5 row 3 | The two configurations "do not compare with and without the block" | Both configurations carry the B-06 block; the without-block comparison was withdrawn (plan D45) |
