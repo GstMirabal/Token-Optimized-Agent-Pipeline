@@ -151,6 +151,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 | QA Agent (Gate 1) | 18 | REJECTED | charter | S2 | Range f70df84..0c41e80; tools on 08c669c..HEAD. Fix replay 0 (19 OK). Chain exit 2: A-1 stop, second chain c5fbf5f>639fd05; re-plan with the human. verify 0, quality-audit 0. R17-1, R17-2 closed. R18-1 (S2, charter) A-1 stop. R18-2 (S2) R-4 notes omit the chain check. R18-3 (S2) docstring vs any() guard; any->all mutation survives. |
 | QA Agent (Gate 1) | 19 | RECORD | testifying | S2 | Range 0c41e80..db738ca; tools also on 08c669c..HEAD. Fix replay 0 (20 OK). Chain exit 2 from the base: same A-1 stop as R18-1, no third chain. verify 0 (1668 passed), quality-audit 0. R18-1 actioned; R18-2, R18-3 closed. R19-1 (S2, testifying) stale line citations in the pipeline workflow. |
 | QA Agent (Gate 1) | 20 | RECORD | testifying | S2 | Range 2c438d6..29c49a4; tools also on 08c669c..HEAD. Fix replay 0 (21 OK). Chain exit 2 from the base: same A-1 stop, chain 2 now four commits, no third chain. verify 0 (1670 passed), quality-audit 0. R19-1, T3-1, T3-2 closed. R20-1 (S2, testifying) T3-1 and T3-2 have no Gate findings row. |
+| QA Agent (Gate 1) | 21 | REJECTED | charter | S0 | Range c6c41fe..cd2ee05 (76 commits); tools on 08c669c..HEAD. Fix replay exit 0 (24 fix( commits, 24 OK). check_remediation_chain exit 2, chains: 3: A-1 stop; new chain 919d4f2>40b2da1 on scripts/session_cost.py, check_task_scope chain grew to 5 commits with a6f569d. make verify exit 0 (1761 passed; fresh clone at cd2ee05: 0 .pyc, no .pytest_cache, no .ruff_cache). make quality-audit exit 0. Pinned ruff exit 0. R21-1 (S2) A-1 stop on session_cost.py, ad7cd48 patched after it. R21-2 (S2) A-56 patched the stopped check_task_scope block with no recorded human re-plan. R21-3 (S0) measured sandbox escape (gitfile vector) has no KI-059-n; whether B-06 opens it on 2.1.319 is unmeasured. R21-4 (S2) C-01b used 23 claude -p calls against a maximum of 20. R21-5 (S2) Progression stops at D39, KI-059-17 row stale. R21-6 (S2) stale A-04 sentence in session_cost.py. R21-7 to R21-11 S3. |
 | Tester Agent (Gate 2) | 1 | REJECTED | charter | S1 | Range `08c669c..c6c7987`, 1531 passed. Baseline on context size with cuts on `cache_read`: 50 of 52 cuts over 35 transcripts are not collapses, and the ratio that feeds the hard bound falls (synthetic 20x reads 2.5x). 3 more: `--resolve` alternatives diverge under Cursor (S2), hard bound and cut field untested (S2), census wording (S3). |
 | Tester Agent (Gate 2) | 2 | RECORD | testifying | S2 | Range c6c7987..8b84259, 1613 passed, make verify exit 0, zero regression. Round 1 S0-S2 findings closed. T2-1 (S2, testifying); 3 S3. |
 | Tester Agent (Gate 2) | 3 | RECORD | testifying | S2 | Range 8b84259..2c438d6, 1668 passed, make verify exit 0, zero regression. T2-1 closed. T3-1 (S2) a repeated unit id drops rows from --batches with exit 0, `scripts/check_task_scope.py:380`. T3-2 (S2) false reason citing hooks/on_commit.py, `workflows/pipeline_workflow.md:24`. T3-3, T3-4 (S3) noted. |
@@ -186,6 +187,12 @@ One row per S0-S2 finding from QA Gate 1 round 13 on (plan D37). Check: the comm
 | 3 | T3-2 | S2 | `workflows/pipeline_workflow.md:24` | `grep -n check_task_scope hooks/on_commit.py hooks/on_commit_msg.py` at `2c438d6` → exit 1, no match; the workflow cell states those hooks ran the check |
 | 20 | R20-1 | S2 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md:176` | `grep -n "T3-[12]" docs/sprints/059-core-pipeline/SPRINT_LOG.md` at `29c49a4` → lines 66 and 149 only, no Gate findings row |
 | 4 | T4-1 | S2 | `docs/sprints/059-core-pipeline/task_scope.md:203` | at `c6c41fe`, the Work rows of `task_scope.md` claim `scripts/check_task_scope.py` for 9 units; its Jurisdiction row names 4 |
+| 21 | R21-1 | S2 | `scripts/session_cost.py` (chain 919d4f2 > 40b2da1) | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` at `cd2ee05` prints `chains: 3`. Class charter. Close: principal_agent re-plans the session_cost.py block with the human (`rules/qa_and_testing.md` §4 A-1); orchestrator records the decision in Progression |
+| 21 | R21-2 | S2 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md:248` (A-56), `scripts/check_task_scope.py` | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` at `cd2ee05` shows chain c5fbf5f, 639fd05, 16b1dc6, 39f243c, a6f569d; A-56 has no recorded human decision. Class charter. Close: record the human re-plan that authorized A-56, or re-plan the block with the human |
+| 21 | R21-3 | S0 | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` sections 4 and 6; `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` abort criterion 1 | `grep -n "KI-059-1[8-9]" docs/sprints/059-core-pipeline/SPRINT_LOG.md` at `cd2ee05` returns nothing. Class charter. Close: write the KI-059-n row as D43 restricts it; before close, measure the 2.1.319 gitfile vector without the B-06 block or revert B-06 |
+| 21 | R21-4 | S2 | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` section 6.10 | the section states 23 `claude -p` calls against a maximum of 20. Class charter. Close: a recorded human decision accepting the 3 calls, or withdraw verdict G's reliance on `G2_*` |
+| 21 | R21-5 | S2 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` Progression and the KI-059-17 row | Progression stops at D39 at `cd2ee05`; the KI-059-17 row is stale. Class testifying. Close: Progression lines for D40-D43 and their units; KI-059-17 row updated with the C-01 result (not reproduced) |
+| 21 | R21-6 | S2 | `scripts/session_cost.py:45-46` | `grep -n "until then it is run by hand" scripts/session_cost.py` at `cd2ee05` matches. Class testifying. Close: delete the sentence |
 
 ### Remediation notes
 
@@ -313,6 +320,11 @@ Example (do not uncomment):
 | Tester Agent (Gate 2) | 4 | `make verify` | 0 |
 | Tester Agent (Gate 2) | 1 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider` | 0 |
 | Tester Agent (Gate 2) | 1 | `make verify` | 0 |
+| QA Agent (Gate 1) | 21 | `python3 scripts/check_fix_reproduces.py --range 08c669c..HEAD` | 0 |
+| QA Agent (Gate 1) | 21 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 2 |
+| QA Agent (Gate 1) | 21 | `make verify` | 0 |
+| QA Agent (Gate 1) | 21 | `make quality-audit` | 0 |
+| QA Agent (Gate 1) | 21 | `venv_skillopt/bin/python -m ruff check --no-cache .` | 0 |
 
 ---
 
