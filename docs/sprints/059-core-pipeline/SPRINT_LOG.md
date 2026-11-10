@@ -164,6 +164,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 | QA Agent (Gate 1) | 21 | REJECTED | charter | S0 | Range c6c41fe..cd2ee05; tools on 08c669c..HEAD. Fix replay 0 (24 OK). Chain exit 2, chains: 3 (A-1 stop). verify 0 (1761 passed), quality-audit 0, ruff 0. R21-3 (S0) gitfile vector with no KI, B-06 on 2.1.319 unmeasured. R21-1, R21-2 (S2) A-1 stop patched. R21-4 (S2) 23 claude -p calls of 20. R21-5, R21-6 (S2) stale records. 5 S3. |
 | QA Agent (Gate 1) | 22 | REJECTED | charter | S2 | Range cd2ee05..548a2d3; tools on 08c669c..HEAD. Fix replay 0 (24 OK). Chain exit 2, chains: 3, unchanged (D44 freeze). verify 0 (1761 passed), quality-audit 0, ruff 0. R21-1, R21-2, R21-4, R21-5, R21-6 closed; R21-3 KI written, measure half open. R22-1 (S2) C-01c without-B-06 case not run, reason circular. R22-2 (S2) KI-059-18 row stale after C-01c. 1 S3. |
 | QA Agent (Gate 1) | 23 | REJECTED | charter | S2 | Range 548a2d3..261b640; tools on 08c669c..HEAD. Fix replay 0 (24 OK). Chain exit 2, chains: 3, unchanged (D44 freeze, no fix( in range). verify 0 (1766 passed), quality-audit 0. R22-1, R22-2 closed; C-05 mutations caught by its tests. R23-1 (S2) check_sprint_refs exits 2 on a sprint with a plan but no task_scope.md or SPRINT_LOG.md (Phases 1-4.2). 3 S3. |
+| QA Agent (Gate 1) | 24 | RECORD | testifying | S3 | Range 261b640..10204e4; tools on 08c669c..HEAD. Fix replay 0 (25 OK, 72d410b included). Chain exit 2, chains: 3, unchanged (D46 check holds; 72d410b not linked). verify 0 (1767 passed), quality-audit 0. R23-1 closed by 72d410b: plan-only fixture exits 0, KI check still exits 2 with both files present. 2 S3. |
 | Tester Agent (Gate 2) | 1 | REJECTED | charter | S1 | Range `08c669c..c6c7987`, 1531 passed. Baseline on context size with cuts on `cache_read`: 50 of 52 cuts over 35 transcripts are not collapses, and the ratio that feeds the hard bound falls (synthetic 20x reads 2.5x). 3 more: `--resolve` alternatives diverge under Cursor (S2), hard bound and cut field untested (S2), census wording (S3). |
 | Tester Agent (Gate 2) | 2 | RECORD | testifying | S2 | Range c6c7987..8b84259, 1613 passed, make verify exit 0, zero regression. Round 1 S0-S2 findings closed. T2-1 (S2, testifying); 3 S3. |
 | Tester Agent (Gate 2) | 3 | RECORD | testifying | S2 | Range 8b84259..2c438d6, 1668 passed, make verify exit 0, zero regression. T2-1 closed. T3-1 (S2) a repeated unit id drops rows from --batches with exit 0, `scripts/check_task_scope.py:380`. T3-2 (S2) false reason citing hooks/on_commit.py, `workflows/pipeline_workflow.md:24`. T3-3, T3-4 (S3) noted. |
@@ -348,6 +349,10 @@ Example (do not uncomment):
 | QA Agent (Gate 1) | 23 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 2 |
 | QA Agent (Gate 1) | 23 | `make verify` | 0 |
 | QA Agent (Gate 1) | 23 | `make quality-audit` | 0 |
+| QA Agent (Gate 1) | 24 | `python3 scripts/check_fix_reproduces.py --range 08c669c..HEAD` | 0 |
+| QA Agent (Gate 1) | 24 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 2 |
+| QA Agent (Gate 1) | 24 | `make verify` | 0 |
+| QA Agent (Gate 1) | 24 | `make quality-audit` | 0 |
 
 ---
 
