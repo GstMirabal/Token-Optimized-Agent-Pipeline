@@ -274,7 +274,7 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | C-01c | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` | modify — tras C-02 (D44): `devops_agent` mide, con un máximo de 10 llamadas `claude -p` en el binario 2.1.319, el disparo fuera del sandbox del vector gitfile con el bloque de B-06 y sin él; `doc_orchestrator` escribe el resultado y la lectura del criterio de aborto 1 | high | `devops_agent` | ✅ `9489ce8` |
 | C-03 | `scripts/session_cost.py` | modify — tras C-02 (D44, R21-6): borra la frase del docstring "Its Phase 6 invoker arrives in Sprint 059 unit A-04; until then it is run by hand."; sin otro cambio | low | `implementer_agent` | ✅ `e04bb84` |
 | C-04 | `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` | modify — tras C-03 (D45, R22-1): la sección 7.6 da como causa de la mitad retirada que sin el bloque de B-06 no hay sandbox declarado; 4.2 y 4.4 dicen lo mismo sobre "B-06 no abre el vector" | low | `doc_orchestrator` | ✅ `159e302` |
-| C-05 | `scripts/check_sprint_refs.py` | modify — tras C-04 (D45, R22-2): falla (exit 2) si una fila KI del `SPRINT_LOG.md` nombra una unidad marcada ✅ en `task_scope.md` sin citar su SHA; test pareado en `tests/test_check_sprint_refs.py` | medium | `implementer_agent` | ⏳ |
+| C-05 | `scripts/check_sprint_refs.py` | modify — tras C-04 (D45, R22-2): falla (exit 2) si una fila KI del `SPRINT_LOG.md` nombra una unidad marcada ✅ en `task_scope.md` sin citar su SHA; test pareado en `tests/test_check_sprint_refs.py` | medium | `implementer_agent` | ✅ `5652a3b` |
 
 ### Wave 5 — Régimen (decisiones con las medidas en la mano)
 
