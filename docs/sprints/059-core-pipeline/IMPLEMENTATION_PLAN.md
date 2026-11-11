@@ -281,10 +281,10 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | C-06 | `scripts/check_sprint_refs.py` | modify — tras C-05 (D46, R23-1): `fix(` el chequeo KI se salta con `[OK] ... (skip)` si falta `task_scope.md` o `SPRINT_LOG.md`; test y docstring ajustados | low | `implementer_agent` | ✅ `72d410b` |
 | C-07 | `tests/test_check_sprint_refs.py` | modify — tras C-06 (D47, T5-1): `test(` un `task_scope.md` con bytes no UTF-8 hace que `check_sprint_refs.py` salga con exit 2 y escriba `cannot read an artifact` en stderr | low | `implementer_agent` | ✅ `649eb96` |
 | C-08 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify — tras C-07 (D47, T5-2): el párrafo de umbrales 5×/15× pasa a remitir a `rules/token_economy.md` sección 3.1 sin cifras | low | `doc_orchestrator` | ✅ `65b4709` |
-| C-09 | `tests/test_check_sprint_refs.py` | modify — tras C-08 (D48, T6-1): `test(` un `task_scope.md` sin permiso de lectura hace que `check_sprint_refs.py` salga con exit 2 y escriba `cannot read an artifact` | low | `implementer_agent` | ⏳ |
-| C-10 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify — tras C-09 (D48, T6-2): la operación de la fila C-07 pasa de `create test` a `modify` | low | `orchestrator` | ⏳ |
-| C-11 | `docs/sprints/059-core-pipeline/task_scope.md` | modify — tras C-10 (D48, T6-3): la cita de la fila C-07 pasa de `scripts/check_sprint_refs.py:264` a `:266` | low | `orchestrator` | ⏳ |
-| C-12 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — tras C-11 (D48, T6-4): el rango de la fila Tester Gate 2 ronda 5 pasa de `c6c41fe..HEAD` a `c6c41fe..d97c1fe` | low | `orchestrator` | ⏳ |
+| C-09 | `tests/test_check_sprint_refs.py` | modify — tras C-08 (D48, T6-1): `test(` un `task_scope.md` sin permiso de lectura hace que `check_sprint_refs.py` salga con exit 2 y escriba `cannot read an artifact` | low | `implementer_agent` | ✅ `28630d7` |
+| C-10 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify — tras C-09 (D48, T6-2): la operación de la fila C-07 pasa de `create test` a `modify` | low | `orchestrator` | ✅ `9e5d8bb` |
+| C-11 | `docs/sprints/059-core-pipeline/task_scope.md` | modify — tras C-10 (D48, T6-3): la cita de la fila C-07 pasa de `scripts/check_sprint_refs.py:264` a `:266` | low | `orchestrator` | ✅ `7aef661` |
+| C-12 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — tras C-11 (D48, T6-4): el rango de la fila Tester Gate 2 ronda 5 pasa de `c6c41fe..HEAD` a `c6c41fe..d97c1fe` | low | `orchestrator` | ✅ `f759d89` |
 
 ### Wave 5 — Régimen (decisiones con las medidas en la mano)
 
