@@ -375,6 +375,10 @@ Example (do not uncomment):
 | QA Agent (Gate 1) | 25 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 2 |
 | QA Agent (Gate 1) | 25 | `make verify` | 0 |
 | QA Agent (Gate 1) | 25 | `make quality-audit` | 0 |
+| QA Agent (Gate 1) | 26 | `python3 scripts/check_fix_reproduces.py --range 08c669c..HEAD` | 0 |
+| QA Agent (Gate 1) | 26 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 2 |
+| QA Agent (Gate 1) | 26 | `make verify` | 0 |
+| QA Agent (Gate 1) | 26 | `make quality-audit` | 0 |
 
 ---
 
@@ -444,7 +448,9 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase (current)**: Phase 7, Wave 4, QA Gate 1 round 26 on range `b13cb49..<end SHA at dispatch>`, then Tester Gate 2 round 7 on range `6196230..<end SHA at dispatch>`, both dispatched fresh; then Phase 6, Wave 5, unit D-01. Units C-09 to C-12 are committed (162 units, plan D48); QA Gate 1 round 25 and Tester Gate 2 round 6 were `RECORD`, S3.
+**Next Phase (current)**: Phase 7, Wave 4, QA Gate 1 round 27 on range `e95d239..<end SHA at dispatch>`, then Tester Gate 2 round 7 on range `6196230..<end SHA at dispatch>`, both dispatched fresh; then Phase 6, Wave 5, unit D-01. Unit C-13 is committed (163 units, plan D49); QA Gate 1 round 26 was `RECORD`, S2.
+
+**Next Phase (superseded by the line above)**: Phase 7, Wave 4, QA Gate 1 round 26 on range `b13cb49..<end SHA at dispatch>`, then Tester Gate 2 round 7 on range `6196230..<end SHA at dispatch>`, both dispatched fresh; then Phase 6, Wave 5, unit D-01. Units C-09 to C-12 are committed (162 units, plan D48); QA Gate 1 round 25 and Tester Gate 2 round 6 were `RECORD`, S3.
 
 **Next Phase (superseded by the line above)**: Phase 7, Wave 4, QA Gate 1 round 25 on range `10204e4..HEAD`, then Tester Gate 2 round 6 on range `d97c1fe..HEAD`, both dispatched fresh. Units C-07 (`649eb96`) and C-08 (`65b4709`) are committed (158 units, plan D47); Tester Gate 2 round 5 was `RECORD`, S2 (`bd2680e`).
 
