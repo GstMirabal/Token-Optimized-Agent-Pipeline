@@ -114,9 +114,9 @@ to plans sealed before 030. Enforced by
 | Subagents dispatched | {{N}} | `0` under Cursor `sequential` |
 | Prior session ratio | {{ratio or "n/a (Cursor / no transcript)"}} | `python3 scripts/session_cost.py --from-anchor --json` |
 
-Soft (5×) / hard (15×) thresholds force an update to this section before new
-work continues — they are not observational-only once a measurable Claude
-transcript exists for this tool.
+The soft and hard session bounds of `rules/token_economy.md` section 3.1 force
+an update to this section before new work continues; they are not
+observational-only once a measurable Claude transcript exists for this tool.
 
 ---
 
