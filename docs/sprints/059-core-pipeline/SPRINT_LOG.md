@@ -172,6 +172,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 | Tester Agent (Gate 2) | 3 | RECORD | testifying | S2 | Range 8b84259..2c438d6, 1668 passed, make verify exit 0, zero regression. T2-1 closed. T3-1 (S2) a repeated unit id drops rows from --batches with exit 0, `scripts/check_task_scope.py:380`. T3-2 (S2) false reason citing hooks/on_commit.py, `workflows/pipeline_workflow.md:24`. T3-3, T3-4 (S3) noted. |
 | Tester Agent (Gate 2) | 4 | RECORD | testifying | S2 | Range 2c438d6..c6c41fe, 1670 passed, make verify exit 0, zero regression. T3-1, T3-2, R20-1 closed. T4-1 (S2) Jurisdiction table omits units claiming the same subject. T4-2 (S3) noted. |
 | Tester Agent (Gate 2) | 5 | RECORD | testifying | S2 | Range c6c41fe..HEAD, 1767 passed, make verify exit 0, zero regression. T4-1 closed: --batches puts no two units with one File in a batch. T5-1 (S2) untested read-failure exit 2, `scripts/check_sprint_refs.py:264`. T5-2 (S2) plan template keeps the hard bound at 15x against ADR-0018 550,000, `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md:117`. T5-3 (S3) noted. |
+| Tester Agent (Gate 2) | 6 | RECORD | testifying | S3 | Range d97c1fe..6196230, 1768 passed, make verify exit 0, zero regression. T5-1 closed by 649eb96: removing the read except fails the new test. T5-2 closed by 65b4709: no 15x left, section 3.1 exists. T6-1 (S3) OSError half of the read except untested, `scripts/check_sprint_refs.py:266`. T6-2, T6-3, T6-4 (S3) C-07 operation and line cite, round 5 range names HEAD. |
 
 ### Gate findings
 
