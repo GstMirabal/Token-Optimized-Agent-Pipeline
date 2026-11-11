@@ -279,7 +279,7 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | C-05 | `scripts/check_sprint_refs.py` | modify — tras C-04 (D45, R22-2): falla (exit 2) si una fila KI del `SPRINT_LOG.md` nombra una unidad marcada ✅ en `task_scope.md` sin citar su SHA; test pareado en `tests/test_check_sprint_refs.py` | medium | `implementer_agent` | ✅ `5652a3b` |
 | C-06 | `scripts/check_sprint_refs.py` | modify — tras C-05 (D46, R23-1): `fix(` el chequeo KI se salta con `[OK] ... (skip)` si falta `task_scope.md` o `SPRINT_LOG.md`; test y docstring ajustados | low | `implementer_agent` | ✅ `72d410b` |
 | C-07 | `tests/test_check_sprint_refs.py` | create test — tras C-06 (D47, T5-1): `test(` un `task_scope.md` con bytes no UTF-8 hace que `check_sprint_refs.py` salga con exit 2 y escriba `cannot read an artifact` en stderr | low | `implementer_agent` | ✅ `649eb96` |
-| C-08 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify — tras C-07 (D47, T5-2): el párrafo de umbrales 5×/15× pasa a remitir a `rules/token_economy.md` sección 3.1 sin cifras | low | `doc_orchestrator` | ⏳ |
+| C-08 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify — tras C-07 (D47, T5-2): el párrafo de umbrales 5×/15× pasa a remitir a `rules/token_economy.md` sección 3.1 sin cifras | low | `doc_orchestrator` | ✅ `65b4709` |
 
 ### Wave 5 — Régimen (decisiones con las medidas en la mano)
 
