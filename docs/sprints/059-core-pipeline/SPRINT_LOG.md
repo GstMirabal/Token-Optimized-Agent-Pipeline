@@ -172,7 +172,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 | QA Agent (Gate 1) | 25 | RECORD | testifying | S3 | Range 10204e4..b13cb49; tools on 08c669c..HEAD. Fix replay 0 (25 OK). Chain exit 2, chains: 3, unchanged (D44/D46 freeze, no fix( in range). verify 0 (1768 passed), quality-audit 0, ruff 0. T5-1 closed by 649eb96: removing the read except fails the new test. T5-2 closed by 65b4709: no 15x figure left in the template. 3 S3 (record wording). |
 | QA Agent (Gate 1) | 26 | RECORD | testifying | S2 | Range b13cb49..e95d239; tools on 08c669c..HEAD. Fix replay 0 (25 OK). Chain exit 2, chains: 3, unchanged (D44/D46 freeze, no fix( in range). verify 0 (1769 passed), quality-audit 0, ruff 0. T6-1 closed by 28630d7: narrowing the except to UnicodeDecodeError fails the new test. R25-1..3, T6-2..4 closed. R26-1 (S2) round 5 row still cites check_sprint_refs.py:264. 1 S3. |
 | QA Agent (Gate 1) | 27 | RECORD | testifying | S3 | Range e95d239..17ed349; tools on 08c669c..HEAD. Fix replay 0 (25 OK). Chain exit 2, chains: 3, unchanged (D44/D46 freeze, no fix( in range). verify 0 (1769 passed), quality-audit 0, ruff 0, check_gate_log/task_scope/sprint_refs 0. R26-1, R26-2 closed by 62db62c; row commands rerun. R27-1 D49 Check names 2 rows, grep -c prints 3. R27-2 R25-2 sed lacks file. R27-3 Close cells lack SHA. 3 S3. |
-| QA Agent (Gate 1) | 28 | RECORD | testifying | S3 | Range 17ed349..b79fdad; tools on 08c669c..HEAD. Fix replay 0 (25 OK). Chain exit 2, chains: 3, unchanged (D44/D46 freeze, no fix( in range). verify 0 (1769 passed), quality-audit 0, ruff 0, check_gate_log/task_scope/sprint_refs 0. R27-1 closed by 8139ca4, R27-2 and R27-3 by a44919a; done-criteria print 0. R28-1 R27-3 command does not discriminate. R28-2 round 5 grep prefix matches 2 rows. R28-3 D50 "hoy 3" now 0. 3 S3. |
+| QA Agent (Gate 1) | 28 | RECORD | testifying | S3 | Range 17ed349..b79fdad; tools on 08c669c..HEAD. Fix replay 0 (25 OK). Chain exit 2, chains: 3, unchanged (D44/D46 freeze, no fix( in range). verify 0 (1769 passed), quality-audit 0, ruff 0, check_gate_log/task_scope/sprint_refs 0. R27-1 closed by 8139ca4, R27-2, R27-3 by a44919a. R28-1 R27-3 grep -o does not discriminate. R28-2 round 5 grep matches 2 rows. R28-3 D50 "hoy 3" is 0. 3 S3. |
 | Tester Agent (Gate 2) | 1 | REJECTED | charter | S1 | Range `08c669c..c6c7987`, 1531 passed. Baseline on context size with cuts on `cache_read`: 50 of 52 cuts over 35 transcripts are not collapses, and the ratio that feeds the hard bound falls (synthetic 20x reads 2.5x). 3 more: `--resolve` alternatives diverge under Cursor (S2), hard bound and cut field untested (S2), census wording (S3). |
 | Tester Agent (Gate 2) | 2 | RECORD | testifying | S2 | Range c6c7987..8b84259, 1613 passed, make verify exit 0, zero regression. Round 1 S0-S2 findings closed. T2-1 (S2, testifying); 3 S3. |
 | Tester Agent (Gate 2) | 3 | RECORD | testifying | S2 | Range 8b84259..2c438d6, 1668 passed, make verify exit 0, zero regression. T2-1 closed. T3-1 (S2) a repeated unit id drops rows from --batches with exit 0, `scripts/check_task_scope.py:380`. T3-2 (S2) false reason citing hooks/on_commit.py, `workflows/pipeline_workflow.md:24`. T3-3, T3-4 (S3) noted. |
@@ -388,6 +388,10 @@ Example (do not uncomment):
 | QA Agent (Gate 1) | 26 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 2 |
 | QA Agent (Gate 1) | 26 | `make verify` | 0 |
 | QA Agent (Gate 1) | 26 | `make quality-audit` | 0 |
+| QA Agent (Gate 1) | 27 | `python3 scripts/check_fix_reproduces.py --range 08c669c..HEAD` | 0 |
+| QA Agent (Gate 1) | 27 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 2 |
+| QA Agent (Gate 1) | 27 | `make verify` | 0 |
+| QA Agent (Gate 1) | 27 | `make quality-audit` | 0 |
 
 ---
 
