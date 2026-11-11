@@ -188,6 +188,7 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | C-10 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
 | C-11 | `docs/sprints/059-core-pipeline/task_scope.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
 | C-12 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
+| C-13 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
 
 ### Wave 5 — regime
 
