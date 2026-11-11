@@ -286,7 +286,7 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | C-10 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify — tras C-09 (D48, T6-2): la operación de la fila C-07 pasa de `create test` a `modify` | low | `orchestrator` | ✅ `9e5d8bb` |
 | C-11 | `docs/sprints/059-core-pipeline/task_scope.md` | modify — tras C-10 (D48, T6-3): la cita de la fila C-07 pasa de `scripts/check_sprint_refs.py:264` a `:266` | low | `orchestrator` | ✅ `7aef661` |
 | C-12 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — tras C-11 (D48, T6-4): el rango de la fila Tester Gate 2 ronda 5 pasa de `c6c41fe..HEAD` a `c6c41fe..d97c1fe` | low | `orchestrator` | ✅ `f759d89` |
-| C-13 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — tras C-12 (D49, R26-1, R26-2): cita `:266` en la fila Tester Gate 2 ronda 5; filas T5-1 y T5-2 en Gate findings; comando en el Check de R25-1 y R25-3; alcance de la tabla ampliado | low | `orchestrator` | ⏳ |
+| C-13 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — tras C-12 (D49, R26-1, R26-2): cita `:266` en la fila Tester Gate 2 ronda 5; filas T5-1 y T5-2 en Gate findings; comando en el Check de R25-1 y R25-3; alcance de la tabla ampliado | low | `orchestrator` | ✅ `62db62c` |
 
 ### Wave 5 — Régimen (decisiones con las medidas en la mano)
 
