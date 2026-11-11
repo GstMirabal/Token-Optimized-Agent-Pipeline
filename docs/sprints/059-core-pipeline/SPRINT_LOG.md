@@ -225,9 +225,9 @@ One row per S0-S2 finding from QA Gate 1 round 13 on (plan D37), plus one row fo
 | 25 | R25-3 | S3 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` Tester Gate 2 round 5 row | testifying. `git show b13cb49:docs/sprints/059-core-pipeline/SPRINT_LOG.md \| grep -n "Gate 2) | 5 | RECORD.*c6c41fe\.\.HEAD"` → one match; round 5 ran at `d97c1fe`. Same as T6-4. Close: C-12 `f759d89` |
 | 26 | R26-1 | S2 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` Tester Gate 2 round 5 row | testifying. `grep -n "check_sprint_refs.py:264" docs/sprints/059-core-pipeline/SPRINT_LOG.md` at `e95d239` matches the round 5 row; `git show d97c1fe:scripts/check_sprint_refs.py \| grep -n "except (OSError, UnicodeDecodeError)"` prints `266:`. The C-11 fix was not propagated (`RA-14`). Close: C-13 `62db62c` |
 | 26 | R26-2 | S3 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` Gate findings table | testifying. `grep -n "^| 25 | R25-" docs/sprints/059-core-pipeline/SPRINT_LOG.md` at `e95d239` prints three S3 rows against the scope sentence "One row per S0-S2 finding"; `grep -c "^| 5 | T5-" docs/sprints/059-core-pipeline/SPRINT_LOG.md` at `e95d239` prints `0` for the two S2 findings T5-1 and T5-2. Close: C-13 `62db62c` |
-| 27 | R27-1 | S3 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` D49 row | testifying. `grep -c "check_sprint_refs.py:264" docs/sprints/059-core-pipeline/SPRINT_LOG.md` at `17ed349` prints `3`; the D49 Check names two rows (R25-2, R26-1) and no number; the third is the QA Gate 1 round 26 row |
-| 27 | R27-2 | S3 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` R25-2 row | testifying. The Check holds `sed -n 264p` with no file; `sed -n 264p scripts/check_sprint_refs.py` at `17ed349` prints `    try:` |
-| 27 | R27-3 | S3 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` R25-2, R26-1, R26-2 rows | testifying. `grep -o "Close: C-1[13]\`*" docs/sprints/059-core-pipeline/SPRINT_LOG.md` at `17ed349` prints Close cells for C-11 and C-13 with no SHA; C-11 is `7aef661`, C-13 is `62db62c` |
+| 27 | R27-1 | S3 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` D49 row | testifying. `grep -c "check_sprint_refs.py:264" docs/sprints/059-core-pipeline/SPRINT_LOG.md` at `17ed349` prints `3`; the D49 Check names two rows (R25-2, R26-1) and no number; the third is the QA Gate 1 round 26 row. Close: C-14 `8139ca4` |
+| 27 | R27-2 | S3 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` R25-2 row | testifying. The Check holds `sed -n 264p` with no file; `sed -n 264p scripts/check_sprint_refs.py` at `17ed349` prints `    try:`. Close: C-15 `a44919a` |
+| 27 | R27-3 | S3 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` R25-2, R26-1, R26-2 rows | testifying. `grep -o "Close: C-1[13]\`*" docs/sprints/059-core-pipeline/SPRINT_LOG.md` at `17ed349` prints Close cells for C-11 and C-13 with no SHA; C-11 is `7aef661`, C-13 is `62db62c`. Close: C-15 `a44919a` |
 
 ### Remediation notes
 
@@ -453,7 +453,7 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase (current)**: Phase 6, Wave 4, units C-14 and C-15 (plan D50, 165 units); then Phase 7, Wave 4, QA Gate 1 round 28 on range `17ed349..<end SHA at dispatch>`, then Tester Gate 2 round 7 on range `6196230..<end SHA at dispatch>`, both dispatched fresh; then Phase 6, Wave 5, unit D-01. QA Gate 1 round 27 was `RECORD`, S3; the human chose to fix R27-1 to R27-3.
+**Next Phase (current)**: Phase 7, Wave 4, QA Gate 1 round 28 on range `17ed349..<end SHA at dispatch>`, then Tester Gate 2 round 7 on range `6196230..<end SHA at dispatch>`, both dispatched fresh; then Phase 6, Wave 5, unit D-01. Units C-14 (`8139ca4`) and C-15 (`a44919a`) are committed (165 units, plan D50); QA Gate 1 round 27 was `RECORD`, S3; no QA Gate 1 round 28 or Tester Gate 2 round 7 verdict exists.
 
 **Next Phase (superseded by the line above)**: Phase 7, Wave 4, in a new session: first the human decides whether R27-1 to R27-3 (S3, QA Gate 1 round 27, `7069c7d`) are noted only or fixed under a new plan decision; then Tester Gate 2 round 7, dispatched fresh on range `6196230..<end SHA at dispatch>`; then Phase 6, Wave 5, unit D-01. Units C-01 to C-13 are committed (163 units, plan D49); QA Gate 1 rounds 26 and 27 were `RECORD` (S2, S3); no Tester Gate 2 round 7 verdict exists.
 

@@ -288,8 +288,8 @@ Sin columna Status: el estado vive en `task_scope.md`. Orden: M-11, M-01 a M-04,
 | C-11 | `docs/sprints/059-core-pipeline/task_scope.md` | modify — tras C-10 (D48, T6-3): la cita de la fila C-07 pasa de `scripts/check_sprint_refs.py:264` a `:266` | low | `orchestrator` | ✅ `7aef661` |
 | C-12 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — tras C-11 (D48, T6-4): el rango de la fila Tester Gate 2 ronda 5 pasa de `c6c41fe..HEAD` a `c6c41fe..d97c1fe` | low | `orchestrator` | ✅ `f759d89` |
 | C-13 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — tras C-12 (D49, R26-1, R26-2): cita `:266` en la fila Tester Gate 2 ronda 5; filas T5-1 y T5-2 en Gate findings; comando en el Check de R25-1 y R25-3; alcance de la tabla ampliado | low | `orchestrator` | ✅ `62db62c` |
-| C-14 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify — tras C-13 (D50, R27-1): el Check de la fila D49 pasa a un grep acotado a la fila Tester Gate 2 ronda 5 que imprime `0` | low | `orchestrator` | ⏳ |
-| C-15 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — tras C-14 (D50, R27-2, R27-3): archivo en el `sed` de la fila R25-2; SHA en las celdas Close de C-11 y C-13 | low | `orchestrator` | ⏳ |
+| C-14 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify — tras C-13 (D50, R27-1): el Check de la fila D49 pasa a un grep acotado a la fila Tester Gate 2 ronda 5 que imprime `0` | low | `orchestrator` | ✅ `8139ca4` |
+| C-15 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify — tras C-14 (D50, R27-2, R27-3): archivo en el `sed` de la fila R25-2; SHA en las celdas Close de C-11 y C-13 | low | `orchestrator` | ✅ `a44919a` |
 
 ### Wave 5 — Régimen (decisiones con las medidas en la mano)
 
