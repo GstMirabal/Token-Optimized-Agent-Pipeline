@@ -452,7 +452,9 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase (current)**: Phase 7, Wave 4, QA Gate 1 round 27 on range `e95d239..<end SHA at dispatch>`, then Tester Gate 2 round 7 on range `6196230..<end SHA at dispatch>`, both dispatched fresh; then Phase 6, Wave 5, unit D-01. Unit C-13 is committed (163 units, plan D49); QA Gate 1 round 26 was `RECORD`, S2.
+**Next Phase (current)**: Phase 7, Wave 4, in a new session: first the human decides whether R27-1 to R27-3 (S3, QA Gate 1 round 27, `7069c7d`) are noted only or fixed under a new plan decision; then Tester Gate 2 round 7, dispatched fresh on range `6196230..<end SHA at dispatch>`; then Phase 6, Wave 5, unit D-01. Units C-01 to C-13 are committed (163 units, plan D49); QA Gate 1 rounds 26 and 27 were `RECORD` (S2, S3); no Tester Gate 2 round 7 verdict exists.
+
+**Next Phase (superseded by the line above)**: Phase 7, Wave 4, QA Gate 1 round 27 on range `e95d239..<end SHA at dispatch>`, then Tester Gate 2 round 7 on range `6196230..<end SHA at dispatch>`, both dispatched fresh; then Phase 6, Wave 5, unit D-01. Unit C-13 is committed (163 units, plan D49); QA Gate 1 round 26 was `RECORD`, S2.
 
 **Next Phase (superseded by the line above)**: Phase 7, Wave 4, QA Gate 1 round 26 on range `b13cb49..<end SHA at dispatch>`, then Tester Gate 2 round 7 on range `6196230..<end SHA at dispatch>`, both dispatched fresh; then Phase 6, Wave 5, unit D-01. Units C-09 to C-12 are committed (162 units, plan D48); QA Gate 1 round 25 and Tester Gate 2 round 6 were `RECORD`, S3.
 
