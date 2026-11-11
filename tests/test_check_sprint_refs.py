@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -83,6 +84,20 @@ def test_an_unreadable_artifact_exits_2(tmp_path: Path) -> None:
     with (sprint / "task_scope.md").open("ab") as handle:
         handle.write(b"\xff\xfe")
     result = _run("--sprint-dir", str(sprint))
+    assert result.returncode == 2
+    assert "cannot read an artifact" in result.stderr
+
+
+@pytest.mark.skipif(os.geteuid() == 0, reason="root ignores the file mode")
+def test_a_permission_denied_artifact_exits_2(tmp_path: Path) -> None:
+    """A task_scope.md with mode 0o000 raises OSError and makes the script exit 2 with a read error."""
+    sprint = _sprint(tmp_path)
+    scope = sprint / "task_scope.md"
+    scope.chmod(0o000)
+    try:
+        result = _run("--sprint-dir", str(sprint))
+    finally:
+        scope.chmod(0o644)
     assert result.returncode == 2
     assert "cannot read an artifact" in result.stderr
 
