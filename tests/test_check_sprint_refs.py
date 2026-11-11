@@ -77,6 +77,16 @@ def test_a_consistent_sprint_passes(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stderr
 
 
+def test_an_unreadable_artifact_exits_2(tmp_path: Path) -> None:
+    """Bytes that are not UTF-8 in task_scope.md make the script exit 2 with a read error."""
+    sprint = _sprint(tmp_path)
+    with (sprint / "task_scope.md").open("ab") as handle:
+        handle.write(b"\xff\xfe")
+    result = _run("--sprint-dir", str(sprint))
+    assert result.returncode == 2
+    assert "cannot read an artifact" in result.stderr
+
+
 @pytest.mark.parametrize(
     ("file_key", "body", "message"),
     [
