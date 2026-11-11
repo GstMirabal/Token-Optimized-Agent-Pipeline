@@ -184,6 +184,10 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | C-06 | `scripts/check_sprint_refs.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | C-07 | `tests/test_check_sprint_refs.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | C-08 | `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| C-09 | `tests/test_check_sprint_refs.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| C-10 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
+| C-11 | `docs/sprints/059-core-pipeline/task_scope.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
+| C-12 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
 
 ### Wave 5 — regime
 
