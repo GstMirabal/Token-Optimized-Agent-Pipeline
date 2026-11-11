@@ -172,7 +172,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 | Tester Agent (Gate 2) | 2 | RECORD | testifying | S2 | Range c6c7987..8b84259, 1613 passed, make verify exit 0, zero regression. Round 1 S0-S2 findings closed. T2-1 (S2, testifying); 3 S3. |
 | Tester Agent (Gate 2) | 3 | RECORD | testifying | S2 | Range 8b84259..2c438d6, 1668 passed, make verify exit 0, zero regression. T2-1 closed. T3-1 (S2) a repeated unit id drops rows from --batches with exit 0, `scripts/check_task_scope.py:380`. T3-2 (S2) false reason citing hooks/on_commit.py, `workflows/pipeline_workflow.md:24`. T3-3, T3-4 (S3) noted. |
 | Tester Agent (Gate 2) | 4 | RECORD | testifying | S2 | Range 2c438d6..c6c41fe, 1670 passed, make verify exit 0, zero regression. T3-1, T3-2, R20-1 closed. T4-1 (S2) Jurisdiction table omits units claiming the same subject. T4-2 (S3) noted. |
-| Tester Agent (Gate 2) | 5 | RECORD | testifying | S2 | Range c6c41fe..HEAD, 1767 passed, make verify exit 0, zero regression. T4-1 closed: --batches puts no two units with one File in a batch. T5-1 (S2) untested read-failure exit 2, `scripts/check_sprint_refs.py:264`. T5-2 (S2) plan template keeps the hard bound at 15x against ADR-0018 550,000, `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md:117`. T5-3 (S3) noted. |
+| Tester Agent (Gate 2) | 5 | RECORD | testifying | S2 | Range c6c41fe..d97c1fe, 1767 passed, make verify exit 0, zero regression. T4-1 closed: --batches puts no two units with one File in a batch. T5-1 (S2) untested read-failure exit 2, `scripts/check_sprint_refs.py:264`. T5-2 (S2) plan template keeps the hard bound at 15x against ADR-0018 550,000, `docs/standards/templates/IMPLEMENTATION_PLAN_TEMPLATE.md:117`. T5-3 (S3) noted. |
 | Tester Agent (Gate 2) | 6 | RECORD | testifying | S3 | Range d97c1fe..6196230, 1768 passed, make verify exit 0, zero regression. T5-1 closed by 649eb96: removing the read except fails the new test. T5-2 closed by 65b4709: no 15x left, section 3.1 exists. T6-1 (S3) OSError half of the read except untested, `scripts/check_sprint_refs.py:266`. T6-2, T6-3, T6-4 (S3) C-07 operation and line cite, round 5 range names HEAD. |
 
 ### Gate findings
@@ -216,7 +216,7 @@ One row per S0-S2 finding from QA Gate 1 round 13 on (plan D37). Check: the comm
 | 23 | R23-1 | S2 | `scripts/check_sprint_refs.py` (`ki_sha_findings`); `tests/test_check_sprint_refs.py` (`test_a_missing_task_scope_exits_2`) | charter. C-05 added an exit 2 the plan did not ask for: a sprint directory with a plan but no `task_scope.md` or `SPRINT_LOG.md` fails, so a correct sprint fails `make verify` during Phases 1 to 4.2; at 548a2d3 the same fixture exits 0. Close: skip the check with an `[OK] ... (skip)` line when either file is missing, as for a missing plan, with the test and docstring changed to match; or a recorded human decision keeps exit 2 and amends the pipeline order. |
 | 25 | R25-1 | S3 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` C-07 row | testifying. The plan calls C-07 `create test`; `task_scope.md` and `agent_assignment.md` call it `modify`, and `649eb96` modified an existing file. Same as T6-2. Close: C-10 |
 | 25 | R25-2 | S3 | `docs/sprints/059-core-pipeline/task_scope.md` C-07 row | testifying. The row cites `scripts/check_sprint_refs.py:264`; `sed -n 264p` prints `try:`, the `except` is at line 266. Same as T6-3. Close: C-11 |
-| 25 | R25-3 | S3 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` Tester Gate 2 round 5 row | testifying. The row's range `c6c41fe..HEAD` names a moving ref; round 5 ran at `d97c1fe`. Same as T6-4. Close: C-12 |
+| 25 | R25-3 | S3 | `docs/sprints/059-core-pipeline/SPRINT_LOG.md` Tester Gate 2 round 5 row | testifying. The row's range ended in the moving ref `HEAD`; round 5 ran at `d97c1fe`. Same as T6-4. Close: C-12 |
 
 ### Remediation notes
 
@@ -434,7 +434,7 @@ Closing the session state and certifying traceability.
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
 **Next Phase (current)**: Phase 7, Wave 4, QA Gate 1 round 25 on range `10204e4..HEAD`, then Tester Gate 2 round 6 on range `d97c1fe..HEAD`, both dispatched fresh. Units C-07 (`649eb96`) and C-08 (`65b4709`) are committed (158 units, plan D47); Tester Gate 2 round 5 was `RECORD`, S2 (`bd2680e`).
 
-**Next Phase (superseded by the line above)**: Phase 7, Wave 4, Tester Gate 2 round 5, in a new session, dispatched fresh on range `c6c41fe..HEAD`. Wave 4 units C-01 to C-06 are committed (156 units); QA Gate 1 converged at round 24 (`RECORD`, S3, `aa5a995`). A round 5 dispatch of 2026-11-10 was stopped before any verdict at the human's suspend order, so no round 5 verdict exists.
+**Next Phase (superseded by the line above)**: Phase 7, Wave 4, Tester Gate 2 round 5, in a new session, dispatched fresh on range `c6c41fe..d97c1fe`. Wave 4 units C-01 to C-06 are committed (156 units); QA Gate 1 converged at round 24 (`RECORD`, S3, `aa5a995`). A round 5 dispatch of 2026-11-10 was stopped before any verdict at the human's suspend order, so no round 5 verdict exists.
 
 **Next Phase (superseded by the line above)**: Phase 6, Wave 4, unit C-01, in a new session, then C-02. B-03, B-04, B-05 and B-16 to B-21 are committed (150 units); after purging `__pycache__`, `.pytest_cache` and `.ruff_cache`, `make verify` exited 0 and modified 0 files in the tree (D41, D42). The Wave 4 gates run after C-02.
 
