@@ -336,6 +336,8 @@ Example (do not uncomment):
 | QA Agent (Gate 1) | 20 | `python3 scripts/check_remediation_chain.py --range 08c669c..HEAD` | 2 |
 | Tester Agent (Gate 2) | 4 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider` | 0 |
 | Tester Agent (Gate 2) | 4 | `make verify` | 0 |
+| Tester Agent (Gate 2) | 5 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider` | 0 |
+| Tester Agent (Gate 2) | 5 | `make verify` | 0 |
 | Tester Agent (Gate 2) | 1 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider` | 0 |
 | Tester Agent (Gate 2) | 1 | `make verify` | 0 |
 | QA Agent (Gate 1) | 21 | `python3 scripts/check_fix_reproduces.py --range 08c669c..HEAD` | 0 |
@@ -424,7 +426,9 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase (current)**: Phase 7, Wave 4, Tester Gate 2 round 5, in a new session, dispatched fresh on range `c6c41fe..HEAD`. Wave 4 units C-01 to C-06 are committed (156 units); QA Gate 1 converged at round 24 (`RECORD`, S3, `aa5a995`). A round 5 dispatch of 2026-11-10 was stopped before any verdict at the human's suspend order, so no round 5 verdict exists.
+**Next Phase (current)**: Phase 7, Wave 4, QA Gate 1 round 25 on range `10204e4..HEAD`, then Tester Gate 2 round 6 on range `d97c1fe..HEAD`, both dispatched fresh. Units C-07 (`649eb96`) and C-08 (`65b4709`) are committed (158 units, plan D47); Tester Gate 2 round 5 was `RECORD`, S2 (`bd2680e`).
+
+**Next Phase (superseded by the line above)**: Phase 7, Wave 4, Tester Gate 2 round 5, in a new session, dispatched fresh on range `c6c41fe..HEAD`. Wave 4 units C-01 to C-06 are committed (156 units); QA Gate 1 converged at round 24 (`RECORD`, S3, `aa5a995`). A round 5 dispatch of 2026-11-10 was stopped before any verdict at the human's suspend order, so no round 5 verdict exists.
 
 **Next Phase (superseded by the line above)**: Phase 6, Wave 4, unit C-01, in a new session, then C-02. B-03, B-04, B-05 and B-16 to B-21 are committed (150 units); after purging `__pycache__`, `.pytest_cache` and `.ruff_cache`, `make verify` exited 0 and modified 0 files in the tree (D41, D42). The Wave 4 gates run after C-02.
 
