@@ -81,6 +81,7 @@ Tracking of atomic goals achieved during the session. Work units and execution o
     - `[x]` Human decision 2026-11-11 after Tester Gate 2 round 6 and QA Gate 1 round 25 (plan D48): the four S3 findings are fixed in this sprint, one unit per subject: C-09 tests the `OSError` half of the read `except` of `scripts/check_sprint_refs.py` (T6-1); C-10, C-11 and C-12 correct the C-07 operation in the plan, the C-07 line cite in `task_scope.md` and the Tester Gate 2 round 5 range in this log (T6-2 to T6-4, R25-1 to R25-3); QA Gate 1 round 26 and Tester Gate 2 round 7 follow, then Wave 5; work units 158 → 162.
     - `[x]` Human decision 2026-11-11 after QA Gate 1 round 26 (plan D49): R26-1 the C-11 line fix was not propagated to the Tester Gate 2 round 5 row (`RA-14`); R26-2 the Gate findings table holds S3 rows without a command and lacks T5-1 and T5-2; unit C-13 fixes both in this log, keeping the S3 rows because `scripts/check_sprint_refs.py` requires a row for every cited `R<round>-<n>` ID; QA Gate 1 round 27 and Tester Gate 2 round 7 follow, then Wave 5; work units 162 → 163.
     - `[x]` Human decision 2026-11-11 after QA Gate 1 round 27 (plan D50): the three S3 findings are fixed in this sprint, one unit per file: C-14 replaces the D49 Check in the plan with a grep scoped to the Tester Gate 2 round 5 row (R27-1); C-15 adds the file to the R25-2 `sed` and the SHA to the C-11 and C-13 Close cells in this log (R27-2, R27-3); QA Gate 1 round 28 and Tester Gate 2 round 7 follow, both fresh, then Wave 5; work units 163 → 165.
+    - `[x]` Human decision 2026-11-12 after QA Gate 1 round 28 (`RECORD`, S3): R28-1 to R28-3 are noted only (`RA-17`); no unit is added; Tester Gate 2 round 7 follows, dispatched fresh, then Wave 5; work units stay 165.
 
 ---
 
@@ -461,7 +462,9 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase (current)**: Phase 7, Wave 4, QA Gate 1 round 28 on range `17ed349..<end SHA at dispatch>`, then Tester Gate 2 round 7 on range `6196230..<end SHA at dispatch>`, both dispatched fresh; then Phase 6, Wave 5, unit D-01. Units C-14 (`8139ca4`) and C-15 (`a44919a`) are committed (165 units, plan D50); QA Gate 1 round 27 was `RECORD`, S3; no QA Gate 1 round 28 or Tester Gate 2 round 7 verdict exists.
+**Next Phase (current)**: Phase 7, Wave 4, Tester Gate 2 round 7, dispatched fresh on range `6196230..<end SHA at dispatch>`; then Phase 6, Wave 5, unit D-01. QA Gate 1 round 28 was `RECORD`, S3 (`7ff090d`); the human noted R28-1 to R28-3 only (2026-11-12); 165 units, plan D50.
+
+**Next Phase (superseded by the line above)**: Phase 7, Wave 4, QA Gate 1 round 28 on range `17ed349..<end SHA at dispatch>`, then Tester Gate 2 round 7 on range `6196230..<end SHA at dispatch>`, both dispatched fresh; then Phase 6, Wave 5, unit D-01. Units C-14 (`8139ca4`) and C-15 (`a44919a`) are committed (165 units, plan D50); QA Gate 1 round 27 was `RECORD`, S3; no QA Gate 1 round 28 or Tester Gate 2 round 7 verdict exists.
 
 **Next Phase (superseded by the line above)**: Phase 7, Wave 4, in a new session: first the human decides whether R27-1 to R27-3 (S3, QA Gate 1 round 27, `7069c7d`) are noted only or fixed under a new plan decision; then Tester Gate 2 round 7, dispatched fresh on range `6196230..<end SHA at dispatch>`; then Phase 6, Wave 5, unit D-01. Units C-01 to C-13 are committed (163 units, plan D49); QA Gate 1 rounds 26 and 27 were `RECORD` (S2, S3); no Tester Gate 2 round 7 verdict exists.
 
