@@ -463,7 +463,9 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase (current)**: Phase 7, Wave 4, Tester Gate 2 round 7, dispatched fresh on range `6196230..<end SHA at dispatch>`; then Phase 6, Wave 5, unit D-01. QA Gate 1 round 28 was `RECORD`, S3 (`7ff090d`); the human noted R28-1 to R28-3 only (2026-11-12); 165 units, plan D50.
+**Next Phase (current)**: Phase 6, Wave 5, unit D-01. Wave 4 gates are closed: Tester Gate 2 round 7 was `APPROVED` (`a7e528c`), QA Gate 1 round 28 was `RECORD`, S3, with R28-1 to R28-3 noted only; 165 units, plan D50.
+
+**Next Phase (superseded by the line above)**: Phase 7, Wave 4, Tester Gate 2 round 7, dispatched fresh on range `6196230..<end SHA at dispatch>`; then Phase 6, Wave 5, unit D-01. QA Gate 1 round 28 was `RECORD`, S3 (`7ff090d`); the human noted R28-1 to R28-3 only (2026-11-12); 165 units, plan D50.
 
 **Next Phase (superseded by the line above)**: Phase 7, Wave 4, QA Gate 1 round 28 on range `17ed349..<end SHA at dispatch>`, then Tester Gate 2 round 7 on range `6196230..<end SHA at dispatch>`, both dispatched fresh; then Phase 6, Wave 5, unit D-01. Units C-14 (`8139ca4`) and C-15 (`a44919a`) are committed (165 units, plan D50); QA Gate 1 round 27 was `RECORD`, S3; no QA Gate 1 round 28 or Tester Gate 2 round 7 verdict exists.
 
