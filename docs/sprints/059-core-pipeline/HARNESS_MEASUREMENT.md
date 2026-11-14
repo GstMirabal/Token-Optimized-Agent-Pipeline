@@ -389,6 +389,38 @@ Measured 2026-11-14 in unit S-11 (plan D52) on this session's transcript.
 
 - Reading: who approved an unsandboxed call cannot be counted from transcripts, because no field records it; in this `acceptEdits` session each unsandboxed call went through the permission prompt. A session in auto mode, the default a child takes here (B1-4), lets the classifier approve such calls. ADR-0019 decides the permission mode of agent sessions and whether unsandboxed calls are allowed at all (`allowUnsandboxedCommands`).
 
+#### B7 key that disables auto mode (unit P-01)
+
+Measured 2026-11-14 by `devops_agent` in unit P-01 (plan D54, plan D52 conditions): configuration reading plus rule semantics with a fixture and a control, 2 child `claude -p --model haiku` calls. Versions: `2.1.322 (Claude Code)` (run) and `2.1.119 (Claude Code)` (read only).
+
+Configuration reading:
+
+| Item | Finding |
+| :--- | :--- |
+| Key | `permissions.disableAutoMode`; a top-level `disableAutoMode` is also read (2.1.322 code: `e.permissions?.disableAutoMode==="disable"\|\|e.disableAutoMode==="disable"`) |
+| Accepted value | only the string `"disable"` is checked; no other value found |
+| Neighbour key | `permissions.disableBypassPermissionsMode` takes `"disable"` the same way (present in 2.1.322 and 2.1.119) |
+| `permissions.defaultMode` values | `acceptEdits`, `plan`, `default`, `auto` (2.1.322) |
+| Binary strings, 2.1.322 | "auto mode disabled: disableAutoMode in settings"; "auto mode is turned off in this computer's managed settings."; a managed-settings file setting `disableAutoMode` to `"disable"` keeps auto mode off whatever `autoModeEnabled` says |
+| Binary strings, 2.1.119 | "auto mode disabled: disableAutoMode in settings"; the key is in the permissions schema beside `defaultMode` and `disableBypassPermissionsMode` |
+
+Measurement:
+
+| Case | CLI | Settings | Command | Literal result |
+| :--- | :--- | :--- | :--- | :--- |
+| B7-5 | 2.1.322 | project `.claude/settings.json` in a fixture: `{"permissions":{"disableAutoMode":"disable"}}` | `claude -p --model haiku --permission-mode auto --output-format stream-json --verbose "Reply with the single word ok"` | init event `"permissionMode":"default"`; no refusal; first stderr line empty |
+| B7-6 (control) | 2.1.322 | fixture `{}` | same | `"permissionMode":"auto"`; first stderr line empty |
+
+- Reading: on 2.1.322 at project level, `disableAutoMode: "disable"` downgrades a requested auto mode to `default` silently (no error, no message); the control stays in auto (B7-5, B7-6). This is the key ADR-0019 D9 B7 ("no auto mode for agents") needs, applied in unit R-01.
+- Limits:
+  - Exit codes were not captured.
+  - User and managed levels were not run; the strings say both are read, and managed overrides `autoModeEnabled`.
+  - An interactive VS Code session was not run.
+  - 2.1.119 was only read, not run.
+  - Precedence between levels, and override by `--settings` or the flag, were not tested.
+  - The `defaultMode: "auto"` path was read, not run.
+- Cleanup: fixture directory removed, repository tree clean.
+
 ### B8
 
 Measured 2026-11-14 in unit S-11 (plan D52); size and exit code only, the clipboard content was not read or changed.
