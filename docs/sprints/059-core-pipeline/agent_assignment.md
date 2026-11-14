@@ -217,10 +217,33 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | D-03 | `rules/project_topology.md` | modify | parallel | `rule_validator` | N/A | `agents/rule_validator.md` |
 | D-04 | `claude/settings.hooks.json` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | E-01b | `claude/settings.hooks.json` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| P-01 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| P-02 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| P-03 | `docs/decisions/ADR-0019-sandbox-regime.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | R-01 | `claude/settings.hooks.json` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | R-02 | `.claude/settings.json` | install (human runs) | sequential | `devops_agent` | N/A | `agents/devops_agent.md` |
 | R-03 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | R-04 | `scripts/sandbox_probe.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| R-05 | `requirements-core.txt` | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| R-06 | `requirements-quality.txt` | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| R-07 | `requirements-skillopt.txt` | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| R-08 | `workflows/repository_hardening_workflow.md` | modify | parallel | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| R-09 | `workflows/deployment_workflow.md` | modify | parallel | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| R-10 | `scripts/sync_agents_pin.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| R-11 | `scripts/install.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| R-12 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| W-01 | `docs/decisions/ADR-0022-github-token-broker.md` | create | parallel | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| W-02 | `scripts/github_token_broker.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W-03 | `tests/test_github_token_broker.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W-04 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| W-05 | `claude/settings.hooks.json` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| W-06 | `.claude/settings.json` | install | sequential | `devops_agent` | N/A | `agents/devops_agent.md` |
+| W-07 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| W-08 | `rules/project_topology.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| W-09 | `agents.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| T-01 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| V-01 | `docs/sprints/059-core-pipeline/HARNESS_ATTACK_RESULT.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| V-02 | `docs/decisions/ADR-0019-sandbox-regime.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 
 ### Wave 6 — hardening, roles and Sprint 058 residues
 
