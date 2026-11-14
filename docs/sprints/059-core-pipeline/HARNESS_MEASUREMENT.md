@@ -333,11 +333,35 @@ Measured 2026-11-14 in unit S-09 (plan D52) in the nucleus, Bash sandbox of this
 
 ### B4
 
-Unit S-10 measures the nucleus-to-host commit path and upstream intake. Not yet measured.
+Measured 2026-11-14 in unit S-10 (plan D52), nucleus, Bash sandbox of this session and the Read tool, no `claude -p` call; GitHub state read through the unauthenticated public API.
+
+| Case | Check | Result |
+| :--- | :--- | :--- |
+| B4-1 | how a host takes a nucleus version | `scripts/session_start.py` `--boot` runs `scripts/sync_agents_pin.py`, which fetches tags and checks out a newer published version tag when the host is behind |
+| B4-2 | tag verification in `scripts/sync_agents_pin.py` and `scripts/install.py` | no `verify-tag`, `verify-commit` or signature check |
+| B4-3 | tag protection on the nucleus repository | `GET repos/<nucleus>/rulesets`: `200`, `[]` (no ruleset) |
+| B4-4 | channel A intake run | `python3 scripts/upstream_intake.py`: `intake queue (channel A): no .upstream_hosts.json registered`, exit 0 |
+| B4-5 | channel A printed fields (static, `scripts/upstream_intake.py` docstring) | only `id`, `status`, `channel`, `nucleus_artifact` and the host label, each printed only when it fully matches a token grammar; `title`, `defect`, `evidence` and `proposed_change` never printed |
+| B4-6 | channel B intake (static, `.github/workflows/host-finding-intake.yml`) | issue fields read from the event file, never interpolated into a command; labels limited to a fixed set; `contents: read`, `issues: write` |
+| B4-7 | a message from another agent reaching this session | a subagent's result arrives marked `[SYSTEM NOTIFICATION - NOT USER INPUT]`, and the harness neutralizes instruction-shaped text in it (observed in this session) |
+| B4-8 | a message from another local interactive session | not measurable by one agent: it needs a second interactive session |
+| B4-9 | fixture `.env` in a fixture directory outside the project, Bash `wc -c` | readable, 14 bytes |
+| B4-10 | same fixture `.env`, Read tool | readable, content returned |
+| B4-11 | control file in the same directory, Bash and Read | readable |
+
+- Reading: a version tag pushed to the nucleus reaches every host at its next boot with no signature check and no tag protection (B4-1 to B4-3), so any credential with Contents write on the nucleus, the A10 token included, can publish code that hosts load (inferred, not executed; attack validation, unit S-16). Channel A prints only token fields and channel B never interpolates issue text, so host text enters as data (B4-4 to B4-6); the triage still reads free text on demand. With the nucleus settings, a `.env` outside the project is readable by Bash and by the Read tool (B4-9, B4-10). ADR-0019 decides tag signing and protection, and a `denyRead` and `Read` deny for `.env*` files outside the project.
 
 ### B5
 
-Unit S-10 measures venv writability and Python pinning. Not yet measured.
+Measured 2026-11-14 in unit S-10 (plan D52), nucleus, Bash sandbox of this session.
+
+| Case | Check | Result |
+| :--- | :--- | :--- |
+| B5-1 | sandbox write to `venv_skillopt/` (new probe file created and removed) | writable |
+| B5-2 | `venv_skillopt/bin/python` | symlink to `python3.13`; `venv_skillopt/` is gitignored |
+| B5-3 | `requirements-core.txt`, `requirements-quality.txt`, `requirements-skillopt.txt` | every package pinned with `==` (`requirements-core.txt` includes `requirements-quality.txt` with `-r`); `--hash` lines: 0 in each |
+
+- Reading: dependencies are pinned by version but not by hash, and the virtual environment the framework runs `graph_update.py` and other scripts with is writable from the sandbox, so an agent can change installed packages that later run for the human. ADR-0019 decides hash pinning and venv write protection.
 
 ### B6
 
