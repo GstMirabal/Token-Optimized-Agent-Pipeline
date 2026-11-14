@@ -25,7 +25,7 @@ PY_EXCLUDES := -not -path "*/.git/*" -not -path "*/node_modules/*" -not -path "*
 VENV_PY := $(AGENTS_DIR)/venv_skillopt/bin/python3
 PY := $(if $(wildcard $(VENV_PY)),$(VENV_PY),python3)
 
-.PHONY: graphify-update graphify-rebuild graphify-deep verify docs-freshness-check session-start model-ledger cursor-tiers cursor-era-audit bridge-state role-artifacts quality-audit
+.PHONY: graphify-update graphify-rebuild graphify-deep verify docs-freshness-check session-start model-ledger cursor-tiers cursor-era-audit bridge-state role-artifacts quality-audit sandbox-probe
 
 
 # Incremental AST sync after code changes (close_workflow Phase 1, no LLM cost).
@@ -147,6 +147,12 @@ cursor-era-audit:
 # running `make verify` is a local-environment fact, not a code defect.
 bridge-state:
 	cd $(AGENTS_DIR) && python3 scripts/bridge_state.py
+
+# Re-measures the closed sandbox cases (M7, M9, A1, B2) against the live
+# sandbox (Sprint 059, S-15). Not a `verify` dependency: the result depends on
+# the running CLI's sandbox and is environment-specific. Exit code propagates.
+sandbox-probe:
+	cd $(AGENTS_DIR) && python3 scripts/sandbox_probe.py
 
 # Deterministic function-length/nesting-depth auditor (Sprint 050). A `verify`
 # step since Sprint 052 (U66): Sprint 050 withheld the wiring (D5 branch B)
