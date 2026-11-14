@@ -1,6 +1,6 @@
 # .agents Global Context & Governance Rules
 
-Rows keep the rule and a pointer; history and precedents: `docs/guides/RULE_PRECEDENTS_GUIDE.md` (on demand). In a row, `(precedents)` means that file, under the row's key.
+Rows keep the rule and a pointer; history and precedents: `docs/guides/RULE_PRECEDENTS_GUIDE.md`. In a row, `(precedents)` means that file, under the row's key.
 
 ## 0. Documentation Entry Point
 
@@ -127,7 +127,7 @@ The pipeline operates under a rigid sequential process. Role usurpation is stric
 | **Subagent Roles** | `tester_agent` | Test Verifier. Ensures logic stability and zero regression. |
 
 > [!NOTE]
-> The 8 roles above are the *Core Pipeline Roles* (mandatory in every Planning → Sprint Closeout cycle). `governance_learner`, `doc_orchestrator`, `topology_mapper`, `git_sync_agent`, `token_economy_agent` and `implementer_agent` are **Auxiliary Agents**, invoked as needed. Project specialists (`profiles/[name]/agents/`) join only when their profile is installed.
+> The 8 roles above are the *Core Pipeline Roles* (mandatory in every Planning → Sprint Closeout cycle). `governance_learner`, `doc_orchestrator`, `topology_mapper`, `git_sync_agent`, `token_economy_agent` and `implementer_agent` are **Auxiliary Agents**, invoked as needed.
 
 ### 🚀 The Execution Pipeline
 
@@ -140,7 +140,7 @@ The pipeline operates under a rigid sequential process. Role usurpation is stric
 | 3 | `workflows/reverse_documentation_workflow.md` (`/agents:revdoc`) | **Documentation of the code**: graph first, paths verified, contracts, C4, ADR | Fix against the system |
 | 4 | `workflows/pipeline_workflow.md` (`/agents:pipeline`) | Change | Only now is there a verified account of what is being changed |
 
-The normative 8-phase pipeline (Planning → Sprint Closeout) is defined **exclusively** in `workflows/pipeline_workflow.md` (`/agents:pipeline`). The Approval Gate (Phase 5) is a single attended human authorization, never wrapped in an unattended `/loop`, and all execution happens on `ai-sprint/[ID]` (RA-12).
+The normative 8-phase pipeline is defined **exclusively** in `workflows/pipeline_workflow.md`. The Approval Gate (Phase 5) is a single attended human authorization, never wrapped in an unattended `/loop`, and all execution happens on `ai-sprint/[ID]` (RA-12).
 
 ## 7. Rule Amendments
 
@@ -154,7 +154,7 @@ The normative 8-phase pipeline (Planning → Sprint Closeout) is defined **exclu
 | **Amendment** | `RA-06: IDENTITY_NAMING` | Standard Option B: All docs must be named `[MODULE]_[TYPE].md` (e.g. `USERS_BLUEPRINT.md`). |
 | **Amendment** | `RA-07: ARCHIVE_PURGE` | Prohibited to keep empty `archive/` folders. Purge immediately if found. |
 | **Amendment** | `RA-08: COMMIT_SQUASH` | Mandatory atomic local commits; mandatory squash & push only during Sprint Closeout. |
-| **Amendment** | `RA-09: SECRET_SOVEREIGNTY`| Never read `.env` into context or print a value from it; the agent prepares secret commands, and `gh` under the sandbox, for the human to run. **No `sandbox.excludedCommands` entry may exist.** Write-denies are not a boundary (`RA-19`). `rules/project_topology.md §5`. |
+| **Amendment** | `RA-09: SECRET_SOVEREIGNTY`| Never read `.env` into context or print a value from it; the agent prepares secret commands, and `gh` under the sandbox, for the human to run. Exposure reduction, no boundary claim: `denyRead` list, `Read(/**/.env*)`, out-of-project `.env*` denies; keychain service and git credential helper stay open (`KI-059-21`). **No `sandbox.excludedCommands` entry may exist.** Write-denies are not a boundary (`RA-19`). `ADR-0019`; `rules/project_topology.md §5`. |
 | **Amendment** | `RA-10: SUPPLY_CHAIN_SHIELD`| See `§8 Supply Chain Security` (canonical). |
 | **Amendment** | `RA-11: HOOK_BLOCKING_SEMANTICS`| `PreToolUse` hooks block only on exit `2`; exit `1` only warns. A hook in `hooks/` that must halt MUST `sys.exit(2)`, never `1`. (precedents) |
 | **Amendment** | `RA-12: BRANCH_DISCIPLINE`| Sprint branch `ai-sprint/[ID]`; direct commits or pushes to `main` PROHIBITED; only `deployment_workflow.md` Phase 1 merges; an IDE prefix is not valid: rename before the first substantive commit. (precedents) |
@@ -163,7 +163,7 @@ The normative 8-phase pipeline (Planning → Sprint Closeout) is defined **exclu
 | **Amendment** | `RA-15: HOST_CONTENT_GENERICIZATION`| MUST genericize host-identifying strings (name, paths, logic) in any `feedback_upstream` contribution. |
 | **Amendment** | `RA-16: INVOCATION_COVERAGE`| No mechanism merges without `invoked_by:` or an entry in `config/invocation_exceptions.json` (`verify_references.py` (d)). |
 | **Amendment** | `RA-17: GATE_VERDICT_CLASSES` | Phase 7 emits `APPROVED` \| `REJECTED` \| `RECORD` with class `charter` / `instructing` / `testifying`, and a severity `S0`-`S3` per finding (the row's `Severity` cell holds the highest, or `none`). `RECORD` does not count toward remediation. Procedure: `rules/qa_and_testing.md` §4. |
-| **Amendment** | `RA-18: CURSOR_PHASE1_NO_PLAN_MODE` | Under `session_tool: cursor`, Phase 1 MUST NOT invoke `SwitchMode` to plan — that mode forbids writing the deliverable. Write `IMPLEMENTATION_PLAN.md` at the canonical sprint path in the current session. A file under `~/.cursor/plans/` is not the `triple_lock` plan. Procedure: `pipeline_workflow.md` Phase 1. |
+| **Amendment** | `RA-18: CURSOR_PHASE1_NO_PLAN_MODE` | Under `session_tool: cursor`, Phase 1 MUST NOT invoke `SwitchMode` to plan. Write `IMPLEMENTATION_PLAN.md` at the canonical sprint path in the current session. A file under `~/.cursor/plans/` is not the `triple_lock` plan. Procedure: `pipeline_workflow.md` Phase 1. |
 | **Amendment** | `RA-19: SANDBOX_BOUNDARY_CLAIMS` | **PROHIBITED**: (1) any `sandbox.excludedCommands` entry or boundary claim without a measured enumeration of EVERY out-of-sandbox entry point; (2) closing only the measured vector; (3) a safety procedure running agent-writable content. `rules/project_topology.md §5`. |
 
 ## 8. Supply Chain Security
