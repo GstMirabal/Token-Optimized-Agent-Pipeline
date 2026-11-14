@@ -134,6 +134,7 @@ for h in webhook.site api.github.com example.org; do printf '%s ' $h; curl -sS -
 | A1-3 | 2.1.322 | `--settings`, control `"network":{}` | 000 | 000 | 000 | 000 | 000 | webhook.site:443, api.github.com:443, example.org:443, 127.0.0.1:5000 |
 | A1-4 | 2.1.119 | project | 000 | 200 | 000 | 000 | 000 | none printed |
 | A1-5 | 2.1.119 | `--settings` | 000 | 200 | 000 | 000 | 000 | none printed |
+| A1-6 | 2.1.322 | `--settings`, control with the `network` key absent | not probed | 000 | 000 | 000 | not probed | api.github.com:443, example.org:443, 127.0.0.1:5000 |
 
 Literal line from case A1-1:
 
@@ -148,7 +149,7 @@ Reading:
 | With `allowedDomains` set to the two GitHub hosts, egress to other hosts is denied and api.github.com is reached, on 2.1.322 and 2.1.119, at project level and via `--settings` | A1-1, A1-2, A1-4, A1-5 |
 | With that list set, the proxy CONNECT to 127.0.0.1:5000 is denied and the sandbox names it | A1-1, A1-2, A1-4, A1-5 |
 | The control A1-3 also denied loopback, so this run does not show that the list is what closes loopback; it shows that the configuration with the list leaves both closed | A1-3 |
-| Open: A1-3 with `"network":{}` denied every host, while the parent session (harness 2.1.322, interactive, auto mode, no `network` key) reached webhook.site (200) and the loopback tunnel (F-01, F-02). Either an empty `network` object means deny-all or `-p` differs from the interactive session; a control with the `network` key absent was not run (cap) | A1-3, F-01, F-02 |
+| A1-6 (unit S-03, 2026-11-14) with the `network` key absent also denied every host, including api.github.com, in a `claude -p` child; the open egress of the parent session (harness 2.1.322, interactive, auto mode, no `network` key; F-01, F-02) is therefore not explained by the settings but by the session mode, which approves domains per command (inferred: the measurement isolates the factor, not the mechanism; B7 measures the auto-mode approvals) | A1-3, A1-6, F-01, F-02 |
 | `direct5000` printed `000`; the error text was not captured | all |
 | User-level and managed settings were not inspected | all |
 | Consequence for KI-059-19 and KI-059-20: setting `network.allowedDomains` explicitly closes both in the measured configurations | A1-1, A1-2, A1-4, A1-5 |
@@ -157,7 +158,18 @@ Cleanup: fixtures removed, repository tree clean.
 
 ### A2
 
-Unit S-03 repeats M9, M13, M14 and M15 on 2.1.322 at project and user level. Not yet measured.
+Unit S-03 repeats M9, M13, M14 and M15 on 2.1.322 at project and user level.
+
+- Measured 2026-11-14 by `devops_agent` on 2.1.322, 3 child `claude -p` calls in unit S-03 (cap 10), of which 2 for A2. Settings: `sandbox.enabled`, `autoAllowBashIfSandboxed`, `network.allowUnixSockets: ["/private/tmp/claude-501/s03/listed.sock"]`; two Python echo servers on `listed.sock` and `unlisted.sock` run outside the sandbox (no database or other local service).
+
+| Case | CLI | Settings level | listed.sock | unlisted.sock |
+| :--- | :--- | :--- | :--- | :--- |
+| A2-1 | 2.1.322 | project (`.claude/settings.json` in a fixture) | b'ok' | EPERM |
+| A2-2 | 2.1.322 | user (fixture `CLAUDE_CONFIG_DIR`) | unmeasured: child exited 1 with "Not logged in · Please run /login" | unmeasured |
+
+- Reading: on 2.1.322 at project level `allowUnixSockets` admits the listed path and refuses an unlisted one (agrees with M9 on 2.1.119); user level is unmeasured because a fixture config directory has no login; the user's real settings were not touched.
+- M13, M14 and M15 were not re-run on 2.1.322 (human decision 2026-11-14, plan S-03 row); they keep their 2.1.119 measurement, and ADR-0019 records this limit.
+- Cleanup: echo servers stopped, socket directory and fixtures removed, repository tree clean.
 
 ### A3
 
