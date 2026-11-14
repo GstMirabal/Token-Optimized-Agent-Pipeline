@@ -316,7 +316,20 @@ Measured 2026-11-14 in unit S-08 (plan D52), no file content read: `test -r`, `l
 
 ### B3
 
-Unit S-09 measures files run by a human, the IDE or Docker. Not yet measured.
+Measured 2026-11-14 in unit S-09 (plan D52) in the nucleus, Bash sandbox of this session, no `claude -p` call. Writability probe: a new file created and removed in a directory, or a zero-byte append to an existing file (content unchanged, `git status` clean afterwards).
+
+| File class | Nucleus path | Run outside the sandbox by | Sandbox write |
+| :--- | :--- | :--- | :--- |
+| IDE settings and tasks | `.vscode/` | the IDE | denied (`Operation not permitted`) |
+| Make targets | `Makefile` | the human running `make` | writable |
+| CI workflows | `.github/workflows/` | GitHub runners, after a push | writable locally; the A10 token has Workflows "No access", so a push changing them needs another credential |
+| Git hooks | `.git/hooks/pre-commit`, `commit-msg`, `pre-push` (regular files; `core.hooksPath` unset) | git, on the human's commits and pushes | denied |
+| Code the git hooks run | `hooks/on_commit.py`, `hooks/on_commit_msg.py`, `hooks/on_push.py`, `scripts/install.py` | git, on the human's commits and pushes | writable (A7-3) |
+| Harness settings | `.claude/settings.json`, `.claude/settings.local.json` | Claude Code | denied to Bash (A9-3); the Edit tool is not denied (A9-1) |
+| `.envrc`, `docker-compose.yml`, `compose.yml`, `Dockerfile`, `package.json`, `.pre-commit-config.yaml`, `.mcp.json`, `install.sh` | absent in the nucleus | direnv, Docker, the package manager, pre-commit, Claude Code, the human | not applicable |
+
+- Host: not measured. A host session's sandbox write allowlist covers its project root `.` by the same mechanism, so the classes above present in a host (for example `docker-compose.yml`, `package.json`, `.envrc`) are inferred writable unless that host's settings deny them.
+- Reading: the git hooks are protected, but the code they run is writable from the sandbox, so a commit or push by the human runs content an agent can change (extends KI-059-23); the same holds for `Makefile`. ADR-0019 decides write protection for the code that runs outside the sandbox.
 
 ### B4
 
