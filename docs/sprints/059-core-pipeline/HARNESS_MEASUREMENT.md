@@ -365,15 +365,40 @@ Measured 2026-11-14 in unit S-10 (plan D52), nucleus, Bash sandbox of this sessi
 
 ### B6
 
-Unit S-11 measures subagent permissions. Not yet measured.
+Measured 2026-11-14 in unit S-11 (plan D52), static reading of `agents/*.md` and observation of the subagents dispatched in this session; no `claude -p` call.
+
+| Case | Check | Result |
+| :--- | :--- | :--- |
+| B6-1 | `tools:` in the 14 agent definitions | each lists its tools; `Bash` in `devops_agent`, `git_sync_agent`, `implementer_agent`, `qa_agent`, `skill_architect`, `tester_agent`, `token_economy_agent`; `WebFetch` in `git_sync_agent` and `skill_architect`; `WebSearch` in `skill_architect`; `Write`/`Edit` never together with `Bash` except `implementer_agent` and `skill_architect` |
+| B6-2 | `permissionMode:` in the agent definitions | 0 files declare it |
+| B6-3 | Bash of a dispatched `devops_agent` (units S-04 and S-05) | ran inside the sandbox: the Docker socket was refused and the agent saw the parent's write deny list |
+| B6-4 | whether a subagent inherits the parent's permission mode | unmeasured |
+
+- Reading: a subagent's tools are bounded by its definition and its Bash runs in the parent's sandbox; since agent definitions are writable from the sandbox (A3-3), the bound is only as strong as the write protection ADR-0019 decides for `agents/*.md`.
 
 ### B7
 
-Unit S-11 measures auto-mode approvals of unsandboxed calls. Not yet measured.
+Measured 2026-11-14 in unit S-11 (plan D52) on this session's transcript.
+
+| Case | Check | Result |
+| :--- | :--- | :--- |
+| B7-1 | Bash calls with `dangerouslyDisableSandbox: true` | 37 |
+| B7-2 | session permission mode recorded in the transcript | `acceptEdits` (62 entries); the auto-mode classifier does not decide in this mode |
+| B7-3 | a transcript field naming who approved an unsandboxed call (human or classifier) | none among the recorded result fields |
+| B7-4 | child sessions started with no flag (B1-1) | `auto` |
+
+- Reading: who approved an unsandboxed call cannot be counted from transcripts, because no field records it; in this `acceptEdits` session each unsandboxed call went through the permission prompt. A session in auto mode, the default a child takes here (B1-4), lets the classifier approve such calls. ADR-0019 decides the permission mode of agent sessions and whether unsandboxed calls are allowed at all (`allowUnsandboxedCommands`).
 
 ### B8
 
-Unit S-11 measures the clipboard. Not yet measured.
+Measured 2026-11-14 in unit S-11 (plan D52); size and exit code only, the clipboard content was not read or changed.
+
+| Case | Check | Result |
+| :--- | :--- | :--- |
+| B8-1 | `pbpaste` inside the Bash sandbox | exit 1, 0 bytes |
+| B8-2 | `pbpaste` outside the sandbox (control) | exit 0, 93 bytes |
+
+- Reading: the Bash sandbox blocks the clipboard. An unsandboxed call reads it, so a credential the human copies is reachable by any approved unsandboxed command (B7).
 
 ### B9
 
