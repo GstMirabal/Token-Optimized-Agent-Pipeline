@@ -264,48 +264,48 @@ Unit S-04, static analysis of `deny` rules over `.claude/settings*.json` (A9-1 t
 
 ### A10
 
-Unit S-11 measures a fine-grained token against branch protection and workflow push. Not yet measured.
+Unit S-06 reads the permissions of a fine-grained single-repository token and the protection state of `main` through the read-only API (plan D52). Not yet measured.
 
 ### B1
 
-Unit S-12 measures tools outside the sandbox and proxy. Not yet measured.
+Unit S-07 measures tools outside the sandbox and proxy. Not yet measured.
 
 ### B2
 
-Unit S-12 measures HOME readability. Not yet measured.
+Unit S-08 measures HOME readability. Not yet measured.
 
 ### B3
 
-Unit S-12 measures files run by a human, the IDE or Docker. Not yet measured.
+Unit S-09 measures files run by a human, the IDE or Docker. Not yet measured.
 
 ### B4
 
-Unit S-12 measures the nucleus-to-host commit path and upstream intake. Not yet measured.
+Unit S-10 measures the nucleus-to-host commit path and upstream intake. Not yet measured.
 
 ### B5
 
-Unit S-12 measures venv writability and Python pinning. Not yet measured.
+Unit S-10 measures venv writability and Python pinning. Not yet measured.
 
 ### B6
 
-Unit S-12 measures subagent permissions. Not yet measured.
+Unit S-11 measures subagent permissions. Not yet measured.
 
 ### B7
 
-Unit S-12 measures auto-mode approvals of unsandboxed calls. Not yet measured.
+Unit S-11 measures auto-mode approvals of unsandboxed calls. Not yet measured.
 
 ### B8
 
-Unit S-12 measures the clipboard. Not yet measured.
+Unit S-11 measures the clipboard. Not yet measured.
 
 ### B9
 
-Unit S-12 measures `make sandbox-probe`. Not yet measured.
+Units S-13 to S-15 build `make sandbox-probe`. Not yet measured.
 
 ### B10
 
-Unit S-12 measures incident response. Not yet measured.
+Unit S-12 records the token rotation steps. Not yet measured.
 
 ### B11
 
-Unit S-12 measures the GitHub repository protection state. Not yet measured.
+Unit S-12 records the GitHub repository protection state. Not yet measured.
