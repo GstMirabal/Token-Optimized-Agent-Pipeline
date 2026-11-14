@@ -86,6 +86,7 @@ Tracking of atomic goals achieved during the session. Work units and execution o
     - `[x]` Human decision 2026-11-14 after two measurement briefs (S-03 original, S-04) were stopped by a safety classifier before dispatch (plan D51 principle): the harness frees normal work, not attacks on the boundary; agents run normal work without prompts and checks that a control still holds; escape attempts are never run by an agent, they go to a list the human runs or ADR-0019 records them as outside the agent's scope; units S-04 to S-12 are dispatched under this principle; nothing was run for the stopped briefs.
     - `[x]` Human decision 2026-11-14 after a fourth measurement brief (S-05) was stopped by a safety classifier before dispatch (plan D52): controls are shown by design and verified configuration, not by attack attempts; S-05 and S-06 are rewritten that way; S-16 scopes an attack validation run outside the agent session after the harness implementation units; work units 181.
     - `[x]` Human decision 2026-11-14 on the ADR-0019 decision brief of unit D-01: the fine-grained token of A10 is held and renewed by the human only, and the GitHub App with a token broker is the target of a later unit; RA-09 is amended to list the measured controls as exposure reduction; lines 141-142 and 149-153 of `workflows/repository_hardening_workflow.md` are rewritten to the measured state; the remaining recommendations (network and read lists, A3, A9, B1, B5, B7, B10, B11) are accepted; `gh` stays with the human, the local DB route and D-12 are RECORD and no hooks run in the nucleus, all determined by measurement; the A5 replacement for `Edit(~/**)` was not put to the human and stays open; recorded in ADR-0019 (`71d2ad6`).
+    - `[x]` Human decision 2026-11-14 after unit D-03 (plan D53): the settings units ADR-0019 decides are added at the close of Wave 5, before its Phase 7 gates: R-01 template `claude/settings.hooks.json`, R-02 the human installs `.claude/settings.json`, R-03 `make sandbox-probe` recorded in B9 in a new session, R-04 probe expectations; work units 181 → 185.
 
 ---
 
@@ -475,7 +476,7 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase (current)**: Phase 6, Wave 5, the next batch of `check_task_scope.py --batches`; S-01 to S-16 and D-01 to D-03 committed, D-04 and E-01b RECORD by ADR-0019; 181 units. Wave 4 gates stay closed: Tester Gate 2 round 7 `APPROVED` (`a7e528c`), QA Gate 1 round 28 `RECORD`, S3.
+**Next Phase (current)**: Phase 6, Wave 5, unit R-01 (plan D53), then R-02 by the human, R-03 in a new session, R-04, then the Wave 5 Phase 7 gates; S-01 to S-16 and D-01 to D-03 committed; 185 units, D-04 and E-01b RECORD by ADR-0019; 181 units. Wave 4 gates stay closed: Tester Gate 2 round 7 `APPROVED` (`a7e528c`), QA Gate 1 round 28 `RECORD`, S3.
 
 **Next Phase (2026-11-14, start of Wave 5, superseded by the line above)**: Phase 6, Wave 5, unit S-01 (plan D51), then S-02 to S-15 in order, then D-01; 180 units. Wave 4 gates stay closed: Tester Gate 2 round 7 `APPROVED` (`a7e528c`), QA Gate 1 round 28 `RECORD`, S3.
 
