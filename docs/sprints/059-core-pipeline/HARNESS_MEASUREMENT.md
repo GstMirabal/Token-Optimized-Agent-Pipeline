@@ -210,15 +210,43 @@ Measured 2026-11-14 by `devops_agent` on 2.1.322, 7 child `claude -p` calls in u
 
 ### A6
 
-Unit S-07 measures a token storage the sandbox cannot read. Not yet measured.
+Measured 2026-11-14 on 2.1.322 in unit S-05 (plan D52: configuration checks, no attack attempt), 3 child `claude -p` calls (cap 4), fixture files with dummy content only.
+
+| Case | Check | Result |
+| :--- | :--- | :--- |
+| A6-1 | `sandbox.filesystem.denyRead` on fixture `blocked.txt`, child run outside the parent sandbox | `cat: blocked.txt: Operation not permitted` |
+| A6-2 | control: fixture `open.txt`, no rule, same run | `fixture` printed |
+| A6-3 | first 2 runs with the child nested inside the parent sandbox | not interpretable: the child's sandbox did not start (EPERM); superseded by A6-1 and A6-2 |
+| A6-4 | `allowMachLookup`, `enableWeakerNetworkIsolation`, `allowUnixSockets`, `allowAllUnixSockets`, `allowLocalBinding` in `.claude/settings.json` and `claude/settings.hooks.json` | absent in both files; neither has a `network` block |
+
+- Reading: `denyRead` on an absolute path blocks Bash reads of that path and leaves other files readable. A credential file can be kept from the agent by listing its path in `denyRead`. A sandboxed child cannot be measured from inside a sandboxed parent. ADR-0019 decides which credential paths the nucleus and host template list.
 
 ### A7
 
-Unit S-08 measures a launchd/LaunchServices escape from the hook profile. Not yet measured.
+Measured 2026-11-14 in unit S-05 (plan D52), Bash sandbox of this session; static inventory of the hook settings.
+
+| Case | Check | Result |
+| :--- | :--- | :--- |
+| A7-1 | hook entries in `.claude/settings.json` | none |
+| A7-2 | hook entries in `claude/settings.hooks.json` (host template) | SessionStart `.agents/hooks/on_init.py`, PreToolUse(Bash) `.agents/hooks/on_commit.py`, Stop `.agents/hooks/state_mirror.py`, PreCompact `.agents/scripts/persist_session_context.py`, SessionEnd `.agents/scripts/session_end_hook.py`, PostCompact `echo` only |
+| A7-3 | sandbox write to `hooks/` and `scripts/` (new probe file created and removed) | writable: these directories hold the code the template's hooks run (as `.agents/hooks/` and `.agents/scripts/` in a host) |
+| A7-4 | `open -g -b com.apple.finder` (control: Finder always runs) | refused: error -600 `procNotFound`, Apple Events blocked |
+| A7-5 | `open -g -R` on an existing fixture file | exit 0; effect not verifiable from the sandbox |
+| A7-6 | `open -b` on a nonexistent bundle id | `LSCopyApplicationURLsForBundleIdentifier() failed`: does not separate "not found" from "blocked" |
+
+- Reading: in the nucleus the hook code is writable from the sandbox, so a hook runs content an agent can change (`RA-19` (3)). Sandbox writability of `.agents/hooks/` in a host is unmeasured. Launching an application through Launch Services is refused (A7-4). ADR-0019 decides write protection for the hook code.
 
 ### A8
 
-Unit S-09 measures a throwaway Postgres with a non-superuser role and a network restriction. Not yet measured.
+Measured 2026-11-14 in unit S-05 (plan D52), one throwaway container `postgres:16` (digest `sha256:63e83b5a3dc36a917dccb76fe1bd2ac51f1ec9c1deb47ff20d4f04233bf6eae9`), no published port, removed after the check; nothing was executed on the server beyond the role creation and the catalog query.
+
+| Case | Check | Result |
+| :--- | :--- | :--- |
+| A8-1 | Docker API from the Bash sandbox | refused: `permission denied` on the Docker socket |
+| A8-2 | `docker inspect` network mode and ports, run outside the sandbox after a permission prompt | `none`, `ports={}` |
+| A8-3 | `pg_roles` row for role `app` created `LOGIN CREATEDB` | `rolsuper=f`, `rolcreatedb=t`, member of `pg_execute_server_program`: `f` |
+
+- Reading: a non-superuser role without `pg_execute_server_program` cannot run server programs, and `--network none` gives the container no network, both shown by configuration. The Docker API is not reachable from the sandbox, so a DB test that starts a container asks for permission today. ADR-0019 decides the DB test route (`KI-057-1`).
 
 ### A9
 
