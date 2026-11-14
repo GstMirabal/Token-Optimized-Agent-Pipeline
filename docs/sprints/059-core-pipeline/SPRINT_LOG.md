@@ -82,6 +82,7 @@ Tracking of atomic goals achieved during the session. Work units and execution o
     - `[x]` Human decision 2026-11-11 after QA Gate 1 round 26 (plan D49): R26-1 the C-11 line fix was not propagated to the Tester Gate 2 round 5 row (`RA-14`); R26-2 the Gate findings table holds S3 rows without a command and lacks T5-1 and T5-2; unit C-13 fixes both in this log, keeping the S3 rows because `scripts/check_sprint_refs.py` requires a row for every cited `R<round>-<n>` ID; QA Gate 1 round 27 and Tester Gate 2 round 7 follow, then Wave 5; work units 162 → 163.
     - `[x]` Human decision 2026-11-11 after QA Gate 1 round 27 (plan D50): the three S3 findings are fixed in this sprint, one unit per file: C-14 replaces the D49 Check in the plan with a grep scoped to the Tester Gate 2 round 5 row (R27-1); C-15 adds the file to the R25-2 `sed` and the SHA to the C-11 and C-13 Close cells in this log (R27-2, R27-3); QA Gate 1 round 28 and Tester Gate 2 round 7 follow, both fresh, then Wave 5; work units 163 → 165.
     - `[x]` Human decision 2026-11-12 after QA Gate 1 round 28 (`RECORD`, S3): R28-1 to R28-3 are noted only (`RA-17`); no unit is added; Tester Gate 2 round 7 follows, dispatched fresh, then Wave 5; work units stay 165.
+    - `[x]` Human decision 2026-11-14 at the start of Wave 5 (plan D51): the wave's goal is a security harness that lets agents work without a permission request per action (run `gh`, database tests, hooks) with no access to credentials and no say in permission decisions; the session measurements M1-M18 and the independent review (F-01 to F-23) are transcribed in unit S-01; A1-A10 and B1-B11 are measured in units S-02 to S-12 with at most 42 `claude -p` calls; S-13 to S-15 add `make sandbox-probe`; ADR-0019 (D-01) follows S-12; F-01, F-02, F-05/F-06 and F-15 recorded as KI-059-19 to KI-059-22; work units 165 → 180.
 
 ---
 
@@ -467,7 +468,9 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase (current)**: Phase 6, Wave 5, unit D-01. Wave 4 gates are closed: Tester Gate 2 round 7 was `APPROVED` (`a7e528c`), QA Gate 1 round 28 was `RECORD`, S3, with R28-1 to R28-3 noted only; 165 units, plan D50.
+**Next Phase (current)**: Phase 6, Wave 5, unit S-01 (plan D51), then S-02 to S-15 in order, then D-01; 180 units. Wave 4 gates stay closed: Tester Gate 2 round 7 `APPROVED` (`a7e528c`), QA Gate 1 round 28 `RECORD`, S3.
+
+**Next Phase (superseded by the line above)**: Phase 6, Wave 5, unit D-01. Wave 4 gates are closed: Tester Gate 2 round 7 was `APPROVED` (`a7e528c`), QA Gate 1 round 28 was `RECORD`, S3, with R28-1 to R28-3 noted only; 165 units, plan D50.
 
 **Next Phase (superseded by the line above)**: Phase 7, Wave 4, Tester Gate 2 round 7, dispatched fresh on range `6196230..<end SHA at dispatch>`; then Phase 6, Wave 5, unit D-01. QA Gate 1 round 28 was `RECORD`, S3 (`7ff090d`); the human noted R28-1 to R28-3 only (2026-11-12); 165 units, plan D50.
 
