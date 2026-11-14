@@ -406,8 +406,27 @@ Units S-13 to S-15 build `make sandbox-probe`. Not yet measured.
 
 ### B10
 
-Unit S-12 records the token rotation steps. Not yet measured.
+Recorded 2026-11-14 in unit S-12 (plan D52). Rotation steps for the two credentials of A10 and KI-059-21; the human runs every step (RA-09).
+
+| Credential | Routine rotation | On a suspected leak |
+| :--- | :--- | :--- |
+| Fine-grained token of A10 (nucleus only, expires 2026-12-14) | before expiry: Settings, Developer settings, Fine-grained tokens, the token, Regenerate token; store the new value where ADR-0019 decides | Revoke the token at the same page |
+| `gh` OAuth token (`gho_`, keyring, scopes `gist`, `read:org`, `repo`, `user`, `workflow`, no expiry) | none: it does not expire | Settings, Applications, Authorized OAuth Apps, GitHub CLI, Revoke; then `gh auth login` |
+| Both, after a revoke | | read the account security log and the repository's recent pushes, tags and ruleset changes |
+
+- Reading: the `gho_` token has no expiry and the broadest scopes, and the agent can read it today (KI-059-21); rotation does not narrow it. ADR-0019 decides whether agent sessions keep any access to it.
 
 ### B11
 
-Unit S-12 records the GitHub repository protection state. Not yet measured.
+Measured 2026-11-14 in unit S-12 (plan D52). The human ran the prepared read-only commands with the owner's own `gh` session (RA-09) and pasted the output; no token value was printed.
+
+| Case | Check | Result |
+| :--- | :--- | :--- |
+| B11-1 | `security_and_analysis` | `dependabot_security_updates`, `secret_scanning`, `secret_scanning_push_protection`: `enabled`; `secret_scanning_non_provider_patterns`, `secret_scanning_validity_checks`: `disabled` |
+| B11-2 | private vulnerability reporting | `true` |
+| B11-3 | `vulnerability-alerts` | `204 No Content` (enabled) |
+| B11-4 | bypass actors of tag ruleset `version-tags` | `RepositoryRole` id 5 (Admin), `bypass_mode: always` |
+| B11-5 | `gh auth status` | logged in through the keyring; token prefix `gho_`; scopes `gist`, `read:org`, `repo`, `user`, `workflow` |
+| B11-6 | protection of `main` | A10-4, plus `enforce_admins` enabled (KI-059-24) |
+
+- Reading: scanning, push protection, Dependabot and the private reporting channel are on. The tag ruleset lets the Admin role bypass it always, so a token acting for the owner may create a version tag (KI-059-26; inferred, not executed; unit S-16). ADR-0019 decides the ruleset bypass list.
