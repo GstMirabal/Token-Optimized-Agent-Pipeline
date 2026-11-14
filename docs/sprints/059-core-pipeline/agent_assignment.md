@@ -196,6 +196,21 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 
 | # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| S-01 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| S-02 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| S-03 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| S-04 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| S-05 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| S-06 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| S-07 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| S-08 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| S-09 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| S-10 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| S-11 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| S-12 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| S-13 | `scripts/sandbox_probe.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| S-14 | `tests/test_sandbox_probe.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| S-15 | `Makefile` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | D-01 | `docs/decisions/ADR-0019-sandbox-regime.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | D-02 | `agents.md` | modify | parallel | `rule_validator` | N/A | `agents/rule_validator.md` |
 | D-03 | `rules/project_topology.md` | modify | parallel | `rule_validator` | N/A | `agents/rule_validator.md` |
