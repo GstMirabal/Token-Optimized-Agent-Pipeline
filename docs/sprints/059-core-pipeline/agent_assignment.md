@@ -211,6 +211,7 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | S-13 | `scripts/sandbox_probe.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | S-14 | `tests/test_sandbox_probe.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | S-15 | `Makefile` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| S-16 | `docs/sprints/059-core-pipeline/HARNESS_ATTACK_SCOPE.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | D-01 | `docs/decisions/ADR-0019-sandbox-regime.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | D-02 | `agents.md` | modify | parallel | `rule_validator` | N/A | `agents/rule_validator.md` |
 | D-03 | `rules/project_topology.md` | modify | parallel | `rule_validator` | N/A | `agents/rule_validator.md` |
