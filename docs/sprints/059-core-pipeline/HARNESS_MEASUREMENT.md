@@ -264,7 +264,19 @@ Unit S-04, static analysis of `deny` rules over `.claude/settings*.json` (A9-1 t
 
 ### A10
 
-Unit S-06 reads the permissions of a fine-grained single-repository token and the protection state of `main` through the read-only API (plan D52). Not yet measured.
+Measured 2026-11-14 in unit S-06 (plan D52: read-only API, no write attempted). The human created a fine-grained token and ran the prepared commands in their own terminal (RA-09); no token value was printed or pasted.
+
+Token as created by the human: resource owner the repository owner; repository access "Only select repositories", the nucleus repository only; repository permissions Metadata read, Contents read and write, Pull requests read and write, every other permission (Administration and Workflows included) "No access"; no account permission; expiry 30 days.
+
+| Case | Check | Result |
+| :--- | :--- | :--- |
+| A10-1 | `GET repos/<nucleus>` with the token | `200 OK`; `Github-Authentication-Token-Expiration: 2026-12-14 14:58:43 UTC` |
+| A10-2 | `GET repos/<nucleus>/branches/main/protection` with the token | `403 Resource not accessible by personal access token` |
+| A10-3 | `GET user/repos` with the token, count | `7`, of which private: `0`; the nucleus repository is public |
+| A10-4 | `GET repos/<nucleus>/branches/main/protection` with the owner's own session (control) | required status checks `audit`, `Analyze (python)`, `CodeQL`, strict; pull request required, `required_approving_review_count: 0`; `enforce_admins: false`; force pushes and deletions not allowed; signatures, linear history and conversation resolution not required |
+| A10-5 | `repos/<nucleus>` field `permissions` with the token | `admin`, `maintain`, `push`, `pull`, `triage` all `true`: the field reports the owner's role, not the token's permissions |
+
+- Reading: the token cannot read the branch protection, so it cannot change it (A10-2, against the owner's control A10-4); it has no private access beyond the nucleus, and the nucleus is public, so a host reads the `.agents` submodule with no token. Two gaps are inferred from A10-4 and not executed (attack validation, unit S-16): with `enforce_admins: false` a push made with the owner's token may bypass the protection, and with 0 required approvals plus Contents and Pull requests write the token may merge a pull request into `main` once the checks pass (`RA-12`). A host session must not hold the nucleus token: with it, an agent could push to `.agents` from a host (`jurisdiction`). ADR-0019 decides the token per repository and session type and the merge control.
 
 ### B1
 
