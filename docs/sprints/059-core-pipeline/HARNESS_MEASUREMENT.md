@@ -280,7 +280,19 @@ Token as created by the human: resource owner the repository owner; repository a
 
 ### B1
 
-Unit S-07 measures tools outside the sandbox and proxy. Not yet measured.
+Measured 2026-11-14 on 2.1.322 in unit S-07 (plan D52), 3 child `claude -p` calls (cap 6) run outside the parent sandbox in a fixture project, tool list read from the `init` message of `--output-format stream-json`. The only outbound request asked for was WebFetch of `https://example.com`; no connector or Artifact tool was invoked.
+
+| Case | Check | Result |
+| :--- | :--- | :--- |
+| B1-1 | permission mode of a child with no flag | `auto`, inherited from the user's settings |
+| B1-2 | out-of-sandbox built-in tools in the child | `Artifact`, `ArtifactComments`, `ArtifactData`, `PushNotification`, `RemoteTrigger`, `SendMessage`, `WebFetch`, `WebSearch` |
+| B1-3 | connectors in the child | Claude Docs `connected` (8 tools), Google Drive `connected` (14 tools), Gmail `needs-auth` |
+| B1-4 | WebFetch with no rule, auto mode | run without an approval prompt; `permission_denials` empty; the request failed on the network (`ECONNRESET`) |
+| B1-5 | `permissions.deny` on `WebFetch`, `WebSearch`, `Artifact`, `mcp__claude_ai_Google_Drive` | `WebFetch`, `WebSearch` and `Artifact` absent from the child's tool list; the agent reported WebFetch unavailable |
+| B1-6 | `permissions.deny` on `mcp__claude_ai_Google_Drive` only (control) | Google Drive tools `0`, Claude Docs tools `8`, `WebFetch` `1`; both connectors `connected` |
+| B1-7 | static: `permissions.deny` in `.claude/settings.json` and `claude/settings.hooks.json` | no rule covers any tool of B1-2 or B1-3 |
+
+- Reading: in auto mode an agent reaches out-of-sandbox tools that send data to third parties (web requests, connectors able to create and share files, Artifact publishing) without an approval prompt (B1-4), and neither the nucleus nor the host template denies any of them (B1-7). A `permissions.deny` entry removes the named tool, or every tool of a named connector, from the agent's tool list (B1-5, B1-6). In B1-5 the Claude Docs tools were also absent although not denied; B1-6 shows a connector-level deny does not cause that, and the B1-5 absence is unexplained. ADR-0019 decides which out-of-sandbox tools the nucleus and the host template deny.
 
 ### B2
 
