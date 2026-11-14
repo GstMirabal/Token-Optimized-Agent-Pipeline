@@ -119,7 +119,41 @@ Taken from the verdict column of section 2 and the findings of section 3; no cla
 
 ### A1
 
-Unit S-02 measures egress and loopback reach with `allowedDomains` set. Not yet measured.
+Question: does `sandbox.network.allowedDomains` close (a) egress to arbitrary hosts and (b) the proxy CONNECT tunnel to loopback? Measured 2026-11-14 by `devops_agent`, 5 child `claude -p --model haiku` calls (cap 6). Settings in every case: `enabled: true`, `autoAllowBashIfSandboxed: true`, `allowUnsandboxedCommands: false`, `network.allowedDomains: ["api.github.com","github.com"]` (case A1-3: `"network":{}`). Binaries: 2.1.322 (`~/.vscode/extensions/anthropic.claude-code-2.1.322-darwin-arm64/resources/native-binary/claude`) and 2.1.119 (Homebrew). Port 5000 is the macOS AirPlay receiver; no database or Redis port was probed.
+
+Probe command:
+
+```bash
+for h in webhook.site api.github.com example.org; do printf '%s ' $h; curl -sS -m 8 -o /dev/null -w '%{http_code}\n' https://$h 2>&1 | tail -1; done; printf 'loopback5000 '; curl -sS -m 8 --noproxy '' -x "$HTTPS_PROXY" -p -o /dev/null -w '%{http_code}\n' http://127.0.0.1:5000/ 2>&1 | tail -1; printf 'direct5000 '; curl -sS -m 5 --noproxy '*' -o /dev/null -w '%{http_code}\n' http://127.0.0.1:5000/ 2>&1 | tail -1
+```
+
+| Case | CLI | Settings level | webhook.site | api.github.com | example.org | loopback5000 via proxy | direct5000 | Sandbox violation lines |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| A1-1 | 2.1.322 | project (`.claude/settings.json` in a fixture) | 000 | 200 | 000 | 000 | 000 | `deny network-outbound` webhook.site:443, example.org:443, 127.0.0.1:5000 |
+| A1-2 | 2.1.322 | `--settings` file | 000 | 200 | 000 | 000 | 000 | same three |
+| A1-3 | 2.1.322 | `--settings`, control `"network":{}` | 000 | 000 | 000 | 000 | 000 | webhook.site:443, api.github.com:443, example.org:443, 127.0.0.1:5000 |
+| A1-4 | 2.1.119 | project | 000 | 200 | 000 | 000 | 000 | none printed |
+| A1-5 | 2.1.119 | `--settings` | 000 | 200 | 000 | 000 | 000 | none printed |
+
+Literal line from case A1-1:
+
+```text
+deny network-outbound webhook.site:443 (not in this command's allowed_domains — re-run the command with this host listed if it needs it)
+```
+
+Reading:
+
+| Statement | Cases |
+| :--- | :--- |
+| With `allowedDomains` set to the two GitHub hosts, egress to other hosts is denied and api.github.com is reached, on 2.1.322 and 2.1.119, at project level and via `--settings` | A1-1, A1-2, A1-4, A1-5 |
+| With that list set, the proxy CONNECT to 127.0.0.1:5000 is denied and the sandbox names it | A1-1, A1-2, A1-4, A1-5 |
+| The control A1-3 also denied loopback, so this run does not show that the list is what closes loopback; it shows that the configuration with the list leaves both closed | A1-3 |
+| Open: A1-3 with `"network":{}` denied every host, while the parent session (harness 2.1.322, interactive, auto mode, no `network` key) reached webhook.site (200) and the loopback tunnel (F-01, F-02). Either an empty `network` object means deny-all or `-p` differs from the interactive session; a control with the `network` key absent was not run (cap) | A1-3, F-01, F-02 |
+| `direct5000` printed `000`; the error text was not captured | all |
+| User-level and managed settings were not inspected | all |
+| Consequence for KI-059-19 and KI-059-20: setting `network.allowedDomains` explicitly closes both in the measured configurations | A1-1, A1-2, A1-4, A1-5 |
+
+Cleanup: fixtures removed, repository tree clean.
 
 ### A2
 
