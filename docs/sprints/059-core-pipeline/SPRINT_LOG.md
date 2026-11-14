@@ -474,7 +474,7 @@ Example (do not uncomment):
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: Plan approved (`triple_lock` lock 1).
-**Next Phase (current)**: Phase 6, Wave 5, unit S-16 (plans D51, D52), then D-01; S-01 to S-15 committed; 181 units. Wave 4 gates stay closed: Tester Gate 2 round 7 `APPROVED` (`a7e528c`), QA Gate 1 round 28 `RECORD`, S3.
+**Next Phase (current)**: Phase 6, Wave 5, unit D-01 (plans D51, D52); S-01 to S-16 committed; 181 units. Wave 4 gates stay closed: Tester Gate 2 round 7 `APPROVED` (`a7e528c`), QA Gate 1 round 28 `RECORD`, S3.
 
 **Next Phase (2026-11-14, start of Wave 5, superseded by the line above)**: Phase 6, Wave 5, unit S-01 (plan D51), then S-02 to S-15 in order, then D-01; 180 units. Wave 4 gates stay closed: Tester Gate 2 round 7 `APPROVED` (`a7e528c`), QA Gate 1 round 28 `RECORD`, S3.
 
