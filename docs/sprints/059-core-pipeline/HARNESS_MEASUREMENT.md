@@ -173,15 +173,40 @@ Unit S-03 repeats M9, M13, M14 and M15 on 2.1.322 at project and user level.
 
 ### A3
 
-Unit S-04 measures hooks declared in subagent frontmatter. Not yet measured.
+Unit S-04, static analysis (plan D51 principle: no hook was run).
+
+| Check | Evidence | Result |
+| :--- | :--- | :--- |
+| A3-1 | CLI 2.1.322 subagent frontmatter reference | `hooks`, `permissionMode` and `mcpServers` are accepted fields |
+| A3-2 | `find .claude/agents -type l \| wc -l` and `find .claude/agents -type f \| wc -l` | 14 symlinks, 0 regular files; each points to `agents/<name>.md` |
+| A3-3 | session sandbox write allowlist | covers the repository root `.`; `agents/*.md` is writable from the sandbox |
+| A3-4 | `grep -l "^hooks:" agents/*.md \| wc -l` | 0: no agent definition declares hooks today |
+
+- Reading: agent definitions are permission-relevant files the sandbox can write. ADR-0019 decides their write protection and the human review route for changes to them.
 
 ### A4
 
-Unit S-05 measures wrapper failure and a forced exit 2. Not yet measured.
+Unit S-04: not measurable. No hook wrapper exists: `grep -rln sandbox-exec hooks scripts` prints nothing. The two fail-closed checks below are acceptance criteria for any wrapper ADR-0019 adopts; an agent runs them, since they test that a closed control stays closed (plan D51 principle, tier 2).
 
+| Check | Expected result |
+| :--- | :--- |
+| A4-1 | With the wrapper's sandbox profile file absent, a guarded tool call is blocked (exit 2) |
+| A4-2 | A non-zero exit of the inner hook reaches the harness as exit 2 (RA-11) |
 ### A5
 
-Unit S-06 measures the semantics of `Edit(~/**)` and `Read(/**/.env*)`. Not yet measured.
+Measured 2026-11-14 by `devops_agent` on 2.1.322, 7 child `claude -p` calls in unit S-04 (cap 10), fixture files with dummy content only.
+
+| Case | Rule | Target | Result |
+| :--- | :--- | :--- | :--- |
+| A5-1 | `Edit(~/**)` deny | a fixture file inside the project | denied: the project is under HOME (F-10) |
+| A5-2 | `Read(/**/.env*)` deny | root `.env` fixture | denied |
+| A5-3 | `Read(/**/.env*)` deny | nested `.env` fixture | denied |
+| A5-4 | `Read(/**/.env*)` deny | `.env.example` fixture | denied |
+| A5-5 | `Read(/**/.env*)` deny | Grep, hidden files included, over `sub/plain.txt`, `sub/.hidden`, `sub/.env` | `plain.txt` and `.hidden` returned; `.env` not returned; `permission_denials` empty |
+| A5-6 | none (control: `deny` empty) | same Grep, same three files | all three returned, `.env` included |
+| A5-7 | `Read(/**/.env*)` deny | Grep without positive control (first run) | no match returned; superseded by A5-5 and A5-6 |
+
+- Reading: `Edit(~/**)` cannot protect HOME without blocking project work, so HOME protection names paths. `Read(/**/.env*)` covers nested and example files that `Read(/.env)` (M-series) misses. ADR-0019 decides the replacement rule. The pair A5-5/A5-6 shows the rule also removes `.env` files from Grep results, silently: no denial is logged.
 
 ### A6
 
@@ -197,7 +222,17 @@ Unit S-09 measures a throwaway Postgres with a non-superuser role and a network 
 
 ### A9
 
-Unit S-10 measures an Edit-tool write to `.claude/settings.local.json`. Not yet measured.
+Unit S-04, static analysis of `deny` rules over `.claude/settings*.json` (A9-1 to A9-3) and a fixture measurement in the A5 call count (A9-4, A9-5).
+
+| Check | File | Evidence | Result |
+| :--- | :--- | :--- | :--- |
+| A9-1 | `.claude/settings.json` (nucleus) | `permissions.deny` | `[]`: no rule |
+| A9-2 | `claude/settings.hooks.json` (host template) | `permissions.deny` | 8 rules; none covers `.claude/settings*.json` |
+| A9-3 | session sandbox | write deny list | `.claude/settings.json` and `.claude/settings.local.json` are write-denied to Bash by the harness in this session |
+| A9-4 | fixture `.claude/settings.local.json` | Edit tool with `Edit(/.claude/settings*.json)` deny | denied; file unchanged (`{}`) |
+| A9-5 | fixture `note.txt` (control, no rule) | Edit tool | allowed; content changed `x` to `y` |
+
+- Reading: Bash cannot write the settings files in this session, and in the nucleus and the host template no permission rule stops the Edit tool from writing them (A9-1, A9-2). An `Edit(/.claude/settings*.json)` deny blocks that write (A9-4) and leaves other edits working (A9-5). ADR-0019 decides adding it to the nucleus and the host template.
 
 ### A10
 
