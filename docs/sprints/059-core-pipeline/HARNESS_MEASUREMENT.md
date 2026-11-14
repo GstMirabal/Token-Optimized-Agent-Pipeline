@@ -296,7 +296,23 @@ Measured 2026-11-14 on 2.1.322 in unit S-07 (plan D52), 3 child `claude -p` call
 
 ### B2
 
-Unit S-08 measures HOME readability. Not yet measured.
+Measured 2026-11-14 in unit S-08 (plan D52), no file content read: `test -r`, `ls` to `/dev/null` and `wc -c` only. "Before" ran in the Bash sandbox of this session; "after" ran in 1 child `claude -p` call (cap 4) on 2.1.322, outside the parent sandbox, with `sandbox.filesystem.denyRead` listing the five existing paths by absolute path, plus a fixture `control.txt` in the child's project.
+
+| Path | Before (session sandbox) | After (`denyRead`) |
+| :--- | :--- | :--- |
+| `~/.ssh` | absent | not listed |
+| `~/.aws` | absent | not listed |
+| `~/.npmrc` | absent | not listed |
+| `~/.bash_history` | absent | not listed |
+| `~/.docker/config.json` | readable, 353 bytes | `Operation not permitted` |
+| `~/.config/gh` | readable, listable | not listable |
+| `~/.config/gh/hosts.yml` | not checked | `Operation not permitted` (covered by the directory entry) |
+| `~/.zsh_history` | readable, 366251 bytes | `Operation not permitted` |
+| `~/.claude/projects` | readable, listable | not listable |
+| `~/Library/Keychains/login.keychain-db` | readable, 417920 bytes | `Operation not permitted` |
+| `control.txt` (fixture, not listed) | not checked | readable, 8 bytes |
+
+- Reading: without a rule, every existing sensitive path is readable from the Bash sandbox; listing it in `denyRead` blocks it, a directory entry covers the files under it, and an unlisted file stays readable. Limits of this subset (`fail_closed_claims`): it covers Bash in the sandbox, not the Read tool, which `permissions` governs; denying the keychain file does not cover the keychain service, which `security find-generic-password` reached (KI-059-21); denying `~/.config/gh` also stops `gh` inside the sandbox from reading its own configuration. ADR-0019 decides the `denyRead` list of the nucleus and the host template.
 
 ### B3
 
