@@ -1,6 +1,6 @@
 # Sprint 059 - Security Harness Measurement
 
-Purpose: plan decision D51 specifies a security harness so that agents can work without a permission request per action, with no access to credentials and no say in permission decisions. This document records the measurements M1-M18 taken for that design, the review findings F-01 to F-23 raised against it, and the claims each supports. Sections A1-A10 and B1-B11 (section 5) are filled by units S-02 to S-12.
+Purpose: the Wave 5 goal is unchanged (plan P7, `KI-056-1`: fewer permission requests while keeping `RA-19`; the D-01 requirement that `devops_agent` runs `gh` instead of the human). Plan decision D51 refines the means: a security harness with which agents run `gh`, database tests and hooks without a permission request per action, with no access to credentials and no say in permission decisions. This document records the measurements M1-M18 taken for that design, the review findings F-01 to F-23 raised against it, and the claims each supports. Sections A1-A10 and B1-B11 (section 5) are filled by units S-02 to S-12.
 
 ## 1. Conditions
 
