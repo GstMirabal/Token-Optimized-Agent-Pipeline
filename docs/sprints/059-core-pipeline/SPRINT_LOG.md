@@ -98,6 +98,7 @@ Tracking of atomic goals achieved during the session. Work units and execution o
     - `[x]` Human decision 2026-11-15 (plan D58): the template sandbox must allow pip; unit P-05 measures `pypi.org` and `files.pythonhosted.org` in `allowedDomains` and the TLS setting pip needs before R-01, as ADR-0019 D8 requires for any other domain; work units 197 → 198.
     - `[x]` Human decision 2026-11-15: the call cap of unit P-05 is raised from 3 to 5; calls 1 to 3 (A1-7 to A1-9) showed pip needs `enableWeakerNetworkIsolation`, which ADR-0019 D2 forbids, so call 4 measures pip with a certificate setting and no widening key, and call 5 isolates `files.pythonhosted.org`.
     - `[x]` Human decision 2026-11-15 (plan D59), after the R-01 report (edit kept uncommitted): unit P-06 measures the `~/` form and the out-of-project `.env*` pattern of `denyRead` before R-01 commits; unit R-14 adds the pip `env` pair on macOS only and merges the template keys and the nucleus `denyWrite` in `install_nucleus_bridge`; R-01 removes `defaultMode: "auto"`; the `SendMessage` deny of ADR-0019 D9 B1 stays, so subagents are relaunched, not continued; work units 198 → 200.
+    - `[x]` Human decision 2026-11-15: the call cap of unit P-06 is raised from 3 to 4, so the fourth call measures `~/**/.env*` on an `.env` nested several levels outside the project and on an `.env` inside the project, each with a control.
 
 ---
 
