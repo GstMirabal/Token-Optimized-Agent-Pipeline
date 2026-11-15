@@ -220,7 +220,6 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | P-01 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | P-02 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | P-03 | `docs/decisions/ADR-0019-sandbox-regime.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
-| P-04 | `rules/project_topology.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
 | R-01 | `claude/settings.hooks.json` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | R-02 | `.claude/settings.json` | install (human runs) | sequential | `devops_agent` | N/A | `agents/devops_agent.md` |
 | R-03 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
@@ -229,9 +228,6 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | R-06 | `requirements-quality.txt` | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | R-07 | `requirements-skillopt.txt` | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | R-08 | `workflows/repository_hardening_workflow.md` | modify | parallel | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
-| R-09 | `workflows/deployment_workflow.md` | modify | parallel | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
-| R-10 | `scripts/sync_agents_pin.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
-| R-11 | `scripts/install.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | R-12 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | R-13 | `.github/workflows/ci.yml` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | T-01 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
