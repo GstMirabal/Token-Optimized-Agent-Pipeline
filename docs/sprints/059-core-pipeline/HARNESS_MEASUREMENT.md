@@ -156,6 +156,27 @@ Reading:
 
 Cleanup: fixtures removed, repository tree clean.
 
+#### A1 pip through the PyPI domains (unit P-05)
+
+Conditions: measured 2026-11-15 by `devops_agent`, plan D58, CLI `2.1.322` (VS Code extension native binary, as A1-1), project-level `.claude/settings.json` in a fixture, child launched outside the parent sandbox, `--model haiku`, settings `enabled: true`, `autoAllowBashIfSandboxed: true`, `allowUnsandboxedCommands: false`; 5 child `claude -p` calls (cap raised from 3 to 5 by the human). Probe: a throwaway venv (pip 26.0.1) runs `pip download --no-deps --require-hashes` of the `iniconfig==2.3.1` pin with its two hashes from `requirements-test.txt`. Results come from the exit code, the files on disk and the sandbox violation lines; macOS only.
+
+| Case | allowedDomains | TLS setting | pip exit | File downloaded | Violation lines |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| A1-7 | `api.github.com`, `github.com`, `pypi.org`, `files.pythonhosted.org` | none | 1 | none | none printed; pip: `SSLCertVerificationError('OSStatus -26276')` on `https://pypi.org/simple/iniconfig/` |
+| A1-8 | same four | `sandbox.enableWeakerNetworkIsolation: true` | 0 | `iniconfig-2.3.1-py3-none-any.whl` | none |
+| A1-9 (control) | `api.github.com`, `github.com` | `enableWeakerNetworkIsolation: true` | 1 | none | `deny network-outbound pypi.org:443` |
+| A1-10 | same four | `enableWeakerNetworkIsolation` absent; settings `env`: `PIP_USE_DEPRECATED=legacy-certs`, `PIP_CERT=/etc/ssl/cert.pem` (both seen in the child Bash env) | 0 | `iniconfig-2.3.1-py3-none-any.whl` | none |
+| A1-11 (control) | `api.github.com`, `github.com`, `pypi.org` | same `env` as A1-10 | 2 | none | `deny network-outbound files.pythonhosted.org:443` |
+
+Reading:
+
+- Pip inside the sandbox fails TLS with default settings (A1-7).
+- Two settings pass it: `enableWeakerNetworkIsolation: true` (A1-8), which ADR-0019 D2 forbids, and the settings `env` pair `PIP_USE_DEPRECATED=legacy-certs` + `PIP_CERT=/etc/ssl/cert.pem` with no widening key (A1-10).
+- Both `pypi.org` (A1-9) and `files.pythonhosted.org` (A1-11) are required in `allowedDomains`.
+- The env pair is shown sufficient together; each variable alone was not run.
+- `/etc/ssl/cert.pem` is the macOS path and the measurement is macOS only.
+- The pin had no dependencies, so one wheel was fetched and its `--require-hashes` check passed.
+
 ### A2
 
 Unit S-03 repeats M9, M13, M14 and M15 on 2.1.322 at project and user level.
