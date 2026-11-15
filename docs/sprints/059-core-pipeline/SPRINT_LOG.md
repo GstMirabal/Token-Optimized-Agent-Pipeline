@@ -94,6 +94,7 @@ Tracking of atomic goals achieved during the session. Work units and execution o
     - `[x]` Human decision 2026-11-15 (plan D55), reversing the decision after D54: the agent creates the version tag and uses the GitHub token through a GitHub App with a broker outside the sandbox, and the same helper signs the tag; everything built for the A10 token is reworked in Sprint 060; P-04, R-09, R-10 and R-11 removed (moved to Sprint 060 through Out of scope), P-03 keeps the broker target of ADR-0019 D6, V-01 no longer depends on R-11, R-09 commit `191feff` reverted in `588ca1a`; work units 201 → 197.
     - `[x]` Human decision 2026-11-15 (unit P-02): the A5 replacement for `Edit(~/**)` is candidate set C1 of section A5 of `HARNESS_MEASUREMENT.md` (`e51109f`): `Edit(~/.ssh/**)`, `Edit(~/.aws/**)`, `Edit(~/.gnupg/**)`, `Edit(~/.config/gh/**)`, `Edit(~/.docker/**)`, `Edit(~/Library/LaunchAgents/**)`, `Edit(~/Library/Keychains/**)`; sets C2 and C3 are not adopted.
     - `[x]` Human decision 2026-11-15 (plan D56): ADR-0019 is `Accepted` and immutable (`rules/documentation_standard.md` line 50), so the in-place edit of P-03 is discarded uncommitted; P-03 creates ADR-0022, which amends ADR-0019, and V-02 writes its results to ADR-0022.
+    - `[x]` Human decision 2026-11-15 (plan D57): ADR-0022 is `Accepted` and immutable too, so V-02 creates ADR-0023, which amends ADR-0019 section 2.1 with the V-01 result, and ADR-0022 carries no boundary section.
 
 ---
 
