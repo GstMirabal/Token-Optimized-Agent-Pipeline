@@ -330,7 +330,7 @@ Objetivo sin cambios (P7, `KI-056-1`, requisito `gh` de D-01): menos solicitudes
 | R-02 | `.claude/settings.json` | install — tras R-01 (D53): el humano ejecuta `install.py --target claude` en el núcleo; `devops_agent` prepara el comando | high | `devops_agent` (prepara) / humano (ejecuta) | ⏳ |
 | R-03 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify — tras R-02 (D53, B9), en una sesión nueva: salida literal de `make sandbox-probe` y versión de la CLI en B9 | medium | `devops_agent` (mide) / `doc_orchestrator` (escribe) | ⏳ |
 | R-04 | `scripts/sandbox_probe.py` | modify — tras R-03 (D53): los casos que R-03 mida cerrados pasan de `known_open` a `closed`; tests en `tests/test_sandbox_probe.py` | medium | `implementer_agent` | ⏳ |
-| R-05 | `requirements-core.txt` | modify — tras D-01 (D54, B5): `--hash` en cada paquete fijado | medium | `implementer_agent` | ⏳ |
+| R-05 | `requirements-core.txt` | modify — tras D-01 (D54, B5): `--hash` en cada paquete fijado | medium | `implementer_agent` | ✅ `0f069da` |
 | R-06 | `requirements-quality.txt` | modify — tras D-01 (D54, B5): `--hash` en cada paquete fijado | medium | `implementer_agent` | ✅ `5befc83` |
 | R-07 | `requirements-skillopt.txt` | modify — tras D-01 (D54, B5): `--hash` en cada paquete fijado | medium | `implementer_agent` | ✅ `e0152f2` |
 | R-08 | `workflows/repository_hardening_workflow.md` | modify — tras D-01 (D54, D7): líneas 141-142 y 149-153 al estado medido | medium | `doc_orchestrator` | ⏳ |
