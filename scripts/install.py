@@ -406,37 +406,110 @@ def write_bridge_locks(target: str) -> None:
 
 NUCLEUS_SANDBOX_BLOCK: dict = {"sandbox": {"enabled": True, "autoAllowBashIfSandboxed": True}}
 
+# Settings `env` pair that lets pip pass TLS inside the sandbox (HM A1-10). The
+# certificate path is the macOS one and the failure is trustd's, so the pair is
+# merged only when `sys.platform == "darwin"` (plan D59).
+DARWIN_PIP_ENV: dict[str, str] = {
+    "PIP_USE_DEPRECATED": "legacy-certs",
+    "PIP_CERT": "/etc/ssl/cert.pem",
+}
+
+# `sandbox.filesystem.denyWrite` entries owned by the nucleus (ADR-0019 D9 A3, B5).
+NUCLEUS_DENY_WRITE: tuple[str, ...] = ("./agents", "./venv_skillopt")
+
+# Template `denyWrite` entries naming the host-side submodule; `./.agents` does
+# not exist in the nucleus, so they are left out of the nucleus merge.
+HOST_ONLY_DENY_WRITE: frozenset[str] = frozenset({"./.agents", "./.git/modules/.agents"})
+
+
+def platform_env_block() -> dict:
+    """Return the settings fragment of the platform `env` pair.
+
+    Returns:
+        `{"env": DARWIN_PIP_ENV}` copy when `sys.platform == "darwin"`, else `{}`.
+    """
+    return {"env": dict(DARWIN_PIP_ENV)} if sys.platform == "darwin" else {}
+
+
+def merge_platform_env(dest: Path) -> None:
+    """Merge the platform `env` pair into a host settings file, non-destructively.
+
+    An `env` key the file already holds keeps its value (the shared merge leaves
+    a conflicting scalar alone). On a platform other than macOS nothing is
+    read or written.
+
+    Args:
+        dest: Settings file to update.
+
+    Raises:
+        SystemExit: With BRIDGE_WRITE_DENIED when the write is refused.
+    """
+    block = platform_env_block()
+    if not block:
+        return
+    data = json.loads(dest.read_text()) if dest.exists() else {}
+    merged = merge(json.loads(json.dumps(data)), block)
+    if merged != data:
+        _write_json(dest, merged)
+        print(f"✅ Merged the pip env pair -> {dest}")
+
+
+def nucleus_settings_block(root: Path) -> dict:
+    """Build the settings fragment the nucleus bridge merges.
+
+    Holds the sandbox flags, the `sandbox` and `permissions` keys of the
+    template (minus the host-only submodule `denyWrite` paths), the nucleus
+    `denyWrite` entries and the platform `env` pair. The template `hooks` block
+    is never included: its paths are host-relative.
+
+    Args:
+        root: Nucleus root holding `claude/settings.hooks.json`.
+
+    Returns:
+        A new dict ready for `merge`.
+    """
+    template = json.loads((root / "claude" / "settings.hooks.json").read_text())
+    shipped = {key: template[key] for key in ("sandbox", "permissions") if key in template}
+    block = merge(json.loads(json.dumps(NUCLEUS_SANDBOX_BLOCK)), json.loads(json.dumps(shipped)))
+    deny_write = block["sandbox"].setdefault("filesystem", {}).setdefault("denyWrite", [])
+    deny_write[:] = [e for e in deny_write if e not in HOST_ONLY_DENY_WRITE]
+    deny_write.extend(e for e in NUCLEUS_DENY_WRITE if e not in deny_write)
+    return merge(block, platform_env_block())
+
 
 def merge_nucleus_sandbox(root: Path) -> None:
-    """Merge the sandbox block into the nucleus `.claude/settings.json`.
+    """Merge the nucleus settings block into `.claude/settings.json`.
 
-    Writes only `sandbox.enabled` and `sandbox.autoAllowBashIfSandboxed`
-    (D12): no hook and no `sandbox.excludedCommands`. Existing keys are kept,
-    retired exclusion entries are pruned by the shared merge, and a second run
-    changes nothing.
+    Writes the fragment of `nucleus_settings_block` (D12, plan D59): no hook and
+    no `sandbox.excludedCommands`. Existing keys are kept, retired entries are
+    pruned by the shared merge, and a second run changes nothing.
 
     Args:
         root: Nucleus root holding `.claude/settings.json`.
 
     Raises:
-        SystemExit: Non-zero with a message when the file root or its
-            `sandbox` value is present and not an object; nothing is written.
+        SystemExit: Non-zero with a message when the file root, its `sandbox`
+            value or its `permissions` value is present and not an object;
+            nothing is written.
     """
     dest = root / ".claude" / "settings.json"
     data = json.loads(dest.read_text()) if dest.exists() else {}
-    if not isinstance(data, dict) or ("sandbox" in data and not isinstance(data["sandbox"], dict)):
-        raise SystemExit(f"🛑 {dest}: the root or its `sandbox` value is not a JSON object; "
-                         "refusing to overwrite it. Fix the file and re-run the installer.")
-    merged = merge(data, json.loads(json.dumps(NUCLEUS_SANDBOX_BLOCK)))
+    bad_key = isinstance(data, dict) and any(
+        k in data and not isinstance(data[k], dict) for k in ("sandbox", "permissions", "env"))
+    if not isinstance(data, dict) or bad_key:
+        raise SystemExit(f"🛑 {dest}: the root or its `sandbox`, `permissions` or `env` value is "
+                         "not a JSON object; refusing to overwrite it. "
+                         "Fix the file and re-run the installer.")
+    merged = merge(data, nucleus_settings_block(root))
     if not dest.exists() or merged != json.loads(dest.read_text()):
         _write_json(dest, merged)
-        print(f"✅ Merged the sandbox block -> {dest}")
+        print(f"✅ Merged the nucleus settings block -> {dest}")
     prune_rendered_exclusions(root)
 
 
 def install_nucleus_bridge() -> int:
     """Minimal self-bridge for the nucleus repo itself: commands + agents +
-    constitution import + the `sandbox` settings block, so `/agents:*` works
+    constitution import + the sandbox/permissions settings block, so `/agents:*` works
     while developing the framework. No hooks (paths are host-relative), no
     skills links, no MCP, no scaffolding — nucleus_neutrality governs
     structure, not tooling access."""
@@ -693,6 +766,7 @@ def install_host_claude_bridge(profile_dir: Path | None) -> int:
 
     merge_into(AGENTS_DIR / "claude" / "settings.hooks.json",
                HOST_DIR / ".claude" / "settings.json")
+    merge_platform_env(HOST_DIR / ".claude" / "settings.json")
     merge_into(AGENTS_DIR / "claude" / "mcp.json", HOST_DIR / ".mcp.json")
     prune_rendered_exclusions(HOST_DIR)
 
