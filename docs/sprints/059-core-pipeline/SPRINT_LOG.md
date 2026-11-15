@@ -89,6 +89,7 @@ Tracking of atomic goals achieved during the session. Work units and execution o
     - `[x]` Human decision 2026-11-14 after unit D-03 (plan D53): the settings units ADR-0019 decides are added at the close of Wave 5, before its Phase 7 gates: R-01 template `claude/settings.hooks.json`, R-02 the human installs `.claude/settings.json`, R-03 `make sandbox-probe` recorded in B9 in a new session, R-04 probe expectations; work units 181 → 185.
     - `[x]` Human decision 2026-11-14 (plan D54): every ADR-0019 consequence without a unit enters this sprint at the close of Wave 5: P-01 to P-03 (B7 key, A5 rule chosen by the human), R-05 to R-12 (hash pinning, hardening workflow, signed and verified tags, ruleset bypass removal), T-01 (A10 token renewal before 2026-12-14), V-01 and V-02 (attack validation by a person outside the session); Z-02 also closes or re-routes KI-059-19 to KI-059-26; work units 185 → 208.
     - `[x]` Human decision 2026-11-14 after D54: no GitHub App and no token broker; units W-01 to W-09 removed, `gh` and the A10 token stay with the human, P-03 withdraws the broker target of ADR-0019 D6; work units 208 → 199; unit P-04 added to delete the broker revisit clause of `rules/project_topology.md` (199 → 200).
+    - `[x]` Human decision 2026-11-15: the call cap of unit P-02 is raised from 4 to 5, so the fifth call isolates the file pattern `Edit(~/<file>)` and the directory entry left unmeasured in section A5 of `HARNESS_MEASUREMENT.md` (`5f71010`).
 
 ---
 
