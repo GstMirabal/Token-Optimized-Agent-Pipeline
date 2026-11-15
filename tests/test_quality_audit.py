@@ -1132,3 +1132,25 @@ def test_js_blank_row_inside_a_template_literal_still_counts(tmp_path: Path) -> 
     rows 2-4 (`const x = ` + backtick, blank, closing backtick) -> 3 + return."""
     source = "function f() {\n  const x = `\n\n`;\n  return x;\n}\n"
     assert _measure_js_function(tmp_path, source, "f") == 4
+
+
+def test_walk_skips_os_refused_path_and_reports_it(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """R-15: a path whose stat raises PermissionError is skipped, named on stderr."""
+    (tmp_path / "good.py").write_text("x = 1\n")
+    (tmp_path / ".env").write_text("SECRET=1\n")
+    real_is_file = Path.is_file
+
+    def refusing_is_file(self: Path) -> bool:
+        if self.name == ".env":
+            raise PermissionError(1, "Operation not permitted", str(self))
+        return real_is_file(self)
+
+    monkeypatch.setattr(Path, "is_file", refusing_is_file)
+    files = qa.iter_source_files([tmp_path])
+    err = capsys.readouterr().err
+    assert files == [tmp_path / "good.py"]
+    assert str(tmp_path / ".env") in err
+    assert "SECRET" not in err
+    assert qa.main([str(tmp_path)]) == 0
