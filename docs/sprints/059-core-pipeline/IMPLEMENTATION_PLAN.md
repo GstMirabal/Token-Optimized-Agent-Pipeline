@@ -333,7 +333,7 @@ Objetivo sin cambios (P7, `KI-056-1`, requisito `gh` de D-01): menos solicitudes
 | R-05 | `requirements-core.txt` | modify — tras D-01 (D54, B5): `--hash` en cada paquete fijado | medium | `implementer_agent` | ✅ `0f069da` |
 | R-06 | `requirements-quality.txt` | modify — tras D-01 (D54, B5): `--hash` en cada paquete fijado | medium | `implementer_agent` | ✅ `5befc83` |
 | R-07 | `requirements-skillopt.txt` | modify — tras D-01 (D54, B5): `--hash` en cada paquete fijado | medium | `implementer_agent` | ✅ `e0152f2` |
-| R-08 | `workflows/repository_hardening_workflow.md` | modify — tras D-01 (D54, D7): líneas 141-142 y 149-153 al estado medido | medium | `doc_orchestrator` | ⏳ |
+| R-08 | `workflows/repository_hardening_workflow.md` | modify — tras D-01 (D54, D7): líneas 141-142 y 149-153 al estado medido | medium | `doc_orchestrator` | ✅ `e56ebbc` |
 | R-12 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify — tras R-03 (D54, B11): el humano quita el bypass del ruleset `version-tags`; relectura de solo lectura | medium | `devops_agent` (prepara) / `doc_orchestrator` (escribe) | ⏳ |
 | R-13 | `.github/workflows/ci.yml` | modify — tras R-06 (D54): la línea 33 instala `pytest` sin hash junto a `requirements-quality.txt` con hashes y pip lo rechaza; `pytest` en un paso aparte o desde un archivo con hashes | medium | `implementer_agent` | ⏳ |
 | T-01 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify — tras R-12 (D54, D6), antes del 2026-12-14: el humano renueva el token A10; relectura de la caducidad | medium | `devops_agent` (prepara) / `doc_orchestrator` (escribe) | ⏳ |
