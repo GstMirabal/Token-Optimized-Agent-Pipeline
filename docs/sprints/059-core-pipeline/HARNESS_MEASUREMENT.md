@@ -371,6 +371,35 @@ Measured 2026-11-14 in unit S-08 (plan D52), no file content read: `test -r`, `l
 
 - Reading: without a rule, every existing sensitive path is readable from the Bash sandbox; listing it in `denyRead` blocks it, a directory entry covers the files under it, and an unlisted file stays readable. Limits of this subset (`fail_closed_claims`): it covers Bash in the sandbox, not the Read tool, which `permissions` governs; denying the keychain file does not cover the keychain service, which `security find-generic-password` reached (KI-059-21); denying `~/.config/gh` also stops `gh` inside the sandbox from reading its own configuration. ADR-0019 decides the `denyRead` list of the nucleus and the host template.
 
+#### B2 denyRead path forms and the .env pattern (unit P-06)
+
+Measured 2026-11-15 by `devops_agent` (plan D59) on CLI `2.1.322` (VS Code extension native binary). Each call was a child `claude -p --model haiku --output-format json` launched outside the parent sandbox, with one fixture project under HOME per call (the child's cwd) and a project-level `.claude/settings.json` with `enabled: true`, `autoAllowBashIfSandboxed: true`, `allowUnsandboxedCommands: false` and the `denyRead` list of the case. 4 child calls (cap raised from 3 to 4 by the human). The probe ran `test -r` and `wc -c` on dummy fixtures only; results come from the printed probe output. `NOREAD` = `test -r` false and `wc` gave `open: Operation not permitted`; `R` = readable. No settings error and `permission_denials` `[]` in every call.
+
+| Case | denyRead | Fixture | Role | Result |
+| :--- | :--- | :--- | :--- | :--- |
+| P06-1 | `["~/.p06-fixture", "~/**/.env*"]` | `~/.p06-fixture/secret.txt` | target | NOREAD |
+| P06-1 | `["~/.p06-fixture", "~/**/.env*"]` | `~/.p06-fixture-open.txt` | control | R |
+| P06-1 | `["~/.p06-fixture", "~/**/.env*"]` | `~/p06-outside/.env` (outside the project) | target | NOREAD |
+| P06-1 | `["~/.p06-fixture", "~/**/.env*"]` | `~/p06-outside/plain.txt` | control | R |
+| P06-2 | `["/Users/<user>/.p06-fixture", "**/.env*"]` | `~/.p06-fixture/secret.txt` | target | NOREAD |
+| P06-2 | `["/Users/<user>/.p06-fixture", "**/.env*"]` | `~/.p06-fixture-open.txt` | control | R |
+| P06-2 | `["/Users/<user>/.p06-fixture", "**/.env*"]` | `~/p06-outside/.env` | target | R (not blocked) |
+| P06-2 | `["/Users/<user>/.p06-fixture", "**/.env*"]` | `~/p06-outside/plain.txt` | control | R |
+| P06-3 | `[]` (control) | `~/.p06-fixture/secret.txt` | target | R |
+| P06-3 | `[]` (control) | `~/.p06-fixture-open.txt` | control | R |
+| P06-3 | `[]` (control) | `~/p06-outside/.env` | target | R |
+| P06-3 | `[]` (control) | `~/p06-outside/plain.txt` | control | R |
+| P06-4 | `["~/**/.env*"]` | `~/p06-deep/a/b/c/.env` (nested, outside the project) | target | NOREAD |
+| P06-4 | `["~/**/.env*"]` | `~/p06-deep/a/b/c/plain.txt` | control | R |
+| P06-4 | `["~/**/.env*"]` | `<project>/.env` (in project) | target | NOREAD |
+| P06-4 | `["~/**/.env*"]` | `<project>/sub/.env` (nested, in project) | target | NOREAD |
+| P06-4 | `["~/**/.env*"]` | `<project>/plain.txt` | control | R |
+
+- Reading: `denyRead` expands `~/` the same as the absolute path (P06-1, P06-2, control P06-3); a directory entry covers the files under it.
+- `~/**/.env*` blocks Bash reads of `.env` files outside the project at any depth and inside the project (P06-1, P06-4); `**/.env*` without `~/` blocks nothing (P06-2).
+- `denyRead` governs the Bash sandbox only, so the Read tool stays covered by `Read(/**/.env*)` (A5).
+- Human decision 2026-11-15 (plan D59): the in-project `.env` block is accepted for hosts, so a host program that loads `.env` from a sandboxed Bash (for example a test runner) cannot read it.
+
 ### B3
 
 Measured 2026-11-14 in unit S-09 (plan D52) in the nucleus, Bash sandbox of this session, no `claude -p` call. Writability probe: a new file created and removed in a directory, or a zero-byte append to an existing file (content unchanged, `git status` clean afterwards).
