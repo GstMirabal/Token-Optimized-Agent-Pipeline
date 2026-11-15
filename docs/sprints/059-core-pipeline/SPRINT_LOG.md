@@ -92,6 +92,7 @@ Tracking of atomic goals achieved during the session. Work units and execution o
     - `[x]` Human decision 2026-11-15: the call cap of unit P-02 is raised from 4 to 5, so the fifth call isolates the file pattern `Edit(~/<file>)` and the directory entry left unmeasured in section A5 of `HARNESS_MEASUREMENT.md` (`5f71010`).
     - `[x]` Human decision 2026-11-15: the call cap of unit P-02 is raised from 5 to 6, so the sixth call measures the Write tool on the exact path of a denied HOME directory that does not exist, the step A5-18 left not executed.
     - `[x]` Human decision 2026-11-15 (plan D55), reversing the decision after D54: the agent creates the version tag and uses the GitHub token through a GitHub App with a broker outside the sandbox, and the same helper signs the tag; everything built for the A10 token is reworked in Sprint 060; P-04, R-09, R-10 and R-11 removed (moved to Sprint 060 through Out of scope), P-03 keeps the broker target of ADR-0019 D6, V-01 no longer depends on R-11, R-09 commit `191feff` reverted in `588ca1a`; work units 201 → 197.
+    - `[x]` Human decision 2026-11-15 (unit P-02): the A5 replacement for `Edit(~/**)` is candidate set C1 of section A5 of `HARNESS_MEASUREMENT.md` (`e51109f`): `Edit(~/.ssh/**)`, `Edit(~/.aws/**)`, `Edit(~/.gnupg/**)`, `Edit(~/.config/gh/**)`, `Edit(~/.docker/**)`, `Edit(~/Library/LaunchAgents/**)`, `Edit(~/Library/Keychains/**)`; sets C2 and C3 are not adopted.
 
 ---
 
