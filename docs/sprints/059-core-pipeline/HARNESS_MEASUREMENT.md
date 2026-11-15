@@ -210,7 +210,7 @@ Measured 2026-11-14 by `devops_agent` on 2.1.322, 7 child `claude -p` calls in u
 
 #### A5 candidate rules naming HOME paths (unit P-02)
 
-Measured 2026-11-15 by `devops_agent`, child CLI `2.1.119` (Homebrew), launched outside the parent sandbox, `--model haiku --permission-mode acceptEdits --output-format json`, 4 child `claude -p` calls (cap 4), cwd a fixture project under HOME, dummy fixtures only, all removed after; results decided from file sha on disk.
+Measured 2026-11-15 by `devops_agent`, child CLI `2.1.119` (Homebrew), launched outside the parent sandbox, `--model haiku --permission-mode acceptEdits --output-format json`, 6 child `claude -p` calls (cap raised from 4 to 6 by the human, 2026-11-15), cwd a fixture project under HOME, dummy fixtures only, all removed after; results decided from file sha on disk.
 
 | Case | Rule(s) | Target | Result |
 | :--- | :--- | :--- | :--- |
@@ -221,17 +221,24 @@ Measured 2026-11-15 by `devops_agent`, child CLI `2.1.119` (Homebrew), launched 
 | A5-12 | same as A5-11 | Edit of `~/.a5p02-fixture/sub/f.txt` | denied: sha unchanged; the deny takes precedence over the allow |
 | A5-13 | same as A5-11 | Write of new `~/.a5p02-fixture/new.txt` | denied: not created; an `Edit(...)` deny also blocks Write of a new file |
 | A5-14 | same as A5-11 | Edit of the project file under HOME | edited: a deny naming a HOME directory does not block project edits under HOME, unlike `Edit(~/**)` (A5-1) |
+| A5-15 | allow `Edit(~/.a5p02-ctl.rc)`, no deny (control, call 5) | Edit of `~/.a5p02-ctl.rc` | edited: sha changed |
+| A5-16 | allow and deny `Edit(~/.a5p02-deny.rc)` (call 5) | Edit of `~/.a5p02-deny.rc` | denied: sha unchanged; the deny takes precedence over an allow on the same file; control A5-15 edited under the same settings |
+| A5-17 | allow and deny `Edit(~/.a5p02-dir/**)` (call 5) | Write of new `~/.a5p02-dir/sub2/new.txt` | denied: no subdirectory or file created; `keep.txt` unchanged |
+| A5-18 | deny `Edit(~/.a5p02-absent/**)`, allow `Edit(~/.a5p02-absent)`, no file-level deny, directory absent (call 6; not executed in call 5) | Write of a file at the exact path `~/.a5p02-absent` | denied: the path still does not exist after the call |
+| A5-19 | none (project control, call 5) | Edit of the project file under HOME | edited: sha changed |
+| A5-20 | allow `Edit(~/.a5p02-ctlabsent)`, no deny (control, call 6) | Write of new `~/.a5p02-ctlabsent` | created: positive control for A5-18 |
+| A5-21 | allow `Edit(~/.a5p02-ctl.rc)` (control, call 6) | Edit of `~/.a5p02-ctl.rc` | edited: sha changed |
+| A5-22 | none (project control, call 6) | Edit of the project file under HOME | edited: sha changed |
 
-- Reading: the directory pattern `Edit(~/<dir>/**)` is isolated with a positive control (A5-11 to A5-14).
-- Reading: the file pattern `Edit(~/<file>)` alone was not isolated against a positive control. Not measured; criterion: one call with allow and deny on the same file and a control file.
-- Reading: whether `Edit(~/<dir>/**)` covers the directory entry itself was not measured.
-- Reading: rule-based denials did not appear in `permission_denials` (A5-9, A5-12, A5-13); only prompt refusals did.
+- Reading: the directory pattern `Edit(~/<dir>/**)` is isolated with positive controls (A5-11 to A5-14, A5-17, A5-18 with A5-20): it denies Edit and Write inside the directory, in new subdirectories, and a file at the exact directory path when the directory is absent, and does not block project edits under HOME.
+- Reading: the file pattern `Edit(~/<file>)` is isolated with a positive control (A5-16 with A5-15): a deny takes precedence over an allow on the same file.
+- Reading: rule-based denials did not appear in `permission_denials` (A5-9, A5-12, A5-13, A5-16, A5-17, A5-18); only prompt refusals did, so a check that reads only that field misses them.
 - Reading: measured on `2.1.119`, not `2.1.322`; the Conditions version limit applies.
 
 | Candidate | Pattern | Paths | Blocks framework work |
 | :--- | :--- | :--- | :--- |
 | C1 directory | `Edit(~/<dir>/**)` | `Edit(~/.ssh/**)`, `Edit(~/.aws/**)`, `Edit(~/.gnupg/**)`, `Edit(~/.config/gh/**)`, `Edit(~/.docker/**)`, `Edit(~/Library/LaunchAgents/**)`, `Edit(~/Library/Keychains/**)` | none found by configuration reading |
-| C2 file (not isolated, see Reading) | `Edit(~/<file>)` | `Edit(~/.zshrc)`, `Edit(~/.zshenv)`, `Edit(~/.zprofile)`, `Edit(~/.bashrc)`, `Edit(~/.bash_profile)`, `Edit(~/.gitconfig)`, `Edit(~/.npmrc)`, `Edit(~/.netrc)` | none found by configuration reading |
+| C2 file | `Edit(~/<file>)` | `Edit(~/.zshrc)`, `Edit(~/.zshenv)`, `Edit(~/.zprofile)`, `Edit(~/.bashrc)`, `Edit(~/.bash_profile)`, `Edit(~/.gitconfig)`, `Edit(~/.npmrc)`, `Edit(~/.netrc)` | none found by configuration reading |
 | C3 harness file | `Edit(~/.claude/settings.json)` | `~/.claude/settings.json` | none |
 | C4 rejected | `Edit(~/.claude/**)` | `~/.claude/**` | yes: denies the agent memory directory `~/.claude/projects/` |
 
