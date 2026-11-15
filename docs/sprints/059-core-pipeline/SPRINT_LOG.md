@@ -96,6 +96,7 @@ Tracking of atomic goals achieved during the session. Work units and execution o
     - `[x]` Human decision 2026-11-15 (plan D56): ADR-0019 is `Accepted` and immutable (`rules/documentation_standard.md` line 50), so the in-place edit of P-03 is discarded uncommitted; P-03 creates ADR-0022, which amends ADR-0019, and V-02 writes its results to ADR-0022.
     - `[x]` Human decision 2026-11-15 (plan D57): ADR-0022 is `Accepted` and immutable too, so V-02 creates ADR-0023, which amends ADR-0019 section 2.1 with the V-01 result, and ADR-0022 carries no boundary section.
     - `[x]` Human decision 2026-11-15 (plan D58): the template sandbox must allow pip; unit P-05 measures `pypi.org` and `files.pythonhosted.org` in `allowedDomains` and the TLS setting pip needs before R-01, as ADR-0019 D8 requires for any other domain; work units 197 → 198.
+    - `[x]` Human decision 2026-11-15: the call cap of unit P-05 is raised from 3 to 5; calls 1 to 3 (A1-7 to A1-9) showed pip needs `enableWeakerNetworkIsolation`, which ADR-0019 D2 forbids, so call 4 measures pip with a certificate setting and no widening key, and call 5 isolates `files.pythonhosted.org`.
 
 ---
 
