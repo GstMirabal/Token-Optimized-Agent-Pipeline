@@ -208,6 +208,35 @@ Measured 2026-11-14 by `devops_agent` on 2.1.322, 7 child `claude -p` calls in u
 
 - Reading: `Edit(~/**)` cannot protect HOME without blocking project work, so HOME protection names paths. `Read(/**/.env*)` covers nested and example files that `Read(/.env)` (M-series) misses. ADR-0019 decides the replacement rule. The pair A5-5/A5-6 shows the rule also removes `.env` files from Grep results, silently: no denial is logged.
 
+#### A5 candidate rules naming HOME paths (unit P-02)
+
+Measured 2026-11-15 by `devops_agent`, child CLI `2.1.119` (Homebrew), launched outside the parent sandbox, `--model haiku --permission-mode acceptEdits --output-format json`, 4 child `claude -p` calls (cap 4), cwd a fixture project under HOME, dummy fixtures only, all removed after; results decided from file sha on disk.
+
+| Case | Rule(s) | Target | Result |
+| :--- | :--- | :--- | :--- |
+| A5-8 | deny `Edit(~/.a5p02-fixture/**)`, deny `Edit(~/.a5p02-fixture.rc)` | Edit of the two HOME fixtures | not interpretable: the child was refused Read outside the cwd and never reached Edit; HOME fixtures unchanged; project file edited |
+| A5-9 | the two denies plus Read allows on both fixtures | Edit of both fixtures, Write of a new `new.txt`, Edit of project file | HOME fixtures unchanged, `new.txt` not created, `permission_denials` empty; confounded by A5-10; project edit failed on a model `old_string` mismatch |
+| A5-10 | control: Read allows only, deny empty | same steps | HOME writes refused anyway (outside-cwd writes in `acceptEdits`, listed in `permission_denials`); project file edited; not a positive control for HOME |
+| A5-11 | allow `Edit(~/.a5p02-fixture/**)` and `Edit(~/.a5p02-fixture.rc)`, deny `Edit(~/.a5p02-fixture/**)` | Edit of `~/.a5p02-fixture.rc` | edited (positive control: an allowed HOME file edit works) |
+| A5-12 | same as A5-11 | Edit of `~/.a5p02-fixture/sub/f.txt` | denied: sha unchanged; the deny takes precedence over the allow |
+| A5-13 | same as A5-11 | Write of new `~/.a5p02-fixture/new.txt` | denied: not created; an `Edit(...)` deny also blocks Write of a new file |
+| A5-14 | same as A5-11 | Edit of the project file under HOME | edited: a deny naming a HOME directory does not block project edits under HOME, unlike `Edit(~/**)` (A5-1) |
+
+- Reading: the directory pattern `Edit(~/<dir>/**)` is isolated with a positive control (A5-11 to A5-14).
+- Reading: the file pattern `Edit(~/<file>)` alone was not isolated against a positive control. Not measured; criterion: one call with allow and deny on the same file and a control file.
+- Reading: whether `Edit(~/<dir>/**)` covers the directory entry itself was not measured.
+- Reading: rule-based denials did not appear in `permission_denials` (A5-9, A5-12, A5-13); only prompt refusals did.
+- Reading: measured on `2.1.119`, not `2.1.322`; the Conditions version limit applies.
+
+| Candidate | Pattern | Paths | Blocks framework work |
+| :--- | :--- | :--- | :--- |
+| C1 directory | `Edit(~/<dir>/**)` | `Edit(~/.ssh/**)`, `Edit(~/.aws/**)`, `Edit(~/.gnupg/**)`, `Edit(~/.config/gh/**)`, `Edit(~/.docker/**)`, `Edit(~/Library/LaunchAgents/**)`, `Edit(~/Library/Keychains/**)` | none found by configuration reading |
+| C2 file (not isolated, see Reading) | `Edit(~/<file>)` | `Edit(~/.zshrc)`, `Edit(~/.zshenv)`, `Edit(~/.zprofile)`, `Edit(~/.bashrc)`, `Edit(~/.bash_profile)`, `Edit(~/.gitconfig)`, `Edit(~/.npmrc)`, `Edit(~/.netrc)` | none found by configuration reading |
+| C3 harness file | `Edit(~/.claude/settings.json)` | `~/.claude/settings.json` | none |
+| C4 rejected | `Edit(~/.claude/**)` | `~/.claude/**` | yes: denies the agent memory directory `~/.claude/projects/` |
+
+No path under the project root may be named by any rule (A5-1). The human chooses the rule set, and the choice is recorded in `SPRINT_LOG.md`.
+
 ### A6
 
 Measured 2026-11-14 on 2.1.322 in unit S-05 (plan D52: configuration checks, no attack attempt), 3 child `claude -p` calls (cap 4), fixture files with dummy content only.
