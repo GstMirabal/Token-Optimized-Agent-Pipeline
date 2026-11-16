@@ -520,7 +520,47 @@ Measured 2026-11-14 in unit S-11 (plan D52); size and exit code only, the clipbo
 
 ### B9
 
-Units S-13 to S-15 build `make sandbox-probe`. Not yet measured.
+Units S-13 to S-15 build `make sandbox-probe`. Measured 2026-11-15 by `devops_agent` (unit R-03), in the Bash sandbox of the running session after R-02 installed the nucleus settings at `374a5f8`; harness CLI `2.1.322` (env `AI_AGENT=claude-code_2-1-322_agent`; the `claude` on the sandbox PATH is `2.1.119`, a different binary); one run of `make sandbox-probe`, exit `0`; the output holds no secret value.
+
+```
+sandbox_probe: cli=claude-code_2-1-322_agent
+M7-1 tcp 127.0.0.1:5432 expected=closed observed=closed [EPERM] verdict=ok
+M7-2 tcp [::1]:5432 expected=closed observed=closed [EPERM] verdict=ok
+M7-3 tcp 127.0.0.1:6379 expected=closed observed=closed [EPERM] verdict=ok
+M9-1 unix bind+listen in tempdir expected=closed observed=closed [EPERM] verdict=ok
+M9-2 unix ~/.docker/run/docker.sock expected=closed observed=closed [EPERM] verdict=ok
+M9-3 unix /var/run/docker.sock expected=closed observed=closed [EPERM] verdict=ok
+M9-4 unix SSH_AUTH_SOCK expected=closed observed=closed [EPERM] verdict=ok
+A1-C connect api.github.com:443 expected=control observed=open [200] verdict=ok
+A1-1 connect 127.0.0.1:5000 expected=known_open observed=not-measurable [proxy-io-error] verdict=NOT-MEASURABLE
+A1-2 connect example.org:443 expected=known_open observed=not-measurable [proxy-io-error] verdict=NOT-MEASURABLE
+B2-1 file ~/.docker/config.json expected=known_open observed=closed [EPERM] verdict=CLOSED KI-059-21 may be resolved
+B2-2 file ~/.config/gh/hosts.yml expected=known_open observed=closed [EPERM] verdict=CLOSED KI-059-21 may be resolved
+B2-3 file ~/.zsh_history expected=known_open observed=closed [EPERM] verdict=CLOSED KI-059-21 may be resolved
+B2-4 file ~/Library/Keychains/login.keychain-db expected=known_open observed=closed [EPERM] verdict=CLOSED KI-059-21 may be resolved
+B2-5 dir ~/.claude/projects expected=known_open observed=closed [EPERM] verdict=CLOSED KI-059-21 may be resolved
+summary: CLOSED=5 NOT-MEASURABLE=2 ok=8 exit=0
+```
+
+| Case | Expected | Observed | Reading |
+| :--- | :--- | :--- | :--- |
+| M7-1 | closed | closed [EPERM] | closed as recorded |
+| M7-2 | closed | closed [EPERM] | closed as recorded |
+| M7-3 | closed | closed [EPERM] | closed as recorded |
+| M9-1 | closed | closed [EPERM] | closed as recorded |
+| M9-2 | closed | closed [EPERM] | closed as recorded |
+| M9-3 | closed | closed [EPERM] | closed as recorded |
+| M9-4 | closed | closed [EPERM] | closed as recorded |
+| A1-C | control | open [200] | control open |
+| A1-1 | known_open | not-measurable [proxy-io-error] | not measurable: with `allowedDomains` set the proxy ends a CONNECT to an unlisted host without a status (a `curl` to `example.org` in the same session gave `000`, `api.github.com` `200`); plan D61 makes R-04 classify it |
+| A1-2 | known_open | not-measurable [proxy-io-error] | not measurable: with `allowedDomains` set the proxy ends a CONNECT to an unlisted host without a status (a `curl` to `example.org` in the same session gave `000`, `api.github.com` `200`); plan D61 makes R-04 classify it |
+| B2-1 | known_open | closed [EPERM] | closed after R-02 (`denyRead`); open before (B2) |
+| B2-2 | known_open | closed [EPERM] | closed after R-02 (`denyRead`); open before (B2) |
+| B2-3 | known_open | closed [EPERM] | closed after R-02 (`denyRead`); open before (B2) |
+| B2-4 | known_open | closed [EPERM] | closed after R-02 (`denyRead`); open before (B2) |
+| B2-5 | known_open | closed [EPERM] | closed after R-02 (`denyRead`); open before (B2) |
+
+- Reading: the exit code counts only cases expected `closed`; A1-1 and A1-2 stay unresolved until R-04 (plan D61) and a re-run.
 
 ### B10
 
