@@ -583,6 +583,17 @@ Measured 2026-11-16 by the human in a terminal CLI session at the nucleus root; 
 
 - Reading: no stored network approval exists outside the project `allowedDomains`. A candidate cause, unproven: the user-scope `permissions.defaultMode: "auto"`. The mtime of `~/.claude/settings.json` is after R-03 (A1 denied, 2026-11-15) and before the two runs that measured A1 open, but the mtime does not show which key changed, and the permission mode of the R-03 session is not recorded. Under D63 this does not yet name the cause; unit P-10 (plan D64) discriminates.
 
+#### P-10 `make sandbox-probe` by permission mode (plan D64, KI-059-27)
+
+Measured 2026-11-16 by the human in a terminal CLI at the nucleus root, running `make sandbox-probe` and `curl -s -o /dev/null -m 15 -w '%{http_code}' https://webhook.site` through the session's Bash tool in one session per permission mode; the version `2.1.119` was read by the agent from `/opt/homebrew/bin/claude --version`, not recorded by the human per session, and the `curl https://example.org` comparison was not run in either session.
+
+| Session start | Probe exit | Summary | A1-C `api.github.com:443` | A1-1 `127.0.0.1:5000` | A1-2 `example.org:443` | M7, M9, B2 cases | `curl https://webhook.site` |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `claude --permission-mode default` | `2` | `NOT-MEASURABLE=2 ok=13` | open (control) | `not-measurable [proxy-timeout]` | `not-measurable [proxy-timeout]` | ok (closed) | `200` |
+| `claude --permission-mode auto` | `1` | `FAIL=2` | not reported | `expected=closed observed=open [200]` | `expected=closed observed=open [200]` | pass | `200` |
+
+- Reading: the permission mode changes the probe's A1 result (default: `proxy-timeout`, which stays `not-measurable` under D61; auto: `open [200]`), but `curl` to the unlisted host `webhook.site` returns `200` in both modes. Neither D64 branch holds as written: A1-1 and A1-2 are not `closed` in default, and the `curl` egress is open in both modes, so the permission mode does not explain the `webhook.site` egress of KI-059-27. The auto-mode probe printed `cli=unknown`; whether the default-mode run printed a `cli=` line was not reported. The re-plan of R-04 is a human decision (next plan decision).
+
 ### B10
 
 Recorded 2026-11-14 in unit S-12 (plan D52). Rotation steps for the two credentials of A10 and KI-059-21; the human runs every step (RA-09).
