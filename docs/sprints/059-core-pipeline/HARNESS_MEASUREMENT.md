@@ -573,6 +573,16 @@ Measured 2026-11-16 with `.claude/settings.json` unchanged since R-02 (2026-11-1
 
 - Reading: egress to unlisted hosts is open on both surfaces with the installed `allowedDomains`, so the surface does not explain KI-059-27; R-03 (same settings file, an earlier session) is the only run that measured A1-1 and A1-2 denied (`proxy-io-error`); the cause stays unmeasured.
 
+#### P-09 `/sandbox` and `/permissions` outputs (plan D63, KI-059-27)
+
+Measured 2026-11-16 by the human in a terminal CLI session at the nucleus root; 2 of the 3 calls D63 allows were used. The agent read the settings files instead of scrolling the lists the `/permissions` screen truncates.
+
+| Date | Surface | `/sandbox` | `/permissions` | Settings files read by the agent |
+| :--- | :--- | :--- | :--- | :--- |
+| 2026-11-16 | Terminal CLI at the nucleus root | Mode tab: "Sandbox BashTool, with auto-allow (current)". Overrides tab: "Strict sandbox mode (current)". Config tab: Excluded Commands: None; Filesystem Read Restrictions: the denied list matches the R-02 `denyRead` list, plus the allow-within-deny `.env.example`, `.env.sample`, `.env.template`; no network section is shown (the human confirmed nothing further below) | Allow tab: Bash rules (the UI list is truncated at 10). Ask tab: empty. Deny tab: `Artifact`, `ArtifactComments`, `ArtifactData`, `git push --force`/`-f`, `git reset --hard origin`, `rm -rf /`, `Edit(/.agents/**)`, `Edit(/.claude/settings*.json)`, and more (truncated). Workspace: the nucleus root only | `.claude/settings.json` (mtime 2026-11-15 20:33): `sandbox.network.allowedDomains` = `api.github.com`, `github.com`, `pypi.org`, `files.pythonhosted.org`; `permissions.deny` holds `WebFetch`; no `WebFetch` or domain allow rule. `.claude/settings.local.json`: no `sandbox` key, no network rule. `~/.claude/settings.json` (user scope, mtime 2026-11-16 08:07): no `sandbox` key, no `WebFetch` or domain rule among its 26 allow rules, `permissions.defaultMode: "auto"`, `skipAutoPermissionPrompt: true`, `autoMode: {}`. No managed-settings file exists |
+
+- Reading: no stored network approval exists outside the project `allowedDomains`. A candidate cause, unproven: the user-scope `permissions.defaultMode: "auto"`. The mtime of `~/.claude/settings.json` is after R-03 (A1 denied, 2026-11-15) and before the two runs that measured A1 open, but the mtime does not show which key changed, and the permission mode of the R-03 session is not recorded. Under D63 this does not yet name the cause; unit P-10 (plan D64) discriminates.
+
 ### B10
 
 Recorded 2026-11-14 in unit S-12 (plan D52). Rotation steps for the two credentials of A10 and KI-059-21; the human runs every step (RA-09).
