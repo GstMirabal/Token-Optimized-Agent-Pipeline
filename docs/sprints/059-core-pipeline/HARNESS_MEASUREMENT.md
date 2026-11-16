@@ -593,6 +593,19 @@ Measured 2026-11-16 by the human in a terminal CLI at the nucleus root, running 
 | `claude --permission-mode auto` | `1` | `FAIL=2` | not reported | `expected=closed observed=open [200]` | `expected=closed observed=open [200]` | pass | `200` |
 
 - Reading: the permission mode changes the probe's A1 result (default: `proxy-timeout`, which stays `not-measurable` under D61; auto: `open [200]`), but `curl` to the unlisted host `webhook.site` returns `200` in both modes. Neither D64 branch holds as written: A1-1 and A1-2 are not `closed` in default, and the `curl` egress is open in both modes, so the permission mode does not explain the `webhook.site` egress of KI-059-27. The auto-mode probe printed `cli=unknown`; whether the default-mode run printed a `cli=` line was not reported. The re-plan of R-04 is a human decision (next plan decision).
+- Correction (P-11, 2026-11-16): the human states that in the P-10 default-mode session the harness showed the network prompt for the `webhook.site` `curl` and they chose "Yes" (the lead had told them to approve prompts). The default-mode `200` in the table above is therefore an approved connection, not an unprompted egress; the table cells are unchanged.
+
+#### P-11 route of `curl` and the network prompt (plan D65, KI-059-27)
+
+Measured 2026-11-16 in two sessions, one by the agent and one by the human, to find which route `curl` takes to an unlisted host and whether the harness prompts for it; no proxy host, port, URL or credential value is recorded.
+
+| Measured by, session | Command | Observation | Result |
+| :--- | :--- | :--- | :--- |
+| Agent, own session (VS Code; user-scope `~/.claude/settings.json` sets `permissions.defaultMode: "auto"`, P-09), Bash tool, `SANDBOX_RUNTIME` set | `curl -sv -o /dev/null -m 15 https://example.org` | Proxy variables present: `HTTPS_PROXY`, `HTTP_PROXY`, `ALL_PROXY`, `NO_PROXY` and their lowercase forms, plus `FTP_PROXY`, `GRPC_PROXY`, `RSYNC_PROXY`, `DOCKER_HTTP_PROXY`, `DOCKER_HTTPS_PROXY`, `CLOUDSDK_PROXY_*`. curl uses `https_proxy`, connects to a loopback proxy, sends `CONNECT example.org:443` and receives `HTTP/1.1 200 Connection Established` with no prompt | curl exit `60` (TLS certificate verification, the trustd cause of `SANDBOX_ENUMERATION.md` section 2.6); the tunnel to the unlisted host opened |
+| Agent, same session | `curl -sv -o /dev/null -m 15 --noproxy '*' https://example.org` | `Could not resolve host: example.org` | curl exit `6` (no direct route, no DNS) |
+| Human, `claude --permission-mode default` at the nucleus root (CLI `2.1.119`, P-10), Bash tool | `curl -s -o /dev/null -m 15 -w '%{http_code}' https://example.org` | The harness showed the prompt "Network request outside of sandbox / Host: example.org / Do you want to allow this connection? 1. Yes 2. Yes, and don't ask again for example.org 3. No, and tell Claude what to do differently (esc)"; the human denied it | `000`, curl exit `28` (timeout) |
+
+- Reading: cause named. `sandbox.network.allowedDomains` is an allowlist that skips the prompt, not a denylist: for an unlisted host the sandbox proxy asks for approval. In `default` the harness prompts the human; a denied or unanswered prompt ends as a timeout (`000`, exit `28`), which matches the P-10 default-mode A1 `proxy-timeout`. In `auto` the connection is approved without a prompt (`200 Connection Established` here; A1 `open [200]` in P-10). Direct egress without the proxy fails at DNS. Closing KI-059-27 needs a setting that denies unlisted hosts instead of asking, in both modes; that setting is not yet identified (next plan decision).
 
 ### B10
 
