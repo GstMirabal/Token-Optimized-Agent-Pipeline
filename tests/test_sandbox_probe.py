@@ -37,6 +37,7 @@ class FakeSock:
         status: int = 200,
         connect_error: Exception | None = None,
         bind_error: Exception | None = None,
+        recv_error: Exception | None = None,
     ) -> None:
         """Store the scripted behavior.
 
@@ -45,7 +46,9 @@ class FakeSock:
             status: HTTP status returned on the first `recv`.
             connect_error: Raised by `connect` when set.
             bind_error: Raised by `bind` when set.
+            recv_error: Raised by `recv` when set; `status=0` means EOF.
         """
+        self.recv_error = recv_error
         self.sent = sent
         self.status = status
         self.connect_error = connect_error
@@ -74,7 +77,9 @@ class FakeSock:
 
     def recv(self, size: int) -> bytes:
         """Return the status line once, then end of stream."""
-        if self.replied:
+        if self.recv_error is not None:
+            raise self.recv_error
+        if self.replied or self.status == 0:
             return b""
         self.replied = True
         return f"HTTP/1.1 {self.status} X\r\n\r\n".encode()
@@ -258,9 +263,9 @@ def test_exit_2_when_closed_case_not_measurable(make_env: Callable[..., object])
     assert probe.exit_code(rows) == 2
 
 
-def test_exit_0_when_everything_closed(make_env: Callable[..., object]) -> None:
-    """A fully closed run exits 0."""
-    _, rows = probe.run_all(make_env(closed=True))
+def test_exit_0_when_everything_closed(tmp_path: Path, sent: list[bytes]) -> None:
+    """A fully closed run (control open, A1 CONNECTs denied with 403) exits 0."""
+    _, rows = probe.run_all(a1_env(tmp_path, sent, {"status": 403}))
     assert probe.exit_code(rows) == 0
 
 
@@ -457,3 +462,96 @@ def test_main_never_prints_proxy_secret(
     assert_no_leak(captured.err)
     assert_no_leak(caplog.text)
     assert any(b"Proxy-Authorization: Basic" in chunk for chunk in sent)
+
+
+# 6. D61: proxy ends the CONNECT --------------------------------------------
+
+
+def a1_env(tmp_path: Path, sent: list[bytes], ending: dict[str, object]) -> object:
+    """Env whose control opens (200) and whose unlisted-host CONNECTs end as `ending`."""
+    env = build_env(tmp_path, sent, closed=True)
+
+    seen: list[str] = []
+
+    def proxy_connect(addr: tuple[str, int], timeout: float = 0.0) -> FakeSock:
+        if addr[0] != PROXY_HOST:
+            raise eperm()
+        seen.append("c")
+        # First proxy connection is the control A1-C; later ones are A1-1 and A1-2.
+        return FakeSock(sent, status=200) if len(seen) == 1 else FakeSock(sent, **ending)
+
+    env.tcp_connect = proxy_connect
+    return env
+
+
+def a1_lines(env: object) -> dict[str, str]:
+    """Run every case and map case id to its output line."""
+    lines, _ = probe.run_all(env)
+    return {line.split(" ", 1)[0]: line for line in lines}
+
+
+def test_b2_cases_expected_closed() -> None:
+    """B2-1..B2-5 are expected `closed` and carry no known-issue id."""
+    for number in range(1, 6):
+        case = case_by_id(f"B2-{number}")
+        assert (case.expected, case.ki) == ("closed", "")
+
+
+def test_a1_cases_expected_closed() -> None:
+    """A1-1 and A1-2 are expected `closed` (D61)."""
+    assert case_by_id("A1-1").expected == "closed"
+    assert case_by_id("A1-2").expected == "closed"
+
+
+@pytest.mark.parametrize(
+    "ending",
+    [{"status": 0}, {"recv_error": ConnectionResetError(errno.ECONNRESET, "x")},
+     {"recv_error": BrokenPipeError(errno.EPIPE, "x")}],
+    ids=["eof", "reset", "broken-pipe"],
+)
+def test_proxy_end_after_open_control_is_closed(
+    tmp_path: Path, sent: list[bytes], ending: dict[str, object]
+) -> None:
+    """EOF or reset of the CONNECT, with the control open, is observed closed."""
+    by_id = a1_lines(a1_env(tmp_path, sent, ending))
+    assert "A1-C" in by_id and "observed=open" in by_id["A1-C"]
+    for case_id in ("A1-1", "A1-2"):
+        assert "observed=closed [proxy-closed] verdict=ok" in by_id[case_id]
+
+
+def test_proxy_timeout_after_open_control_is_not_measurable(
+    tmp_path: Path, sent: list[bytes]
+) -> None:
+    """A timeout stays not-measurable even with the control open."""
+    by_id = a1_lines(a1_env(tmp_path, sent, {"recv_error": TimeoutError()}))
+    for case_id in ("A1-1", "A1-2"):
+        assert "observed=not-measurable [proxy-timeout]" in by_id[case_id]
+
+
+def test_proxy_other_oserror_is_not_measurable(tmp_path: Path, sent: list[bytes]) -> None:
+    """Any other OSError is not-measurable `proxy-io-error`."""
+    by_id = a1_lines(a1_env(tmp_path, sent, {"recv_error": OSError(errno.EIO, "x")}))
+    for case_id in ("A1-1", "A1-2"):
+        assert "observed=not-measurable [proxy-io-error]" in by_id[case_id]
+
+
+def test_proxy_eof_without_open_control_is_not_measurable(
+    tmp_path: Path, sent: list[bytes]
+) -> None:
+    """EOF on every CONNECT, control included, leaves A1-1 and A1-2 not-measurable."""
+    env = build_env(tmp_path, sent, closed=False)
+    env.tcp_connect = lambda addr, timeout=0.0: FakeSock(sent, status=0)
+    by_id = a1_lines(env)
+    assert "observed=not-measurable [proxy-closed]" in by_id["A1-C"]
+    for case_id in ("A1-1", "A1-2"):
+        assert "observed=not-measurable" in by_id[case_id]
+        assert "observed=closed" not in by_id[case_id]
+
+
+def test_apply_control_maps_proxy_closed_only_with_open_control() -> None:
+    """`apply_control` turns proxy-closed into closed only when the control is open."""
+    raw = probe.Result("not-measurable", "proxy-closed")
+    case = case_by_id("A1-1")
+    assert probe.apply_control(case, raw, control_open=True) == probe.Result("closed", "proxy-closed")
+    assert probe.apply_control(case, raw, control_open=False).observed == "not-measurable"
+    assert probe.apply_control(case_by_id("A1-C"), raw, control_open=True) is raw

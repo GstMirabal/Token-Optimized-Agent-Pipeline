@@ -50,6 +50,7 @@ OPEN = "open"
 CLOSED = "closed"
 ABSENT = "absent"
 NOT_MEASURABLE = "not-measurable"
+PROXY_CLOSED = "proxy-closed"
 
 
 @dataclass(frozen=True)
@@ -105,14 +106,14 @@ CASES: tuple[Case, ...] = (
     Case("M9-3", "M9", "unix /var/run/docker.sock", "closed", "", "unix_abs", ("/var/run/docker.sock",)),
     Case("M9-4", "M9", "unix SSH_AUTH_SOCK", "closed", "", "unix_env", ("SSH_AUTH_SOCK",)),
     Case("A1-C", "A1 control", "connect api.github.com:443", "control", "", "proxy", ("api.github.com", "443")),
-    Case("A1-1", "A1", "connect 127.0.0.1:5000", "known_open", "KI-059-20", "proxy", ("127.0.0.1", "5000")),
-    Case("A1-2", "A1", "connect example.org:443", "known_open", "KI-059-19", "proxy", ("example.org", "443")),
-    Case("B2-1", "B2", "file ~/.docker/config.json", "known_open", "KI-059-21", "file", (".docker/config.json",)),
-    Case("B2-2", "B2", "file ~/.config/gh/hosts.yml", "known_open", "KI-059-21", "file", (".config/gh/hosts.yml",)),
-    Case("B2-3", "B2", "file ~/.zsh_history", "known_open", "KI-059-21", "file", (".zsh_history",)),
-    Case("B2-4", "B2", "file ~/Library/Keychains/login.keychain-db", "known_open", "KI-059-21", "file",
+    Case("A1-1", "A1", "connect 127.0.0.1:5000", "closed", "", "proxy", ("127.0.0.1", "5000")),
+    Case("A1-2", "A1", "connect example.org:443", "closed", "", "proxy", ("example.org", "443")),
+    Case("B2-1", "B2", "file ~/.docker/config.json", "closed", "", "file", (".docker/config.json",)),
+    Case("B2-2", "B2", "file ~/.config/gh/hosts.yml", "closed", "", "file", (".config/gh/hosts.yml",)),
+    Case("B2-3", "B2", "file ~/.zsh_history", "closed", "", "file", (".zsh_history",)),
+    Case("B2-4", "B2", "file ~/Library/Keychains/login.keychain-db", "closed", "", "file",
          ("Library/Keychains/login.keychain-db",)),
-    Case("B2-5", "B2", "dir ~/.claude/projects", "known_open", "KI-059-21", "listdir", (".claude/projects",)),
+    Case("B2-5", "B2", "dir ~/.claude/projects", "closed", "", "listdir", (".claude/projects",)),
 )
 
 
@@ -272,6 +273,29 @@ def parse_proxy(environ: Mapping[str, str]) -> tuple[str, int, str] | None:
     return parts.hostname, parts.port, auth
 
 
+def recv_status_head(sock: socket.socket) -> bytes:
+    """Receive bytes until a line end, 512 bytes or the peer closing.
+
+    Args:
+        sock: Connected socket that has sent a request.
+
+    Returns:
+        The bytes received, non-empty.
+
+    Raises:
+        EOFError: The peer closed the connection before sending any byte.
+    """
+    data = b""
+    while b"\r\n" not in data and len(data) < 512:
+        chunk = sock.recv(256)
+        if not chunk:
+            break
+        data += chunk
+    if not data:
+        raise EOFError("proxy closed the connection without a status line")
+    return data
+
+
 def read_status(sock: socket.socket) -> int | None:
     """Read only the HTTP status line from a socket.
 
@@ -280,13 +304,11 @@ def read_status(sock: socket.socket) -> int | None:
 
     Returns:
         The numeric status code, or `None` when the line is malformed.
+
+    Raises:
+        EOFError: The peer closed the connection before sending any byte.
     """
-    data = b""
-    while b"\r\n" not in data and len(data) < 512:
-        chunk = sock.recv(256)
-        if not chunk:
-            break
-        data += chunk
+    data = recv_status_head(sock)
     fields = data.split(b"\r\n", 1)[0].split()
     if len(fields) >= 2 and fields[1].isdigit():
         return int(fields[1])
@@ -322,7 +344,10 @@ def probe_proxy(env: Env, host: str, port: str) -> Result:
 
     Returns:
         The classified observation; `not-measurable` when the proxy variable is
-        unset or the proxy cannot be reached.
+        unset or the proxy cannot be reached. A CONNECT ended by EOF, reset or
+        broken pipe is `not-measurable` with detail `proxy-closed`; `run_all`
+        turns it into `closed` only when the control is open. A timeout is
+        `proxy-timeout`; any other `OSError` is `proxy-io-error`.
     """
     proxy = parse_proxy(env.environ)
     if proxy is None:
@@ -339,6 +364,10 @@ def probe_proxy(env: Env, host: str, port: str) -> Result:
         sock.settimeout(TIMEOUT_SECONDS)
         sock.sendall(("\r\n".join(lines) + "\r\n\r\n").encode())
         return classify_status(read_status(sock))
+    except (EOFError, ConnectionResetError, BrokenPipeError):
+        return Result(NOT_MEASURABLE, PROXY_CLOSED)
+    except TimeoutError:
+        return Result(NOT_MEASURABLE, "proxy-timeout")
     except OSError:
         return Result(NOT_MEASURABLE, "proxy-io-error")
     finally:
@@ -472,11 +501,16 @@ def apply_control(case: Case, result: Result, control_open: bool) -> Result:
         control_open: Whether the A1 control was observed `open`.
 
     Returns:
-        `not-measurable` for an A1 non-control case without an open control,
-        else `result` unchanged.
+        `not-measurable` for an A1 non-control case without an open control;
+        `closed` (D61) for one whose CONNECT the proxy ended while the control
+        is open; else `result` unchanged.
     """
-    if case.source == "A1" and case.expected != "control" and not control_open:
+    if case.source != "A1" or case.expected == "control":
+        return result
+    if not control_open:
         return Result(NOT_MEASURABLE, "control-not-open")
+    if result.observed == NOT_MEASURABLE and result.detail == PROXY_CLOSED:
+        return Result(CLOSED, PROXY_CLOSED)
     return result
 
 
