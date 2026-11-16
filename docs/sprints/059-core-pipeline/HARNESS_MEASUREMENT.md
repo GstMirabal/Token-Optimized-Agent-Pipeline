@@ -562,6 +562,17 @@ summary: CLOSED=5 NOT-MEASURABLE=2 ok=8 exit=0
 
 - Reading: the exit code counts only cases expected `closed`; A1-1 and A1-2 stay unresolved until R-04 (plan D61) and a re-run.
 
+#### P-08 re-run per surface (plan D62, KI-059-27)
+
+Measured 2026-11-16 with `.claude/settings.json` unchanged since R-02 (2026-11-15 20:33), `sandbox.network.allowedDomains` = `api.github.com`, `github.com`, `pypi.org`, `files.pythonhosted.org`. The VS Code row was run by the agent in session `7b446d03`; the terminal row was run by the human through the Bash tool of a `claude` session started at the nucleus root (`pwd` printed the nucleus root, `SANDBOX_RUNTIME=1`). In that terminal `claude --version` printed `2.1.119` and the probe printed `cli=unknown` (no `AI_AGENT` in that session), so the 2.1.119 version is the PATH binary's, not a value the probe printed. The pasted terminal transcript has some lines cut mid-line; every value in the table is readable in it.
+
+| Surface | Version | Probe exit | A1-C | A1-1 | A1-2 | B2-1 to B2-5 | M7-1 to M9-4 | `webhook.site` |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| VS Code extension | 2.1.322 (`cli=claude-code_2-1-322_agent`) | `1` (`FAIL=2 ok=13`) | open [200] | open [200], FAIL | open [200], FAIL | closed [EPERM] | closed [EPERM] | `200` |
+| Terminal CLI | 2.1.119 (PATH binary; probe `cli=unknown`) | `1` (`make` Error 1, `FAIL=2 ok=13`) | open [200] | open [200], FAIL | open [200], FAIL | closed [EPERM] | closed [EPERM] | `200` |
+
+- Reading: egress to unlisted hosts is open on both surfaces with the installed `allowedDomains`, so the surface does not explain KI-059-27; R-03 (same settings file, an earlier session) is the only run that measured A1-1 and A1-2 denied (`proxy-io-error`); the cause stays unmeasured.
+
 ### B10
 
 Recorded 2026-11-14 in unit S-12 (plan D52). Rotation steps for the two credentials of A10 and KI-059-21; the human runs every step (RA-09).
