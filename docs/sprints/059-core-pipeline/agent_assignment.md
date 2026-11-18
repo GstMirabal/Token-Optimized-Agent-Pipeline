@@ -228,6 +228,7 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | P-10 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | P-11 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | P-12 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| P-13 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | R-01 | `claude/settings.hooks.json` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | R-02 | `.claude/settings.json` | install (human runs) | sequential | `devops_agent` | N/A | `agents/devops_agent.md` |
 | R-03 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
@@ -245,6 +246,7 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | R-18 | `~/.claude/settings.json` | install (human runs) | sequential | `devops_agent` | N/A | `agents/devops_agent.md` |
 | R-19 | `docs/decisions/ADR-0019-sandbox-regime.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | R-20 | `rules/project_topology.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| R-21 | `~/.claude/settings.json` | install (human runs) | sequential | `devops_agent` | N/A | `agents/devops_agent.md` |
 | T-01 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | V-01 | `docs/sprints/059-core-pipeline/HARNESS_ATTACK_RESULT.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | V-02 | `docs/decisions/ADR-0023-sandbox-boundary-result.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
