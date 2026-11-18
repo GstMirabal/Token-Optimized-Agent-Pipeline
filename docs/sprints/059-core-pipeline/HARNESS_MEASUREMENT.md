@@ -167,6 +167,8 @@ Conditions: measured 2026-11-15 by `devops_agent`, plan D58, CLI `2.1.322` (VS C
 | A1-9 (control) | `api.github.com`, `github.com` | `enableWeakerNetworkIsolation: true` | 1 | none | `deny network-outbound pypi.org:443` |
 | A1-10 | same four | `enableWeakerNetworkIsolation` absent; settings `env`: `PIP_USE_DEPRECATED=legacy-certs`, `PIP_CERT=/etc/ssl/cert.pem` (both seen in the child Bash env) | 0 | `iniconfig-2.3.1-py3-none-any.whl` | none |
 | A1-11 (control) | `api.github.com`, `github.com`, `pypi.org` | same `env` as A1-10 | 2 | none | `deny network-outbound files.pythonhosted.org:443` |
+| A1-12 (control; pnpm 11.23.0 `pnpm view is-number version`, user scope with `strictAllowlist: true`, 2026-11-18, unit P-07) | `api.github.com`, `files.pythonhosted.org`, `github.com`, `pypi.org` | none | 1 (`ERR_PNPM_META_FETCH_FAIL`) | none | `deny network-outbound registry.npmjs.org:443 (host is not on the allow list)` |
+| A1-13 (same probe, same session) | the same four plus `registry.npmjs.org` | none | 0 (prints `7.0.0`) | none (metadata only) | none for `registry.npmjs.org`; the unlisted control `example.org:443` is denied |
 
 Reading:
 
@@ -176,6 +178,7 @@ Reading:
 - The env pair is shown sufficient together; each variable alone was not run.
 - `/etc/ssl/cert.pem` is the macOS path and the measurement is macOS only.
 - The pin had no dependencies, so one wheel was fetched and its `--require-hashes` check passed.
+- Rows A1-12 and A1-13 are the pnpm registry case (B9 P-07); they reuse the columns above, and "File downloaded" is `none` because only metadata was fetched.
 
 ### A2
 
@@ -634,6 +637,23 @@ Measured 2026-11-18 by the agent in its own session and by the human in a termin
 In both rows the `sandbox_violations` block lists `deny network-outbound 127.0.0.1:5000` and `example.org:443` `(host is not on the allow list)`, and no line for `api.github.com`.
 
 - Reading: with `strictAllowlist` and `allowedDomains` both at user scope, the listed host opens and unlisted hosts are refused with `403` and no prompt, so KI-059-27 is closed in this session and `make sandbox-probe` exits 0 with every case `ok`. The refusal form is `403` with the control open, which the probe already classifies `closed` (4xx other than 407). Measured after R-21 on VS Code in auto mode and on the terminal CLI in default mode with the same result; the VS Code default and CLI auto combinations were not re-run, and in P-12 all four combinations behaved alike.
+
+#### P-07 pnpm registry through the user-scope `allowedDomains` (plan D69, KI-059-27)
+
+Measured 2026-11-18 by the agent in its own VS Code session (Claude Code 2.1.325, permission mode auto, Bash tool without `allowed_domains`, cwd `$TMPDIR`; pnpm 11.23.0, node v25.9.0), with `~/.claude/settings.json` holding `sandbox.network.strictAllowlist: true`, the project `allowedDomains` unchanged (`api.github.com`, `github.com`, `pypi.org`, `files.pythonhosted.org`), no `sandbox.enableWeakerNetworkIsolation` key at any scope and no `NODE_*` or `SSL_CERT*` variable in the environment. Between the two runs the human backed up the file to `~/.claude/settings.json.bak-p07` and merged `registry.npmjs.org` into the user-scope `allowedDomains` with `jq` (printed result: `strictAllowlist` true, five domains); the session read it without a restart.
+
+| Run (user-scope `allowedDomains`) | `pnpm view is-number version` | `pnpm store path` | `curl https://registry.npmjs.org/is-number` | `curl https://example.org` (unlisted control) | Violation lines | Network prompt |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 1, control: `api.github.com`, `files.pythonhosted.org`, `github.com`, `pypi.org` | two `[WARN] GET https://registry.npmjs.org/is-number error (0)` retries, then `ERR_PNPM_META_FETCH_FAIL ... fetch failed`, exit `1` | not run | `000`, exit `56` | not run | `deny network-outbound registry.npmjs.org:443 (host is not on the allow list)` | none |
+| 2: the same four plus `registry.npmjs.org` | `7.0.0`, exit `0` | `/private/tmp/claude-501/.pnpm-store/v11` (under the sandbox TMPDIR, not `~/Library/pnpm`), exit `0` | `200` | `000`, exit `56` | `deny network-outbound example.org:443 (host is not on the allow list)` | none |
+
+TLS: Node needed no TLS setting, unlike pip, which failed with no setting (A1-7) and needed `enableWeakerNetworkIsolation` (A1-8) or the `env` pair (A1-10). Human decision 2026-11-18 (D69 step 4): `registry.npmjs.org` stays in the user-scope `allowedDomains`.
+
+- Reading: under user-scope `strictAllowlist`, the pnpm registry host is refused until it is listed (run 1) and reachable once it is listed at user scope (run 2); an unlisted host stays refused in the same run, so the addition did not reopen general egress.
+- The measurement covers a pnpm metadata fetch (`pnpm view`) only; an install was not run.
+- The store location matches `rules/project_topology.md` row S-6; the store path was read, not exercised by an install.
+- The Node TLS result is for this environment (no `NODE_*` or `SSL_CERT*` variable, no `enableWeakerNetworkIsolation`); other hosts, package versions and Node settings were not run.
+- One session, one mode (auto) and one surface (VS Code) were run; the terminal CLI and the default mode were not re-run.
 
 ### B10
 
