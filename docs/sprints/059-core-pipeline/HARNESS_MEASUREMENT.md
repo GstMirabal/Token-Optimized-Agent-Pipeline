@@ -624,15 +624,16 @@ Every row's `<sandbox_violations>` block reads `deny network-outbound <host>:443
 
 #### P-13 user-scope `allowedDomains` next to `strictAllowlist` (plan D67, KI-059-27)
 
-Measured 2026-11-18 by the agent in its own session after R-21, with `~/.claude/settings.json` holding `sandbox.network` = `{"strictAllowlist": true, "allowedDomains": ["api.github.com", "github.com", "pypi.org", "files.pythonhosted.org"]}` (read by the agent); the session reloaded the user settings without a restart, and the command ran through the Bash tool without `allowed_domains`.
+Measured 2026-11-18 by the agent in its own session and by the human in a terminal CLI session, both after R-21, with `~/.claude/settings.json` holding `sandbox.network` = `{"strictAllowlist": true, "allowedDomains": ["api.github.com", "github.com", "pypi.org", "files.pythonhosted.org"]}` (read by the agent); the session reloaded the user settings without a restart, and the command ran through the Bash tool without `allowed_domains`.
 
 | Session (surface, mode, who ran it) | Network prompt | A1-C `api.github.com:443` | A1-1 `127.0.0.1:5000` | A1-2 `example.org:443` | Probe summary and exit | `curl https://example.org` | `curl https://api.github.com` |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | VS Code extension (probe `cli=claude-code_2-1-325_agent`), auto mode (inferred as in P-12), the agent's own session | none | `open [200]`, verdict `ok` | `closed [403]`, verdict `ok` | `closed [403]`, verdict `ok` | `ok=15`, exit `0` | `000`, exit `56` | `200`, exit `0` |
+| Terminal CLI 2.1.311 (`cli=claude-code_2-1-311_agent`), `claude --permission-mode default`, human, 2026-11-18 | none (only Bash command-permission prompts "This command requires approval", answered "Yes") | `open [200]`, verdict `ok` | `closed [403]`, verdict `ok` | `closed [403]`, verdict `ok` | `ok=15`, exit `0` | `000`, exit `56` | `200`, exit `0` |
 
-The `sandbox_violations` block lists `deny network-outbound 127.0.0.1:5000` and `example.org:443` `(host is not on the allow list)`, and no line for `api.github.com`.
+In both rows the `sandbox_violations` block lists `deny network-outbound 127.0.0.1:5000` and `example.org:443` `(host is not on the allow list)`, and no line for `api.github.com`.
 
-- Reading: with `strictAllowlist` and `allowedDomains` both at user scope, the listed host opens and unlisted hosts are refused with `403` and no prompt, so KI-059-27 is closed in this session and `make sandbox-probe` exits 0 with every case `ok`. The refusal form is `403` with the control open, which the probe already classifies `closed` (4xx other than 407). Only the agent session (VS Code auto) was measured after R-21; the other three P-12 surfaces/modes were not re-run.
+- Reading: with `strictAllowlist` and `allowedDomains` both at user scope, the listed host opens and unlisted hosts are refused with `403` and no prompt, so KI-059-27 is closed in this session and `make sandbox-probe` exits 0 with every case `ok`. The refusal form is `403` with the control open, which the probe already classifies `closed` (4xx other than 407). Measured after R-21 on VS Code in auto mode and on the terminal CLI in default mode with the same result; the VS Code default and CLI auto combinations were not re-run, and in P-12 all four combinations behaved alike.
 
 ### B10
 
