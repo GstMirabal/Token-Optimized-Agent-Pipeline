@@ -555,3 +555,29 @@ def test_apply_control_maps_proxy_closed_only_with_open_control() -> None:
     assert probe.apply_control(case, raw, control_open=True) == probe.Result("closed", "proxy-closed")
     assert probe.apply_control(case, raw, control_open=False).observed == "not-measurable"
     assert probe.apply_control(case_by_id("A1-C"), raw, control_open=True) is raw
+
+
+# 7. R-04: the P-13 and P-12 refusal forms ------------------------------------
+
+
+def test_a1_403_with_open_control_is_closed_exit_0(tmp_path: Path, sent: list[bytes]) -> None:
+    """P-13 form: control 200, A1-1 and A1-2 answered 403, so closed, ok and exit 0."""
+    env = a1_env(tmp_path, sent, {"status": 403})
+    lines, rows = probe.run_all(env)
+    by_id = {line.split(" ", 1)[0]: line for line in lines}
+    assert "observed=open" in by_id["A1-C"]
+    for case_id in ("A1-1", "A1-2"):
+        assert "observed=closed [403] verdict=ok" in by_id[case_id]
+    assert probe.exit_code(rows) == 0
+
+
+def test_a1_403_with_refused_control_is_not_measurable_exit_2(
+    tmp_path: Path, sent: list[bytes]
+) -> None:
+    """P-12 form: every CONNECT, control included, answered 403, so exit 2."""
+    env = build_env(tmp_path, sent, closed=True)
+    lines, rows = probe.run_all(env)
+    by_id = {line.split(" ", 1)[0]: line for line in lines}
+    for case_id in ("A1-1", "A1-2"):
+        assert "not-measurable [control-not-open]" in by_id[case_id]
+    assert probe.exit_code(rows) == 2
