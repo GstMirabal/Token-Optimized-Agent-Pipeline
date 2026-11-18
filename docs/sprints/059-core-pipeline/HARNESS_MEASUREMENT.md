@@ -622,6 +622,18 @@ Every row's `<sandbox_violations>` block reads `deny network-outbound <host>:443
 
 - Reading: with `strictAllowlist` at user scope, the sandbox proxy denies unlisted hosts without a prompt and without auto-approval in both modes and on both surfaces, so the KI-059-27 egress is closed (no `200` in any row). It also denies `api.github.com`, which the project `allowedDomains` lists: under `strictAllowlist` the project-scope `allowedDomains` is not honored in these sessions, so `git push`, `gh` and `pip` hosts are blocked too. The A1 cases stay `not-measurable` because the control A1-C is denied. Whether `allowedDomains` declared at user scope next to `strictAllowlist` reopens the control is not measured (next plan decision).
 
+#### P-13 user-scope `allowedDomains` next to `strictAllowlist` (plan D67, KI-059-27)
+
+Measured 2026-11-18 by the agent in its own session after R-21, with `~/.claude/settings.json` holding `sandbox.network` = `{"strictAllowlist": true, "allowedDomains": ["api.github.com", "github.com", "pypi.org", "files.pythonhosted.org"]}` (read by the agent); the session reloaded the user settings without a restart, and the command ran through the Bash tool without `allowed_domains`.
+
+| Session (surface, mode, who ran it) | Network prompt | A1-C `api.github.com:443` | A1-1 `127.0.0.1:5000` | A1-2 `example.org:443` | Probe summary and exit | `curl https://example.org` | `curl https://api.github.com` |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| VS Code extension (probe `cli=claude-code_2-1-325_agent`), auto mode (inferred as in P-12), the agent's own session | none | `open [200]`, verdict `ok` | `closed [403]`, verdict `ok` | `closed [403]`, verdict `ok` | `ok=15`, exit `0` | `000`, exit `56` | `200`, exit `0` |
+
+The `sandbox_violations` block lists `deny network-outbound 127.0.0.1:5000` and `example.org:443` `(host is not on the allow list)`, and no line for `api.github.com`.
+
+- Reading: with `strictAllowlist` and `allowedDomains` both at user scope, the listed host opens and unlisted hosts are refused with `403` and no prompt, so KI-059-27 is closed in this session and `make sandbox-probe` exits 0 with every case `ok`. The refusal form is `403` with the control open, which the probe already classifies `closed` (4xx other than 407). Only the agent session (VS Code auto) was measured after R-21; the other three P-12 surfaces/modes were not re-run.
+
 ### B10
 
 Recorded 2026-11-14 in unit S-12 (plan D52). Rotation steps for the two credentials of A10 and KI-059-21; the human runs every step (RA-09).
