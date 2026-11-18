@@ -607,6 +607,21 @@ Measured 2026-11-16 in two sessions, one by the agent and one by the human, to f
 
 - Reading: cause named. `sandbox.network.allowedDomains` is an allowlist that skips the prompt, not a denylist: for an unlisted host the sandbox proxy asks for approval. In `default` the harness prompts the human; a denied or unanswered prompt ends as a timeout (`000`, exit `28`), which matches the P-10 default-mode A1 `proxy-timeout`. In `auto` the connection is approved without a prompt (`200 Connection Established` here; A1 `open [200]` in P-10). Direct egress without the proxy fails at DNS. Closing KI-059-27 needs a setting that denies unlisted hosts instead of asking, in both modes; that setting is not yet identified (next plan decision).
 
+#### P-12 `sandbox.network.strictAllowlist` by surface and mode (plan D66, KI-059-27)
+
+Measured 2026-11-16 to 2026-11-18 after R-18 (user-scope `~/.claude/settings.json` holds `sandbox.network.strictAllowlist: true`; project `.claude/settings.json` unchanged since R-02 with `allowedDomains` = `api.github.com`, `github.com`, `pypi.org`, `files.pythonhosted.org`), with every command run through the session's Bash tool without `allowed_domains`; `claude --version` reads the Homebrew CLI (2.1.311), while the VS Code extension runs its own binary, which the probe reports as `cli=claude-code_2-1-325_agent`.
+
+| Session (surface, mode, who ran it) | Network prompt | A1-C `api.github.com:443` | A1-1 `127.0.0.1:5000` | A1-2 `example.org:443` | Probe summary and exit | `curl https://example.org` | `curl https://api.github.com` |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| Terminal CLI 2.1.311 (`cli=claude-code_2-1-311_agent`), `claude --permission-mode default`, human | none (human confirmed; only a Bash command-permission prompt, answered "Yes") | `closed [403]`, verdict NOT-MEASURABLE | `not-measurable [control-not-open]` | `not-measurable [control-not-open]` | `NOT-MEASURABLE=3 ok=12`, exit `2` | `000`, exit `56` | not run (A1-C covers the host) |
+| Terminal CLI 2.1.311, `claude --permission-mode auto`, human | the human believes none appeared (not certain) | `closed [403]` | `not-measurable [control-not-open]` | `not-measurable [control-not-open]` | `NOT-MEASURABLE=3 ok=12`, exit `2` | `000`, exit `56` | not run |
+| VS Code extension 2.1.325, mode "Manual" (default), new conversation, human | two prompts; the human believes neither was a network prompt (not certain) | `closed [403]` | `not-measurable [control-not-open]` | `not-measurable [control-not-open]` | `NOT-MEASURABLE=3 ok=12`, exit `2` | `000`, exit `56` | `000`, exit `56` |
+| VS Code extension 2.1.325, auto mode (inferred: the session's Bash tool exposes the auto-mode-only `allowed_domains` parameter; no on-screen indicator), the agent's own session, started before R-18 | none | `closed [403]` | `not-measurable [control-not-open]` | `not-measurable [control-not-open]` | `NOT-MEASURABLE=3 ok=12`, exit `2` | `000`, exit `56` | `000`, exit `56` |
+
+Every row's `<sandbox_violations>` block reads `deny network-outbound <host>:443 (host is not on the allow list)` for each host contacted, including `api.github.com`; the M7, M9 and B2 cases are `ok` in every row. In VS Code the Shift+Tab mode cycle offers only "Plan", "Edit automatically" and "Manual".
+
+- Reading: with `strictAllowlist` at user scope, the sandbox proxy denies unlisted hosts without a prompt and without auto-approval in both modes and on both surfaces, so the KI-059-27 egress is closed (no `200` in any row). It also denies `api.github.com`, which the project `allowedDomains` lists: under `strictAllowlist` the project-scope `allowedDomains` is not honored in these sessions, so `git push`, `gh` and `pip` hosts are blocked too. The A1 cases stay `not-measurable` because the control A1-C is denied. Whether `allowedDomains` declared at user scope next to `strictAllowlist` reopens the control is not measured (next plan decision).
+
 ### B10
 
 Recorded 2026-11-14 in unit S-12 (plan D52). Rotation steps for the two credentials of A10 and KI-059-21; the human runs every step (RA-09).
