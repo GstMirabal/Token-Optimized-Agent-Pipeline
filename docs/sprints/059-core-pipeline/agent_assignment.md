@@ -270,6 +270,9 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | K-02 | `scripts/detect_drift.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | K-03 | `tests/test_detect_drift.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | K-04 | `agents.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
+| R-22 | `rules/project_topology.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| R-23 | `scripts/install.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| U-01 | `docs/guides/SANDBOX_SETUP_GUIDE.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | L-01 | `scripts/graph_update.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | L-02 | `Makefile` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | L-03 | `rules/graphify.md` | modify | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
