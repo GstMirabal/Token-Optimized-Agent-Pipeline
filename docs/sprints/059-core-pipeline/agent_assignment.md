@@ -248,6 +248,7 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | R-20 | `rules/project_topology.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | R-21 | `~/.claude/settings.json` | install (human runs) | sequential | `devops_agent` | N/A | `agents/devops_agent.md` |
 | T-01 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| V-00 | `docs/sprints/059-core-pipeline/HARNESS_ATTACK_SCOPE.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | V-01 | `docs/sprints/059-core-pipeline/HARNESS_ATTACK_RESULT.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | V-02 | `docs/decisions/ADR-0023-sandbox-boundary-result.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 
