@@ -28,7 +28,9 @@
       "PushNotification",
       "RemoteTrigger",
       "SendMessage",
-      "mcp__claude_ai_Google_Drive"
+      "mcp__claude_ai_Google_Drive",
+      "mcp__claude_ai_Claude_Docs",
+      "mcp__claude_ai_Gmail"
     ],
     "allow": [
       "Bash(cd:*)",
