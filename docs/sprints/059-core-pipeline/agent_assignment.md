@@ -257,6 +257,8 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | C-16 | `tests/test_pytest_env_collection.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | C-17 | `scripts/quality_audit.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | C-18 | `scripts/check_fix_reproduces.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| C-19 | `tests/test_quality_audit.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| C-20 | `tests/test_pytest_env_collection.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 
 ### Wave 6 — hardening, roles and Sprint 058 residues
 
