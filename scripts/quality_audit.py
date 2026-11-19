@@ -727,13 +727,37 @@ def _add_if_source_file(path: Path, all_suffixes: frozenset[str], found: set[Pat
         found.add(path)
 
 
-def _refused(path: Path, exc: OSError) -> None:
-    """Report one OS-refused path on stderr (name and error class only).
+# Refusals of the current run: every refused path (reported once) and the
+# subset that makes the run non-compliant. `main` resets both per run.
+_REFUSED: set[Path] = set()
+_BLOCKING: set[Path] = set()
+
+
+def _reset_refusals() -> None:
+    """Forget the refusals of the previous run."""
+    _REFUSED.clear()
+    _BLOCKING.clear()
+
+
+def _refused(path: Path, exc: OSError, is_dir: bool = False) -> None:
+    """Record and report one OS-refused path on stderr, once per run.
+
+    A refused directory, or a refused file with a Python/JS/TS suffix, could
+    hold unaudited code: it blocks the run (`main` exits 2, fail-closed). A
+    refused `.env*` name (a secret file, not source) and any other refused
+    non-source file are skipped and do not change the exit code.
 
     Args:
         path: Path the OS refused to stat or list.
         exc: The refusal; only its class name is printed, never content.
+        is_dir: True when the path is a directory (or of unknown kind).
     """
+    if path in _REFUSED:
+        return
+    _REFUSED.add(path)
+    is_source = path.suffix.lower() in PY_SUFFIXES | JS_SUFFIXES
+    if not path.name.startswith(".env") and (is_dir or is_source):
+        _BLOCKING.add(path)
     print(f"quality_audit: skipped (OS refused access): {path} [{type(exc).__name__}]", file=sys.stderr)
 
 
@@ -769,7 +793,7 @@ def _is_dir_safe(path: Path, report: bool = True) -> bool:
         return path.is_dir()
     except OSError as exc:
         if report:
-            _refused(path, exc)
+            _refused(path, exc, is_dir=True)
         return False
 
 
@@ -779,7 +803,7 @@ def _refused_walk(exc: OSError) -> None:
     Args:
         exc: The listing error; `filename` carries the directory.
     """
-    _refused(Path(str(exc.filename)), exc)
+    _refused(Path(str(exc.filename)), exc, is_dir=True)
 
 
 def _add_dir_files(
@@ -802,9 +826,11 @@ def _add_dir_files(
 def _walk_directory(directory: Path, all_suffixes: frozenset[str], found: set[Path]) -> None:
     """Add every non-excluded source file under `directory` (recursive).
 
-    A path the OS refuses (stat or directory listing) is reported on stderr
-    and skipped; the walk continues. A refusal does not change the exit code
-    (`R-15`): a refused file is not audited, and the report names it.
+    A path the OS refuses (stat or directory listing) is reported once on
+    stderr and skipped; the walk continues. A refused directory or source
+    file makes the run non-compliant (`main` exits 2, fail-closed, `agents.md
+    §1 fail_closed_claims`); a refused `.env*` is not source and stays
+    skipped without changing the exit code.
 
     Args:
         directory: Directory to walk.
@@ -1008,6 +1034,7 @@ def main(argv: list[str] | None = None) -> int:
     targets = args.paths or [Path(".")]
     root = Path(".")
     exclusions_path = args.exclusions or (root / DEFAULT_EXCLUSIONS_RELPATH)
+    _reset_refusals()
 
     try:
         exclude = load_exclusions(exclusions_path, root)
@@ -1037,6 +1064,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"❌ quality_audit: {len(violations)} violation(s)", file=sys.stderr)
         for u in violations:
             print(f"   • {_format_unit_line(u)}", file=sys.stderr)
+        return 2
+    if _BLOCKING:
+        print(f"❌ quality_audit: {len(_BLOCKING)} refused path(s) not audited", file=sys.stderr)
         return 2
     n_files = len(iter_source_files(targets)) - len(_excluded_files(targets, exclude))
     print(

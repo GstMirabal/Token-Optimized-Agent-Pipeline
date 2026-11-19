@@ -160,6 +160,73 @@ def test_main_exit_0_when_clean(tmp_path: Path) -> None:
     assert code == 0
 
 
+@pytest.fixture
+def _restore_modes(tmp_path: Path):
+    """Yield a list of paths; restore owner access on them at teardown."""
+    locked: list[Path] = []
+    yield locked
+    for item in locked:
+        item.chmod(0o755 if item.is_dir() else 0o644)
+
+
+def _skip_if_chmod_not_enforced(probe: Path) -> None:
+    """Skip when the OS lets the owner read a mode-000 path (root, odd FS)."""
+    try:
+        list(probe.iterdir()) if probe.is_dir() else probe.read_bytes()
+    except OSError:
+        return
+    pytest.skip("chmod 000 does not block this user")
+
+
+def test_refused_directory_with_source_exits_2(
+    tmp_path: Path, _restore_modes: list[Path], capsys: pytest.CaptureFixture[str]
+) -> None:
+    (tmp_path / "ok.py").write_text("def ok():\n    return 1\n", encoding="utf-8")
+    locked = tmp_path / "locked"
+    locked.mkdir()
+    (locked / "hidden.py").write_text("def h():\n    return 1\n", encoding="utf-8")
+    locked.chmod(0o000)
+    _restore_modes.append(locked)
+    _skip_if_chmod_not_enforced(locked)
+
+    code = qa.main([str(tmp_path)])
+
+    assert code == 2
+    assert "OS refused access" in capsys.readouterr().err
+
+
+def test_refused_root_env_is_skipped_exit_0(
+    tmp_path: Path, _restore_modes: list[Path], capsys: pytest.CaptureFixture[str]
+) -> None:
+    (tmp_path / "ok.py").write_text("def ok():\n    return 1\n", encoding="utf-8")
+    env = tmp_path / ".env"
+    env.write_text("K=v\n", encoding="utf-8")
+    env.chmod(0o000)
+    _restore_modes.append(env)
+    qa._reset_refusals()
+
+    qa._refused(env, PermissionError(), is_dir=False)
+
+    assert not qa._BLOCKING
+    assert qa.main([str(tmp_path)]) == 0
+    assert "violation(s)" not in capsys.readouterr().err
+
+
+def test_refused_path_is_reported_once_per_run(
+    tmp_path: Path, _restore_modes: list[Path], capsys: pytest.CaptureFixture[str]
+) -> None:
+    (tmp_path / "ok.py").write_text("def ok():\n    return 1\n", encoding="utf-8")
+    locked = tmp_path / "locked"
+    locked.mkdir()
+    locked.chmod(0o000)
+    _restore_modes.append(locked)
+    _skip_if_chmod_not_enforced(locked)
+
+    qa.main([str(tmp_path)])
+
+    assert capsys.readouterr().err.count(f"{locked} [") == 1
+
+
 def test_main_report_exits_0_even_with_violation(tmp_path: Path) -> None:
     """`--report` is informational, not a gate: exit 0 regardless of findings."""
     statements = "\n    ".join(f"x{i} = {i}" for i in range(55))
