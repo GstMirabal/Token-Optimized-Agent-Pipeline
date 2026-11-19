@@ -437,6 +437,11 @@ Example (do not uncomment):
 | QA Agent (Gate 1) | 28 | `python3 scripts/check_sprint_refs.py --current-sprint` | 0 |
 | QA Agent (Gate 1) | 28 | `python3 scripts/verify_references.py` | 0 |
 | QA Agent (Gate 1) | 28 | `make docs-freshness-check` | 0 |
+| QA Agent (Gate 1) | 29 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider tests/test_pytest_env_collection.py` | 0 |
+| QA Agent (Gate 1) | 29 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider tests/test_check_fix_reproduces.py` | 0 |
+| QA Agent (Gate 1) | 29 | `make verify` | 0 |
+| QA Agent (Gate 1) | 29 | `make quality-audit` | 0 |
+| QA Agent (Gate 1) | 29 | `python3 scripts/check_sprint_refs.py --current-sprint` | 0 |
 
 ---
 
