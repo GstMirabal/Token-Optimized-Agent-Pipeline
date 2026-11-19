@@ -254,6 +254,9 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | R-26 | `.claude/settings.json` | install | sequential | `devops_agent` | N/A | `agents/devops_agent.md` |
 | P-14 | `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | V-02 | `docs/decisions/ADR-0023-sandbox-boundary-result.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| C-16 | `tests/test_pytest_env_collection.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| C-17 | `scripts/quality_audit.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| C-18 | `scripts/check_fix_reproduces.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 
 ### Wave 6 — hardening, roles and Sprint 058 residues
 
