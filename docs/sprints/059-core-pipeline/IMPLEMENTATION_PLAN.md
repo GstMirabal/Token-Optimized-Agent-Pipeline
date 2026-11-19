@@ -392,10 +392,10 @@ Objetivo sin cambios (P7, `KI-056-1`, requisito `gh` de D-01): menos solicitudes
 | # | File | Operation | Risk | Assignee (proposed) | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | E-02 | `claude/mcp.json` | modify — servidor MCP de GitHub remoto con OAuth (sin token en archivo) | medium | `implementer_agent` | ⏳ |
-| E-03 | `.github/workflows/ci.yml` | modify — fijar `actions/checkout`, `actions/setup-python`, `errata-ai/vale-action` por SHA | low | `implementer_agent` | ⏳ |
+| E-03 | `.github/workflows/ci.yml` | modify — fijar `actions/checkout`, `actions/setup-python`, `errata-ai/vale-action` por SHA | low | `implementer_agent` | ✅ `4f4435c` |
 | F-01 | `docs/decisions/ADR-0020-owner-writer-dispatch.md` | create — C-7: cuándo el owner escribe un artefacto trivial sin dispatch (enmienda `ADR-0017`) | medium | `principal_agent` (owner) / `doc_orchestrator` (writer) | ⏳ |
 | F-02 | `config/artifact_registry.json` | modify — tras F-01: si ADR-0020 se aprueba, registra la excepción owner-escribe con la condición que fije el ADR y `python3 scripts/check_role_artifact.py` exit 0; si no se aprueba, `RECORD` sin cambio | medium | `implementer_agent` | ⏳ |
-| I-01 | `scripts/check_absolute_paths.py` | modify — `fix(` `KI-058-1`: escanear también el índice y los archivos sin trackear; paired test nuevo `tests/test_check_absolute_paths.py` | low | `implementer_agent` | ⏳ |
+| I-01 | `scripts/check_absolute_paths.py` | modify — `fix(` `KI-058-1`: escanear también el índice y los archivos sin trackear; paired test nuevo `tests/test_check_absolute_paths.py` | low | `implementer_agent` | ✅ `7022aea` |
 | I-02 | `scripts/upstream_outbox.py` | modify — `fix(` `KI-058-4`: `read_text_file` pasa por `read_regular_bytes`, así un FIFO sale 2 en vez de colgarse; paired test con un FIFO en `tests/test_upstream_outbox.py` | low | `implementer_agent` | ⏳ |
 | I-03 | `scripts/upstream_outbox.py` | modify — tras I-02: `fix(` `KI-058-5` a: `deltas` sale 2 con un directorio `--rules` inexistente; paired test en `tests/test_upstream_outbox.py` | low | `implementer_agent` | ⏳ |
 | I-04 | `scripts/upstream_outbox.py` | modify — tras I-03: `fix(` `KI-058-5` b: `export --out` a un directorio inexistente sale 2 con mensaje en vez de traceback; paired test en `tests/test_upstream_outbox.py` | low | `implementer_agent` | ⏳ |

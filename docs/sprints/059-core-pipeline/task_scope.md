@@ -260,10 +260,10 @@ Operation: the plan row of the same id (plan D37).
 | # | File | Operation | Risk | Assignee | Model | Effort | Depends on | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | E-02 | `claude/mcp.json` | modify: remote GitHub MCP server with OAuth, no token in a file | medium | `implementer_agent` | sonnet | medium | - | ⏳ |
-| E-03 | `.github/workflows/ci.yml` | modify: pin `actions/checkout`, `actions/setup-python`, `errata-ai/vale-action` by SHA | low | `implementer_agent` | sonnet | medium | - | ⏳ |
+| E-03 | `.github/workflows/ci.yml` | modify: pin `actions/checkout`, `actions/setup-python`, `errata-ai/vale-action` by SHA | low | `implementer_agent` | sonnet | medium | - | ✅ `4f4435c` |
 | F-01 | `docs/decisions/ADR-0020-owner-writer-dispatch.md` | create: C-7, when the owner writes a trivial artifact without a dispatch (amends ADR-0017) | medium | `doc_orchestrator` | sonnet | medium | - | ⏳ |
 | F-02 | `config/artifact_registry.json` | modify: after F-01, if ADR-0020 is approved register the owner-writes exception with the condition the ADR sets and `check_role_artifact.py` exit 0; otherwise RECORD with no change | medium | `implementer_agent` | sonnet | medium | F-01 | ⏳ |
-| I-01 | `scripts/check_absolute_paths.py` | modify: fix( KI-058-1, also scan the index and untracked files; new paired test `tests/test_check_absolute_paths.py` | low | `implementer_agent` | sonnet | medium | - | ⏳ |
+| I-01 | `scripts/check_absolute_paths.py` | modify: fix( KI-058-1, also scan the index and untracked files; new paired test `tests/test_check_absolute_paths.py` | low | `implementer_agent` | sonnet | medium | - | ✅ `7022aea` |
 | I-02 | `scripts/upstream_outbox.py` | modify: fix( KI-058-4, `read_text_file` goes through `read_regular_bytes` so a FIFO exits 2; paired test with a FIFO in `tests/test_upstream_outbox.py` | low | `implementer_agent` | sonnet | medium | - | ⏳ |
 | I-03 | `scripts/upstream_outbox.py` | modify: after I-02, fix( KI-058-5 a, `deltas` exits 2 on a missing `--rules` directory; paired test in `tests/test_upstream_outbox.py` | low | `implementer_agent` | sonnet | medium | I-02 | ⏳ |
 | I-04 | `scripts/upstream_outbox.py` | modify: after I-03, fix( KI-058-5 b, `export --out` to a missing directory exits 2 with a message; paired test in `tests/test_upstream_outbox.py` | low | `implementer_agent` | sonnet | medium | I-03 | ⏳ |
