@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import json
 import sys
+from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
@@ -161,7 +162,7 @@ def test_main_exit_0_when_clean(tmp_path: Path) -> None:
 
 
 @pytest.fixture
-def _restore_modes(tmp_path: Path):
+def _restore_modes(tmp_path: Path) -> Iterator[list[Path]]:
     """Yield a list of paths; restore owner access on them at teardown."""
     locked: list[Path] = []
     yield locked
@@ -210,6 +211,47 @@ def test_refused_root_env_is_skipped_exit_0(
     assert not qa._BLOCKING
     assert qa.main([str(tmp_path)]) == 0
     assert "violation(s)" not in capsys.readouterr().err
+
+
+def test_refused_source_file_exits_2(
+    tmp_path: Path, _restore_modes: list[Path], capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A listable directory whose source file stat is refused blocks the run."""
+    (tmp_path / "ok.py").write_text("def ok():\n    return 1\n", encoding="utf-8")
+    folder = tmp_path / "listed"
+    folder.mkdir()
+    hidden = folder / "hidden.py"
+    hidden.write_text("def h():\n    return 1\n", encoding="utf-8")
+    folder.chmod(0o444)
+    _restore_modes.append(folder)
+    _skip_if_chmod_not_enforced(hidden)
+
+    code = qa.main([str(tmp_path)])
+
+    assert code == 2
+    assert f"{hidden} [" in capsys.readouterr().err
+
+
+def test_refused_env_named_source_reaches_main_and_exits_0(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A `.env*` path refused at the stat boundary is reported, not blocking."""
+    (tmp_path / "ok.py").write_text("def ok():\n    return 1\n", encoding="utf-8")
+    env = tmp_path / ".env.py"
+    env.write_text("K = 1\n", encoding="utf-8")
+    real_is_file = Path.is_file
+
+    def refuse_env(self: Path) -> bool:
+        if self.name.startswith(".env"):
+            raise PermissionError(13, "Permission denied", str(self))
+        return real_is_file(self)
+
+    monkeypatch.setattr(Path, "is_file", refuse_env)
+
+    code = qa.main([str(tmp_path)])
+
+    assert code == 0
+    assert f"{env} [PermissionError]" in capsys.readouterr().err
 
 
 def test_refused_path_is_reported_once_per_run(
