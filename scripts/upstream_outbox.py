@@ -197,12 +197,10 @@ def load_json(path: Path) -> Any:
 def read_text_file(path: Path) -> str:
     """Read a UTF-8 text file that is not JSON (issue body, titles, rule file).
 
-    Known open violation (``KI-058-4``, Sprint 058 ``SPRINT_LOG.md``): this
-    function does not do the regular-file check and byte cap that
-    ``agents.md §1`` ``exception_handling`` requires for a path supplied by a
-    host or by data. It serves ``--body-file``, ``--open-titles-file`` and the
-    ``deltas`` rule files. Deferred because changing its lines would open a
-    second remediation chain; do not read this docstring as a guarantee.
+    The read goes through ``read_regular_bytes``: a FIFO, a device, a directory
+    or a file over ``MAX_READ_BYTES`` is refused instead of blocking or
+    exhausting memory. It serves ``--body-file``, ``--open-titles-file`` and the
+    ``deltas`` rule files.
 
     Args:
         path: File to read.
@@ -211,11 +209,13 @@ def read_text_file(path: Path) -> str:
         str: The file's text.
 
     Raises:
-        OutboxError: When the file is absent or unreadable (``OSError``) or
-            not UTF-8 (``UnicodeDecodeError``, a ``ValueError``).
+        OutboxError: When the file is absent or unreadable, is not a regular
+            file or is larger than ``MAX_READ_BYTES`` (an ``OSError`` from
+            ``read_regular_bytes``), or is not UTF-8 (``UnicodeDecodeError``,
+            a ``ValueError``).
     """
     try:
-        return path.read_text(encoding="utf-8")
+        return read_regular_bytes(path).decode("utf-8")
     except (OSError, ValueError) as exc:
         raise OutboxError(f"{path}: {exc}") from exc
 

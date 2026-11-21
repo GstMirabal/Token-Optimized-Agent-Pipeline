@@ -229,6 +229,36 @@ def test_outbox_that_is_not_a_bounded_regular_file_exits_2_without_hanging(
     assert result.stdout.startswith("[FAIL] ")
 
 
+def _text_file_cli_args(tmp_path: Path, mode: str, fifo: Path) -> list[str]:
+    """Return the CLI arguments that route ``fifo`` through ``read_text_file``."""
+    body = tmp_path / "body.md"
+    body.write_text("text\n", encoding="utf-8")
+    if mode == "body_file":
+        return ["check-issue", "--body-file", str(fifo)]
+    if mode == "open_titles_file":
+        return ["check-issue", "--body-file", str(body), "--open-titles-file", str(fifo)]
+    rules = tmp_path / "rules"
+    rules.mkdir()
+    os.mkfifo(rules / "rule.md")
+    return ["deltas", str(_outbox(tmp_path)), "--rules", str(rules)]
+
+
+@pytest.mark.parametrize("mode", ["body_file", "open_titles_file", "rules_file"])
+def test_text_file_that_is_a_fifo_exits_2_without_hanging(tmp_path: Path, mode: str) -> None:
+    fifo = _fifo(tmp_path)
+    args = _text_file_cli_args(tmp_path, mode, fifo)
+    try:
+        result = subprocess.run(
+            [sys.executable, "-I", "-B", str(SCRIPT), *args],
+            capture_output=True, text=True, check=False, timeout=READ_TIMEOUT,
+        )
+    except subprocess.TimeoutExpired:
+        pytest.fail(f"{mode} on a FIFO did not finish within {READ_TIMEOUT} s")
+    assert "Traceback" not in result.stderr
+    assert result.returncode == 2
+    assert ("rule.md" if mode == "rules_file" else fifo.name) in result.stderr + result.stdout
+
+
 def test_outbox_at_the_read_cap_is_still_read(tmp_path: Path) -> None:
     path = tmp_path / "at_cap.json"
     path.write_bytes(b'{"entries": []}'.ljust(READ_CAP))
