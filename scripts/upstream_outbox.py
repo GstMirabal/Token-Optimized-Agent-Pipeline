@@ -571,6 +571,10 @@ def cmd_export(args: argparse.Namespace) -> int:
 
     Returns:
         int: 0 when the body was written, 2 when the export is refused.
+
+    Raises:
+        OutboxError: ``--out`` has no existing parent directory or the body
+            cannot be written; ``main`` turns it into exit 2.
     """
     matches = [e for e in load_entries(Path(args.outbox)) if e.get("id") == args.id]
     if len(matches) != 1:
@@ -581,7 +585,12 @@ def cmd_export(args: argparse.Namespace) -> int:
         print(f"[FAIL] {args.id}: export refused — {refusal}")
         return 2
     out = Path(args.out)
-    out.write_text(render_issue_body(matches[0]), encoding="utf-8")
+    if not out.parent.is_dir():
+        raise OutboxError(f"--out directory does not exist: {out.parent}")
+    try:
+        out.write_text(render_issue_body(matches[0]), encoding="utf-8")
+    except OSError as exc:
+        raise OutboxError(f"{out}: {exc}") from exc
     slug = load_json(agents_root() / IDENTITY_PATH)["framework_repo_slug"]
     command = [
         "gh", "issue", "create", "--repo", slug, "--title", matches[0]["title"],

@@ -385,6 +385,24 @@ def test_export_unknown_id_exits_2(tmp_path: Path) -> None:
     assert result.returncode == 2
 
 
+def test_export_out_in_missing_directory_exits_2(tmp_path: Path) -> None:
+    missing = tmp_path / "missing"
+    out = missing / "out.md"
+    result = _run("export", str(_outbox(tmp_path, _entry())), "--id", "H-7", "--out", str(out))
+    assert result.returncode == 2, result.stdout + result.stderr
+    assert str(missing) in result.stdout + result.stderr
+    assert "Traceback" not in result.stderr
+    assert not missing.exists()
+
+
+def test_export_out_in_existing_directory_still_exports(tmp_path: Path) -> None:
+    (tmp_path / "exists").mkdir()
+    out = tmp_path / "exists" / "out.md"
+    result = _run("export", str(_outbox(tmp_path, _entry())), "--id", "H-7", "--out", str(out))
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert out.is_file()
+
+
 def test_export_round_trips_through_check_issue(tmp_path: Path) -> None:
     out = tmp_path / "body.md"
     result = _run("export", str(_outbox(tmp_path, _entry())), "--id", "H-7", "--out", str(out))
