@@ -77,7 +77,7 @@ from _repro_grammar import parse_trailers as _parse_claims
 LOG = logging.getLogger(__name__)
 RUNNER_PYTHON: str = sys.executable
 STRIPPED_ENV = ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "DJANGO_SETTINGS_MODULE")
-_FIX_SUBJECT = re.compile(r"^fix(\([^)]*\))?!?:|^fix\(")
+_FIX_SUBJECT = re.compile(r"^fix(\([^)]*\))?!?:|^fix\(", re.IGNORECASE)
 JS_SUFFIXES = (".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs")
 SOURCE_PATTERNS = ("readFileSync(", "?raw", ".read_text(", ".read_bytes(", "open(")
 HINT = (

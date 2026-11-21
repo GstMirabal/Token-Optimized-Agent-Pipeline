@@ -433,3 +433,12 @@ def test_refused_worktree_add_exits_2_with_error_line_and_no_traceback(repo, cap
     assert "ERROR: git worktree add refused: fatal: could not create" in captured.err
     assert "hint: x" not in captured.err
     assert "Traceback" not in captured.err + captured.out
+
+
+@pytest.mark.parametrize("subject", ["FIX: add", "FIX(calc): add", "Fix(calc): add", "fix(calc): add"])
+def test_uppercase_fix_subject_is_selected_like_lowercase(repo, subject):
+    """KI-058-5 d: any case of ``fix`` selects the commit, as lowercase ``fix(`` does."""
+    base = commit_fix(repo, {"calc.py": FIXED}, None, subject=subject)
+    head = git(repo, "rev-parse", "HEAD")
+    assert cfr.select_fixes(repo, [head]) == [head]
+    assert base != head
