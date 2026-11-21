@@ -846,6 +846,22 @@ def test_every_fix_subject_form_staging_source_needs_a_trailer(subject):
 
 
 @pytest.mark.parametrize("subject", [
+    "FIX: reject empty input #059",
+    "FIX(hooks): reject empty input #059",
+    "Fix(hooks): reject empty input #059",
+    "fIx!: reject empty input #059",
+])
+def test_uppercase_fix_subject_is_treated_as_a_fix_commit(subject):
+    """KI-058-5 d: any case of `fix` takes the same Repro: path as `fix(`."""
+    reason = on_commit.audit_regression_test(subject, FIX_STAGED)
+    assert reason is not None
+    assert "Repro: <test id>" in reason
+    assert on_commit.audit_regression_test(
+        subject + "\n\nRepro: manual \u2014 SPRINT_LOG section 3", ["hooks/on_commit.py"]
+    ) is None
+
+
+@pytest.mark.parametrize("subject", [
     "fixup! reject empty input #058",
     "fixes: reject empty input #058",
     "feat: fix empty input #058",

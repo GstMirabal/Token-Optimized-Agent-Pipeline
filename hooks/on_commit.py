@@ -1078,7 +1078,7 @@ MESSAGE_AUDITS: tuple[tuple[Callable[[str, list[str]], str | None], str], ...] =
 )
 
 
-FIX_SUBJECT_RE = re.compile(r"^fix(\([^)]*\))?!?:|^fix\(")
+FIX_SUBJECT_RE = re.compile(r"^fix(\([^)]*\))?!?:|^fix\(", re.IGNORECASE)
 
 
 def warn_remediation_chain(message: str) -> None:
