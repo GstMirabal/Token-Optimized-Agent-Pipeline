@@ -122,3 +122,12 @@ def test_invalid_range_exit_2(repo: Path) -> None:
     r = _run(repo, "nope..HEAD")
     assert r.returncode == 2
     assert "error" in r.stderr
+
+
+def test_uppercase_fix_subject_is_a_link(repo: Path) -> None:
+    base = _git(repo, "rev-parse", "HEAD")
+    _commit(repo, "a.txt", "1\n2\n", "FIX(probe): first")
+    _commit(repo, "a.txt", "1\n2b\n", "FIX(probe): second")
+    r = _run(repo, f"{base}..HEAD")
+    assert r.returncode == 0
+    assert "chains: 1" in r.stdout
