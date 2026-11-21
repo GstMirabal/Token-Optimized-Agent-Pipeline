@@ -341,8 +341,18 @@ def advise_user_sandbox() -> None:
     """Print the jq command when the user-scope sandbox allowlist is incomplete.
 
     Advisory only: it never writes the user file and never changes the exit
-    code of the install. Complete settings print nothing.
+    code of the install. Complete settings print nothing. This is a fault
+    boundary: any Exception from the check becomes a one-line warning.
     """
+    try:
+        _advise_user_sandbox()
+    except Exception as exc:  # noqa: BLE001 - fault boundary: advisory never changes the exit code
+        print(f"⚠️  User-scope sandbox check failed for {user_settings_path()}: "
+              f"{type(exc).__name__}: {exc}; install exit code unchanged.", file=sys.stderr)
+
+
+def _advise_user_sandbox() -> None:
+    """Run the user-scope sandbox check; may raise on malformed settings content."""
     base, command = read_base_advice()
     if not command:
         print("⚠️  Could not read the base allowlist from rules/project_topology.md; "

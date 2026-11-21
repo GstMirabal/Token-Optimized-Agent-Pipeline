@@ -73,6 +73,24 @@ def test_malformed_json_warns_without_traceback(install, capsys) -> None:
     assert "Traceback" not in cap.out + cap.err
 
 
+def test_unhashable_allowed_domains_is_a_fault_boundary(install, capsys, monkeypatch) -> None:
+    path = _user_file(install, _net(True, [{"x": 1}]))
+    install.advise_user_sandbox()
+    cap = capsys.readouterr()
+    assert "check failed" in cap.err and str(path) in cap.err and "TypeError" in cap.err
+    assert "Traceback" not in cap.out + cap.err
+
+    class Fresh(Exception):
+        pass
+
+    def boom() -> None:
+        raise Fresh("injected")
+
+    monkeypatch.setattr(install, "_advise_user_sandbox", boom)
+    install.advise_user_sandbox()
+    assert "Fresh: injected" in capsys.readouterr().err
+
+
 def test_missing_user_file_prints_advice(install, capsys) -> None:
     install.advise_user_sandbox()
     assert "jq '.sandbox.network" in capsys.readouterr().out
