@@ -12,12 +12,13 @@ this script reported as success. Every caller using the framework's own role
 vocabulary was therefore approving empty directories (D17).
 
 invoked_by: Makefile 'role-artifacts' target; claude/settings.hooks.json
-SubagentStop (Sprint 027).
+SubagentStop (Sprint 027); workflows/deployment_workflow.md ledger_seal (unit F-05).
 
 Usage:
     python3 scripts/check_role_artifact.py --role Orchestrator --sprint-dir docs/sprints/027-core-pipeline
     python3 scripts/check_role_artifact.py --role rule_validator --sprint-dir ...
     python3 scripts/check_role_artifact.py --from-hook   # SubagentStop: JSON on stdin
+    python3 scripts/check_role_artifact.py --owner-commit HEAD   # ADR-0020 ledger-seal bound
 
 Exit codes:
     0 — required artifacts present, or the registry declares none for the role
@@ -506,6 +507,146 @@ def main_from_hook(stdin_text: str | None = None) -> int:
     return _report(role, sprint_dir)
 
 
+_VERSION_HEADING_RE = re.compile(r"^## \[v?\d+\.\d+\.\d+\]")
+_UNRELEASED_HEADING = "## [Unreleased]"
+
+
+def _git_out(*args: str) -> str:
+    """Run ``git`` in the current working directory and return its stdout.
+
+    Args:
+        *args: Git arguments after the program name.
+
+    Returns:
+        str: Standard output of the command.
+
+    Raises:
+        RuntimeError: When git cannot run or exits non-zero (the message holds stderr).
+    """
+    try:
+        done = subprocess.run(["git", *args], capture_output=True, text=True, check=False)
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise RuntimeError(f"git could not run: {exc}") from exc
+    if done.returncode != 0:
+        raise RuntimeError(f"git {' '.join(args)} failed: {done.stderr.strip()}")
+    return done.stdout
+
+
+def _owner_bounds_error(path: str, entry: dict) -> str | None:
+    """Describe why the registry entry for ``path`` does not bound an owner write.
+
+    Args:
+        path: Repository-relative path the commit touches.
+        entry: Registry entry whose ``filename`` is the basename of ``path``.
+
+    Returns:
+        str | None: The refusal, or None when both bounds are declared.
+    """
+    block = entry.get("owner_writes")
+    if not isinstance(block, dict):
+        return f"{path}: registry entry {entry.get('filename')!r} has no owner_writes; the owner may not write it"
+    for key in ("max_added_lines", "max_deleted_lines"):
+        if not isinstance(block.get(key), int) or isinstance(block.get(key), bool):
+            return f"{path}: registry entry {entry.get('filename')!r} owner_writes lacks {key}"
+    return None
+
+
+def _is_ledger_seal(sha: str) -> bool:
+    """True when ``sha`` renames ``[Unreleased]`` to a version heading in CHANGELOG.md.
+
+    The rule, read from real seals (``2e06ac6``, ``367e055``, ``d258b43``): the
+    diff adds a ``## [X.Y.Z]`` or ``## [vX.Y.Z]`` heading line, and the
+    ``## [Unreleased]`` heading is either still present after the commit (the
+    form every sealed ledger takes, a fresh empty section stays on top) or is
+    removed by it.
+
+    Args:
+        sha: Commit to inspect.
+
+    Returns:
+        bool: Whether both halves of the rule hold.
+    """
+    diff = _git_out("diff", "-U0", f"{sha}^", sha, "--", "CHANGELOG.md").splitlines()
+    added = any(
+        line.startswith("+") and not line.startswith("+++") and _VERSION_HEADING_RE.match(line[1:])
+        for line in diff
+    )
+    removed_unreleased = f"-{_UNRELEASED_HEADING}" in diff
+    kept = any(
+        line.rstrip() == _UNRELEASED_HEADING
+        for line in _git_out("show", f"{sha}:CHANGELOG.md").splitlines()
+    )
+    return added and (removed_unreleased or kept)
+
+
+def _numstat(sha: str, path: str) -> tuple[int, int]:
+    """Return ``(added, deleted)`` lines of ``path`` in ``sha`` by ``git diff --numstat``.
+
+    Args:
+        sha: Commit to inspect.
+        path: Repository-relative path.
+
+    Returns:
+        tuple[int, int]: Added and deleted line counts; ``(0, 0)`` when untouched.
+    """
+    out = _git_out("diff", "--numstat", f"{sha}^", sha, "--", path).split()
+    if len(out) < 2 or not (out[0].isdigit() and out[1].isdigit()):
+        return (0, 0)
+    return (int(out[0]), int(out[1]))
+
+
+def _owner_commit_errors(sha: str) -> list[str]:
+    """Collect every reason the owner may not have written commit ``sha``.
+
+    Args:
+        sha: Commit asserted to be owner-written.
+
+    Returns:
+        list[str]: Refusals, empty when all of ADR-0020 conditions 1 to 3 hold.
+    """
+    by_name = {str(e.get("filename")): e for e in load_registry()}
+    touched = _git_out("diff", "--name-only", f"{sha}^", sha).splitlines()
+    errors = [
+        err
+        for path in touched
+        if Path(path).name in by_name
+        for err in [_owner_bounds_error(path, by_name[Path(path).name])]
+        if err
+    ]
+    if errors or "CHANGELOG.md" not in touched:
+        return errors or ["commit does not touch CHANGELOG.md"]
+    if not _is_ledger_seal(sha):
+        return ["CHANGELOG.md change is not a ledger seal (no [Unreleased] rename to a version)"]
+    added, deleted = _numstat(sha, "CHANGELOG.md")
+    bound = by_name["CHANGELOG.md"]["owner_writes"]
+    if added > bound["max_added_lines"]:
+        errors.append(f"CHANGELOG.md added {added} lines, bound {bound['max_added_lines']}")
+    if deleted > bound["max_deleted_lines"]:
+        errors.append(f"CHANGELOG.md deleted {deleted} lines, bound {bound['max_deleted_lines']}")
+    return errors
+
+
+def check_owner_commit(sha: str) -> int:
+    """ADR-0020 check: may the owner have written commit ``sha`` without the writer.
+
+    Args:
+        sha: Commit the caller asserts is owner-written.
+
+    Returns:
+        int: 0 when every condition holds; 2 on a refusal or any git failure.
+    """
+    try:
+        errors = _owner_commit_errors(sha)
+    except Exception as exc:  # noqa: BLE001 - fault boundary: a bad sha or missing parent must not traceback
+        print(f"❌ [ROLE-ARTIFACT] --owner-commit {sha!r}: {exc}", file=sys.stderr)
+        return 2
+    if errors:
+        print(f"❌ [ROLE-ARTIFACT] --owner-commit {sha!r}: {'; '.join(errors)}", file=sys.stderr)
+        return 2
+    print(f"✅ [ROLE-ARTIFACT] --owner-commit {sha!r} — within the owner_writes bound")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     """CLI entry: exit 2 when required role artifacts are missing.
 
@@ -531,7 +672,15 @@ def main(argv: list[str] | None = None) -> int:
         type=Path,
         help="Path to docs/sprints/[ID]-[Stack]-[Layer]/",
     )
+    parser.add_argument(
+        "--owner-commit",
+        metavar="SHA",
+        help="Assert SHA is owner-written; require a bounded ledger seal (ADR-0020)",
+    )
     args = parser.parse_args(argv)
+
+    if args.owner_commit:
+        return check_owner_commit(args.owner_commit)
 
     if args.from_hook:
         return main_from_hook()
