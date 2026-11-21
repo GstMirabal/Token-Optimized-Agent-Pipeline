@@ -4,6 +4,54 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+### Added
+- **Sprint 059 `efficiency-and-sandbox-regime`**: one sprint in six waves (cost levers and method, pace and autonomy, in-session token economy, sandbox measurement, sandbox regime, hardening and Sprint 058 residues). Host findings closed: `host:F-116-N1` and `host:F-116-N2` (see Changed and Fixed).
+  - **Cost levers, wave 1**:
+    - `agents.md` is trimmed to rule plus pointer, at most 20000 bytes (`d6f5756`, `dc53642`, `de19dad`); the moved history lives in `docs/guides/RULE_PRECEDENTS_GUIDE.md` (new, `a014f4f`), `rules/code_craft.md` (`0c7a9b2`), `rules/project_topology.md` (`a694ffe`, `d133bc2`), `rules/skills_and_integrations.md` (`18b692e`), `rules/qa_and_testing.md` (`9b8db89`) and `docs/guides/SELF_IMPROVEMENT_GUIDE.md` (`72ac88b`).
+    - `docs/decisions/ADR-0021-qa-agent-tier-trial.md` (new) records the `qa_agent` tier trial (`ed96115`). The tier change was applied (`80518b4`) and reverted (`8e8a566`) under abort criterion 4, so `qa_agent` stays a gate profile.
+    - `tests/test_token_economy_soft_bound.py` (new) pins the soft row and the calibration sentence of `rules/token_economy.md` §3.1 (`1e1deda`, `d059aac`); `tests/test_profile_references.py` (new) checks every tracked `profiles/<slug>` reference (`dbe243a`, `8923501`).
+    - `governance_learner` routes learnings through a destination table (`2d0d39b`, `24de04e`, `f052ea9`, `d6b388c`).
+  - **Method, wave 1b**: `scripts/_current_sprint.py` (new) resolves the current sprint directory for `check_task_scope.py`, `check_gate_log.py`, `audit_plan.py` and `loop_guard.py` (`62bbce8`, `80c5184`, `7c9115c`, `e393405`, `d74a969`, `e0185d8`, `92bb5e7`); `scripts/check_sprint_refs.py` (new) checks the references among sprint artifacts (`e15d86e`, `cc4f009`) and exits 2 when a known-issue row names a landed unit without its SHA (`5652a3b`); the plan, log and assignment templates follow (`1196fea`, `2979326`, `0e1cf6c`).
+  - **Pace and autonomy, wave 2**:
+    - `scripts/check_task_scope.py` reads `Depends on`, prints parallel batches (`21080e9`) and accumulates `Est. cost` and `Suspend after` (`7eacfde`); `workflows/pipeline_workflow.md` Phase 6 dispatches each batch in worktrees (`808d098`).
+    - `scripts/prompt_count.py` (new) counts authorizations per session (`4952195`, `d534c04`, `10c8e1a`), run by an advisory step of `workflows/close_workflow.md` (`2d40946`); the baseline is in `docs/sprints/059-core-pipeline/PROMPT_MEASUREMENT.md` (`7fc8ae5`, `9e55888`).
+    - `scripts/install.py` installs the nucleus `sandbox` block with `autoAllowBashIfSandboxed: true`, no hooks and no `excludedCommands` (`92fddf8`).
+  - **In-session token economy, wave 3**: `docs/decisions/ADR-0018-in-session-token-economy.md` (new) chooses the method (`33ac3ad`); `scripts/session_cost.py --bound` prints `OK`, `SOFT` or `HARD` with exit 0 (`5c5e0a3`, `ad7cd48`); `scripts/session_probe.py` replaces the 15x ratio with the absolute bound of 550,000 tokens (`b561a47`); `config/unit_cost_estimates.json` (new, `d8a083e`) and `scripts/unit_cost.py` (new, `780579b`) compare the estimate with the measured cost, invoked by `workflows/close_workflow.md` (`1678522`); `rules/token_economy.md` §3.1 states the in-session meter and the per-unit budget (`50c75a8`); `workflows/pipeline_workflow.md` Phase 4.3 and Phase 6 run it (`bced56b`).
+  - **Sandbox measurement and regime, waves 4 and 5**:
+    - `docs/sprints/059-core-pipeline/SANDBOX_ENUMERATION.md` (new) re-measures the `RA-19` entry points (`e4f435d`, `56b715f`, `9489ce8`); `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` (new) holds the measurements M1-M18 and sections A1-A10 and B1-B11 (`58837ae`, `1b5997a`, `ea85ed5`, `cecbed8`, `343f3d7`, `c72528c`, `0ac2fd0`, `bfbc361`, `f17299e`, `2b4cbaa`, `a90e103`, `00ba632`).
+    - `scripts/sandbox_probe.py` (new, `18ba568`) with `tests/test_sandbox_probe.py` (`6700478`) and the `make sandbox-probe` target (`7b153e6`) probes the cases measured closed; the probe expects the refusal form measured in P-13 (`d5eec41`).
+    - `docs/sprints/059-core-pipeline/HARNESS_ATTACK_SCOPE.md` (`b803704`, `affe05f`) scopes the attack validation and `HARNESS_ATTACK_RESULT.md` records its result (`46f17bf`).
+    - ADRs: `ADR-0019-sandbox-regime.md` decides the regime, with no hooks in the nucleus and no local database route (`71d2ad6`); `ADR-0022-sandbox-regime-amendment.md` (`114f649`); `ADR-0024-sandbox-egress-amendment.md` (`d6607f5`); `ADR-0023-sandbox-boundary-result.md` states the boundary claim for the controls the attack validation found holding (`18edac3`).
+    - `docs/guides/SANDBOX_SETUP_GUIDE.md` (new) gives one row per sandbox key of project and user scope with symptom, cause, command and check (`ae605bb`).
+  - **Hardening, roles and residues, wave 6**:
+    - `docs/decisions/ADR-0020-owner-writer-dispatch.md` (new) defines when the owner writes a trivial artifact (`107cfeb`); `config/artifact_registry.json` registers the exception (`be36bdc`), `scripts/check_role_artifact.py --owner-commit <sha>` exits non-zero above the line limits (`c3f3a90`), ADR-0017 carries the amendment line (`5088ad3`) and `workflows/deployment_workflow.md` runs the check after the ledger seal commit (`0485e38`).
+    - `scripts/graph_update.py` (new) runs the graphify AST rebuild sequentially (`7ff0c66`) behind `make graphify-update` (`cd57745`), with `rules/graphify.md` and `rules/project_topology.md` rows (`62b7729`, `d570ec7`, `32bcd7f`).
+    - `claude/mcp.json` adds the remote GitHub MCP server over `http` with OAuth and no token in a file (`5e090bf`); `.github/workflows/ci.yml` pins its actions by SHA (`4f4435c`).
+    - `workflows/deployment_workflow.md` `release_tagging` holds the single tag-ruleset bypass command, measured by the human with the closing call printing `[]` (`755e6c9`).
+
+### Changed
+- **`host:F-116-N2` (no hook invokes `session_cost.py` or `session_probe.py`)**: the Phase 6 invoker is `workflows/pipeline_workflow.md` (`bced56b`), the meter is `scripts/session_cost.py --bound` (`5c5e0a3`, `ad7cd48`); the finding is marked closed in `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` (`c6ad385`).
+- **`host:F-116-N1` and `host:F-116-N2` triage**: both were recorded as accepted with their reproduction commands (`1dbe533`).
+- **Sandbox settings**: `claude/settings.hooks.json` adds the `sandbox.network.allowedDomains` list, the `denyRead` paths, the `permissions.deny` rules and the two denied MCP connectors, and drops `defaultMode: "auto"` (`d89bdda`, `46bc655`); the human installed them in the nucleus (`374a5f8`, `3e40535`) and in user scope (`50a09bb`, `bfbbbec`). `scripts/install.py` merges the sandbox, permissions and `denyWrite` keys (`7abe081`) and reports a user-scope `strictAllowlist` or a missing base domain without writing it (`9dea305`).
+- **Supply chain**: `requirements-core.txt`, `requirements-quality.txt` and `requirements-skillopt.txt` carry `--hash` lines (`0f069da`, `5befc83`, `e0152f2`), and `.github/workflows/ci.yml` installs `pytest` outside hash mode (`fe0ee0f`).
+- **Branch protection**: `workflows/repository_hardening_workflow.md` states the measured state with `enforce_admins: true` (`e56ebbc`).
+- **Rules**: `rules/project_topology.md` states that `allowedDomains` skips the prompt and that denial needs `strictAllowlist` at user or managed scope (`01e7a16`, `0ba4414`).
+- **Verification without writes**: `make verify` compiles without `.pyc` and with no pytest or ruff cache (`b31bdfb`, `4f9b418`, `2cdebc5`, `81aeffa`, `50ce3c4`, `93ad37b`, `a0b6c62`, `5e9dd18`, `af5f230`).
+- **Host identifiers**: host names, profile slugs and business domains are replaced with generic text across the changelog, roadmaps, one workflow and sample data (`4fb09a9`, `4e34b49`, `28242ff`, `a3c5a14`, `6256efd`, `e6f27cb`).
+
+### Fixed
+- **`host:F-116-N1` (`ratio` is `None` for the 11 of 33 nucleus sessions whose first turn has `cache_read` 0)**: `scripts/session_cost.py` takes the cycle baseline from the context size of the first turn, `cache_read + cache_creation + input`, and cuts cycles on context size (`ef490cd`, `919d4f2`); `read_turns` counts each `message.id` once (`40b2da1`).
+- **Session end**: `scripts/session_state.py` `suspend` acts only when the hook `session_id` matches the anchor (`c10f8bd`) and releases the session lock between sprints (`3a3136b`).
+- **Empty task scope**: `scripts/check_task_scope.py` exits non-zero on a file with no work rows (`a6f569d`).
+- **Denied `.env*` reads under the installed `denyRead`**: `scripts/quality_audit.py` skips a refused `.env*` and exits 2 on a refused source path (`ea79fef`, `029ccba`); `pytest.ini` ignores `.env*` in collection (`16f24af`, `470cd17`, `bdd63d1`); `tests/test_installer.sh` excludes `.env*` from its copies (`d6887b1`); `scripts/check_fix_reproduces.py` exits 2 on a failed `git worktree add` (`a337fc1`).
+- **Sprint 058 known issues**: `scripts/check_absolute_paths.py` scans the index and untracked files (`7022aea`, `KI-058-1`); `scripts/upstream_outbox.py` reads through `read_regular_bytes` (`22d6bf4`, `KI-058-4`), exits 2 on a missing `--rules` directory and on `export --out` to a missing directory, and `PIN_PATTERN` takes ASCII digits only (`d5752e7`, `35951ad`, `65e4833`, `KI-058-5`); an uppercase `FIX:` subject counts as `fix(` in `hooks/on_commit.py` and `scripts/check_fix_reproduces.py` (`77eee15`, `17b2c34`).
+- **`KI-059-6`**: `scripts/detect_drift.py` (`5663e5b`), `tests/test_detect_drift.py` (`4eddb1a`), `config/invocation_exceptions.json` (`2f435d1`) and `agents.md` (`262e41c`) change together.
+
+### Security
+- `docs/sprints/059-core-pipeline/HARNESS_MEASUREMENT.md` records that under user-scope `strictAllowlist` the project `allowedDomains` is not honored (`55e3d2d`, `4339f38`).
+- The tag ruleset `version-tags` holds no bypass after the human removed it (`49412ee`).
+- The `mcp__claude_ai_Claude_Docs` and `mcp__claude_ai_Gmail` connectors are denied in `permissions.deny` (`46bc655`, `3e40535`).
+
 ## [4.41.0] - 2026-11-02
 
 ### Added
