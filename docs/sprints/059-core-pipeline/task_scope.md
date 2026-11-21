@@ -259,7 +259,7 @@ Operation: the plan row of the same id (plan D37).
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Depends on | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| E-02 | `claude/mcp.json` | modify: remote GitHub MCP server with OAuth, no token in a file | medium | `implementer_agent` | sonnet | medium | - | ⏳ |
+| E-02 | `claude/mcp.json` | modify: after plan D77, remote GitHub MCP server `https://api.githubcopilot.com/mcp/` with `type: http` and OAuth, no token in a file; companion `tests/test_mcp_template.py` in the same commit | medium | `implementer_agent` | sonnet | medium | - | ⏳ |
 | E-03 | `.github/workflows/ci.yml` | modify: pin `actions/checkout`, `actions/setup-python`, `errata-ai/vale-action` by SHA | low | `implementer_agent` | sonnet | medium | - | ✅ `4f4435c` |
 | F-01 | `docs/decisions/ADR-0020-owner-writer-dispatch.md` | create: C-7, when the owner writes a trivial artifact without a dispatch (amends ADR-0017) | medium | `doc_orchestrator` | sonnet | medium | - | ⏳ |
 | F-02 | `config/artifact_registry.json` | modify: after F-01, if ADR-0020 is approved register the owner-writes exception with the condition the ADR sets and `check_role_artifact.py` exit 0; otherwise RECORD with no change | medium | `implementer_agent` | sonnet | medium | F-01 | ⏳ |
