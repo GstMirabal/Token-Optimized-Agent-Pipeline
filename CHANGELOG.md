@@ -4,6 +4,8 @@ All notable changes to the Token-Optimized Agent Pipeline framework. Format: [Ke
 
 ## [Unreleased]
 
+## [4.42.0] - 2026-11-21
+
 ### Added
 - **Sprint 059 `efficiency-and-sandbox-regime`**: one sprint in six waves (cost levers and method, pace and autonomy, in-session token economy, sandbox measurement, sandbox regime, hardening and Sprint 058 residues). Host findings closed: `host:F-116-N1` and `host:F-116-N2` (see Changed and Fixed).
   - **Cost levers, wave 1**:
