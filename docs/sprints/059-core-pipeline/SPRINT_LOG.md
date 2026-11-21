@@ -222,6 +222,7 @@ Example (do not uncomment — Phase 7 writes the real rows):
 | Tester Agent (Gate 2) | 6 | RECORD | testifying | S3 | Range d97c1fe..6196230, 1768 passed, make verify exit 0, zero regression. T5-1 closed by 649eb96: removing the read except fails the new test. T5-2 closed by 65b4709: no 15x left, section 3.1 exists. T6-1 (S3) OSError half of the read except untested, `scripts/check_sprint_refs.py:266`. T6-2, T6-3, T6-4 (S3) C-07 operation and line cite, round 5 range names HEAD. |
 | Tester Agent (Gate 2) | 7 | APPROVED |  | none | Range 6196230..3bc2bdb; tools on 08c669c..HEAD. 1769 passed, make verify 0, pytest 0, zero regression. T6-1 closed by 28630d7: narrowing the except to UnicodeDecodeError fails the new test, removing it fails both. C-07..C-15 and D47..D50 checks print as claimed. Fix replay 0 (25 OK), chain exit 2 unchanged (chains: 3), gate_log/task_scope/sprint_refs 0. No findings. |
 | Tester Agent (Gate 2) | 8 | RECORD | testifying | S3 | Range 3bc2bdb..b02b76a (Wave 5 and its QA remediation). make verify 0, 1880 passed, test_installer.sh 7 PASSED, zero regression; 5 touched test files run 3 times, 215 passed each; no test deleted; no DB engine added. T8-1 (S3) CI pins pytest 9.2.0, the local venv runs 9.1.1. |
+| Tester Agent (Gate 2) | 9 | RECORD | testifying | S3 | Range b02b76a..bd269d3 (Wave 6 and QA rounds 32-34). make verify 0 (1924 passed, no skip or xfail); fix replay 0 on a scratch clone (11 fix(, 0 violations); chain 0 (chains: 1, D83); gate_log, role_artifact, task_scope 0; --owner-commit on real seals 0, on non-seals 1, bad sha 2. T9-1 S3: tests/test_installer.sh runs install.py without a HOME override, so it reads the real user settings |
 
 ### Gate findings
 
@@ -484,6 +485,7 @@ Example (do not uncomment):
 | QA Agent (Gate 1) | 33 | `python3 scripts/check_role_artifact.py --owner-commit 2e06ac6` | 0 |
 | QA Agent (Gate 1) | 33 | `python3 scripts/check_role_artifact.py --owner-commit ce29f36` | 1 |
 | QA Agent (Gate 1) | 33 | `make verify` | 0 |
+| Tester Agent (Gate 2) | 8 | `make verify` | 0 |
 
 ---
 
