@@ -268,6 +268,8 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | E-03 | `.github/workflows/ci.yml` | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | F-01 | `docs/decisions/ADR-0020-owner-writer-dispatch.md` | create | parallel | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | F-02 | `config/artifact_registry.json` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| F-03 | `scripts/check_role_artifact.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| F-04 | `docs/decisions/ADR-0017-typed-artifact-writer.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | I-01 | `scripts/check_absolute_paths.py` | modify | parallel | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | I-02 | `scripts/upstream_outbox.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | I-03 | `scripts/upstream_outbox.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |

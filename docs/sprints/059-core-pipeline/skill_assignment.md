@@ -70,6 +70,8 @@ with `<bool>` replaced by the real value. No HTTP in `make verify`.
 | B-04 | `mass-standardizer` (`skills/mass-standardizer/scripts/generate_manifest.py`, the subject) | N/A | P1 hit |
 | E-03 | `git ls-remote` to resolve each action tag to its commit SHA | N/A | P1: no tool needed |
 | F-02 | `scripts/check_role_artifact.py` reads `config/artifact_registry.json` after the edit | N/A | P1: no tool needed |
+| F-03 | `git diff --numstat` read by `scripts/check_role_artifact.py` | N/A | P1: no tool needed |
+| F-04 | N/A | N/A | P1: no tool needed |
 | I-01..I-07 | `scripts/check_fix_reproduces.py` (Gate 1 first check) for every paired test | N/A | P1: no tool needed |
 | All units | `graphify` (`graphify-out/graph.json`) before any recursive search (`agents.md §2 graph_sovereignty`); `topology-monitor` via `make verify` | N/A | P1 hit |
 
