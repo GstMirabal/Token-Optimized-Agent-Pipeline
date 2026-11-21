@@ -324,10 +324,10 @@ def integration_refs() -> list[str]:
 
     head = git("rev-parse", "--abbrev-ref", "HEAD")
     # Every configured remote, not a hardcoded `origin`. Gate 2 found the
-    # `charter` hole reopening under a different remote name: the fork workflow
-    # `agents.md §4 feedback_upstream` *mandates* leaves the integration branch on
-    # `upstream/`, and consulting only `origin/` put work already landed there back
-    # into the in-flight half.
+    # `charter` hole reopening under a different remote name: in a fork workflow
+    # the integration branch can live on `upstream/` rather than `origin/`, and
+    # consulting only `origin/` put work already landed there back into the
+    # in-flight half. No document in this repository states that workflow.
     remotes = (git("remote") or "").split()
     refs: list[str] = []
     for name in candidates:
