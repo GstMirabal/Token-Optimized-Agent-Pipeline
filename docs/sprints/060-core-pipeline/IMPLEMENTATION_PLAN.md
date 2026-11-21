@@ -41,9 +41,9 @@ humano (`RA-09`) el 2026-11-21: `no issues match your search`. Hallazgo abierto
 lo cierra; D2 instala el broker fuera de todo árbol escribible para no añadir un
 punto de entrada nuevo a ese hallazgo.
 
-**Dependabot alert #28** (moderada, `main`): el humano pega la alerta
-(`gh api repos/{owner}/{repo}/dependabot/alerts/28`); si nombra un paquete de
-`requirements*.txt`, entra como unidad `K-01`.
+**Dependabot alert #28** (moderada, `main`), pegada por el humano el 2026-11-21:
+`graphifyy` (`requirements-core.txt`), GHSA-pcc4-rvhr-2pr8, rango `>= 0.7.2, < 0.9.70`,
+corregido en 0.9.70; el pin es 0.8.30 (`requirements-core.txt:11`). Unidad `K-01` (D12).
 
 Hecho cuando: una sesión con sandbox empuja `ai-sprint/060`, abre y fusiona el PR,
 empuja el tag firmado `v4.43.0` y publica la Release sin que el humano ejecute `gh`
@@ -65,13 +65,14 @@ ni `git push`; y las unidades B a J están cerradas con su comando de verificaci
 | D8 | El detector de modelos falla cerrado (exit `2`) con `session_tool: claude-code` y sin catálogo; la fuente nueva del catálogo se busca en la CLI 2.1.311 en Phase 6; si no hay fuente en disco, el snapshot lo refresca un paso atendido y el resultado se escribe «not measurable» con su criterio | Mantener exit `0` sin catálogo: `make verify` pasa sin comparar nada | `python3 scripts/detect_new_models.py --check; echo $?` → `2` sin catálogo bajo `claude-code` |
 | D9 | El escáner de nombres de host compara el SHA-256 de cada token normalizado contra `config/host_term_hashes.json`; el texto plano nunca entra al repositorio (`RA-15`). El humano genera los hashes con un comando local | Lista en texto plano: publicaría el nombre que el escáner protege | `python3 scripts/check_host_terms.py --history origin/main; echo $?` |
 | D10 | Los 9 renombres `RA-06` (auditoría 059 A5, R1-R9) son una unidad cada uno; el humano aprobó los 9 con los nombres propuestos el 2026-11-21, R8 con el tipo `REGISTER` (`THIRD_PARTY_PROVENANCE_REGISTER.md`) | Un solo commit de renombres: impide aprobar uno y rechazar otro | `git log --oneline -- <ruta nueva>` por renombre |
+| D12 | `graphifyy` sube a ≥ 0.9.70 por GHSA-pcc4-rvhr-2pr8 (Dependabot #28, moderada: lectura de archivos del host al indexar un repo no confiable, rango `>= 0.7.2, < 0.9.70`). Se mantiene `--require-hashes` y el método de la cabecera de `requirements-core.txt`; si 0.9.x vuelve innecesario o rompe el rodeo de `graph_update.py`, el mismo commit lo ajusta | Quedarse en 0.8.30: sigue en el rango vulnerable; desactivar el extractor de Fortran: no lo permite la API pública de `graphifyy` sin un rodeo nuevo | `grep -c '^graphifyy==0.8' requirements-core.txt` → `0`; `venv_skillopt/bin/python -m pip install --require-hashes -r requirements-core.txt; echo $?` → `0`; `venv_skillopt/bin/python -I scripts/graph_update.py; echo $?` → `0` |
 | D11 | Las auditorías de prompts y de motivos en prosa miden primero (bytes y tokens por archivo cargado en cada sesión) y cada hallazgo S0-S2 se cierra en este sprint con código o borrado | Auditar sin medición previa (roadmap: «needs a prior measurement») | `PROMPT_AUDIT_REPORT-060.md` lista el comando de cada cifra |
 
 ---
 
 ## Work
 
-Orden de ejecución: Wave A (broker) → Wave B (detector de modelos) → C → D → E → F → G → H → I → J → Z.
+Orden de ejecución: Wave A (broker) → Wave B (detector de modelos) → K (`graphifyy`) → C → D → E → F → G → H → I → J → Z.
 
 | # | File | Operation | Risk | Assignee (proposed) |
 | :--- | :--- | :--- | :--- | :--- |
@@ -91,6 +92,7 @@ Orden de ejecución: Wave A (broker) → Wave B (detector de modelos) → C → 
 | A-14 | `workflows/repository_hardening_workflow.md` | modify — estado medido de `ADR-0019` D7 y la instalación de la App | low | `doc_orchestrator` |
 | B-01 | `scripts/detect_new_models.py` | fix — fallo cerrado y fuente nueva (D8); test `tests/test_detect_new_models.py` | medium | `implementer_agent` |
 | B-02 | `config/model_tiers.json` | modify — `catalog_snapshot`, `context_limits.haiku`, `excluded` (`claude-fable-5-2`), `verified_at` | low | `token_economy_agent` |
+| K-01 | `requirements-core.txt` | modify — `graphifyy` 0.8.30 → la versión más nueva ≥ 0.9.70 publicada hace ≥ 24 h, closure transitivo y hashes regenerados por el método de la cabecera; revisión del rodeo de `scripts/graph_update.py` en el mismo commit (D12) | high | `implementer_agent` |
 | C-01 | `workflows/deployment_workflow.md` | modify — `ledger_seal` en `ai-sprint/[ID]` (D7, `KI-059-35`) | medium | `doc_orchestrator` |
 | D-01 | `scripts/check_host_terms.py` | create — escáner por hash (D9); test `tests/test_check_host_terms.py` | medium | `implementer_agent` |
 | D-02 | `config/host_term_hashes.json` | create — hashes que genera el humano | low | `implementer_agent` |
@@ -103,7 +105,15 @@ Orden de ejecución: Wave A (broker) → Wave B (detector de modelos) → C → 
 | G-02 | `scripts/prompt_count.py` | fix — `EPERM` sobre la transcripción imprime el comando para el humano y exit `2` documentado (`KI-059-34`); test `tests/test_prompt_count.py` | low | `implementer_agent` |
 | H-01 | `docs/sprints/060-core-pipeline/SANDBOX_REMEASUREMENT.md` | create — matrices de 055 y 056 en una CLI fija (`KI-059-31`) | high | `devops_agent` |
 | H-02 | `rules/project_topology.md` | modify — fila `Measuring CLI` y filas afectadas por H-01 | medium | `doc_orchestrator` |
-| I-01…I-09 | rutas R1-R9 de `PIPELINE_AUDIT_REPORT-059.md` | rename — `git mv` + grep `RA-14` (D10) | low | `doc_orchestrator` |
+| I-01 | `docs/architecture/global_topology.md` | rename → `GLOBAL_TOPOLOGY_MAP.md` (R1); `git mv` + grep `RA-14` de la ruta vieja → 0 aciertos fuera de registros sellados (D10) | low | `doc_orchestrator` |
+| I-02 | `docs/architecture/topology_map.md` | rename → `TOPOLOGY_MAP.md` (R2); `git mv` + grep `RA-14` de la ruta vieja → 0 aciertos fuera de registros sellados (D10) | low | `doc_orchestrator` |
+| I-03 | `docs/contracts/core/doc_orchestrator_contract.md` | rename → `DOC_ORCHESTRATOR_CONTRACT.md` (R3); `git mv` + grep `RA-14` de la ruta vieja → 0 aciertos fuera de registros sellados (D10) | low | `doc_orchestrator` |
+| I-04 | `docs/contracts/core/topology_mapper_contract.md` | rename → `TOPOLOGY_MAPPER_CONTRACT.md` (R4); `git mv` + grep `RA-14` de la ruta vieja → 0 aciertos fuera de registros sellados (D10) | low | `doc_orchestrator` |
+| I-05 | `docs/contracts/core/topology_scaffolder_contract.md` | rename → `TOPOLOGY_SCAFFOLDER_CONTRACT.md` (R5); `git mv` + grep `RA-14` de la ruta vieja → 0 aciertos fuera de registros sellados (D10) | low | `doc_orchestrator` |
+| I-06 | `docs/audits/TOKEN_ECONOMY_AUDIT-documentation-standard.md` | rename → `TOKEN_ECONOMY_DOCUMENTATION_STANDARD_AUDIT.md` (R6); `git mv` + grep `RA-14` de la ruta vieja → 0 aciertos fuera de registros sellados (D10) | low | `doc_orchestrator` |
+| I-07 | `docs/audits/SKILLOPT_TRANSITIVE_CLOSURE.md` | rename → `SKILLOPT_TRANSITIVE_CLOSURE_AUDIT.md` (R7); `git mv` + grep `RA-14` de la ruta vieja → 0 aciertos fuera de registros sellados (D10) | low | `doc_orchestrator` |
+| I-08 | `docs/audits/THIRD_PARTY_PROVENANCE_TODO.md` | rename → `THIRD_PARTY_PROVENANCE_REGISTER.md` (R8); `git mv` + grep `RA-14` de la ruta vieja → 0 aciertos fuera de registros sellados (D10) | low | `doc_orchestrator` |
+| I-09 | `docs/plans/027-autonomy-posture-DRAFT.md` | rename → `AUTONOMY_POSTURE_PLAN.md` (R9); `git mv` + grep `RA-14` de la ruta vieja → 0 aciertos fuera de registros sellados (D10) | low | `doc_orchestrator` |
 | J-01 | `docs/audits/PROMPT_AUDIT_REPORT-060.md` | create — medición y hallazgos (D11) | medium | `token_economy_agent` |
 | J-02 | `docs/audits/PROSE_MOTIVES_AUDIT_REPORT-060.md` | create — motivos en prosa en documentos normativos (D11) | medium | `rule_validator` |
 | Z-01 | `docs/sprints/060-core-pipeline/SPRINT_LOG.md` | create — Phase 3 | low | `orchestrator` |
@@ -143,7 +153,7 @@ Los hallazgos de J-01 y J-02 entran como filas nuevas `J-NN` de una línea al ce
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 45 (37 filas, I-01…I-09 cuentan 9) | Count of rows in Work tables |
+| Work units | 46 | Count of rows in Work tables |
 | Subagents dispatched | 45 + gates | una dispatch por unidad; gates QA y Tester por ronda |
 | Prior session ratio | n/a (no prior Claude transcript: `~/.claude/projects` en `denyRead`) | `python3 scripts/session_cost.py --from-anchor --json` |
 
@@ -156,6 +166,7 @@ Los hallazgos de J-01 y J-02 entran como filas nuevas `J-NN` de una línea al ce
 | `python3 scripts/detect_new_models.py --check` sin catálogo bajo `claude-code` sale con `2` | **Yes** — this is the defect | exit `0` (`No bundled catalogue on this machine`), 2026-11-21 |
 | `python3 scripts/unit_cost.py --sprint-dir docs/sprints/059-core-pipeline` sale con `0` | **Yes** — this is the defect | exit `2` (`unresolved SHA 27267601 of unit R-24`) |
 | `python3 scripts/prompt_count.py --session <id> --json` bajo el sandbox imprime el comando para el humano | **Yes** — this is the defect | exit `2`, `Cannot read transcript: [Errno 1] Operation not permitted` sin comando |
+| `grep -c '^graphifyy==0.8' requirements-core.txt` → `0` | **Yes** — this is the defect | `1` (`graphifyy==0.8.30`) |
 | `wc -c < agents.md` < 20000 | **Yes** — this is the defect | `20000` |
 | `make verify` | **No** — this is a regression to protect | exit `0`, 103 s |
 | `tests/test_github_broker.py`, `tests/test_install_broker.py`, `tests/test_check_host_terms.py` | **Yes** — los archivos no existen | unverified: los tests se crean en A-03, A-04, D-01 |
@@ -190,6 +201,7 @@ Los hallazgos de J-01 y J-02 entran como filas nuevas `J-NN` de una línea al ce
 | `agents.md`, `rules/skills_and_integrations.md` | recorte; `mass-standardizer`; `RA-09` |
 | `agents/devops_agent.md` | herramientas del broker |
 | `config/model_tiers.json` | snapshot y límites |
+| `requirements-core.txt` | `graphifyy` ≥ 0.9.70, closure y hashes |
 | Rutas R1-R9 | renombradas |
 | `docs/audits/PROMPT_AUDIT_REPORT-060.md`, `PROSE_MOTIVES_AUDIT_REPORT-060.md` | nuevos |
 
