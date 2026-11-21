@@ -431,9 +431,9 @@ Objetivo sin cambios (P7, `KI-056-1`, requisito `gh` de D-01): menos solicitudes
 
 | # | File | Operation | Risk | Assignee (proposed) | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| Z-01 | `CHANGELOG.md` | modify — entrada `[Unreleased]` del sprint; cita `host:F-116-N1` y `host:F-116-N2` (`agents.md §4 feedback_upstream`, cierre) | low | `doc_orchestrator` | ⏳ |
-| Z-02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify — cerrar o re-enrutar `KI-056-1`, `KI-056-6`, `KI-057-1`, `KI-057-2`, `KI-058-1`, `KI-058-3`, `KI-058-4`, `KI-058-5, KI-059-19 a KI-059-26 (D54)`, `KI-059-28` (D75: las tres consecuencias de ADR-0023 sin unidad; las 10 filas remotas al broker del Sprint 060); `KI-058-2` y los condicionados de Out of scope quedan con su condición de desbloqueo; nuevos `KI-059-n`, incluido uno para los puntos 3-5 de la propuesta E (P11); enruta o cierra con evidencia cada fila `KI-059-n` de la tabla de `SPRINT_LOG.md` que siga abierta; esa tabla es la lista (D36) | low | `doc_orchestrator` | ⏳ |
-| Z-03 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify — tras F-02, F-03 y F-04 (D80): la fila C-7 pasa de «accept for debate» a cerrada por ADR-0020 con los SHA de F-01, F-02, F-03 y F-04; ninguna otra fila cambia | low | `doc_orchestrator` | ⏳ |
+| Z-01 | `CHANGELOG.md` | modify — entrada `[Unreleased]` del sprint; cita `host:F-116-N1` y `host:F-116-N2` (`agents.md §4 feedback_upstream`, cierre) | low | `doc_orchestrator` | ✅ `9b6860c` |
+| Z-02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify — cerrar o re-enrutar `KI-056-1`, `KI-056-6`, `KI-057-1`, `KI-057-2`, `KI-058-1`, `KI-058-3`, `KI-058-4`, `KI-058-5, KI-059-19 a KI-059-26 (D54)`, `KI-059-28` (D75: las tres consecuencias de ADR-0023 sin unidad; las 10 filas remotas al broker del Sprint 060); `KI-058-2` y los condicionados de Out of scope quedan con su condición de desbloqueo; nuevos `KI-059-n`, incluido uno para los puntos 3-5 de la propuesta E (P11); enruta o cierra con evidencia cada fila `KI-059-n` de la tabla de `SPRINT_LOG.md` que siga abierta; esa tabla es la lista (D36) | low | `doc_orchestrator` | ✅ `c9f76a9` |
+| Z-03 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify — tras F-02, F-03 y F-04 (D80): la fila C-7 pasa de «accept for debate» a cerrada por ADR-0020 con los SHA de F-01, F-02, F-03 y F-04; ninguna otra fila cambia | low | `doc_orchestrator` | ✅ `7e937dd` |
 
 ---
 
