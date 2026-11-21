@@ -19,7 +19,7 @@ Mode: **claude-code**, `delegation_mode: native` — the
 Values: `host:.claude/agents/` (default), `profile:<path>`, `nucleus:PR`.
 Units that do not create a profile use `N/A`.
 
-No agent profile is created in Sprint 060: all 37 Work rows are staffed from the 14 existing profiles in `agents/`. Every `Destination` is `N/A`. The `fix` operations of the plan (B-01, G-01, G-02) are recorded as `modify`; the `rename` operations of I-01…I-09 (`git mv`) are recorded as `modify` with the pre-rename path as Target.
+No agent profile is created in Sprint 060: all 69 Work rows are staffed from the 14 existing profiles in `agents/`. Every `Destination` is `N/A`. The `fix` operations of the plan (B-01, G-01, G-02) are recorded as `modify`; the `rename` operations of I-01…I-09 (`git mv`) are recorded as `modify` with the pre-rename path as Target.
 
 ---
 
@@ -32,17 +32,18 @@ No agent profile is created in Sprint 060: all 37 Work rows are staffed from the
 | A-01 | `docs/decisions/ADR-0025-github-app-broker.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | A-02 | `docs/architecture/GITHUB_BROKER_BLUEPRINT.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | A-03 | `scripts/github_broker.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| A-09 | `docs/guides/GITHUB_BROKER_SETUP_GUIDE.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | A-04 | `scripts/install_broker.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | A-05 | `claude/settings.hooks.json` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | A-06 | `config/allowed_signers` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | A-07 | `scripts/sync_agents_pin.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | A-08 | `scripts/install.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
-| A-09 | `docs/guides/GITHUB_BROKER_SETUP_GUIDE.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | A-10 | `docs/sprints/060-core-pipeline/BROKER_MEASUREMENT.md` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | A-11 | `workflows/deployment_workflow.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | A-12 | `agents/devops_agent.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | A-13 | `rules/project_topology.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | A-14 | `workflows/repository_hardening_workflow.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| A-15 | `docs/sprints/060-core-pipeline/BROKER_MEASUREMENT.md` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 
 ### Wave B — Model detector
 
@@ -51,17 +52,48 @@ No agent profile is created in Sprint 060: all 37 Work rows are staffed from the
 | B-01 | `scripts/detect_new_models.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | B-02 | `config/model_tiers.json` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 
-### Wave C — Ledger seal
+### Wave K — graphifyy pin
 
 | # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | K-01 | `requirements-core.txt` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+
+### Wave M — Graph as brain (D14)
+
+| # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| M-01 | `scripts/graph_battery.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| M-02 | `docs/audits/GRAPH_USAGE_AUDIT_REPORT-060.md` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| M-03 | `scripts/graph_query.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| M-04 | `scripts/graph_mcp.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| M-05 | `claude/mcp.json` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| M-06 | `rules/graphify.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| M-07 | `agents/principal_agent.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| M-08 | `agents/rule_validator.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| M-09 | `agents/qa_agent.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| M-10 | `agents/implementer_agent.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| M-11 | `agents/doc_orchestrator.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| M-12 | `workflows/pipeline_workflow.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| M-13 | `hooks/graph_usage_log.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| M-14 | `claude/settings.hooks.json` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| M-15 | `scripts/check_graph_usage.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| M-16 | `docs/sprints/060-core-pipeline/GRAPH_AB_MEASUREMENT.md` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+
+### Wave L — Dependency advisories
+
+| # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | L-01 | `scripts/check_dependency_advisories.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | L-02 | `.github/workflows/ci.yml` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | L-03 | `scripts/session_start.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | L-04 | `claude/settings.hooks.json` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | L-05 | `docs/decisions/ADR-0026-dependency-advisory-check.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | L-06 | `.github/dependabot.yml` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+
+### Wave C — Ledger seal
+
+| # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | C-01 | `workflows/deployment_workflow.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 
 ### Wave D — Host-term scanner
@@ -72,6 +104,7 @@ No agent profile is created in Sprint 060: all 37 Work rows are staffed from the
 | D-02 | `config/host_term_hashes.json` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | D-03 | `tests/test_profile_references.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | D-04 | `docs/sprints/060-core-pipeline/HISTORY_REVIEW_REPORT.md` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| D-05 | `Makefile` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 
 ### Wave E — Gate log
 
@@ -130,7 +163,6 @@ New names (D10): I-01 `GLOBAL_TOPOLOGY_MAP.md`; I-02 `TOPOLOGY_MAP.md`; I-03 `DO
 | Z-01 | `docs/sprints/060-core-pipeline/SPRINT_LOG.md` | create | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
 | Z-02 | `docs/sprints/060-core-pipeline/task_scope.md` | create | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
 | Z-03 | `docs/sprints/060-core-pipeline/agent_assignment.md` | create | sequential | `agent_orchestrator` | N/A | `agents/agent_orchestrator.md` |
-| Z-04 | `docs/walkthroughs/core/pipeline/060_WALKTHROUGH.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | Z-05 | `CHANGELOG.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | Z-06 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
 
@@ -145,4 +177,4 @@ New names (D10): I-01 `GLOBAL_TOPOLOGY_MAP.md`; I-02 `TOPOLOGY_MAP.md`; I-03 `DO
 | B-02 | `token_economy_agent` | `implementer_agent` | `token_economy_agent` owns `config/model_tiers.json` (`tier_ownership`) but has no `Write`/`Edit`; the same profile staffs `config/` JSON in A-06 and D-02 and `B-01` (its sibling `detect_new_models.py`), per `agents/implementer_agent.md` `scope_boundaries` (changes requested through `implementer_agent`). The value choices come from `token_economy_agent`. |
 | A-12 | `agent_orchestrator` | `doc_orchestrator` | `agent_orchestrator` has exclusive jurisdiction over agent staffing and never edits profile content (`restriction`); A-12 rewrites a profile's rules text, which is documentation authoring. `A-12` must also match the `A-11` deployment text. |
 
-Notes, no change: A-05, A-06 and D-02 are `config/` or `claude/` files outside the literal `scripts/`, `hooks/`, `tests/` write scope of `implementer_agent`, but they are code-adjacent configuration with no other profile holding `Write` and a code role; the plan proposal stands. `A-06` and `D-02` content is supplied by the human. F-01, F-02 and J-02 stay with `rule_validator` as proposed.
+Notes, no change (amendment: A-15, D-05, M-01…M-16 added, Z-04 deleted per D15, A-09 moved before A-04): A-15 is a `modify` of the A-10 report; the push, PR, merge, tag and Release calls of M5 go through the broker MCP tools, which `implementer_agent` (`tools: Read, Glob, Grep, Write, Edit, Bash`) does not list, so the lead session issues those calls and `implementer_agent` records each GitHub ID in the report. M-07…M-11 edit other profiles' rules text, which is documentation authoring (same basis as the A-12 override), so `doc_orchestrator` stays; M-11 edits its own profile and M-10 edits the profile of the Wave M code author, with no concurrent claim on either file. M-05, M-14 and D-05 (`claude/mcp.json`, `claude/settings.hooks.json`, `Makefile`) sit outside the literal `scripts/`, `hooks/`, `tests/` scope on the same code-adjacent basis as A-05; `devops_agent` has no `Write`/`Edit`. M-16 needs `session_cost.py` run by the human outside the sandbox; `implementer_agent` writes the pasted output. Earlier note: A-05, A-06 and D-02 are `config/` or `claude/` files outside the literal `scripts/`, `hooks/`, `tests/` write scope of `implementer_agent`, but they are code-adjacent configuration with no other profile holding `Write` and a code role; the plan proposal stands. `A-06` and `D-02` content is supplied by the human. F-01, F-02 and J-02 stay with `rule_validator` as proposed.

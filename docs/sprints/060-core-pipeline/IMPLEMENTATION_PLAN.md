@@ -64,52 +64,72 @@ ni `git push`; y las unidades B a J están cerradas con su comando de verificaci
 | D7 | `ledger_seal` sella `[Unreleased]` en `ai-sprint/[ID]` antes del PR del sprint, con `require-released` y `--owner-commit` re-ejecutados en esa punta (`KI-059-35`) | Un segundo PR para el sello: doble espera de CI, como #96 | `grep -n ledger_seal workflows/deployment_workflow.md` muestra la rama `ai-sprint/[ID]` |
 | D8 | El detector de modelos falla cerrado (exit `2`) con `session_tool: claude-code` y sin catálogo; la fuente nueva del catálogo se busca en la CLI 2.1.311 en Phase 6; si no hay fuente en disco, el snapshot lo refresca un paso atendido y el resultado se escribe «not measurable» con su criterio | Mantener exit `0` sin catálogo: `make verify` pasa sin comparar nada | `python3 scripts/detect_new_models.py --check; echo $?` → `2` sin catálogo bajo `claude-code` |
 | D9 | El escáner de nombres de host compara el SHA-256 de cada token normalizado contra `config/host_term_hashes.json`; el texto plano nunca entra al repositorio (`RA-15`). El humano genera los hashes con un comando local | Lista en texto plano: publicaría el nombre que el escáner protege | `python3 scripts/check_host_terms.py --history origin/main; echo $?` |
-| D10 | Los 9 renombres `RA-06` (auditoría 059 A5, R1-R9) son una unidad cada uno; el humano aprobó los 9 con los nombres propuestos el 2026-11-21, R8 con el tipo `REGISTER` (`THIRD_PARTY_PROVENANCE_REGISTER.md`) | Un solo commit de renombres: impide aprobar uno y rechazar otro | `git log --oneline -- <ruta nueva>` por renombre |
+| D10 | Los 9 renombres `RA-06` (auditoría 059 A5, R1-R9) son una unidad cada uno; las referencias vivas a la ruta vieja se editan en el mismo commit del `git mv`, y los `skills/*/SKILL.md` de terceros quedan exentos y listados (RV-1); el humano aprobó los 9 con los nombres propuestos el 2026-11-21, R8 con el tipo `REGISTER` (`THIRD_PARTY_PROVENANCE_REGISTER.md`) | Un solo commit de renombres: impide aprobar uno y rechazar otro | `git log --oneline -- <ruta nueva>` por renombre |
 | D12 | `graphifyy` sube a ≥ 0.9.70 por GHSA-pcc4-rvhr-2pr8 (Dependabot #28, moderada: lectura de archivos del host al indexar un repo no confiable, rango `>= 0.7.2, < 0.9.70`). Se mantiene `--require-hashes` y el método de la cabecera de `requirements-core.txt`; si 0.9.x vuelve innecesario o rompe el rodeo de `graph_update.py`, el mismo commit lo ajusta | Quedarse en 0.8.30: sigue en el rango vulnerable; desactivar el extractor de Fortran: no lo permite la API pública de `graphifyy` sin un rodeo nuevo | `grep -c '^graphifyy==0.8' requirements-core.txt` → `0`; `venv_skillopt/bin/python -m pip install --require-hashes -r requirements-core.txt; echo $?` → `0`; `venv_skillopt/bin/python -I scripts/graph_update.py; echo $?` → `0` |
 | D13 | Avisos de vulnerabilidad de dependencias sin depender de GitHub: `check_dependency_advisories.py` consulta OSV por cada pin; corre en CI (cada PR y cron diario, fallo cerrado) y en la boot (aviso), en nucleus y host. Huecos medidos: el agente no ve las alertas (solo GitHub, `gh` con el humano); `dependabot_security_updates: enabled` (pegado por el humano 2026-11-21) y aun así 0 ramas `dependabot/*`; Dependabot no escanea submódulos, así que un host no recibe la alerta. `api.osv.dev` entra en `allowedDomains` (decisión humana 2026-11-21) | Solo CI: la sesión y los hosts no se enteran hasta un tag nuevo; leer alertas por el broker: no cubre hosts y depende de que Dependabot escanee | `python3 scripts/check_dependency_advisories.py --check; echo $?` → `2` con `graphifyy==0.8.30`, `0` tras K-01 |
+| D14 | El grafo se implementa como cerebro de la optimización de tokens, no como adorno (decisión humana 2026-11-21). Medido en la base: 17 346 nodos, 25 307 aristas, 14,6 MB; 13 de 14 perfiles de `agents/` no lo mencionan; sin `.mcp.json` en el nucleus; los lectores de `graph.json` en `scripts/` solo comprueban existencia o frescura; una consulta en lenguaje natural devolvió 2 nodos irrelevantes; una consulta por símbolo devolvió la cadena correcta con una arista invertida (`_run_install_lock` → `_install_lock_notes`, inversa de `scripts/session_start.py:353`); ni esta sesión ni `rule_validator` lo consultaron. Los agentes consultan por estructura (símbolo, archivo), nunca en lenguaje natural (decisión humana 2026-11-21). Umbral de calidad: 100 % de la batería estructural igual al AST y 0 aristas invertidas; umbral de beneficio: ≥ 30 % menos tokens `fresh` en el A/B | Lenguaje natural con umbral de precisión: el agente ya conoce el símbolo y la CLI en lenguaje natural es la vía que falla; retirar las promesas del grafo: el humano decide implementarlo al 100 % | `python3 scripts/graph_battery.py; echo $?` → `0`; `python3 scripts/check_graph_usage.py --current-sprint; echo $?` → `0`; `GRAPH_AB_MEASUREMENT.md` ≥ 30 % |
+| D15 | Z-04 (walkthrough) se retira: `acknowledged_gaps.walkthroughs` (Sprint 042) sigue vigente y un único miembro inauguraría una estructura vacía (RV-12, decisión humana 2026-11-21). A-02 se mantiene: el broker es el primer módulo de código con runtime propio del nucleus, que es el disparador de reevaluación de `acknowledged_gaps.docs`, y `agents.md §0` exige el Blueprint antes del código | Crear `docs/walkthroughs/` con un miembro: contradice el hueco aceptado | `ls docs/walkthroughs; echo $?` → `1` al cierre |
 | D11 | Las auditorías de prompts y de motivos en prosa miden primero (bytes y tokens por archivo cargado en cada sesión) y cada hallazgo S0-S2 se cierra en este sprint con código o borrado | Auditar sin medición previa (roadmap: «needs a prior measurement») | `PROMPT_AUDIT_REPORT-060.md` lista el comando de cada cifra |
 
 ---
 
 ## Work
 
-Orden de ejecución: Wave A (broker) → Wave B (detector de modelos) → K (`graphifyy`) → L (avisos de dependencias) → C → D → E → F → G → H → I → J → Z.
+Orden de ejecución: Wave A (broker) → Wave B (detector de modelos) → K (`graphifyy`) → M (grafo como cerebro) → L (avisos de dependencias) → C → D → E → F → G → H → I → J → Z.
 
 | # | File | Operation | Risk | Assignee (proposed) |
 | :--- | :--- | :--- | :--- | :--- |
-| A-01 | `docs/decisions/ADR-0025-github-app-broker.md` | create — D1-D6; reemplaza `ADR-0019` D2 y D6 | medium | `doc_orchestrator` |
+| A-01 | `docs/decisions/ADR-0025-github-app-broker.md` | create — D1-D6; reemplaza `ADR-0019` D2 y D6; en el mismo commit, una línea `Superseded by ADR-0025` en las filas D2 y D6 de `ADR-0019` (RV-10) | medium | `doc_orchestrator` |
 | A-02 | `docs/architecture/GITHUB_BROKER_BLUEPRINT.md` | create — desde `BLUEPRINT_TEMPLATE.md` | low | `doc_orchestrator` |
 | A-03 | `scripts/github_broker.py` | create — servidor MCP stdio con las operaciones de D4; test `tests/test_github_broker.py` en el mismo commit | high | `implementer_agent` |
+| A-09 | `docs/guides/GITHUB_BROKER_SETUP_GUIDE.md` | create — pasos humanos: crear la App, permisos de D4, instalarla solo en el nucleus, claves, `install_broker.py`, `claude mcp add --scope user` | low | `doc_orchestrator` |
 | A-04 | `scripts/install_broker.py` | create — instalación desde tag firmado o commit de `main` (D5); test `tests/test_install_broker.py` | high | `implementer_agent` |
 | A-05 | `claude/settings.hooks.json` | modify — `denyRead` y `permissions.deny` de D3 | medium | `implementer_agent` |
-| A-06 | `config/allowed_signers` | create — clave pública de firma que entrega el humano | low | `implementer_agent` |
+| A-06 | `config/allowed_signers` | create — clave pública de firma; el agente escribe solo el valor que pega el humano, nunca lo genera (RV-15) | low | `implementer_agent` |
 | A-07 | `scripts/sync_agents_pin.py` | modify — `verify-tag` (D6); test `tests/test_sync_agents_pin.py` | medium | `implementer_agent` |
 | A-08 | `scripts/install.py` | modify — `verify-tag` (D6); test `tests/test_install.py` | medium | `implementer_agent` |
-| A-09 | `docs/guides/GITHUB_BROKER_SETUP_GUIDE.md` | create — pasos humanos: crear la App, permisos de D4, instalarla solo en el nucleus, claves, `install_broker.py`, `claude mcp add --scope user` | low | `doc_orchestrator` |
-| A-10 | `docs/sprints/060-core-pipeline/BROKER_MEASUREMENT.md` | create — M1 claves ilegibles, M2 broker instalado no editable, M3 ningún token en el sandbox, M4 rechazos de D4 en vivo, M5 extremo a extremo en el despliegue de 060 | high | `devops_agent` |
+| A-10 | `docs/sprints/060-core-pipeline/BROKER_MEASUREMENT.md` | create — M1 claves ilegibles, medida solo con códigos de salida, sin imprimir contenido (RV-5); M2 broker instalado no editable; M3 ningún token alcanzable en el conjunto enumerado: entorno de los procesos del sandbox, archivos bajo `~/.config/agents-broker/`, salida del MCP hacia la transcripción y `ps`; la afirmación se limita a ese conjunto (`RA-19`, RV-6); M4 rechazos de D4 en vivo | high | `implementer_agent` |
 | A-11 | `workflows/deployment_workflow.md` | modify — push, PR, merge, tag y Release por el broker | medium | `doc_orchestrator` |
-| A-12 | `agents/devops_agent.md` | modify — usa las herramientas del broker; ya no prepara `gh` para el humano | low | `agent_orchestrator` |
+| A-12 | `agents/devops_agent.md` | modify — las operaciones de GitHub las ejecutan las herramientas MCP del broker; `devops_agent` conserva solo `Bash` y no recibe autoridad de escritura (`ADR-0009`, RV-11) | low | `doc_orchestrator` |
 | A-13 | `rules/project_topology.md` | modify — fila `gh`/credencial: broker (`KI-059-21`, `-22`, `-24`) | medium | `doc_orchestrator` |
 | A-14 | `workflows/repository_hardening_workflow.md` | modify — estado medido de `ADR-0019` D7 y la instalación de la App | low | `doc_orchestrator` |
-| B-01 | `scripts/detect_new_models.py` | fix — fallo cerrado y fuente nueva (D8); test `tests/test_detect_new_models.py` | medium | `implementer_agent` |
+| A-15 | `docs/sprints/060-core-pipeline/BROKER_MEASUREMENT.md` | modify — M5 en el despliegue de 060: push, PR, merge, tag firmado y Release por el agente, con el ID de GitHub de cada operación; los gates leen M1-M4 (RV-7) | high | `implementer_agent` |
+| B-01 | `scripts/detect_new_models.py` | fix — fallo cerrado y fuente nueva (D8); test `tests/test_detect_new_models.py::test_check_fails_closed_without_catalogue` (RV-8) | medium | `implementer_agent` |
 | B-02 | `config/model_tiers.json` | modify — `catalog_snapshot`, `context_limits.haiku`, `excluded` (`claude-fable-5-2`), `verified_at` | low | `token_economy_agent` |
-| K-01 | `requirements-core.txt` | modify — `graphifyy` 0.8.30 → la versión más nueva ≥ 0.9.70 publicada hace ≥ 24 h, closure transitivo y hashes regenerados por el método de la cabecera; revisión del rodeo de `scripts/graph_update.py` en el mismo commit (D12) | high | `implementer_agent` |
+| K-01 | `requirements-core.txt` | modify — `graphifyy` 0.8.30 → la versión más nueva ≥ 0.9.70 publicada hace ≥ 24 h, closure transitivo y hashes regenerados por el método de la cabecera; en el mismo commit: revisión del rodeo de `scripts/graph_update.py` y las cifras de versión de `rules/graphify.md` (RV-9) (D12) | high | `implementer_agent` |
+| M-01 | `scripts/graph_battery.py` | create — batería fija de consultas estructurales (`callers`, `callees`, `dependents`, `impact`, `path`) contra la verdad del AST de Python; exit `2` si una consulta difiere o una arista está invertida (D14); test `tests/test_graph_battery.py` | high | `implementer_agent` |
+| M-02 | `docs/audits/GRAPH_USAGE_AUDIT_REPORT-060.md` | create — línea base: batería M-01 con 0.8.30 y tras K-01, consumidores reales del grafo, coste de reconstrucción (tiempo, bytes), consultas al grafo frente a grep en las fases 1-4 de 060 (D14) | medium | `implementer_agent` |
+| M-03 | `scripts/graph_query.py` | create — consultas estructurales sobre `graph.json` con corrección de dirección de aristas y cierre transitivo; la interfaz que usan los agentes (D14); test `tests/test_graph_query.py` | high | `implementer_agent` |
+| M-04 | `scripts/graph_mcp.py` | create — servidor MCP stdio de solo lectura que expone M-03; instalación de ámbito usuario con `install_broker.py`, fuera de árboles escribibles (D2, `F-055-N1`); test `tests/test_graph_mcp.py` | high | `implementer_agent` |
+| M-05 | `claude/mcp.json` | modify — retira la entrada `graphify` de ámbito proyecto (escribible por el agente) a favor del registro de usuario de M-04 (D14) | medium | `implementer_agent` |
+| M-06 | `rules/graphify.md` | modify — protocolo estructural primero: el agente consulta por símbolo o archivo con M-03/M-04; el modo de lenguaje natural de la CLI no se usa (D14) | medium | `doc_orchestrator` |
+| M-07 | `agents/principal_agent.md` | modify — Phase 1: impacto de cada unidad por `impact`/`dependents` antes de redactar Work (D14) | low | `doc_orchestrator` |
+| M-08 | `agents/rule_validator.md` | modify — Phase 4.3: archivos dependientes por `dependents` en lugar de Grep (D14) | low | `doc_orchestrator` |
+| M-09 | `agents/qa_agent.md` | modify — Gate 1: integridad del grafo con `graph_battery.py` y radio de impacto del diff (D14) | low | `doc_orchestrator` |
+| M-10 | `agents/implementer_agent.md` | modify — `callers`/`callees` antes de editar un símbolo (D14) | low | `doc_orchestrator` |
+| M-11 | `agents/doc_orchestrator.md` | modify — referencias de un documento por `dependents` antes de editar o renombrar (D14) | low | `doc_orchestrator` |
+| M-12 | `workflows/pipeline_workflow.md` | modify — pasos de consulta del grafo en Phases 1, 4.3, 6 y 7 (D14) | medium | `doc_orchestrator` |
+| M-13 | `hooks/graph_usage_log.py` | create — hook `PostToolUse` que registra por sesión las consultas al grafo frente a `Grep`, `Glob` y búsquedas por `Bash` (D14); test `tests/test_graph_usage_log.py` | medium | `implementer_agent` |
+| M-14 | `claude/settings.hooks.json` | modify — registra M-13; después de A-05 y L-04 (D14) | low | `implementer_agent` |
+| M-15 | `scripts/check_graph_usage.py` | create — exit `2` si una fase de investigación buscó por texto antes de consultar el grafo; invocado por `workflows/close_workflow.md` (D14); test `tests/test_check_graph_usage.py` | medium | `implementer_agent` |
+| M-16 | `docs/sprints/060-core-pipeline/GRAPH_AB_MEASUREMENT.md` | create — A/B con las mismas tareas de investigación con y sin grafo; tokens `fresh` por `session_cost.py`, que el humano ejecuta fuera del sandbox (`~/.claude/projects` en `denyRead`); criterio ≥ 30 % (D14) | high | `implementer_agent` |
 | L-01 | `scripts/check_dependency_advisories.py` | create — consulta OSV `/v1/querybatch` (stdlib) por cada pin de `requirements*.txt` del nucleus; exit `2` con aviso o sin red (D13); test `tests/test_check_dependency_advisories.py` | medium | `implementer_agent` |
 | L-02 | `.github/workflows/ci.yml` | modify — L-01 en cada PR y cron diario sobre `main` | medium | `implementer_agent` |
 | L-03 | `scripts/session_start.py` | modify — la boot muestra L-01 como aviso en nucleus y host (D13); test `tests/test_session_start.py` | medium | `implementer_agent` |
 | L-04 | `claude/settings.hooks.json` | modify — `api.osv.dev` en `sandbox.network.allowedDomains` (D13) | low | `implementer_agent` |
-| L-05 | `docs/decisions/ADR-0026-dependency-advisory-check.md` | create — D13 y la ampliación de egress, enmienda de `ADR-0024` | low | `doc_orchestrator` |
+| L-05 | `docs/decisions/ADR-0026-dependency-advisory-check.md` | create — D13 y la ampliación de egress; en el mismo commit, una línea `Amended by ADR-0026` en `ADR-0024` (RV-10) | low | `doc_orchestrator` |
 | L-06 | `.github/dependabot.yml` | create — solo si el mensaje de la alerta #28 en la UI de GitHub muestra que la falta de configuración `pip` impidió el PR; si no, la fila se cierra con el mensaje transcrito (D13) | low | `implementer_agent` |
 | C-01 | `workflows/deployment_workflow.md` | modify — `ledger_seal` en `ai-sprint/[ID]` (D7, `KI-059-35`) | medium | `doc_orchestrator` |
 | D-01 | `scripts/check_host_terms.py` | create — escáner por hash (D9); test `tests/test_check_host_terms.py` | medium | `implementer_agent` |
-| D-02 | `config/host_term_hashes.json` | create — hashes que genera el humano | low | `implementer_agent` |
+| D-02 | `config/host_term_hashes.json` | create — hashes que genera el humano; el agente escribe solo lo que pega el humano (RV-15) | low | `implementer_agent` |
 | D-03 | `tests/test_profile_references.py` | modify — usa `check_host_terms.py` (`KI-059-14`) | low | `implementer_agent` |
-| D-04 | `docs/sprints/060-core-pipeline/HISTORY_REVIEW_REPORT.md` | create — escaneo de `origin/main`; reescribir historia lo decide el humano (`KI-059-12`) | medium | `devops_agent` |
-| E-01 | `scripts/check_gate_log.py` | modify — una fila de Gate findings por hallazgo S0-S2 (hallazgo 1 de la ronda 20 de QA de 059); test `tests/test_check_gate_log.py` | medium | `implementer_agent` |
+| D-04 | `docs/sprints/060-core-pipeline/HISTORY_REVIEW_REPORT.md` | create — escaneo de `origin/main`; registra solo SHA, ruta y línea, nunca el texto coincidente (`RA-15`, RV-4); reescribir historia lo decide el humano (`KI-059-12`) | medium | `implementer_agent` |
+| D-05 | `Makefile` | modify — `verify` invoca `scripts/check_host_terms.py` (`RA-16`, RV-2) | low | `implementer_agent` |
+| E-01 | `scripts/check_gate_log.py` | modify — una fila de Gate findings por hallazgo S0-S2 (hallazgo 1 de la ronda 20 de QA de 059); test `tests/test_check_gate_log.py::test_s0_s2_finding_without_row_fails` (RV-8) | medium | `implementer_agent` |
 | F-01 | `agents.md` | modify — recorte bajo 20000 bytes; redacción de `mass-standardizer` (`KI-059-32`); `RA-09`/`§6 devops_agent` con el broker | high | `rule_validator` |
 | F-02 | `rules/skills_and_integrations.md` | modify — redacción de `mass-standardizer` (`KI-059-32`) | low | `rule_validator` |
-| G-01 | `scripts/unit_cost.py` | fix — solo SHAs entre comillas invertidas que resuelven como commit (`KI-059-34`); test `tests/test_unit_cost.py` | low | `implementer_agent` |
-| G-02 | `scripts/prompt_count.py` | fix — `EPERM` sobre la transcripción imprime el comando para el humano y exit `2` documentado (`KI-059-34`); test `tests/test_prompt_count.py` | low | `implementer_agent` |
+| G-01 | `scripts/unit_cost.py` | fix — solo SHAs entre comillas invertidas que resuelven como commit (`KI-059-34`); test `tests/test_unit_cost.py::test_non_commit_hex_in_status_is_ignored` (RV-8) | low | `implementer_agent` |
+| G-02 | `scripts/prompt_count.py` | fix — `EPERM` sobre la transcripción imprime el comando para el humano y exit `2` documentado (`KI-059-34`); test `tests/test_prompt_count.py::test_eperm_prints_human_command` (RV-8) | low | `implementer_agent` |
 | H-01 | `docs/sprints/060-core-pipeline/SANDBOX_REMEASUREMENT.md` | create — matrices de 055 y 056 en una CLI fija (`KI-059-31`) | high | `devops_agent` |
 | H-02 | `rules/project_topology.md` | modify — fila `Measuring CLI` y filas afectadas por H-01 | medium | `doc_orchestrator` |
 | I-01 | `docs/architecture/global_topology.md` | rename → `GLOBAL_TOPOLOGY_MAP.md` (R1); `git mv` + grep `RA-14` de la ruta vieja → 0 aciertos fuera de registros sellados (D10) | low | `doc_orchestrator` |
@@ -126,7 +146,6 @@ Orden de ejecución: Wave A (broker) → Wave B (detector de modelos) → K (`gr
 | Z-01 | `docs/sprints/060-core-pipeline/SPRINT_LOG.md` | create — Phase 3 | low | `orchestrator` |
 | Z-02 | `docs/sprints/060-core-pipeline/task_scope.md` | create — Phase 4.2 | low | `rule_validator` |
 | Z-03 | `docs/sprints/060-core-pipeline/agent_assignment.md` | create — Phase 4.1 | low | `agent_orchestrator` |
-| Z-04 | `docs/walkthroughs/core/pipeline/060_WALKTHROUGH.md` | create — closeout `RA-05` | low | `doc_orchestrator` |
 | Z-05 | `CHANGELOG.md` | modify — `[Unreleased]` | low | `doc_orchestrator` |
 | Z-06 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify — KI routed → closed | low | `orchestrator` |
 
@@ -161,7 +180,7 @@ Los hallazgos de J-01 y J-02 entran como filas nuevas `J-NN` de una línea al ce
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 52 | Count of rows in Work tables |
+| Work units | 69 | Count of rows in Work tables |
 | Subagents dispatched | 45 + gates | una dispatch por unidad; gates QA y Tester por ronda |
 | Prior session ratio | n/a (no prior Claude transcript: `~/.claude/projects` en `denyRead`) | `python3 scripts/session_cost.py --from-anchor --json` |
 
@@ -190,9 +209,11 @@ Los hallazgos de J-01 y J-02 entran como filas nuevas `J-NN` de una línea al ce
 | `python3 scripts/detect_new_models.py --check; echo $?` | `2` sin catálogo bajo `claude-code`; `0` con snapshot al día | exit `0` (defect) | n/a |
 | `python3 scripts/unit_cost.py --sprint-dir docs/sprints/059-core-pipeline; echo $?` | `0` | exit `2` (defect) | n/a |
 | `wc -c < agents.md` | < 20000 | `20000` | n/a |
+| `grep -c excludedCommands claude/settings.hooks.json` | `0` | `0` | `grep -c allowedDomains claude/settings.hooks.json` → ≥ 1, prueba que el grep lee el archivo (RV-14) |
 | `grep -c agents-broker claude/mcp.json` | `0` | `0` | `grep -c mcpServers claude/mcp.json` → ≥ 1, prueba que el grep lee el archivo |
 | `python3 skills/token-saver-auditor/scripts/audit_plan.py docs/sprints/060-core-pipeline/IMPLEMENTATION_PLAN.md; echo $?` | `0` | run at close of Phase 3: el archivo se extrae ahí | n/a |
 | `python3 scripts/check_sprint_refs.py --current-sprint; echo $?` | `0` | run at close of Phase 3: el directorio del sprint no existe aún | n/a |
+| `python3 scripts/graph_battery.py; echo $?` | `0` | unverified: el script se crea en M-01 | M-02 registra la batería con 0.8.30, donde la arista invertida medida la hace fallar |
 | `BROKER_MEASUREMENT.md` M5 (push, PR, merge, tag, Release por el agente) | 5 operaciones con el ID de GitHub de cada una | run at close: ocurre en el despliegue de 060 | M4: `push_branch main` rechazado |
 
 ---
@@ -211,6 +232,8 @@ Los hallazgos de J-01 y J-02 entran como filas nuevas `J-NN` de una línea al ce
 | `agents/devops_agent.md` | herramientas del broker |
 | `config/model_tiers.json` | snapshot y límites |
 | `requirements-core.txt` | `graphifyy` ≥ 0.9.70, closure y hashes |
+| `rules/graphify.md`, `agents/{principal_agent,rule_validator,qa_agent,implementer_agent,doc_orchestrator}.md`, `workflows/pipeline_workflow.md` | protocolo del grafo por estructura (D14) |
+| `claude/mcp.json` | sin entrada `graphify` de ámbito proyecto |
 | `docs/decisions/ADR-0026-dependency-advisory-check.md` | nuevo; enmienda `ADR-0024` (egress `api.osv.dev`) |
 | `.github/workflows/ci.yml` | job de avisos OSV y cron diario |
 | Rutas R1-R9 | renombradas |
@@ -224,6 +247,7 @@ Los hallazgos de J-01 y J-02 entran como filas nuevas `J-NN` de una línea al ce
 
 | Exclusion | Why, and where it goes instead |
 | :--- | :--- |
+| Análisis del lenguaje del framework: qué formato es el correcto para cada tipo de artefacto (Markdown, JSON, HTML u otro), medido y decidido | Decisión humana 2026-11-21: **primera unidad de Sprint 061**; Z-06 lo escribe en la roadmap |
 | `F-055-N1` (hooks y MCP del proyecto escribibles) | No lo cierra el broker; sigue abierto en `UPSTREAM_FINDINGS_FROM_HOSTS.md` |
 | Reescritura del historial público | Destructiva; decisión humana con la evidencia de D-04 |
 | Las 21 filas provisionales de `ADR-0023` y A1-d (`KI-059-28`) | Siguen abiertas; necesitan un archivo de settings de ámbito managed |
@@ -235,12 +259,14 @@ Los hallazgos de J-01 y J-02 entran como filas nuevas `J-NN` de una línea al ce
 
 Decisión humana 2026-11-21: el criterio es la ejecución del broker al 100%.
 
-1. Se cumple cuando `BROKER_MEASUREMENT.md` registra M1 a M5 en verde: M1 clave ilegible desde el
+1. Broker. Se cumple cuando `BROKER_MEASUREMENT.md` registra M1 a M5 en verde (M1-M4 en A-10, M5 en A-15): M1 clave ilegible desde el
 sandbox, M2 broker instalado no editable, M3 ningún token alcanzable, M4 cada rechazo
 de D4 observado, M5 las cinco operaciones (push, PR, merge, tag firmado, Release)
 ejecutadas por el agente con el ID de GitHub de cada una.
 
-Si una de M1 a M5 falla, la ejecución se detiene y el sprint **vuelve a Phase 1**: el
+2. Grafo como cerebro (decisión humana 2026-11-21). Se cumple cuando las cinco fases de D14 están en verde: `graph_battery.py` exit `0` (100 % estructural, 0 aristas invertidas); las herramientas de M-04 aparecen y responden en una sesión con registro de usuario; los perfiles M-07 a M-11 y `pipeline_workflow.md` tienen sus pasos; `check_graph_usage.py` exit `0` sobre las waves de 060 que siguen a M-15; `GRAPH_AB_MEASUREMENT.md` registra ≥ 30 % menos tokens `fresh`.
+
+Si una de las condiciones de 1 o 2 falla, la ejecución se detiene y el sprint **vuelve a Phase 1**: el
 plan se rehace con la medición que falló como entrada, y pasa otra vez por Phases 3 a
 5 antes de continuar. No se revierte a `gh` con el humano ni se cierra el sprint con el
 broker parcial.
