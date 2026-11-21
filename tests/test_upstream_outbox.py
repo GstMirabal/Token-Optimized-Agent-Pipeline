@@ -637,3 +637,21 @@ def test_pin_is_full_matched(pin: str) -> None:
     assert upstream_outbox.parse_pin(pin) is None
     assert "`pin` must be vX.Y.Z" in upstream_outbox.entry_errors(_entry(pin=pin))
     assert upstream_outbox.parse_pin(pin.strip()) == (4, 40, 0)
+
+
+def test_deltas_exits_2_naming_a_missing_rules_directory(tmp_path: Path) -> None:
+    """KI-058-5 a: a missing ``--rules`` directory read as an empty one (exit 0)."""
+    missing = tmp_path / "missing"
+    result = _run("deltas", str(_outbox(tmp_path)), "--rules", str(missing))
+    assert result.returncode == 2
+    assert str(missing) in result.stdout
+    assert "Traceback" not in result.stderr
+
+
+def test_deltas_keeps_exit_0_for_an_existing_empty_rules_directory(tmp_path: Path) -> None:
+    """Control for KI-058-5 a: an existing empty directory has no deltas and passes."""
+    rules = tmp_path / "rules"
+    rules.mkdir()
+    result = _run("deltas", str(_outbox(tmp_path)), "--rules", str(rules))
+    assert result.returncode == 0
+    assert result.stdout == ""

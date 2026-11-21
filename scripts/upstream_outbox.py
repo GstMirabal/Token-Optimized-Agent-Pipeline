@@ -720,7 +720,13 @@ def delta_tags(rules: Path) -> list[tuple[str, str]]:
 
     Returns:
         list[tuple[str, str]]: ``(<file>:<line>, <id>)`` in file and line order.
+
+    Raises:
+        OutboxError: ``rules`` is not an existing directory (``rglob`` on a
+            missing path yields nothing, which read as "no deltas").
     """
+    if not rules.is_dir():
+        raise OutboxError(f"--rules is not an existing directory: {rules}")
     tags: list[tuple[str, str]] = []
     for path in sorted(rules.rglob("*.md")):
         lines = read_text_file(path).splitlines()
