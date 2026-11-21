@@ -1,6 +1,6 @@
 {
-  "last_update": "2026-11-02",
-  "sprint_id": "058",
+  "last_update": "2026-11-21",
+  "sprint_id": "059",
   "_schema": "Entries are summary-only Knowledge Items. The 'file' field is omitted once the raw log has been purged (agents.md §4 definitive_amnesia) — the 1-line summary IS the retained knowledge.",
   "items": [
     {
@@ -222,6 +222,31 @@
     {
       "id": "F-20261102-S583",
       "summary": "Make a `Repro:` test fail on the parent with an assertion about the defect, not with an `AttributeError` on the name the fix adds (patch new names with `monkeypatch.setattr(..., raising=False)`), because Sprint 058 `6e6e024` first reproduced only the missing constant.",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20261121-S591",
+      "summary": "A `Repro: ... fails at <sha>` trailer goes stale when another commit lands on the shared tree while a fix agent works, so before accepting a `fix(` commit compare the trailer with `git rev-parse --short <commit>^`, re-verify the test fails at the real parent, and re-commit with the corrected trailer.",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20261121-S592",
+      "summary": "Marking a unit done makes `scripts/check_sprint_refs.py` require that unit's SHA in every `SPRINT_LOG.md` KI row that names it, so cite the SHA in those rows in the same commit that marks the unit.",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20261121-S593",
+      "summary": "`scripts/check_gate_log.py` requires a Remediation notes row for gate round N-1 before a round N row is accepted, even when round N-1 was `RECORD`, so record the last command run before dispatching round N with its exit code.",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20261121-S594",
+      "summary": "When briefing a writer to replace measured figures in a row, name the exact span to replace, because a brief saying to remove any other figure made the writer delete unrelated figures of the same row.",
+      "routing_class": "host"
+    },
+    {
+      "id": "F-20261121-S595",
+      "summary": "Gate a commit on checks whose exit code is read with `$?` from a run without a pipe, because `cmd | tail` returns the exit of `tail` and twice let a commit through after a failing check.",
       "routing_class": "host"
     }
   ]
