@@ -1,6 +1,6 @@
 # 📜 ADR-0020: The owner writes a bounded ledger seal without dispatching the writer
-**Status**: `Proposed`
-**Date**: 2026-11-19
+**Status**: `Accepted`
+**Date**: 2026-11-21
 **Triggers**: 2 (`rules/documentation_standard.md §3.1`) — changes a contract (`config/artifact_registry.json`'s schema) consumed by other containers (`scripts/check_role_artifact.py`, `scripts/docs_freshness_check.py`, `scripts/map_workflows.py`, `tests/test_artifact_registry.py`). Trigger #2 does not auto-escalate individually (`§3.2`), so this ADR is Nygard-format.
 **Amends**: `ADR-0017` (`docs/decisions/ADR-0017-typed-artifact-writer.md`). `ADR-0017` stays `Accepted` and is not edited; this ADR adds one exception to its §2 and leaves every other clause in force.
 
@@ -11,7 +11,7 @@
 | Fact | Where to verify |
 | :--- | :--- |
 | Finding `C-7` — "The owner/writer split costs a dispatch per trivial step (`ADR-0017`)" — was triaged "accept for debate (needs a new ADR)", Sprint 059 | `grep -n "C-7" docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` (line 2137) |
-| Sprint 059 plan rows: `P10` (the problem), `D7` (resolve with an ADR that amends `ADR-0017`; implement in the registry only if the ADR is approved), `D78` (bounds and enforcement), `F-01` (this file), `F-02` (the registry change), `F-03` (the check), `F-04` (the `ADR-0017` pointer) | `grep -nE "^\| (P10\|D7\|D78\|F-01\|F-02\|F-03\|F-04) " docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` |
+| Sprint 059 plan rows: `P10` (the problem), `D7` (resolve with an ADR that amends `ADR-0017`; implement in the registry only if the ADR is approved; approved 2026-11-21 as `D79`), `D78` (bounds and enforcement), `F-01` (this file), `F-02` (the registry change), `F-03` (the check), `F-04` (the `ADR-0017` pointer) | `grep -nE "^\| (P10\|D7\|D78\|F-01\|F-02\|F-03\|F-04) " docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` |
 | `ADR-0017` §2 splits each artifact into `role` (owner: accountable for content) and `writer` (what materializes the file); every `writer` must resolve to a profile holding `Write`/`Edit`, a script that exists, or a Makefile target that exists | `docs/decisions/ADR-0017-typed-artifact-writer.md` §2; `tests/test_artifact_registry.py::test_every_writer_resolves` |
 | Three artifacts have `role: Principal Agent` and a different `writer`: `IMPLEMENTATION_PLAN.md` (`orchestrator`), `PHASE_REGISTER.md` (`doc_orchestrator`), `CHANGELOG.md` (`doc_orchestrator`) | `grep -n -B3 -A2 '"role": "Principal Agent"' config/artifact_registry.json` |
 | The `principal_agent` profile declares no `Write` and no `Edit` | `grep -n "^tools:" agents/principal_agent.md` prints `tools: Read, Glob, Grep, TodoWrite` |
@@ -57,10 +57,10 @@
 | Consequence | Mapped to |
 | :--- | :--- |
 | The registry carries a second path to a file's bytes (owner as well as `writer`); a reader of `writer` alone no longer sees every legitimate author of an eligible artifact | `config/artifact_registry.json` `_fields` entry for `owner_writes`, added by unit `F-02` |
-| Encoding the condition in the registry is unit `F-02`; `F-02` runs only if this ADR is approved, and ends with `python3 scripts/check_role_artifact.py` exit 0 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` row `F-02` |
-| Conditions 2 and 3 are not checked by any script today: `scripts/check_role_artifact.py` does not read `owner_writes`. Unit `F-03` makes it exit non-zero for an owner commit on an `owner_writes` artifact above `max_added_lines` or `max_deleted_lines` by `git diff --numstat`, with a paired test in `tests/test_check_role_artifact.py`. `F-03` does not exist yet; it runs after `F-02`, only if this ADR is approved | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` row `F-03` |
-| `ADR-0017` carries no pointer to this ADR, because this ADR amends it and does not supersede it; a reader of `ADR-0017` alone would not learn of the exception. Unit `F-04` adds an `Amended by ADR-0020` line to the `ADR-0017` status (`rules/documentation_standard.md §6`, "annotated in place, never deleted"), only if this ADR is approved | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` row `F-04` |
-| If this ADR is not approved, `C-7` stays open in `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` and `F-02`, `F-03` and `F-04` each record `RECORD` with no change | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` rows `F-02`, `F-03`, `F-04` |
+| Encoding the condition in the registry is unit `F-02`; `F-02` is pending (this ADR is accepted) and ends with `python3 scripts/check_role_artifact.py` exit 0 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` row `F-02` |
+| Conditions 2 and 3 are not checked by any script today: `scripts/check_role_artifact.py` does not read `owner_writes`. Unit `F-03` makes it exit non-zero for an owner commit on an `owner_writes` artifact above `max_added_lines` or `max_deleted_lines` by `git diff --numstat`, with a paired test in `tests/test_check_role_artifact.py`. `F-03` does not exist yet; it is pending and runs after `F-02` | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` row `F-03` |
+| `ADR-0017` carries no pointer to this ADR, because this ADR amends it and does not supersede it; a reader of `ADR-0017` alone would not learn of the exception. Unit `F-04` adds an `Amended by ADR-0020` line to the `ADR-0017` status (`rules/documentation_standard.md §6`, "annotated in place, never deleted"); `F-04` is pending | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` row `F-04` |
+| The human approved this ADR on 2026-11-21 (plan decision `D79`), so `F-02`, `F-03` and `F-04` proceed; closing `C-7` in `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` is not done by this unit | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` rows `F-02`, `F-03`, `F-04` |
 
 ---
 *Immutable once Accepted — a changed decision gets a new ADR that supersedes this one, never an in-place edit (`rules/documentation_standard.md §3`). File lives at `docs/decisions/ADR-0020-owner-writer-dispatch.md`. Amends `ADR-0017` (`docs/decisions/ADR-0017-typed-artifact-writer.md`); source finding `C-7` (`docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md:2137`).*
