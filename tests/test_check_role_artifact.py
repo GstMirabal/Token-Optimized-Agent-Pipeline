@@ -434,6 +434,23 @@ def test_owner_commit_other_artifact_fails(check_mod, monkeypatch, tmp_path: Pat
     assert check_mod.main(["--owner-commit", sha]) != 0
 
 
+def test_owner_commit_seal_with_unregistered_file_exits_1(
+    check_mod, monkeypatch, tmp_path: Path, capsys
+) -> None:
+    """R32-2: a seal that also edits a file outside the registry is refused, naming it."""
+    repo = _owner_repo(monkeypatch, tmp_path, _BOUNDS)
+    (repo / "scripts").mkdir()
+    sha = _commit(
+        repo,
+        {
+            "CHANGELOG.md": _SEAL_BASE.replace("## [Unreleased]\n\n", _SEAL_HEAD),
+            "scripts/install.py": "x = 1\n",
+        },
+    )
+    assert check_mod.main(["--owner-commit", sha]) == 1
+    assert "scripts/install.py" in capsys.readouterr().err
+
+
 def test_owner_commit_bad_sha_exits_2(check_mod, monkeypatch, tmp_path: Path, capsys) -> None:
     _owner_repo(monkeypatch, tmp_path, _BOUNDS)
     assert check_mod.main(["--owner-commit", "deadbeef"]) == 2

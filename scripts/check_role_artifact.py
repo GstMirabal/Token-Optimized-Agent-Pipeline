@@ -613,6 +613,11 @@ def _owner_commit_errors(sha: str) -> list[str]:
         for err in [_owner_bounds_error(path, by_name[Path(path).name])]
         if err
     ]
+    errors += [
+        f"commit also touches {path}, which is not the owner_writes artifact"
+        for path in touched
+        if Path(path).name not in by_name
+    ]
     if errors or "CHANGELOG.md" not in touched:
         return errors or ["commit does not touch CHANGELOG.md"]
     if not _is_ledger_seal(sha):
@@ -633,7 +638,7 @@ def check_owner_commit(sha: str) -> int:
         sha: Commit the caller asserts is owner-written.
 
     Returns:
-        int: 0 when every condition holds; 2 on a refusal or any git failure.
+        int: 0 when every condition holds; 1 on a refusal; 2 on any git failure.
     """
     try:
         errors = _owner_commit_errors(sha)
@@ -642,7 +647,7 @@ def check_owner_commit(sha: str) -> int:
         return 2
     if errors:
         print(f"❌ [ROLE-ARTIFACT] --owner-commit {sha!r}: {'; '.join(errors)}", file=sys.stderr)
-        return 2
+        return 1
     print(f"✅ [ROLE-ARTIFACT] --owner-commit {sha!r} — within the owner_writes bound")
     return 0
 
