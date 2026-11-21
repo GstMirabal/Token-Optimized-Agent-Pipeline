@@ -110,6 +110,7 @@ import argparse
 import ast
 import io
 import json
+import os
 import sys
 import tokenize
 from dataclasses import dataclass
@@ -726,22 +727,121 @@ def _add_if_source_file(path: Path, all_suffixes: frozenset[str], found: set[Pat
         found.add(path)
 
 
+# Refusals of the current run: every refused path (reported once) and the
+# subset that makes the run non-compliant. `main` resets both per run.
+_REFUSED: set[Path] = set()
+_BLOCKING: set[Path] = set()
+
+
+def _reset_refusals() -> None:
+    """Forget the refusals of the previous run."""
+    _REFUSED.clear()
+    _BLOCKING.clear()
+
+
+def _refused(path: Path, exc: OSError, is_dir: bool = False) -> None:
+    """Record and report one OS-refused path on stderr, once per run.
+
+    A refused directory, or a refused file with a Python/JS/TS suffix, could
+    hold unaudited code: it blocks the run (`main` exits 2, fail-closed). A
+    refused `.env*` name (a secret file, not source) and any other refused
+    non-source file are skipped and do not change the exit code.
+
+    Args:
+        path: Path the OS refused to stat or list.
+        exc: The refusal; only its class name is printed, never content.
+        is_dir: True when the path is a directory (or of unknown kind).
+    """
+    if path in _REFUSED:
+        return
+    _REFUSED.add(path)
+    is_source = path.suffix.lower() in PY_SUFFIXES | JS_SUFFIXES
+    if not path.name.startswith(".env") and (is_dir or is_source):
+        _BLOCKING.add(path)
+    print(f"quality_audit: skipped (OS refused access): {path} [{type(exc).__name__}]", file=sys.stderr)
+
+
+def _is_file_safe(path: Path, report: bool = True) -> bool:
+    """`path.is_file()` that treats an OS refusal as "not a file".
+
+    Args:
+        path: Path to test.
+        report: Print the refused path on stderr when True.
+
+    Returns:
+        bool: True only for a readable regular file; False on refusal.
+    """
+    try:
+        return path.is_file()
+    except OSError as exc:
+        if report:
+            _refused(path, exc)
+        return False
+
+
+def _is_dir_safe(path: Path, report: bool = True) -> bool:
+    """`path.is_dir()` that treats an OS refusal as "not a directory".
+
+    Args:
+        path: Path to test.
+        report: Print the refused path on stderr when True.
+
+    Returns:
+        bool: True only for a readable directory; False on refusal.
+    """
+    try:
+        return path.is_dir()
+    except OSError as exc:
+        if report:
+            _refused(path, exc, is_dir=True)
+        return False
+
+
+def _refused_walk(exc: OSError) -> None:
+    """`os.walk` error callback: report the refused directory and continue.
+
+    Args:
+        exc: The listing error; `filename` carries the directory.
+    """
+    _refused(Path(str(exc.filename)), exc, is_dir=True)
+
+
+def _add_dir_files(
+    root: str, filenames: list[str], all_suffixes: frozenset[str], found: set[Path]
+) -> None:
+    """Add the source files among `filenames` of directory `root` to `found`.
+
+    Args:
+        root: Directory the names were listed in.
+        filenames: Entry names that are not directories.
+        all_suffixes: Scanned suffixes (`PY_SUFFIXES | JS_SUFFIXES`).
+        found: Accumulator set, mutated in place.
+    """
+    for name in filenames:
+        child = Path(root) / name
+        if _is_file_safe(child):
+            _add_if_source_file(child, all_suffixes, found)
+
+
 def _walk_directory(directory: Path, all_suffixes: frozenset[str], found: set[Path]) -> None:
     """Add every non-excluded source file under `directory` (recursive).
+
+    A path the OS refuses (stat or directory listing) is reported once on
+    stderr and skipped; the walk continues. A refused directory or source
+    file makes the run non-compliant (`main` exits 2, fail-closed, `agents.md
+    §1 fail_closed_claims`); a refused `.env*` is not source and stays
+    skipped without changing the exit code.
 
     Args:
         directory: Directory to walk.
         all_suffixes: Scanned suffixes (`PY_SUFFIXES | JS_SUFFIXES`).
         found: Accumulator set, mutated in place.
     """
-    for child in directory.rglob("*"):
-        if not child.is_file():
-            continue
-        # Only components BELOW the given root count: a root that itself sits
-        # under `node_modules/` is scanned (`D1`, Sprint 054).
-        if any(part in DEFAULT_EXCLUDE_DIRS for part in child.relative_to(directory).parts):
-            continue
-        _add_if_source_file(child, all_suffixes, found)
+    # Only components BELOW the given root count: a root that itself sits
+    # under `node_modules/` is scanned (`D1`, Sprint 054).
+    for root, dirnames, filenames in os.walk(directory, onerror=_refused_walk):
+        dirnames[:] = [d for d in dirnames if d not in DEFAULT_EXCLUDE_DIRS]
+        _add_dir_files(root, filenames, all_suffixes, found)
 
 
 def iter_source_files(paths: list[Path]) -> list[Path]:
@@ -749,10 +849,10 @@ def iter_source_files(paths: list[Path]) -> list[Path]:
     all_suffixes = PY_SUFFIXES | JS_SUFFIXES
     found: set[Path] = set()
     for given in paths:
-        if given.is_file():
+        if _is_file_safe(given):
             _add_if_source_file(given, all_suffixes, found)
             continue
-        if given.is_dir():
+        if _is_dir_safe(given):
             _walk_directory(given, all_suffixes, found)
     return sorted(found)
 
@@ -904,7 +1004,7 @@ def _unusable_input_message(targets: list[Path], files: list[Path]) -> str | Non
         one source file was found.
     """
     cwd = Path.cwd()
-    missing = [str(t) for t in targets if not (t.is_file() or t.is_dir())]
+    missing = [str(t) for t in targets if not (_is_file_safe(t, False) or _is_dir_safe(t, False))]
     if missing:
         return (
             f"quality_audit: path(s) not found: {', '.join(missing)} "
@@ -934,6 +1034,7 @@ def main(argv: list[str] | None = None) -> int:
     targets = args.paths or [Path(".")]
     root = Path(".")
     exclusions_path = args.exclusions or (root / DEFAULT_EXCLUSIONS_RELPATH)
+    _reset_refusals()
 
     try:
         exclude = load_exclusions(exclusions_path, root)
@@ -963,6 +1064,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"❌ quality_audit: {len(violations)} violation(s)", file=sys.stderr)
         for u in violations:
             print(f"   • {_format_unit_line(u)}", file=sys.stderr)
+        return 2
+    if _BLOCKING:
+        print(f"❌ quality_audit: {len(_BLOCKING)} refused path(s) not audited", file=sys.stderr)
         return 2
     n_files = len(iter_source_files(targets)) - len(_excluded_files(targets, exclude))
     print(

@@ -15,7 +15,8 @@
     "scope": "sprint — lives inside the sprint directory named in agents.md §5 mandatory_topology. repository — one per repository.",
     "host_path": "Path in a host project, relative to the host root.",
     "nucleus_path": "Path in the .agents nucleus, relative to the nucleus root. null where the artifact does not exist in nucleus mode.",
-    "required": "true when a gate refuses or warns on absence. ENFORCED TODAY ONLY FOR scope=sprint: the two gates above filter on scope==sprint && required. On scope=repository the field is declarative — it records that a protocol depends on the artifact, and no consumer filters on it yet. Stated rather than implied, because a field that looks enforced and is not is the defect class this sprint exists to remove."
+    "required": "true when a gate refuses or warns on absence. ENFORCED TODAY ONLY FOR scope=sprint: the two gates above filter on scope==sprint && required. On scope=repository the field is declarative — it records that a protocol depends on the artifact, and no consumer filters on it yet. Stated rather than implied, because a field that looks enforced and is not is the defect class this sprint exists to remove.",
+    "owner_writes": "Optional object on an artifact entry (ADR-0020, docs/decisions/ADR-0020-owner-writer-dispatch.md). Present only on an entry whose role is Principal Agent and whose eligible change is a ledger seal (CHANGELOG.md). Keys: max_added_lines (integer >= 1) and max_deleted_lines (integer >= 0), the per-commit bound under which the owner may write the file without dispatching the writer. Absent means every change dispatches the writer."
   },
   "gate_evidence": {
     "_purpose": "The two Double-Gate roles were the only pipeline roles owing no artifact, so a gate that never ran and a gate that reviewed thoroughly were indistinguishable to every automated check (Sprint 034 D17). Their evidence is not a file of their own — it is a row inside SPRINT_LOG.md.",
@@ -128,6 +129,7 @@
       "host_path": "CHANGELOG.md",
       "nucleus_path": "CHANGELOG.md",
       "required": true,
+      "owner_writes": {"max_added_lines": 5, "max_deleted_lines": 2},
       "note": "Same filename, separate jurisdictions: the host root file is the Master Ledger of the project, the nucleus file records framework evolution. The only crossover permitted is a pin-bump entry."
     },
     {

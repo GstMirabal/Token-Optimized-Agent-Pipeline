@@ -19,7 +19,7 @@ fail() { echo "❌ FAIL: $1" >&2; exit 1; }
 
 # --- Arrange: fake host with .agents as a submodule-style checkout ----------
 mkdir -p "$WORK/host/.agents"
-rsync -a --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
+rsync -a --include='.env.example' --include='.env.sample' --include='.env.template' --exclude='.env*' --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
   "$AGENTS_SRC/" "$WORK/host/.agents/"
 echo "gitdir: ../.git/modules/.agents" > "$WORK/host/.agents/.git"
 rm -f "$WORK/host/.agents/.bridge_claude.lock" "$WORK/host/.agents/.bridge_cursor.lock"
@@ -82,7 +82,7 @@ echo "✅ installer sandbox test PASSED"
 # ── Nucleus mode: a real .git directory must produce the minimal self-bridge ──
 NUCLEUS="$WORK/nucleus"
 mkdir -p "$NUCLEUS"
-rsync -a --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
+rsync -a --include='.env.example' --include='.env.sample' --include='.env.template' --exclude='.env*' --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
       --exclude='graphify-out' --exclude='.claude' "$AGENTS_SRC/" "$NUCLEUS/"
 mkdir -p "$NUCLEUS/.git"   # real dir -> nucleus detection
 rm -f "$NUCLEUS/.bridge_claude.lock" "$NUCLEUS/.bridge_cursor.lock" "$NUCLEUS/CLAUDE.md"
@@ -127,7 +127,7 @@ echo "✅ nucleus self-bridge test PASSED"
 # ── P4.1: --target cursor and --target both on a host with a real .git ───────
 HOST_CURSOR="$WORK/host-cursor"
 mkdir -p "$HOST_CURSOR/.agents"
-rsync -a --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
+rsync -a --include='.env.example' --include='.env.sample' --include='.env.template' --exclude='.env*' --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
   "$AGENTS_SRC/" "$HOST_CURSOR/.agents/"
 echo "gitdir: ../.git/modules/.agents" > "$HOST_CURSOR/.agents/.git"
 rm -f "$HOST_CURSOR/.agents/.bridge_claude.lock" "$HOST_CURSOR/.agents/.bridge_cursor.lock"
@@ -159,7 +159,7 @@ echo "✅ host --target cursor test PASSED"
 # ── F-049-1: --target cursor + --profile must not drop the profile silently ──
 HOST_CURSOR_PROFILE="$WORK/host-cursor-profile"
 mkdir -p "$HOST_CURSOR_PROFILE/.agents"
-rsync -a --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
+rsync -a --include='.env.example' --include='.env.sample' --include='.env.template' --exclude='.env*' --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
   "$AGENTS_SRC/" "$HOST_CURSOR_PROFILE/.agents/"
 echo "gitdir: ../.git/modules/.agents" > "$HOST_CURSOR_PROFILE/.agents/.git"
 rm -f "$HOST_CURSOR_PROFILE/.agents/.bridge_claude.lock" "$HOST_CURSOR_PROFILE/.agents/.bridge_cursor.lock"
@@ -179,7 +179,7 @@ echo "✅ host --target cursor --profile test PASSED (F-049-1)"
 
 HOST_BOTH="$WORK/host-both"
 mkdir -p "$HOST_BOTH/.agents"
-rsync -a --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
+rsync -a --include='.env.example' --include='.env.sample' --include='.env.template' --exclude='.env*' --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
   "$AGENTS_SRC/" "$HOST_BOTH/.agents/"
 echo "gitdir: ../.git/modules/.agents" > "$HOST_BOTH/.agents/.git"
 rm -f "$HOST_BOTH/.agents/.bridge_claude.lock" "$HOST_BOTH/.agents/.bridge_cursor.lock"
@@ -200,7 +200,7 @@ echo "✅ host --target both test PASSED"
 HOST_EXT="$WORK/host-ext-profile"
 EXTERNAL_PROFILE="$WORK/external-profile"
 mkdir -p "$HOST_EXT/.agents" "$EXTERNAL_PROFILE/agents" "$EXTERNAL_PROFILE/rules"
-rsync -a --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
+rsync -a --include='.env.example' --include='.env.sample' --include='.env.template' --exclude='.env*' --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
   "$AGENTS_SRC/" "$HOST_EXT/.agents/"
 echo "gitdir: ../.git/modules/.agents" > "$HOST_EXT/.agents/.git"
 cat > "$EXTERNAL_PROFILE/agents/custom_agent.md" <<'EOF'
@@ -255,7 +255,7 @@ test_existing_pre_commit_hook_is_not_overwritten() {
 # HEAD and the hooks are installed into .git/hooks.
 NUC_CLAUDE="$WORK/nucleus_claude_only"
 mkdir -p "$NUC_CLAUDE"
-rsync -a --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
+rsync -a --include='.env.example' --include='.env.sample' --include='.env.template' --exclude='.env*' --exclude='.git' --exclude='node_modules' --exclude='venv_skillopt' \
   --exclude='.claude' --exclude='.cursor' "$AGENTS_SRC/" "$NUC_CLAUDE/"
 rm -f "$NUC_CLAUDE/.bridge_claude.lock" "$NUC_CLAUDE/.bridge_cursor.lock"
 git -C "$NUC_CLAUDE" init -q

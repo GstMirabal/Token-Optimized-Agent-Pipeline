@@ -33,8 +33,8 @@ Governs Django-specific architecture the language-level rules cannot express: ap
 > `skills/django-expert-3rd/skills/`, which is where the vendored content starts.
 > `signals.py`, `receiver`, `post_save` and `pre_save` appear in zero files;
 > `signal` appears three times, all incidental — two ORM caveats that
-> `bulk_create()` and `update()` do not send them (`references/models-and-orm.md:249`,
-> `:281`) and one auth-logging import (`references/security-checklist.md:344`).
+> `bulk_create()` and `update()` do not send them (`references/models-and-orm.md`)
+> and one auth-logging import (`references/security-checklist.md`).
 > Every `decoupl*` match across the tree is the `python-decouple` library, all
 > four in `references/production-deployment.md`.
 >

@@ -125,15 +125,15 @@ def test_bad_range_exits_two(repo, capsys):
     assert "ERROR" in capsys.readouterr().err
 
 
-def test_worktree_removed_after_exception(repo, monkeypatch):
+def test_worktree_removed_after_exception(repo, capsys, monkeypatch):
     base = commit_fix(repo, {"calc.py": FIXED, "tests/test_calc.py": RED_TEST}, TRAILER)
 
     def boom(cwd, ids):
         raise RuntimeError("runner exploded")
 
     monkeypatch.setattr(cfr, "run_pytest", boom)
-    with pytest.raises(RuntimeError, match="exploded"):
-        cfr.main(["--range", f"{base}..HEAD", "--repo", str(repo)])
+    assert cfr.main(["--range", f"{base}..HEAD", "--repo", str(repo)]) == 2
+    assert "ERROR: RuntimeError: runner exploded" in capsys.readouterr().err
     listing = git(repo, "worktree", "list").splitlines()
     assert len(listing) == 1
 
@@ -240,7 +240,7 @@ def test_script_runs_under_isolated_mode() -> None:
     """`python3 -I` drops the script directory from `sys.path` (QA1-6)."""
     script = Path(__file__).resolve().parent.parent / "scripts" / "check_fix_reproduces.py"
     result = subprocess.run(
-        [sys.executable, "-I", str(script), "--help"],
+        [sys.executable, "-I", "-B", str(script), "--help"],
         capture_output=True,
         text=True,
         check=False,
@@ -413,3 +413,32 @@ def test_js_id_inspects_whole_file(repo):
     sha = git(repo, "rev-parse", "HEAD")
     lines = cfr.source_text_hits(repo, sha, ["web/a.test.ts::t"])
     assert lines == [f"SOURCE_TEXT {sha[:7]} web/a.test.ts::t: readFileSync("]
+
+
+def test_refused_worktree_add_exits_2_with_error_line_and_no_traceback(repo, capsys, monkeypatch):
+    base = commit_fix(repo, {"calc.py": FIXED, "tests/test_calc.py": RED_TEST}, TRAILER)
+    real_git = cfr._git
+
+    def refuse(r, *args):
+        if args[:2] == ("worktree", "add"):
+            return subprocess.CompletedProcess(
+                args, 128, "", "fatal: could not create '.git/worktrees': Read-only file system\nhint: x\n"
+            )
+        return real_git(r, *args)
+
+    monkeypatch.setattr(cfr, "_git", refuse)
+    code = cfr.main(["--range", f"{base}..HEAD", "--repo", str(repo)])
+    captured = capsys.readouterr()
+    assert code == 2
+    assert "ERROR: git worktree add refused: fatal: could not create" in captured.err
+    assert "hint: x" not in captured.err
+    assert "Traceback" not in captured.err + captured.out
+
+
+@pytest.mark.parametrize("subject", ["FIX: add", "FIX(calc): add", "Fix(calc): add", "fix(calc): add"])
+def test_uppercase_fix_subject_is_selected_like_lowercase(repo, subject):
+    """KI-058-5 d: any case of ``fix`` selects the commit, as lowercase ``fix(`` does."""
+    base = commit_fix(repo, {"calc.py": FIXED}, None, subject=subject)
+    head = git(repo, "rev-parse", "HEAD")
+    assert cfr.select_fixes(repo, [head]) == [head]
+    assert base != head

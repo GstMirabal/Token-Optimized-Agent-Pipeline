@@ -91,7 +91,7 @@ CHANNELS = ("A", "B", "C")
 # Applied with ``fullmatch``: ``$`` also matches before a trailing newline (QA2-1).
 ID_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
 STATUS_PATTERN = re.compile(r"(?:drafted|(?:sent|triaged|shipped|rejected):\S.*)")
-PIN_PATTERN = re.compile(r"v?(\d+)\.(\d+)\.(\d+)")
+PIN_PATTERN = re.compile(r"v?([0-9]+)\.([0-9]+)\.([0-9]+)")
 SPRINT_SUFFIX = re.compile(r"#(\d+)\s*$")
 DELTA_TAG = re.compile(r"outbox:([A-Za-z0-9][A-Za-z0-9._-]*)")
 SCAN_FAMILIES = (
@@ -197,12 +197,10 @@ def load_json(path: Path) -> Any:
 def read_text_file(path: Path) -> str:
     """Read a UTF-8 text file that is not JSON (issue body, titles, rule file).
 
-    Known open violation (``KI-058-4``, Sprint 058 ``SPRINT_LOG.md``): this
-    function does not do the regular-file check and byte cap that
-    ``agents.md §1`` ``exception_handling`` requires for a path supplied by a
-    host or by data. It serves ``--body-file``, ``--open-titles-file`` and the
-    ``deltas`` rule files. Deferred because changing its lines would open a
-    second remediation chain; do not read this docstring as a guarantee.
+    The read goes through ``read_regular_bytes``: a FIFO, a device, a directory
+    or a file over ``MAX_READ_BYTES`` is refused instead of blocking or
+    exhausting memory. It serves ``--body-file``, ``--open-titles-file`` and the
+    ``deltas`` rule files.
 
     Args:
         path: File to read.
@@ -211,11 +209,13 @@ def read_text_file(path: Path) -> str:
         str: The file's text.
 
     Raises:
-        OutboxError: When the file is absent or unreadable (``OSError``) or
-            not UTF-8 (``UnicodeDecodeError``, a ``ValueError``).
+        OutboxError: When the file is absent or unreadable, is not a regular
+            file or is larger than ``MAX_READ_BYTES`` (an ``OSError`` from
+            ``read_regular_bytes``), or is not UTF-8 (``UnicodeDecodeError``,
+            a ``ValueError``).
     """
     try:
-        return path.read_text(encoding="utf-8")
+        return read_regular_bytes(path).decode("utf-8")
     except (OSError, ValueError) as exc:
         raise OutboxError(f"{path}: {exc}") from exc
 
@@ -571,6 +571,10 @@ def cmd_export(args: argparse.Namespace) -> int:
 
     Returns:
         int: 0 when the body was written, 2 when the export is refused.
+
+    Raises:
+        OutboxError: ``--out`` has no existing parent directory or the body
+            cannot be written; ``main`` turns it into exit 2.
     """
     matches = [e for e in load_entries(Path(args.outbox)) if e.get("id") == args.id]
     if len(matches) != 1:
@@ -581,7 +585,12 @@ def cmd_export(args: argparse.Namespace) -> int:
         print(f"[FAIL] {args.id}: export refused — {refusal}")
         return 2
     out = Path(args.out)
-    out.write_text(render_issue_body(matches[0]), encoding="utf-8")
+    if not out.parent.is_dir():
+        raise OutboxError(f"--out directory does not exist: {out.parent}")
+    try:
+        out.write_text(render_issue_body(matches[0]), encoding="utf-8")
+    except OSError as exc:
+        raise OutboxError(f"{out}: {exc}") from exc
     slug = load_json(agents_root() / IDENTITY_PATH)["framework_repo_slug"]
     command = [
         "gh", "issue", "create", "--repo", slug, "--title", matches[0]["title"],
@@ -720,7 +729,13 @@ def delta_tags(rules: Path) -> list[tuple[str, str]]:
 
     Returns:
         list[tuple[str, str]]: ``(<file>:<line>, <id>)`` in file and line order.
+
+    Raises:
+        OutboxError: ``rules`` is not an existing directory (``rglob`` on a
+            missing path yields nothing, which read as "no deltas").
     """
+    if not rules.is_dir():
+        raise OutboxError(f"--rules is not an existing directory: {rules}")
     tags: list[tuple[str, str]] = []
     for path in sorted(rules.rglob("*.md")):
         lines = read_text_file(path).splitlines()

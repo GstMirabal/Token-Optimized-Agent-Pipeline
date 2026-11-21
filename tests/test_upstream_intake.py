@@ -426,7 +426,7 @@ def test_host_that_hangs_for_any_cause_times_out_and_the_others_are_listed(
 
     def command() -> list[str]:
         # Only the first host hangs: the first call, i.e. the first registered host.
-        return [sys.executable, "-I", *HANG_CHILDREN[cause]]
+        return [sys.executable, "-I", "-B", *HANG_CHILDREN[cause]]
 
     calls = {"n": 0}
 
@@ -454,7 +454,7 @@ def test_malformed_child_output_is_reported_without_echo(
 ) -> None:
     root = _two_hosts(tmp_path, str(tmp_path / "x.json"))
     emit = ["-c", f"import sys; print({output!r}); print('HOST-TEXT-MUST-NOT-PRINT', file=sys.stderr)"]
-    monkeypatch.setattr(upstream_intake, "child_command", lambda: [sys.executable, "-I", *emit])
+    monkeypatch.setattr(upstream_intake, "child_command", lambda: [sys.executable, "-I", "-B", *emit])
     lines, healthy = upstream_intake.intake_lines(root)
     captured = capsys.readouterr()
     assert not healthy

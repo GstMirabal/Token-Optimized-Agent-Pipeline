@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import json
 import sys
+from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
@@ -158,6 +159,114 @@ def test_main_exit_0_when_clean(tmp_path: Path) -> None:
     code = qa.main([str(path)])
 
     assert code == 0
+
+
+@pytest.fixture
+def _restore_modes(tmp_path: Path) -> Iterator[list[Path]]:
+    """Yield a list of paths; restore owner access on them at teardown."""
+    locked: list[Path] = []
+    yield locked
+    for item in locked:
+        item.chmod(0o755 if item.is_dir() else 0o644)
+
+
+def _skip_if_chmod_not_enforced(probe: Path) -> None:
+    """Skip when the OS lets the owner read a mode-000 path (root, odd FS)."""
+    try:
+        list(probe.iterdir()) if probe.is_dir() else probe.read_bytes()
+    except OSError:
+        return
+    pytest.skip("chmod 000 does not block this user")
+
+
+def test_refused_directory_with_source_exits_2(
+    tmp_path: Path, _restore_modes: list[Path], capsys: pytest.CaptureFixture[str]
+) -> None:
+    (tmp_path / "ok.py").write_text("def ok():\n    return 1\n", encoding="utf-8")
+    locked = tmp_path / "locked"
+    locked.mkdir()
+    (locked / "hidden.py").write_text("def h():\n    return 1\n", encoding="utf-8")
+    locked.chmod(0o000)
+    _restore_modes.append(locked)
+    _skip_if_chmod_not_enforced(locked)
+
+    code = qa.main([str(tmp_path)])
+
+    assert code == 2
+    assert "OS refused access" in capsys.readouterr().err
+
+
+def test_refused_root_env_is_skipped_exit_0(
+    tmp_path: Path, _restore_modes: list[Path], capsys: pytest.CaptureFixture[str]
+) -> None:
+    (tmp_path / "ok.py").write_text("def ok():\n    return 1\n", encoding="utf-8")
+    env = tmp_path / ".env"
+    env.write_text("K=v\n", encoding="utf-8")
+    env.chmod(0o000)
+    _restore_modes.append(env)
+    qa._reset_refusals()
+
+    qa._refused(env, PermissionError(), is_dir=False)
+
+    assert not qa._BLOCKING
+    assert qa.main([str(tmp_path)]) == 0
+    assert "violation(s)" not in capsys.readouterr().err
+
+
+def test_refused_source_file_exits_2(
+    tmp_path: Path, _restore_modes: list[Path], capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A listable directory whose source file stat is refused blocks the run."""
+    (tmp_path / "ok.py").write_text("def ok():\n    return 1\n", encoding="utf-8")
+    folder = tmp_path / "listed"
+    folder.mkdir()
+    hidden = folder / "hidden.py"
+    hidden.write_text("def h():\n    return 1\n", encoding="utf-8")
+    folder.chmod(0o444)
+    _restore_modes.append(folder)
+    _skip_if_chmod_not_enforced(hidden)
+
+    code = qa.main([str(tmp_path)])
+
+    assert code == 2
+    assert f"{hidden} [" in capsys.readouterr().err
+
+
+def test_refused_env_named_source_reaches_main_and_exits_0(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A `.env*` path refused at the stat boundary is reported, not blocking."""
+    (tmp_path / "ok.py").write_text("def ok():\n    return 1\n", encoding="utf-8")
+    env = tmp_path / ".env.py"
+    env.write_text("K = 1\n", encoding="utf-8")
+    real_is_file = Path.is_file
+
+    def refuse_env(self: Path) -> bool:
+        if self.name.startswith(".env"):
+            raise PermissionError(13, "Permission denied", str(self))
+        return real_is_file(self)
+
+    monkeypatch.setattr(Path, "is_file", refuse_env)
+
+    code = qa.main([str(tmp_path)])
+
+    assert code == 0
+    assert f"{env} [PermissionError]" in capsys.readouterr().err
+
+
+def test_refused_path_is_reported_once_per_run(
+    tmp_path: Path, _restore_modes: list[Path], capsys: pytest.CaptureFixture[str]
+) -> None:
+    (tmp_path / "ok.py").write_text("def ok():\n    return 1\n", encoding="utf-8")
+    locked = tmp_path / "locked"
+    locked.mkdir()
+    locked.chmod(0o000)
+    _restore_modes.append(locked)
+    _skip_if_chmod_not_enforced(locked)
+
+    qa.main([str(tmp_path)])
+
+    assert capsys.readouterr().err.count(f"{locked} [") == 1
 
 
 def test_main_report_exits_0_even_with_violation(tmp_path: Path) -> None:
@@ -1132,3 +1241,25 @@ def test_js_blank_row_inside_a_template_literal_still_counts(tmp_path: Path) -> 
     rows 2-4 (`const x = ` + backtick, blank, closing backtick) -> 3 + return."""
     source = "function f() {\n  const x = `\n\n`;\n  return x;\n}\n"
     assert _measure_js_function(tmp_path, source, "f") == 4
+
+
+def test_walk_skips_os_refused_path_and_reports_it(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """R-15: a path whose stat raises PermissionError is skipped, named on stderr."""
+    (tmp_path / "good.py").write_text("x = 1\n")
+    (tmp_path / ".env").write_text("SECRET=1\n")
+    real_is_file = Path.is_file
+
+    def refusing_is_file(self: Path) -> bool:
+        if self.name == ".env":
+            raise PermissionError(1, "Operation not permitted", str(self))
+        return real_is_file(self)
+
+    monkeypatch.setattr(Path, "is_file", refusing_is_file)
+    files = qa.iter_source_files([tmp_path])
+    err = capsys.readouterr().err
+    assert files == [tmp_path / "good.py"]
+    assert str(tmp_path / ".env") in err
+    assert "SECRET" not in err
+    assert qa.main([str(tmp_path)]) == 0

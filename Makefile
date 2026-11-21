@@ -13,7 +13,6 @@
 #     they keep the caller's CWD — that is the tree they are meant to inspect.
 
 AGENTS_DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
-GRAPHIFY := $(AGENTS_DIR)/venv_skillopt/bin/python -I -m graphify
 PY_EXCLUDES := -not -path "*/.git/*" -not -path "*/node_modules/*" -not -path "*/venv_skillopt/*"
 
 # Prefer the framework venv when it exists (a local checkout, where pytest lives
@@ -26,12 +25,12 @@ PY_EXCLUDES := -not -path "*/.git/*" -not -path "*/node_modules/*" -not -path "*
 VENV_PY := $(AGENTS_DIR)/venv_skillopt/bin/python3
 PY := $(if $(wildcard $(VENV_PY)),$(VENV_PY),python3)
 
-.PHONY: graphify-update graphify-rebuild graphify-deep verify docs-freshness-check session-start model-ledger cursor-tiers cursor-era-audit bridge-state role-artifacts quality-audit
+.PHONY: graphify-update graphify-rebuild graphify-deep verify docs-freshness-check session-start model-ledger cursor-tiers cursor-era-audit bridge-state role-artifacts quality-audit sandbox-probe
 
 
 # Incremental AST sync after code changes (close_workflow Phase 1, no LLM cost).
 graphify-update:
-	$(GRAPHIFY) update .
+	$(AGENTS_DIR)/venv_skillopt/bin/python -I $(AGENTS_DIR)/scripts/graph_update.py
 	python3 $(AGENTS_DIR)/scripts/graph_reconcile.py --root .
 
 # Full AST rebuild — required when documentation changed (close_workflow Phase 1,
@@ -41,7 +40,7 @@ graphify-update:
 # Deep semantic rebuild stays available as a manual escalation:
 #   make graphify-deep   # needs a provider key in .env
 graphify-rebuild:
-	$(AGENTS_DIR)/venv_skillopt/bin/python -I -m graphify update . --force
+	$(AGENTS_DIR)/venv_skillopt/bin/python -I $(AGENTS_DIR)/scripts/graph_update.py --force
 	python3 $(AGENTS_DIR)/scripts/graph_reconcile.py --root .
 
 # Semantic rebuild that needs a provider key from `.env`. It runs the named
@@ -66,6 +65,8 @@ graphify-deep:
 # The only CI step deliberately NOT here is the Vale prose lint: it is a GitHub
 # Action, not a command. Anything requiring network or credentials stays out of
 # this target by the same rule.
+# PYTHONDONTWRITEBYTECODE keeps verify from writing .pyc files in the tree (plan D41).
+verify: export PYTHONDONTWRITEBYTECODE := 1
 verify:
 	cd $(AGENTS_DIR) && python3 skills/slash-commander/scripts/verify_commands.py
 	cd $(AGENTS_DIR) && python3 scripts/py_compile_tree.py
@@ -76,6 +77,7 @@ verify:
 	cd $(AGENTS_DIR) && python3 skills/token-saver-auditor/scripts/audit_plan.py --current-sprint
 	cd $(AGENTS_DIR) && python3 scripts/check_task_scope.py --current-sprint
 	cd $(AGENTS_DIR) && python3 scripts/check_gate_log.py --current-sprint
+	cd $(AGENTS_DIR) && python3 scripts/check_sprint_refs.py --current-sprint
 	cd $(AGENTS_DIR) && python3 scripts/check_template_gates.py
 	cd $(AGENTS_DIR) && python3 scripts/verify_references.py
 	cd $(AGENTS_DIR) && $(PY) scripts/check_model_tiers.py
@@ -86,10 +88,9 @@ verify:
 	cd $(AGENTS_DIR) && python3 scripts/check_manifest_parity.py
 	cd $(AGENTS_DIR) && python3 scripts/check_absolute_paths.py
 	cd $(AGENTS_DIR) && python3 skills/topology-monitor/scripts/legacy_app_auditor.py
-	cd $(AGENTS_DIR) && $(PY) -m ruff check .
+	cd $(AGENTS_DIR) && $(PY) -m ruff check --no-cache .
 	cd $(AGENTS_DIR) && $(PY) scripts/quality_audit.py .
-	cd $(AGENTS_DIR) && python3 skills/mass-standardizer/scripts/generate_manifest.py \
-	  && git -C $(AGENTS_DIR) diff --exit-code skills/manifest_skills.json
+	cd $(AGENTS_DIR) && python3 skills/mass-standardizer/scripts/generate_manifest.py --check
 # A test must not leave the tracked tree changed. Once `C0.3` anchored
 # `branch_sovereignty.WAIVERS` to the framework root, a test that had been
 # writing into its own tmp_path started overwriting the real
@@ -103,7 +104,7 @@ verify:
 # first version of this check compared against HEAD and failed on its own
 # author's unstaged edits.
 	cd $(AGENTS_DIR) && before=$$(git diff -- config/ hooks/ scripts/); \
-	  $(PY) -m pytest tests/ -q || exit 1; \
+	  $(PY) -m pytest -p no:cacheprovider tests/ -q || exit 1; \
 	  bash tests/test_installer.sh || exit 1; \
 	  after=$$(git diff -- config/ hooks/ scripts/); \
 	  if [ "$$before" != "$$after" ]; then \
@@ -146,6 +147,12 @@ cursor-era-audit:
 # running `make verify` is a local-environment fact, not a code defect.
 bridge-state:
 	cd $(AGENTS_DIR) && python3 scripts/bridge_state.py
+
+# Re-measures the closed sandbox cases (M7, M9, A1, B2) against the live
+# sandbox (Sprint 059, S-15). Not a `verify` dependency: the result depends on
+# the running CLI's sandbox and is environment-specific. Exit code propagates.
+sandbox-probe:
+	cd $(AGENTS_DIR) && python3 scripts/sandbox_probe.py
 
 # Deterministic function-length/nesting-depth auditor (Sprint 050). A `verify`
 # step since Sprint 052 (U66): Sprint 050 withheld the wiring (D5 branch B)

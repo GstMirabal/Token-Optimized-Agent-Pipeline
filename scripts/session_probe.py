@@ -48,8 +48,6 @@ from _mode import is_nucleus as _is_nucleus
 
 logger = logging.getLogger(__name__)
 
-HARD_RATIO = 15  # rules/token_economy.md §3.1
-
 ACTIVE_STATE = Path("docs/active_state.json")
 GRAPH = Path("graphify-out/graph.json")
 PLATFORM_TTL_DAYS = 7
@@ -714,15 +712,15 @@ def probe_cost(state: dict) -> str | None:
         return None
 
     breaches = [(n, c) for n, c in enumerate(result["cycles"], 1)
-                if (c["ratio"] or 0) > HARD_RATIO]
+                if c["peak"] >= session_cost.HARD_CONTEXT]
     if not breaches:
         return None
-    worst = max(breaches, key=lambda pair: pair[1]["ratio"])
+    worst = max(breaches, key=lambda pair: pair[1]["peak"])
     return (
         f"Previous session ({result['session'][:8]}) had {len(breaches)} context "
-        f"cycle(s) past the hard bound of {HARD_RATIO}x — worst was cycle "
-        f"{worst[0]} at {worst[1]['ratio']}x its first turn "
-        f"({worst[1]['peak']:,} tokens). Cost is the area under the sawtooth, and "
+        f"cycle(s) at or past the hard bound of "
+        f"{session_cost.HARD_CONTEXT:,} tokens of context — worst was cycle "
+        f"{worst[0]} at a peak of {worst[1]['peak']:,} tokens. Cost is the area under the sawtooth, and "
         f"compaction resets the axis without reducing it "
         f"(`rules/token_economy.md §3.1`). Reproduce: "
         f"`python3 .agents/scripts/session_cost.py --session {result['session']}`."

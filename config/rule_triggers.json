@@ -53,9 +53,12 @@
         "docker-compose*.yml",
         "**/Dockerfile",
         "scripts/**",
-        "hooks/**"
+        "hooks/**",
+        "**/pnpm-workspace.yaml",
+        "**/package.json",
+        "**/.npmrc"
       ],
-      "trigger_prose": "Running local commands, choosing interpreters/paths, or touching DB containers."
+      "trigger_prose": "Running local commands, choosing interpreters/paths, installing packages, or touching DB containers."
     },
     {
       "path": "rules/skills_and_integrations.md",
@@ -98,9 +101,10 @@
         "docs/**",
         "architecture/**",
         "roadmaps/**",
-        "walkthroughs/**"
+        "walkthroughs/**",
+        "rules/*.md"
       ],
-      "trigger_prose": "Creating/updating any document under `docs/`, authoring an ADR, or running `docs-freshness-check`."
+      "trigger_prose": "Editing any document under `docs/` or `rules/`, authoring an ADR, or running `docs-freshness-check`."
     },
     {
       "path": "rules/LEGACY_RULE_CONCORDANCE.md",

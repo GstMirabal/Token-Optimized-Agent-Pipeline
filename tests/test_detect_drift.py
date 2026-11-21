@@ -456,9 +456,8 @@ def test_verdict_m_when_only_some_commits_are_unsealed(repo: Path) -> None:
 def test_an_integration_branch_on_a_remote_not_named_origin_still_blocks(
     repo: Path,
 ) -> None:
-    """Gate 2 finding 1. `agents.md §4 feedback_upstream` mandates the fork
-    workflow, which leaves the integration branch on `upstream/`. Consulting only
-    `origin/` reopened the `charter` hole Gate 1 rejected round 1 for — and it was
+    """Gate 2 finding 1. A fork workflow leaves the integration branch on
+    `upstream/`. Consulting only `origin/` reopened the `charter` hole Gate 1 rejected round 1 for — and it was
     the one place HEAD was less safe than the baseline."""
     _seal(repo)
     baseline = _head(repo)

@@ -1043,3 +1043,43 @@ def test_main_dispatches_unblock(repo: Path, monkeypatch: pytest.MonkeyPatch):
 
     assert ss.main() == 0
     assert _read_sprint(repo)["status"] == "OPEN"
+
+
+# --- suspend between sprints: sealed sprint, session still IN_PROGRESS -----
+
+def _sealed_in_progress(root: Path) -> dict:
+    state = {
+        "session_id": "session-A",
+        "status": ss.IN_PROGRESS,
+        "last_close_commit": "abc123deadbeef00000000000000000000000000",
+        "current_sprint": {"id": 58, "status": ss.CLOSED},
+    }
+    (root / "docs" / "active_state.json").write_text(json.dumps(state), encoding="utf-8")
+    return state
+
+
+def test_suspend_over_a_sealed_sprint_releases_the_session_lock(
+    repo: Path, monkeypatch: pytest.MonkeyPatch
+):
+    before = _sealed_in_progress(repo)
+    monkeypatch.setattr(ss, "mirror_active_state", lambda: None)
+    assert ss.suspend() == 0
+    after = _read_anchor(repo)
+    assert after["status"] != ss.IN_PROGRESS
+    assert after["current_sprint"] == before["current_sprint"]
+    assert after["last_close_commit"] == before["last_close_commit"]
+    # The next boot, from any session, is no longer refused.
+    assert ss.claim("session-B", takeover=False, tool="terminal") == 0
+
+
+def test_suspend_over_a_sealed_sprint_leaves_another_sessions_lock(
+    repo: Path, monkeypatch: pytest.MonkeyPatch
+):
+    before = _sealed_in_progress(repo)
+    monkeypatch.setattr(ss, "mirror_active_state", lambda: None)
+    assert ss.suspend("session-B") == 0
+    assert _read_anchor(repo) == before
+
+
+def _read_anchor(root: Path) -> dict:
+    return json.loads((root / "docs" / "active_state.json").read_text(encoding="utf-8"))

@@ -15,14 +15,16 @@ carrying `input_tokens`, `output_tokens`, `cache_read_input_tokens` and
 **A session is a sawtooth, and that is the whole point of this script.** An
 earlier measurement of this repository reported cost growing monotonically with
 message position — quartiles of 7/15/23/54%. Re-measured over a full session the
-quartiles are 157K/681K/245K/485K, because compaction resets the context window.
+quartiles are 157K/681K/245K/485K (Sprint 021, unit not recorded), because
+compaction resets the context window.
 The first measurement covered only the first cycle, at a scope never declared.
 
 So the unit is the **context cycle**, not the session: cost is the area under the
 sawtooth, and compaction resets the x axis without reducing that area. Measured
-across four cycles of one session — peaks of 849K, 995K, 361K and 631K against a
-reset point of ~22K — the cycle that cost most per message was the *shortest*:
-113 messages reached 995K and spent 99.5M, nearly matching a 414-message cycle.
+on `cache_read` (Sprint 021) across four cycles of one session — `cache_read`
+peaks of 849K, 995K, 361K and 631K against a `cache_read` reset point of ~22K —
+the cycle that cost most per message was the *shortest*: 113 messages reached
+995K and spent 99.5M of `cache_read`, nearly matching a 414-message cycle.
 **Cost tracks peak height, not message count.**
 
 Reported in tokens, never in currency. The per-family price ratio belongs to
@@ -36,10 +38,17 @@ Usage:
     python3 scripts/session_cost.py                 # newest session, this project
     python3 scripts/session_cost.py --session <uid>
     python3 scripts/session_cost.py --json
+    python3 scripts/session_cost.py --bound [--session <uid>] [--json]
+
+`--bound` classifies the latest turn of the current cycle (the last one after
+any compaction) as `OK`, `SOFT` or `HARD` (ADR-0018 decisions 1 and 2). It only
+warns: the three statuses exit 0 (D3).
 
 Exit codes:
     0 — measured, or nothing measurable and said so
     1 — the named session does not exist
+    2 — `--bound` could not measure (unreadable or unmeasurable transcript);
+        never reported as `OK`
 """
 
 import argparse
@@ -50,11 +59,17 @@ from pathlib import Path
 
 PROJECTS = Path.home() / ".claude" / "projects"
 
-# A context reset shows as a collapse in cache_read: the window was rebuilt from
-# a summary. Both bounds matter — the floor keeps ordinary small turns early in a
+# A context reset shows as a collapse in context size (`context_size`): the window
+# was rebuilt from a summary. A cache expiry zeroes cache_read but leaves the
+# window unchanged, so it is not a reset. Both bounds matter — the floor keeps ordinary small turns early in a
 # cycle from registering as resets, and the ratio keeps normal variation out.
 RESET_FLOOR = 100_000
 RESET_RATIO = 0.5
+
+# ADR-0018 decision 1: absolute context size at which the bound is HARD.
+HARD_CONTEXT = 550_000
+# ADR-0018 decision 2: multiple of the cycle's first-turn context that is SOFT.
+SOFT_RATIO = 5
 
 SYNTHETIC = "<synthetic>"
 FIELDS = ("input_tokens", "output_tokens",
@@ -69,6 +84,13 @@ def project_slug(path: Path) -> str:
 def read_turns(transcript: Path) -> tuple[list[dict], int]:
     """Every usage-bearing turn in a transcript, and how many were synthetic.
 
+    Claude Code writes one API message across several records that share
+    `message.id`, so each id is counted once, from its first record, and turns
+    keep the order of first appearance. A record with no `id` has nothing to
+    deduplicate on and is counted once per record. Records of one id carried
+    identical usage in every transcript measured, so which one represents the
+    message does not change a total.
+
     Args:
         transcript: path to a `<session-uid>.jsonl` file.
 
@@ -77,6 +99,7 @@ def read_turns(transcript: Path) -> tuple[list[dict], int]:
             count of `<synthetic>` entries skipped).
     """
     turns, skipped = [], 0
+    seen: set[str] = set()
     for line in transcript.read_text(encoding="utf-8", errors="replace").splitlines():
         try:
             record = json.loads(line)
@@ -91,16 +114,41 @@ def read_turns(transcript: Path) -> tuple[list[dict], int]:
             # Not an API call: counting these inflates every total.
             skipped += 1
             continue
+        message_id = message.get("id")
+        if message_id in seen:
+            continue
+        if message_id:
+            seen.add(message_id)
         turn = {"model": model}
         turn.update({field: usage.get(field, 0) for field in FIELDS})
         turns.append(turn)
     return turns, skipped
 
 
+def context_size(turn: dict) -> int:
+    """Tokens in the window on one turn: `cache_read + cache_creation + input`.
+
+    `cache_read` alone is the cached part only. A cold-cache turn writes the
+    window instead of reading it (`cache_read` 0), so the window size of every
+    turn is the sum of the three input-side fields (`F-116-N1`).
+
+    Args:
+        turn: a turn as returned by `read_turns`.
+
+    Returns:
+        int: input-side tokens of the turn.
+    """
+    return (turn["cache_read_input_tokens"]
+            + turn["cache_creation_input_tokens"]
+            + turn["input_tokens"])
+
+
 def segment_cycles(turns: list[dict]) -> list[list[dict]]:
     """Split turns into context cycles at each window reset.
 
-    Compaction rebuilds the window from a summary, so `cache_read` collapses.
+    Compaction rebuilds the window from a summary, so the context size
+    (`context_size`) collapses. A cache expiry zeroes `cache_read` while the
+    window stays the same, so it never cuts.
     Measuring a bound against the *session's* first turn would therefore stop
     firing after the first reset; the cycle is the unit that keeps meaning.
 
@@ -114,8 +162,8 @@ def segment_cycles(turns: list[dict]) -> list[list[dict]]:
         return []
     cuts = [0]
     for index in range(1, len(turns)):
-        previous = turns[index - 1]["cache_read_input_tokens"]
-        current = turns[index]["cache_read_input_tokens"]
+        previous = context_size(turns[index - 1])
+        current = context_size(turns[index])
         if previous > RESET_FLOOR and current < previous * RESET_RATIO:
             cuts.append(index)
     cuts.append(len(turns))
@@ -123,9 +171,12 @@ def segment_cycles(turns: list[dict]) -> list[list[dict]]:
 
 
 def cycle_summary(cycle: list[dict]) -> dict:
-    """First turn, peak, ratio and totals for one context cycle."""
-    reads = [turn["cache_read_input_tokens"] for turn in cycle]
-    first, peak = reads[0], max(reads)
+    """First turn, peak, ratio and totals for one context cycle.
+
+    `first_turn` and `peak` are context sizes (`context_size`), one measure.
+    """
+    sizes = [context_size(turn) for turn in cycle]
+    first, peak = sizes[0], max(sizes)
     return {
         "messages": len(cycle),
         "first_turn": first,
@@ -231,6 +282,68 @@ def render(result: dict) -> None:
           f"\n  compaction resets the axis without reducing it.")
 
 
+def bound_status(transcript: Path) -> dict:
+    """Classify the latest turn of the current cycle as OK, SOFT or HARD.
+
+    HARD is an absolute context size (`HARD_CONTEXT`), independent of the first
+    turn. SOFT applies when not HARD and the context exceeds `SOFT_RATIO` times
+    the first-turn context of the same cycle (strictly: exactly 5x is OK).
+
+    Args:
+        transcript: path to a `<session-uid>.jsonl` file.
+
+    Returns:
+        dict: `status`, `context`, `first_turn`, `ratio` and `session`.
+
+    Raises:
+        ValueError: the transcript has no usage data, or the first-turn context
+            is zero while the latest is below `HARD_CONTEXT` (OK and SOFT cannot
+            be told apart). With a zero first turn at HARD, `ratio` is None.
+        OSError: the transcript cannot be read.
+    """
+    turns, _ = read_turns(transcript)
+    cycles = segment_cycles(turns)
+    if not cycles:
+        raise ValueError("no usage data in this transcript")
+    cycle = cycles[-1]
+    first, latest = context_size(cycle[0]), context_size(cycle[-1])
+    if not first and latest < HARD_CONTEXT:
+        raise ValueError("the current cycle's first turn has no context")
+    if latest >= HARD_CONTEXT:
+        status = "HARD"
+    elif latest > SOFT_RATIO * first:
+        status = "SOFT"
+    else:
+        status = "OK"
+    return {"status": status, "context": latest, "first_turn": first,
+            "ratio": round(latest / first, 1) if first else None,
+            "session": transcript.stem}
+
+
+def run_bound(transcript: Path, as_json: bool) -> int:
+    """`--bound` mode: print one status line (or JSON) for the session.
+
+    Args:
+        transcript: path to the session transcript.
+        as_json: True to print the fields as JSON.
+
+    Returns:
+        int: 0 for OK, SOFT and HARD (the meter only warns); 2 when the session
+            cannot be measured, with one stderr line.
+    """
+    try:
+        result = bound_status(transcript)
+    except (OSError, ValueError) as error:
+        print(f"session_cost: cannot measure {transcript.stem}: {error}", file=sys.stderr)
+        return 2
+    if as_json:
+        print(json.dumps(result, indent=2))
+    else:
+        print(f"{result['status']} context={result['context']} "
+              f"first_turn={result['first_turn']} ratio={result['ratio'] or 'n/a'}")
+    return 0
+
+
 def find_transcript(session: str | None, project: Path) -> Path | None:
     """The named session's transcript, or the newest one for this project."""
     directory = PROJECTS / project_slug(project)
@@ -312,6 +425,8 @@ def main() -> int:
     parser.add_argument("--session", help="session UID; default is the newest")
     parser.add_argument("--project", type=Path, default=Path.cwd())
     parser.add_argument("--json", action="store_true", help="machine-readable output")
+    parser.add_argument("--bound", action="store_true",
+                        help="print OK, SOFT or HARD for the current cycle (exit 0)")
     parser.add_argument(
         "--from-anchor",
         action="store_true",
@@ -328,6 +443,9 @@ def main() -> int:
         target = args.session or f"any session for {args.project}"
         print(f"⚠️  No transcript found for {target}.", file=sys.stderr)
         return 1
+
+    if args.bound:
+        return run_bound(transcript, args.json)
 
     result = measure(transcript)
     _report_result(result, args.json)

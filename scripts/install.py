@@ -279,6 +279,102 @@ def report_surviving_exclusions(found: list[tuple[str, object]]) -> None:
           f"`{install_command('claude', False)}`. Nothing was written.", file=sys.stderr)
 
 
+USER_ADVICE_RE = re.compile(r"`(cp ~/\.claude/settings\.json [^`]*\.sandbox\.network\.strictAllowlist[^`]*)`")
+
+
+def user_settings_path() -> Path:
+    """Return the user-scope Claude settings path (patched by tests).
+
+    Returns:
+        Path: `~/.claude/settings.json` under the current home directory.
+    """
+    return Path.home() / ".claude" / "settings.json"
+
+
+def read_base_advice() -> tuple[list[str], str]:
+    """Parse the base domain list and the jq command from the topology rule.
+
+    The rule file is the single source (`rules/project_topology.md` section 5);
+    nothing is duplicated here.
+
+    Returns:
+        tuple[list[str], str]: (base domains, backup-and-jq command); ([], "")
+        when the rule file or its command line is absent.
+    """
+    try:
+        text = (AGENTS_DIR / "rules" / "project_topology.md").read_text(encoding="utf-8")
+    except OSError:
+        return [], ""
+    match = USER_ADVICE_RE.search(text)
+    if not match:
+        return [], ""
+    command = match.group(1)
+    listed = command.split("+ [", 1)[-1].split("]", 1)[0]
+    return re.findall(r'"([^"]+)"', listed), command
+
+
+def _user_network(path: Path) -> tuple[dict, str]:
+    """Read the user-scope sandbox.network block read-only.
+
+    Args:
+        path: User settings file; never created or modified.
+
+    Returns:
+        tuple[dict, str]: (network block, warning); the block is empty and the
+        warning set when the file is unreadable or malformed. A missing file
+        yields an empty block and no warning.
+    """
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return {}, ""
+    except (OSError, UnicodeDecodeError):
+        return {}, f"{path} is unreadable"
+    except ValueError:
+        return {}, f"{path} is malformed JSON"
+    sandbox = data.get("sandbox") if isinstance(data, dict) else None
+    network = sandbox.get("network") if isinstance(sandbox, dict) else None
+    return (network if isinstance(network, dict) else {}), ""
+
+
+def advise_user_sandbox() -> None:
+    """Print the jq command when the user-scope sandbox allowlist is incomplete.
+
+    Advisory only: it never writes the user file and never changes the exit
+    code of the install. Complete settings print nothing. This is a fault
+    boundary: any Exception from the check becomes a one-line warning.
+    """
+    try:
+        _advise_user_sandbox()
+    except Exception as exc:  # noqa: BLE001 - fault boundary: advisory never changes the exit code
+        print(f"⚠️  User-scope sandbox check failed for {user_settings_path()}: "
+              f"{type(exc).__name__}: {exc}; install exit code unchanged.", file=sys.stderr)
+
+
+def _advise_user_sandbox() -> None:
+    """Run the user-scope sandbox check; may raise on malformed settings content."""
+    base, command = read_base_advice()
+    if not command:
+        print("⚠️  Could not read the base allowlist from rules/project_topology.md; "
+              "user-scope sandbox check skipped.", file=sys.stderr)
+        return
+    network, warning = _user_network(user_settings_path())
+    if warning:
+        print(f"⚠️  {warning}; treating the user-scope sandbox as unconfigured.", file=sys.stderr)
+    listed = network.get("allowedDomains")
+    present = set(listed) if isinstance(listed, list) else set()
+    missing = [d for d in base if d not in present]
+    if network.get("strictAllowlist") is True and not missing:
+        return
+    if network.get("strictAllowlist") is not True:
+        print("ℹ️  User-scope sandbox: sandbox.network.strictAllowlist is not true.")
+    if missing:
+        print(f"ℹ️  User-scope sandbox: allowedDomains is missing {', '.join(missing)}.")
+    print("   Advisory only (install exit code unchanged). Run, then see "
+          "rules/project_topology.md section 5:")
+    print(f"   {command}")
+
+
 def add_claude_import(import_line: str) -> None:
     claude_md = HOST_DIR / "CLAUDE.md"
     existing = claude_md.read_text() if claude_md.exists() else ""
@@ -404,12 +500,117 @@ def write_bridge_locks(target: str) -> None:
         print(f"🔒 Bridge installed at commit {commit[:12]}. Marked {lock_path}")
 
 
+NUCLEUS_SANDBOX_BLOCK: dict = {"sandbox": {"enabled": True, "autoAllowBashIfSandboxed": True}}
+
+# Settings `env` pair that lets pip pass TLS inside the sandbox (HM A1-10). The
+# certificate path is the macOS one and the failure is trustd's, so the pair is
+# merged only when `sys.platform == "darwin"` (plan D59).
+DARWIN_PIP_ENV: dict[str, str] = {
+    "PIP_USE_DEPRECATED": "legacy-certs",
+    "PIP_CERT": "/etc/ssl/cert.pem",
+}
+
+# `sandbox.filesystem.denyWrite` entries owned by the nucleus (ADR-0019 D9 A3, B5).
+NUCLEUS_DENY_WRITE: tuple[str, ...] = ("./agents", "./venv_skillopt")
+
+# Template `denyWrite` entries naming the host-side submodule; `./.agents` does
+# not exist in the nucleus, so they are left out of the nucleus merge.
+HOST_ONLY_DENY_WRITE: frozenset[str] = frozenset({"./.agents", "./.git/modules/.agents"})
+
+
+def platform_env_block() -> dict:
+    """Return the settings fragment of the platform `env` pair.
+
+    Returns:
+        `{"env": DARWIN_PIP_ENV}` copy when `sys.platform == "darwin"`, else `{}`.
+    """
+    return {"env": dict(DARWIN_PIP_ENV)} if sys.platform == "darwin" else {}
+
+
+def merge_platform_env(dest: Path) -> None:
+    """Merge the platform `env` pair into a host settings file, non-destructively.
+
+    An `env` key the file already holds keeps its value (the shared merge leaves
+    a conflicting scalar alone). On a platform other than macOS nothing is
+    read or written.
+
+    Args:
+        dest: Settings file to update.
+
+    Raises:
+        SystemExit: With BRIDGE_WRITE_DENIED when the write is refused.
+    """
+    block = platform_env_block()
+    if not block:
+        return
+    data = json.loads(dest.read_text()) if dest.exists() else {}
+    merged = merge(json.loads(json.dumps(data)), block)
+    if merged != data:
+        _write_json(dest, merged)
+        print(f"✅ Merged the pip env pair -> {dest}")
+
+
+def nucleus_settings_block(root: Path) -> dict:
+    """Build the settings fragment the nucleus bridge merges.
+
+    Holds the sandbox flags, the `sandbox` and `permissions` keys of the
+    template (minus the host-only submodule `denyWrite` paths), the nucleus
+    `denyWrite` entries and the platform `env` pair. The template `hooks` block
+    is never included: its paths are host-relative.
+
+    Args:
+        root: Nucleus root holding `claude/settings.hooks.json`.
+
+    Returns:
+        A new dict ready for `merge`.
+    """
+    template = json.loads((root / "claude" / "settings.hooks.json").read_text())
+    shipped = {key: template[key] for key in ("sandbox", "permissions") if key in template}
+    block = merge(json.loads(json.dumps(NUCLEUS_SANDBOX_BLOCK)), json.loads(json.dumps(shipped)))
+    deny_write = block["sandbox"].setdefault("filesystem", {}).setdefault("denyWrite", [])
+    deny_write[:] = [e for e in deny_write if e not in HOST_ONLY_DENY_WRITE]
+    deny_write.extend(e for e in NUCLEUS_DENY_WRITE if e not in deny_write)
+    return merge(block, platform_env_block())
+
+
+def merge_nucleus_sandbox(root: Path) -> None:
+    """Merge the nucleus settings block into `.claude/settings.json`.
+
+    Writes the fragment of `nucleus_settings_block` (D12, plan D59): no hook and
+    no `sandbox.excludedCommands`. Existing keys are kept, retired entries are
+    pruned by the shared merge, and a second run changes nothing.
+
+    Args:
+        root: Nucleus root holding `.claude/settings.json`.
+
+    Raises:
+        SystemExit: Non-zero with a message when the file root, its `sandbox`
+            value or its `permissions` value is present and not an object;
+            nothing is written.
+    """
+    dest = root / ".claude" / "settings.json"
+    data = json.loads(dest.read_text()) if dest.exists() else {}
+    bad_key = isinstance(data, dict) and any(
+        k in data and not isinstance(data[k], dict) for k in ("sandbox", "permissions", "env"))
+    if not isinstance(data, dict) or bad_key:
+        raise SystemExit(f"🛑 {dest}: the root or its `sandbox`, `permissions` or `env` value is "
+                         "not a JSON object; refusing to overwrite it. "
+                         "Fix the file and re-run the installer.")
+    merged = merge(data, nucleus_settings_block(root))
+    if not dest.exists() or merged != json.loads(dest.read_text()):
+        _write_json(dest, merged)
+        print(f"✅ Merged the nucleus settings block -> {dest}")
+    prune_rendered_exclusions(root)
+
+
 def install_nucleus_bridge() -> int:
     """Minimal self-bridge for the nucleus repo itself: commands + agents +
-    constitution import, so `/agents:*` works while developing the framework.
-    No hooks (paths are host-relative), no skills links, no MCP, no scaffolding
-    — nucleus_neutrality governs structure, not tooling access."""
+    constitution import + the sandbox/permissions settings block, so `/agents:*` works
+    while developing the framework. No hooks (paths are host-relative), no
+    skills links, no MCP, no scaffolding — nucleus_neutrality governs
+    structure, not tooling access."""
     print(f"🧬 Nucleus detected — installing minimal self-bridge into {AGENTS_DIR / '.claude'} ...")
+    merge_nucleus_sandbox(AGENTS_DIR)
     for f in sorted((AGENTS_DIR / "commands").glob("*.md")):
         link_one(f"../../../commands/{f.name}",
                  AGENTS_DIR / ".claude" / "commands" / "agents" / f.name)
@@ -661,6 +862,7 @@ def install_host_claude_bridge(profile_dir: Path | None) -> int:
 
     merge_into(AGENTS_DIR / "claude" / "settings.hooks.json",
                HOST_DIR / ".claude" / "settings.json")
+    merge_platform_env(HOST_DIR / ".claude" / "settings.json")
     merge_into(AGENTS_DIR / "claude" / "mcp.json", HOST_DIR / ".mcp.json")
     prune_rendered_exclusions(HOST_DIR)
 
@@ -680,8 +882,8 @@ def install_nucleus(args: argparse.Namespace, install_cursor_bridge) -> int:
 
     Nucleus mode (`agents.md §5 nucleus_neutrality`): the full host bridge is
     refused, but the minimal self-bridge (commands, agents, constitution
-    import) is installed so the framework's own workflows are invocable while
-    developing it.
+    import, and the `sandbox` block in `.claude/settings.json`) is installed
+    so the framework's own workflows are invocable while developing it.
 
     **Every target ends the same way** — git hooks, then the lock. Neither is
     Cursor-specific: the hooks are the secret scanner, the `#[Sprint_ID]`
@@ -709,6 +911,7 @@ def install_nucleus(args: argparse.Namespace, install_cursor_bridge) -> int:
         install_cursor_bridge(AGENTS_DIR, nucleus=True)
     install_nucleus_git_hooks()
     write_bridge_locks(args.target)
+    advise_user_sandbox()
     return 0
 
 
@@ -749,6 +952,7 @@ def main() -> int:
             install_host_git_hooks()
 
     write_bridge_locks(args.target)
+    advise_user_sandbox()
     return 0
 
 

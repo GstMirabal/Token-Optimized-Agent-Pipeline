@@ -75,3 +75,62 @@ def test_py_compile_tree_reports_syntax_error_with_exit_1(
     assert "bad.py" in err
     assert "1 failure(s)" in err
     assert list(root.rglob("__pycache__")) == []
+
+
+def test_py_compile_tree_compiles_in_memory_without_tempfile(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "repo"
+    (root / "pkg").mkdir(parents=True)
+    (root / "pkg" / "ok.py").write_text("x = 1\n", encoding="utf-8")
+    mod = _load_module(monkeypatch, root)
+    before = sorted(p for p in root.rglob("*"))
+
+    def boom(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("tempfile.TemporaryDirectory must not be used")
+
+    monkeypatch.setattr("tempfile.TemporaryDirectory", boom)
+    assert mod.main() == 0
+    assert sorted(p for p in root.rglob("*")) == before
+
+
+def test_py_compile_tree_null_byte_source_fails_and_names_file(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    root = tmp_path / "repo"
+    root.mkdir()
+    (root / "nul.py").write_bytes(b"x = 1\x00\n")
+    mod = _load_module(monkeypatch, root)
+    assert mod.main() == 1
+    err = capsys.readouterr().err
+    assert "nul.py" in err
+    assert "1 failure(s)" in err
+
+
+def test_py_compile_tree_non_utf8_source_without_cookie_fails_and_names_file(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    root = tmp_path / "repo"
+    root.mkdir()
+    (root / "latin.py").write_bytes(b"x = '\xe9'\n")
+    mod = _load_module(monkeypatch, root)
+    assert mod.main() == 1
+    err = capsys.readouterr().err
+    assert "latin.py" in err
+    assert "1 failure(s)" in err
+
+
+def test_py_compile_tree_accepts_latin1_source_with_coding_cookie(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "repo"
+    root.mkdir()
+    (root / "cookie.py").write_bytes(b"# -*- coding: latin-1 -*-\nx = '\xe9'\n")
+    mod = _load_module(monkeypatch, root)
+    assert mod.main() == 0

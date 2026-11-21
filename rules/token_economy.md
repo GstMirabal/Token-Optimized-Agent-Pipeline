@@ -30,12 +30,23 @@ Full-dumping a file >200 lines is PROHIBITED (`agents.md §2 token_saver`). Skip
 
 ### 3.1 The session bound — binding, and measured per context cycle
 
-**Unit: the ratio of a turn's `cache_read` against the first turn of the current context cycle**, never of the session. Self-calibrating per project — a large repository starts with more base context, but "10× your first turn" means the same everywhere, and nothing is configured per host.
+**Unit: a turn's context size (`cache_read + cache_creation + input`) in the current context cycle**, never of the session. The soft bound is the ratio of that size against the cycle's first turn, so it self-calibrates per project; the hard bound is the same size read as an absolute token count (`docs/decisions/ADR-0018-in-session-token-economy.md` §2, decisions 1 and 2). Nothing is configured per host.
 
 | Threshold | Trigger | Action |
 | :--- | :--- | :--- |
-| **Soft** | turn > **5×** the cycle's first | Declare remaining cost in the plan's **Cost** section (work units left, delegation mode). `session_probe.py` surfaces the breach at the next start. Calibration may still record-only while the baseline builds |
-| **Hard** | turn > **15×** the cycle's first | No new work starts. Sprint complete → close it; sprint open → **suspend** (`session_state.py suspend`) and continue in a fresh session. Declare Cost before the next claim |
+| **Soft** | latest turn's context size > **5×** the cycle's first turn (advisory) | Declare remaining cost in the plan's **Cost** section (work units left, delegation mode). `probe_cost` in `scripts/session_probe.py` reports only the hard bound, so no instrument surfaces a soft breach; the agent reads it with `python3 scripts/session_cost.py --bound` |
+| **Hard** | latest turn's context size **≥ 550,000 tokens** (absolute, ADR-0018 decision 1) | No new work starts. Sprint complete → close it; sprint open → **suspend** (`session_state.py suspend`) and continue in a fresh session. Declare Cost before the next claim |
+
+**In-session invoker.** The command `python3 scripts/session_cost.py --bound` prints `OK`, `SOFT` or `HARD` with the context size, the first turn and the ratio. It exits 0 for those three statuses; a non-zero exit means the session could not be measured. One exception: a first turn of 0 with context at or above 550,000 still reports `HARD`. The meter only warns (plan decision D3, ADR-0018 §2.1): `HARD` is never an exit-code block, and the Action column above is what the agent does on reading `HARD`.
+
+**Per-unit budget with planned suspend points** (plan decision D14, ADR-0018 decision 3a). `task_scope.md` carries two columns:
+
+| Column | Content |
+| :--- | :--- |
+| `Est. cost` | Estimated cost of the unit in `fresh` tokens (`input + output + cache_creation`), by unit type and risk. The four-field total (`+ cache_read`) is not used: it depends on the context size at execution time |
+| `Suspend after` | `yes` on the unit after which the session is suspended with `session_state.py suspend`; empty otherwise |
+
+The method: sum `Est. cost` in execution order, and place `Suspend after: yes` before the sum projects the cycle above the soft bound (5× the first turn). A wave larger than that is split at planning time, not mid-execution. The `--bound` reading in session checks the estimate.
 
 **Portable Cost half (Cursor and Claude).** Every Implementation Plan from Sprint
 030 onward carries a **Cost** section: work-unit count, `delegation_mode`, and —
@@ -45,15 +56,13 @@ when a Claude transcript exists for this tool — the prior cycle ratio from
 always runs. Structural plan wastes are rejected by
 `skills/token-saver-auditor/scripts/audit_plan.py` (exit `2`).
 
-**Why the cycle and not the session.** A session is a **sawtooth**: compaction rebuilds the window from a summary and `cache_read` collapses back to the start-up cost. Measured over one full session of this repository — four cycles, peaks of 849K, 995K, 361K and 631K against reset points of **22,174 tokens, identical three times** — a ratio taken against the session's first turn would collapse at the first reset and never fire again.
+**Why the cycle and not the session.** A session is a **sawtooth**: compaction rebuilds the window from a summary and the context size collapses back to the start-up cost. Measured on `cache_read`, the unit of Sprint 021, over one full session of this repository — four cycles, `cache_read` peaks of 849K, 995K, 361K and 631K against `cache_read` reset points of **22,174 tokens, identical three times** — a ratio taken against the session's first turn would collapse at the first reset and never fire again.
 
 **Compaction is not a cost control, and this rule exists because of that.** Those four resets happened and the session still spent 423M `cache_read`. Cycle 2 is the proof: **113 messages cost 99.5M**, nearly matching a 414-message cycle, because it climbed to 995K. **Cost tracks peak height, not message count** — cost is the area under the sawtooth, and compaction only resets the x axis.
 
-**Break-even is an observed constant, not an estimate.** Restarting costs ~22K, measured identically three times. The hard threshold would have fired in **3 of those 4 cycles**.
+**Break-even was observed, not estimated.** Restarting cost ~22K of `cache_read`, identical three times in that session; it is not a context-size figure.
 
-**Calibration that does not destroy its own data.** A binding hard threshold means the sprint always closes at the bound and the natural close is never observed. So the soft threshold **records and does not act** while the distribution builds, and the hard one records `forced: true` plus whether `task_scope.md` still held unfinished work. A forced close with pending work is the "too tight" signal; one on a complete sprint is not.
-
-**Provenance: n=1**, and of one kind — intensive planning, many reads, little code execution. A file-editing sprint will have a different curve. `scripts/session_cost.py --json` is the reproducing command; a figure without it is memory, not evidence.
+**Provenance: n=1**, and of one kind — intensive planning, many reads, little code execution. A file-editing sprint will have a different curve. `scripts/session_cost.py --json` is the reproducing command for the context-size figures; a figure without a command is memory, not evidence. The Sprint 021 figures above are recorded in `docs/sprints/021-core-pipeline/IMPLEMENTATION_PLAN.md`, and their totals may overcount: the script of that date (`git show 1b3be58:scripts/session_cost.py`) has `read_turns` append one turn per transcript record, with no `message.id` deduplication, and only the shape of that date's transcripts stays unknown; no transcript on disk can re-measure them.
 
 ## 4. Tool-Result Economics
 

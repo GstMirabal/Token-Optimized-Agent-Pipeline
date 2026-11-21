@@ -73,9 +73,11 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 2. Sprint Closeout | `repo_docs_check` | write |
 | 2. Sprint Closeout | `extract_handoff` | write |
 | 2. Sprint Closeout | `upstream_outbox_advisory` | write |
+| 2. Sprint Closeout | `prompt_count_advisory` | ambiguous |
 | 2.5 Heuristic Pulse Gate | `heuristic_pulse_gate` | verify |
 | 2.6 Phase Completion Gate | `double_gate_evidence` | write |
 | 2.6 Phase Completion Gate | `plan_closure_gate` | write |
+| 2.6 Phase Completion Gate | `unit_cost_compare` | write |
 | 3. Zero-Tolerance Purge | `memory_wipe` | write |
 | 3.5 Platform Recheck | `platform_recheck` | verify |
 | 4. State Sync | `state_sync` | write |
@@ -158,7 +160,7 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 1. Deadlock Term | `state_nuke` | ambiguous |
 | 2. Extraction | `error_mining` | write |
 | 2. Extraction | `family_check` | write |
-| 2. Extraction | `negative_ki` | ambiguous |
+| 2. Extraction | `negative_ki` | verify |
 | 3. Rollback | `roadmap_tag` | write |
 | 3. Rollback | `session_lock` | ambiguous |
 

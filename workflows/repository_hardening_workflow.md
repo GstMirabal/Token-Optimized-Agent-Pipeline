@@ -39,7 +39,7 @@ setting is given instead. `$R` is `owner/repo` as set at the top of Phase 1.
 | **5** | `community_health` | Create repository-specific `SECURITY.md`, `CONTRIBUTING.md` and issue templates only where the account-level `.github` defaults would be wrong | `gh api graphql -f query='{ repository(owner:"OWNER", name:"REPO") { issueTemplates { name filename } } }'` |
 | **6** | `repo_metadata` | Update the repository description, topics and homepage URL | `gh api "repos/$R" --jq '{description, homepage, topics}'` |
 | **7** | `history_rewrite` | Rewrite or squash history only after confirming explicit per-operation human authorization, stating what will be lost before each irreversible action | `git log --oneline origin/main..HEAD` |
-| **8** | `branch_protection` | Update branch protection on `main` from the status-check names observed on a real check-run listing, requiring exactly those checks with `enforce_admins:false` and `required_pull_request_reviews:null` | `gh api "repos/$R/commits/main/check-runs" --jq '.check_runs[] \| select(.conclusion=="success") \| .name'` |
+| **8** | `branch_protection` | Update branch protection on `main` from the status-check names observed on a real check-run listing, requiring exactly those checks with `enforce_admins:true` and a `required_pull_request_reviews` object with `required_approving_review_count:0` | `gh api "repos/$R/commits/main/check-runs" --jq '.check_runs[] \| select(.conclusion=="success") \| .name'` |
 
 Sandbox behaviour of the `gh` calls above: see the single table `rules/project_topology.md` section 4. A `gh` call fails in the sandbox with `x509: OSStatus -26276`. Under the template sandbox, every `gh` call in this workflow (the verify column and the code blocks below) is run by the human (condition and unsandboxed case: the `gh` row of that table); no `gh` pattern is excluded from the sandbox. Residual risk: the "After a sandboxed agent session" row of that table.
 
@@ -133,27 +133,25 @@ Then require exactly those:
 gh api -X PUT "repos/$R/branches/main/protection" --input - <<'JSON'
 {
   "required_status_checks": {"strict": true, "checks": [{"context": "ci / Lint and tests"}]},
-  "enforce_admins": false,
-  "required_pull_request_reviews": null,
+  "enforce_admins": true,
+  "required_pull_request_reviews": {"required_approving_review_count": 0},
   "restrictions": null,
   "allow_force_pushes": false,
   "allow_deletions": false,
-  "required_linear_history": true,
-  "required_conversation_resolution": true
+  "required_linear_history": false,
+  "required_conversation_resolution": false
 }
 JSON
 ```
 
-Two deliberate choices for a solo maintainer:
+Measured state of `main` protection (ADR-0019 D7; `HARNESS_MEASUREMENT.md` rows A10-4 and B11-6):
 
-- **`enforce_admins: false`.** A required check that breaks — a renamed job, a
-  third-party outage — otherwise locks the owner out of their own repository
-  with no way back in.
-- **`required_pull_request_reviews: null`.** Requiring an approval with no
-  second maintainer makes every pull request unmergeable.
+- **`enforce_admins: true`** (B11-6, `KI-059-24`). The required checks apply to the repository owner as well as to other accounts.
+- **`required_pull_request_reviews`: an object with `required_approving_review_count: 0`** (A10-4). A pull request is required and no approval is required, because the repository has one maintainer.
+- **`required_linear_history: false` and `required_conversation_resolution: false`** (A10-4). Neither is required.
+- **Force pushes and deletions: not allowed** (A10-4).
 
-What is being bought here is the part that matters: no force-push, no branch
-deletion, linear history, and checks that must pass.
+What the protection enforces: no force-push, no branch deletion, a pull request for every change, and checks that must pass.
 
 ## Phase 7 — On rewriting history
 

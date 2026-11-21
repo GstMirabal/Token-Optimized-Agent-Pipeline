@@ -13,33 +13,72 @@ Phase 4.3, Makefile `verify`.
 Usage:
     python3 scripts/check_task_scope.py --sprint-dir docs/sprints/030-core-pipeline
     python3 scripts/check_task_scope.py --current-sprint
+    python3 scripts/check_task_scope.py --sprint-dir docs/sprints/059-core-pipeline --batches
+
+An optional ``Depends on`` column in a Work table lists, per unit, ``-`` or an
+empty cell (none) or comma-separated unit ids from the ``#`` column. When the
+column is present the check refuses an id naming no unit, a unit depending on
+itself, and a dependency cycle. ``--batches`` prints the remaining order of the
+units whose Status is the pending mark, one ``batch N: id id`` line per batch of
+at most ``MAX_BATCH`` units whose dependencies landed (a dependency on a
+non-pending unit counts as landed) and whose ``File`` cells differ (plan D11 of
+Sprint 059). ``--batches`` refuses, with exit 2 and no batch, a unit whose Status
+is missing (no Status column, or an empty cell) or unrecognised; the audit does not.
+The audit and ``--batches`` both refuse an id repeated in the ``#`` column of the
+Work tables, with or without a ``Depends on`` column: ``schedule`` removes pending
+units by id, so a repeated row would never be dispatched.
 
 Also refuses a row whose assignee cannot perform the operation it is given: a
 profile with no ``Write``/``Edit`` tool cannot ``create``/``modify``/``delete`` a
 file. Sprints 030 and 031 recorded such rows as executed successfully.
 
+``Est. cost`` and ``Suspend after`` columns (plan decisions D14 and D40 of Sprint
+059) are required on every Work table from ``COST_FROM_SPRINT``, and checked on
+an earlier sprint whose Work table carries either of them. ``Est. cost`` is a
+non-negative integer of ``fresh`` tokens and ``Suspend after`` is ``yes`` or
+empty. In file row order the check sums ``Est. cost``; a unit is non-compliant
+when ``baseline_context + sum > 5 * baseline_context`` (equal passes), where
+``baseline_context`` is read from ``config/unit_cost_estimates.json`` and a
+missing or non-positive value is a finding. ``Suspend after: yes`` zeroes the
+sum after that unit is counted.
+
 Exit codes:
-    0 — pass, or skip (historical columns / non-canonical dir / no anchor)
-    2 — shape, undeclared mechanical-high row, incapable assignee, or a
+    0 — pass, or skip (historical columns / non-canonical dir / no anchor or
+        no ``current_sprint`` block)
+    2 — a task_scope.md with no work-unit rows (empty, blank or headings only),
+        a repeated unit id, a bad ``Depends on`` value, units ``--batches`` cannot schedule, an anchor that names no existing sprint directory, shape, undeclared mechanical-high row, incapable assignee, or a
         canonical sprint directory holding no task_scope.md at all (RA-11)
 """
 
 from __future__ import annotations
 
 import argparse
+import collections
 import json
 import re
 import sys
 from pathlib import Path
+from typing import NamedTuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _current_sprint import CurrentSprintError, current_sprint_dir, project_root
 from _md_table import split_cells
 from _root import agents_root
 
 MODEL_FROM_SPRINT = 28
+COST_FROM_SPRINT = 60
+COST_COLUMNS = ("Est. cost", "Suspend after")
+SOFT_MULTIPLE = 5
+COST_CONFIG = "unit_cost_estimates.json"
 MECHANICAL_PROFILES = frozenset({"devops_agent", "git_sync_agent", "topology_mapper"})
 MECHANICAL_MODELS = frozenset({"haiku", "composer-2.5", "composer-2"})
 WORK_KEYS = ("File", "Operation", "Risk", "Assignee")
+MAX_BATCH = 4
+NO_WORK_ROWS = (
+    "task_scope.md holds no work-unit rows: a zero-byte, blank or heading-only "
+    "file would disable jurisdictional_lock and no_interference while passing."
+)
+COMMITTED_STATUS = re.compile(r"^\u2705\s+`?[0-9a-f]{7,40}\b")
 WRITE_TOOLS = frozenset({"Write", "Edit"})
 # Matched as substrings: real tables write "modify/create", "create + delete"
 # and "modify (hito 2 gate)", so equality missed most of them. Deliberately
@@ -59,51 +98,10 @@ MUTATING_OPERATIONS = (
 def sprint_id_from_dir(sprint_dir: Path) -> int | None:
     """Leading digits of ``030-core-pipeline`` → 30."""
     name = sprint_dir.name
-    if len(name) >= 3 and name[:3].isdigit() and name[3:4] == "-":
-        return int(name.split("-", 1)[0])
+    prefix, separator, _ = name.partition("-")
+    if separator and len(prefix) >= 3 and prefix.isascii() and prefix.isdigit():
+        return int(prefix)
     return None
-
-
-def current_sprint_dir(root: Path) -> Path | None:
-    """Canonical sprint directory for the anchor's ``current_sprint.id``.
-
-    Accepts the id as a string or an integer. It required ``int`` until Sprint
-    051, while every other reader of the same field — ``session_start.py:102``,
-    ``check_role_artifact.py:154``, ``persist_session_context.py:33`` — takes it
-    untyped, and real anchors carry the zero-padded string form (``"051"``,
-    ``"112"``) because that is what the canonical directory name uses.
-
-    The consequence was not a crash. This function returns ``None`` for an
-    unusable id and both callers read ``None`` as *no current sprint, skip* — so
-    ``check_task_scope.py --current-sprint`` and ``check_gate_log.py
-    --current-sprint``, two steps of ``make verify``, printed ``[OK] … (skip)``
-    and exited ``0`` in every repository whose anchor used the string form. A
-    gate that fails open reports success for work it never looked at, which is
-    the `PR #28` shape this corpus keeps naming (`F-051-R2`).
-
-    Args:
-        root: repository root holding ``docs/active_state.json``.
-
-    Returns:
-        Path | None: the sprint directory, or None when the anchor names no
-        usable sprint — the one case where skipping is correct.
-    """
-    anchor = root / "docs" / "active_state.json"
-    if not anchor.is_file():
-        return None
-    try:
-        data = json.loads(anchor.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        return None
-    raw = (data.get("current_sprint") or {}).get("id")
-    if isinstance(raw, bool) or not isinstance(raw, (int, str)):
-        return None
-    text = str(raw).strip()
-    if not text.isdigit():
-        return None
-    matches = sorted((root / "docs" / "sprints").glob(f"{int(text):03d}-*"))
-    dirs = [path for path in matches if path.is_dir()]
-    return dirs[0] if dirs else None
 
 
 def _cells(line: str) -> list[str]:
@@ -185,6 +183,15 @@ def requires_model_columns(sprint_id: int | None, text: str) -> bool:
     return "Model | Effort" in text or "Model \\| Effort" in text
 
 
+def requires_cost_columns(
+    sprint_id: int | None, tables: list[tuple[list[str], list[list[str]]]]
+) -> bool:
+    """True when the budget columns are required or claimed by a Work table."""
+    if sprint_id is not None and sprint_id >= COST_FROM_SPRINT:
+        return True
+    return any(name in header for header, _ in tables for name in COST_COLUMNS)
+
+
 def _col(header: list[str], row: list[str], name: str) -> str:
     try:
         position = header.index(name)
@@ -241,17 +248,192 @@ def _capability_findings(
     return findings
 
 
+class Unit(NamedTuple):
+    """One Work row: id, claimed file, dependencies, wave and Status text.
+
+    ``pending`` is true only when the Status cell holds the pending mark.
+    """
+
+    id: str
+    file: str
+    deps: tuple[str, ...]
+    has_column: bool
+    table: int = 0
+    status: str = ""
+
+    @property
+    def pending(self) -> bool:
+        """True when the Status cell holds the pending mark."""
+        return "\u23f3" in self.status
+
+    @property
+    def recognised(self) -> bool:
+        """True when the Status is the pending mark, committed, replaced or RECORD."""
+        return bool(
+            self.pending
+            or COMMITTED_STATUS.match(self.status)
+            or self.status.startswith(("replaced", "RECORD"))
+        )
+
+
+def _parse_deps(cell: str) -> tuple[str, ...]:
+    """Unit ids of a ``Depends on`` cell; ``-`` and empty mean none."""
+    parts = (part.strip().strip("`") for part in cell.split(","))
+    return tuple(part for part in parts if part and part != "-")
+
+
+def _row_unit(header: list[str], row: list[str], table: int) -> Unit | None:
+    unit_id = _col(header, row, "#")
+    if not unit_id:
+        return None
+    return Unit(
+        unit_id,
+        _col(header, row, "File"),
+        _parse_deps(_col(header, row, "Depends on")),
+        "Depends on" in header,
+        table,
+        _col(header, row, "Status").strip(),
+    )
+
+
+def work_units(tables: list[tuple[list[str], list[list[str]]]]) -> list[Unit]:
+    """Units of every Work table, in table order, rows without an id skipped.
+
+    Each unit records the index of its table; ``schedule`` treats it as a wave.
+    """
+    parsed = (
+        _row_unit(header, row, number)
+        for number, (header, rows) in enumerate(tables)
+        for row in rows
+    )
+    return [unit for unit in parsed if unit is not None]
+
+
+def _dependency_problem(unit: Unit, dep: str, known: set[str]) -> str | None:
+    if dep == unit.id:
+        return f"Unit {unit.id}: depends on itself."
+    if dep not in known:
+        return f"Unit {unit.id}: depends on {dep!r}, which names no unit."
+    return None
+
+
+def _unit_dependency_findings(unit: Unit, known: set[str]) -> list[str]:
+    problems = (_dependency_problem(unit, dep, known) for dep in unit.deps)
+    return [problem for problem in problems if problem is not None]
+
+
+def _cycle_members(units: list[Unit], known: set[str]) -> list[str]:
+    """Units left after peeling every unit whose dependencies are all peeled."""
+    waiting = {
+        unit.id: {dep for dep in unit.deps if dep in known and dep != unit.id}
+        for unit in units
+    }
+    while True:
+        free = [name for name, deps in waiting.items() if not deps]
+        if not free:
+            return sorted(waiting)
+        for name in free:
+            del waiting[name]
+        for deps in waiting.values():
+            deps.difference_update(free)
+
+
+def dependency_findings(units: list[Unit]) -> list[str]:
+    """Unknown ids, self-dependencies and cycles. Empty without the column."""
+    if not any(unit.has_column for unit in units):
+        return []
+    known = {unit.id for unit in units}
+    findings: list[str] = []
+    for unit in units:
+        findings.extend(_unit_dependency_findings(unit, known))
+    cyclic = _cycle_members(units, known)
+    if cyclic:
+        findings.append(
+            "Dependency cycle among or behind units: " + ", ".join(cyclic) + "."
+        )
+    return findings
+
+
+def duplicate_findings(units: list[Unit]) -> list[str]:
+    """One finding per id that more than one unit carries."""
+    counts = collections.Counter(unit.id for unit in units)
+    return [f"Unit {name}: id appears {count} times." for name, count in counts.items() if count > 1]
+
+
+def status_findings(units: list[Unit]) -> list[str]:
+    """One finding per unit whose non-empty Status is not a recognised form."""
+    return [
+        f"Unit {unit.id}: unrecognised Status {unit.status!r} (expected the pending "
+        "mark, a check mark and a short SHA, 'replaced' or 'RECORD')."
+        for unit in units
+        if unit.status and not unit.recognised
+    ]
+
+
+def _fill_batch(ready: list[Unit]) -> list[Unit]:
+    """First units of ``ready`` (table order) with distinct files, up to MAX_BATCH."""
+    batch: list[Unit] = []
+    files: set[str] = set()
+    for unit in ready:
+        if len(batch) >= MAX_BATCH:
+            break
+        if unit.file and unit.file in files:
+            continue
+        files.add(unit.file)
+        batch.append(unit)
+    return batch
+
+
+def schedule(units: list[Unit]) -> tuple[list[list[str]], list[str]]:
+    """Batches of pending unit ids, and the ids that could not be scheduled.
+
+    Only units whose Status holds the pending mark are scheduled. A unit whose
+    Status is a recognised non-pending form (committed with a short SHA,
+    ``replaced``, ``RECORD``) counts as landed for the dependencies of pending
+    units and never appears in a batch.
+
+    Args:
+        units: Work units in table order.
+
+    Returns:
+        tuple[list[list[str]], list[str]]: Batches in dispatch order; each batch
+        treats the earlier ones as landed and holds units of one table only: a
+        table is a barrier, so the earliest table with a pending unit is placed
+        entirely before the next one starts. The second item is empty on success.
+    """
+    landed = {unit.id for unit in units if not unit.pending}
+    remaining = [unit for unit in units if unit.pending]
+    batches: list[list[str]] = []
+    while remaining:
+        wave = remaining[0].table
+        ready = [
+            unit for unit in remaining
+            if unit.table == wave and landed.issuperset(unit.deps)
+        ]
+        batch = _fill_batch(ready)
+        if not batch:
+            return batches, [unit.id for unit in remaining]
+        ids = [unit.id for unit in batch]
+        batches.append(ids)
+        landed.update(ids)
+        remaining = [unit for unit in remaining if unit.id not in ids]
+    return batches, []
+
+
 def collect_findings(
     text: str, sprint_id: int | None, root: Path | None = None
 ) -> list[str]:
-    """Shape, mechanical-high and capability findings. Empty means pass."""
+    """Dependency, shape, mechanical-high and capability findings. Empty means pass."""
     tables = work_tables(text)
-    if not tables:
-        return []
-    if not requires_model_columns(sprint_id, text):
-        return []
+    units = work_units(tables)
+    if not units:
+        return [NO_WORK_ROWS]
     resolved_root = root if root is not None else agents_root()
-    findings: list[str] = []
+    findings = duplicate_findings(units) + dependency_findings(units)
+    if requires_cost_columns(sprint_id, tables):
+        findings += budget_findings(tables, resolved_root)
+    if not requires_model_columns(sprint_id, text):
+        return findings
     for header, rows in tables:
         findings.extend(_capability_findings(header, rows, resolved_root))
         if "Model" not in header or "Effort" not in header:
@@ -261,6 +443,78 @@ def collect_findings(
             )
             continue
         findings.extend(_mechanical_high_findings(header, rows))
+    return findings
+
+
+def load_baseline(root: Path) -> tuple[int | None, str]:
+    """Read ``baseline_context`` from the unit cost estimates.
+
+    Args:
+        root: Framework root holding ``config/``.
+
+    Returns:
+        tuple[int | None, str]: The baseline and an empty string, or None and
+        the reason it is unusable.
+    """
+    path = root / "config" / COST_CONFIG
+    try:
+        value = json.loads(path.read_text(encoding="utf-8")).get("baseline_context")
+    except (OSError, ValueError, AttributeError) as exc:
+        return None, f"cannot read baseline_context from config/{COST_CONFIG}: {exc}"
+    if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+        return None, f"baseline_context in config/{COST_CONFIG} is not a positive integer."
+    return value, ""
+
+
+def _cost_cells_problem(unit: str, cost: str, suspend: str) -> str | None:
+    """Reason a unit's budget cells are malformed, or None."""
+    if not (cost.isascii() and cost.isdigit()):
+        return f"Unit {unit}: Est. cost {cost!r} is not a non-negative integer."
+    if suspend not in ("", "yes"):
+        return f"Unit {unit}: Suspend after {suspend!r} is neither 'yes' nor empty."
+    return None
+
+
+def _budget_rows(
+    tables: list[tuple[list[str], list[list[str]]]],
+) -> list[tuple[str, str, str]]:
+    """Unit id, Est. cost and Suspend after cells of every row, in file row order."""
+    return [
+        (_col(header, row, "#"), _col(header, row, "Est. cost").strip(),
+         _col(header, row, "Suspend after").strip())
+        for header, rows in tables for row in rows if _col(header, row, "#")
+    ]
+
+
+def budget_findings(
+    tables: list[tuple[list[str], list[list[str]]]], root: Path
+) -> list[str]:
+    """Missing budget columns, malformed cells and units past the soft bound."""
+    missing = [
+        f"Work table is missing {name} column (header: {' | '.join(header)})."
+        for header, _ in tables for name in COST_COLUMNS if name not in header
+    ]
+    if missing:
+        return missing
+    baseline, reason = load_baseline(root)
+    if baseline is None:
+        return [reason]
+    findings: list[str] = []
+    total = 0
+    for unit, cost, suspend in _budget_rows(tables):
+        problem = _cost_cells_problem(unit, cost, suspend)
+        if problem is not None:
+            findings.append(problem)
+            continue
+        total += int(cost)
+        if baseline + total > SOFT_MULTIPLE * baseline:
+            findings.append(
+                f"Unit {unit}: cumulative Est. cost {total} projects the cycle past "
+                f"{SOFT_MULTIPLE}x baseline_context {baseline} with no earlier "
+                "Suspend after: yes."
+            )
+        if suspend == "yes":
+            total = 0
     return findings
 
 
@@ -310,21 +564,53 @@ def check(sprint_dir: Path) -> int:
     return 2
 
 
+def print_batches(sprint_dir: Path) -> int:
+    """Print the remaining batches of one sprint directory; exit code 0 or 2."""
+    path = sprint_dir / "task_scope.md"
+    if not path.is_file():
+        print(f"❌ check_task_scope: no task_scope.md under {sprint_dir}", file=sys.stderr)
+        return 2
+    units = work_units(work_tables(path.read_text(encoding="utf-8")))
+    findings = ([] if units else [NO_WORK_ROWS]) + duplicate_findings(units) + dependency_findings(units) + [
+        f"Unit {unit.id}: Status is missing or empty." for unit in units if not unit.status
+    ] + status_findings(units)
+    batches, stuck = ([], []) if findings else schedule(units)
+    if stuck:
+        findings.append("Pending units cannot be scheduled: " + ", ".join(stuck) + ".")
+    if findings:
+        print(f"❌ check_task_scope: {path}", file=sys.stderr)
+        for item in findings:
+            print(f"   • {item}", file=sys.stderr)
+        return 2
+    for number, ids in enumerate(batches, start=1):
+        print(f"batch {number}: {' '.join(ids)}")
+    if not batches:
+        print("no pending units")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n", 1)[0])
     parser.add_argument("--sprint-dir", type=Path, help="Canonical sprint directory")
     parser.add_argument("--current-sprint", action="store_true")
+    parser.add_argument(
+        "--batches", action="store_true",
+        help="Print the remaining parallel batches instead of auditing",
+    )
     args = parser.parse_args()
-    root = agents_root() if (Path.cwd() / "scripts" / "check_task_scope.py").is_file() else Path.cwd()
     if args.current_sprint:
-        target = current_sprint_dir(root)
+        try:
+            target = current_sprint_dir(project_root())
+        except CurrentSprintError as exc:
+            print(f"❌ check_task_scope: {exc}", file=sys.stderr)
+            return 2
         if target is None:
             print("[OK] check_task_scope: no current sprint directory (skip)")
             return 0
-        return check(target)
+        return print_batches(target) if args.batches else check(target)
     if args.sprint_dir is None:
         parser.error("--sprint-dir or --current-sprint is required")
-    return check(args.sprint_dir)
+    return print_batches(args.sprint_dir) if args.batches else check(args.sprint_dir)
 
 
 if __name__ == "__main__":

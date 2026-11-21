@@ -1,7 +1,7 @@
 {
   "permissions": {
-    "defaultMode": "auto",
     "disableBypassPermissionsMode": "disable",
+    "disableAutoMode": "disable",
     "deny": [
       "Bash(git push --force:*)",
       "Bash(git push -f:*)",
@@ -10,7 +10,27 @@
       "Edit(/.agents/**)",
       "Edit(/.git/modules/.agents/**)",
       "Edit(/.env)",
-      "Read(/.env)"
+      "Read(/.env)",
+      "Edit(~/.ssh/**)",
+      "Edit(~/.aws/**)",
+      "Edit(~/.gnupg/**)",
+      "Edit(~/.config/gh/**)",
+      "Edit(~/.docker/**)",
+      "Edit(~/Library/LaunchAgents/**)",
+      "Edit(~/Library/Keychains/**)",
+      "Edit(/.claude/settings*.json)",
+      "Read(/**/.env*)",
+      "WebFetch",
+      "WebSearch",
+      "Artifact",
+      "ArtifactComments",
+      "ArtifactData",
+      "PushNotification",
+      "RemoteTrigger",
+      "SendMessage",
+      "mcp__claude_ai_Google_Drive",
+      "mcp__claude_ai_Claude_Docs",
+      "mcp__claude_ai_Gmail"
     ],
     "allow": [
       "Bash(cd:*)",
@@ -43,10 +63,29 @@
   "sandbox": {
     "enabled": true,
     "autoAllowBashIfSandboxed": true,
+    "allowUnsandboxedCommands": false,
+    "network": {
+      "allowedDomains": [
+        "api.github.com",
+        "github.com",
+        "pypi.org",
+        "files.pythonhosted.org"
+      ]
+    },
     "filesystem": {
       "denyRead": [
         "./.env",
-        "./.env.*"
+        "./.env.*",
+        "~/.docker/config.json",
+        "~/.config/gh",
+        "~/.zsh_history",
+        "~/.claude/projects",
+        "~/Library/Keychains/login.keychain-db",
+        "~/.ssh",
+        "~/.aws",
+        "~/.npmrc",
+        "~/.bash_history",
+        "~/**/.env*"
       ],
       "allowRead": [
         "./.env.example",

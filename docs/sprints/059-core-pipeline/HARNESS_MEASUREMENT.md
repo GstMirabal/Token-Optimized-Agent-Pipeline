@@ -1,0 +1,693 @@
+# Sprint 059 - Security Harness Measurement
+
+Purpose: the Wave 5 goal is unchanged (plan P7, `KI-056-1`: fewer permission requests while keeping `RA-19`; the D-01 requirement that `devops_agent` runs `gh` instead of the human). Plan decision D51 refines the means: a security harness with which agents run `gh`, database tests and hooks without a permission request per action, with no access to credentials and no say in permission decisions. This document records the measurements M1-M18 taken for that design, the review findings F-01 to F-23 raised against it, and the claims each supports. Sections A1-A10 and B1-B11 (section 5) are filled by units S-02 to S-12.
+
+## 1. Conditions
+
+| Item | Value |
+| :--- | :--- |
+| Parent sandbox probes | VS Code extension harness `2.1.322` (env `AI_AGENT=claude-code_2-1-322_agent`) |
+| Child sessions | `claude -p --model haiku --settings <json>` with the Homebrew CLI `2.1.119`, launched outside the parent sandbox |
+| Earlier document | `SANDBOX_ENUMERATION.md` records `2.1.319` |
+| Version limit | No design claim is measured on 2.1.322 child sessions |
+| Measurement dates | 2026-11-12 (M1-M18); 2026-11-14 (review) |
+| Child session volume | About 19 `claude -p` calls in M1-M18 |
+| Cleanup | Repository tree clean after every probe; all markers, listeners, the bridge and the throwaway container were removed |
+| Reviewer incident | The independent reviewer (fresh agent, model Fable) printed the session-local sandbox proxy credential (`CLOUDSDK_PROXY_*` variables) in its own tool output by mistake; it is not a user or GitHub secret; the value is not recorded |
+
+## 2. Measurements M1-M18
+
+| ID | Question | Method | Literal result | CLI | Review verdict |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| M1 | Does trustd fetch attacker-chosen AIA/OCSP URLs? | Leaf certs signed by an untrusted self-made root with AIA caIssuers and OCSP URIs to a local HTTP listener (loopback and LAN IP, marker paths); `security verify-cert -p ssl -R ocsp` unsandboxed and in a child sandbox with `enableWeakerNetworkIsolation` true and false; positive control: the real api.github.com leaf alone | 0 requests at both listeners in every run; control: `certificate verification successful` (on), `0` (off) | 2.1.119 child; unsandboxed | Conclusion not established: null result with no positive control that trustd fetches for that chain; AIA/OCSP fetches need a chain that can anchor; loopback/LAN http may be refused by policy. Unmeasured. |
+| M2 | gh with `enableWeakerNetworkIsolation` | child with `network.allowedDomains: ["api.github.com"]`, on and off | on: `gh api rate_limit` -> `5000`; off: `tls: failed to verify certificate: x509: OSStatus -26276`; `curl https://example.com` failed in both; binary: the key adds only `(allow mach-lookup (global-name "com.apple.trustd.agent"))` and the default profile already allows `com.apple.securityd.xpc`; binary text: "opens a potential data exfiltration vector through the trustd service" | 2.1.119 | Holds for 2.1.119; the one-rule claim rests on binary text, not a profile diff; not measured on 2.1.322. |
+| M3 | Does the proxy intercept TLS? | `curl -v` to api.github.com through `HTTPS_PROXY` | CONNECT tunnel; subject `*.github.com`, issuer `Sectigo Public Server Authentication CA DV E36`; `NO_PROXY` includes localhost, 127.0.0.1 and private ranges | 2.1.322 parent | Confirmed (reproduced). |
+| M4 | Authenticated REST through the proxy | `gh auth token \| sed 's/^/Authorization: Bearer /' \| curl -H @- https://api.github.com/user` x3; Python urllib default and with `cafile=/etc/ssl/cert.pem` | `200`, 0.38-0.42 s; Python default `CERTIFICATE_VERIFY_FAILED`, with cafile `200` | 2.1.322 parent | Confirmed (reproduced). |
+| M5 | Is the gh token readable by the agent? | `gh auth token` inside the sandbox; response headers of `/user` | readable; `x-oauth-scopes: gist, read:org, repo, user, workflow`; no `github-authentication-token-expiration` header | 2.1.322 parent | Confirmed; label corrected: a gh OAuth-app token (`gho_` prefix), not a classic PAT; a second credential (git osxkeychain helper) was missed, see F-06. |
+| M6 | Egress from the sandbox | `curl` status codes, no `allowedDomains` in any settings, auto mode | github.com 200, raw.githubusercontent.com 301, codeload.github.com 301, github.io 301, objects.githubusercontent.com 404, pypi.org 200, registry.npmjs.org 200, example.com 000 (`SSL_ERROR_SYSCALL`) | 2.1.322 parent | Status codes reproduced; conclusion "egress is filtered" refuted: example.com is not proxy-refused (CONNECT 200, http 200; the HTTPS failure is upstream); webhook.site, pastebin.com, httpbin.org answered 200. See F-01, KI-059-19. |
+| M7 | TCP to localhost from the sandbox | direct connects; binary key search; proxy CONNECT via `curl -p -x "$HTTPS_PROXY" http://127.0.0.1:5433/` | direct: 127.0.0.1:5432, ::1:5432, 127.0.0.1:6379 `EPERM`; keys found: `allowUnixSockets`, `allowAllUnixSockets`, `allowLocalBinding` (bind only), `allowMachLookup`, `allowUnsandboxedCommands`, `allowManagedHooksOnly`, `allowManagedDomainsOnly`; no key for outbound loopback TCP; proxy CONNECT reported `000` | 2.1.119 binary; 2.1.322 parent | Direct half and key search confirmed; proxy half refuted: the `000` came from `NO_PROXY` sending curl direct; with `--noproxy ''` CONNECT to 127.0.0.1, localhost and other loopback spellings returns `200 Connection Established` (port 5000 `Server: AirTunes`). See F-02, KI-059-20. |
+| M8 | Postgres in Docker Desktop over a bind-mounted socket dir | throwaway `postgres:15`, `/var/run/postgresql` bind-mounted to a macOS dir, Docker Desktop 29.7.2 | `could not set permissions of file ".s.PGSQL.5432": Invalid argument`; `FATAL: could not create any Unix-domain sockets` | Docker Desktop | Holds, narrow (one version, one backend); general conclusion right. |
+| M9 | Unix sockets under the sandbox | parent: AF_UNIX bind+listen in `$TMPDIR`; child with `allowUnixSockets: [<bridge>.sock, <own>.sock]` and without | parent `EPERM`; child on: bridge connect -> Postgres SSLRequest reply `N`, bind+listen on own listed path OK, unlisted `~/.docker/run/docker.sock` `EPERM`, TCP 5433 `EPERM`; child off: all `EPERM` | 2.1.322 parent; 2.1.119 child | Parent half confirmed (also docker.sock, /var/run/docker.sock, the SSH agent socket, the harness messaging socket and mDNSResponder `EPERM`; socketpair works); child half not reproduced; missing: unlink and re-bind of a listed path, project-level honouring on 2.1.322. |
+| M10 | Bridge outside the sandbox | Python forwarder unix socket -> 127.0.0.1:5433 (the host's development Postgres) run unsandboxed | sandboxed child reached Postgres (M9) | 2.1.119 child | Holds as plumbing; the probe reached the development database; the forwarder has no error handling (one refused connect ends the accept loop). |
+| M11 | `sandbox-exec` around a hook | profile: allow default, deny network-outbound except the mDNSResponder socket, deny file-write* then allow the repo, `/private/tmp/claude-501`, `/dev/null`, `/dev/tty`; run outside the sandbox | repo write OK; HOME write denied; `~/.claude/settings.json` append-open denied; TCP 1.1.1.1:443 and 127.0.0.1:5433 denied; `git status` OK; child `curl` denied; overhead 5.3 ms (20 runs); nested inside the Claude sandbox: `sandbox_apply: Operation not permitted`, exit 71 | macOS | Holds; only writes and TCP tested (see F-08, F-09). |
+| M12 | Hook profile gaps | first profile vs a second with denies for `.git/config`, `.git/hooks`, `.git/commondir`, `.git/modules`, `.git/worktrees`, `.claude/settings*.json`, `.claude/hooks`, `.mcp.json` | first: all of those writable; second: denied, `scripts/` still writable | macOS | Confirmed, incomplete: renaming `.git` bypasses the literal denies (F-07); `.claude/agents`, `.claude/commands`, `.claude/skills` writable under the profile. |
+| M13 | Can a PreToolUse hook grant permission? | child with a hook printing `{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow"}}` | Bash `touch ~/<marker>` with `dangerouslyDisableSandbox: true`: marker created, no approval (control without hook: blocked); Write tool to `~/<marker>`: created (control: "requested permissions ... haven't granted it yet") | 2.1.119 | Sound, not reproduced; only PreToolUse, `-p`, haiku; `PermissionRequest` hooks, `updatedInput` and the auto-mode classifier unmeasured. |
+| M14 | `allowUnsandboxedCommands: false` with the allow hook | same child | Bash: `touch: ... Operation not permitted` (ran sandboxed), no marker; Write: file created | 2.1.119 | Sound, not reproduced: Write/Edit are outside the sandbox regardless. |
+| M15 | Wrapper that drops hook stdout | `sandbox-exec -f <profile> python3 -I <hook> >/dev/null` | allow hook: Write not auto-approved; exit-2 block hook: `blocked by probe hook`, no file | 2.1.119 | Sound for one channel; wrapper failure exit codes not tested (F-03). |
+| M16 | `permissions.deny` vs hook allow | `--permission-mode acceptEdits` | `Write(~/**)`, `Write(/x)`, `Write(./x)`, `Write(**/x)` denied nothing even without the hook; bare `Write` removes the tool; `Edit(//<absolute path>)` and `Edit(~/<file>)` denied the Write tool with and without the allow hook; framework templates use only `Edit(...)`/`Read(...)` path rules | 2.1.119 | Plausible, not reproduced; `Edit(~/**)` as a pattern untested (F-10). |
+| M17 | Template `Read(/.env)` scope | fixture project with `.claude/settings.json` deny `Read(/.env)` | Read of `<root>/.env` denied; Read of `<root>/.claude/.env` allowed; control with no rule: allowed | 2.1.119 | Sound, not reproduced; `Read(/**/.env*)`, `.env.example`, Grep/Glob untested. |
+| M18 | Where approvals and hand-offs come from | transcripts | the host's last long session: 66 tool uses, 8 human-approved, 8 of 21 human messages were pasted `make test` / `pytest --create-db` / `check_fix_reproduces.py` / Django shell output; the nucleus session of 2026-11-12: 17 of 115 approvals, 4 AskUserQuestion and about 10 Bash commands with shell expansion (`$?`, for-loops, `$(...)`, heredoc) | transcripts | Not verified by the reviewer. |
+
+## 3. Review findings F-01 to F-23
+
+Design names used in the column "Design part":
+
+| Name | Design part |
+| :--- | :--- |
+| S1 | Hooks wrapped in `sandbox-exec` with stdout dropped |
+| S2 | Explicit deny rules |
+| S3 | GitHub broker outside the sandbox |
+| S4 | Test database bridge |
+| S5 | `allowUnsandboxedCommands` |
+| S6 | Server-side protection |
+| (a) | Native gh with `enableWeakerNetworkIsolation` |
+| (b) | In-sandbox REST client |
+
+| ID | Severity | Basis | Design part | Finding | Evidence |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| F-01 | S1 | Measured (2.1.322, auto mode, no allowedDomains) | S3, (a), (b) | Egress is effectively allow-all; a broker is not a choke point and L4 body scanning protects nothing; anything readable can be posted to an arbitrary host | `curl -o /dev/null -w '%{http_code}' https://webhook.site` -> 200; pastebin, httpbin, paste.rs, discord 200; hooks.slack.com 302, api.telegram.org 302, s3.amazonaws.com 307 (KI-059-19) |
+| F-02 | S1 | Measured (2.1.322) | S4, RA-19 | The proxy tunnels to loopback, an entry point absent from the enumeration; any local TCP service is reachable; if the development Redis is a Celery broker an injected task runs in a worker holding the host's `.env` (inferred) | `curl -sv --noproxy '' -x "$HTTPS_PROXY" -p http://127.0.0.1:5000/` -> `200 Connection Established`, `403`, `Server: AirTunes/1005.13.5` (KI-059-20) |
+| F-03 | S1 | Measured | S1 | The hook wrapper fails open: exit 71 when `sandbox-exec` cannot apply, 65 for a missing profile; neither is 2, so under RA-11 the gate is skipped (`§1 fail_closed_claims`) | `sh -c "sandbox-exec -f <profile> python3 -I <block hook> >/dev/null"; echo $?` -> 71; `-f /nonexistent` -> 65 |
+| F-04 | S1 | Inferred (doc E19 + listing) | S1 | Hooks declared in subagent frontmatter are not covered: `.claude/agents/*.md` symlink into root `agents/`, which the sandboxed agent can write; a `hooks:` block there would run unwrapped with allow power | `ls -la .claude/agents` -> symlinks to `../../agents/*.md`; `SANDBOX_ENUMERATION.md` §3.2 row `agents/` |
+| F-05 | S1 | Measured | S3 | "A token only the broker can read" is unproven for a same-UID process: HOME and the keychain are readable from the Bash sandbox and under the hook profile | `security find-generic-password -s gh:github.com -w >/dev/null; echo $?` -> 0; `wc -c ~/.config/gh/hosts.yml ~/.docker/config.json ~/Library/Keychains/login.keychain-db` succeed (KI-059-21) |
+| F-06 | S1 | Measured | S3 | A second GitHub credential: the osxkeychain git helper returns username and password for github.com in the sandbox; git transport is not addressed by the design | `printf 'protocol=https\nhost=github.com\n\n' \| git credential fill` -> fields present (values discarded); `git ls-remote origin` works (KI-059-21) |
+| F-07 | S2 | Measured (fixture) | S1 | Literal `.git/config` deny bypassed by renaming `.git` and writing a gitfile to a config the hook wrote; the next unsandboxed git reads it; KI-059-18 stays open | under the profile: `mv .git .git_moved`, append to `.git_moved/config`, write `.git` as `gitdir:`; outside: `git config --get` of the planted key -> `1` |
+| F-08 | S2 | Measured | S1 | The hook profile allows the mDNSResponder socket, so DNS works there (data in labels) while the Bash sandbox denies it | under the profile `getaddrinfo("example.com",443)` resolves; Bash sandbox: mDNSResponder `EPERM` |
+| F-09 | S2 | Inferred; one attempt inconclusive | S1 | `(allow default)` leaves Mach services (LaunchServices, Apple Events, launchd) reachable; `launchctl submit` returned 1 with no marker, which does not prove the path closed | profile text; `launchctl submit -l <label> -- /usr/bin/touch <marker>` -> exit 1 |
+| F-10 | S2 | Inferred | S2 | `Edit(~/**)` never measured as a pattern; the project is under HOME, so it may deny every project edit | rule text vs working directory |
+| F-11 | S1 | Inferred | S4 | A test Postgres with the image superuser allows `COPY ... TO PROGRAM`, and a container with network reaches the internet and `host.docker.internal:5433`; needs a non-superuser CREATEDB role and a measured network restriction | reasoning chain |
+| F-12 | S2 | Inferred | S4 | "Redis likewise" is unsafe for the development Redis (no auth, `CONFIG SET`, `REPLICAOF`, F-02 path); needs its own throwaway instance | design text |
+| F-13 | S2 | Rule reading | S4 | `agents.md §3 local_testing` and `rules/qa_and_testing.md §7` require a host ADR and an ephemeral database per run; one long-lived container shared by sessions is shared unless each run gets its own database name | `rules/qa_and_testing.md` lines 153-155 |
+| F-14 | S2 | Inferred | S4 | The host sandbox denies `./.env`, so settings that load it will not import in the sandbox; a separate non-secret test settings path is an unstated precondition | host settings |
+| F-15 | S1 | Inferred; reach measured | S6, (a), (b) | Branch protection is not a boundary while the agent holds the owner's `repo` token, which can delete it via the API; `workflow` scope lets a pushed branch alter a workflow and print repository secrets; neither executed | scopes from M5; reach from F-05, F-06 (KI-059-22) |
+| F-16 | S2 | Inferred | S3 | The broker policy is a deny list though called an allowlist; unlisted routes reach `main` (`PUT /contents`, `PATCH /git/refs/heads/main`, GraphQL mutations, `workflow_dispatch`); PR/issue bodies stay an exfiltration channel | design text |
+| F-17 | S2 | Inferred | S3 | The broker socket has no caller authentication; any same-UID process connects; repository scope must be fixed in the broker | Unix socket semantics; M9 |
+| F-18 | S1 | Inferred | S3, S4 | If `allowUnixSockets` is honoured from project settings, one Edit-tool write to `.claude/settings.local.json` (not sandboxed, M14) adds `docker.sock`, a full escape; whether the CLI or classifier blocks it is unmeasured | M14; no deny for `.claude/settings*.json` in the nucleus settings |
+| F-19 | S2 | Measured by reading | S1 | `>/dev/null` removes outputs the framework uses: `SessionStart` (`on_init.py`) and `PostCompact` deliver context on stdout | `claude/settings.hooks.json` |
+| F-20 | S2 | Measured by reading | S1 | The profile hard-codes an absolute repository path: fails in a host or another clone, breaks `§1 path_type`; if the profile sits in an agent-writable tree, RA-19 clause 3 applies and deleting it triggers F-03 | profile text |
+| F-21 | S2 | Doc measurement (N319) | S5 | "Attended" does not mean human-approved: on 2.1.319 with `defaultMode: auto`, `dangerouslyDisableSandbox` ran with no human | `SANDBOX_ENUMERATION.md` §6.7 `N319` |
+| F-22 | S3 | Reading | S1, RA-19 | The MCP server runs outside the sandbox from `venv_skillopt/bin/python`, agent-writable in the nucleus (E19); S1 does not cover it | `claude/mcp.json` |
+| F-23 | S3 | M18 | permission load | About 10 of 17 approvals came from command-shape prompts; S1-S6 leave that cause untouched | M18 |
+
+## 4. Claims
+
+Taken from the verdict column of section 2 and the findings of section 3; no claim is added here.
+
+### Confirmed
+
+- M3: the proxy tunnels with CONNECT and does not intercept TLS (reproduced).
+- M4: authenticated REST through the proxy returns `200` (reproduced).
+- M5: the gh token is readable by the agent; it is a gh OAuth-app token, not a classic PAT.
+- M6: the status codes are reproduced.
+- M7: the direct loopback half and the binary key search.
+- M8: Docker Desktop refuses the bind-mounted Unix socket (narrow: one version, one backend).
+- M9: the parent half (Unix sockets denied in the parent sandbox).
+- M10: the bridge holds as plumbing.
+- M11: `sandbox-exec` around a hook holds for writes and TCP.
+- M12: the hook profile has gaps (confirmed, incomplete).
+- M2: holds for 2.1.119.
+- F-01, F-02, F-03, F-05, F-06, F-07, F-08, F-19, F-20: measured or measured by reading.
+
+### Refuted
+
+- M6: "egress is filtered" is refuted; webhook.site, pastebin.com and httpbin.org answered 200.
+- M7: the proxy half is refuted; the `000` came from `NO_PROXY`, and with `--noproxy ''` CONNECT to loopback returns `200 Connection Established`.
+
+### Unmeasured
+
+- M1: whether trustd fetches AIA/OCSP URLs for that chain (null result without a positive control).
+- M2: behaviour on 2.1.322; the one-rule claim rests on binary text, not a profile diff.
+- M9: the child half is not reproduced; unlink and re-bind of a listed path and project-level honouring on 2.1.322 are missing.
+- M13, M14, M15, M16, M17: sound but not reproduced; `PermissionRequest` hooks, `updatedInput`, the auto-mode classifier, wrapper failure exit codes, `Edit(~/**)`, `Read(/**/.env*)`, `.env.example` and Grep/Glob are untested.
+- M18: not verified by the reviewer.
+- F-09: one attempt inconclusive; the Mach service path is not proven closed.
+- F-10: `Edit(~/**)` never measured as a pattern.
+- F-18: whether the CLI or classifier blocks a `.claude/settings.local.json` write is unmeasured.
+- F-04, F-11, F-12, F-14, F-15, F-16, F-17: inferred, not executed.
+
+## 5. Pending measurements
+
+### A1
+
+Question: does `sandbox.network.allowedDomains` close (a) egress to arbitrary hosts and (b) the proxy CONNECT tunnel to loopback? Measured 2026-11-14 by `devops_agent`, 5 child `claude -p --model haiku` calls (cap 6). Settings in every case: `enabled: true`, `autoAllowBashIfSandboxed: true`, `allowUnsandboxedCommands: false`, `network.allowedDomains: ["api.github.com","github.com"]` (case A1-3: `"network":{}`). Binaries: 2.1.322 (`~/.vscode/extensions/anthropic.claude-code-2.1.322-darwin-arm64/resources/native-binary/claude`) and 2.1.119 (Homebrew). Port 5000 is the macOS AirPlay receiver; no database or Redis port was probed.
+
+Probe command:
+
+```bash
+for h in webhook.site api.github.com example.org; do printf '%s ' $h; curl -sS -m 8 -o /dev/null -w '%{http_code}\n' https://$h 2>&1 | tail -1; done; printf 'loopback5000 '; curl -sS -m 8 --noproxy '' -x "$HTTPS_PROXY" -p -o /dev/null -w '%{http_code}\n' http://127.0.0.1:5000/ 2>&1 | tail -1; printf 'direct5000 '; curl -sS -m 5 --noproxy '*' -o /dev/null -w '%{http_code}\n' http://127.0.0.1:5000/ 2>&1 | tail -1
+```
+
+| Case | CLI | Settings level | webhook.site | api.github.com | example.org | loopback5000 via proxy | direct5000 | Sandbox violation lines |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| A1-1 | 2.1.322 | project (`.claude/settings.json` in a fixture) | 000 | 200 | 000 | 000 | 000 | `deny network-outbound` webhook.site:443, example.org:443, 127.0.0.1:5000 |
+| A1-2 | 2.1.322 | `--settings` file | 000 | 200 | 000 | 000 | 000 | same three |
+| A1-3 | 2.1.322 | `--settings`, control `"network":{}` | 000 | 000 | 000 | 000 | 000 | webhook.site:443, api.github.com:443, example.org:443, 127.0.0.1:5000 |
+| A1-4 | 2.1.119 | project | 000 | 200 | 000 | 000 | 000 | none printed |
+| A1-5 | 2.1.119 | `--settings` | 000 | 200 | 000 | 000 | 000 | none printed |
+| A1-6 | 2.1.322 | `--settings`, control with the `network` key absent | not probed | 000 | 000 | 000 | not probed | api.github.com:443, example.org:443, 127.0.0.1:5000 |
+
+Literal line from case A1-1:
+
+```text
+deny network-outbound webhook.site:443 (not in this command's allowed_domains — re-run the command with this host listed if it needs it)
+```
+
+Reading:
+
+| Statement | Cases |
+| :--- | :--- |
+| With `allowedDomains` set to the two GitHub hosts, egress to other hosts is denied and api.github.com is reached, on 2.1.322 and 2.1.119, at project level and via `--settings` | A1-1, A1-2, A1-4, A1-5 |
+| With that list set, the proxy CONNECT to 127.0.0.1:5000 is denied and the sandbox names it | A1-1, A1-2, A1-4, A1-5 |
+| The control A1-3 also denied loopback, so this run does not show that the list is what closes loopback; it shows that the configuration with the list leaves both closed | A1-3 |
+| A1-6 (unit S-03, 2026-11-14) with the `network` key absent also denied every host, including api.github.com, in a `claude -p` child; the open egress of the parent session (harness 2.1.322, interactive, auto mode, no `network` key; F-01, F-02) is therefore not explained by the settings but by the session mode, which approves domains per command (inferred: the measurement isolates the factor, not the mechanism; B7 measures the auto-mode approvals) | A1-3, A1-6, F-01, F-02 |
+| `direct5000` printed `000`; the error text was not captured | all |
+| User-level and managed settings were not inspected | all |
+| Consequence for KI-059-19 and KI-059-20: setting `network.allowedDomains` explicitly closes both in the measured configurations | A1-1, A1-2, A1-4, A1-5 |
+
+Cleanup: fixtures removed, repository tree clean.
+
+#### A1 pip through the PyPI domains (unit P-05)
+
+Conditions: measured 2026-11-15 by `devops_agent`, plan D58, CLI `2.1.322` (VS Code extension native binary, as A1-1), project-level `.claude/settings.json` in a fixture, child launched outside the parent sandbox, `--model haiku`, settings `enabled: true`, `autoAllowBashIfSandboxed: true`, `allowUnsandboxedCommands: false`; 5 child `claude -p` calls (cap raised from 3 to 5 by the human). Probe: a throwaway venv (pip 26.0.1) runs `pip download --no-deps --require-hashes` of the `iniconfig==2.3.1` pin with its two hashes from `requirements-test.txt`. Results come from the exit code, the files on disk and the sandbox violation lines; macOS only.
+
+| Case | allowedDomains | TLS setting | pip exit | File downloaded | Violation lines |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| A1-7 | `api.github.com`, `github.com`, `pypi.org`, `files.pythonhosted.org` | none | 1 | none | none printed; pip: `SSLCertVerificationError('OSStatus -26276')` on `https://pypi.org/simple/iniconfig/` |
+| A1-8 | same four | `sandbox.enableWeakerNetworkIsolation: true` | 0 | `iniconfig-2.3.1-py3-none-any.whl` | none |
+| A1-9 (control) | `api.github.com`, `github.com` | `enableWeakerNetworkIsolation: true` | 1 | none | `deny network-outbound pypi.org:443` |
+| A1-10 | same four | `enableWeakerNetworkIsolation` absent; settings `env`: `PIP_USE_DEPRECATED=legacy-certs`, `PIP_CERT=/etc/ssl/cert.pem` (both seen in the child Bash env) | 0 | `iniconfig-2.3.1-py3-none-any.whl` | none |
+| A1-11 (control) | `api.github.com`, `github.com`, `pypi.org` | same `env` as A1-10 | 2 | none | `deny network-outbound files.pythonhosted.org:443` |
+| A1-12 (control; pnpm 11.23.0 `pnpm view is-number version`, user scope with `strictAllowlist: true`, 2026-11-18, unit P-07) | `api.github.com`, `files.pythonhosted.org`, `github.com`, `pypi.org` | none | 1 (`ERR_PNPM_META_FETCH_FAIL`) | none | `deny network-outbound registry.npmjs.org:443 (host is not on the allow list)` |
+| A1-13 (same probe, same session) | the same four plus `registry.npmjs.org` | none | 0 (prints `7.0.0`) | none (metadata only) | none for `registry.npmjs.org`; the unlisted control `example.org:443` is denied |
+
+Reading:
+
+- Pip inside the sandbox fails TLS with default settings (A1-7).
+- Two settings pass it: `enableWeakerNetworkIsolation: true` (A1-8), which ADR-0019 D2 forbids, and the settings `env` pair `PIP_USE_DEPRECATED=legacy-certs` + `PIP_CERT=/etc/ssl/cert.pem` with no widening key (A1-10).
+- Both `pypi.org` (A1-9) and `files.pythonhosted.org` (A1-11) are required in `allowedDomains`.
+- The env pair is shown sufficient together; each variable alone was not run.
+- `/etc/ssl/cert.pem` is the macOS path and the measurement is macOS only.
+- The pin had no dependencies, so one wheel was fetched and its `--require-hashes` check passed.
+- Rows A1-12 and A1-13 are the pnpm registry case (B9 P-07); they reuse the columns above, and "File downloaded" is `none` because only metadata was fetched.
+
+### A2
+
+Unit S-03 repeats M9, M13, M14 and M15 on 2.1.322 at project and user level.
+
+- Measured 2026-11-14 by `devops_agent` on 2.1.322, 3 child `claude -p` calls in unit S-03 (cap 10), of which 2 for A2. Settings: `sandbox.enabled`, `autoAllowBashIfSandboxed`, `network.allowUnixSockets: ["/private/tmp/claude-501/s03/listed.sock"]`; two Python echo servers on `listed.sock` and `unlisted.sock` run outside the sandbox (no database or other local service).
+
+| Case | CLI | Settings level | listed.sock | unlisted.sock |
+| :--- | :--- | :--- | :--- | :--- |
+| A2-1 | 2.1.322 | project (`.claude/settings.json` in a fixture) | b'ok' | EPERM |
+| A2-2 | 2.1.322 | user (fixture `CLAUDE_CONFIG_DIR`) | unmeasured: child exited 1 with "Not logged in · Please run /login" | unmeasured |
+
+- Reading: on 2.1.322 at project level `allowUnixSockets` admits the listed path and refuses an unlisted one (agrees with M9 on 2.1.119); user level is unmeasured because a fixture config directory has no login; the user's real settings were not touched.
+- M13, M14 and M15 were not re-run on 2.1.322 (human decision 2026-11-14, plan S-03 row); they keep their 2.1.119 measurement, and ADR-0019 records this limit.
+- Cleanup: echo servers stopped, socket directory and fixtures removed, repository tree clean.
+
+### A3
+
+Unit S-04, static analysis (plan D51 principle: no hook was run).
+
+| Check | Evidence | Result |
+| :--- | :--- | :--- |
+| A3-1 | CLI 2.1.322 subagent frontmatter reference | `hooks`, `permissionMode` and `mcpServers` are accepted fields |
+| A3-2 | `find .claude/agents -type l \| wc -l` and `find .claude/agents -type f \| wc -l` | 14 symlinks, 0 regular files; each points to `agents/<name>.md` |
+| A3-3 | session sandbox write allowlist | covers the repository root `.`; `agents/*.md` is writable from the sandbox |
+| A3-4 | `grep -l "^hooks:" agents/*.md \| wc -l` | 0: no agent definition declares hooks today |
+
+- Reading: agent definitions are permission-relevant files the sandbox can write. ADR-0019 decides their write protection and the human review route for changes to them.
+
+### A4
+
+Unit S-04: not measurable. No hook wrapper exists: `grep -rln sandbox-exec hooks scripts` prints nothing. The two fail-closed checks below are acceptance criteria for any wrapper ADR-0019 adopts; an agent runs them, since they test that a closed control stays closed (plan D51 principle, tier 2).
+
+| Check | Expected result |
+| :--- | :--- |
+| A4-1 | With the wrapper's sandbox profile file absent, a guarded tool call is blocked (exit 2) |
+| A4-2 | A non-zero exit of the inner hook reaches the harness as exit 2 (RA-11) |
+### A5
+
+Measured 2026-11-14 by `devops_agent` on 2.1.322, 7 child `claude -p` calls in unit S-04 (cap 10), fixture files with dummy content only.
+
+| Case | Rule | Target | Result |
+| :--- | :--- | :--- | :--- |
+| A5-1 | `Edit(~/**)` deny | a fixture file inside the project | denied: the project is under HOME (F-10) |
+| A5-2 | `Read(/**/.env*)` deny | root `.env` fixture | denied |
+| A5-3 | `Read(/**/.env*)` deny | nested `.env` fixture | denied |
+| A5-4 | `Read(/**/.env*)` deny | `.env.example` fixture | denied |
+| A5-5 | `Read(/**/.env*)` deny | Grep, hidden files included, over `sub/plain.txt`, `sub/.hidden`, `sub/.env` | `plain.txt` and `.hidden` returned; `.env` not returned; `permission_denials` empty |
+| A5-6 | none (control: `deny` empty) | same Grep, same three files | all three returned, `.env` included |
+| A5-7 | `Read(/**/.env*)` deny | Grep without positive control (first run) | no match returned; superseded by A5-5 and A5-6 |
+
+- Reading: `Edit(~/**)` cannot protect HOME without blocking project work, so HOME protection names paths. `Read(/**/.env*)` covers nested and example files that `Read(/.env)` (M-series) misses. ADR-0019 decides the replacement rule. The pair A5-5/A5-6 shows the rule also removes `.env` files from Grep results, silently: no denial is logged.
+
+#### A5 candidate rules naming HOME paths (unit P-02)
+
+Measured 2026-11-15 by `devops_agent`, child CLI `2.1.119` (Homebrew), launched outside the parent sandbox, `--model haiku --permission-mode acceptEdits --output-format json`, 6 child `claude -p` calls (cap raised from 4 to 6 by the human, 2026-11-15), cwd a fixture project under HOME, dummy fixtures only, all removed after; results decided from file sha on disk.
+
+| Case | Rule(s) | Target | Result |
+| :--- | :--- | :--- | :--- |
+| A5-8 | deny `Edit(~/.a5p02-fixture/**)`, deny `Edit(~/.a5p02-fixture.rc)` | Edit of the two HOME fixtures | not interpretable: the child was refused Read outside the cwd and never reached Edit; HOME fixtures unchanged; project file edited |
+| A5-9 | the two denies plus Read allows on both fixtures | Edit of both fixtures, Write of a new `new.txt`, Edit of project file | HOME fixtures unchanged, `new.txt` not created, `permission_denials` empty; confounded by A5-10; project edit failed on a model `old_string` mismatch |
+| A5-10 | control: Read allows only, deny empty | same steps | HOME writes refused anyway (outside-cwd writes in `acceptEdits`, listed in `permission_denials`); project file edited; not a positive control for HOME |
+| A5-11 | allow `Edit(~/.a5p02-fixture/**)` and `Edit(~/.a5p02-fixture.rc)`, deny `Edit(~/.a5p02-fixture/**)` | Edit of `~/.a5p02-fixture.rc` | edited (positive control: an allowed HOME file edit works) |
+| A5-12 | same as A5-11 | Edit of `~/.a5p02-fixture/sub/f.txt` | denied: sha unchanged; the deny takes precedence over the allow |
+| A5-13 | same as A5-11 | Write of new `~/.a5p02-fixture/new.txt` | denied: not created; an `Edit(...)` deny also blocks Write of a new file |
+| A5-14 | same as A5-11 | Edit of the project file under HOME | edited: a deny naming a HOME directory does not block project edits under HOME, unlike `Edit(~/**)` (A5-1) |
+| A5-15 | allow `Edit(~/.a5p02-ctl.rc)`, no deny (control, call 5) | Edit of `~/.a5p02-ctl.rc` | edited: sha changed |
+| A5-16 | allow and deny `Edit(~/.a5p02-deny.rc)` (call 5) | Edit of `~/.a5p02-deny.rc` | denied: sha unchanged; the deny takes precedence over an allow on the same file; control A5-15 edited under the same settings |
+| A5-17 | allow and deny `Edit(~/.a5p02-dir/**)` (call 5) | Write of new `~/.a5p02-dir/sub2/new.txt` | denied: no subdirectory or file created; `keep.txt` unchanged |
+| A5-18 | deny `Edit(~/.a5p02-absent/**)`, allow `Edit(~/.a5p02-absent)`, no file-level deny, directory absent (call 6; not executed in call 5) | Write of a file at the exact path `~/.a5p02-absent` | denied: the path still does not exist after the call |
+| A5-19 | none (project control, call 5) | Edit of the project file under HOME | edited: sha changed |
+| A5-20 | allow `Edit(~/.a5p02-ctlabsent)`, no deny (control, call 6) | Write of new `~/.a5p02-ctlabsent` | created: positive control for A5-18 |
+| A5-21 | allow `Edit(~/.a5p02-ctl.rc)` (control, call 6) | Edit of `~/.a5p02-ctl.rc` | edited: sha changed |
+| A5-22 | none (project control, call 6) | Edit of the project file under HOME | edited: sha changed |
+
+- Reading: the directory pattern `Edit(~/<dir>/**)` is isolated with positive controls (A5-11 to A5-14, A5-17, A5-18 with A5-20): it denies Edit and Write inside the directory, in new subdirectories, and a file at the exact directory path when the directory is absent, and does not block project edits under HOME.
+- Reading: the file pattern `Edit(~/<file>)` is isolated with a positive control (A5-16 with A5-15): a deny takes precedence over an allow on the same file.
+- Reading: rule-based denials did not appear in `permission_denials` (A5-9, A5-12, A5-13, A5-16, A5-17, A5-18); only prompt refusals did, so a check that reads only that field misses them.
+- Reading: measured on `2.1.119`, not `2.1.322`; the Conditions version limit applies.
+
+| Candidate | Pattern | Paths | Blocks framework work |
+| :--- | :--- | :--- | :--- |
+| C1 directory | `Edit(~/<dir>/**)` | `Edit(~/.ssh/**)`, `Edit(~/.aws/**)`, `Edit(~/.gnupg/**)`, `Edit(~/.config/gh/**)`, `Edit(~/.docker/**)`, `Edit(~/Library/LaunchAgents/**)`, `Edit(~/Library/Keychains/**)` | none found by configuration reading |
+| C2 file | `Edit(~/<file>)` | `Edit(~/.zshrc)`, `Edit(~/.zshenv)`, `Edit(~/.zprofile)`, `Edit(~/.bashrc)`, `Edit(~/.bash_profile)`, `Edit(~/.gitconfig)`, `Edit(~/.npmrc)`, `Edit(~/.netrc)` | none found by configuration reading |
+| C3 harness file | `Edit(~/.claude/settings.json)` | `~/.claude/settings.json` | none |
+| C4 rejected | `Edit(~/.claude/**)` | `~/.claude/**` | yes: denies the agent memory directory `~/.claude/projects/` |
+
+No path under the project root may be named by any rule (A5-1). The human chooses the rule set, and the choice is recorded in `SPRINT_LOG.md`.
+
+### A6
+
+Measured 2026-11-14 on 2.1.322 in unit S-05 (plan D52: configuration checks, no attack attempt), 3 child `claude -p` calls (cap 4), fixture files with dummy content only.
+
+| Case | Check | Result |
+| :--- | :--- | :--- |
+| A6-1 | `sandbox.filesystem.denyRead` on fixture `blocked.txt`, child run outside the parent sandbox | `cat: blocked.txt: Operation not permitted` |
+| A6-2 | control: fixture `open.txt`, no rule, same run | `fixture` printed |
+| A6-3 | first 2 runs with the child nested inside the parent sandbox | not interpretable: the child's sandbox did not start (EPERM); superseded by A6-1 and A6-2 |
+| A6-4 | `allowMachLookup`, `enableWeakerNetworkIsolation`, `allowUnixSockets`, `allowAllUnixSockets`, `allowLocalBinding` in `.claude/settings.json` and `claude/settings.hooks.json` | absent in both files; neither has a `network` block |
+
+- Reading: `denyRead` on an absolute path blocks Bash reads of that path and leaves other files readable. A credential file can be kept from the agent by listing its path in `denyRead`. A sandboxed child cannot be measured from inside a sandboxed parent. ADR-0019 decides which credential paths the nucleus and host template list.
+
+### A7
+
+Measured 2026-11-14 in unit S-05 (plan D52), Bash sandbox of this session; static inventory of the hook settings.
+
+| Case | Check | Result |
+| :--- | :--- | :--- |
+| A7-1 | hook entries in `.claude/settings.json` | none |
+| A7-2 | hook entries in `claude/settings.hooks.json` (host template) | SessionStart `.agents/hooks/on_init.py`, PreToolUse(Bash) `.agents/hooks/on_commit.py`, Stop `.agents/hooks/state_mirror.py`, PreCompact `.agents/scripts/persist_session_context.py`, SessionEnd `.agents/scripts/session_end_hook.py`, PostCompact `echo` only |
+| A7-3 | sandbox write to `hooks/` and `scripts/` (new probe file created and removed) | writable: these directories hold the code the template's hooks run (as `.agents/hooks/` and `.agents/scripts/` in a host) |
+| A7-4 | `open -g -b com.apple.finder` (control: Finder always runs) | refused: error -600 `procNotFound`, Apple Events blocked |
+| A7-5 | `open -g -R` on an existing fixture file | exit 0; effect not verifiable from the sandbox |
+| A7-6 | `open -b` on a nonexistent bundle id | `LSCopyApplicationURLsForBundleIdentifier() failed`: does not separate "not found" from "blocked" |
+
+- Reading: in the nucleus the hook code is writable from the sandbox, so a hook runs content an agent can change (`RA-19` (3)). Sandbox writability of `.agents/hooks/` in a host is unmeasured. Launching an application through Launch Services is refused (A7-4). ADR-0019 decides write protection for the hook code.
+
+### A8
+
+Measured 2026-11-14 in unit S-05 (plan D52), one throwaway container `postgres:16` (digest `sha256:63e83b5a3dc36a917dccb76fe1bd2ac51f1ec9c1deb47ff20d4f04233bf6eae9`), no published port, removed after the check; nothing was executed on the server beyond the role creation and the catalog query.
+
+| Case | Check | Result |
+| :--- | :--- | :--- |
+| A8-1 | Docker API from the Bash sandbox | refused: `permission denied` on the Docker socket |
+| A8-2 | `docker inspect` network mode and ports, run outside the sandbox after a permission prompt | `none`, `ports={}` |
+| A8-3 | `pg_roles` row for role `app` created `LOGIN CREATEDB` | `rolsuper=f`, `rolcreatedb=t`, member of `pg_execute_server_program`: `f` |
+
+- Reading: a non-superuser role without `pg_execute_server_program` cannot run server programs, and `--network none` gives the container no network, both shown by configuration. The Docker API is not reachable from the sandbox, so a DB test that starts a container asks for permission today. ADR-0019 decides the DB test route (`KI-057-1`).
+
+### A9
+
+Unit S-04, static analysis of `deny` rules over `.claude/settings*.json` (A9-1 to A9-3) and a fixture measurement in the A5 call count (A9-4, A9-5).
+
+| Check | File | Evidence | Result |
+| :--- | :--- | :--- | :--- |
+| A9-1 | `.claude/settings.json` (nucleus) | `permissions.deny` | `[]`: no rule |
+| A9-2 | `claude/settings.hooks.json` (host template) | `permissions.deny` | 8 rules; none covers `.claude/settings*.json` |
+| A9-3 | session sandbox | write deny list | `.claude/settings.json` and `.claude/settings.local.json` are write-denied to Bash by the harness in this session |
+| A9-4 | fixture `.claude/settings.local.json` | Edit tool with `Edit(/.claude/settings*.json)` deny | denied; file unchanged (`{}`) |
+| A9-5 | fixture `note.txt` (control, no rule) | Edit tool | allowed; content changed `x` to `y` |
+
+- Reading: Bash cannot write the settings files in this session, and in the nucleus and the host template no permission rule stops the Edit tool from writing them (A9-1, A9-2). An `Edit(/.claude/settings*.json)` deny blocks that write (A9-4) and leaves other edits working (A9-5). ADR-0019 decides adding it to the nucleus and the host template.
+
+### A10
+
+Measured 2026-11-14 in unit S-06 (plan D52: read-only API, no write attempted). The human created a fine-grained token and ran the prepared commands in their own terminal (RA-09); no token value was printed or pasted.
+
+Token as created by the human: resource owner the repository owner; repository access "Only select repositories", the nucleus repository only; repository permissions Metadata read, Contents read and write, Pull requests read and write, every other permission (Administration and Workflows included) "No access"; no account permission; expiry 30 days.
+
+| Case | Check | Result |
+| :--- | :--- | :--- |
+| A10-1 | `GET repos/<nucleus>` with the token | `200 OK`; `Github-Authentication-Token-Expiration: 2026-12-14 14:58:43 UTC` |
+| A10-2 | `GET repos/<nucleus>/branches/main/protection` with the token | `403 Resource not accessible by personal access token` |
+| A10-3 | `GET user/repos` with the token, count | `7`, of which private: `0`; the nucleus repository is public |
+| A10-4 | `GET repos/<nucleus>/branches/main/protection` with the owner's own session (control) | required status checks `audit`, `Analyze (python)`, `CodeQL`, strict; pull request required, `required_approving_review_count: 0`; `enforce_admins: false`; force pushes and deletions not allowed; signatures, linear history and conversation resolution not required |
+| A10-5 | `repos/<nucleus>` field `permissions` with the token | `admin`, `maintain`, `push`, `pull`, `triage` all `true`: the field reports the owner's role, not the token's permissions |
+| A10-6 | renewal and re-read, 2026-11-18, unit T-01: the human regenerated the token (Regenerate token, 30 days) in the browser, then ran `GET repos/<nucleus>` with it in their own terminal, the value read with `read -s` and unset after (RA-09) | `HTTP/2 200`; `Github-Authentication-Token-Expiration: 2026-12-18 21:28:15 UTC` |
+
+- Reading: the token cannot read the branch protection, so it cannot change it (A10-2, against the owner's control A10-4); it has no private access beyond the nucleus, and the nucleus is public, so a host reads the `.agents` submodule with no token. Two gaps are inferred from A10-4 and not executed (attack validation, unit S-16): with `enforce_admins: false` a push made with the owner's token may bypass the protection, and with 0 required approvals plus Contents and Pull requests write the token may merge a pull request into `main` once the checks pass (`RA-12`). A host session must not hold the nucleus token: with it, an agent could push to `.agents` from a host (`jurisdiction`). ADR-0019 decides the token per repository and session type and the merge control.
+- T-01's done criterion holds: the regenerated token answers `200` and expires 2026-12-18 21:28:15 UTC, replacing the 2026-12-14 expiry of A10-1; regeneration invalidates the previous value. Permissions were not re-read: Regenerate keeps the token's settings (not measured here; A10-2 and A10-3 were not re-run).
+
+### B1
+
+Measured 2026-11-14 on 2.1.322 in unit S-07 (plan D52), 3 child `claude -p` calls (cap 6) run outside the parent sandbox in a fixture project, tool list read from the `init` message of `--output-format stream-json`. The only outbound request asked for was WebFetch of `https://example.com`; no connector or Artifact tool was invoked.
+
+| Case | Check | Result |
+| :--- | :--- | :--- |
+| B1-1 | permission mode of a child with no flag | `auto`, inherited from the user's settings |
+| B1-2 | out-of-sandbox built-in tools in the child | `Artifact`, `ArtifactComments`, `ArtifactData`, `PushNotification`, `RemoteTrigger`, `SendMessage`, `WebFetch`, `WebSearch` |
+| B1-3 | connectors in the child | Claude Docs `connected` (8 tools), Google Drive `connected` (14 tools), Gmail `needs-auth` |
+| B1-4 | WebFetch with no rule, auto mode | run without an approval prompt; `permission_denials` empty; the request failed on the network (`ECONNRESET`) |
+| B1-5 | `permissions.deny` on `WebFetch`, `WebSearch`, `Artifact`, `mcp__claude_ai_Google_Drive` | `WebFetch`, `WebSearch` and `Artifact` absent from the child's tool list; the agent reported WebFetch unavailable |
+| B1-6 | `permissions.deny` on `mcp__claude_ai_Google_Drive` only (control) | Google Drive tools `0`, Claude Docs tools `8`, `WebFetch` `1`; both connectors `connected` |
+| B1-7 | static: `permissions.deny` in `.claude/settings.json` and `claude/settings.hooks.json` | no rule covers any tool of B1-2 or B1-3 |
+| B1-8 | after R-25 (`46bc655`) and R-26 (human, at `3e40535`): `permissions.deny` of `.claude/settings.json` ends with `mcp__claude_ai_Google_Drive`, `mcp__claude_ai_Claude_Docs`, `mcp__claude_ai_Gmail`; tool list of the running agent session (VS Code, Claude Code 2.1.325), 2026-11-19, unit P-14 | right after the install the harness notified the running session that every `mcp__claude_ai_Claude_Docs__*` tool (8) and every `mcp__claude_ai_Gmail__*` tool (24) is no longer available, with no restart; a tool search for "gmail claude docs" then returned no tool of either connector |
+
+- Reading: in auto mode an agent reaches out-of-sandbox tools that send data to third parties (web requests, connectors able to create and share files, Artifact publishing) without an approval prompt (B1-4), and neither the nucleus nor the host template denies any of them (B1-7). A `permissions.deny` entry removes the named tool, or every tool of a named connector, from the agent's tool list (B1-5, B1-6). In B1-5 the Claude Docs tools were also absent although not denied; B1-6 shows a connector-level deny does not cause that, and the B1-5 absence is unexplained. ADR-0019 decides which out-of-sandbox tools the nucleus and the host template deny.
+- P-14 (plan D74): the connector denies of R-25 remove both connectors' tools from the session, which closes V-01 row B1-b by configuration (read of the tool list, no attack). Deviation from the P-14 row: it was observed in the running session, which reloaded the project settings without a restart (as P-12 showed for user settings), not in a new session; a new session was not opened.
+
+### B2
+
+Measured 2026-11-14 in unit S-08 (plan D52), no file content read: `test -r`, `ls` to `/dev/null` and `wc -c` only. "Before" ran in the Bash sandbox of this session; "after" ran in 1 child `claude -p` call (cap 4) on 2.1.322, outside the parent sandbox, with `sandbox.filesystem.denyRead` listing the five existing paths by absolute path, plus a fixture `control.txt` in the child's project.
+
+| Path | Before (session sandbox) | After (`denyRead`) |
+| :--- | :--- | :--- |
+| `~/.ssh` | absent | not listed |
+| `~/.aws` | absent | not listed |
+| `~/.npmrc` | absent | not listed |
+| `~/.bash_history` | absent | not listed |
+| `~/.docker/config.json` | readable, 353 bytes | `Operation not permitted` |
+| `~/.config/gh` | readable, listable | not listable |
+| `~/.config/gh/hosts.yml` | not checked | `Operation not permitted` (covered by the directory entry) |
+| `~/.zsh_history` | readable, 366251 bytes | `Operation not permitted` |
+| `~/.claude/projects` | readable, listable | not listable |
+| `~/Library/Keychains/login.keychain-db` | readable, 417920 bytes | `Operation not permitted` |
+| `control.txt` (fixture, not listed) | not checked | readable, 8 bytes |
+
+- Reading: without a rule, every existing sensitive path is readable from the Bash sandbox; listing it in `denyRead` blocks it, a directory entry covers the files under it, and an unlisted file stays readable. Limits of this subset (`fail_closed_claims`): it covers Bash in the sandbox, not the Read tool, which `permissions` governs; denying the keychain file does not cover the keychain service, which `security find-generic-password` reached (KI-059-21); denying `~/.config/gh` also stops `gh` inside the sandbox from reading its own configuration. ADR-0019 decides the `denyRead` list of the nucleus and the host template.
+
+#### B2 denyRead path forms and the .env pattern (unit P-06)
+
+Measured 2026-11-15 by `devops_agent` (plan D59) on CLI `2.1.322` (VS Code extension native binary). Each call was a child `claude -p --model haiku --output-format json` launched outside the parent sandbox, with one fixture project under HOME per call (the child's cwd) and a project-level `.claude/settings.json` with `enabled: true`, `autoAllowBashIfSandboxed: true`, `allowUnsandboxedCommands: false` and the `denyRead` list of the case. 4 child calls (cap raised from 3 to 4 by the human). The probe ran `test -r` and `wc -c` on dummy fixtures only; results come from the printed probe output. `NOREAD` = `test -r` false and `wc` gave `open: Operation not permitted`; `R` = readable. No settings error and `permission_denials` `[]` in every call.
+
+| Case | denyRead | Fixture | Role | Result |
+| :--- | :--- | :--- | :--- | :--- |
+| P06-1 | `["~/.p06-fixture", "~/**/.env*"]` | `~/.p06-fixture/secret.txt` | target | NOREAD |
+| P06-1 | `["~/.p06-fixture", "~/**/.env*"]` | `~/.p06-fixture-open.txt` | control | R |
+| P06-1 | `["~/.p06-fixture", "~/**/.env*"]` | `~/p06-outside/.env` (outside the project) | target | NOREAD |
+| P06-1 | `["~/.p06-fixture", "~/**/.env*"]` | `~/p06-outside/plain.txt` | control | R |
+| P06-2 | `["/Users/<user>/.p06-fixture", "**/.env*"]` | `~/.p06-fixture/secret.txt` | target | NOREAD |
+| P06-2 | `["/Users/<user>/.p06-fixture", "**/.env*"]` | `~/.p06-fixture-open.txt` | control | R |
+| P06-2 | `["/Users/<user>/.p06-fixture", "**/.env*"]` | `~/p06-outside/.env` | target | R (not blocked) |
+| P06-2 | `["/Users/<user>/.p06-fixture", "**/.env*"]` | `~/p06-outside/plain.txt` | control | R |
+| P06-3 | `[]` (control) | `~/.p06-fixture/secret.txt` | target | R |
+| P06-3 | `[]` (control) | `~/.p06-fixture-open.txt` | control | R |
+| P06-3 | `[]` (control) | `~/p06-outside/.env` | target | R |
+| P06-3 | `[]` (control) | `~/p06-outside/plain.txt` | control | R |
+| P06-4 | `["~/**/.env*"]` | `~/p06-deep/a/b/c/.env` (nested, outside the project) | target | NOREAD |
+| P06-4 | `["~/**/.env*"]` | `~/p06-deep/a/b/c/plain.txt` | control | R |
+| P06-4 | `["~/**/.env*"]` | `<project>/.env` (in project) | target | NOREAD |
+| P06-4 | `["~/**/.env*"]` | `<project>/sub/.env` (nested, in project) | target | NOREAD |
+| P06-4 | `["~/**/.env*"]` | `<project>/plain.txt` | control | R |
+
+- Reading: `denyRead` expands `~/` the same as the absolute path (P06-1, P06-2, control P06-3); a directory entry covers the files under it.
+- `~/**/.env*` blocks Bash reads of `.env` files outside the project at any depth and inside the project (P06-1, P06-4); `**/.env*` without `~/` blocks nothing (P06-2).
+- `denyRead` governs the Bash sandbox only, so the Read tool stays covered by `Read(/**/.env*)` (A5).
+- Human decision 2026-11-15 (plan D59): the in-project `.env` block is accepted for hosts, so a host program that loads `.env` from a sandboxed Bash (for example a test runner) cannot read it.
+
+### B3
+
+Measured 2026-11-14 in unit S-09 (plan D52) in the nucleus, Bash sandbox of this session, no `claude -p` call. Writability probe: a new file created and removed in a directory, or a zero-byte append to an existing file (content unchanged, `git status` clean afterwards).
+
+| File class | Nucleus path | Run outside the sandbox by | Sandbox write |
+| :--- | :--- | :--- | :--- |
+| IDE settings and tasks | `.vscode/` | the IDE | denied (`Operation not permitted`) |
+| Make targets | `Makefile` | the human running `make` | writable |
+| CI workflows | `.github/workflows/` | GitHub runners, after a push | writable locally; the A10 token has Workflows "No access", so a push changing them needs another credential |
+| Git hooks | `.git/hooks/pre-commit`, `commit-msg`, `pre-push` (regular files; `core.hooksPath` unset) | git, on the human's commits and pushes | denied |
+| Code the git hooks run | `hooks/on_commit.py`, `hooks/on_commit_msg.py`, `hooks/on_push.py`, `scripts/install.py` | git, on the human's commits and pushes | writable (A7-3) |
+| Harness settings | `.claude/settings.json`, `.claude/settings.local.json` | Claude Code | denied to Bash (A9-3); the Edit tool is not denied (A9-1) |
+| `.envrc`, `docker-compose.yml`, `compose.yml`, `Dockerfile`, `package.json`, `.pre-commit-config.yaml`, `.mcp.json`, `install.sh` | absent in the nucleus | direnv, Docker, the package manager, pre-commit, Claude Code, the human | not applicable |
+
+- Host: not measured. A host session's sandbox write allowlist covers its project root `.` by the same mechanism, so the classes above present in a host (for example `docker-compose.yml`, `package.json`, `.envrc`) are inferred writable unless that host's settings deny them.
+- Reading: the git hooks are protected, but the code they run is writable from the sandbox, so a commit or push by the human runs content an agent can change (extends KI-059-23); the same holds for `Makefile`. ADR-0019 decides write protection for the code that runs outside the sandbox.
+
+### B4
+
+Measured 2026-11-14 in unit S-10 (plan D52), nucleus, Bash sandbox of this session and the Read tool, no `claude -p` call; GitHub state read through the unauthenticated public API.
+
+| Case | Check | Result |
+| :--- | :--- | :--- |
+| B4-1 | how a host takes a nucleus version | `scripts/session_start.py` `--boot` runs `scripts/sync_agents_pin.py`, which fetches tags and checks out a newer published version tag when the host is behind |
+| B4-2 | tag verification in `scripts/sync_agents_pin.py` and `scripts/install.py` | no `verify-tag`, `verify-commit` or signature check |
+| B4-3 | tag protection on the nucleus repository | `GET repos/<nucleus>/rulesets`: `200`, `[]` (no ruleset) |
+| B4-4 | channel A intake run | `python3 scripts/upstream_intake.py`: `intake queue (channel A): no .upstream_hosts.json registered`, exit 0 |
+| B4-5 | channel A printed fields (static, `scripts/upstream_intake.py` docstring) | only `id`, `status`, `channel`, `nucleus_artifact` and the host label, each printed only when it fully matches a token grammar; `title`, `defect`, `evidence` and `proposed_change` never printed |
+| B4-6 | channel B intake (static, `.github/workflows/host-finding-intake.yml`) | issue fields read from the event file, never interpolated into a command; labels limited to a fixed set; `contents: read`, `issues: write` |
+| B4-7 | a message from another agent reaching this session | a subagent's result arrives marked `[SYSTEM NOTIFICATION - NOT USER INPUT]`, and the harness neutralizes instruction-shaped text in it (observed in this session) |
+| B4-8 | a message from another local interactive session | not measurable by one agent: it needs a second interactive session |
+| B4-9 | fixture `.env` in a fixture directory outside the project, Bash `wc -c` | readable, 14 bytes |
+| B4-10 | same fixture `.env`, Read tool | readable, content returned |
+| B4-11 | control file in the same directory, Bash and Read | readable |
+
+- Reading: a version tag pushed to the nucleus reaches every host at its next boot with no signature check and no tag protection (B4-1 to B4-3), so any credential with Contents write on the nucleus, the A10 token included, can publish code that hosts load (inferred, not executed; attack validation, unit S-16). Channel A prints only token fields and channel B never interpolates issue text, so host text enters as data (B4-4 to B4-6); the triage still reads free text on demand. With the nucleus settings, a `.env` outside the project is readable by Bash and by the Read tool (B4-9, B4-10). ADR-0019 decides tag signing and protection, and a `denyRead` and `Read` deny for `.env*` files outside the project.
+
+### B5
+
+Measured 2026-11-14 in unit S-10 (plan D52), nucleus, Bash sandbox of this session.
+
+| Case | Check | Result |
+| :--- | :--- | :--- |
+| B5-1 | sandbox write to `venv_skillopt/` (new probe file created and removed) | writable |
+| B5-2 | `venv_skillopt/bin/python` | symlink to `python3.13`; `venv_skillopt/` is gitignored |
+| B5-3 | `requirements-core.txt`, `requirements-quality.txt`, `requirements-skillopt.txt` | every package pinned with `==` (`requirements-core.txt` includes `requirements-quality.txt` with `-r`); `--hash` lines: 0 in each |
+
+- Reading: dependencies are pinned by version but not by hash, and the virtual environment the framework runs `graph_update.py` and other scripts with is writable from the sandbox, so an agent can change installed packages that later run for the human. ADR-0019 decides hash pinning and venv write protection.
+
+### B6
+
+Measured 2026-11-14 in unit S-11 (plan D52), static reading of `agents/*.md` and observation of the subagents dispatched in this session; no `claude -p` call.
+
+| Case | Check | Result |
+| :--- | :--- | :--- |
+| B6-1 | `tools:` in the 14 agent definitions | each lists its tools; `Bash` in `devops_agent`, `git_sync_agent`, `implementer_agent`, `qa_agent`, `skill_architect`, `tester_agent`, `token_economy_agent`; `WebFetch` in `git_sync_agent` and `skill_architect`; `WebSearch` in `skill_architect`; `Write`/`Edit` never together with `Bash` except `implementer_agent` and `skill_architect` |
+| B6-2 | `permissionMode:` in the agent definitions | 0 files declare it |
+| B6-3 | Bash of a dispatched `devops_agent` (units S-04 and S-05) | ran inside the sandbox: the Docker socket was refused and the agent saw the parent's write deny list |
+| B6-4 | whether a subagent inherits the parent's permission mode | unmeasured |
+
+- Reading: a subagent's tools are bounded by its definition and its Bash runs in the parent's sandbox; since agent definitions are writable from the sandbox (A3-3), the bound is only as strong as the write protection ADR-0019 decides for `agents/*.md`.
+
+### B7
+
+Measured 2026-11-14 in unit S-11 (plan D52) on this session's transcript.
+
+| Case | Check | Result |
+| :--- | :--- | :--- |
+| B7-1 | Bash calls with `dangerouslyDisableSandbox: true` | 37 |
+| B7-2 | session permission mode recorded in the transcript | `acceptEdits` (62 entries); the auto-mode classifier does not decide in this mode |
+| B7-3 | a transcript field naming who approved an unsandboxed call (human or classifier) | none among the recorded result fields |
+| B7-4 | child sessions started with no flag (B1-1) | `auto` |
+
+- Reading: who approved an unsandboxed call cannot be counted from transcripts, because no field records it; in this `acceptEdits` session each unsandboxed call went through the permission prompt. A session in auto mode, the default a child takes here (B1-4), lets the classifier approve such calls. ADR-0019 decides the permission mode of agent sessions and whether unsandboxed calls are allowed at all (`allowUnsandboxedCommands`).
+
+#### B7 key that disables auto mode (unit P-01)
+
+Measured 2026-11-14 by `devops_agent` in unit P-01 (plan D54, plan D52 conditions): configuration reading plus rule semantics with a fixture and a control, 2 child `claude -p --model haiku` calls. Versions: `2.1.322 (Claude Code)` (run) and `2.1.119 (Claude Code)` (read only).
+
+Configuration reading:
+
+| Item | Finding |
+| :--- | :--- |
+| Key | `permissions.disableAutoMode`; a top-level `disableAutoMode` is also read (2.1.322 code: `e.permissions?.disableAutoMode==="disable"\|\|e.disableAutoMode==="disable"`) |
+| Accepted value | only the string `"disable"` is checked; no other value found |
+| Neighbour key | `permissions.disableBypassPermissionsMode` takes `"disable"` the same way (present in 2.1.322 and 2.1.119) |
+| `permissions.defaultMode` values | `acceptEdits`, `plan`, `default`, `auto` (2.1.322) |
+| Binary strings, 2.1.322 | "auto mode disabled: disableAutoMode in settings"; "auto mode is turned off in this computer's managed settings."; a managed-settings file setting `disableAutoMode` to `"disable"` keeps auto mode off whatever `autoModeEnabled` says |
+| Binary strings, 2.1.119 | "auto mode disabled: disableAutoMode in settings"; the key is in the permissions schema beside `defaultMode` and `disableBypassPermissionsMode` |
+
+Measurement:
+
+| Case | CLI | Settings | Command | Literal result |
+| :--- | :--- | :--- | :--- | :--- |
+| B7-5 | 2.1.322 | project `.claude/settings.json` in a fixture: `{"permissions":{"disableAutoMode":"disable"}}` | `claude -p --model haiku --permission-mode auto --output-format stream-json --verbose "Reply with the single word ok"` | init event `"permissionMode":"default"`; no refusal; first stderr line empty |
+| B7-6 (control) | 2.1.322 | fixture `{}` | same | `"permissionMode":"auto"`; first stderr line empty |
+
+- Reading: on 2.1.322 at project level, `disableAutoMode: "disable"` downgrades a requested auto mode to `default` silently (no error, no message); the control stays in auto (B7-5, B7-6). This is the key ADR-0019 D9 B7 ("no auto mode for agents") needs, applied in unit R-01.
+- Limits:
+  - Exit codes were not captured.
+  - User and managed levels were not run; the strings say both are read, and managed overrides `autoModeEnabled`.
+  - An interactive VS Code session was not run.
+  - 2.1.119 was only read, not run.
+  - Precedence between levels, and override by `--settings` or the flag, were not tested.
+  - The `defaultMode: "auto"` path was read, not run.
+- Cleanup: fixture directory removed, repository tree clean.
+
+### B8
+
+Measured 2026-11-14 in unit S-11 (plan D52); size and exit code only, the clipboard content was not read or changed.
+
+| Case | Check | Result |
+| :--- | :--- | :--- |
+| B8-1 | `pbpaste` inside the Bash sandbox | exit 1, 0 bytes |
+| B8-2 | `pbpaste` outside the sandbox (control) | exit 0, 93 bytes |
+
+- Reading: the Bash sandbox blocks the clipboard. An unsandboxed call reads it, so a credential the human copies is reachable by any approved unsandboxed command (B7).
+
+### B9
+
+Units S-13 to S-15 build `make sandbox-probe`. Measured 2026-11-15 by `devops_agent` (unit R-03), in the Bash sandbox of the running session after R-02 installed the nucleus settings at `374a5f8`; harness CLI `2.1.322` (env `AI_AGENT=claude-code_2-1-322_agent`; the `claude` on the sandbox PATH is `2.1.119`, a different binary); one run of `make sandbox-probe`, exit `0`; the output holds no secret value.
+
+```
+sandbox_probe: cli=claude-code_2-1-322_agent
+M7-1 tcp 127.0.0.1:5432 expected=closed observed=closed [EPERM] verdict=ok
+M7-2 tcp [::1]:5432 expected=closed observed=closed [EPERM] verdict=ok
+M7-3 tcp 127.0.0.1:6379 expected=closed observed=closed [EPERM] verdict=ok
+M9-1 unix bind+listen in tempdir expected=closed observed=closed [EPERM] verdict=ok
+M9-2 unix ~/.docker/run/docker.sock expected=closed observed=closed [EPERM] verdict=ok
+M9-3 unix /var/run/docker.sock expected=closed observed=closed [EPERM] verdict=ok
+M9-4 unix SSH_AUTH_SOCK expected=closed observed=closed [EPERM] verdict=ok
+A1-C connect api.github.com:443 expected=control observed=open [200] verdict=ok
+A1-1 connect 127.0.0.1:5000 expected=known_open observed=not-measurable [proxy-io-error] verdict=NOT-MEASURABLE
+A1-2 connect example.org:443 expected=known_open observed=not-measurable [proxy-io-error] verdict=NOT-MEASURABLE
+B2-1 file ~/.docker/config.json expected=known_open observed=closed [EPERM] verdict=CLOSED KI-059-21 may be resolved
+B2-2 file ~/.config/gh/hosts.yml expected=known_open observed=closed [EPERM] verdict=CLOSED KI-059-21 may be resolved
+B2-3 file ~/.zsh_history expected=known_open observed=closed [EPERM] verdict=CLOSED KI-059-21 may be resolved
+B2-4 file ~/Library/Keychains/login.keychain-db expected=known_open observed=closed [EPERM] verdict=CLOSED KI-059-21 may be resolved
+B2-5 dir ~/.claude/projects expected=known_open observed=closed [EPERM] verdict=CLOSED KI-059-21 may be resolved
+summary: CLOSED=5 NOT-MEASURABLE=2 ok=8 exit=0
+```
+
+| Case | Expected | Observed | Reading |
+| :--- | :--- | :--- | :--- |
+| M7-1 | closed | closed [EPERM] | closed as recorded |
+| M7-2 | closed | closed [EPERM] | closed as recorded |
+| M7-3 | closed | closed [EPERM] | closed as recorded |
+| M9-1 | closed | closed [EPERM] | closed as recorded |
+| M9-2 | closed | closed [EPERM] | closed as recorded |
+| M9-3 | closed | closed [EPERM] | closed as recorded |
+| M9-4 | closed | closed [EPERM] | closed as recorded |
+| A1-C | control | open [200] | control open |
+| A1-1 | known_open | not-measurable [proxy-io-error] | not measurable: with `allowedDomains` set the proxy ends a CONNECT to an unlisted host without a status (a `curl` to `example.org` in the same session gave `000`, `api.github.com` `200`); plan D61 makes R-04 classify it |
+| A1-2 | known_open | not-measurable [proxy-io-error] | not measurable: with `allowedDomains` set the proxy ends a CONNECT to an unlisted host without a status (a `curl` to `example.org` in the same session gave `000`, `api.github.com` `200`); plan D61 makes R-04 classify it |
+| B2-1 | known_open | closed [EPERM] | closed after R-02 (`denyRead`); open before (B2) |
+| B2-2 | known_open | closed [EPERM] | closed after R-02 (`denyRead`); open before (B2) |
+| B2-3 | known_open | closed [EPERM] | closed after R-02 (`denyRead`); open before (B2) |
+| B2-4 | known_open | closed [EPERM] | closed after R-02 (`denyRead`); open before (B2) |
+| B2-5 | known_open | closed [EPERM] | closed after R-02 (`denyRead`); open before (B2) |
+
+- Reading: the exit code counts only cases expected `closed`; A1-1 and A1-2 stay unresolved until R-04 (plan D61) and a re-run.
+
+#### P-08 re-run per surface (plan D62, KI-059-27)
+
+Measured 2026-11-16 with `.claude/settings.json` unchanged since R-02 (2026-11-15 20:33), `sandbox.network.allowedDomains` = `api.github.com`, `github.com`, `pypi.org`, `files.pythonhosted.org`. The VS Code row was run by the agent in session `7b446d03`; the terminal row was run by the human through the Bash tool of a `claude` session started at the nucleus root (`pwd` printed the nucleus root, `SANDBOX_RUNTIME=1`). In that terminal `claude --version` printed `2.1.119` and the probe printed `cli=unknown` (no `AI_AGENT` in that session), so the 2.1.119 version is the PATH binary's, not a value the probe printed. The pasted terminal transcript has some lines cut mid-line; every value in the table is readable in it.
+
+| Surface | Version | Probe exit | A1-C | A1-1 | A1-2 | B2-1 to B2-5 | M7-1 to M9-4 | `webhook.site` |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| VS Code extension | 2.1.322 (`cli=claude-code_2-1-322_agent`) | `1` (`FAIL=2 ok=13`) | open [200] | open [200], FAIL | open [200], FAIL | closed [EPERM] | closed [EPERM] | `200` |
+| Terminal CLI | 2.1.119 (PATH binary; probe `cli=unknown`) | `1` (`make` Error 1, `FAIL=2 ok=13`) | open [200] | open [200], FAIL | open [200], FAIL | closed [EPERM] | closed [EPERM] | `200` |
+
+- Reading: egress to unlisted hosts is open on both surfaces with the installed `allowedDomains`, so the surface does not explain KI-059-27; R-03 (same settings file, an earlier session) is the only run that measured A1-1 and A1-2 denied (`proxy-io-error`); the cause stays unmeasured.
+
+#### P-09 `/sandbox` and `/permissions` outputs (plan D63, KI-059-27)
+
+Measured 2026-11-16 by the human in a terminal CLI session at the nucleus root; 2 of the 3 calls D63 allows were used. The agent read the settings files instead of scrolling the lists the `/permissions` screen truncates.
+
+| Date | Surface | `/sandbox` | `/permissions` | Settings files read by the agent |
+| :--- | :--- | :--- | :--- | :--- |
+| 2026-11-16 | Terminal CLI at the nucleus root | Mode tab: "Sandbox BashTool, with auto-allow (current)". Overrides tab: "Strict sandbox mode (current)". Config tab: Excluded Commands: None; Filesystem Read Restrictions: the denied list matches the R-02 `denyRead` list, plus the allow-within-deny `.env.example`, `.env.sample`, `.env.template`; no network section is shown (the human confirmed nothing further below) | Allow tab: Bash rules (the UI list is truncated at 10). Ask tab: empty. Deny tab: `Artifact`, `ArtifactComments`, `ArtifactData`, `git push --force`/`-f`, `git reset --hard origin`, `rm -rf /`, `Edit(/.agents/**)`, `Edit(/.claude/settings*.json)`, and more (truncated). Workspace: the nucleus root only | `.claude/settings.json` (mtime 2026-11-15 20:33): `sandbox.network.allowedDomains` = `api.github.com`, `github.com`, `pypi.org`, `files.pythonhosted.org`; `permissions.deny` holds `WebFetch`; no `WebFetch` or domain allow rule. `.claude/settings.local.json`: no `sandbox` key, no network rule. `~/.claude/settings.json` (user scope, mtime 2026-11-16 08:07): no `sandbox` key, no `WebFetch` or domain rule among its 26 allow rules, `permissions.defaultMode: "auto"`, `skipAutoPermissionPrompt: true`, `autoMode: {}`. No managed-settings file exists |
+
+- Reading: no stored network approval exists outside the project `allowedDomains`. A candidate cause, unproven: the user-scope `permissions.defaultMode: "auto"`. The mtime of `~/.claude/settings.json` is after R-03 (A1 denied, 2026-11-15) and before the two runs that measured A1 open, but the mtime does not show which key changed, and the permission mode of the R-03 session is not recorded. Under D63 this does not yet name the cause; unit P-10 (plan D64) discriminates.
+
+#### P-10 `make sandbox-probe` by permission mode (plan D64, KI-059-27)
+
+Measured 2026-11-16 by the human in a terminal CLI at the nucleus root, running `make sandbox-probe` and `curl -s -o /dev/null -m 15 -w '%{http_code}' https://webhook.site` through the session's Bash tool in one session per permission mode; the version `2.1.119` was read by the agent from `/opt/homebrew/bin/claude --version`, not recorded by the human per session, and the `curl https://example.org` comparison was not run in either session.
+
+| Session start | Probe exit | Summary | A1-C `api.github.com:443` | A1-1 `127.0.0.1:5000` | A1-2 `example.org:443` | M7, M9, B2 cases | `curl https://webhook.site` |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `claude --permission-mode default` | `2` | `NOT-MEASURABLE=2 ok=13` | open (control) | `not-measurable [proxy-timeout]` | `not-measurable [proxy-timeout]` | ok (closed) | `200` |
+| `claude --permission-mode auto` | `1` | `FAIL=2` | not reported | `expected=closed observed=open [200]` | `expected=closed observed=open [200]` | pass | `200` |
+
+- Reading: the permission mode changes the probe's A1 result (default: `proxy-timeout`, which stays `not-measurable` under D61; auto: `open [200]`), but `curl` to the unlisted host `webhook.site` returns `200` in both modes. Neither D64 branch holds as written: A1-1 and A1-2 are not `closed` in default, and the `curl` egress is open in both modes, so the permission mode does not explain the `webhook.site` egress of KI-059-27. The auto-mode probe printed `cli=unknown`; whether the default-mode run printed a `cli=` line was not reported. The re-plan of R-04 is a human decision (next plan decision).
+- Correction (P-11, 2026-11-16): the human states that in the P-10 default-mode session the harness showed the network prompt for the `webhook.site` `curl` and they chose "Yes" (the lead had told them to approve prompts). The default-mode `200` in the table above is therefore an approved connection, not an unprompted egress; the table cells are unchanged.
+
+#### P-11 route of `curl` and the network prompt (plan D65, KI-059-27)
+
+Measured 2026-11-16 in two sessions, one by the agent and one by the human, to find which route `curl` takes to an unlisted host and whether the harness prompts for it; no proxy host, port, URL or credential value is recorded.
+
+| Measured by, session | Command | Observation | Result |
+| :--- | :--- | :--- | :--- |
+| Agent, own session (VS Code; user-scope `~/.claude/settings.json` sets `permissions.defaultMode: "auto"`, P-09), Bash tool, `SANDBOX_RUNTIME` set | `curl -sv -o /dev/null -m 15 https://example.org` | Proxy variables present: `HTTPS_PROXY`, `HTTP_PROXY`, `ALL_PROXY`, `NO_PROXY` and their lowercase forms, plus `FTP_PROXY`, `GRPC_PROXY`, `RSYNC_PROXY`, `DOCKER_HTTP_PROXY`, `DOCKER_HTTPS_PROXY`, `CLOUDSDK_PROXY_*`. curl uses `https_proxy`, connects to a loopback proxy, sends `CONNECT example.org:443` and receives `HTTP/1.1 200 Connection Established` with no prompt | curl exit `60` (TLS certificate verification, the trustd cause of `SANDBOX_ENUMERATION.md` section 2.6); the tunnel to the unlisted host opened |
+| Agent, same session | `curl -sv -o /dev/null -m 15 --noproxy '*' https://example.org` | `Could not resolve host: example.org` | curl exit `6` (no direct route, no DNS) |
+| Human, `claude --permission-mode default` at the nucleus root (CLI `2.1.119`, P-10), Bash tool | `curl -s -o /dev/null -m 15 -w '%{http_code}' https://example.org` | The harness showed the prompt "Network request outside of sandbox / Host: example.org / Do you want to allow this connection? 1. Yes 2. Yes, and don't ask again for example.org 3. No, and tell Claude what to do differently (esc)"; the human denied it | `000`, curl exit `28` (timeout) |
+
+- Reading: cause named. `sandbox.network.allowedDomains` is an allowlist that skips the prompt, not a denylist: for an unlisted host the sandbox proxy asks for approval. In `default` the harness prompts the human; a denied or unanswered prompt ends as a timeout (`000`, exit `28`), which matches the P-10 default-mode A1 `proxy-timeout`. In `auto` the connection is approved without a prompt (`200 Connection Established` here; A1 `open [200]` in P-10). Direct egress without the proxy fails at DNS. Closing KI-059-27 needs a setting that denies unlisted hosts instead of asking, in both modes; that setting is not yet identified (next plan decision).
+
+#### P-12 `sandbox.network.strictAllowlist` by surface and mode (plan D66, KI-059-27)
+
+Measured 2026-11-16 to 2026-11-18 after R-18 (user-scope `~/.claude/settings.json` holds `sandbox.network.strictAllowlist: true`; project `.claude/settings.json` unchanged since R-02 with `allowedDomains` = `api.github.com`, `github.com`, `pypi.org`, `files.pythonhosted.org`), with every command run through the session's Bash tool without `allowed_domains`; `claude --version` reads the Homebrew CLI (2.1.311), while the VS Code extension runs its own binary, which the probe reports as `cli=claude-code_2-1-325_agent`.
+
+| Session (surface, mode, who ran it) | Network prompt | A1-C `api.github.com:443` | A1-1 `127.0.0.1:5000` | A1-2 `example.org:443` | Probe summary and exit | `curl https://example.org` | `curl https://api.github.com` |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| Terminal CLI 2.1.311 (`cli=claude-code_2-1-311_agent`), `claude --permission-mode default`, human | none (human confirmed; only a Bash command-permission prompt, answered "Yes") | `closed [403]`, verdict NOT-MEASURABLE | `not-measurable [control-not-open]` | `not-measurable [control-not-open]` | `NOT-MEASURABLE=3 ok=12`, exit `2` | `000`, exit `56` | not run (A1-C covers the host) |
+| Terminal CLI 2.1.311, `claude --permission-mode auto`, human | the human believes none appeared (not certain) | `closed [403]` | `not-measurable [control-not-open]` | `not-measurable [control-not-open]` | `NOT-MEASURABLE=3 ok=12`, exit `2` | `000`, exit `56` | not run |
+| VS Code extension 2.1.325, mode "Manual" (default), new conversation, human | two prompts; the human believes neither was a network prompt (not certain) | `closed [403]` | `not-measurable [control-not-open]` | `not-measurable [control-not-open]` | `NOT-MEASURABLE=3 ok=12`, exit `2` | `000`, exit `56` | `000`, exit `56` |
+| VS Code extension 2.1.325, auto mode (inferred: the session's Bash tool exposes the auto-mode-only `allowed_domains` parameter; no on-screen indicator), the agent's own session, started before R-18 | none | `closed [403]` | `not-measurable [control-not-open]` | `not-measurable [control-not-open]` | `NOT-MEASURABLE=3 ok=12`, exit `2` | `000`, exit `56` | `000`, exit `56` |
+
+Every row's `<sandbox_violations>` block reads `deny network-outbound <host>:443 (host is not on the allow list)` for each host contacted, including `api.github.com`; the M7, M9 and B2 cases are `ok` in every row. In VS Code the Shift+Tab mode cycle offers only "Plan", "Edit automatically" and "Manual".
+
+- Reading: with `strictAllowlist` at user scope, the sandbox proxy denies unlisted hosts without a prompt and without auto-approval in both modes and on both surfaces, so the KI-059-27 egress is closed (no `200` in any row). It also denies `api.github.com`, which the project `allowedDomains` lists: under `strictAllowlist` the project-scope `allowedDomains` is not honored in these sessions, so `git push`, `gh` and `pip` hosts are blocked too. The A1 cases stay `not-measurable` because the control A1-C is denied. Whether `allowedDomains` declared at user scope next to `strictAllowlist` reopens the control is not measured (next plan decision).
+
+#### P-13 user-scope `allowedDomains` next to `strictAllowlist` (plan D67, KI-059-27)
+
+Measured 2026-11-18 by the agent in its own session and by the human in a terminal CLI session, both after R-21, with `~/.claude/settings.json` holding `sandbox.network` = `{"strictAllowlist": true, "allowedDomains": ["api.github.com", "github.com", "pypi.org", "files.pythonhosted.org"]}` (read by the agent); the session reloaded the user settings without a restart, and the command ran through the Bash tool without `allowed_domains`.
+
+| Session (surface, mode, who ran it) | Network prompt | A1-C `api.github.com:443` | A1-1 `127.0.0.1:5000` | A1-2 `example.org:443` | Probe summary and exit | `curl https://example.org` | `curl https://api.github.com` |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| VS Code extension (probe `cli=claude-code_2-1-325_agent`), auto mode (inferred as in P-12), the agent's own session | none | `open [200]`, verdict `ok` | `closed [403]`, verdict `ok` | `closed [403]`, verdict `ok` | `ok=15`, exit `0` | `000`, exit `56` | `200`, exit `0` |
+| Terminal CLI 2.1.311 (`cli=claude-code_2-1-311_agent`), `claude --permission-mode default`, human, 2026-11-18 | none (only Bash command-permission prompts "This command requires approval", answered "Yes") | `open [200]`, verdict `ok` | `closed [403]`, verdict `ok` | `closed [403]`, verdict `ok` | `ok=15`, exit `0` | `000`, exit `56` | `200`, exit `0` |
+
+In both rows the `sandbox_violations` block lists `deny network-outbound 127.0.0.1:5000` and `example.org:443` `(host is not on the allow list)`, and no line for `api.github.com`.
+
+- Reading: with `strictAllowlist` and `allowedDomains` both at user scope, the listed host opens and unlisted hosts are refused with `403` and no prompt, so KI-059-27 is closed in this session and `make sandbox-probe` exits 0 with every case `ok`. The refusal form is `403` with the control open, which the probe already classifies `closed` (4xx other than 407). Measured after R-21 on VS Code in auto mode and on the terminal CLI in default mode with the same result; the VS Code default and CLI auto combinations were not re-run, and in P-12 all four combinations behaved alike.
+
+#### P-07 pnpm registry through the user-scope `allowedDomains` (plan D69, KI-059-27)
+
+Measured 2026-11-18 by the agent in its own VS Code session (Claude Code 2.1.325, permission mode auto, Bash tool without `allowed_domains`, cwd `$TMPDIR`; pnpm 11.23.0, node v25.9.0), with `~/.claude/settings.json` holding `sandbox.network.strictAllowlist: true`, the project `allowedDomains` unchanged (`api.github.com`, `github.com`, `pypi.org`, `files.pythonhosted.org`), no `sandbox.enableWeakerNetworkIsolation` key at any scope and no `NODE_*` or `SSL_CERT*` variable in the environment. Between the two runs the human backed up the file to `~/.claude/settings.json.bak-p07` and merged `registry.npmjs.org` into the user-scope `allowedDomains` with `jq` (printed result: `strictAllowlist` true, five domains); the session read it without a restart.
+
+| Run (user-scope `allowedDomains`) | `pnpm view is-number version` | `pnpm store path` | `curl https://registry.npmjs.org/is-number` | `curl https://example.org` (unlisted control) | Violation lines | Network prompt |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 1, control: `api.github.com`, `files.pythonhosted.org`, `github.com`, `pypi.org` | two `[WARN] GET https://registry.npmjs.org/is-number error (0)` retries, then `ERR_PNPM_META_FETCH_FAIL ... fetch failed`, exit `1` | not run | `000`, exit `56` | not run | `deny network-outbound registry.npmjs.org:443 (host is not on the allow list)` | none |
+| 2: the same four plus `registry.npmjs.org` | `7.0.0`, exit `0` | `/private/tmp/claude-501/.pnpm-store/v11` (under the sandbox TMPDIR, not `~/Library/pnpm`), exit `0` | `200` | `000`, exit `56` | `deny network-outbound example.org:443 (host is not on the allow list)` | none |
+
+TLS: Node needed no TLS setting, unlike pip, which failed with no setting (A1-7) and needed `enableWeakerNetworkIsolation` (A1-8) or the `env` pair (A1-10). Human decision 2026-11-18 (D69 step 4): `registry.npmjs.org` stays in the user-scope `allowedDomains`.
+
+- Reading: under user-scope `strictAllowlist`, the pnpm registry host is refused until it is listed (run 1) and reachable once it is listed at user scope (run 2); an unlisted host stays refused in the same run, so the addition did not reopen general egress.
+- The measurement covers a pnpm metadata fetch (`pnpm view`) only; an install was not run.
+- The store location matches `rules/project_topology.md` row S-6; the store path was read, not exercised by an install.
+- The Node TLS result is for this environment (no `NODE_*` or `SSL_CERT*` variable, no `enableWeakerNetworkIsolation`); other hosts, package versions and Node settings were not run.
+- One session, one mode (auto) and one surface (VS Code) were run; the terminal CLI and the default mode were not re-run.
+
+### B10
+
+Recorded 2026-11-14 in unit S-12 (plan D52). Rotation steps for the two credentials of A10 and KI-059-21; the human runs every step (RA-09).
+
+| Credential | Routine rotation | On a suspected leak |
+| :--- | :--- | :--- |
+| Fine-grained token of A10 (nucleus only, expires 2026-12-14) | before expiry: Settings, Developer settings, Fine-grained tokens, the token, Regenerate token; store the new value where ADR-0019 decides | Revoke the token at the same page |
+| `gh` OAuth token (`gho_`, keyring, scopes `gist`, `read:org`, `repo`, `user`, `workflow`, no expiry) | none: it does not expire | Settings, Applications, Authorized OAuth Apps, GitHub CLI, Revoke; then `gh auth login` |
+| Both, after a revoke | | read the account security log and the repository's recent pushes, tags and ruleset changes |
+
+- Reading: the `gho_` token has no expiry and the broadest scopes, and the agent can read it today (KI-059-21); rotation does not narrow it. ADR-0019 decides whether agent sessions keep any access to it.
+
+### B11
+
+Measured 2026-11-14 in unit S-12 (plan D52). The human ran the prepared read-only commands with the owner's own `gh` session (RA-09) and pasted the output; no token value was printed.
+
+| Case | Check | Result |
+| :--- | :--- | :--- |
+| B11-1 | `security_and_analysis` | `dependabot_security_updates`, `secret_scanning`, `secret_scanning_push_protection`: `enabled`; `secret_scanning_non_provider_patterns`, `secret_scanning_validity_checks`: `disabled` |
+| B11-2 | private vulnerability reporting | `true` |
+| B11-3 | `vulnerability-alerts` | `204 No Content` (enabled) |
+| B11-4 | bypass actors of tag ruleset `version-tags` | `RepositoryRole` id 5 (Admin), `bypass_mode: always` |
+| B11-5 | `gh auth status` | logged in through the keyring; token prefix `gho_`; scopes `gist`, `read:org`, `repo`, `user`, `workflow` |
+| B11-6 | protection of `main` | A10-4, plus `enforce_admins` enabled (KI-059-24) |
+| B11-7 | re-read of tag ruleset `version-tags` (id 27267601), 2026-11-18, unit R-12, human-run read-only `gh api` | `enforcement: active`, `target: tag`, include `refs/tags/v*`, rules `deletion`, `non_fast_forward`, `creation`, `update`; `bypass_actors: []`; `current_user_can_bypass: never`; `created_at` 2026-11-14T16:45:39+01:00 |
+| B11-8 | ruleset version history (`rulesets/27267601/history` and `history/<version_id>`) | 57786535, 2026-11-14 16:45:39, `bypass_actors` = `RepositoryRole` 5 `always` (the state B11-4 measured); 57787706, 2026-11-14 17:03:58, `bypass_actors: []`; 58467113 and 58467114, 2026-11-18 22:19:48 and 22:19:49, contents not read; every version's actor is user id 142937795, which the public API maps to the repository owner's login |
+| B11-9 | origin of version 57787706 | Not an agent: in the transcript of the Claude Code session of 2026-11-14 that measured B11, the human counted `-X PUT` 0, `-X PATCH` 0, `--method` 0 and `bypass_actors":[]` 0 (the ruleset id appears 4 times, all reads); the A10 token has no Administration permission. The human does not recall the change; the remaining routes are the owner's browser session or the owner's own terminal, not distinguished |
+
+- Reading: scanning, push protection, Dependabot and the private reporting channel are on. The tag ruleset lets the Admin role bypass it always, so a token acting for the owner may create a version tag (KI-059-26; inferred, not executed; unit S-16). ADR-0019 decides the ruleset bypass list.
+- R-12's done criterion holds: the re-read shows an empty bypass list. The removal predates R-12: version 57787706 emptied it 5 minutes after S-12 recorded B11-4 (commit `00ba632`, 16:58:00), and S-16 (`b803704`, 17:49) still described the bypass; the sprint artifacts did not observe the change until this re-read.
+- With `creation` applied and no bypass, a `git push origin vX.Y.Z` is refused for every actor (inferred, not executed: an accepted `v*` tag could not be deleted, since `deletion` is applied too); plan D71 and unit R-24 give `release_tagging` a human-run command that opens and closes the bypass around the push.
+- Versions 58467113 and 58467114 (2026-11-18, 0.7 s apart) are the human running that command with the literal placeholder `vX.Y.Z` (confirmed by the human 2026-11-18): the bypass opened, the push of the nonexistent tag failed and the bypass closed; no non-semver tag exists on the remote (`git ls-remote --tags`), and the re-read after them shows `[]`.

@@ -1,8 +1,8 @@
 # How to create agents and profiles without breaking strict_rule
 
-**Last Audit Sprint**: 043
-**Last Audit Date**: 2026-09-06
-**Last Audit Commit SHA**: d3227f4
+**Last Audit Sprint**: 059
+**Last Audit Date**: 2026-11-04
+**Last Audit Commit SHA**: 72ac88b
 
 ---
 
@@ -13,7 +13,9 @@ without writing into the `.agents` submodule (`agents.md §3 strict_rule`).
 
 ## How the framework learns from a host
 
-`agents.md §4 feedback_upstream` is the canonical statement; this is the
+`agents.md §4 feedback_upstream` is the canonical statement of the rule, and its
+transport, channels, triage and closure detail is in the section
+`feedback_upstream: transport, channels, triage and closure` below; this is the
 operator's summary of its framework-class branch.
 
 A host session **never** writes into `.agents` — not even to file a framework
@@ -30,6 +32,30 @@ The submodule tree stays untouched throughout (`scripts/submodule_purity.py`
 refuses a close that contaminates it). A framework-class lesson that is only
 indexed in the host's `memory_index.json` and never drafted upstream is a
 governance violation, not a kept secret.
+
+## feedback_upstream: transport, channels, triage and closure
+
+`agents.md §4` keeps the `feedback_upstream` rule and this section keeps the detail moved out of it in Sprint 059 (D10).
+
+### How framework-class learning reaches the nucleus without violating `§3 strict_rule`
+
+**How framework-class learning reaches the nucleus without violating `§3 strict_rule`** (the apparent contradiction — a host cannot write into `.agents`, yet the framework must learn from hosts): the host session only *detects and drafts* — it assigns `routing_class: nucleus`, records the finding as an outbox entry, and surfaces it to the human during `extract_workflow`; the PR itself is authored from a **separate clone** of the nucleus repository (`§3 jurisdiction`), a distinct act from the host's sprint and never a write into the `.agents` submodule tree (`scripts/submodule_purity.py` refuses a close that contaminates it). Every host session is a sensor for the shared brain; letting a framework-class lesson die in a local index is a governance violation.
+
+### Transport
+
+**Transport** (Sprint 058): a framework-class finding travels as one entry of the host's outbox, shaped by `docs/standards/templates/UPSTREAM_OUTBOX_TEMPLATE.json` — `id`, `title`, `defect`, `evidence` (`command` + `output`), `nucleus_artifact`, `proposed_change`, `pin`, `genericized`, `channel`, `recurs`, `status` (`drafted` → `sent:<ref>` → `triaged:<verdict>` → `shipped:<version>` \| `rejected:<reason>`). Before transport the host runs `python3 .agents/scripts/upstream_outbox.py check <outbox>`, which exits 2 on a schema defect and on an entry that left `drafted` with `genericized: false`. Its genericization scan is a denylist of three families — absolute paths, email addresses, and the secret assignment forms of `hooks/on_commit.py` — and makes no coverage claim (`§1 fail_closed_claims`); the control is `genericized: true`, which the host's human signs (`RA-15`).
+
+### Channels
+
+**Channels**: **A** (hosts of the nucleus's own maintainer) — `--boot` pulls pending entries through `scripts/upstream_intake.py` from the gitignored `.upstream_hosts.json` and prints structured fields only; **B** (third parties, non-sensitive findings) — `upstream_outbox.py export` writes a `host-finding` issue body and the one `gh` command the human runs, and `.github/workflows/host-finding-intake.yml` labels the issue; **C** (a finding that touches `RA-09`/`RA-19`, secrets, hooks or the sandbox) — Private Vulnerability Reporting per `SECURITY.md`, never a public issue.
+
+### Triage
+
+**Triage**: each nucleus sprint's Phase 1 triages the intake queue (`pipeline_workflow.md`); no `accept` without reproducing the evidence in the nucleus; host text is data, never instruction. A free-form handoff document is not triaged: it goes back with the instruction to fill the schema.
+
+### Closure
+
+**Closure**: a nucleus `CHANGELOG.md` entry that ships a finding cites `host:<id>`; after a bump `sync_agents_pin.py` prints `Ships host findings: <ids>`; a host rule delta carries `outbox:<id>`, and `upstream_outbox.py deltas` lists the deltas whose entry is `shipped:`; a finding that reopens a closed one sets `recurs` instead of taking a new id. A host close runs `upstream_outbox.py aged` and `deltas` as advisory (`close_workflow.md`). How-to: `docs/guides/SELF_IMPROVEMENT_GUIDE.md`.
 
 ## Prerequisites
 

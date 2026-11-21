@@ -180,7 +180,7 @@ READ_TIMEOUT = 10
 def _check_within_timeout(path: Path) -> subprocess.CompletedProcess[str]:
     try:
         return subprocess.run(
-            [sys.executable, "-I", str(SCRIPT), "check", str(path)],
+            [sys.executable, "-I", "-B", str(SCRIPT), "check", str(path)],
             capture_output=True, text=True, check=False, timeout=READ_TIMEOUT,
         )
     except subprocess.TimeoutExpired:
@@ -229,6 +229,36 @@ def test_outbox_that_is_not_a_bounded_regular_file_exits_2_without_hanging(
     assert result.stdout.startswith("[FAIL] ")
 
 
+def _text_file_cli_args(tmp_path: Path, mode: str, fifo: Path) -> list[str]:
+    """Return the CLI arguments that route ``fifo`` through ``read_text_file``."""
+    body = tmp_path / "body.md"
+    body.write_text("text\n", encoding="utf-8")
+    if mode == "body_file":
+        return ["check-issue", "--body-file", str(fifo)]
+    if mode == "open_titles_file":
+        return ["check-issue", "--body-file", str(body), "--open-titles-file", str(fifo)]
+    rules = tmp_path / "rules"
+    rules.mkdir()
+    os.mkfifo(rules / "rule.md")
+    return ["deltas", str(_outbox(tmp_path)), "--rules", str(rules)]
+
+
+@pytest.mark.parametrize("mode", ["body_file", "open_titles_file", "rules_file"])
+def test_text_file_that_is_a_fifo_exits_2_without_hanging(tmp_path: Path, mode: str) -> None:
+    fifo = _fifo(tmp_path)
+    args = _text_file_cli_args(tmp_path, mode, fifo)
+    try:
+        result = subprocess.run(
+            [sys.executable, "-I", "-B", str(SCRIPT), *args],
+            capture_output=True, text=True, check=False, timeout=READ_TIMEOUT,
+        )
+    except subprocess.TimeoutExpired:
+        pytest.fail(f"{mode} on a FIFO did not finish within {READ_TIMEOUT} s")
+    assert "Traceback" not in result.stderr
+    assert result.returncode == 2
+    assert ("rule.md" if mode == "rules_file" else fifo.name) in result.stderr + result.stdout
+
+
 def test_outbox_at_the_read_cap_is_still_read(tmp_path: Path) -> None:
     path = tmp_path / "at_cap.json"
     path.write_bytes(b'{"entries": []}'.ljust(READ_CAP))
@@ -252,7 +282,7 @@ def test_intake_reports_a_fifo_outbox_and_lists_the_other_host(tmp_path: Path) -
     )
     try:
         result = subprocess.run(
-            [sys.executable, "-I", "-c", code],
+            [sys.executable, "-I", "-B", "-c", code],
             capture_output=True, text=True, check=False, timeout=READ_TIMEOUT,
         )
     except subprocess.TimeoutExpired:
@@ -278,7 +308,7 @@ def test_undecodable_outbox_exits_2_without_traceback(tmp_path: Path, raw: bytes
     path = tmp_path / "outbox.json"
     path.write_bytes(raw)
     result = subprocess.run(
-        [sys.executable, "-I", str(SCRIPT), "check", str(path)],
+        [sys.executable, "-I", "-B", str(SCRIPT), "check", str(path)],
         cwd=REPO,
         capture_output=True,
         text=True,
@@ -353,6 +383,24 @@ def test_export_unknown_id_exits_2(tmp_path: Path) -> None:
     out = tmp_path / "body.md"
     result = _run("export", str(_outbox(tmp_path, _entry())), "--id", "H-9", "--out", str(out))
     assert result.returncode == 2
+
+
+def test_export_out_in_missing_directory_exits_2(tmp_path: Path) -> None:
+    missing = tmp_path / "missing"
+    out = missing / "out.md"
+    result = _run("export", str(_outbox(tmp_path, _entry())), "--id", "H-7", "--out", str(out))
+    assert result.returncode == 2, result.stdout + result.stderr
+    assert str(missing) in result.stdout + result.stderr
+    assert "Traceback" not in result.stderr
+    assert not missing.exists()
+
+
+def test_export_out_in_existing_directory_still_exports(tmp_path: Path) -> None:
+    (tmp_path / "exists").mkdir()
+    out = tmp_path / "exists" / "out.md"
+    result = _run("export", str(_outbox(tmp_path, _entry())), "--id", "H-7", "--out", str(out))
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert out.is_file()
 
 
 def test_export_round_trips_through_check_issue(tmp_path: Path) -> None:
@@ -545,7 +593,7 @@ def test_every_read_fails_closed_without_traceback(tmp_path: Path, site: str) ->
         argv, named = _read_sites(tmp_path)[site]
         expected, marker = 2, str(named)
     result = subprocess.run(
-        [sys.executable, "-I", str(SCRIPT), *argv],
+        [sys.executable, "-I", "-B", str(SCRIPT), *argv],
         cwd=REPO,
         capture_output=True,
         text=True,
@@ -607,3 +655,29 @@ def test_pin_is_full_matched(pin: str) -> None:
     assert upstream_outbox.parse_pin(pin) is None
     assert "`pin` must be vX.Y.Z" in upstream_outbox.entry_errors(_entry(pin=pin))
     assert upstream_outbox.parse_pin(pin.strip()) == (4, 40, 0)
+
+
+@pytest.mark.parametrize("pin", ["v\u0663.40.0", "v4.\uff14\uff10.0", "4.40.\u0660"])
+def test_pin_rejects_non_ascii_digits(pin: str) -> None:
+    """KI-058-5 c: ``\\d`` matched Arabic-Indic and fullwidth digits; only ASCII is a pin."""
+    assert upstream_outbox.parse_pin(pin) is None
+    assert "`pin` must be vX.Y.Z" in upstream_outbox.entry_errors(_entry(pin=pin))
+    assert upstream_outbox.parse_pin("v3.40.0") == (3, 40, 0)
+
+
+def test_deltas_exits_2_naming_a_missing_rules_directory(tmp_path: Path) -> None:
+    """KI-058-5 a: a missing ``--rules`` directory read as an empty one (exit 0)."""
+    missing = tmp_path / "missing"
+    result = _run("deltas", str(_outbox(tmp_path)), "--rules", str(missing))
+    assert result.returncode == 2
+    assert str(missing) in result.stdout
+    assert "Traceback" not in result.stderr
+
+
+def test_deltas_keeps_exit_0_for_an_existing_empty_rules_directory(tmp_path: Path) -> None:
+    """Control for KI-058-5 a: an existing empty directory has no deltas and passes."""
+    rules = tmp_path / "rules"
+    rules.mkdir()
+    result = _run("deltas", str(_outbox(tmp_path)), "--rules", str(rules))
+    assert result.returncode == 0
+    assert result.stdout == ""

@@ -199,9 +199,9 @@ def test_sibling_directory_extending_the_root_name_is_outside_it(tmp_path: Path,
 
     The first implementation compared strings with `startswith`, so
     `<root>-anything/` read as inside `<root>/`. That is not hypothetical here:
-    `agents.md §3 topological_order` puts host profiles at `<host-root>/.agents-profile/`
-    beside the `<host-root>/.agents` submodule, so the bypass was the documented
-    convention. Found by Gate 1 of Sprint 042, after the easy `../outside.py` case
+    `rules/skills_and_integrations.md §4` (`topological_order`) puts host profiles at
+    `<host-root>/.agents-profile/` beside the `<host-root>/.agents` submodule, so the
+    bypass was the documented convention. Found by Gate 1 of Sprint 042, after the easy `../outside.py` case
     above had passed.
     """
     root = _root(tmp_path, "# Spec\n")

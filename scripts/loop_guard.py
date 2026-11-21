@@ -217,6 +217,10 @@ def main() -> int:
 
     args = parser.parse_args()
     sprint_dir = args.sprint_dir
+    if sprint_dir and not Path(sprint_dir).is_dir():
+        print(f"❌ --sprint-dir {sprint_dir} is not a directory, so progress "
+              f"cannot be measured from it.", file=sys.stderr)
+        return 2
     if args.current_sprint:
         if sprint_dir:
             print("❌ --current-sprint and --sprint-dir name the same thing two "

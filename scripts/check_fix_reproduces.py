@@ -77,7 +77,7 @@ from _repro_grammar import parse_trailers as _parse_claims
 LOG = logging.getLogger(__name__)
 RUNNER_PYTHON: str = sys.executable
 STRIPPED_ENV = ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "DJANGO_SETTINGS_MODULE")
-_FIX_SUBJECT = re.compile(r"^fix(\([^)]*\))?!?:|^fix\(")
+_FIX_SUBJECT = re.compile(r"^fix(\([^)]*\))?!?:|^fix\(", re.IGNORECASE)
 JS_SUFFIXES = (".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs")
 SOURCE_PATTERNS = ("readFileSync(", "?raw", ".read_text(", ".read_bytes(", "open(")
 HINT = (
@@ -172,6 +172,10 @@ def parse_trailers(message: str) -> list[str]:
     return [c.claim for c in _parse_claims(message)]
 
 
+class WorktreeError(RuntimeError):
+    """``git worktree add`` was refused; carries the first stderr line."""
+
+
 @contextlib.contextmanager
 def worktree(repo: Path, rev: str) -> Iterator[Path]:
     """Provide a detached temporary worktree, always removed afterwards.
@@ -184,14 +188,15 @@ def worktree(repo: Path, rev: str) -> Iterator[Path]:
         The worktree directory.
 
     Raises:
-        RuntimeError: If the worktree cannot be created.
+        WorktreeError: If the worktree cannot be created.
     """
     base = Path(tempfile.mkdtemp(prefix="fix-repro-"))
     path = base / "wt"
     try:
         added = _git(repo, "worktree", "add", "--detach", str(path), rev)
         if added.returncode != 0:
-            raise RuntimeError(f"git worktree add {rev} failed: {added.stderr.strip()}")
+            lines = added.stderr.strip().splitlines()
+            raise WorktreeError(lines[0] if lines else f"exit {added.returncode}")
         yield path
     finally:
         _git(repo, "worktree", "remove", "--force", str(path))
@@ -560,6 +565,27 @@ def select_fixes(repo: Path, commits: list[str]) -> list[str]:
     return picked
 
 
+def _replay(repo: Path, fixes: list[str]) -> int:
+    """Judge each fix commit, printing one line per commit.
+
+    Args:
+        repo: Repository directory.
+        fixes: Fix commit SHAs to replay.
+
+    Returns:
+        The number of violations.
+    """
+    violations = 0
+    for sha in fixes:
+        verdict, detail = judge(repo, sha)
+        violations += verdict not in ("OK", "MANUAL")
+        print(f"{sha[:7]} {verdict} {detail}")
+        claims = [c for c in parse_trailers(_git(repo, "log", "-1", "--format=%B", sha).stdout) if c != "manual"]
+        for warning in source_text_hits(repo, sha, claims):
+            print(warning)
+    return violations
+
+
 def main(argv: list[str] | None = None) -> int:
     """Entry point.
 
@@ -567,7 +593,7 @@ def main(argv: list[str] | None = None) -> int:
         argv: Argument list; defaults to ``sys.argv[1:]``.
 
     Returns:
-        0 when no violation, 2 otherwise.
+        0 when no violation, 2 on a violation or a non-verdict (``ERROR:``).
     """
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--range", dest="spec", required=True, help="<base>..<head>")
@@ -595,14 +621,13 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 2
-    violations = 0
-    for sha in fixes:
-        verdict, detail = judge(repo, sha)
-        violations += verdict not in ("OK", "MANUAL")
-        print(f"{sha[:7]} {verdict} {detail}")
-        claims = [c for c in parse_trailers(_git(repo, "log", "-1", "--format=%B", sha).stdout) if c != "manual"]
-        for warning in source_text_hits(repo, sha, claims):
-            print(warning)
+    try:
+        violations = _replay(repo, fixes)
+    except Exception as exc:  # noqa: BLE001 - fault boundary: a failure is a non-verdict, not a traceback
+        LOG.error("replay aborted: %s", exc)
+        label = "git worktree add refused" if isinstance(exc, WorktreeError) else type(exc).__name__
+        print(f"ERROR: {label}: {exc}", file=sys.stderr)
+        return 2
     print(f"{len(fixes)} fix( commits in range, {violations} violation(s)")
     return 2 if violations else 0
 

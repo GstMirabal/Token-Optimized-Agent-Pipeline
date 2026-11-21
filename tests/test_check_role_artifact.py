@@ -41,6 +41,8 @@ def check_mod(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
                         "filename": "CHANGELOG.md",
                         "role": "Principal Agent",
                         "scope": "repository",
+                        "host_path": "CHANGELOG.md",
+                        "nucleus_path": "CHANGELOG.md",
                         "required": True,
                     },
                 ],
@@ -328,3 +330,158 @@ def test_tester_row_required_once_qa_gate_approved(check_mod, tmp_path: Path) ->
         encoding="utf-8",
     )
     assert check_mod.main(["--role", "tester_agent", "--sprint-dir", str(sprint)]) == 0
+
+
+# --- Sprint 059 F-03 / D81: --owner-commit bounds a ledger seal by the
+# ADR-0020 owner_writes lines. ---
+
+_SEAL_BASE = "# Changelog\n\n## [Unreleased]\n\n### Added\n- one\n- two\n- three\n"
+_SEAL_HEAD = "## [Unreleased]\n\n## [1.2.3] - 2026-01-01\n\n"
+_BOUNDS = {"max_added_lines": 5, "max_deleted_lines": 2}
+
+
+def _git(repo: Path, *args: str) -> str:
+    """Run git in ``repo`` with a fixed identity; return stdout (helper)."""
+    env = {
+        "GIT_AUTHOR_NAME": "t",
+        "GIT_AUTHOR_EMAIL": "t@example.invalid",
+        "GIT_COMMITTER_NAME": "t",
+        "GIT_COMMITTER_EMAIL": "t@example.invalid",
+        "PATH": "/usr/bin:/bin:/usr/local/bin:/opt/homebrew/bin",
+        "HOME": str(repo),
+    }
+    done = subprocess.run(
+        ["git", *args], cwd=repo, env=env, check=True, capture_output=True, text=True
+    )
+    return done.stdout.strip()
+
+
+def _commit(repo: Path, files: dict[str, str]) -> str:
+    """Write ``files`` under ``repo``, commit them and return the new sha."""
+    for name, text in files.items():
+        (repo / name).write_text(text, encoding="utf-8")
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "-q", "-m", "change")
+    return _git(repo, "rev-parse", "HEAD")
+
+
+def _owner_repo(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, bounds: dict | None
+) -> Path:
+    """Temp git repo holding ``_SEAL_BASE``; registry CHANGELOG entry gets ``bounds``."""
+    registry = tmp_path / "config" / "artifact_registry.json"
+    data = json.loads(registry.read_text(encoding="utf-8"))
+    for entry in data["artifacts"]:
+        if entry["filename"] == "CHANGELOG.md" and bounds is not None:
+            entry["owner_writes"] = bounds
+    registry.write_text(json.dumps(data), encoding="utf-8")
+    repo = tmp_path / "work"
+    _init_repo(repo)
+    _commit(repo, {"CHANGELOG.md": _SEAL_BASE})
+    monkeypatch.chdir(repo)
+    return repo
+
+
+def test_owner_commit_two_added_seal_passes(check_mod, monkeypatch, tmp_path: Path) -> None:
+    repo = _owner_repo(monkeypatch, tmp_path, _BOUNDS)
+    sha = _commit(repo, {"CHANGELOG.md": _SEAL_BASE.replace("## [Unreleased]\n\n", _SEAL_HEAD)})
+    assert check_mod.main(["--owner-commit", sha]) == 0
+
+
+def test_owner_commit_five_one_seal_passes(check_mod, monkeypatch, tmp_path: Path) -> None:
+    repo = _owner_repo(monkeypatch, tmp_path, _BOUNDS)
+    text = _SEAL_BASE.replace("## [Unreleased]\n\n", _SEAL_HEAD).replace(
+        "- three\n", "- three, replaced\n- a\n- b\n"
+    )
+    assert check_mod.main(["--owner-commit", _commit(repo, {"CHANGELOG.md": text})]) == 0
+
+
+def test_owner_commit_six_added_fails(check_mod, monkeypatch, tmp_path: Path, capsys) -> None:
+    repo = _owner_repo(monkeypatch, tmp_path, _BOUNDS)
+    text = _SEAL_BASE.replace("## [Unreleased]\n\n", _SEAL_HEAD) + "- x\n- y\n- z\n- w\n"
+    assert check_mod.main(["--owner-commit", _commit(repo, {"CHANGELOG.md": text})]) != 0
+    assert "added 6" in capsys.readouterr().err
+
+
+def test_owner_commit_three_deleted_fails(check_mod, monkeypatch, tmp_path: Path, capsys) -> None:
+    repo = _owner_repo(monkeypatch, tmp_path, _BOUNDS)
+    text = "# Changelog\n\n" + _SEAL_HEAD + "### Added\n"
+    assert check_mod.main(["--owner-commit", _commit(repo, {"CHANGELOG.md": text})]) != 0
+    assert "deleted 3" in capsys.readouterr().err
+
+
+def test_owner_commit_not_a_seal_fails(check_mod, monkeypatch, tmp_path: Path, capsys) -> None:
+    repo = _owner_repo(monkeypatch, tmp_path, _BOUNDS)
+    sha = _commit(repo, {"CHANGELOG.md": _SEAL_BASE + "- four\n"})
+    assert check_mod.main(["--owner-commit", sha]) != 0
+    assert "not a ledger seal" in capsys.readouterr().err
+
+
+def test_owner_commit_missing_bound_fails(check_mod, monkeypatch, tmp_path: Path, capsys) -> None:
+    repo = _owner_repo(monkeypatch, tmp_path, {"max_added_lines": 5})
+    sha = _commit(repo, {"CHANGELOG.md": _SEAL_BASE.replace("## [Unreleased]\n\n", _SEAL_HEAD)})
+    assert check_mod.main(["--owner-commit", sha]) != 0
+    assert "max_deleted_lines" in capsys.readouterr().err
+
+
+def test_owner_commit_other_artifact_fails(check_mod, monkeypatch, tmp_path: Path) -> None:
+    repo = _owner_repo(monkeypatch, tmp_path, _BOUNDS)
+    sha = _commit(
+        repo,
+        {
+            "CHANGELOG.md": _SEAL_BASE.replace("## [Unreleased]\n\n", _SEAL_HEAD),
+            "SPRINT_LOG.md": "# log\n",
+        },
+    )
+    assert check_mod.main(["--owner-commit", sha]) != 0
+
+
+def test_owner_commit_seal_with_unregistered_file_exits_1(
+    check_mod, monkeypatch, tmp_path: Path, capsys
+) -> None:
+    """R32-2: a seal that also edits a file outside the registry is refused, naming it."""
+    repo = _owner_repo(monkeypatch, tmp_path, _BOUNDS)
+    (repo / "scripts").mkdir()
+    sha = _commit(
+        repo,
+        {
+            "CHANGELOG.md": _SEAL_BASE.replace("## [Unreleased]\n\n", _SEAL_HEAD),
+            "scripts/install.py": "x = 1\n",
+        },
+    )
+    assert check_mod.main(["--owner-commit", sha]) == 1
+    assert "scripts/install.py" in capsys.readouterr().err
+
+
+def test_owner_commit_seal_with_nested_same_name_file_exits_1(
+    check_mod, monkeypatch, tmp_path: Path, capsys
+) -> None:
+    """R33-1: a nested CHANGELOG.md is not the registry artifact; the seal is refused, naming it."""
+    repo = _owner_repo(monkeypatch, tmp_path, _BOUNDS)
+    (repo / "skills" / "probe").mkdir(parents=True)
+    sha = _commit(
+        repo,
+        {
+            "CHANGELOG.md": _SEAL_BASE.replace("## [Unreleased]\n\n", _SEAL_HEAD),
+            "skills/probe/CHANGELOG.md": "# probe\n",
+        },
+    )
+    assert check_mod.main(["--owner-commit", sha]) == 1
+    assert "skills/probe/CHANGELOG.md" in capsys.readouterr().err
+
+
+def test_owner_commit_nested_same_name_file_alone_exits_1(
+    check_mod, monkeypatch, tmp_path: Path, capsys
+) -> None:
+    """R33-1: a nested CHANGELOG.md alone satisfies neither the seal nor the bound check."""
+    repo = _owner_repo(monkeypatch, tmp_path, _BOUNDS)
+    (repo / "skills" / "probe").mkdir(parents=True)
+    sha = _commit(repo, {"skills/probe/CHANGELOG.md": "# probe\n"})
+    assert check_mod.main(["--owner-commit", sha]) == 1
+    assert "skills/probe/CHANGELOG.md" in capsys.readouterr().err
+
+
+def test_owner_commit_bad_sha_exits_2(check_mod, monkeypatch, tmp_path: Path, capsys) -> None:
+    _owner_repo(monkeypatch, tmp_path, _BOUNDS)
+    assert check_mod.main(["--owner-commit", "deadbeef"]) == 2
+    assert "Traceback" not in capsys.readouterr().err

@@ -10,7 +10,8 @@ project, so this script MUST NOT adopt `scripts/_root.py` `agents_root()`
 Why it exists: `pipeline_workflow.md` Phase 3 says to extract Phase 1's plan
 into `IMPLEMENTATION_PLAN.md` and commit it, and nothing performed the
 extraction. A draft left in `docs/plans/` or `~/.cursor/plans/` can be lost to
-ephemeral storage (`agents.md §0`, Implementation Plan row).
+ephemeral storage (`agents.md §0`, Implementation Plan row; history in
+`docs/guides/RULE_PRECEDENTS_GUIDE.md`).
 
 Usage: `python3 scripts/extract_plan.py <source> [--sprint-dir <dir>]`.
 Without `--sprint-dir`, `current_sprint.path` is read from

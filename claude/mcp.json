@@ -9,6 +9,11 @@
         "graphify-out/graph.json"
       ],
       "description": "Graphify Knowledge Graph MCP Server"
+    },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "description": "GitHub Remote MCP Server (OAuth via /mcp)"
     }
   }
 }

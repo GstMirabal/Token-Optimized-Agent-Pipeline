@@ -39,6 +39,11 @@ REVIEWED_TEMPLATE: dict[str, Any] = {
             "args": ["-I", "-m", "graphify.serve", "graphify-out/graph.json"],
             "description": "Graphify Knowledge Graph MCP Server",
         },
+        "github": {
+            "type": "http",
+            "url": "https://api.githubcopilot.com/mcp/",
+            "description": "GitHub Remote MCP Server (OAuth via /mcp)",
+        },
     },
 }
 
@@ -95,11 +100,12 @@ def _python_servers() -> list[tuple[str, dict[str, Any]]]:
     """Return the template servers whose command is a Python interpreter path.
 
     Returns:
-        (name, server) pairs whose command ends with `/python` or `/python3`.
+        (name, server) pairs whose command ends with `/python` or `/python3`;
+        an http server has no `command` and is skipped.
     """
     return [
         (name, server) for name, server in _template()["mcpServers"].items()
-        if server["command"].endswith(("/python", "/python3"))
+        if server.get("command", "").endswith(("/python", "/python3"))
     ]
 
 
@@ -117,6 +123,13 @@ def test_python_server_runs_isolated(name: str, server: dict[str, Any]) -> None:
 def test_template_equals_reviewed_copy() -> None:
     """The shipped template is exactly the reviewed copy (H-007)."""
     assert _is_reviewed(_template())
+
+
+def test_no_server_carries_a_credential() -> None:
+    """No server entry has a `headers` key or a `${` expansion: no token lives in the template."""
+    for name, server in _template()["mcpServers"].items():
+        assert "headers" not in server, name
+        assert "${" not in json.dumps(server), name
 
 
 def _graphify(template: dict[str, Any]) -> dict[str, Any]:
