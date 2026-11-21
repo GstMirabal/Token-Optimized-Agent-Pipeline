@@ -548,6 +548,34 @@ Example (do not uncomment):
 
 | Section | Row | Check | Result |
 | :--- | :--- | :--- | :--- |
+| Tests | 1 | tests/test_session_cost.py: cold first turn gives a numeric ratio | `test_cold_cache_first_turn_has_a_baseline_and_a_ratio` in `tests/test_session_cost.py`: 28 passed, exit 0 (A-01 `ef490cd`, `919d4f2`). |
+| Tests | 2 | check_task_scope.py prints batches that respect Depends on and disjoint files | `tests/test_check_task_scope.py` (`test_same_file_units_are_split_across_batches`): 75 passed, exit 0; `check_task_scope.py --current-sprint --batches` printed batches all through Wave 6 (G-01 `21080e9`). |
+| Tests | 3 | install.py nucleus mode writes sandbox.autoAllowBashIfSandboxed: true | `tests/test_install_nucleus_sandbox.py`: 21 passed, exit 0; `.claude/settings.json` holds `autoAllowBashIfSandboxed: true`. |
+| Tests | 4 | check_task_scope.py exits 2 past soft without a prior Suspend after | `test_a_budget_past_soft_without_a_suspend_point_fails` in `tests/test_check_task_scope.py`: 75 passed, exit 0 (H-02 `7eacfde`). |
+| Tests | 5 | session_cost.py --bound prints HARD and exits 0 on a 16x cycle | `test_hard_wins_over_soft_and_holds_under_five_times` in `tests/test_session_cost.py`: 28 passed, exit 0 (A-02 `5c5e0a3`, `ad7cd48`). |
+| Tests | 6 | scripts/py_compile_tree.py creates no __pycache__ | `tests/test_verify_py_compile.py`: 8 passed, exit 0. |
+| Tests | 7 | tests/test_session_end_hook.py: SessionEnd of another session does not suspend | `test_session_end_of_another_session_leaves_the_anchor_untouched`: 10 passed, exit 0 (E-01 `c10f8bd`). |
+| Tests | 8 | tests/test_session_state.py: suspend with a sealed sprint releases the lock (E-01c) | `tests/test_session_state.py`: 89 passed, exit 0 (E-01c `3a3136b`). |
+| Tests | 9 | tests/test_mass_standardizer.py: generate_manifest.py --check exits 2 on a changed manifest (B-04) | `test_check_detects_a_changed_description_and_a_rerun_clears_it`: 21 passed, exit 0 (B-04 `4f9b418`). |
+| Tests | 10 | Paired tests of I-01..I-07 | Tester Gate 2 round 9 `check_fix_reproduces.py --range b02b76a..HEAD` on a scratch clone: `7022aea`, `22d6bf4`, `77eee15`, `17b2c34`, `d5752e7`, `35951ad`, `65e4833` each `OK`, 0 violations, exit 0. |
+| Tests | 11 | Replaced by D37: paired tests of I-08..I-10 | Not run as written: D37 replaced I-08 to I-10 with M-02 to M-04, held by `tests/test_current_sprint_matrix.py` (Tests row 15). |
+| Tests | 12 | tests/test_token_economy_soft_bound.py (A-25) | 4 passed, exit 0 (A-25 `1e1deda`, reduced `d059aac`). |
+| Tests | 13 | tests/test_profile_references.py (A-31) | 3 passed, exit 0 (A-31 `dbe243a`). |
+| Tests | 14 | Withdrawn by D35: tests/test_check_log_append_only.py (A-50) | Not run: withdrawn by D35; `ls tests/test_check_log_append_only.py` finds no file. |
+| Tests | 15 | tests/test_current_sprint_matrix.py (M-05) | 36 passed, exit 0 (M-05 `74eb9d7`). |
+| Tests | 16 | tests/test_check_sprint_refs.py (M-06): an unhoused cited id exits 2 | 22 passed, exit 0 (M-06 `e15d86e`, `cc4f009`). |
+| Tests | 17 | Full make verify suite | `make verify` exit 0, 1924 passed (after C-26, and Tester Gate 2 round 9). |
+| Verification | 1 | wc -c agents.md | 20000, exit 0 (K-04 `262e41c`). |
+| Verification | 2 | grep -n "^model:" agents/qa_agent.md | `5:model: opus`, exit 0. |
+| Verification | 3 | python3 -I scripts/session_cost.py --from-anchor --json | exit 0; `measurable: false`, `no prior Claude transcript` in this closing session; the numeric-ratio case is held by Tests row 1. |
+| Verification | 4 | grep -rn -e session_cost -e session_probe hooks/ | exit 1, no output. |
+| Verification | 5 | grep -n "isolation" workflows/pipeline_workflow.md | exit 0; one line, in the Phase 6 row. |
+| Verification | 6 | make verify | exit 0, 1924 passed. |
+| Verification | 7 | python3 scripts/check_sprint_refs.py --current-sprint | exit 0, `[OK]`. |
+| Verification | 8 | venv_skillopt/bin/python -m pytest -q -p no:cacheprovider | exit 0 inside `make verify`, 1924 passed. |
+| Verification | 9 | python3 skills/token-saver-auditor/scripts/audit_plan.py docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md | exit 0, `[OK] audit_plan`. |
+| Verification | 10 | grep -n "@v[0-9]" .github/workflows/ci.yml | exit 1, no output (E-03 `4f4435c`). |
+| Verification | 11 | Withdrawn by D35: check_log_append_only.py | Not run: withdrawn by D35; `ls scripts/check_log_append_only.py` exit 1, no such file. |
 
 ---
 
