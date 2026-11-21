@@ -450,6 +450,7 @@ Routing decided at Sprint 059 unit `Z-02` (plan `D36`, `D54`, `D75`, `P11`). The
 | `KI-059-32` | Audit A3 (`docs/audits/PIPELINE_AUDIT_REPORT-059.md`, plan `D84`): `agents.md:86` and `rules/skills_and_integrations.md:44` say `mass-standardizer` only regenerates `skills/manifest_skills.json`; it also injects `SKILL.md` and `README.md` from templates | **Routed**: Sprint 060. Unblock: a trim of `agents.md` (at 20000 bytes) that makes room for the corrected wording |
 | `KI-059-33` | Audit A5 (`docs/audits/PIPELINE_AUDIT_REPORT-059.md`, plan `D84`): nine files under `docs/` outside `docs/sprints/` break RA-06 Option B naming (list in the report) | **Routed**: Sprint 060. Unblock: human approval of each rename and its RA-14 grep |
 | `KI-059-34` | Close advisories (plan `D84`): `python3 scripts/unit_cost.py --sprint-dir docs/sprints/059-core-pipeline` exits 2 with `unresolved SHA 27267601 of unit R-24`, because it reads the all-digit ruleset id in the R-24 Status cell as a SHA; `python3 scripts/prompt_count.py --session <id> --json` exits 2 under the sandbox because `~/.claude/projects` is in `denyRead` | **Routed**: Sprint 060. Unblock: `unit_cost.py` takes only backticked SHAs that resolve as commits, with a paired test; `prompt_count.py` runs by the human or reads a path outside the deny |
+| `KI-059-35` | Deployment of `v4.42.0` (2026-11-21): `workflows/deployment_workflow.md` `ledger_seal` commits the seal on `main` and pushes it, but `main` now refuses a direct push (`GH006`: changes through a pull request, 3 required checks; admin bypass closed in Sprint 059), so the seal needed a second pull request (#96, `a6bddaa`) and a second CI wait, and this roadmap mark could not land with the release | **Routed**: Sprint 060. Unblock: `ledger_seal` seals `[Unreleased]` on `ai-sprint/[ID]` before the sprint pull request, with `require-released` and `--owner-commit` re-checked at that tip, or the broker pushes the seal |
 
 #### Kept with their unblock condition (plan `Out of scope`)
 
@@ -462,7 +463,7 @@ Routing decided at Sprint 059 unit `Z-02` (plan `D36`, `D54`, `D75`, `P11`). The
 | More than 4 parallel subagents | The integration measurement of Wave 3 |
 | Instrument for the Gate findings table (`scripts/check_gate_log.py` requiring one row per S0-S2 finding, `R20-1`) | Sprint 060, human decision 2026-11-09 |
 | Audit of prose motives in normative documents | Sprint 060, human decision 2026-11-09; needs a prior measurement |
-| GitHub App with a broker outside the sandbox for the GitHub token, tag signing by the helper, signature verification in `release_tagging`, `scripts/sync_agents_pin.py` and `scripts/install.py` | Sprint 060, human decision 2026-11-15 (plan `D55`) |
+| GitHub App with a broker outside the sandbox for the GitHub token, tag signing by the helper, signature verification in `release_tagging`, `scripts/sync_agents_pin.py` and `scripts/install.py` | Sprint 060, human decision 2026-11-15 (plan `D55`); human decision 2026-11-21: the first unit of Sprint 060, done when a sandboxed agent session itself pushes the sprint branch, opens and merges the pull request, pushes the release tag and publishes the GitHub Release with no `gh` or `git push` run by the human |
 
 ---
 
