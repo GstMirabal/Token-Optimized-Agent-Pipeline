@@ -657,6 +657,14 @@ def test_pin_is_full_matched(pin: str) -> None:
     assert upstream_outbox.parse_pin(pin.strip()) == (4, 40, 0)
 
 
+@pytest.mark.parametrize("pin", ["v\u0663.40.0", "v4.\uff14\uff10.0", "4.40.\u0660"])
+def test_pin_rejects_non_ascii_digits(pin: str) -> None:
+    """KI-058-5 c: ``\\d`` matched Arabic-Indic and fullwidth digits; only ASCII is a pin."""
+    assert upstream_outbox.parse_pin(pin) is None
+    assert "`pin` must be vX.Y.Z" in upstream_outbox.entry_errors(_entry(pin=pin))
+    assert upstream_outbox.parse_pin("v3.40.0") == (3, 40, 0)
+
+
 def test_deltas_exits_2_naming_a_missing_rules_directory(tmp_path: Path) -> None:
     """KI-058-5 a: a missing ``--rules`` directory read as an empty one (exit 0)."""
     missing = tmp_path / "missing"

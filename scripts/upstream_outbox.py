@@ -91,7 +91,7 @@ CHANNELS = ("A", "B", "C")
 # Applied with ``fullmatch``: ``$`` also matches before a trailing newline (QA2-1).
 ID_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
 STATUS_PATTERN = re.compile(r"(?:drafted|(?:sent|triaged|shipped|rejected):\S.*)")
-PIN_PATTERN = re.compile(r"v?(\d+)\.(\d+)\.(\d+)")
+PIN_PATTERN = re.compile(r"v?([0-9]+)\.([0-9]+)\.([0-9]+)")
 SPRINT_SUFFIX = re.compile(r"#(\d+)\s*$")
 DELTA_TAG = re.compile(r"outbox:([A-Za-z0-9][A-Za-z0-9._-]*)")
 SCAN_FAMILIES = (
