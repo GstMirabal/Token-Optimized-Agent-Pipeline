@@ -308,6 +308,8 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | C-24 | `docs/sprints/059-core-pipeline/IMPLEMENTATION_PLAN.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | C-25 | `docs/guides/SANDBOX_SETUP_GUIDE.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | C-26 | `scripts/check_role_artifact.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| C-27 | `rules/project_topology.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| Z-04 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 
 ## Disagreements with the plan
 
