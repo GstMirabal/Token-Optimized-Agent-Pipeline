@@ -300,6 +300,7 @@ without a rule allowing it. The declared mode stays `sequential` and this is no 
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | Z-01 | `CHANGELOG.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | Z-02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| Z-03 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 
 ## Disagreements with the plan
 

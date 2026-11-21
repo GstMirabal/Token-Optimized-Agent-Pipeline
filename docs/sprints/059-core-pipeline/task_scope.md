@@ -295,6 +295,7 @@ Operation: the plan row of the same id (plan D37).
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | Z-01 | `CHANGELOG.md` | modify: add the sprint entry under `[Unreleased]`, citing `host:F-116-N1` and `host:F-116-N2` | low | `doc_orchestrator` | sonnet | medium | - | ⏳ |
 | Z-02 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify: close or re-route KI-056-1, KI-056-6, KI-057-1, KI-057-2, KI-058-1, KI-058-3, KI-058-4, KI-058-5, KI-059-19, KI-059-20, KI-059-21, KI-059-22, KI-059-23, KI-059-24, KI-059-25, KI-059-26 (plan D54), KI-059-28 (plan D75: the three ADR-0023 consequences with no unit, the 10 remote rows to the Sprint 060 broker); keep KI-058-2 and the conditional Out of scope items with their unblock condition; add new KI-059-n, including one for proposal E points 3-5 (P11); route or close with evidence each KI-059-n row of the `SPRINT_LOG.md` table that stays open; that table is the list (plan D36) | low | `doc_orchestrator` | sonnet | medium | - | ⏳ |
+| Z-03 | `docs/audits/UPSTREAM_FINDINGS_FROM_HOSTS.md` | modify: after F-02, F-03 and F-04 (plan D80), the C-7 row moves from accept for debate to closed by ADR-0020 citing the SHAs of F-01 to F-04; no other row changes | low | `doc_orchestrator` | sonnet | low | F-02, F-03, F-04 | ⏳ |
 
 ## Jurisdiction check (serial or concurrent)
 
