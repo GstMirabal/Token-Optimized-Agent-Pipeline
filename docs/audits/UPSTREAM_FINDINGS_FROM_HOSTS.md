@@ -2155,7 +2155,7 @@ request, and R-1 and R-2 carried none (the nucleus already covered them).
 | C-4 | Boot bridge advisory false positive | merge-into:`KI-056-4` | shipped `v4.40.0` (`2ee3ded`) |
 | C-5 | `Repro:` evidence lost at squash | accept | shipped `v4.40.0`: the squash body is passed explicitly (`d0f332d`, `493d300`) |
 | C-6 | `audit_plan.py` does not check full-suite rows | merge-into:R-5 | Sprint 058 B-07, B-08 |
-| C-7 | The owner/writer split costs a dispatch per trivial step (`ADR-0017`) | accept for debate (needs a new ADR) | Sprint 059 |
+| C-7 | The owner/writer split costs a dispatch per trivial step (`ADR-0017`) | closed by `ADR-0020` (`docs/decisions/ADR-0020-owner-writer-dispatch.md`) | Sprint 059: ADR created `107cfeb` (F-01); `owner_writes` bounds `be36bdc` (F-02); `check_role_artifact.py --owner-commit` `c3f3a90` (F-03); `ADR-0017` marked "Amended by ADR-0020" `5088ad3` (F-04) |
 | C-8 | Plan extraction is not deterministic | accept | shipped `v4.40.0` (`7c6c2be`, `scripts/extract_plan.py`) |
 | C-9 | Anchor free-text fields have no writer | accept | not reproduced: Sprint 057 W25 recorded it `RECORD` (`docs/sprints/057-core-pipeline/SPRINT_LOG.md`) |
 | D-1 | `.env` read and `stat()` denied | merge-into:`KI-056-1` | Sprint 059 |
