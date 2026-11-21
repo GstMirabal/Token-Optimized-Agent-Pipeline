@@ -1,6 +1,7 @@
 # 📜 ADR-0017: `config/artifact_registry.json` `writer` is typed — profile, script, or make target
 
 **Status**: `Accepted`
+**Amended by**: [ADR-0020](ADR-0020-owner-writer-dispatch.md) — the owner writes a ledger seal of `CHANGELOG.md` within 5 added and 2 deleted lines without a dispatch (2026-11-21).
 **Date**: 2026-09-25
 **Triggers**: 2 (`rules/documentation_standard.md §3.1`) — changes a contract (`config/artifact_registry.json`'s schema) consumed by other containers (`scripts/docs_freshness_check.py`, `scripts/map_workflows.py`, `close_workflow.md` Phase 2.6, `scripts/check_role_artifact.py`, `tests/test_artifact_registry.py`). Trigger #2 does not auto-escalate individually (`§3.2`), so this ADR is Nygard-format.
 
