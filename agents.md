@@ -118,7 +118,7 @@ The pipeline operates under a rigid sequential process. Role usurpation is stric
 | Category | Rule (Key) | Value / Constraint (Value) |
 | :--- | :--- | :--- |
 | **Subagent Roles** | `principal_agent` | Lead Agent. Creates Implementation Plan (informed by graphify), manages the Approval Gate. |
-| **Subagent Roles** | `devops_agent` | Environment Agent: venv, Docker; `.env` commands prepared for the human (`RA-09`). No `Write`/`Edit` on `scripts/hooks/tests` (`ADR-0009`). |
+| **Subagent Roles** | `devops_agent` | Environment Agent: venv, Docker; `.env` commands prepared for the human (`RA-09`). No `Write`/`Edit` on framework-root `scripts/hooks/tests` (`ADR-0009`). |
 | **Subagent Roles** | `orchestrator` | Roadmap Author. Drafts Initial Roadmap and instantiates Sprint Hierarchy. |
 | **Subagent Roles** | `agent_orchestrator`| Agent Assignment. Assigns specific subagents to the Initial Roadmap steps. |
 | **Subagent Roles** | `skill_architect` | Skill Builder. Prepares/injects skills for the assigned subagents. |
@@ -135,7 +135,7 @@ The pipeline operates under a rigid sequential process. Role usurpation is stric
 
 | # | Protocol | Owns | Why here |
 | :--- | :--- | :--- | :--- |
-| 1 | `workflows/repository_hardening_workflow.md` (`/agents:harden`) | **Platform controls**: secret and vulnerability scanning, Dependabot, branch protection | Risk-free |
+| 1 | `workflows/repository_hardening_workflow.md` (`/agents:harden`) | **Platform controls**: secret and vulnerability scanning, Dependabot, branch protection | Code-free |
 | 2 | `workflows/standardization_workflow.md` (`/agents:standardization`) | **Artifacts and topology**: census, secret scan, snapshot branch, migration | Order first |
 | 3 | `workflows/reverse_documentation_workflow.md` (`/agents:revdoc`) | **Documentation of the code**: graph first, paths verified, contracts, C4, ADR | Fix against the system |
 | 4 | `workflows/pipeline_workflow.md` (`/agents:pipeline`) | Change | Only now is there a verified account of what is being changed |
