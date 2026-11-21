@@ -41,6 +41,8 @@ def check_mod(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
                         "filename": "CHANGELOG.md",
                         "role": "Principal Agent",
                         "scope": "repository",
+                        "host_path": "CHANGELOG.md",
+                        "nucleus_path": "CHANGELOG.md",
                         "required": True,
                     },
                 ],
@@ -449,6 +451,34 @@ def test_owner_commit_seal_with_unregistered_file_exits_1(
     )
     assert check_mod.main(["--owner-commit", sha]) == 1
     assert "scripts/install.py" in capsys.readouterr().err
+
+
+def test_owner_commit_seal_with_nested_same_name_file_exits_1(
+    check_mod, monkeypatch, tmp_path: Path, capsys
+) -> None:
+    """R33-1: a nested CHANGELOG.md is not the registry artifact; the seal is refused, naming it."""
+    repo = _owner_repo(monkeypatch, tmp_path, _BOUNDS)
+    (repo / "skills" / "probe").mkdir(parents=True)
+    sha = _commit(
+        repo,
+        {
+            "CHANGELOG.md": _SEAL_BASE.replace("## [Unreleased]\n\n", _SEAL_HEAD),
+            "skills/probe/CHANGELOG.md": "# probe\n",
+        },
+    )
+    assert check_mod.main(["--owner-commit", sha]) == 1
+    assert "skills/probe/CHANGELOG.md" in capsys.readouterr().err
+
+
+def test_owner_commit_nested_same_name_file_alone_exits_1(
+    check_mod, monkeypatch, tmp_path: Path, capsys
+) -> None:
+    """R33-1: a nested CHANGELOG.md alone satisfies neither the seal nor the bound check."""
+    repo = _owner_repo(monkeypatch, tmp_path, _BOUNDS)
+    (repo / "skills" / "probe").mkdir(parents=True)
+    sha = _commit(repo, {"skills/probe/CHANGELOG.md": "# probe\n"})
+    assert check_mod.main(["--owner-commit", sha]) == 1
+    assert "skills/probe/CHANGELOG.md" in capsys.readouterr().err
 
 
 def test_owner_commit_bad_sha_exits_2(check_mod, monkeypatch, tmp_path: Path, capsys) -> None:

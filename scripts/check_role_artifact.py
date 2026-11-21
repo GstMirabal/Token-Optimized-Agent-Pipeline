@@ -24,6 +24,8 @@ Exit codes:
     0 — required artifacts present, or the registry declares none for the role
     2 — a required artifact or Gate row is missing, or the role is unknown
         (RA-11: only 2 blocks)
+    1 — ``--owner-commit`` refusal: the commit is not within the owner_writes bound
+    2 — also ``--owner-commit`` only when git fails (bad sha, missing parent)
 
 The CLI refuses an unrecognised role; ``--from-hook`` only warns, because a
 SubagentStop payload carries arbitrary agent types including the runtime's own
@@ -537,7 +539,7 @@ def _owner_bounds_error(path: str, entry: dict) -> str | None:
 
     Args:
         path: Repository-relative path the commit touches.
-        entry: Registry entry whose ``filename`` is the basename of ``path``.
+        entry: Registry entry whose ``host_path`` or ``nucleus_path`` equals ``path``.
 
     Returns:
         str | None: The refusal, or None when both bounds are declared.
@@ -604,26 +606,31 @@ def _owner_commit_errors(sha: str) -> list[str]:
     Returns:
         list[str]: Refusals, empty when all of ADR-0020 conditions 1 to 3 hold.
     """
-    by_name = {str(e.get("filename")): e for e in load_registry()}
+    by_path = {
+        str(entry[key]): entry
+        for entry in load_registry()
+        for key in ("host_path", "nucleus_path")
+        if entry.get(key)
+    }
     touched = _git_out("diff", "--name-only", f"{sha}^", sha).splitlines()
     errors = [
         err
         for path in touched
-        if Path(path).name in by_name
-        for err in [_owner_bounds_error(path, by_name[Path(path).name])]
+        if path in by_path
+        for err in [_owner_bounds_error(path, by_path[path])]
         if err
     ]
     errors += [
         f"commit also touches {path}, which is not the owner_writes artifact"
         for path in touched
-        if Path(path).name not in by_name
+        if path not in by_path
     ]
     if errors or "CHANGELOG.md" not in touched:
         return errors or ["commit does not touch CHANGELOG.md"]
     if not _is_ledger_seal(sha):
         return ["CHANGELOG.md change is not a ledger seal (no [Unreleased] rename to a version)"]
     added, deleted = _numstat(sha, "CHANGELOG.md")
-    bound = by_name["CHANGELOG.md"]["owner_writes"]
+    bound = by_path["CHANGELOG.md"]["owner_writes"]
     if added > bound["max_added_lines"]:
         errors.append(f"CHANGELOG.md added {added} lines, bound {bound['max_added_lines']}")
     if deleted > bound["max_deleted_lines"]:
@@ -660,7 +667,8 @@ def main(argv: list[str] | None = None) -> int:
 
     Returns:
         int: The ``main_from_hook`` or ``_report`` result, or 2 for an unknown
-            role; argparse exits 2 itself on a usage error.
+            role; ``--owner-commit`` returns 0 within the bound, 1 on a refusal
+            and 2 on a git error; argparse exits 2 itself on a usage error.
     """
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n", 1)[0])
     parser.add_argument(
