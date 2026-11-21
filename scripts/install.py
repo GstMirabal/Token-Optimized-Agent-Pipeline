@@ -279,6 +279,92 @@ def report_surviving_exclusions(found: list[tuple[str, object]]) -> None:
           f"`{install_command('claude', False)}`. Nothing was written.", file=sys.stderr)
 
 
+USER_ADVICE_RE = re.compile(r"`(cp ~/\.claude/settings\.json [^`]*\.sandbox\.network\.strictAllowlist[^`]*)`")
+
+
+def user_settings_path() -> Path:
+    """Return the user-scope Claude settings path (patched by tests).
+
+    Returns:
+        Path: `~/.claude/settings.json` under the current home directory.
+    """
+    return Path.home() / ".claude" / "settings.json"
+
+
+def read_base_advice() -> tuple[list[str], str]:
+    """Parse the base domain list and the jq command from the topology rule.
+
+    The rule file is the single source (`rules/project_topology.md` section 5);
+    nothing is duplicated here.
+
+    Returns:
+        tuple[list[str], str]: (base domains, backup-and-jq command); ([], "")
+        when the rule file or its command line is absent.
+    """
+    try:
+        text = (AGENTS_DIR / "rules" / "project_topology.md").read_text(encoding="utf-8")
+    except OSError:
+        return [], ""
+    match = USER_ADVICE_RE.search(text)
+    if not match:
+        return [], ""
+    command = match.group(1)
+    listed = command.split("+ [", 1)[-1].split("]", 1)[0]
+    return re.findall(r'"([^"]+)"', listed), command
+
+
+def _user_network(path: Path) -> tuple[dict, str]:
+    """Read the user-scope sandbox.network block read-only.
+
+    Args:
+        path: User settings file; never created or modified.
+
+    Returns:
+        tuple[dict, str]: (network block, warning); the block is empty and the
+        warning set when the file is unreadable or malformed. A missing file
+        yields an empty block and no warning.
+    """
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return {}, ""
+    except (OSError, UnicodeDecodeError):
+        return {}, f"{path} is unreadable"
+    except ValueError:
+        return {}, f"{path} is malformed JSON"
+    sandbox = data.get("sandbox") if isinstance(data, dict) else None
+    network = sandbox.get("network") if isinstance(sandbox, dict) else None
+    return (network if isinstance(network, dict) else {}), ""
+
+
+def advise_user_sandbox() -> None:
+    """Print the jq command when the user-scope sandbox allowlist is incomplete.
+
+    Advisory only: it never writes the user file and never changes the exit
+    code of the install. Complete settings print nothing.
+    """
+    base, command = read_base_advice()
+    if not command:
+        print("⚠️  Could not read the base allowlist from rules/project_topology.md; "
+              "user-scope sandbox check skipped.", file=sys.stderr)
+        return
+    network, warning = _user_network(user_settings_path())
+    if warning:
+        print(f"⚠️  {warning}; treating the user-scope sandbox as unconfigured.", file=sys.stderr)
+    listed = network.get("allowedDomains")
+    present = set(listed) if isinstance(listed, list) else set()
+    missing = [d for d in base if d not in present]
+    if network.get("strictAllowlist") is True and not missing:
+        return
+    if network.get("strictAllowlist") is not True:
+        print("ℹ️  User-scope sandbox: sandbox.network.strictAllowlist is not true.")
+    if missing:
+        print(f"ℹ️  User-scope sandbox: allowedDomains is missing {', '.join(missing)}.")
+    print("   Advisory only (install exit code unchanged). Run, then see "
+          "rules/project_topology.md section 5:")
+    print(f"   {command}")
+
+
 def add_claude_import(import_line: str) -> None:
     claude_md = HOST_DIR / "CLAUDE.md"
     existing = claude_md.read_text() if claude_md.exists() else ""
@@ -815,6 +901,7 @@ def install_nucleus(args: argparse.Namespace, install_cursor_bridge) -> int:
         install_cursor_bridge(AGENTS_DIR, nucleus=True)
     install_nucleus_git_hooks()
     write_bridge_locks(args.target)
+    advise_user_sandbox()
     return 0
 
 
@@ -855,6 +942,7 @@ def main() -> int:
             install_host_git_hooks()
 
     write_bridge_locks(args.target)
+    advise_user_sandbox()
     return 0
 
 
