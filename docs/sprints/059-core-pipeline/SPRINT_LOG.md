@@ -479,6 +479,9 @@ Example (do not uncomment):
 | QA Agent (Gate 1) | 32 | `venv_skillopt/bin/python -m pytest -q -p no:cacheprovider tests/test_check_remediation_chain.py tests/test_check_role_artifact.py tests/test_install_user_sandbox_advice.py` | 0 |
 | QA Agent (Gate 1) | 32 | `make verify` | 0 |
 | QA Agent (Gate 1) | 32 | `python3 scripts/check_remediation_chain.py --range 2d3ffc2..HEAD` | 0 |
+| QA Agent (Gate 1) | 33 | `python3 scripts/check_role_artifact.py --owner-commit 2e06ac6` | 0 |
+| QA Agent (Gate 1) | 33 | `python3 scripts/check_role_artifact.py --owner-commit ce29f36` | 1 |
+| QA Agent (Gate 1) | 33 | `make verify` | 0 |
 
 ---
 
