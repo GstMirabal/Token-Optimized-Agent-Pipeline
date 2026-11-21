@@ -66,13 +66,14 @@ ni `git push`; y las unidades B a J están cerradas con su comando de verificaci
 | D9 | El escáner de nombres de host compara el SHA-256 de cada token normalizado contra `config/host_term_hashes.json`; el texto plano nunca entra al repositorio (`RA-15`). El humano genera los hashes con un comando local | Lista en texto plano: publicaría el nombre que el escáner protege | `python3 scripts/check_host_terms.py --history origin/main; echo $?` |
 | D10 | Los 9 renombres `RA-06` (auditoría 059 A5, R1-R9) son una unidad cada uno; el humano aprobó los 9 con los nombres propuestos el 2026-11-21, R8 con el tipo `REGISTER` (`THIRD_PARTY_PROVENANCE_REGISTER.md`) | Un solo commit de renombres: impide aprobar uno y rechazar otro | `git log --oneline -- <ruta nueva>` por renombre |
 | D12 | `graphifyy` sube a ≥ 0.9.70 por GHSA-pcc4-rvhr-2pr8 (Dependabot #28, moderada: lectura de archivos del host al indexar un repo no confiable, rango `>= 0.7.2, < 0.9.70`). Se mantiene `--require-hashes` y el método de la cabecera de `requirements-core.txt`; si 0.9.x vuelve innecesario o rompe el rodeo de `graph_update.py`, el mismo commit lo ajusta | Quedarse en 0.8.30: sigue en el rango vulnerable; desactivar el extractor de Fortran: no lo permite la API pública de `graphifyy` sin un rodeo nuevo | `grep -c '^graphifyy==0.8' requirements-core.txt` → `0`; `venv_skillopt/bin/python -m pip install --require-hashes -r requirements-core.txt; echo $?` → `0`; `venv_skillopt/bin/python -I scripts/graph_update.py; echo $?` → `0` |
+| D13 | Avisos de vulnerabilidad de dependencias sin depender de GitHub: `check_dependency_advisories.py` consulta OSV por cada pin; corre en CI (cada PR y cron diario, fallo cerrado) y en la boot (aviso), en nucleus y host. Huecos medidos: el agente no ve las alertas (solo GitHub, `gh` con el humano); `dependabot_security_updates: enabled` (pegado por el humano 2026-11-21) y aun así 0 ramas `dependabot/*`; Dependabot no escanea submódulos, así que un host no recibe la alerta. `api.osv.dev` entra en `allowedDomains` (decisión humana 2026-11-21) | Solo CI: la sesión y los hosts no se enteran hasta un tag nuevo; leer alertas por el broker: no cubre hosts y depende de que Dependabot escanee | `python3 scripts/check_dependency_advisories.py --check; echo $?` → `2` con `graphifyy==0.8.30`, `0` tras K-01 |
 | D11 | Las auditorías de prompts y de motivos en prosa miden primero (bytes y tokens por archivo cargado en cada sesión) y cada hallazgo S0-S2 se cierra en este sprint con código o borrado | Auditar sin medición previa (roadmap: «needs a prior measurement») | `PROMPT_AUDIT_REPORT-060.md` lista el comando de cada cifra |
 
 ---
 
 ## Work
 
-Orden de ejecución: Wave A (broker) → Wave B (detector de modelos) → K (`graphifyy`) → C → D → E → F → G → H → I → J → Z.
+Orden de ejecución: Wave A (broker) → Wave B (detector de modelos) → K (`graphifyy`) → L (avisos de dependencias) → C → D → E → F → G → H → I → J → Z.
 
 | # | File | Operation | Risk | Assignee (proposed) |
 | :--- | :--- | :--- | :--- | :--- |
@@ -93,6 +94,12 @@ Orden de ejecución: Wave A (broker) → Wave B (detector de modelos) → K (`gr
 | B-01 | `scripts/detect_new_models.py` | fix — fallo cerrado y fuente nueva (D8); test `tests/test_detect_new_models.py` | medium | `implementer_agent` |
 | B-02 | `config/model_tiers.json` | modify — `catalog_snapshot`, `context_limits.haiku`, `excluded` (`claude-fable-5-2`), `verified_at` | low | `token_economy_agent` |
 | K-01 | `requirements-core.txt` | modify — `graphifyy` 0.8.30 → la versión más nueva ≥ 0.9.70 publicada hace ≥ 24 h, closure transitivo y hashes regenerados por el método de la cabecera; revisión del rodeo de `scripts/graph_update.py` en el mismo commit (D12) | high | `implementer_agent` |
+| L-01 | `scripts/check_dependency_advisories.py` | create — consulta OSV `/v1/querybatch` (stdlib) por cada pin de `requirements*.txt` del nucleus; exit `2` con aviso o sin red (D13); test `tests/test_check_dependency_advisories.py` | medium | `implementer_agent` |
+| L-02 | `.github/workflows/ci.yml` | modify — L-01 en cada PR y cron diario sobre `main` | medium | `implementer_agent` |
+| L-03 | `scripts/session_start.py` | modify — la boot muestra L-01 como aviso en nucleus y host (D13); test `tests/test_session_start.py` | medium | `implementer_agent` |
+| L-04 | `claude/settings.hooks.json` | modify — `api.osv.dev` en `sandbox.network.allowedDomains` (D13) | low | `implementer_agent` |
+| L-05 | `docs/decisions/ADR-0026-dependency-advisory-check.md` | create — D13 y la ampliación de egress, enmienda de `ADR-0024` | low | `doc_orchestrator` |
+| L-06 | `.github/dependabot.yml` | create — solo si el mensaje de la alerta #28 en la UI de GitHub muestra que la falta de configuración `pip` impidió el PR; si no, la fila se cierra con el mensaje transcrito (D13) | low | `implementer_agent` |
 | C-01 | `workflows/deployment_workflow.md` | modify — `ledger_seal` en `ai-sprint/[ID]` (D7, `KI-059-35`) | medium | `doc_orchestrator` |
 | D-01 | `scripts/check_host_terms.py` | create — escáner por hash (D9); test `tests/test_check_host_terms.py` | medium | `implementer_agent` |
 | D-02 | `config/host_term_hashes.json` | create — hashes que genera el humano | low | `implementer_agent` |
@@ -142,6 +149,7 @@ Los hallazgos de J-01 y J-02 entran como filas nuevas `J-NN` de una línea al ce
 | `scripts/github_broker.py` | script | `claude mcp add --scope user` (registro del humano, A-09); `workflows/deployment_workflow.md` |
 | `scripts/install_broker.py` | script | `docs/guides/GITHUB_BROKER_SETUP_GUIDE.md` (humano) |
 | `scripts/check_host_terms.py` | script | `Makefile#verify` |
+| `scripts/check_dependency_advisories.py` | script | `.github/workflows/ci.yml`; `scripts/session_start.py` |
 | `verify-tag` en `sync_agents_pin.py` / `install.py` | script | `scripts/session_start.py`; `scripts/install.py` |
 | `check_gate_log.py` fila por hallazgo | script | `Makefile#verify` (ya invocado) |
 | `detect_new_models.py --check` fallo cerrado | script | `Makefile#verify` (ya invocado) |
@@ -153,7 +161,7 @@ Los hallazgos de J-01 y J-02 entran como filas nuevas `J-NN` de una línea al ce
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 46 | Count of rows in Work tables |
+| Work units | 52 | Count of rows in Work tables |
 | Subagents dispatched | 45 + gates | una dispatch por unidad; gates QA y Tester por ronda |
 | Prior session ratio | n/a (no prior Claude transcript: `~/.claude/projects` en `denyRead`) | `python3 scripts/session_cost.py --from-anchor --json` |
 
@@ -167,6 +175,7 @@ Los hallazgos de J-01 y J-02 entran como filas nuevas `J-NN` de una línea al ce
 | `python3 scripts/unit_cost.py --sprint-dir docs/sprints/059-core-pipeline` sale con `0` | **Yes** — this is the defect | exit `2` (`unresolved SHA 27267601 of unit R-24`) |
 | `python3 scripts/prompt_count.py --session <id> --json` bajo el sandbox imprime el comando para el humano | **Yes** — this is the defect | exit `2`, `Cannot read transcript: [Errno 1] Operation not permitted` sin comando |
 | `grep -c '^graphifyy==0.8' requirements-core.txt` → `0` | **Yes** — this is the defect | `1` (`graphifyy==0.8.30`) |
+| OSV devuelve GHSA-pcc4-rvhr-2pr8 para `graphifyy` 0.8.30 | **Yes** — this is the defect | unverified: el sandbox deniega `api.osv.dev:443` (`host is not on the allow list`); se observa tras L-04 |
 | `wc -c < agents.md` < 20000 | **Yes** — this is the defect | `20000` |
 | `make verify` | **No** — this is a regression to protect | exit `0`, 103 s |
 | `tests/test_github_broker.py`, `tests/test_install_broker.py`, `tests/test_check_host_terms.py` | **Yes** — los archivos no existen | unverified: los tests se crean en A-03, A-04, D-01 |
@@ -202,6 +211,8 @@ Los hallazgos de J-01 y J-02 entran como filas nuevas `J-NN` de una línea al ce
 | `agents/devops_agent.md` | herramientas del broker |
 | `config/model_tiers.json` | snapshot y límites |
 | `requirements-core.txt` | `graphifyy` ≥ 0.9.70, closure y hashes |
+| `docs/decisions/ADR-0026-dependency-advisory-check.md` | nuevo; enmienda `ADR-0024` (egress `api.osv.dev`) |
+| `.github/workflows/ci.yml` | job de avisos OSV y cron diario |
 | Rutas R1-R9 | renombradas |
 | `docs/audits/PROMPT_AUDIT_REPORT-060.md`, `PROSE_MOTIVES_AUDIT_REPORT-060.md` | nuevos |
 

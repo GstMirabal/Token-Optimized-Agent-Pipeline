@@ -56,6 +56,12 @@ No agent profile is created in Sprint 060: all 37 Work rows are staffed from the
 | # | Target | Operation | Mode | Assignee | Destination | Ruleset file |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | K-01 | `requirements-core.txt` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| L-01 | `scripts/check_dependency_advisories.py` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| L-02 | `.github/workflows/ci.yml` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| L-03 | `scripts/session_start.py` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| L-04 | `claude/settings.hooks.json` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
+| L-05 | `docs/decisions/ADR-0026-dependency-advisory-check.md` | create | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| L-06 | `.github/dependabot.yml` | create | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | C-01 | `workflows/deployment_workflow.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 
 ### Wave D — Host-term scanner
