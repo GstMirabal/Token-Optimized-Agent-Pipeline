@@ -77,7 +77,7 @@ ni `git push`; y las unidades B a J están cerradas con su comando de verificaci
 
 ## Work
 
-Orden de ejecución: O-12 (alcance de escritura de `implementer_agent`) → Q-01 (lotes en paralelo sin worktrees) → S-01 (afirmación del auditor de calidad) → Q-02 (recuento del README en Phase 6) → Wave A (broker) → S-02..S-05 (dependencias de skills) → Wave B (detector de modelos) → K (`graphifyy`) → N (lectura de transcripciones) → L-04 → O-11 → M (grafo como cerebro) → O (forja de agentes y skills; sin O-02, O-09, O-11, O-12, O-13, O-14) → L (avisos de dependencias; sin L-04) → C → D → E → P → F → O-02 → G → H → I → J → O-09 → O-13 → O-14 → Z. A-15 corre en el despliegue de 060 (RV-25, RV-26).
+Orden de ejecución: O-12 (alcance de escritura de `implementer_agent`) → Q-01 (lotes en paralelo sin worktrees) → S-01 (afirmación del auditor de calidad) → Q-02 (recuento del README en Phase 6) → Wave A (broker) → S-02..S-05 (dependencias de skills) → Wave B (detector de modelos) → K (`graphifyy`) → N (lectura de transcripciones) → L-04 → O-11 → M (grafo como cerebro) → O (forja de agentes y skills; sin O-02, O-09, O-11, O-12, O-13, O-14) → L (avisos de dependencias; sin L-04) → C → D → E → P → F → O-02 → G → H → T (vía a base de datos local) → I → J → O-09 → O-13 → O-14 → Z. A-15 corre en el despliegue de 060 (RV-25, RV-26).
 
 | # | File | Operation | Risk | Assignee (proposed) |
 | :--- | :--- | :--- | :--- | :--- |
@@ -162,6 +162,9 @@ Orden de ejecución: O-12 (alcance de escritura de `implementer_agent`) → Q-01
 | G-02 | `scripts/prompt_count.py` | fix — bajo el sandbox con el `allowRead` de N-02 lee la transcripción y sale con `0`; sin él, `EPERM` imprime el comando para el humano y exit `2` documentado (`KI-059-34`, D16, RV-24); test `tests/test_prompt_count.py::test_eperm_prints_human_command` (RV-8) | low | `implementer_agent` |
 | H-01 | `docs/sprints/060-core-pipeline/SANDBOX_REMEASUREMENT.md` | create — matrices de 055 y 056 en una CLI fija (`KI-059-31`) | high | `devops_agent` |
 | H-02 | `rules/project_topology.md` | modify — fila `Measuring CLI` y filas afectadas por H-01 | medium | `doc_orchestrator` |
+| T-01 | `docs/sprints/060-core-pipeline/DB_ROUTE_MEASUREMENT.md` | create — mide de extremo a extremo cada vía a una base de datos local que `ADR-0019` D4 deja sin medir (A1-b / `KI-059-20`, M9 / A2-1, A2-d unlink y re-bind, F-18) y la de un contenedor desechable sin red alcanzado por socket; por vía: exit de una consulta a la base desechable, exit de un intento contra la base de desarrollo (debe fallar), y la enumeración de cada punto de entrada fuera del sandbox que la vía abre (`RA-19`); los pasos que solo el humano puede correr (Docker, `.env`) se preparan como comandos y se registra su salida pegada (`RA-09`); después de H-01 (KI-060-07, decisión humana 2026-11-22) | high | `implementer_agent` |
+| T-02 | `docs/decisions/ADR-0029-local-database-route.md` | create — con la evidencia de T-01: si una vía alcanza la base desechable y no la de desarrollo con todos sus puntos de entrada enumerados, la aprueba y sustituye `ADR-0019` D4; si ninguna lo cumple, declara que los tests de un host con ADR de motor real (`ADR-0016`) son de ejecución humana y que el Tester los registra como `RECORD`, no como `APPROVED`; en el mismo commit, una línea `Amended by ADR-0029` en `ADR-0019` y la fila `KI-057-1` de `docs/roadmaps/core/pipeline/021-030-program-queue.md` reabierta o cerrada con el ADR; después de T-01 (KI-060-07) | high | `doc_orchestrator` |
+| T-03 | `rules/qa_and_testing.md` | modify — §7 `local_testing`: la vía aprobada por T-02 y su comando, o la regla de ejecución humana y el veredicto `RECORD` del Tester para esos tests; después de T-02 (KI-060-07) | medium | `doc_orchestrator` |
 | I-01 | `docs/architecture/global_topology.md` | rename → `GLOBAL_TOPOLOGY_MAP.md` (R1); `git mv` + grep `RA-14` de la ruta vieja → 0 aciertos fuera de registros sellados (D10) | low | `doc_orchestrator` |
 | I-02 | `docs/architecture/topology_map.md` | rename → `TOPOLOGY_MAP.md` (R2); `git mv` + grep `RA-14` de la ruta vieja → 0 aciertos fuera de registros sellados (D10) | low | `doc_orchestrator` |
 | I-03 | `docs/contracts/core/doc_orchestrator_contract.md` | rename → `DOC_ORCHESTRATOR_CONTRACT.md` (R3); `git mv` + grep `RA-14` de la ruta vieja → 0 aciertos fuera de registros sellados (D10) | low | `doc_orchestrator` |
@@ -185,6 +188,8 @@ Cada candidato que O-13 u O-14 decidan `forge` entra como fila nueva `O-NN` de u
 Los hallazgos de J-01 y J-02 entran como filas nuevas `J-NN` de una línea al cerrarse cada auditoría.
 
 Los hallazgos de S-04 entran como filas nuevas `S-NN` de una línea al cerrarse el informe.
+
+Si T-02 aprueba una vía, el cambio de `claude/settings.hooks.json` que la habilita entra como fila nueva `T-NN` de una línea.
 
 ---
 
@@ -224,7 +229,7 @@ Los hallazgos de S-04 entran como filas nuevas `S-NN` de una línea al cerrarse 
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 98 | Count of rows in Work tables |
+| Work units | 101 | Count of rows in Work tables |
 | Subagents dispatched | 45 + gates | una dispatch por unidad; gates QA y Tester por ronda |
 | Prior session ratio | n/a en Phase 1 (`~/.claude/projects` en `denyRead`); medible por el agente tras N-04 (D16, RV-24) | `python3 scripts/session_cost.py --from-anchor --json` |
 
