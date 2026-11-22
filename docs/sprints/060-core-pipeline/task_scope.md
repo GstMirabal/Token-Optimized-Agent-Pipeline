@@ -64,7 +64,7 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Est. cost | Suspend after | Depends on | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| S-01 | `docs/sprints/060-core-pipeline/skill_assignment.md` | modify: the `python-quality-auditor` row stops claiming "the Ruff/Mypy/Bandit gate": it names what is measured (`ruff check` and `scripts/quality_audit.py`) and records A-03 as inconclusive for Mypy, Bandit and Radon (tools absent from `venv_skillopt`); after Q-01, before Wave A batch 2 (KI-060-05) | low | `skill_architect` | sonnet | medium | 2798 | | Q-01 | ⏳ pending |
+| S-01 | `docs/sprints/060-core-pipeline/skill_assignment.md` | modify: the `python-quality-auditor` row stops claiming "the Ruff/Mypy/Bandit gate": it names what is measured (`ruff check` and `scripts/quality_audit.py`) and records A-03 as inconclusive for Mypy, Bandit and Radon (tools absent from `venv_skillopt`); after Q-01, before Wave A batch 2 (KI-060-05) | low | `skill_architect` | sonnet | medium | 2798 | | Q-01 | ✅ f1a0211 |
 
 ### Wave A — GitHub App broker
 
