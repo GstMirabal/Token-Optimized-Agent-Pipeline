@@ -15,13 +15,13 @@ After writing this file, run:
 
 `rules/skills_and_integrations.md §1`:
 
-The plan has 91 Work rows. Under D17 the ladder is opened per candidate, not per
+The plan has 92 Work rows. Under D17 the ladder is opened per candidate, not per
 unit: a unit can be served by the standard library or an edit (so P1 always
 resolves it) and still belong to a recurring capability worth packaging. Section 2
-resolves the 91 units; `## Candidates` decides the 8 candidates with
+resolves the 92 units; `## Candidates` decides the 8 candidates with
 criteria (a) and (b) of D17, and records the ladder trail of each.
 
-Result for the 91 units: P1 resolves every unit with a tool already present in
+Result for the 92 units: P1 resolves every unit with a tool already present in
 `skills/`, the Python standard library, `git`/`make`/`openssl`/`ssh-keygen`/
 `venv_skillopt/bin/python`, or an edit of an existing file. The plan's Dependencies
 table adds no package. Result for the 8 candidates: P1 resolves 6 (`none`, nearest skill named in Reason); 2 go
@@ -29,7 +29,7 @@ through P1, P2 and P3 with no match and wait for the O-09 A/B evidence (`forge-p
 
 | Rung | Source | Result | Evidence |
 | :--- | :--- | :--- | :--- |
-| P1 | `skills/manifest_skills.json` | hit for 91 of 91 units (section 2) and 6 of 8 candidates; partial or no match for C1 and C2 | `skills/manifest_skills.json` lists `python-quality-auditor`, `env-shielding-auditor`, `omni-context-minimizer`, `compliance-checker`, `token-saver-auditor`, `graphify`; the five script-bearing skills have their script on disk (`graphify` is a knowledge skill without `scripts/`); `grep -rli sandbox skills/*/SKILL.md` returns 0 files; the `graphify` skill queries by natural-language question, not by symbol with edge direction |
+| P1 | `skills/manifest_skills.json` | hit for 92 of 92 units (section 2) and 6 of 8 candidates; partial or no match for C1 and C2 | `skills/manifest_skills.json` lists `python-quality-auditor`, `env-shielding-auditor`, `omni-context-minimizer`, `compliance-checker`, `token-saver-auditor`, `graphify`; the five script-bearing skills have their script on disk (`graphify` is a knowledge skill without `scripts/`); `grep -rli sandbox skills/*/SKILL.md` returns 0 files; the `graphify` skill queries by natural-language question, not by symbol with edge direction |
 | P2 | `autoskills-3rd` | reached for C1 and C2 by reading only; no match | `skills/autoskills-3rd/SKILL.md` and `package.json`: a stack scanner that writes a discovery file; `node_modules/` is absent, so running it needs `pnpm install` (section 4); its description names no graph-query or sandbox-measurement capability |
 | P3 | `https://skills.sh/` (WebSearch/WebFetch; simulated JSON allowed in tests) | reached for C1 and C2; WebSearch/WebFetch denied by `permissions.deny`, `curl` refused by the network allowlist, no result | `## Candidates`, "P3 search log" |
 | P4 | Three-File Standard at Destination | not reached | no candidate has passed the O-09 A/B; nothing was built this task |
@@ -114,6 +114,7 @@ with `<bool>` replaced by the real value. No HTTP in `make verify`.
 | O-10 | `compliance-checker` | N/A | P1 hit: scan of the edited normative workflow; candidate C7 |
 | O-11 | `env-shielding-auditor` | N/A | P1 hit: `env_shielding_auditor.py` after the JSON settings edit (`claude/settings.hooks.json`, add `skills.sh` to `sandbox.network.allowedDomains`); opens the egress for the `curl` P3 of O-04; candidate C6 |
 | O-12 | none | N/A | P1: agent profile prose edit (`agents/implementer_agent.md` `write_scope`) plus the `ADR-0009` amendment in the same commit; candidate C7 |
+| Q-01 | `compliance-checker` | N/A | P1 hit: scan of the edited normative workflow (`workflows/pipeline_workflow.md`, Phase 6 parallel batches without worktrees); candidate C7 |
 | O-13 | none | N/A | P1: prose edit of `agent_assignment.md` (final forge/none decision per agent candidate from O-09 evidence, reconciled with `skill_assignment.md` on `claude/settings.hooks.json`); no skill applies |
 | O-14 | none | N/A | P1: prose edit of `skill_assignment.md` (final forge/none decision per candidate from O-09 evidence; C6 reconciled with the agent candidate for the same file, RV-37, RV-39); no skill applies |
 | L-01 | `python-quality-auditor`, `env-shielding-auditor` | N/A | P1 hit: new stdlib script with network I/O and a paired test |
@@ -174,7 +175,7 @@ Applies D17 from the plan text (the template gains this table in O-06).
 The final decision per candidate is written by unit O-14 from the O-09 evidence; there C6 (`claude/settings.hooks.json`) is reconciled with the agent candidate for the same file in `agent_assignment.md` (O-13), so both files carry one decision (RV-37, RV-39). Decisions below are provisional until O-14.
 
 Notation: `P` = `docs/sprints/060-core-pipeline/IMPLEMENTATION_PLAN.md`; `E` =
-`grep -E '^\| [A-Z]-[0-9]{2} \|' P` (91 lines, `grep -c` reproduces it); `Q<n>` =
+`grep -E '^\| [A-Z]-[0-9]{2} \|' P` (92 lines, `grep -c` reproduces it); `Q<n>` =
 the same plan file of sprint `05<n>-core-pipeline`.
 
 | Candidate | Units | Criterion (a/b) | Evidence | Decision | Reason |
@@ -185,7 +186,7 @@ the same plan file of sprint `05<n>-core-pipeline`.
 | C4 OSV advisory check of pins | L-01 (script); L-04, L-05 (settings, ADR) | a: no; b: no | `E \| grep -ciE 'osv\|advisor'` = 3 units, with 3 different operations (create script, edit settings, write ADR); the check itself is 1 unit; `grep -rliE 'osv\|advisor' skills/*/SKILL.md` = 0 files; L-01 subject is a Python script under `rules/code_craft.md`, covered by `python-quality-auditor` | none | No skill packages this work; gap evaluated by O-09 under D17. One script in one unit does not meet (a); the settings and ADR rows belong to C6 and C8. Nothing recurs, so nothing to package. `python-quality-auditor` is the nearest skill and audits the L-01 script; no OSV capability is missing from it that a skill could supply |
 | C5 stdlib script plus paired test | A-03, A-04, A-07, A-08, B-01, N-03, M-01, M-03, M-04, M-13, M-15, M-18, O-07, O-08, L-01, L-03, D-01, E-01, P-01, G-01, G-02 | a: yes; b: no | `E \| grep -cE '\| `(scripts\|hooks)/[a-z_]+\.py`'` = 21 units; `grep -cE '^\| [^\|]+\| `(scripts\|hooks)/[a-z_]+\.py`'` on Q5..Q9 = 9, 11, 22, 18, 57 (5 of 5 sprints); `rules/code_craft.md` is covered by `python-quality-auditor` | none | No skill packages this work; gap evaluated by O-09 under D17. Highest recurrence in the plan, and `python-quality-auditor` (nearest skill) is already assigned to all 21 units (section 2) and `omni-context-minimizer` to the 8 that edit an existing script above 200 lines. A new skill would add no capability |
 | C6 sandbox settings edit (`claude/settings.hooks.json`) | A-05, N-02, L-04, O-11, M-14 | a: yes; b: no | `E \| grep -c 'settings.hooks.json'` = 6 lines (the 5 units plus O-04, which names the file but edits `agents/skill_architect.md`); `grep -cE '^\| [^\|]+\| `claude/settings'` on Q5..Q9 = 3, 1, 1, 1, 4 (5 of 5 sprints); `env-shielding-auditor` covers the secret and deny-list part of `rules/project_topology.md §5` | none | No skill packages this work; gap evaluated by O-09 under D17. Recurs in every sprint and in 5 units here, but the edit text is fixed by each plan row. `env-shielding-auditor` is the nearest skill and already scans the result; the boundary measurement after the edit is C2, not this candidate |
-| C7 normative prose edit (`agents/`, `workflows/`, `rules/`) | A-11, A-12, A-13, A-14, C-01, F-02, H-02, M-06..M-12, M-17, O-02, O-03, O-04, O-10, O-12 | a: yes; b: no | `E \| grep -cE '\| `(agents\|workflows\|rules)/'` = 20 (9 agents + 6 workflows + 5 rules); on Q5..Q9: agents rows 1, 1, 0, 1, 4 and workflows rows 3, 4, 6, 7, 11 | none | No skill packages this work; gap evaluated by O-09 under D17. The text of each edit is fixed by its plan row; the only deterministic part is the rule-violation scan, which `compliance-checker` already performs. A skill would add no capability |
+| C7 normative prose edit (`agents/`, `workflows/`, `rules/`) | A-11, A-12, A-13, A-14, C-01, F-02, H-02, M-06..M-12, M-17, O-02, O-03, O-04, O-10, O-12, Q-01 | a: yes; b: no | `E \| grep -cE '\| `(agents\|workflows\|rules)/'` = 20 (9 agents + 6 workflows + 5 rules); on Q5..Q9: agents rows 1, 1, 0, 1, 4 and workflows rows 3, 4, 6, 7, 11 | none | No skill packages this work; gap evaluated by O-09 under D17. The text of each edit is fixed by its plan row; the only deterministic part is the rule-violation scan, which `compliance-checker` already performs. A skill would add no capability |
 | C8 ADR and document authoring from a template | A-01, A-02, N-01, O-01, L-05 | a: yes; b: no | `E \| grep -c 'docs/decisions/ADR'` = 4 (A-01, N-01, O-01, L-05) plus A-02 from `BLUEPRINT_TEMPLATE.md`; ADR rows on Q9 = 8, on Q6 = 0; `rules/documentation_standard.md` is covered by the `doc_orchestrator` profile, so (b) fails | none | No skill packages this work; gap evaluated by O-09 under D17. The templates under `docs/standards/templates/` and the `doc_orchestrator` profile are the capability; `compliance-checker` scans the result. A skill would duplicate the templates |
 
 ### Ladder trail per candidate
@@ -225,7 +226,7 @@ because the A/B evidence, not the search, decides whether a skill is written.
 | `python-quality-auditor` | A-03, A-04, A-07, A-08, B-01, L-01, L-03, D-01, D-03, E-01, G-01, G-02, M-01, M-03, M-04, M-13, M-15, M-18, N-03, O-07, O-08, P-01: every Python unit meets the Ruff/Mypy/Bandit gate before QA (`agents.md §1 linter_command`). |
 | `env-shielding-auditor` | A-03, A-04, A-05, L-01, L-04, D-01, M-04, M-05, M-13, M-14, M-18, N-02, N-03, O-08, O-11: the broker, its installer, the deny settings, the hash scanner, the graph MCP server, the usage hook, the transcript-read setting and the capability-usage script handle credentials, host names or tool input; the scan proves nothing sensitive is committed (`RA-09`, `RA-15`). |
 | `omni-context-minimizer` | A-07, A-08, B-01, L-03, E-01, M-18, N-03, O-07: existing scripts above 200 lines get a skeleton before any partial read (`agents.md §2 ast_skeleton`). |
-| `compliance-checker` | F-01, F-02, J-02, M-06, M-12, M-17, O-02, O-10: normative text edits and the prose-motive audit need a rule-violation scan. |
+| `compliance-checker` | F-01, F-02, J-02, M-06, M-12, M-17, O-02, O-10, Q-01: normative text edits and the prose-motive audit need a rule-violation scan. |
 | `token-saver-auditor` | J-01: its rejection filters are the classification basis for prompt-audit findings. The plan itself was already audited at Phase 3. |
 | `graphify` | K-01, Z-02, M-01, M-02, M-03, M-04, M-06: graph workaround check on the new `graphifyy`, the dependency graph behind `task_scope.md`, and the `rules/graphify.md` schema and method that Wave M (D14) turns into the battery, the query interface, the MCP server and the structural-first protocol. |
 
