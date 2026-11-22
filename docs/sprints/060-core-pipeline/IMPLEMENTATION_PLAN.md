@@ -70,13 +70,14 @@ ni `git push`; y las unidades B a J están cerradas con su comando de verificaci
 | D14 | El grafo se implementa como cerebro de la optimización de tokens, no como adorno (decisión humana 2026-11-21). Medido en la base: 17 346 nodos, 25 307 aristas, 14,6 MB; 13 de 14 perfiles de `agents/` no lo mencionan; sin `.mcp.json` en el nucleus; los lectores de `graph.json` en `scripts/` solo comprueban existencia o frescura; una consulta en lenguaje natural devolvió 2 nodos irrelevantes; una consulta por símbolo devolvió la cadena correcta con una arista invertida (`_run_install_lock` → `_install_lock_notes`, inversa de `scripts/session_start.py:353`); ni esta sesión ni `rule_validator` lo consultaron. Los agentes consultan por estructura (símbolo, archivo), nunca en lenguaje natural (decisión humana 2026-11-21). Umbral de calidad: 100 % de la batería estructural igual al AST y 0 aristas invertidas; umbral de beneficio: ≥ 30 % menos tokens `fresh` en el A/B | Lenguaje natural con umbral de precisión: el agente ya conoce el símbolo y la CLI en lenguaje natural es la vía que falla; retirar las promesas del grafo: el humano decide implementarlo al 100 % | `python3 scripts/graph_battery.py; echo $?` → `0`; `python3 scripts/check_graph_usage.py --current-sprint; echo $?` → `0`; `GRAPH_AB_MEASUREMENT.md` ≥ 30 % |
 | D15 | Z-04 (walkthrough) se retira: `acknowledged_gaps.walkthroughs` (Sprint 042) sigue vigente y un único miembro inauguraría una estructura vacía (RV-12, decisión humana 2026-11-21). A-02 se mantiene: el broker es el primer módulo de código con runtime propio del nucleus, que es el disparador de reevaluación de `acknowledged_gaps.docs`, y `agents.md §0` exige el Blueprint antes del código | Crear `docs/walkthroughs/` con un miembro: contradice el hueco aceptado | `ls docs/walkthroughs; echo $?` → `1` al cierre |
 | D16 | La sesión lee sus propias transcripciones bajo el sandbox: `session_cost.py` y `prompt_count.py` son base del framework (decisión humana 2026-11-21). Medido: `~/.claude/projects` en `denyRead` de `claude/settings.hooks.json:81` → `session_cost.py --from-anchor` `measurable: false`, `prompt_count.py` exit `2`. Se mantiene la barrera entre proyectos: solo se abre el directorio del proyecto actual. G-02 pasa a verificarse en el sandbox y M-16 lo ejecuta el agente | Abrir todo `~/.claude/projects`: expone transcripciones de otros proyectos; dejar el cálculo al humano: rompe la sección Cost y el A/B | `python3 scripts/session_cost.py --from-anchor --json` → `measurable: true` bajo el sandbox |
+| D17 | Forjar agentes y skills pasa a ser una decisión con criterio, evidencia y evaluación (decisión humana 2026-11-22). Medido: 14 perfiles, el último del 2026-08-25 (sprint 033, nacido de F-021-A2 y no de Phase 4.1); 34 skills, ninguna desde 2026-07; 0 de 39 `skill_assignment.md` llegaron a P4; `rules/skills_and_integrations.md:6` abre la escalera solo para funciones fuera de la stdlib, así que P1 acierta siempre; «suitable profile» (`agents/agent_orchestrator.md:24`) no tiene definición; `check_forge_ladder.py` comprueba forma y nunca si debió forjarse (059 → exit `0` sin candidatos); no existe telemetría de uso ni evaluación de perfiles y skills existentes. Criterio: un candidato es obligatorio cuando (a) una misma operación sobre una misma clase de sujeto aparece en ≥ 3 unidades del plan o en ≥ 2 de los 5 sprints anteriores, o (b) el sujeto de la unidad lo gobierna un archivo de `rules/` que el perfil asignado no cita. Cada candidato se decide (`forge` / `reuse`) con evidencia; se forja solo si su A/B mide ≥ 30 % menos tokens `fresh` en sus unidades (umbral de D14). Phases 4.1 y 4.2 de 060 aplican este criterio desde el texto del plan; O-07 lo vuelve control | Mantener la escalera actual: 39 sprints sin crear nada demuestran que el control no distingue «no hace falta» de «no se preguntó»; forjar por juicio sin A/B: suma coste del framework sin beneficio medido | `python3 scripts/check_forge_ladder.py --sprint-dir docs/sprints/059-core-pipeline; echo $?` → `2` tras O-07 (sin tabla de candidatos); `CAPABILITY_EVALUATION_REPORT-060.md` decide cada candidato con su comando |
 | D11 | Las auditorías de prompts y de motivos en prosa miden primero (bytes y tokens por archivo cargado en cada sesión) y cada hallazgo S0-S2 se cierra en este sprint con código o borrado | Auditar sin medición previa (roadmap: «needs a prior measurement») | `PROMPT_AUDIT_REPORT-060.md` lista el comando de cada cifra |
 
 ---
 
 ## Work
 
-Orden de ejecución: Wave A (broker) → Wave B (detector de modelos) → K (`graphifyy`) → N (lectura de transcripciones) → M (grafo como cerebro) → L (avisos de dependencias) → C → D → E → F → G → H → I → J → Z.
+Orden de ejecución: Wave A (broker) → Wave B (detector de modelos) → K (`graphifyy`) → N (lectura de transcripciones) → M (grafo como cerebro) → O (forja de agentes y skills) → L (avisos de dependencias) → C → D → E → F → G → H → I → J → Z.
 
 | # | File | Operation | Risk | Assignee (proposed) |
 | :--- | :--- | :--- | :--- | :--- |
@@ -118,6 +119,16 @@ Orden de ejecución: Wave A (broker) → Wave B (detector de modelos) → K (`gr
 | M-14 | `claude/settings.hooks.json` | modify — registra M-13; después de A-05 y L-04 (D14) | low | `implementer_agent` |
 | M-15 | `scripts/check_graph_usage.py` | create — exit `2` si una fase de investigación buscó por texto antes de consultar el grafo; invocado por `workflows/close_workflow.md` (D14); test `tests/test_check_graph_usage.py` | medium | `implementer_agent` |
 | M-16 | `docs/sprints/060-core-pipeline/GRAPH_AB_MEASUREMENT.md` | create — A/B con las mismas tareas de investigación con y sin grafo; tokens `fresh` por `session_cost.py`, que el humano ejecuta fuera del sandbox (`~/.claude/projects` en `denyRead`); criterio ≥ 30 % (D14) | high | `implementer_agent` |
+| O-01 | `docs/decisions/ADR-0028-forge-trigger.md` | create — D17: criterio de candidato, decisión `forge`/`reuse` con evidencia, umbral A/B | medium | `doc_orchestrator` |
+| O-02 | `rules/skills_and_integrations.md` | modify — §1: la escalera se abre por cada candidato de D17, no solo por funciones fuera de la stdlib; después de F-02 (mismo archivo) | medium | `rule_validator` |
+| O-03 | `agents/agent_orchestrator.md` | modify — `agent_creation` define «suitable» con el criterio de D17 y exige la tabla de candidatos | low | `doc_orchestrator` |
+| O-04 | `agents/skill_architect.md` | modify — `skill_search` parte de los candidatos de D17 y registra la decisión de cada uno | low | `doc_orchestrator` |
+| O-05 | `docs/standards/templates/AGENT_ASSIGNMENT_TEMPLATE.md` | modify — tabla `Candidates` (candidato, unidades, criterio a/b, evidencia, decisión, motivo) | low | `doc_orchestrator` |
+| O-06 | `docs/standards/templates/SKILL_ASSIGNMENT_TEMPLATE.md` | modify — la misma tabla `Candidates` | low | `doc_orchestrator` |
+| O-07 | `scripts/check_forge_ladder.py` | modify — exit `2` sin tabla `Candidates` o con un candidato sin evidencia o sin decisión (sprint ≥ 60); test `tests/test_check_forge_ladder.py::test_missing_candidates_table_fails` | medium | `implementer_agent` |
+| O-08 | `scripts/capability_usage.py` | create — invocaciones por perfil (`Agent` `subagent_type`) y por skill (`Skill`) desde las transcripciones del proyecto (D16) y los `agent_assignment.md`/`skill_assignment.md` de los sprints; después de N-04; test `tests/test_capability_usage.py` | medium | `implementer_agent` |
+| O-09 | `docs/audits/CAPABILITY_EVALUATION_REPORT-060.md` | create — uso (O-08), solapes y huecos de los 14 perfiles y las 34 skills; los candidatos de 060 (p. ej. agente de medición de sandbox para A-10, A-15, H-01, N-04; skill de consulta estructural del grafo sobre M-03) decididos con A/B por `session_cost.py` según D17 | high | `token_economy_agent` |
+| O-10 | `workflows/pipeline_workflow.md` | modify — done-criterion de Phases 4.1 y 4.2: tabla `Candidates` con `capability_usage.py` como evidencia; después de M-12 (mismo archivo) | medium | `doc_orchestrator` |
 | L-01 | `scripts/check_dependency_advisories.py` | create — consulta OSV `/v1/querybatch` (stdlib) por cada pin de `requirements*.txt` del nucleus; exit `2` con aviso o sin red (D13); test `tests/test_check_dependency_advisories.py` | medium | `implementer_agent` |
 | L-02 | `.github/workflows/ci.yml` | modify — L-01 en cada PR y cron diario sobre `main` | medium | `implementer_agent` |
 | L-03 | `scripts/session_start.py` | modify — la boot muestra L-01 como aviso en nucleus y host (D13); test `tests/test_session_start.py` | medium | `implementer_agent` |
@@ -154,6 +165,8 @@ Orden de ejecución: Wave A (broker) → Wave B (detector de modelos) → K (`gr
 | Z-05 | `CHANGELOG.md` | modify — `[Unreleased]` | low | `doc_orchestrator` |
 | Z-06 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify — KI routed → closed | low | `orchestrator` |
 
+Cada candidato que O-09 decida `forge` entra como fila nueva `O-NN` de una línea (perfil o skill, con su `Destination`).
+
 Los hallazgos de J-01 y J-02 entran como filas nuevas `J-NN` de una línea al cerrarse cada auditoría.
 
 ---
@@ -177,6 +190,9 @@ Los hallazgos de J-01 y J-02 entran como filas nuevas `J-NN` de una línea al ce
 | `verify-tag` en `sync_agents_pin.py` / `install.py` | script | `scripts/session_start.py`; `scripts/install.py` |
 | `check_gate_log.py` fila por hallazgo | script | `Makefile#verify` (ya invocado) |
 | `detect_new_models.py --check` fallo cerrado | script | `Makefile#verify` (ya invocado) |
+| `check_forge_ladder.py` tabla `Candidates` | script | `workflows/pipeline_workflow.md` Phases 4.1 y 4.2 (ya invocado) |
+| `scripts/capability_usage.py` | script | `workflows/pipeline_workflow.md` Phases 4.1 y 4.2 (O-10) |
+| Decisión `forge`/`reuse` por candidato | agent judgment, acotado por el umbral A/B de D17 | `agents/agent_orchestrator.md`, `agents/skill_architect.md` |
 
 ---
 
@@ -185,7 +201,7 @@ Los hallazgos de J-01 y J-02 entran como filas nuevas `J-NN` de una línea al ce
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 73 | Count of rows in Work tables |
+| Work units | 83 | Count of rows in Work tables |
 | Subagents dispatched | 45 + gates | una dispatch por unidad; gates QA y Tester por ronda |
 | Prior session ratio | n/a (no prior Claude transcript: `~/.claude/projects` en `denyRead`) | `python3 scripts/session_cost.py --from-anchor --json` |
 
@@ -201,6 +217,7 @@ Los hallazgos de J-01 y J-02 entran como filas nuevas `J-NN` de una línea al ce
 | `grep -c '^graphifyy==0.8' requirements-core.txt` → `0` | **Yes** — this is the defect | `1` (`graphifyy==0.8.30`) |
 | OSV devuelve GHSA-pcc4-rvhr-2pr8 para `graphifyy` 0.8.30 | **Yes** — this is the defect | unverified: el sandbox deniega `api.osv.dev:443` (`host is not on the allow list`); se observa tras L-04 |
 | `wc -c < agents.md` < 20000 | **Yes** — this is the defect | `20000` |
+| `python3 scripts/check_forge_ladder.py --sprint-dir docs/sprints/059-core-pipeline` sale con `2` (sin tabla `Candidates`) | **Yes** — this is the defect | exit `0` (`[OK] check_forge_ladder`), 2026-11-22 |
 | `make verify` | **No** — this is a regression to protect | exit `0`, 103 s |
 | `tests/test_github_broker.py`, `tests/test_install_broker.py`, `tests/test_check_host_terms.py` | **Yes** — los archivos no existen | unverified: los tests se crean en A-03, A-04, D-01 |
 
@@ -219,6 +236,7 @@ Los hallazgos de J-01 y J-02 entran como filas nuevas `J-NN` de una línea al ce
 | `python3 skills/token-saver-auditor/scripts/audit_plan.py docs/sprints/060-core-pipeline/IMPLEMENTATION_PLAN.md; echo $?` | `0` | run at close of Phase 3: el archivo se extrae ahí | n/a |
 | `python3 scripts/check_sprint_refs.py --current-sprint; echo $?` | `0` | run at close of Phase 3: el directorio del sprint no existe aún | n/a |
 | `python3 scripts/graph_battery.py; echo $?` | `0` | unverified: el script se crea en M-01 | M-02 registra la batería con 0.8.30, donde la arista invertida medida la hace fallar |
+| `python3 scripts/check_forge_ladder.py --sprint-dir docs/sprints/060-core-pipeline; echo $?` | `0` con tabla `Candidates` | unverified: la tabla la escriben Phases 4.1 y 4.2 | el mismo comando sobre `docs/sprints/059-core-pipeline` → `2` tras O-07 |
 | `BROKER_MEASUREMENT.md` M5 (push, PR, merge, tag, Release por el agente) | 5 operaciones con el ID de GitHub de cada una | run at close: ocurre en el despliegue de 060 | M4: `push_branch main` rechazado |
 
 ---
@@ -241,6 +259,8 @@ Los hallazgos de J-01 y J-02 entran como filas nuevas `J-NN` de una línea al ce
 | `claude/mcp.json` | sin entrada `graphify` de ámbito proyecto |
 | `docs/decisions/ADR-0026-dependency-advisory-check.md` | nuevo; enmienda `ADR-0024` (egress `api.osv.dev`) |
 | `.github/workflows/ci.yml` | job de avisos OSV y cron diario |
+| `docs/decisions/ADR-0028-forge-trigger.md`, `docs/audits/CAPABILITY_EVALUATION_REPORT-060.md` | nuevos (D17) |
+| `rules/skills_and_integrations.md` §1, `agents/{agent_orchestrator,skill_architect}.md`, plantillas de asignación, `workflows/pipeline_workflow.md` Phases 4.1-4.2 | criterio de forja y tabla `Candidates` (D17) |
 | Rutas R1-R9 | renombradas |
 | `docs/audits/PROMPT_AUDIT_REPORT-060.md`, `PROSE_MOTIVES_AUDIT_REPORT-060.md` | nuevos |
 
