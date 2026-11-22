@@ -15,17 +15,24 @@ After writing this file, run:
 
 `rules/skills_and_integrations.md §1`:
 
-The ladder terminates at the first rung. Every Work row is served by a tool already
-present in `skills/`, by the Python standard library, by `git`/`make`/`openssl`/
-`ssh-keygen`/`venv_skillopt/bin/python`, or by editing an existing file. The plan's
-Dependencies table adds no package. Rungs two to four are `not reached`.
+The plan has 84 Work rows. Under D17 the ladder is opened per candidate, not per
+unit: a unit can be served by the standard library or an edit (so P1 always
+resolves it) and still belong to a recurring capability worth packaging. Section 2
+resolves the 84 units; `## Candidates` decides the 8 candidates with
+criteria (a) and (b) of D17, and records the ladder trail of each.
+
+Result for the 84 units: P1 resolves every unit with a tool already present in
+`skills/`, the Python standard library, `git`/`make`/`openssl`/`ssh-keygen`/
+`venv_skillopt/bin/python`, or an edit of an existing file. The plan's Dependencies
+table adds no package. Result for the 8 candidates: P1 resolves 6 (`reuse`); 2 go
+through P1, P2 and P3 with no match and wait for the O-09 A/B (`forge-pending-O-09`).
 
 | Rung | Source | Result | Evidence |
 | :--- | :--- | :--- | :--- |
-| P1 | `skills/manifest_skills.json` | hit - every unit resolved (section 2) | `skills/manifest_skills.json` lists `python-quality-auditor`, `env-shielding-auditor`, `omni-context-minimizer`, `compliance-checker`, `token-saver-auditor`, `graphify`; the five script-bearing skills have their script on disk (`graphify` is a knowledge skill without `scripts/`) |
-| P2 | `autoskills-3rd` | not reached | ladder terminated at P1 |
-| P3 | `https://skills.sh/` (WebSearch/WebFetch; simulated JSON allowed in tests) | not reached | ladder terminated at P1 |
-| P4 | Three-File Standard at Destination | not reached | ladder terminated at P1; nothing was built |
+| P1 | `skills/manifest_skills.json` | hit for 84 of 84 units (section 2) and 6 of 8 candidates; partial or no match for C1 and C2 | `skills/manifest_skills.json` lists `python-quality-auditor`, `env-shielding-auditor`, `omni-context-minimizer`, `compliance-checker`, `token-saver-auditor`, `graphify`; the five script-bearing skills have their script on disk (`graphify` is a knowledge skill without `scripts/`); `grep -rli sandbox skills/*/SKILL.md` returns 0 files; the `graphify` skill queries by natural-language question, not by symbol with edge direction |
+| P2 | `autoskills-3rd` | reached for C1 and C2 by reading only; no match | `skills/autoskills-3rd/SKILL.md` and `package.json`: a stack scanner that writes a discovery file; `node_modules/` is absent, so running it needs `pnpm install` (section 4); its description names no graph-query or sandbox-measurement capability |
+| P3 | `https://skills.sh/` (WebSearch/WebFetch; simulated JSON allowed in tests) | reached for C1 and C2; network refused, no result | `## Candidates`, "P3 search log" |
+| P4 | Three-File Standard at Destination | not reached | no candidate has passed the O-09 A/B; nothing was built this task |
 
 **When this sprint builds a new skill**, the third rung's outcome MUST be recorded
 as a machine-readable trail — a JSON object carrying `source`, `query` and a
@@ -73,6 +80,10 @@ with `<bool>` replaced by the real value. No HTTP in `make verify`.
 | B-01 | `omni-context-minimizer`, `python-quality-auditor` | N/A | P1 hit: skeleton before partial read; quality audit on the fix |
 | B-02 | none | N/A | P1: JSON edit with values from `token_economy_agent` |
 | K-01 | `graphify` | N/A | P1 hit: `rules/graphify.md` method to confirm the `graph_update.py` workaround still holds on 0.9.x; the pin itself is `pip` under `--require-hashes`, no skill |
+| N-01 | none | N/A | P1: ADR prose from `ADR_TEMPLATE.md`; candidate C8 |
+| N-02 | `env-shielding-auditor` | N/A | P1 hit: `env_shielding_auditor.py` after the `allowRead` edit; the `{{PROJECT_TRANSCRIPT_DIR}}` marker carries no host path (`RA-15`); candidate C6 |
+| N-03 | `python-quality-auditor`, `omni-context-minimizer`, `env-shielding-auditor` | N/A | P1 hit: skeleton before partial read of `install.py` (>200 lines); quality audit on the change and `tests/test_install.py`; `env_shielding_auditor.py` confirms the rendered path lands only in the host's settings; candidate C5 |
+| N-04 | none | N/A | P1: exit-code-only probes by Bash after the human applies `install.py`; candidate C2 is `forge-pending-O-09`, so no skill exists to call yet |
 | M-01 | `python-quality-auditor`, `graphify` | N/A | P1 hit: quality audit on the battery and its test; `rules/graphify.md` for the `graph.json` edge schema the battery compares with the stdlib `ast` ground truth |
 | M-02 | `graphify` | N/A | P1 hit: `rules/graphify.md` rebuild method for the 0.8.30 and post-K-01 baselines; counts by `wc -c`, timing by `time`, battery from M-01 |
 | M-03 | `python-quality-auditor`, `graphify` | N/A | P1 hit: quality audit on the query script and its test; `rules/graphify.md` for the node and edge schema |
@@ -89,6 +100,17 @@ with `<bool>` replaced by the real value. No HTTP in `make verify`.
 | M-14 | `env-shielding-auditor` | N/A | P1 hit: same check as A-05 after the hook registration edit |
 | M-15 | `python-quality-auditor` | N/A | P1 hit: quality audit on the checker and its test |
 | M-16 | none | N/A | P1: the A/B is run by the human with `scripts/session_cost.py` outside the sandbox; `token-saver-auditor` classifies prompts, it does not measure sessions |
+| O-01 | none | N/A | P1: ADR prose from `ADR_TEMPLATE.md`; candidate C8 |
+| O-02 | `compliance-checker` | N/A | P1 hit: scan of the edited rule text (`rules/skills_and_integrations.md` §1); candidate C7 |
+| O-03 | none | N/A | P1: agent profile prose edit; candidate C7 |
+| O-04 | none | N/A | P1: agent profile prose edit; candidate C7 |
+| O-05 | none | N/A | P1: template edit; the table shape is in D17 |
+| O-06 | none | N/A | P1: template edit; the table shape is in D17 and `## Candidates` of this file is its first instance |
+| O-07 | `python-quality-auditor`, `omni-context-minimizer` | N/A | P1 hit: skeleton before partial read of `check_forge_ladder.py` (>200 lines); quality audit on the change and its test; candidate C5 |
+| O-08 | `python-quality-auditor`, `env-shielding-auditor` | N/A | P1 hit: new stdlib script that reads transcripts; quality audit; `env_shielding_auditor.py` confirms it prints counts and names, no message content; candidate C5 |
+| O-09 | none | N/A | P1: the A/B per candidate is run with `scripts/session_cost.py` (D16); `token-saver-auditor` classifies prompts and does not measure sessions; decides C1 and C2 |
+| O-10 | `compliance-checker` | N/A | P1 hit: scan of the edited normative workflow; candidate C7 |
+| O-11 | none | N/A | P1: JSON settings edit (`claude/settings.hooks.json`, add `skills.sh` to `sandbox.network.allowedDomains`); no skill applies; remediates the refused P3 connection |
 | L-01 | `python-quality-auditor`, `env-shielding-auditor` | N/A | P1 hit: new stdlib script with network I/O and a paired test |
 | L-02 | none | N/A | YAML job edit; no skill applies |
 | L-03 | `python-quality-auditor`, `omni-context-minimizer` | N/A | P1 hit: modify a large script (`session_start.py`) with a paired test |
@@ -127,7 +149,63 @@ with `<bool>` replaced by the real value. No HTTP in `make verify`.
 
 `Destination` for a forged skill: `host:.claude/skills/<name>/` (default),
 `profile:<path>`, or `nucleus:PR`. Writing under `.agents/skills/` from a
-host session is PROHIBITED (`strict_rule`). Every Destination here is `N/A`: no skill is created.
+host session is PROHIBITED (`strict_rule`). Every Destination here is `N/A`: no skill is created in Phase 4.2; D17 allows writing one only after the O-09 A/B.
+
+---
+
+## Candidates
+
+Applies D17 from the plan text (the template gains this table in O-06).
+
+- Criterion (a): the same operation on the same class of subject appears in 3 or
+  more plan units, or in 2 or more of the previous 5 sprints (`055`..`059`).
+- Criterion (b): the unit's subject is governed by a `rules/` file that no assigned
+  skill or profile covers.
+- Decision: `reuse:<skill>` or `forge-pending-O-09`. A skill is written only if its
+  O-09 A/B measures at least 30 % fewer `fresh` tokens (D14 threshold) on its units.
+
+Notation: `P` = `docs/sprints/060-core-pipeline/IMPLEMENTATION_PLAN.md`; `E` =
+`grep -E '^\| [A-Z]-[0-9]{2} \|' P` (84 lines, `grep -c` reproduces it); `Q<n>` =
+the same plan file of sprint `05<n>-core-pipeline`.
+
+| Candidate | Units | Criterion (a/b) | Evidence | Decision | Reason |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| C1 structural graph query (symbol or file to callers, callees, dependents, impact) | M-03, M-04 (build); M-07, M-08, M-09, M-10, M-11 (consume) | a: yes; b: no | `E \| grep -cE 'graph_query\|graph_mcp\|dependents\|callers\|impact'` = 8 units (M-01, M-03, M-04, M-07..M-11); `grep -ciE '^\| .*graph'` on Q5..Q9 = 28, 4, 0, 7, 9 (4 of 5 sprints); `rules/graphify.md` is covered by `graphify`, so (b) fails | forge-pending-O-09 | The same operation on the same subject class recurs in 5 consumer units and in 4 of 5 earlier sprints. `graphify` answers natural-language questions and M-06 prohibits that mode; no skill wraps the M-03/M-04 interface. Value is unproven until M-03 exists: O-09 runs the A/B on M-07..M-11 |
+| C2 sandbox boundary measurement (exit-code-only probes, no content printed) | A-10, A-15, H-01, N-04 | a: yes; b: yes | `E \| grep -c 'MEASUREMENT'` = 5 (A-10, A-15, N-04, M-16, H-01; M-16 is an A/B, not a probe, so 4 units); `ls docs/sprints/05[5-9]-core-pipeline \| grep -c SANDBOX` = 4 (055, 056, 057, 059); `grep -rli sandbox skills/*/SKILL.md` = 0 files; `rules/project_topology.md §5` and `RA-19` govern the subject | forge-pending-O-09 | Both criteria hold: 4 units here and 4 of 5 earlier sprints, and no assigned skill covers the sandbox rule. `scripts/sandbox_probe.py` is a script with no `SKILL.md`, so agents do not find it through the manifest. The plan also names an agent form of this candidate; that decision belongs to `agent_assignment.md` |
+| C3 rename plus old-path grep sweep (`RA-06`, `RA-14`) | I-01..I-09 | a: yes; b: no | `E \| grep -c 'git mv'` = 9 (I-01..I-09); `grep -E '^\| ' Q5..Q9 \| grep -ciE 'git mv\|rename'` = 0 in all five; `grep -ciE 'rename\|git mv' skills/manifest_skills.json` = 0; no `rules/` file governs it (`RA-06` and `RA-14` are in `agents.md`) | none | No skill packages this work; gap evaluated by O-09 under D17. Unit count meets (a) but the batch is one pair of commands (`git mv`, then a grep of the old path with 0 hits) and appeared in 0 of the 5 earlier sprints: not recurring. `compliance-checker` scans the `RA-06` names after the batch. If renames recur, `check_sprint_refs.py` is the nearest script to extend |
+| C4 OSV advisory check of pins | L-01 (script); L-04, L-05 (settings, ADR) | a: no; b: no | `E \| grep -ciE 'osv\|advisor'` = 3 units, with 3 different operations (create script, edit settings, write ADR); the check itself is 1 unit; `grep -rliE 'osv\|advisor' skills/*/SKILL.md` = 0 files; L-01 subject is a Python script under `rules/code_craft.md`, covered by `python-quality-auditor` | reuse:python-quality-auditor | One script in one unit does not meet (a); the settings and ADR rows belong to C6 and C8. Nothing recurs, so nothing to package |
+| C5 stdlib script plus paired test | A-03, A-04, A-07, A-08, B-01, N-03, M-01, M-03, M-04, M-13, M-15, O-07, O-08, L-01, L-03, D-01, E-01, G-01, G-02 | a: yes; b: no | `E \| grep -cE '\| `(scripts\|hooks)/[a-z_]+\.py`'` = 19 units; `grep -cE '^\| [^\|]+\| `(scripts\|hooks)/[a-z_]+\.py`'` on Q5..Q9 = 9, 11, 22, 18, 57 (5 of 5 sprints); `rules/code_craft.md` is covered by `python-quality-auditor` | reuse:python-quality-auditor | Highest recurrence in the plan and already packaged: `python-quality-auditor` is assigned to all 19 units (section 2) and `omni-context-minimizer` to the 7 that edit an existing script above 200 lines. No forge needed |
+| C6 sandbox settings edit (`claude/settings.hooks.json`) | A-05, N-02, M-14, L-04 | a: yes; b: no | `E \| grep -c 'settings.hooks.json'` = 4; `grep -cE '^\| [^\|]+\| `claude/settings'` on Q5..Q9 = 3, 1, 1, 1, 4 (5 of 5 sprints); `env-shielding-auditor` covers the secret and deny-list part of `rules/project_topology.md §5` | reuse:env-shielding-auditor | Recurs in every sprint and in 4 units here. The skill already scans the result; the boundary measurement after the edit is C2, not this candidate |
+| C7 normative prose edit (`agents/`, `workflows/`, `rules/`) | A-11, A-12, A-13, A-14, C-01, F-02, H-02, M-06..M-12, O-02, O-03, O-04, O-10 | a: yes; b: no | `E \| grep -cE '\| `(agents\|workflows\|rules)/'` = 18 (8 agents + 5 workflows + 5 rules); on Q5..Q9: agents rows 1, 1, 0, 1, 4 and workflows rows 3, 4, 6, 7, 11 | none | No skill packages this work; gap evaluated by O-09 under D17. The text of each edit is fixed by its plan row; the only deterministic part is the rule-violation scan, which `compliance-checker` already performs. A skill would add no capability |
+| C8 ADR and document authoring from a template | A-01, A-02, N-01, O-01, L-05 | a: yes; b: no | `E \| grep -c 'docs/decisions/ADR'` = 4 (A-01, N-01, O-01, L-05) plus A-02 from `BLUEPRINT_TEMPLATE.md`; ADR rows on Q9 = 8, on Q6 = 0; `rules/documentation_standard.md` is covered by the `doc_orchestrator` profile, so (b) fails | none | No skill packages this work; gap evaluated by O-09 under D17. The templates under `docs/standards/templates/` and the `doc_orchestrator` profile are the capability; `compliance-checker` scans the result. A skill would duplicate the templates |
+
+### Ladder trail per candidate
+
+| Candidate | P1 manifest | P2 `autoskills-3rd` | P3 `skills.sh` | P4 |
+| :--- | :--- | :--- | :--- | :--- |
+| C1 | `graphify` found, partial: natural-language query only, no symbol or edge-direction query | read `SKILL.md` and `package.json`: stack scanner, no graph-query capability; not run | network refused (log below) | pending O-09 |
+| C2 | no skill: 0 files mention `sandbox` | same read: no sandbox-measurement capability; not run | network refused (log below) | pending O-09 |
+| C3 | `compliance-checker` found (naming scan only) | not needed | not needed | not reached |
+| C4 | `python-quality-auditor` found | not needed | not needed | not reached |
+| C5 | `python-quality-auditor`, `omni-context-minimizer` found | not needed | not needed | not reached |
+| C6 | `env-shielding-auditor` found | not needed | not needed | not reached |
+| C7 | `compliance-checker` found | not needed | not needed | not reached |
+| C8 | `compliance-checker` found; templates on disk | not needed | not needed | not reached |
+
+### P3 search log
+
+WebSearch and WebFetch are not exposed to this agent. The fallback was `curl` through
+Bash against `https://skills.sh/` with generic terms only (no project or host term):
+`graph query`, `sandbox measurement`, `rename references`, `dependency advisory osv`.
+Every request returned the same refusal, verbatim:
+
+- `curl: (56) CONNECT tunnel failed, response 403`
+- `deny network-outbound skills.sh:443 (host is not on the allow list)`
+
+No result came back for any term, so P3 is recorded as unresolved, not as a
+confirmed absence. For C1 and C2, the human or O-09 may repeat the search from a
+session whose allowlist covers `skills.sh`; plan unit O-11 adds `skills.sh` to `sandbox.network.allowedDomains` as the remediation of the refused connection; `forge-pending-O-09` holds either way
+because the A/B, not the search, decides whether a skill is written.
 
 ---
 
@@ -135,10 +213,10 @@ host session is PROHIBITED (`strict_rule`). Every Destination here is `N/A`: no 
 
 | Skill | Why |
 | :--- | :--- |
-| `python-quality-auditor` | A-03, A-04, A-07, A-08, B-01, L-01, L-03, D-01, D-03, E-01, G-01, G-02, M-01, M-03, M-04, M-13, M-15: every Python unit meets the Ruff/Mypy/Bandit gate before QA (`agents.md §1 linter_command`). |
-| `env-shielding-auditor` | A-03, A-04, A-05, L-01, L-04, D-01, M-04, M-05, M-13, M-14: the broker, its installer, the deny settings, the hash scanner, the graph MCP server and the usage hook handle credentials, host names or tool input; the scan proves nothing sensitive is committed (`RA-09`, `RA-15`). |
-| `omni-context-minimizer` | A-07, A-08, B-01, L-03, E-01: existing scripts above 200 lines get a skeleton before any partial read (`agents.md §2 ast_skeleton`). |
-| `compliance-checker` | F-01, F-02, J-02, M-06, M-12: normative text edits and the prose-motive audit need a rule-violation scan. |
+| `python-quality-auditor` | A-03, A-04, A-07, A-08, B-01, L-01, L-03, D-01, D-03, E-01, G-01, G-02, M-01, M-03, M-04, M-13, M-15, N-03, O-07, O-08: every Python unit meets the Ruff/Mypy/Bandit gate before QA (`agents.md §1 linter_command`). |
+| `env-shielding-auditor` | A-03, A-04, A-05, L-01, L-04, D-01, M-04, M-05, M-13, M-14, N-02, N-03, O-08: the broker, its installer, the deny settings, the hash scanner, the graph MCP server, the usage hook, the transcript-read setting and the capability-usage script handle credentials, host names or tool input; the scan proves nothing sensitive is committed (`RA-09`, `RA-15`). |
+| `omni-context-minimizer` | A-07, A-08, B-01, L-03, E-01, N-03, O-07: existing scripts above 200 lines get a skeleton before any partial read (`agents.md §2 ast_skeleton`). |
+| `compliance-checker` | F-01, F-02, J-02, M-06, M-12, O-02, O-10: normative text edits and the prose-motive audit need a rule-violation scan. |
 | `token-saver-auditor` | J-01: its rejection filters are the classification basis for prompt-audit findings. The plan itself was already audited at Phase 3. |
 | `graphify` | K-01, Z-02, M-01, M-02, M-03, M-04, M-06: graph workaround check on the new `graphifyy`, the dependency graph behind `task_scope.md`, and the `rules/graphify.md` schema and method that Wave M (D14) turns into the battery, the query interface, the MCP server and the structural-first protocol. |
 
@@ -147,11 +225,12 @@ host session is PROHIBITED (`strict_rule`). Every Destination here is `N/A`: no 
 | Candidate | Why rejected |
 | :--- | :--- |
 | `mcp-registry` | A-03 and M-04 are MCP servers, but D2 forbids registering it in `claude/mcp.json` or `.mcp.json`; the registry protocol would route it into agent-writable files. Registration is the human's `claude mcp add --scope user` step; M-05 removes the project-scope `graphify` entry rather than adding one. |
-| `autoskills-3rd` | P1 already resolved every unit; running it needs `pnpm install` provisioning and writes a discovery file for no gain. |
+| `autoskills-3rd` (run) | Read for C1 and C2 only: it is a stack scanner, with no graph-query or sandbox-measurement capability. Running it needs `pnpm install` (`node_modules/` is absent) and writes a discovery file for no gain. |
 | `skillopt` | F-01, F-02, M-06, M-12: it rewrites rule files and needs explicit human authorization per run; no authorization exists and the edits are specified by the plan. |
 | `contract-writer` | A-03 has no HTTP API of its own; the operation list is in D4 and ADR-0025. M-04 is a stdio tool surface specified by D14, not an HTTP contract. |
 | `token-saver-auditor` for M-16 | It classifies prompt findings; the A/B needs per-session `fresh` token counts, which only `scripts/session_cost.py` run by the human produces. |
-| Any new graph skill for Wave M | `graphify` plus M-01, M-03 and M-04 (scripts in `scripts/`, not skills) cover the need; D14 asks for a query interface, not a skill. |
+| A graph-query skill for Wave M, decided now | Not rejected and not built: C1 in `## Candidates` is `forge-pending-O-09`. M-01, M-03 and M-04 stay scripts in `scripts/`; D14 asks for a query interface, and only the O-09 A/B can justify a skill over it. |
+| A sandbox-measurement skill, decided now | Not rejected and not built: C2 is `forge-pending-O-09`, for the same reason. |
 | `topology-scaffolder`, `topology-monitor` | Nucleus mode forbids scaffolding (`nucleus_neutrality`); I-01..I-09 are renames of existing files, not new topology. |
 | `mass-standardizer`, `readme-standardizer`, `skill-creator` | No skill is added or changed this sprint, so the manifest is not regenerated and no README is written. |
 | `sprint-architect` | The plan exists and was approved for drafting at Phase 3; Z-01 and Z-03 are already templated. |
@@ -159,4 +238,4 @@ host session is PROHIBITED (`strict_rule`). Every Destination here is `N/A`: no 
 
 ## 5. Gaps
 
-None. No skill was forged and nothing was written under `skills/`. The plan's Dependencies table adds no package, so no external discovery was needed.
+Two open decisions, both owned by O-09: C1 (structural graph query) and C2 (sandbox boundary measurement) are `forge-pending-O-09`. No skill was forged and nothing was written under `skills/`. The P3 search was refused by the network allowlist (log in `## Candidates`), so P3 is unresolved for C1 and C2, not confirmed absent. The plan's Dependencies table adds no package.

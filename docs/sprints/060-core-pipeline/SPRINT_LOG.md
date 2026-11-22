@@ -29,6 +29,8 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 
 | Friction Point | Resolution / Workaround | KI ID |
 | :--- | :--- | :--- |
+| Phase 4.2 rung P3 unreachable: `skills.sh:443` denied by the sandbox (403), and the dispatched `skill_architect` had no `WebSearch`/`WebFetch` although its profile declares them | Plan unit O-11 adds `skills.sh` to `allowedDomains`; the missing web tools are routed to `rule_validator` at Phase 4.3 | KI-060-01 |
+| `python3 scripts/check_task_scope.py --sprint-dir docs/sprints/060-core-pipeline` exits `0` while `task_scope.md` lacks every N-0x and O-0x plan row (`fail_closed_claims`) | Routed to `rule_validator` at Phase 4.3 for a unit or a narrowed claim | KI-060-02 |
 
 ---
 
