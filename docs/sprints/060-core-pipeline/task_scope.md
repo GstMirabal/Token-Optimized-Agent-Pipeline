@@ -63,12 +63,12 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Est. cost | Suspend after | Depends on | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| A-01 | `docs/decisions/ADR-0025-github-app-broker.md` | create: D1-D6; replaces `ADR-0019` D2 and D6; same commit adds `Superseded by ADR-0025` to the D2 and D6 rows of `ADR-0019` | medium | `doc_orchestrator` | sonnet | medium | 115354 | | - | ⏳ pending |
+| A-01 | `docs/decisions/ADR-0025-github-app-broker.md` | create: D1-D6; replaces `ADR-0019` D2 and D6; same commit adds `Superseded by ADR-0025` to the D2 and D6 rows of `ADR-0019` | medium | `doc_orchestrator` | sonnet | medium | 115354 | | - | ✅ 1dac062 |
 | A-02 | `docs/architecture/GITHUB_BROKER_BLUEPRINT.md` | create: from `BLUEPRINT_TEMPLATE.md` | low | `doc_orchestrator` | sonnet | medium | 115354 | yes | A-01 | ⏳ pending |
 | A-03 | `scripts/github_broker.py` | create: stdio MCP server with the D4 operations; companion `tests/test_github_broker.py` in the same commit | high | `implementer_agent` | sonnet | medium | 15109 | | A-01 | ⏳ pending |
 | A-09 | `docs/guides/GITHUB_BROKER_SETUP_GUIDE.md` | create: human steps (create the App, D4 permissions, install on the nucleus only, keys, `install_broker.py`, `claude mcp add --scope user`; the user-scope registration of the graph server, M-04 and M-18, RV-28) | low | `doc_orchestrator` | sonnet | medium | 115354 | | A-03 | ⏳ pending |
 | A-04 | `scripts/install_broker.py` | create: install from a signed tag or a named `main` commit (D5); companion `tests/test_install_broker.py`; its `invoked_by:` is the guide A-09, which exists first | high | `implementer_agent` | sonnet | medium | 15109 | | A-03, A-09 | ⏳ pending |
-| A-05 | `claude/settings.hooks.json` | modify: `denyRead` and `permissions.deny` of D3; check `grep -c excludedCommands` = 0 | medium | `implementer_agent` | sonnet | medium | 10101 | | - | ⏳ pending |
+| A-05 | `claude/settings.hooks.json` | modify: `denyRead` and `permissions.deny` of D3; check `grep -c excludedCommands` = 0 | medium | `implementer_agent` | sonnet | medium | 10101 | | - | ✅ 2f4bfc9 |
 | A-06 | `config/allowed_signers` | create: public signing key the human pastes; the agent does not generate it | low | `implementer_agent` | sonnet | medium | 4613 | | - | ⏳ pending |
 | A-07 | `scripts/sync_agents_pin.py` | modify: `git verify-tag` (D6); companion `tests/test_sync_agents_pin.py` | medium | `implementer_agent` | sonnet | medium | 10101 | | A-06 | ⏳ pending |
 | A-08 | `scripts/install.py` | modify: `git verify-tag` (D6); companion `tests/test_install.py` | medium | `implementer_agent` | sonnet | medium | 10101 | yes | A-06 | ⏳ pending |
