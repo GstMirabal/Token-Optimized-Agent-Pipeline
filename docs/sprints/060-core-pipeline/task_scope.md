@@ -51,7 +51,7 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Est. cost | Suspend after | Depends on | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| O-12 | `agents/implementer_agent.md` | modify: `write_scope` names the sprint-directory reports, `docs/audits/`, `config/`, `claude/`, `.github/`, `Makefile` and `requirements-core.txt`; `ADR-0009` amended in the same commit (companion, not a second subject); first unit of the sprint, before M-10 (RV-20) | medium | `doc_orchestrator` | sonnet | medium | 3753 | | - | ⏳ pending |
+| O-12 | `agents/implementer_agent.md` | modify: `write_scope` names the sprint-directory reports, `docs/audits/`, `config/`, `claude/`, `.github/`, `Makefile` and `requirements-core.txt`; `ADR-0009` amended in the same commit (companion, not a second subject); first unit of the sprint, before M-10 (RV-20) | medium | `doc_orchestrator` | sonnet | medium | 3753 | | - | ✅ c83d8b5 |
 
 ### Wave A — GitHub App broker
 
