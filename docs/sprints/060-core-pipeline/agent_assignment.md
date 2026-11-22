@@ -19,7 +19,7 @@ Mode: **claude-code**, `delegation_mode: native` — the
 Values: `host:.claude/agents/` (default), `profile:<path>`, `nucleus:PR`.
 Units that do not create a profile use `N/A`.
 
-No agent profile is authored in Phase 4.1: all 88 Work rows are staffed from the 14 existing profiles in `agents/`, and forging a profile is decided after O-09 records its evidence, by this file and `skill_assignment.md` under D17 (`## Candidates`, RV-20). Every `Destination` is `N/A`. The `fix` operations of the plan (B-01, G-01, G-02) are recorded as `modify`; the `rename` operations of I-01…I-09 (`git mv`) are recorded as `modify` with the pre-rename path as Target.
+No agent profile is authored in Phase 4.1: all 90 Work rows are staffed from the 14 existing profiles in `agents/`, and forging a profile is decided after O-09 records its evidence, by this file and `skill_assignment.md` under D17 (`## Candidates`, RV-20). Every `Destination` is `N/A`. The `fix` operations of the plan (B-01, G-01, G-02) are recorded as `modify`; the `rename` operations of I-01…I-09 (`git mv`) are recorded as `modify` with the pre-rename path as Target.
 
 ---
 
@@ -110,8 +110,12 @@ Ordering: M-17 adds the step that invokes `scripts/check_graph_usage.py` (M-15) 
 | O-10 | `workflows/pipeline_workflow.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | O-11 | `claude/settings.hooks.json` | modify | sequential | `implementer_agent` | N/A | `agents/implementer_agent.md` |
 | O-12 | `agents/implementer_agent.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
+| O-13 | `docs/sprints/060-core-pipeline/agent_assignment.md` | modify | sequential | `agent_orchestrator` | N/A | `agents/agent_orchestrator.md` |
+| O-14 | `docs/sprints/060-core-pipeline/skill_assignment.md` | modify | sequential | `skill_architect` | N/A | `agents/skill_architect.md` |
 
-Ordering (plan execution order: O-12 → A → B → K → N → L-04 → O-11 → M → O without O-02, O-09, O-11, O-12 → L without L-04 → C → D → E → P → F → O-02 → G → H → I → J → O-09 → Z): O-12 runs first in the sprint, widening the `write_scope` of `implementer_agent` before M-10 (same file) and before O-09; O-02 runs after F-02 (same file); O-08 runs after N-04; O-09 runs after O-12 and H-01; O-10 runs after M-12 (same file); L-04 runs before O-11 and O-11 before M-14 (same file). O-12 edits a profile's `write_scope` and amends `ADR-0009` in the same commit, which is documentation authoring on the A-12 basis, so `doc_orchestrator` stays as proposed. O-03 edits `agents/agent_orchestrator.md` and O-04 edits `agents/skill_architect.md`, both profile rules text, which is documentation authoring on the A-12 basis.
+Ordering O-09 → O-13 → O-14: O-13 writes the forge/reuse decision per agent candidate from the O-09 evidence, and O-14 does the same for skill candidates; the two are reconciled on `claude/settings.hooks.json` (RV-39). M-18 runs before M-05 and M-16 (RV-35).
+
+Ordering (plan execution order: O-12 → A → B → K → N → L-04 → O-11 → M → O without O-02, O-09, O-11, O-12 → L without L-04 → C → D → E → P → F → O-02 → G → H → I → J → O-09 → O-13 → O-14 → Z): O-12 runs first in the sprint, widening the `write_scope` of `implementer_agent` before M-10 (same file) and before O-09; O-02 runs after F-02 (same file); O-08 runs after N-04; O-09 runs after O-12 and H-01; O-10 runs after M-12 (same file); L-04 runs before O-11 and O-11 before M-14 (same file). O-12 edits a profile's `write_scope` and amends `ADR-0009` in the same commit, which is documentation authoring on the A-12 basis, so `doc_orchestrator` stays as proposed. O-03 edits `agents/agent_orchestrator.md` and O-04 edits `agents/skill_architect.md`, both profile rules text, which is documentation authoring on the A-12 basis.
 
 ### Wave L — Dependency advisories
 
@@ -210,7 +214,7 @@ New names (D10): I-01 `GLOBAL_TOPOLOGY_MAP.md`; I-02 `TOPOLOGY_MAP.md`; I-03 `DO
 
 ## Candidates
 
-Decision D17 applied from the plan text (the template gains this table in O-05). Criterion (a): the same operation on the same class of subject appears in >= 3 plan units, or in >= 2 of the previous 5 sprints (`docs/sprints/055…059-core-pipeline/agent_assignment.md`). Criterion (b): the unit's subject is governed by a `rules/` file that the assigned profile in `agents/` does not cite. Decision values: `reuse` (the existing profile already holds the tools and scope; the gap, if any, is text in that profile) or `forge-pending-O-09` (O-09 records the evidence only; the `forge`/`reuse` decision for each candidate stays with this file and `skill_assignment.md` after O-09, RV-20; no profile is authored in Phase 4.1). Counts below are Grep line counts run over the plan Work rows (`^\| [A-Z]-\d\d \|` + the stated pattern) and over `docs/sprints/055…059-core-pipeline/agent_assignment.md`.
+Decision D17 applied from the plan text (the template gains this table in O-05). Criterion (a): the same operation on the same class of subject appears in >= 3 plan units, or in >= 2 of the previous 5 sprints (`docs/sprints/055…059-core-pipeline/agent_assignment.md`). Criterion (b): the unit's subject is governed by a `rules/` file that the assigned profile in `agents/` does not cite. Decision values: `reuse` (the existing profile already holds the tools and scope; the gap, if any, is text in that profile) or `forge-pending-O-09` (O-09 records the evidence only; the `forge`/`reuse` decision for each candidate stays with this file and `skill_assignment.md` after O-09, RV-20; no profile is authored in Phase 4.1). The final decision for every candidate is written by O-13 (RV-37), not by this table; the `claude/settings.hooks.json` agent candidate and skill candidate C6 are reconciled in O-13 with O-14 (RV-39). Counts below are Grep line counts run over the plan Work rows (`^\| [A-Z]-\d\d \|` + the stated pattern) and over `docs/sprints/055…059-core-pipeline/agent_assignment.md`.
 
 | Candidate | Units | Criterion (a/b) | Evidence | Decision | Reason |
 | :--- | :--- | :--- | :--- | :--- | :--- |
