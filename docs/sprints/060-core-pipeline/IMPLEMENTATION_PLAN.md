@@ -84,7 +84,7 @@ Orden de ejecución: O-12 (alcance de escritura de `implementer_agent`) → Q-01
 | A-01 | `docs/decisions/ADR-0025-github-app-broker.md` | create — D1-D6; reemplaza `ADR-0019` D2 y D6; en el mismo commit, una línea `Superseded by ADR-0025` en las filas D2 y D6 de `ADR-0019` (RV-10) | medium | `doc_orchestrator` |
 | A-02 | `docs/architecture/GITHUB_BROKER_BLUEPRINT.md` | create — desde `BLUEPRINT_TEMPLATE.md` | low | `doc_orchestrator` |
 | A-03 | `scripts/github_broker.py` | create — servidor MCP stdio con las operaciones de D4; test `tests/test_github_broker.py` en el mismo commit | high | `implementer_agent` |
-| A-09 | `docs/guides/GITHUB_BROKER_SETUP_GUIDE.md` | create — pasos humanos: crear la App, permisos de D4, instalarla solo en el nucleus, claves, `install_broker.py`, `claude mcp add --scope user`; el registro de ámbito usuario del servidor del grafo (M-04, M-18) (RV-28) | low | `doc_orchestrator` |
+| A-09 | `docs/guides/GITHUB_BROKER_SETUP_GUIDE.md` | create — pasos humanos: crear la App, permisos de D4, instalarla solo en el nucleus, claves, `install_broker.py`, `claude mcp add --scope user`; el registro de ámbito usuario del servidor del grafo (M-04, M-18) (RV-28); después de A-11, para que A-11, U-03, U-01 y U-02 quepan en un lote de cuatro (RV-75) | low | `doc_orchestrator` |
 | A-04 | `scripts/install_broker.py` | create — instalación desde tag firmado o commit de `main` (D5); test `tests/test_install_broker.py` | high | `implementer_agent` |
 | A-05 | `claude/settings.hooks.json` | modify — `denyRead` y `permissions.deny` de D3 | medium | `implementer_agent` |
 | A-06 | `config/allowed_signers` | create — clave pública de firma; el agente escribe solo el valor que pega el humano, nunca lo genera (RV-15) | low | `implementer_agent` |
