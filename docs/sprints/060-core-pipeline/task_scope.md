@@ -224,7 +224,7 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Est. cost | Suspend after | Depends on | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| H-01 | `docs/sprints/060-core-pipeline/SANDBOX_REMEASUREMENT.md` | create: 055 and 056 matrices on one fixed CLI (`KI-059-31`) | high | `implementer_agent` | sonnet | medium | 115354 | | - | ⏳ pending |
+| H-01 | `docs/sprints/060-core-pipeline/SANDBOX_REMEASUREMENT.md` | create: 055 and 056 matrices on one fixed CLI (`KI-059-31`) | high | `implementer_agent` | sonnet | medium | 115354 | | - | ✅ `d65865c` |
 | H-02 | `rules/project_topology.md` | modify: `Measuring CLI` row and the rows H-01 changes | medium | `doc_orchestrator` | sonnet | medium | 7867 | yes | A-13, U-03, H-01 | ⏳ pending |
 
 ### Wave T — Local database route (KI-060-07)
