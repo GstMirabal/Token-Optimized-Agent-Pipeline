@@ -1,13 +1,13 @@
 # Task Scope — Sprint 060 (core-pipeline)
 
-Source: `docs/sprints/060-core-pipeline/IMPLEMENTATION_PLAN.md` (`## Work` 90 rows, `## Design` D1-D17, `## Mechanisms`, `## Abort criterion`), HEAD `e8d83a2`. Row count reproduces with `grep -cE '^\| [A-Z]-[0-9]{2} \|' docs/sprints/060-core-pipeline/IMPLEMENTATION_PLAN.md` = 90, and this file carries the same 90 ids (Z-04 was deleted by plan decision D15; O-12, P-01, M-17, M-18 were added by `241fc29`; O-13, O-14 by `9ae34dd`, which also moved M-18 before M-05 and M-16).
+Source: `docs/sprints/060-core-pipeline/IMPLEMENTATION_PLAN.md` (`## Work` 91 rows, `## Design` D1-D17, `## Mechanisms`, `## Abort criterion`), HEAD `613f795`. Row count reproduces with `grep -cE '^\| [A-Z]-[0-9]{2} \|' docs/sprints/060-core-pipeline/IMPLEMENTATION_PLAN.md` = 91, and this file carries the same 91 ids (Z-04 was deleted by plan decision D15; O-12, P-01, M-17, M-18 were added by `241fc29`; O-13, O-14 by `9ae34dd`, which also moved M-18 before M-05 and M-16; Z-07 by `bdecc1a`).
 Staffing authority: `agent_assignment.md` (its Assignee column overrides the plan's `Assignee (proposed)`; the overwrites A-10, A-12, B-02, D-04, H-01 and J-01 are in its "Disagreements with the plan" and are used verbatim here; the O-09 overwrite was adopted by the plan in `241fc29` and is no longer a disagreement). `skill_assignment.md` was read: it assigns no skill that adds a Work row; its `## Candidates` decisions are audited below (RV-22, RV-23).
 Phase 4.3 of `workflows/pipeline_workflow.md`. Enforced by `scripts/check_task_scope.py`.
 Mode: `claude-code`, `delegation_mode: native`. Sprint id 60 >= `MODEL_FROM_SPRINT` (28) and >= `COST_FROM_SPRINT` (60), so Model, Effort, `Est. cost` and `Suspend after` are all required.
 
 ## Tier transcription
 
-Model and Effort are transcribed from each assignee's `agents/<role>.md` frontmatter (`model:`, `tier:`) and the `claude_code` column of `config/model_tiers.json` (`tiers.author.claude_code` = `sonnet` / `medium`). No tier is invented and no dated model ID is written. `session_tool` is `claude-code`, so `make cursor-tiers` does not apply. Waves N and O add no assignee: every N and O row is staffed by `doc_orchestrator`, `implementer_agent` or `rule_validator`, all `author` tier, except that O-14 adds `skill_architect` (`agents/skill_architect.md` frontmatter `model: sonnet`, `tier: author`), so the six-row map below covers all 90 rows (new rows: O-12 `doc_orchestrator`, M-17 `doc_orchestrator`, P-01 `implementer_agent`, M-18 `implementer_agent`, O-13 `agent_orchestrator`, O-14 `skill_architect`).
+Model and Effort are transcribed from each assignee's `agents/<role>.md` frontmatter (`model:`, `tier:`) and the `claude_code` column of `config/model_tiers.json` (`tiers.author.claude_code` = `sonnet` / `medium`). No tier is invented and no dated model ID is written. `session_tool` is `claude-code`, so `make cursor-tiers` does not apply. Waves N and O add no assignee: every N and O row is staffed by `doc_orchestrator`, `implementer_agent` or `rule_validator`, all `author` tier, except that O-14 adds `skill_architect` (`agents/skill_architect.md` frontmatter `model: sonnet`, `tier: author`), so the six-row map below covers all 91 rows (new rows: O-12 `doc_orchestrator`, M-17 `doc_orchestrator`, P-01 `implementer_agent`, M-18 `implementer_agent`, O-13 `agent_orchestrator`, O-14 `skill_architect`, Z-07 `skill_architect`).
 
 | Assignee | model | tier | effort |
 | :--- | :--- | :--- | :--- |
@@ -38,14 +38,14 @@ Declared escalations: none. No Work row is assigned to a `mechanical` profile (`
 | F-02 | 240340 | C-01..F-02 including P-01; margin 2108 to the ceiling; O-02 would reach 248207 |
 | I-09 | 165704 | O-02, G-01, G-02, H-01, H-02, I-01..I-09; J-01 would reach 281058 |
 | J-02 | 230708 | O-09 would reach 346062 |
-| O-09 | 115354 | O-09 alone; O-13, O-14, Z-01 and Z-02 after it would reach 236304 and Z-03 351658, so the segment closes at Z-02 below |
+| O-09 | 115354 | O-09 alone; O-13, O-14, Z-01 and Z-02 after it would reach 236304 and Z-03 351658, so the segment closes at Z-02 below (Z-07 follows Z-03 in the last segment) |
 | Z-02 | 236304 | O-13, O-14, Z-01, Z-02 (2798 + 2798 + 115354 + 115354); Z-03 would reach 351658 |
 
-The last segment (Z-03, Z-05, Z-06, A-15) sums to 124703. The bound is on estimates (soft). A-10, H-01, N-04, M-16 and O-09 are the largest uncertainty (`create/doc` `max_fresh` 152885); if one measures above 242448 alone the suspension must come earlier. The F-02 segment has the least margin (2108): a single overrun of `modify/script` there moves the suspension to E-01.
+The last segment (Z-03, Z-07, Z-05, Z-06, A-15) sums to 240057 (115354 + 115354 + 2798 + 2798 + 3753; margin 2391 to the ceiling; Z-07 is `create/doc`). The bound is on estimates (soft). A-10, H-01, N-04, M-16 and O-09 are the largest uncertainty (`create/doc` `max_fresh` 152885); if one measures above 242448 alone the suspension must come earlier. The F-02 segment has the least margin (2108): a single overrun of `modify/script` there moves the suspension to E-01.
 
 ## Work
 
-Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from the plan. `Depends on` records order only where one exists in the plan or where this audit found one (see "Same-file ordering"). Rows Z-01 and Z-03 already exist on disk (`4cb4570`, `024598e`) and Z-02 is this file; they are `pending` here because the Phase 4.3 contract sets `pending` on every unit and the closing commit stamps them. Tables follow the plan's execution-order line (plan line 80, `241fc29`): O-12, A, B, K, N, L-04 and O-11, M, O (without O-02, O-09, O-11, O-12), L (without L-04), C, D, E and P-01, F with O-02, G, H, I, J, O-09, O-13, O-14, Z; within Wave M the order is M-01..M-04, M-18, M-05..M-17 (`9ae34dd`, RV-35). A table is a barrier for `check_task_scope.py` and a dependency on a later table is unschedulable (RV-26, closed by `241fc29` plan line 80). O-11 no longer lists O-01 in `Depends on`: the plan runs O-11 before Wave O, so the ADR that records it (O-01) is written after the egress change, as ADR-0026 (L-05) follows L-04. M-14 returns to Wave M after M-13. A-15 is the last table: it runs at the deployment, after Phase 8 (RV-7).
+Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from the plan. `Depends on` records order only where one exists in the plan or where this audit found one (see "Same-file ordering"). Rows Z-01, Z-03 and Z-07 already exist on disk (`4cb4570`, `024598e`; Z-07 is `skill_assignment.md`, Phase 4.2) and Z-02 is this file; none is re-run in Phase 6; they are `pending` here because the Phase 4.3 contract sets `pending` on every unit and the closing commit stamps them. Tables follow the plan's execution-order line (plan line 80, `241fc29`): O-12, A, B, K, N, L-04 and O-11, M, O (without O-02, O-09, O-11, O-12), L (without L-04), C, D, E and P-01, F with O-02, G, H, I, J, O-09, O-13, O-14, Z; within Wave M the order is M-01..M-04, M-18, M-05..M-17 (`9ae34dd`, RV-35). A table is a barrier for `check_task_scope.py` and a dependency on a later table is unschedulable (RV-26, closed by `241fc29` plan line 80). O-11 no longer lists O-01 in `Depends on`: the plan runs O-11 before Wave O, so the ADR that records it (O-01) is written after the egress change, as ADR-0026 (L-05) follows L-04. M-14 returns to Wave M after M-13. A-15 is the last table: it runs at the deployment, after Phase 8 (RV-7).
 
 ### Wave O-12 — Implementer write scope (first unit)
 
@@ -236,8 +236,9 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | # | File | Operation | Risk | Assignee | Model | Effort | Est. cost | Suspend after | Depends on | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | Z-01 | `docs/sprints/060-core-pipeline/SPRINT_LOG.md` | create: Phase 3 | low | `orchestrator` | sonnet | medium | 115354 | | - | ⏳ pending |
-| Z-02 | `docs/sprints/060-core-pipeline/task_scope.md` | create: Phase 4.3 | low | `rule_validator` | sonnet | medium | 115354 | yes | - | ⏳ pending |
-| Z-03 | `docs/sprints/060-core-pipeline/agent_assignment.md` | create: Phase 4.1 | low | `agent_orchestrator` | sonnet | medium | 115354 | | O-13 | ⏳ pending |
+| Z-02 | `docs/sprints/060-core-pipeline/task_scope.md` | create: Phase 4.3; created before Phase 5, not re-run in Phase 6 | low | `rule_validator` | sonnet | medium | 115354 | yes | - | ⏳ pending |
+| Z-03 | `docs/sprints/060-core-pipeline/agent_assignment.md` | create: Phase 4.1; created before Phase 5, not re-run in Phase 6; O-13 is its only later modification | low | `agent_orchestrator` | sonnet | medium | 115354 | | - | ⏳ pending |
+| Z-07 | `docs/sprints/060-core-pipeline/skill_assignment.md` | create: Phase 4.2; created before Phase 5, not re-run in Phase 6; O-14 is its only later modification | low | `skill_architect` | sonnet | medium | 115354 | | - | ⏳ pending |
 | Z-05 | `CHANGELOG.md` | modify: `[Unreleased]` | low | `doc_orchestrator` | sonnet | medium | 2798 | | - | ⏳ pending |
 | Z-06 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify: KI routed to closed | low | `orchestrator` | sonnet | medium | 2798 | | - | ⏳ pending |
 
@@ -249,7 +250,7 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 
 ## Same-file ordering (`jurisdictional_lock`, `no_interference`)
 
-Ninety rows; every `File` cell is distinct except the ten files below. No two rows are `in progress` at once: the plan executes sequentially (`agent_assignment.md` Mode column), and each chain is ordered by `Depends on`.
+91 rows; every `File` cell is distinct except the eleven files below. No two rows are `in progress` at once: the plan executes sequentially (`agent_assignment.md` Mode column), and each chain is ordered by `Depends on`.
 
 | File | Rows in order | Order recorded |
 | :--- | :--- | :--- |
@@ -259,7 +260,8 @@ Ninety rows; every `File` cell is distinct except the ten files below. No two ro
 | `rules/skills_and_integrations.md` | F-02, O-02 | O-02 `Depends on` F-02; the plan's order line puts O-02 after F, so O-02 sits in the Wave F table |
 | `agents/implementer_agent.md` | O-12, M-10 | M-10 `Depends on` O-12; O-12 is the first unit of the sprint (RV-20, RV-31); `ADR-0009` is a companion of O-12 |
 | `scripts/install_broker.py` | A-04, M-18 | M-18 `Depends on` A-04 and M-04; companion `tests/test_install_broker.py` reached by both in that order (RV-28) |
-| `docs/sprints/060-core-pipeline/agent_assignment.md` | O-13, Z-03 | Z-03 `Depends on` O-13; the file already exists (`4cb4570`), so Z-03 may only stamp status, never re-create it (RV-40) |
+| `docs/sprints/060-core-pipeline/agent_assignment.md` | O-13, Z-03 | Z-03 is a Phase 4.1 `create` done before Phase 5 (`4cb4570`) and not re-run in Phase 6 (plan line 171); O-13 is its only later modification, so no `Depends on` (the earlier Z-03 `Depends on` O-13 was dropped: it would order a create after the modify; `check_task_scope.py` does not require a dependency between rows sharing a file) (RV-40) |
+| `docs/sprints/060-core-pipeline/skill_assignment.md` | O-14, Z-07 | Z-07 is a Phase 4.2 `create` done before Phase 5, not re-run in Phase 6 (plan line 172); O-14 is its only later modification (RV-41) |
 | `workflows/deployment_workflow.md` | A-11, C-01 | C-01 `Depends on` A-11; C-01 rewrites the merge/seal sequence A-11 wrote |
 | `rules/project_topology.md` | A-13, H-02 | H-02 `Depends on` A-13 and H-01; disjoint rows |
 | `docs/sprints/060-core-pipeline/BROKER_MEASUREMENT.md` | A-10, A-15 | A-15 `Depends on` A-10 and is the last table: M5 is written at the deployment |
@@ -310,7 +312,7 @@ Companion edits that cross rows (not structural subjects): `docs/guides/WORKFLOW
 | RV-10 | A-01 and L-05 rows add the `Superseded by` / `Amended by` line; N-01 and O-01 repeated the defect (RV-27), closed by `241fc29` N-01, O-01 | resolved |
 | RV-11 | A-12 row words the broker as MCP tools with `Bash` only and cites `ADR-0009`; F-01's row (`RA-09`/`§6 devops_agent` "con el broker") has no such wording | resolved for A-12, open for F-01 (S3) |
 | RV-12 | D15 deletes Z-04; `ls docs/walkthroughs` stays absent | resolved |
-| RV-13 | `Work units` 90 reproduces and `agent_assignment.md` says 90; the Cost row "Subagents dispatched" = "45 + gates" (plan line 218) contradicts "una dispatch por unidad" with 90 units; `241fc29` edited the Cost row (Work units, Prior session ratio) and left it | open (S3) |
+| RV-13 | `Work units` was 90 when raised (now 91, `bdecc1a`) and `agent_assignment.md` said 90; the Cost row "Subagents dispatched" = "45 + gates" (plan line 218) contradicts "una dispatch por unidad" with 90 units; `241fc29` edited the Cost row (Work units, Prior session ratio) and left it | open (S3) |
 | RV-14 | Verification table carries `grep -c excludedCommands claude/settings.hooks.json` -> 0 with a positive control; rows A-05 and L-04 cite no check (the table does) | resolved |
 | RV-15 | A-06 and D-02 rows: the agent writes only what the human pastes | resolved |
 
@@ -392,6 +394,15 @@ Statuses read from the plan at `e8d83a2` (rows 123, 121, 136, 137, order line 80
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | RV-40 | O-13, Z-03 | `jurisdictional_lock`, `RA-14` | Z-03 claims `agent_assignment.md` as `create`, and it runs after O-13, which modifies the same file; a re-run of `create` discards the O-13 decisions. The file already exists since Phase 4.1. `grep -nE '^\| (O-13\|Z-03) ' IMPLEMENTATION_PLAN.md` gives lines 136 and 171, Z-03 `create`, no dependency | Change Z-03 to `modify: stamp status only` with `Depends on` O-13 (done in this file), and amend the plan row | S2 |
 | RV-41 | O-14 | `jurisdictional_lock`, artifact ownership | `skill_assignment.md` is modified by O-14 but no Work row creates it (Phase 4.2 artifact); O-13 and O-14 edit Phase 4.1/4.2 artifacts after the Phase 5 approval, so the staffing the human approved changes. Owners match (`agent_orchestrator`, `skill_architect`), so no ownership conflict. `grep -nE '^\| [A-Z]-[0-9]{2} \|.*skill_assignment' IMPLEMENTATION_PLAN.md` returns O-14 only | State in O-13/O-14 that a changed decision is re-submitted at the Approval Gate; or no finding if the plan's re-plan rule already covers it | S3 |
+
+### Round 4 — closure (diff `bdecc1a~1..613f795`, rows Z-01, Z-02, Z-03, Z-07)
+
+| ID | Status | Evidence |
+| :--- | :--- | :--- |
+| RV-40 | closed by `bdecc1a` Z-03 | Plan lines 169-171 say Z-01, Z-02, Z-03 were created before Phase 5 and are not re-run in Phase 6; Z-03 names O-13 as its only later modification. `grep -nE '^\| Z-0[123] ' IMPLEMENTATION_PLAN.md` |
+| RV-41 | closed by `bdecc1a` Z-07 | Plan line 172 adds Z-07 (`skill_assignment.md`, Phase 4.2, O-14 its only later modification); `grep -cE '^\| [A-Z]-[0-9]{2} \|' IMPLEMENTATION_PLAN.md` = 91 and `Work units` = 91 |
+
+No new finding (RV-42 onward: none). `613f795` adds Z-07 to both assignment files; counts in this file are 91.
 
 No new finding against the size of O-12: its `Model`/`Effort` are the `doc_orchestrator` map entry, and no Work row is assigned to a `mechanical` profile.
 

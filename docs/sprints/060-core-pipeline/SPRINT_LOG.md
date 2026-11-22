@@ -9,7 +9,7 @@
 | :--- | :--- |
 | **Active Layer** | core / pipeline |
 | **Strategic Goal** | GitHub App broker run end to end by a sandboxed agent (push, PR, merge, signed tag, Release), then the Sprint 059 residue: model detector, `KI-059-35`, host-term scanner, the 059 QA round-20 gate-findings instrument, `agents.md` trim, `unit_cost.py` / `prompt_count.py`, sandbox re-measurement, `RA-06` renames, prompt and prose-motive audits |
-| **Intelligence State** | Plan drafted; Phase 5 pending |
+| **Intelligence State** | Phase 4 closed; Phase 5 pending |
 | **Start Time** | 2026-11-21 |
 
 ---
@@ -96,6 +96,8 @@ row per criterion. Leave it with **no data rows** until the first measurement.
 
 | Criterion | Command | Exit | Observation |
 | :--- | :--- | :--- | :--- |
+| 1 Broker (M1-M5) | `test -f docs/sprints/060-core-pipeline/BROKER_MEASUREMENT.md; echo $?` | 1 | Phase 4 → 5 boundary, 2026-11-22: not reached, A-10 runs in Phase 6 |
+| 2 Graph as brain (D14) | `test -f scripts/graph_battery.py; echo $?` | 1 | Phase 4 → 5 boundary, 2026-11-22: not reached, M-01 runs in Phase 6 |
 
 ---
 
@@ -115,6 +117,6 @@ until close.
 Closing the session state and certifying traceability.
 
 **Strategic Lock**: OPEN
-**Next Phase**: Resume Phase 4. (0) 2026-11-22: Wave O (D17, forge trigger and capability evaluation, O-01…O-10) approved by the human and added to the plan; Phases 4.1 and 4.2 re-run with the D17 criterion and a `Candidates` table in `agent_assignment.md` and `skill_assignment.md`, covering Waves N and O. (1) Wave N approved by the human 2026-11-21 and added to the plan as N-01…N-04 (D16); `agent_orchestrator` and `skill_architect` add those rows to their files. Former item: decision on Wave N (transcript read scoped to the current project: ADR-0027, `claude/settings.hooks.json` `allowRead` placeholder, `scripts/install.py` rendering, measurement report), proposed between Waves K and M; on approval, add its rows to the plan. (2) `rule_validator` brings `task_scope.md` to the plan's rows (69, plus Wave N if approved), marks how RV-1…RV-15 were resolved, audits new rows as RV-16+; the dispatch was stopped before it edited the file. (3) Run `check_task_scope.py`, `check_sprint_refs.py` (exit 2 until step 2), `audit_plan.py`; commit; Phase 5 Approval Gate.
+**Next Phase**: Phase 5 Approval Gate. Phase 4 closed 2026-11-22: plan 91 Work units (Waves N, O, P added; RV-16…RV-41 closed in four `rule_validator` rounds, S3 RV-13, RV-32…RV-34, RV-36, RV-38 recorded open); `check_task_scope.py` (with `--batches`), `check_sprint_refs.py`, `check_forge_ladder.py`, `audit_plan.py` exit 0.
 
 *Certified under conventional commit standard: feat(scope): message #060*
