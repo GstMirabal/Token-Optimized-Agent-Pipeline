@@ -96,6 +96,8 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 0. Sprint Seal Gate | `sprint_seal_gate` | write |
 | 0. Git State Gate | `git_state_gate` | ambiguous |
 | 1. Branch Merge | `test_audit` | verify |
+| 1. Branch Merge | `broker_precondition` | write |
+| 1. Branch Merge | `branch_push` | ambiguous |
 | 1. Branch Merge | `pr_flow` | write |
 | 1. Branch Merge | `deploy_unlock` | write |
 | 2. Environment | `production_bridge` | ambiguous |
