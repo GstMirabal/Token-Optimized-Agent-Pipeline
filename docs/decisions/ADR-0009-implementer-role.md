@@ -46,3 +46,26 @@ Rejected: promoting `devops_agent` to `author`; a ninth core role; dual
   enters); closure is identity of an implementer in that set, not the count.
 - Nucleus and hosts that pin this tag gain a dispatchable author for code
   and tests without widening gate write grants.
+
+---
+
+## 4. Amendment 2026-11-22 (Sprint 060, unit O-12, finding RV-20)
+
+The original decision (Section 2) limited `Write`/`Edit` to framework-root
+`scripts/`, `hooks/` and `tests/`. Sprint 060 assigns about 20 Work rows to
+`implementer_agent` whose target files lie outside those trees, and no other
+profile holds `Write`/`Edit` on those paths.
+
+`write_scope` in `agents/implementer_agent.md` now also covers, each only
+when a plan Work row assigns the file to `implementer_agent`:
+
+| Path | Note |
+| :--- | :--- |
+| `docs/sprints/[Sprint_ID]-[Stack]-[Layer]/*_MEASUREMENT.md`, `*_REPORT.md` | Current sprint directory only. |
+| `docs/audits/`, `config/`, `claude/`, `.github/` | Whole trees. |
+| `Makefile`, `requirements-core.txt` | Single files. |
+
+Still PROHIBITED: `agents.md`, `rules/`, `workflows/`, `agents/`,
+`skills/[name]/scripts/` (stays with `skill_architect`), and secrets
+(`RA-09`). The `tools:` line, the one-subject rule and Sections 1-3 are
+unchanged.
