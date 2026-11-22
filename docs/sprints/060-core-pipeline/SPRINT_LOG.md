@@ -32,6 +32,7 @@ Extraction of knowledge for the **Memory Purge Protocol**.
 | Phase 4.2 rung P3 unreachable: `skills.sh:443` denied by the sandbox (403), and the dispatched `skill_architect` had no `WebSearch`/`WebFetch` although its profile declares them | Plan unit O-11 adds `skills.sh` to `allowedDomains`; the missing web tools are routed to `rule_validator` at Phase 4.3 | KI-060-01 |
 | `python3 scripts/check_task_scope.py --sprint-dir docs/sprints/060-core-pipeline` exits `0` while `task_scope.md` lacks every N-0x and O-0x plan row (`fail_closed_claims`) | Routed to `rule_validator` at Phase 4.3 for a unit or a narrowed claim | KI-060-02 |
 | Phase 6 cost bound unmeasured: `python3 scripts/session_cost.py --bound` exits `1` (`No transcript found`), `~/.claude/projects` in `denyRead` (2026-11-22, before O-12) | Recorded per `pipeline_workflow.md` Phase 6 and work continues; Wave N (D16) makes the session measurable | KI-060-03 |
+| Phase 6 parallel batches with `isolation: worktree` cannot be cleaned under the sandbox: `git worktree remove` → `failed to delete '.git/worktrees/agent-…': Operation not permitted` (exit 255), the branch stays checked out in a prunable worktree; the harness worktree is born at `a6bddaa`, not the sprint tip (2026-11-22 probe) | The human ran `git worktree prune && git branch -D worktree-agent-a4819d8980ab7ef7e`; plan unit Q-01 moves batches to the shared tree with orchestrator commits (human decision 2026-11-22) | KI-060-04 |
 
 ---
 

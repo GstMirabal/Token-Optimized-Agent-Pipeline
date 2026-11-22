@@ -77,7 +77,7 @@ ni `git push`; y las unidades B a J están cerradas con su comando de verificaci
 
 ## Work
 
-Orden de ejecución: O-12 (alcance de escritura de `implementer_agent`) → Wave A (broker) → Wave B (detector de modelos) → K (`graphifyy`) → N (lectura de transcripciones) → L-04 → O-11 → M (grafo como cerebro) → O (forja de agentes y skills; sin O-02, O-09, O-11, O-12, O-13, O-14) → L (avisos de dependencias; sin L-04) → C → D → E → P → F → O-02 → G → H → I → J → O-09 → O-13 → O-14 → Z. A-15 corre en el despliegue de 060 (RV-25, RV-26).
+Orden de ejecución: O-12 (alcance de escritura de `implementer_agent`) → Q-01 (lotes en paralelo sin worktrees) → Wave A (broker) → Wave B (detector de modelos) → K (`graphifyy`) → N (lectura de transcripciones) → L-04 → O-11 → M (grafo como cerebro) → O (forja de agentes y skills; sin O-02, O-09, O-11, O-12, O-13, O-14) → L (avisos de dependencias; sin L-04) → C → D → E → P → F → O-02 → G → H → I → J → O-09 → O-13 → O-14 → Z. A-15 corre en el despliegue de 060 (RV-25, RV-26).
 
 | # | File | Operation | Risk | Assignee (proposed) |
 | :--- | :--- | :--- | :--- | :--- |
@@ -133,6 +133,7 @@ Orden de ejecución: O-12 (alcance de escritura de `implementer_agent`) → Wave
 | O-10 | `workflows/pipeline_workflow.md` | modify — done-criterion de Phases 4.1 y 4.2: tabla `Candidates` con `capability_usage.py` como evidencia; después de M-12 (mismo archivo); el commit incluye `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` regenerado por `scripts/map_workflows.py` (RV-29) | medium | `doc_orchestrator` |
 | O-11 | `claude/settings.hooks.json` | modify — `skills.sh` en `sandbox.network.allowedDomains`: el escalón P3 de la escalera no corre bajo el sandbox (Phase 4.2 de 060: `deny network-outbound skills.sh:443`, 403); registrado en ADR-0028 (O-01); después de L-04 y antes de M-14 en el orden de ese archivo (decisión humana 2026-11-22) | low | `implementer_agent` |
 | O-12 | `agents/implementer_agent.md` | modify — `write_scope` nombra los informes del directorio del sprint, `docs/audits/`, `config/`, `claude/`, `.github/`, `Makefile` y `requirements-core.txt`; `ADR-0009` enmendado en el mismo commit; primera unidad del sprint, antes de M-10 (mismo archivo) (RV-20) | medium | `doc_orchestrator` |
+| Q-01 | `workflows/pipeline_workflow.md` | modify — Phase 6 lotes en paralelo sin worktrees: los subagentes del lote editan solo los archivos de su unidad en el árbol compartido, corren solo sus tests y no hacen commit; el orquestador commitea cada unidad por separado en el orden de `task_scope.md`, regenera los artefactos generados y corre `make verify` una vez por lote; el commit incluye `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` regenerado; después de O-12, antes del lote 2 y de M-12 y O-10 (mismo archivo) (KI-060-04, decisión humana 2026-11-22) | medium | `doc_orchestrator` |
 | O-13 | `docs/sprints/060-core-pipeline/agent_assignment.md` | modify — decisión `forge`/`reuse` de cada candidato de agente con la evidencia de O-09; un candidato `forge` entra como fila de re-plan `O-NN` con su `Destination`; la decisión sobre `claude/settings.hooks.json` se reconcilia con O-14 (RV-37, RV-39); después de O-09 | low | `agent_orchestrator` |
 | O-14 | `docs/sprints/060-core-pipeline/skill_assignment.md` | modify — decisión `forge`/`none` de cada candidato de skill con la evidencia de O-09; un candidato `forge` entra como fila de re-plan `O-NN` con su `Destination`; reconciliada con O-13 (RV-37, RV-39); después de O-09 | low | `skill_architect` |
 | L-01 | `scripts/check_dependency_advisories.py` | create — consulta OSV `/v1/querybatch` (stdlib) por cada pin de `requirements*.txt` del nucleus; exit `2` con aviso o sin red (D13); test `tests/test_check_dependency_advisories.py` | medium | `implementer_agent` |
@@ -215,7 +216,7 @@ Los hallazgos de J-01 y J-02 entran como filas nuevas `J-NN` de una línea al ce
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 91 | Count of rows in Work tables |
+| Work units | 92 | Count of rows in Work tables |
 | Subagents dispatched | 45 + gates | una dispatch por unidad; gates QA y Tester por ronda |
 | Prior session ratio | n/a en Phase 1 (`~/.claude/projects` en `denyRead`); medible por el agente tras N-04 (D16, RV-24) | `python3 scripts/session_cost.py --from-anchor --json` |
 
