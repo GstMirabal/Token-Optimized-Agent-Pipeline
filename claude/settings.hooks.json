@@ -20,6 +20,12 @@
       "Edit(~/Library/Keychains/**)",
       "Edit(/.claude/settings*.json)",
       "Read(/**/.env*)",
+      "Read(~/.config/agents-broker/**)",
+      "Edit(~/.config/agents-broker/**)",
+      "Write(~/.config/agents-broker/**)",
+      "Read(~/.claude.json)",
+      "Edit(~/.claude.json)",
+      "Write(~/.claude.json)",
       "WebFetch",
       "WebSearch",
       "Artifact",
@@ -85,7 +91,9 @@
         "~/.aws",
         "~/.npmrc",
         "~/.bash_history",
-        "~/**/.env*"
+        "~/**/.env*",
+        "~/.config/agents-broker",
+        "~/.claude.json"
       ],
       "allowRead": [
         "./.env.example",
