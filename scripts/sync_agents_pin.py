@@ -5,7 +5,10 @@ nucleus close publishes a tag so hosts can keep working; waiting left them on a
 stale pin until someone noticed. Auto-update is **version tags only**
 (``vX.Y.Z``, the deploy product), never ``main`` HEAD. Unreachable origin
 degrades to the current pin (start continues). A dirty `.agents` tree while
-behind exits ``2`` and does not overwrite (`submodule_purity`). Nucleus mode is
+behind exits ``2`` and does not overwrite (`submodule_purity`). A newer tag is
+checked out only after ``git verify-tag`` accepts its SSH signature against the
+**currently pinned** checkout's ``config/allowed_signers`` (plan D6, ``KI-059-26``);
+the file of the tag being installed is never the trust anchor. Nucleus mode is
 a no-op: this checkout *is* the framework.
 
 invoked_by: workflows/start_workflow.md#lightweight_sync
@@ -16,13 +19,17 @@ Usage:
 
 Exit codes:
     0 — nucleus; already current; bumped; or ping failed (degraded)
-    2 — dirty tree blocked a required bump (RA-11)
+    2 — dirty tree blocked a required bump, or the newer tag has no valid
+        signature (unsigned, signed by a key outside ``allowed_signers``,
+        ``config/allowed_signers`` missing, or ``ssh-keygen`` missing); the
+        pin does not move (RA-11, fail closed)
 """
 
 from __future__ import annotations
 
 import os
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -33,6 +40,7 @@ from _root import agents_root
 
 FETCH_TIMEOUT_S = 20
 GIT_TIMEOUT_S = 15
+ALLOWED_SIGNERS = Path("config") / "allowed_signers"
 
 
 def git(
@@ -217,6 +225,45 @@ def checkout_tag(root: Path, tag: str) -> bool:
     return True
 
 
+def verify_tag(root: Path, tag: str) -> bool:
+    """Accept ``tag`` only when ``git verify-tag`` validates its SSH signature.
+
+    The trust anchor is ``config/allowed_signers`` of the checkout currently
+    pinned, read before the checkout moves. Fails closed: a missing
+    ``allowed_signers``, a missing ``ssh-keygen``, a timeout, an unsigned tag
+    and a signature by an unlisted key all return False.
+
+    Args:
+        root: Framework checkout (current pin).
+        tag: Version tag about to be checked out.
+
+    Returns:
+        bool: True only when git exited 0.
+    """
+    signers = root / ALLOWED_SIGNERS
+    if not signers.is_file():
+        print(f"[sync_agents_pin] cannot verify {tag}: {ALLOWED_SIGNERS} missing")
+        return False
+    if shutil.which("ssh-keygen") is None:
+        print(f"[sync_agents_pin] cannot verify {tag}: ssh-keygen not found")
+        return False
+    args = [
+        "-c", "gpg.format=ssh",
+        "-c", f"gpg.ssh.allowedSignersFile={signers}",
+        "verify-tag", tag,
+    ]
+    try:
+        result = git(args, cwd=root, timeout=30)
+    except subprocess.TimeoutExpired:
+        print(f"[sync_agents_pin] verify-tag {tag} timed out")
+        return False
+    if result.returncode != 0:
+        err = (result.stderr or result.stdout).strip().replace("\n", " ")[:200]
+        print(f"[sync_agents_pin] tag {tag} has no valid signature ({err})")
+        return False
+    return True
+
+
 def init_submodule(host: Path) -> bool:
     """``git submodule update --init -- .agents`` from the host root.
 
@@ -247,7 +294,7 @@ def bump_if_behind(root: Path, current: str | None, latest: str) -> int:
         latest: Newest version tag after fetch.
 
     Returns:
-        int: 0 bumped or already current; 2 dirty-while-behind.
+        int: 0 bumped or already current; 2 dirty-while-behind or unverified signature.
     """
     if current is not None and parse_version(current) >= parse_version(latest):
         print(f"[sync_agents_pin] pin current ({current})")
@@ -260,6 +307,8 @@ def bump_if_behind(root: Path, current: str | None, latest: str) -> int:
             "re-run `/agents:start`.",
             file=sys.stderr,
         )
+        return 2
+    if not verify_tag(root, latest):
         return 2
     before = git(["rev-parse", "HEAD"], cwd=root).stdout.strip()
     if not checkout_tag(root, latest):

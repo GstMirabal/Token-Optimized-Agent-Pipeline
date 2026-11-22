@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -27,6 +28,9 @@ def pin_mod(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     monkeypatch.setattr(mod, "is_nucleus", lambda: False)
     monkeypatch.setattr(mod, "agents_root", lambda: tmp_path)
     (tmp_path / ".git").mkdir()
+    (tmp_path / "config").mkdir()
+    (tmp_path / "config" / "allowed_signers").write_text("x namespaces=\"git\" ssh-ed25519 AAAA\n")
+    monkeypatch.setattr(mod.shutil, "which", lambda name: f"/usr/bin/{name}")
     return mod
 
 
@@ -309,3 +313,136 @@ def test_git_wrapper_runs(pin_mod, tmp_path: Path) -> None:
 def test_current_tag_none_on_failure(pin_mod, tmp_path: Path) -> None:
     pin_mod.git = lambda *a, **k: _done(1, "")
     assert pin_mod.current_tag(tmp_path) is None
+
+
+def _verdict(verify: subprocess.CompletedProcess[str] | None) -> subprocess.CompletedProcess[str]:
+    if verify is None:
+        raise subprocess.TimeoutExpired(cmd=["git"], timeout=30)
+    return verify
+
+
+def _behind_git(verify: subprocess.CompletedProcess[str] | None, calls: list[list[str]]):
+    def fake_git(args: list[str], cwd: Path | None, timeout: int | None = None):
+        calls.append(args)
+        if args[:1] == ["remote"]:
+            return _done(0, "origin\n")
+        if args[:2] == ["tag", "--sort=-v:refname"]:
+            return _done(0, "v4.17.0\n")
+        if args[:3] == ["describe", "--tags", "--abbrev=0"]:
+            return _done(0, "v4.16.0\n")
+        if "verify-tag" in args:
+            return _verdict(verify)
+        return _done(0, "")
+
+    return fake_git
+
+
+def test_unsigned_tag_exits_2_without_checkout(
+    pin_mod, monkeypatch: pytest.MonkeyPatch, capsys
+) -> None:
+    calls: list[list[str]] = []
+    bad = _done(1, "", "error: no signature found")
+    monkeypatch.setattr(pin_mod, "git", _behind_git(bad, calls))
+    assert pin_mod.main() == 2
+    assert "no valid signature" in capsys.readouterr().out
+    assert not any(a[:2] == ["checkout", "--detach"] for a in calls)
+
+
+def test_verify_uses_ssh_format_and_pinned_allowed_signers(
+    pin_mod, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    calls: list[list[str]] = []
+    monkeypatch.setattr(pin_mod, "git", _behind_git(_done(0), calls))
+    assert pin_mod.main() == 0
+    signers = tmp_path / "config" / "allowed_signers"
+    assert [
+        "-c", "gpg.format=ssh",
+        "-c", f"gpg.ssh.allowedSignersFile={signers}",
+        "verify-tag", "v4.17.0",
+    ] in calls
+    verify_at = next(i for i, a in enumerate(calls) if "verify-tag" in a)
+    checkout_at = next(i for i, a in enumerate(calls) if a[:2] == ["checkout", "--detach"])
+    assert verify_at < checkout_at
+
+
+def test_missing_allowed_signers_exits_2(
+    pin_mod, monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys
+) -> None:
+    (tmp_path / "config" / "allowed_signers").unlink()
+    calls: list[list[str]] = []
+    monkeypatch.setattr(pin_mod, "git", _behind_git(_done(0), calls))
+    assert pin_mod.main() == 2
+    assert "allowed_signers" in capsys.readouterr().out
+    assert not any(a[:2] == ["checkout", "--detach"] for a in calls)
+
+
+def test_missing_ssh_keygen_exits_2(
+    pin_mod, monkeypatch: pytest.MonkeyPatch, capsys
+) -> None:
+    calls: list[list[str]] = []
+    monkeypatch.setattr(pin_mod.shutil, "which", lambda name: None)
+    monkeypatch.setattr(pin_mod, "git", _behind_git(_done(0), calls))
+    assert pin_mod.main() == 2
+    assert "ssh-keygen not found" in capsys.readouterr().out
+    assert not any(a[:2] == ["checkout", "--detach"] for a in calls)
+
+
+def test_verify_timeout_exits_2(
+    pin_mod, monkeypatch: pytest.MonkeyPatch, capsys
+) -> None:
+    calls: list[list[str]] = []
+    monkeypatch.setattr(pin_mod, "git", _behind_git(None, calls))
+    assert pin_mod.main() == 2
+    assert "timed out" in capsys.readouterr().out
+
+
+def test_already_current_does_not_verify(
+    pin_mod, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls: list[list[str]] = []
+    monkeypatch.setattr(pin_mod, "git", _behind_git(_done(1), calls))
+    monkeypatch.setattr(pin_mod, "current_tag", lambda root: "v4.17.0")
+    assert pin_mod.main() == 0
+    assert not any("verify-tag" in a for a in calls)
+
+
+@pytest.mark.skipif(
+    shutil.which("ssh-keygen") is None or shutil.which("git") is None,
+    reason="needs git and ssh-keygen",
+)
+def test_real_signed_and_foreign_signed_tags(tmp_path: Path) -> None:
+    """End to end: a tag signed by the listed key verifies; another key does not."""
+    sys.path.insert(0, str(SCRIPTS))
+    sys.modules.pop("sync_agents_pin", None)
+    mod = importlib.import_module("sync_agents_pin")
+    repo = tmp_path / "repo"
+    (repo / "config").mkdir(parents=True)
+    keys = {}
+    for name in ("good", "evil"):
+        key = tmp_path / name
+        subprocess.run(
+            ["ssh-keygen", "-q", "-t", "ed25519", "-N", "", "-f", str(key)],
+            check=True, capture_output=True,
+        )
+        keys[name] = key
+    pub = keys["good"].with_suffix(".pub").read_text().split()
+    (repo / "config" / "allowed_signers").write_text(
+        f'agents-broker namespaces="git" {pub[0]} {pub[1]}\n'
+    )
+
+    def run(*args: str) -> None:
+        subprocess.run(
+            ["git", "-c", "user.name=t", "-c", "user.email=t@t", *args],
+            cwd=repo, check=True, capture_output=True,
+        )
+
+    run("init", "-q")
+    run("add", ".")
+    run("commit", "-q", "-m", "init", "--no-gpg-sign")
+    for tag, name in (("v1.0.0", "good"), ("v1.0.1", "evil")):
+        run("-c", "gpg.format=ssh", "-c", f"user.signingkey={keys[name]}",
+            "tag", "-s", tag, "-m", tag)
+    run("tag", "v1.0.2", "-m", "unsigned")
+    assert mod.verify_tag(repo, "v1.0.0") is True
+    assert mod.verify_tag(repo, "v1.0.1") is False
+    assert mod.verify_tag(repo, "v1.0.2") is False
