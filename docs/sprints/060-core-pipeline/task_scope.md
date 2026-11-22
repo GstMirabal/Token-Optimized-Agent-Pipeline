@@ -1,13 +1,13 @@
 # Task Scope — Sprint 060 (core-pipeline)
 
-Source: `docs/sprints/060-core-pipeline/IMPLEMENTATION_PLAN.md` (`## Work` 91 rows, `## Design` D1-D17, `## Mechanisms`, `## Abort criterion`), HEAD `613f795`. Row count reproduces with `grep -cE '^\| [A-Z]-[0-9]{2} \|' docs/sprints/060-core-pipeline/IMPLEMENTATION_PLAN.md` = 91, and this file carries the same 91 ids (Z-04 was deleted by plan decision D15; O-12, P-01, M-17, M-18 were added by `241fc29`; O-13, O-14 by `9ae34dd`, which also moved M-18 before M-05 and M-16; Z-07 by `bdecc1a`).
+Source: `docs/sprints/060-core-pipeline/IMPLEMENTATION_PLAN.md` (`## Work` 92 rows, `## Design` D1-D17, `## Mechanisms`, `## Abort criterion`), HEAD `b9e5336`. Row count reproduces with `grep -cE '^\| [A-Z]-[0-9]{2} \|' docs/sprints/060-core-pipeline/IMPLEMENTATION_PLAN.md` = 92, and this file carries the same 92 ids (Z-04 was deleted by plan decision D15; O-12, P-01, M-17, M-18 were added by `241fc29`; O-13, O-14 by `9ae34dd`, which also moved M-18 before M-05 and M-16; Z-07 by `bdecc1a`; Q-01 by `a5131ea`).
 Staffing authority: `agent_assignment.md` (its Assignee column overrides the plan's `Assignee (proposed)`; the overwrites A-10, A-12, B-02, D-04, H-01 and J-01 are in its "Disagreements with the plan" and are used verbatim here; the O-09 overwrite was adopted by the plan in `241fc29` and is no longer a disagreement). `skill_assignment.md` was read: it assigns no skill that adds a Work row; its `## Candidates` decisions are audited below (RV-22, RV-23).
 Phase 4.3 of `workflows/pipeline_workflow.md`. Enforced by `scripts/check_task_scope.py`.
 Mode: `claude-code`, `delegation_mode: native`. Sprint id 60 >= `MODEL_FROM_SPRINT` (28) and >= `COST_FROM_SPRINT` (60), so Model, Effort, `Est. cost` and `Suspend after` are all required.
 
 ## Tier transcription
 
-Model and Effort are transcribed from each assignee's `agents/<role>.md` frontmatter (`model:`, `tier:`) and the `claude_code` column of `config/model_tiers.json` (`tiers.author.claude_code` = `sonnet` / `medium`). No tier is invented and no dated model ID is written. `session_tool` is `claude-code`, so `make cursor-tiers` does not apply. Waves N and O add no assignee: every N and O row is staffed by `doc_orchestrator`, `implementer_agent` or `rule_validator`, all `author` tier, except that O-14 adds `skill_architect` (`agents/skill_architect.md` frontmatter `model: sonnet`, `tier: author`), so the six-row map below covers all 91 rows (new rows: O-12 `doc_orchestrator`, M-17 `doc_orchestrator`, P-01 `implementer_agent`, M-18 `implementer_agent`, O-13 `agent_orchestrator`, O-14 `skill_architect`, Z-07 `skill_architect`).
+Model and Effort are transcribed from each assignee's `agents/<role>.md` frontmatter (`model:`, `tier:`) and the `claude_code` column of `config/model_tiers.json` (`tiers.author.claude_code` = `sonnet` / `medium`). No tier is invented and no dated model ID is written. `session_tool` is `claude-code`, so `make cursor-tiers` does not apply. Waves N and O add no assignee: every N and O row is staffed by `doc_orchestrator`, `implementer_agent` or `rule_validator`, all `author` tier, except that O-14 adds `skill_architect` (`agents/skill_architect.md` frontmatter `model: sonnet`, `tier: author`), so the six-row map below covers all 92 rows (new rows: Q-01 `doc_orchestrator`, O-12 `doc_orchestrator`, M-17 `doc_orchestrator`, P-01 `implementer_agent`, M-18 `implementer_agent`, O-13 `agent_orchestrator`, O-14 `skill_architect`, Z-07 `skill_architect`).
 
 | Assignee | model | tier | effort |
 | :--- | :--- | :--- | :--- |
@@ -26,7 +26,7 @@ Declared escalations: none. No Work row is assigned to a `mechanical` profile (`
 
 | Segment closes at | Accumulated `Est. cost` | Why there |
 | :--- | :--- | :--- |
-| A-02 | 234461 | O-12, A-01, A-02; A-03 would reach 249570 |
+| A-02 | 238214 | O-12, Q-01, A-01, A-02; A-03 would reach 253323 |
 | A-08 | 180488 | The human installs the broker and registers it (guide A-09, installer A-04) before A-10 can measure; A-10 would reach 295842 |
 | B-02 | 147284 | End of the model-detector wave |
 | N-03 | 190353 | The human applies `install.py` and opens a new session before N-04 measures (D16); N-04 would reach 305707 |
@@ -52,6 +52,12 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | # | File | Operation | Risk | Assignee | Model | Effort | Est. cost | Suspend after | Depends on | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | O-12 | `agents/implementer_agent.md` | modify: `write_scope` names the sprint-directory reports, `docs/audits/`, `config/`, `claude/`, `.github/`, `Makefile` and `requirements-core.txt`; `ADR-0009` amended in the same commit (companion, not a second subject); first unit of the sprint, before M-10 (RV-20) | medium | `doc_orchestrator` | sonnet | medium | 3753 | | - | ✅ c83d8b5 |
+
+### Wave Q-01 — Phase 6 parallel batches without worktrees (second unit)
+
+| # | File | Operation | Risk | Assignee | Model | Effort | Est. cost | Suspend after | Depends on | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| Q-01 | `workflows/pipeline_workflow.md` | modify: Phase 6 parallel batches without worktrees (batch subagents edit only their unit's files in the shared tree, run only their own tests, do not commit; the orchestrator commits each unit separately in `task_scope.md` order, regenerates generated artifacts and runs `make verify` once per batch); the commit includes the regenerated `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md`; after O-12, before every Wave A unit, M-12 and O-10 (same file) (KI-060-04, RV-42) | medium | `doc_orchestrator` | sonnet | medium | 3753 | | O-12 | ✅ 07be305 |
 
 ### Wave A — GitHub App broker
 
@@ -117,7 +123,7 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | M-09 | `agents/qa_agent.md` | modify: Gate 1 graph integrity with `graph_battery.py` and the diff's impact radius | low | `doc_orchestrator` | sonnet | medium | 2798 | | M-06 | ⏳ pending |
 | M-10 | `agents/implementer_agent.md` | modify: `callers`/`callees` before editing a symbol; cites `rules/qa_and_testing.md` and `rules/code_craft.md`; after O-12 (same file) (RV-31) | low | `doc_orchestrator` | sonnet | medium | 2798 | | M-06, O-12 | ⏳ pending |
 | M-11 | `agents/doc_orchestrator.md` | modify: references of a document by `dependents` before editing or renaming; cites `rules/documentation_standard.md` (RV-31) | low | `doc_orchestrator` | sonnet | medium | 2798 | | M-06 | ⏳ pending |
-| M-12 | `workflows/pipeline_workflow.md` | modify: graph query steps in Phases 1, 4.3, 6 and 7; the commit includes the regenerated `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` (RV-29) | medium | `doc_orchestrator` | sonnet | medium | 3753 | | M-06 | ⏳ pending |
+| M-12 | `workflows/pipeline_workflow.md` | modify: graph query steps in Phases 1, 4.3, 6 and 7; the commit includes the regenerated `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` (RV-29) | medium | `doc_orchestrator` | sonnet | medium | 3753 | | M-06, Q-01 | ⏳ pending |
 | M-13 | `hooks/graph_usage_log.py` | create: `PostToolUse` hook logging graph queries against `Grep`, `Glob` and search by `Bash`; companion `tests/test_graph_usage_log.py` | medium | `implementer_agent` | sonnet | medium | 33574 | | - | ⏳ pending |
 | M-14 | `claude/settings.hooks.json` | modify: registers the M-13 hook; after A-05, N-02, L-04 and O-11 | low | `implementer_agent` | sonnet | medium | 4613 | | M-13, O-11 | ⏳ pending |
 | M-15 | `scripts/check_graph_usage.py` | create: exit `2` if a research phase searched by text before querying the graph; named invoker `workflows/close_workflow.md` (finding RV-19); companion `tests/test_check_graph_usage.py` | medium | `implementer_agent` | sonnet | medium | 33574 | | M-13 | ⏳ pending |
@@ -250,13 +256,13 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 
 ## Same-file ordering (`jurisdictional_lock`, `no_interference`)
 
-91 rows; every `File` cell is distinct except the eleven files below. No two rows are `in progress` at once: the plan executes sequentially (`agent_assignment.md` Mode column), and each chain is ordered by `Depends on`.
+92 rows; every `File` cell is distinct except the eleven files below. No two rows are `in progress` at once: the plan executes sequentially (`agent_assignment.md` Mode column), and each chain is ordered by `Depends on`.
 
 | File | Rows in order | Order recorded |
 | :--- | :--- | :--- |
 | `claude/settings.hooks.json` | A-05, N-02, L-04, O-11, M-14 | N-02 after A-05; L-04 after A-05 and N-02; O-11 after L-04; M-14 after O-11 (plan rows A-05/N-02/M-14/O-11). The plan's execution-order line (`241fc29`) runs L-04 and O-11 before Wave M, then M-14 in Wave M (RV-26 closed); L-04 and O-11 share one table, M-14 sits in Wave M |
 | `scripts/install.py` | A-08, N-03 | N-03 `Depends on` A-08, N-02; companion `tests/test_install.py` reached by both in that order |
-| `workflows/pipeline_workflow.md` | M-12, O-10 | O-10 `Depends on` M-12 |
+| `workflows/pipeline_workflow.md` | Q-01, M-12, O-10 | M-12 `Depends on` Q-01; O-10 `Depends on` M-12; Q-01 is the second unit of the sprint, after O-12 (RV-42) |
 | `rules/skills_and_integrations.md` | F-02, O-02 | O-02 `Depends on` F-02; the plan's order line puts O-02 after F, so O-02 sits in the Wave F table |
 | `agents/implementer_agent.md` | O-12, M-10 | M-10 `Depends on` O-12; O-12 is the first unit of the sprint (RV-20, RV-31); `ADR-0009` is a companion of O-12 |
 | `scripts/install_broker.py` | A-04, M-18 | M-18 `Depends on` A-04 and M-04; companion `tests/test_install_broker.py` reached by both in that order (RV-28) |
@@ -277,6 +283,7 @@ Companion edits that cross rows (not structural subjects): `docs/guides/WORKFLOW
 | A-05, N-02, L-04, O-11, M-14 | `tests/test_template_sandbox.py`, `tests/test_install_nucleus_sandbox.py`, `tests/test_merge_json.py`; consumers `scripts/install.py`, `scripts/merge_json.py`, `scripts/with_env.py`, `scripts/session_end_hook.py`, `hooks/on_init.py`, `hooks/on_commit.py`, `hooks/state_mirror.py`; `permissions.deny` lines 23-24 hold `WebFetch` and `WebSearch` (RV-16) |
 | A-07 | `scripts/session_start.py` (calls it at lines 19, 453, 681; must handle exit `2`), `scripts/_root.py:58`, `scripts/_mode.py:37`, `workflows/start_workflow.md:32`, `workflows/close_workflow.md:35` |
 | A-08, N-03 | `scripts/install_lock.py`, `scripts/merge_json.py`, `scripts/_mode.py`; `rules/project_topology.md` and `workflows/repository_hardening_workflow.md` cite `ADR-0019` D2/D6 |
+| Q-01 | `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` (generated; `python3 scripts/map_workflows.py`, checked by `make verify`), `scripts/check_task_scope.py --batches` (the command Phase 6 step 1 names), `scripts/session_cost.py` and `scripts/unit_cost.py` (named by the same Phase 6 row), `scripts/branch_sovereignty.py` (KI-060-04: refuses the seal after a worktree) |
 | O-12 | `docs/decisions/ADR-0009-implementer-role.md` (companion), `tests/test_implementer_role.py` (pins the `tools:` line, not `write_scope`; re-run), `agents/implementer_agent.md` read by `config/model_tiers.json` checks and `scripts/check_task_scope.py` tool check (Grep, not a graph traversal) |
 | P-01 | `tests/test_check_task_scope.py` (companion), importers by `Grep`: `scripts/loop_guard.py`, `scripts/unit_cost.py`, `scripts/check_sprint_refs.py`, `scripts/check_gate_log.py`, `scripts/_current_sprint.py`, `scripts/_md_table.py`, `scripts/model_ledger.py`, `scripts/audit_cursor_era.py`; invoker `workflows/pipeline_workflow.md` Phase 4.3 and `workflows/close_workflow.md` |
 | M-17 | `scripts/check_graph_usage.py` (M-15, the invoker's target), `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` (generated, `scripts/map_workflows.py --check` in `make verify`), `scripts/session_state.py`, `tests/test_session_protocol.py` |
@@ -402,7 +409,13 @@ Statuses read from the plan at `e8d83a2` (rows 123, 121, 136, 137, order line 80
 | RV-40 | closed by `bdecc1a` Z-03 | Plan lines 169-171 say Z-01, Z-02, Z-03 were created before Phase 5 and are not re-run in Phase 6; Z-03 names O-13 as its only later modification. `grep -nE '^\| Z-0[123] ' IMPLEMENTATION_PLAN.md` |
 | RV-41 | closed by `bdecc1a` Z-07 | Plan line 172 adds Z-07 (`skill_assignment.md`, Phase 4.2, O-14 its only later modification); `grep -cE '^\| [A-Z]-[0-9]{2} \|' IMPLEMENTATION_PLAN.md` = 91 and `Work units` = 91 |
 
-No new finding (RV-42 onward: none). `613f795` adds Z-07 to both assignment files; counts in this file are 91.
+### Round 5 — Q-01 (diff `613f795..b9e5336`)
+
+| ID | Severity | Rule | Row | Finding and reproducing command | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| RV-42 | S3 | `unambiguous_action`, `RA-08`, `RA-14` | Q-01 | Phase 6 step (4) says generated artifacts are regenerated "in the commit of the unit that caused them", but step (3) already committed each unit; the text does not say whether that means amending or a later commit, and an amend rewrites the SHA stamped in `task_scope.md`. Q-01 should state: the regenerating unit's commit is made after step (4), or a separate `chore` commit. `grep -n 'in the commit of the unit that caused them' workflows/pipeline_workflow.md` | closed by the Q-01 commit: step (3) regenerates before each unit commit, amend PROHIBITED (`RA-08`) |
+
+No other finding against Q-01: one structural subject (`jurisdictional_lock`; the guide is a generated companion); no commit on `main` (`RA-12`); atomic per-unit commits (`RA-08`); `make verify` and the commit are separate steps (`RA-13`); the `KI-059-16` base check is superseded by the prohibition of `isolation: "worktree"` (`KI-060-04`). Q-01 is `Depends on` O-12; M-12 now `Depends on` Q-01; Wave A rows follow by table barrier. Q-01 is `modify/doc` 3753; the A-02 segment is 238214 (margin 4234). Counts in this file are 92.
 
 No new finding against the size of O-12: its `Model`/`Effort` are the `doc_orchestrator` map entry, and no Work row is assigned to a `mechanical` profile.
 
