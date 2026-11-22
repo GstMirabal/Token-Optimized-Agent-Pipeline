@@ -2,7 +2,7 @@
 
 **Canonical path**: `docs/sprints/060-core-pipeline/IMPLEMENTATION_PLAN.md`
 **Branch**: `ai-sprint/060` · **Base**: `main` at `a6bddaa` (más `fb64486` y `0e08ee1` de `deploy-notes/059`)
-**Status**: `DRAFT` (pending Phase 5)
+**Status**: `APPROVED` (Phase 5, 2026-11-22)
 
 > Authored at Phase 1 (Planning) by `principal_agent`, extracted to this path at
 > Phase 3, and **committed before Phase 5 approves it**: `agents.md §2 triple_lock`
@@ -320,9 +320,9 @@ broker parcial.
 
 | Field | Value |
 | :--- | :--- |
-| **Approved by** | {{HUMAN}} |
-| **Date** | {{ISO_DATE}} |
-| **Plan commit at approval** | `{{COMMIT_SHA}}` |
+| **Approved by** | GstMirabal (human, attended chat) |
+| **Date** | 2026-11-22 |
+| **Plan commit at approval** | `2d8f1e8` |
 | **Remaining locks** | Active Sprint · QA + Tester verdicts · Human OK at close |
 
 *Phase 5 is a single attended human authorization. It MUST NOT be wrapped inside an
