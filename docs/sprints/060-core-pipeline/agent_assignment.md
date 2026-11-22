@@ -19,7 +19,7 @@ Mode: **claude-code**, `delegation_mode: native` — the
 Values: `host:.claude/agents/` (default), `profile:<path>`, `nucleus:PR`.
 Units that do not create a profile use `N/A`.
 
-No agent profile is authored in Phase 4.1: all 90 Work rows are staffed from the 14 existing profiles in `agents/`, and forging a profile is decided after O-09 records its evidence, by this file and `skill_assignment.md` under D17 (`## Candidates`, RV-20). Every `Destination` is `N/A`. The `fix` operations of the plan (B-01, G-01, G-02) are recorded as `modify`; the `rename` operations of I-01…I-09 (`git mv`) are recorded as `modify` with the pre-rename path as Target.
+No agent profile is authored in Phase 4.1: all 91 Work rows are staffed from the 14 existing profiles in `agents/`, and forging a profile is decided after O-09 records its evidence, by this file and `skill_assignment.md` under D17 (`## Candidates`, RV-20). Every `Destination` is `N/A`. The `fix` operations of the plan (B-01, G-01, G-02) are recorded as `modify`; the `rename` operations of I-01…I-09 (`git mv`) are recorded as `modify` with the pre-rename path as Target.
 
 ---
 
@@ -209,6 +209,7 @@ New names (D10): I-01 `GLOBAL_TOPOLOGY_MAP.md`; I-02 `TOPOLOGY_MAP.md`; I-03 `DO
 | Z-01 | `docs/sprints/060-core-pipeline/SPRINT_LOG.md` | create | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
 | Z-02 | `docs/sprints/060-core-pipeline/task_scope.md` | create | sequential | `rule_validator` | N/A | `agents/rule_validator.md` |
 | Z-03 | `docs/sprints/060-core-pipeline/agent_assignment.md` | create | sequential | `agent_orchestrator` | N/A | `agents/agent_orchestrator.md` |
+| Z-07 | `docs/sprints/060-core-pipeline/skill_assignment.md` | create | sequential | `skill_architect` | N/A | `agents/skill_architect.md` |
 | Z-05 | `CHANGELOG.md` | modify | sequential | `doc_orchestrator` | N/A | `agents/doc_orchestrator.md` |
 | Z-06 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify | sequential | `orchestrator` | N/A | `agents/orchestrator.md` |
 
