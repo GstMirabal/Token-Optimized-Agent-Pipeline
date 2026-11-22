@@ -1,13 +1,13 @@
 # Task Scope — Sprint 060 (core-pipeline)
 
-Source: `docs/sprints/060-core-pipeline/IMPLEMENTATION_PLAN.md` (`## Work` 88 rows, `## Design` D1-D17, `## Mechanisms`, `## Abort criterion`), HEAD `2aa9a32`. Row count reproduces with `grep -cE '^\| [A-Z]-[0-9]{2} \|' docs/sprints/060-core-pipeline/IMPLEMENTATION_PLAN.md` = 88, and this file carries the same 88 ids (Z-04 was deleted by plan decision D15; O-12, P-01, M-17, M-18 were added by `241fc29`).
+Source: `docs/sprints/060-core-pipeline/IMPLEMENTATION_PLAN.md` (`## Work` 90 rows, `## Design` D1-D17, `## Mechanisms`, `## Abort criterion`), HEAD `e8d83a2`. Row count reproduces with `grep -cE '^\| [A-Z]-[0-9]{2} \|' docs/sprints/060-core-pipeline/IMPLEMENTATION_PLAN.md` = 90, and this file carries the same 90 ids (Z-04 was deleted by plan decision D15; O-12, P-01, M-17, M-18 were added by `241fc29`; O-13, O-14 by `9ae34dd`, which also moved M-18 before M-05 and M-16).
 Staffing authority: `agent_assignment.md` (its Assignee column overrides the plan's `Assignee (proposed)`; the overwrites A-10, A-12, B-02, D-04, H-01 and J-01 are in its "Disagreements with the plan" and are used verbatim here; the O-09 overwrite was adopted by the plan in `241fc29` and is no longer a disagreement). `skill_assignment.md` was read: it assigns no skill that adds a Work row; its `## Candidates` decisions are audited below (RV-22, RV-23).
 Phase 4.3 of `workflows/pipeline_workflow.md`. Enforced by `scripts/check_task_scope.py`.
 Mode: `claude-code`, `delegation_mode: native`. Sprint id 60 >= `MODEL_FROM_SPRINT` (28) and >= `COST_FROM_SPRINT` (60), so Model, Effort, `Est. cost` and `Suspend after` are all required.
 
 ## Tier transcription
 
-Model and Effort are transcribed from each assignee's `agents/<role>.md` frontmatter (`model:`, `tier:`) and the `claude_code` column of `config/model_tiers.json` (`tiers.author.claude_code` = `sonnet` / `medium`). No tier is invented and no dated model ID is written. `session_tool` is `claude-code`, so `make cursor-tiers` does not apply. Waves N and O add no assignee: every N and O row is staffed by `doc_orchestrator`, `implementer_agent` or `rule_validator`, all `author` tier, so the five-row map below covers all 88 rows (new rows: O-12 `doc_orchestrator`, M-17 `doc_orchestrator`, P-01 `implementer_agent`, M-18 `implementer_agent`).
+Model and Effort are transcribed from each assignee's `agents/<role>.md` frontmatter (`model:`, `tier:`) and the `claude_code` column of `config/model_tiers.json` (`tiers.author.claude_code` = `sonnet` / `medium`). No tier is invented and no dated model ID is written. `session_tool` is `claude-code`, so `make cursor-tiers` does not apply. Waves N and O add no assignee: every N and O row is staffed by `doc_orchestrator`, `implementer_agent` or `rule_validator`, all `author` tier, except that O-14 adds `skill_architect` (`agents/skill_architect.md` frontmatter `model: sonnet`, `tier: author`), so the six-row map below covers all 90 rows (new rows: O-12 `doc_orchestrator`, M-17 `doc_orchestrator`, P-01 `implementer_agent`, M-18 `implementer_agent`, O-13 `agent_orchestrator`, O-14 `skill_architect`).
 
 | Assignee | model | tier | effort |
 | :--- | :--- | :--- | :--- |
@@ -16,6 +16,7 @@ Model and Effort are transcribed from each assignee's `agents/<role>.md` frontma
 | `rule_validator` | sonnet | author | medium |
 | `orchestrator` | sonnet | author | medium |
 | `agent_orchestrator` | sonnet | author | medium |
+| `skill_architect` | sonnet | author | medium |
 
 Declared escalations: none. No Work row is assigned to a `mechanical` profile (`agent_assignment.md` moved A-10, D-04 and H-01 from `devops_agent`, and B-02, J-01 and O-09 from `token_economy_agent`, to `implementer_agent`), so the mechanical-at-high-risk check does not apply. The high-risk rows (A-03, A-04, A-10, A-15, K-01, N-04, M-01, M-03, M-04, M-16, O-09, F-01, H-01) stay on the `author` tier: the adversarial check on them is the Phase 7 gate (`tier: gate`). No `token_economy_agent` verdict on tiers was produced for this sprint, so none is transcribed.
 
@@ -30,21 +31,21 @@ Declared escalations: none. No Work row is assigned to a `mechanical` profile (`
 | B-02 | 147284 | End of the model-detector wave |
 | N-03 | 190353 | The human applies `install.py` and opens a new session before N-04 measures (D16); N-04 would reach 305707 |
 | N-04 | 115354 | M-02 would reach 255043 (N-04, L-04, O-11, M-01, M-02) |
-| M-04 | 169907 | L-04, O-11, M-01..M-04. The human installs and registers the graph MCP server at user scope (D2, D14) before consumers use it (but see RV-35: the installer step is M-18, which runs later) |
-| M-18 | 235725 | M-05..M-18 (M-16 no longer closes the segment: M-17 and M-18 follow it); O-01 would reach 351079 |
+| M-18 | 180008 | L-04, O-11, M-01..M-04, M-18. The human registers the graph MCP server at user scope (D2, D14) after M-18 installs it and before M-16 (RV-35 closed); M-05 would reach 190109 |
+| M-17 | 225624 | M-05..M-17 (M-05..M-15, M-16, M-17); O-01 would reach 340978 |
 | O-08 | 170221 | O-01..O-08; continuing to L-05 would reach 343104 |
 | L-06 | 177496 | O-10, L-01..L-03, L-05, L-06; end of the advisory wave; D-04 would reach 339507 if the segment continued |
 | F-02 | 240340 | C-01..F-02 including P-01; margin 2108 to the ceiling; O-02 would reach 248207 |
 | I-09 | 165704 | O-02, G-01, G-02, H-01, H-02, I-01..I-09; J-01 would reach 281058 |
 | J-02 | 230708 | O-09 would reach 346062 |
-| O-09 | 115354 | O-09 alone; Z-01 and Z-02 after it would reach 346062 |
-| Z-02 | 230708 | Z-03 would reach 346062 |
+| O-09 | 115354 | O-09 alone; O-13, O-14, Z-01 and Z-02 after it would reach 236304 and Z-03 351658, so the segment closes at Z-02 below |
+| Z-02 | 236304 | O-13, O-14, Z-01, Z-02 (2798 + 2798 + 115354 + 115354); Z-03 would reach 351658 |
 
 The last segment (Z-03, Z-05, Z-06, A-15) sums to 124703. The bound is on estimates (soft). A-10, H-01, N-04, M-16 and O-09 are the largest uncertainty (`create/doc` `max_fresh` 152885); if one measures above 242448 alone the suspension must come earlier. The F-02 segment has the least margin (2108): a single overrun of `modify/script` there moves the suspension to E-01.
 
 ## Work
 
-Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from the plan. `Depends on` records order only where one exists in the plan or where this audit found one (see "Same-file ordering"). Rows Z-01 and Z-03 already exist on disk (`4cb4570`, `024598e`) and Z-02 is this file; they are `pending` here because the Phase 4.3 contract sets `pending` on every unit and the closing commit stamps them. Tables follow the plan's execution-order line (plan line 80, `241fc29`): O-12, A, B, K, N, L-04 and O-11, M, O (without O-02, O-09, O-11, O-12), L (without L-04), C, D, E and P-01, F with O-02, G, H, I, J, O-09, Z. A table is a barrier for `check_task_scope.py` and a dependency on a later table is unschedulable (RV-26, closed by `241fc29` plan line 80). O-11 no longer lists O-01 in `Depends on`: the plan runs O-11 before Wave O, so the ADR that records it (O-01) is written after the egress change, as ADR-0026 (L-05) follows L-04. M-14 returns to Wave M after M-13. A-15 is the last table: it runs at the deployment, after Phase 8 (RV-7).
+Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from the plan. `Depends on` records order only where one exists in the plan or where this audit found one (see "Same-file ordering"). Rows Z-01 and Z-03 already exist on disk (`4cb4570`, `024598e`) and Z-02 is this file; they are `pending` here because the Phase 4.3 contract sets `pending` on every unit and the closing commit stamps them. Tables follow the plan's execution-order line (plan line 80, `241fc29`): O-12, A, B, K, N, L-04 and O-11, M, O (without O-02, O-09, O-11, O-12), L (without L-04), C, D, E and P-01, F with O-02, G, H, I, J, O-09, O-13, O-14, Z; within Wave M the order is M-01..M-04, M-18, M-05..M-17 (`9ae34dd`, RV-35). A table is a barrier for `check_task_scope.py` and a dependency on a later table is unschedulable (RV-26, closed by `241fc29` plan line 80). O-11 no longer lists O-01 in `Depends on`: the plan runs O-11 before Wave O, so the ADR that records it (O-01) is written after the egress change, as ADR-0026 (L-05) follows L-04. M-14 returns to Wave M after M-13. A-15 is the last table: it runs at the deployment, after Phase 8 (RV-7).
 
 ### Wave O-12 — Implementer write scope (first unit)
 
@@ -107,8 +108,9 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | M-01 | `scripts/graph_battery.py` | create: fixed structural query battery against Python AST truth; exit `2` on a differing query or inverted edge; companion `tests/test_graph_battery.py` | high | `implementer_agent` | sonnet | medium | 15109 | | - | ⏳ pending |
 | M-02 | `docs/audits/GRAPH_USAGE_AUDIT_REPORT-060.md` | create: baseline with 0.8.30 and after K-01, real consumers, rebuild cost, graph queries versus grep in Phases 1-4 | medium | `implementer_agent` | sonnet | medium | 115354 | | M-01, K-01 | ⏳ pending |
 | M-03 | `scripts/graph_query.py` | create: structural queries on `graph.json` with edge-direction correction and transitive closure; companion `tests/test_graph_query.py` | high | `implementer_agent` | sonnet | medium | 15109 | | M-01 | ⏳ pending |
-| M-04 | `scripts/graph_mcp.py` | create: read-only stdio MCP server exposing M-03; user-scope install outside writable trees; companion `tests/test_graph_mcp.py` | high | `implementer_agent` | sonnet | medium | 15109 | yes | M-03, A-04 | ⏳ pending |
-| M-05 | `claude/mcp.json` | modify: removes the project-scope `graphify` entry in favour of the M-04 user registration | medium | `implementer_agent` | sonnet | medium | 10101 | | M-04 | ⏳ pending |
+| M-04 | `scripts/graph_mcp.py` | create: read-only stdio MCP server exposing M-03; user-scope install outside writable trees; companion `tests/test_graph_mcp.py` | high | `implementer_agent` | sonnet | medium | 15109 | | M-03, A-04 | ⏳ pending |
+| M-18 | `scripts/install_broker.py` | modify: installs `scripts/graph_mcp.py` from a signed tag with the D5 verification; companion `tests/test_install_broker.py`; after A-04 and M-04, before M-05 and M-16: the human's user-scope registration follows M-18 and precedes M-16 (RV-28, RV-35) | medium | `implementer_agent` | sonnet | medium | 10101 | yes | A-04, M-04 | ⏳ pending |
+| M-05 | `claude/mcp.json` | modify: removes the project-scope `graphify` entry in favour of the M-04 user registration | medium | `implementer_agent` | sonnet | medium | 10101 | | M-04, M-18 | ⏳ pending |
 | M-06 | `rules/graphify.md` | modify: structural-first protocol (symbol or file through M-03/M-04); natural-language CLI mode not used | medium | `doc_orchestrator` | sonnet | medium | 7867 | | K-01, M-03, M-04 | ⏳ pending |
 | M-07 | `agents/principal_agent.md` | modify: Phase 1 impact by `impact`/`dependents` before drafting Work | low | `doc_orchestrator` | sonnet | medium | 2798 | | M-06 | ⏳ pending |
 | M-08 | `agents/rule_validator.md` | modify: Phase 4.3 dependent files by `dependents` instead of Grep | low | `doc_orchestrator` | sonnet | medium | 2798 | | M-06 | ⏳ pending |
@@ -119,9 +121,8 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | M-13 | `hooks/graph_usage_log.py` | create: `PostToolUse` hook logging graph queries against `Grep`, `Glob` and search by `Bash`; companion `tests/test_graph_usage_log.py` | medium | `implementer_agent` | sonnet | medium | 33574 | | - | ⏳ pending |
 | M-14 | `claude/settings.hooks.json` | modify: registers the M-13 hook; after A-05, N-02, L-04 and O-11 | low | `implementer_agent` | sonnet | medium | 4613 | | M-13, O-11 | ⏳ pending |
 | M-15 | `scripts/check_graph_usage.py` | create: exit `2` if a research phase searched by text before querying the graph; named invoker `workflows/close_workflow.md` (finding RV-19); companion `tests/test_check_graph_usage.py` | medium | `implementer_agent` | sonnet | medium | 33574 | | M-13 | ⏳ pending |
-| M-16 | `docs/sprints/060-core-pipeline/GRAPH_AB_MEASUREMENT.md` | create: A/B with and without the graph on the same research tasks; `fresh` tokens by `session_cost.py` (finding RV-24 on who runs it); threshold >= 30 % | high | `implementer_agent` | sonnet | medium | 115354 | | M-04, N-04 | ⏳ pending |
-| M-17 | `workflows/close_workflow.md` | modify: step that runs `scripts/check_graph_usage.py`, the invoker of M-15 (RV-19); the commit includes the regenerated `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` (RV-29) | low | `doc_orchestrator` | sonnet | medium | 2798 | | M-15 | ⏳ pending |
-| M-18 | `scripts/install_broker.py` | modify: installs `scripts/graph_mcp.py` from a signed tag with the D5 verification; companion `tests/test_install_broker.py`; after A-04 and M-04 (RV-28; ordering defect RV-35) | medium | `implementer_agent` | sonnet | medium | 10101 | yes | A-04, M-04 | ⏳ pending |
+| M-16 | `docs/sprints/060-core-pipeline/GRAPH_AB_MEASUREMENT.md` | create: A/B with and without the graph on the same research tasks; `fresh` tokens by `session_cost.py` (finding RV-24 on who runs it); threshold >= 30 %; after M-18 and the human's user-scope registration of the graph server (RV-35) | high | `implementer_agent` | sonnet | medium | 115354 | | M-04, M-18, N-04 | ⏳ pending |
+| M-17 | `workflows/close_workflow.md` | modify: step that runs `scripts/check_graph_usage.py`, the invoker of M-15 (RV-19); the commit includes the regenerated `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` (RV-29) | low | `doc_orchestrator` | sonnet | medium | 2798 | yes | M-15 | ⏳ pending |
 
 ### Wave O — Forge trigger and capability evaluation (D17)
 
@@ -218,13 +219,25 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | O-09 | `docs/audits/CAPABILITY_EVALUATION_REPORT-060.md` | create: usage (O-08), overlaps and gaps of the 14 profiles and 34 skills; D17 candidates with an A/B by `session_cost.py` on the executed units A-10, N-04, H-01 (A-15 runs at the deployment and is out, RV-25); records evidence only, the `forge`/`reuse` decision is written by `agent_orchestrator` and `skill_architect` (RV-20; but see RV-37); after O-12 and H-01 | high | `implementer_agent` | sonnet | medium | 115354 | yes | O-07, O-08, M-03, O-12, H-01 | ⏳ pending |
 
+### Wave O-13 — Agent candidate decisions
+
+| # | File | Operation | Risk | Assignee | Model | Effort | Est. cost | Suspend after | Depends on | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| O-13 | `docs/sprints/060-core-pipeline/agent_assignment.md` | modify: `forge`/`reuse` decision per agent candidate from the O-09 evidence; a `forge` candidate enters as a re-plan row `O-NN` with its `Destination`; the `claude/settings.hooks.json` decision is reconciled with O-14 (RV-37, RV-39) | low | `agent_orchestrator` | sonnet | medium | 2798 | | O-09 | ⏳ pending |
+
+### Wave O-14 — Skill candidate decisions
+
+| # | File | Operation | Risk | Assignee | Model | Effort | Est. cost | Suspend after | Depends on | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| O-14 | `docs/sprints/060-core-pipeline/skill_assignment.md` | modify: `forge`/`none` decision per skill candidate from the O-09 evidence; a `forge` candidate enters as a re-plan row `O-NN` with its `Destination`; reconciled with O-13 (RV-37, RV-39) | low | `skill_architect` | sonnet | medium | 2798 | | O-09, O-13 | ⏳ pending |
+
 ### Wave Z — Pipeline and closeout artifacts
 
 | # | File | Operation | Risk | Assignee | Model | Effort | Est. cost | Suspend after | Depends on | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | Z-01 | `docs/sprints/060-core-pipeline/SPRINT_LOG.md` | create: Phase 3 | low | `orchestrator` | sonnet | medium | 115354 | | - | ⏳ pending |
 | Z-02 | `docs/sprints/060-core-pipeline/task_scope.md` | create: Phase 4.3 | low | `rule_validator` | sonnet | medium | 115354 | yes | - | ⏳ pending |
-| Z-03 | `docs/sprints/060-core-pipeline/agent_assignment.md` | create: Phase 4.1 | low | `agent_orchestrator` | sonnet | medium | 115354 | | - | ⏳ pending |
+| Z-03 | `docs/sprints/060-core-pipeline/agent_assignment.md` | create: Phase 4.1 | low | `agent_orchestrator` | sonnet | medium | 115354 | | O-13 | ⏳ pending |
 | Z-05 | `CHANGELOG.md` | modify: `[Unreleased]` | low | `doc_orchestrator` | sonnet | medium | 2798 | | - | ⏳ pending |
 | Z-06 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify: KI routed to closed | low | `orchestrator` | sonnet | medium | 2798 | | - | ⏳ pending |
 
@@ -236,7 +249,7 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 
 ## Same-file ordering (`jurisdictional_lock`, `no_interference`)
 
-Eighty-eight rows; every `File` cell is distinct except the nine files below. No two rows are `in progress` at once: the plan executes sequentially (`agent_assignment.md` Mode column), and each chain is ordered by `Depends on`.
+Ninety rows; every `File` cell is distinct except the ten files below. No two rows are `in progress` at once: the plan executes sequentially (`agent_assignment.md` Mode column), and each chain is ordered by `Depends on`.
 
 | File | Rows in order | Order recorded |
 | :--- | :--- | :--- |
@@ -246,6 +259,7 @@ Eighty-eight rows; every `File` cell is distinct except the nine files below. No
 | `rules/skills_and_integrations.md` | F-02, O-02 | O-02 `Depends on` F-02; the plan's order line puts O-02 after F, so O-02 sits in the Wave F table |
 | `agents/implementer_agent.md` | O-12, M-10 | M-10 `Depends on` O-12; O-12 is the first unit of the sprint (RV-20, RV-31); `ADR-0009` is a companion of O-12 |
 | `scripts/install_broker.py` | A-04, M-18 | M-18 `Depends on` A-04 and M-04; companion `tests/test_install_broker.py` reached by both in that order (RV-28) |
+| `docs/sprints/060-core-pipeline/agent_assignment.md` | O-13, Z-03 | Z-03 `Depends on` O-13; the file already exists (`4cb4570`), so Z-03 may only stamp status, never re-create it (RV-40) |
 | `workflows/deployment_workflow.md` | A-11, C-01 | C-01 `Depends on` A-11; C-01 rewrites the merge/seal sequence A-11 wrote |
 | `rules/project_topology.md` | A-13, H-02 | H-02 `Depends on` A-13 and H-01; disjoint rows |
 | `docs/sprints/060-core-pipeline/BROKER_MEASUREMENT.md` | A-10, A-15 | A-15 `Depends on` A-10 and is the last table: M5 is written at the deployment |
@@ -265,6 +279,7 @@ Companion edits that cross rows (not structural subjects): `docs/guides/WORKFLOW
 | P-01 | `tests/test_check_task_scope.py` (companion), importers by `Grep`: `scripts/loop_guard.py`, `scripts/unit_cost.py`, `scripts/check_sprint_refs.py`, `scripts/check_gate_log.py`, `scripts/_current_sprint.py`, `scripts/_md_table.py`, `scripts/model_ledger.py`, `scripts/audit_cursor_era.py`; invoker `workflows/pipeline_workflow.md` Phase 4.3 and `workflows/close_workflow.md` |
 | M-17 | `scripts/check_graph_usage.py` (M-15, the invoker's target), `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` (generated, `scripts/map_workflows.py --check` in `make verify`), `scripts/session_state.py`, `tests/test_session_protocol.py` |
 | M-18 | `scripts/install_broker.py` (A-04), `tests/test_install_broker.py`, `scripts/graph_mcp.py` (M-04), `docs/guides/GITHUB_BROKER_SETUP_GUIDE.md` (A-09 registration step) |
+| O-13, O-14 | `scripts/check_forge_ladder.py` and `tests/test_check_forge_ladder.py` (O-07: a `Candidates` table without evidence or decision exits `2`; both edits must keep it passing), `docs/standards/templates/AGENT_ASSIGNMENT_TEMPLATE.md`, `SKILL_ASSIGNMENT_TEMPLATE.md` (O-05, O-06), `config/template_gates.json:75`, `scripts/capability_usage.py` (O-08 reads both files) |
 | A-11, C-01, M-12, O-10, A-14 | `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` (generated; `make verify` runs `scripts/map_workflows.py --check`, Makefile:85); `scripts/session_state.py`, `scripts/check_role_artifact.py`, `tests/test_session_state.py`, `tests/test_session_protocol.py`, `workflows/close_workflow.md` |
 | B-01, B-02 | `scripts/_root.py:55`, `scripts/_md_table.py:14`, `Makefile:84`, `tests/test_detect_new_models.py`; `config/model_tiers.json` is read by `scripts/audit_cursor_models.py` and the profile/tier check in `make verify` |
 | K-01 | `scripts/graph_update.py`, `rules/graphify.md:18` ("graphifyy 0.8.30"), `rules/project_topology.md:38,40`, `tests/test_mcp_template.py`, `Makefile:32-44` |
@@ -295,7 +310,7 @@ Companion edits that cross rows (not structural subjects): `docs/guides/WORKFLOW
 | RV-10 | A-01 and L-05 rows add the `Superseded by` / `Amended by` line; N-01 and O-01 repeated the defect (RV-27), closed by `241fc29` N-01, O-01 | resolved |
 | RV-11 | A-12 row words the broker as MCP tools with `Bash` only and cites `ADR-0009`; F-01's row (`RA-09`/`§6 devops_agent` "con el broker") has no such wording | resolved for A-12, open for F-01 (S3) |
 | RV-12 | D15 deletes Z-04; `ls docs/walkthroughs` stays absent | resolved |
-| RV-13 | `Work units` 88 reproduces and `agent_assignment.md` says 88; the Cost row "Subagents dispatched" = "45 + gates" (plan line 216) contradicts "una dispatch por unidad" with 88 units; `241fc29` edited the Cost row (Work units, Prior session ratio) and left it | open (S3) |
+| RV-13 | `Work units` 90 reproduces and `agent_assignment.md` says 90; the Cost row "Subagents dispatched" = "45 + gates" (plan line 218) contradicts "una dispatch por unidad" with 90 units; `241fc29` edited the Cost row (Work units, Prior session ratio) and left it | open (S3) |
 | RV-14 | Verification table carries `grep -c excludedCommands claude/settings.hooks.json` -> 0 with a positive control; rows A-05 and L-04 cite no check (the table does) | resolved |
 | RV-15 | A-06 and D-02 rows: the agent writes only what the human pastes | resolved |
 
@@ -360,10 +375,28 @@ RV-32, RV-33 and RV-34 are unchanged by the diff and stay open (S3).
 | RV-38 | O-04 | `RA-14` | `agents/git_sync_agent.md:4` declares `WebFetch`, which `permissions.deny` removes; O-04 fixes only `skill_architect`. `grep -n WebFetch agents/git_sync_agent.md claude/settings.hooks.json` | One row dropping `WebFetch` from `git_sync_agent` `tools:` or a stated reason it stays | S3 |
 | RV-39 | `agent_assignment.md`, `skill_assignment.md` C6 | `RA-14` | The same subject `claude/settings.hooks.json` is `forge-pending-O-09` as an agent candidate and `none` as a skill candidate; both can be correct but no sentence reconciles them. `grep -n 'settings.hooks.json' agent_assignment.md skill_assignment.md` | One sentence in each file naming the other's decision | S3 |
 
+### Round 3 — status of RV-35, RV-37, RV-39 (diff `225d85d..e8d83a2`)
+
+Statuses read from the plan at `e8d83a2` (rows 123, 121, 136, 137, order line 80) and from `agent_assignment.md` lines 113-116 and `skill_assignment.md` lines 117-118, 173.
+
+| ID | Status | Evidence |
+| :--- | :--- | :--- |
+| RV-35 | closed by `9ae34dd` M-18, M-16 | Plan row 123 puts M-18 before M-05 and M-16 and the human's registration between M-18 and M-16; M-16 row (121) says it follows both. This file moved M-18 after M-04, suspension from M-04 to M-18 (segment 180008) and added M-18 to `Depends on` of M-05 and M-16; M-17 now carries the second `Suspend after` (225624) |
+| RV-37 | closed by `9ae34dd` O-13, O-14 | One row per decision file after O-09, each with the re-plan row rule for `forge` (plan line 175). Residual conflict with `Z-03`: RV-40 (S2) |
+| RV-39 | closed by `e8d83a2` | `agent_assignment.md` line 116 and `skill_assignment.md` line 173 each name the other file's decision as reconciled at O-13/O-14 on `claude/settings.hooks.json` |
+| RV-34 | open (S3) | Its proposed fix named a row `O-13`, an id now taken by `9ae34dd`; read it as a new unit with a new id |
+
+### Round 3 — new findings (RV-40 onward)
+
+| ID | Unit | Rule | Finding and reproducing command | Proposed fix | Severity |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| RV-40 | O-13, Z-03 | `jurisdictional_lock`, `RA-14` | Z-03 claims `agent_assignment.md` as `create`, and it runs after O-13, which modifies the same file; a re-run of `create` discards the O-13 decisions. The file already exists since Phase 4.1. `grep -nE '^\| (O-13\|Z-03) ' IMPLEMENTATION_PLAN.md` gives lines 136 and 171, Z-03 `create`, no dependency | Change Z-03 to `modify: stamp status only` with `Depends on` O-13 (done in this file), and amend the plan row | S2 |
+| RV-41 | O-14 | `jurisdictional_lock`, artifact ownership | `skill_assignment.md` is modified by O-14 but no Work row creates it (Phase 4.2 artifact); O-13 and O-14 edit Phase 4.1/4.2 artifacts after the Phase 5 approval, so the staffing the human approved changes. Owners match (`agent_orchestrator`, `skill_architect`), so no ownership conflict. `grep -nE '^\| [A-Z]-[0-9]{2} \|.*skill_assignment' IMPLEMENTATION_PLAN.md` returns O-14 only | State in O-13/O-14 that a changed decision is re-submitted at the Approval Gate; or no finding if the plan's re-plan rule already covers it | S3 |
+
 No new finding against the size of O-12: its `Model`/`Effort` are the `doc_orchestrator` map entry, and no Work row is assigned to a `mechanical` profile.
 
 No finding against `RA-16` for `check_dependency_advisories.py` (invokers rows L-02, L-03), `detect_new_models.py`, `check_gate_log.py`. O-09's change of assignee to `implementer_agent` conflicts with `write_scope` and the decision jurisdiction (RV-20); it does not conflict with `code_unit_assignee` (that rule covers `scripts/`, `hooks/`, `tests/`). No finding against `RA-09` for A-09, nor for F-01, F-02, J-02 (`rule_validator` holds `Write`/`Edit`).
 
 ## Verification record
 
-`python3 scripts/check_task_scope.py --sprint-dir docs/sprints/060-core-pipeline`, `python3 scripts/check_sprint_refs.py --current-sprint` and `python3 skills/token-saver-auditor/scripts/audit_plan.py docs/sprints/060-core-pipeline/IMPLEMENTATION_PLAN.md` could not be run in this dispatch (no shell tool). Segment sums above were computed by hand from `config/unit_cost_estimates.json`; the maximum is 240340 (segment F-02, margin 2108) against a ceiling of 242448. Round 2 changed the table order (O-12 first; L-04 and O-11 before Wave M; M-14 in Wave M; O-09 after J), so `check_task_scope.py --batches` must be re-run by the caller.
+`python3 scripts/check_task_scope.py --sprint-dir docs/sprints/060-core-pipeline`, `python3 scripts/check_sprint_refs.py --current-sprint` and `python3 skills/token-saver-auditor/scripts/audit_plan.py docs/sprints/060-core-pipeline/IMPLEMENTATION_PLAN.md` could not be run in this dispatch (no shell tool). Segment sums above were computed by hand from `config/unit_cost_estimates.json`; the maximum is 240340 (segment F-02, margin 2108) against a ceiling of 242448; round 3 segments are M-18 180008, M-17 225624 and Z-02 236304. Round 2 changed the table order (O-12 first; L-04 and O-11 before Wave M; M-14 in Wave M; O-09 after J), so `check_task_scope.py --batches` must be re-run by the caller.

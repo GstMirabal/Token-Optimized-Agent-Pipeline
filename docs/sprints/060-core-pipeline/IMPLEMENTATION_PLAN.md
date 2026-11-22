@@ -166,9 +166,10 @@ Orden de ejecución: O-12 (alcance de escritura de `implementer_agent`) → Wave
 | I-09 | `docs/plans/027-autonomy-posture-DRAFT.md` | rename → `AUTONOMY_POSTURE_PLAN.md` (R9); `git mv` + grep `RA-14` de la ruta vieja → 0 aciertos fuera de registros sellados (D10) | low | `doc_orchestrator` |
 | J-01 | `docs/audits/PROMPT_AUDIT_REPORT-060.md` | create — medición y hallazgos (D11) | medium | `token_economy_agent` |
 | J-02 | `docs/audits/PROSE_MOTIVES_AUDIT_REPORT-060.md` | create — motivos en prosa en documentos normativos (D11) | medium | `rule_validator` |
-| Z-01 | `docs/sprints/060-core-pipeline/SPRINT_LOG.md` | create — Phase 3 | low | `orchestrator` |
-| Z-02 | `docs/sprints/060-core-pipeline/task_scope.md` | create — Phase 4.2 | low | `rule_validator` |
-| Z-03 | `docs/sprints/060-core-pipeline/agent_assignment.md` | create — Phase 4.1 | low | `agent_orchestrator` |
+| Z-01 | `docs/sprints/060-core-pipeline/SPRINT_LOG.md` | create — Phase 3; creado antes de Phase 5 (`4cb4570`) y no se re-ejecuta en Phase 6, donde solo se añaden filas (RV-40) | low | `orchestrator` |
+| Z-02 | `docs/sprints/060-core-pipeline/task_scope.md` | create — Phase 4.3; creado antes de Phase 5 y no se re-ejecuta en Phase 6 (RV-40) | low | `rule_validator` |
+| Z-03 | `docs/sprints/060-core-pipeline/agent_assignment.md` | create — Phase 4.1; creado antes de Phase 5 y no se re-ejecuta en Phase 6; O-13 es su única modificación posterior (RV-40) | low | `agent_orchestrator` |
+| Z-07 | `docs/sprints/060-core-pipeline/skill_assignment.md` | create — Phase 4.2; creado antes de Phase 5 y no se re-ejecuta en Phase 6; O-14 es su única modificación posterior (RV-41) | low | `skill_architect` |
 | Z-05 | `CHANGELOG.md` | modify — `[Unreleased]` | low | `doc_orchestrator` |
 | Z-06 | `docs/roadmaps/core/pipeline/021-030-program-queue.md` | modify — KI routed → closed | low | `orchestrator` |
 
@@ -214,7 +215,7 @@ Los hallazgos de J-01 y J-02 entran como filas nuevas `J-NN` de una línea al ce
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 90 | Count of rows in Work tables |
+| Work units | 91 | Count of rows in Work tables |
 | Subagents dispatched | 45 + gates | una dispatch por unidad; gates QA y Tester por ronda |
 | Prior session ratio | n/a en Phase 1 (`~/.claude/projects` en `denyRead`); medible por el agente tras N-04 (D16, RV-24) | `python3 scripts/session_cost.py --from-anchor --json` |
 
