@@ -82,7 +82,7 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | A-01 | `docs/decisions/ADR-0025-github-app-broker.md` | create: D1-D6; replaces `ADR-0019` D2 and D6; same commit adds `Superseded by ADR-0025` to the D2 and D6 rows of `ADR-0019` | medium | `doc_orchestrator` | sonnet | medium | 115354 | | - | ✅ 1dac062 |
 | A-02 | `docs/architecture/GITHUB_BROKER_BLUEPRINT.md` | create: from `BLUEPRINT_TEMPLATE.md` | low | `doc_orchestrator` | sonnet | medium | 115354 | yes | A-01 | ✅ 800d483 |
 | A-03 | `scripts/github_broker.py` | create: stdio MCP server with the D4 operations; companion `tests/test_github_broker.py` in the same commit | high | `implementer_agent` | sonnet | medium | 15109 | | A-01 | ✅ 172c145 |
-| A-09 | `docs/guides/GITHUB_BROKER_SETUP_GUIDE.md` | create: human steps (create the App, D4 permissions, install on the nucleus only, keys, `install_broker.py`, `claude mcp add --scope user`; the user-scope registration of the graph server, M-04 and M-18, RV-28); `Depends on` A-11 is a scheduling dependency, not a content one (RV-75: with U-03 in the A-11 batch five units were ready for the four places of `MAX_BATCH`, and A-09 first in row order would have pushed U-02 to batch 2; flagged deviation from the plan row, plan decision needed) | low | `doc_orchestrator` | sonnet | medium | 115354 | | A-03, A-11 | ⏳ pending |
+| A-09 | `docs/guides/GITHUB_BROKER_SETUP_GUIDE.md` | create: human steps (create the App, D4 permissions, install on the nucleus only, keys, `install_broker.py`, `claude mcp add --scope user`; the user-scope registration of the graph server, M-04 and M-18, RV-28); `Depends on` A-11 is a scheduling dependency, not a content one (RV-75: with U-03 in the A-11 batch five units were ready for the four places of `MAX_BATCH`, and A-09 first in row order would have pushed U-02 to batch 2; the plan row now states "después de A-11", closed by `c9a505c`) | low | `doc_orchestrator` | sonnet | medium | 115354 | | A-03, A-11 | ⏳ pending |
 | A-04 | `scripts/install_broker.py` | create: install from a signed tag or a named `main` commit (D5); companion `tests/test_install_broker.py`; its `invoked_by:` is the guide A-09, which exists first | high | `implementer_agent` | sonnet | medium | 15109 | | A-03, A-09 | ⏳ pending |
 | A-05 | `claude/settings.hooks.json` | modify: `denyRead` and `permissions.deny` of D3; check `grep -c excludedCommands` = 0 | medium | `implementer_agent` | sonnet | medium | 10101 | | - | ✅ 2f4bfc9 |
 | A-06 | `config/allowed_signers` | create: public signing key the human pastes; the agent does not generate it | low | `implementer_agent` | sonnet | medium | 4613 | | - | ✅ 59c2d40 |
@@ -711,7 +711,7 @@ New findings:
 
 | ID | Severity | Rule | Row | Finding and reproducing command | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| RV-75 | S2 | `fail_closed_claims`, `RA-14` | plan line 80, U-01..U-03, A-09 | The batch the plan names holds five ready units for four places. In the Wave A table A-09 (`Depends on` A-03, landed) precedes A-11 in row order, so batch 1 is A-09, A-11, U-03, U-01 (`_fill_batch` takes the first four ready rows; `MAX_BATCH` = 4) and U-02 falls to batch 2 with A-04, A-12, A-13. `make verify` at the end of batch 1 then fails: `tests/test_ci_gate.py:849` asserts `"ci_gate.py" in workflow`, and A-11 removes the name from `workflows/deployment_workflow.md`, so the plan's "mismo lote" for U-02 (and its `make verify` exit `0`) is false. Round 13 had exactly four ready units (A-09, A-11, U-01, U-02); U-03 made five. Reproduce: `python3 scripts/check_task_scope.py --current-sprint --batches` with A-09 `Depends on` A-03 only lists batch 1 without U-02; `grep -n 'ci_gate.py" in workflow' tests/test_ci_gate.py` prints line 849. Remedy options for the plan: (a) A-09 `Depends on` A-11 (applied in this file, flagged; batch 1 = A-11, U-03, U-01, U-02; A-09 moves to batch 2, A-04 to batch 3, A-10 to batch 4; segment sums unchanged, the segment cut is by row order); (b) move A-09 below U-02 in the table: A-09 would join the A-14 segment at 274961, past 242448, so it needs a new `Suspend after` and re-cuts the A-08 segment; (c) drop `rules` from U-02's pathspec again and run U-03 later (RV-74 first remedy), which frees a place but not the A-09 pressure if any further unit joins batch 1. The plan must say which; this file keeps (a) until it does | open |
+| RV-75 | S2 | `fail_closed_claims`, `RA-14` | plan line 80, U-01..U-03, A-09 | The batch the plan names holds five ready units for four places. In the Wave A table A-09 (`Depends on` A-03, landed) precedes A-11 in row order, so batch 1 is A-09, A-11, U-03, U-01 (`_fill_batch` takes the first four ready rows; `MAX_BATCH` = 4) and U-02 falls to batch 2 with A-04, A-12, A-13. `make verify` at the end of batch 1 then fails: `tests/test_ci_gate.py:849` asserts `"ci_gate.py" in workflow`, and A-11 removes the name from `workflows/deployment_workflow.md`, so the plan's "mismo lote" for U-02 (and its `make verify` exit `0`) is false. Round 13 had exactly four ready units (A-09, A-11, U-01, U-02); U-03 made five. Reproduce: `python3 scripts/check_task_scope.py --current-sprint --batches` with A-09 `Depends on` A-03 only lists batch 1 without U-02; `grep -n 'ci_gate.py" in workflow' tests/test_ci_gate.py` prints line 849. Remedy options for the plan: (a) A-09 `Depends on` A-11 (applied in this file, flagged; batch 1 = A-11, U-03, U-01, U-02; A-09 moves to batch 2, A-04 to batch 3, A-10 to batch 4; segment sums unchanged, the segment cut is by row order); (b) move A-09 below U-02 in the table: A-09 would join the A-14 segment at 274961, past 242448, so it needs a new `Suspend after` and re-cuts the A-08 segment; (c) drop `rules` from U-02's pathspec again and run U-03 later (RV-74 first remedy), which frees a place but not the A-09 pressure if any further unit joins batch 1. The plan must say which; this file keeps (a) until it does | closed by `c9a505c` (round 15): plan row A-09 now says "después de A-11, para que A-11, U-03, U-01 y U-02 quepan en un lote de cuatro", option (a); the deviation flag is removed from this file |
 
 Checks with no finding:
 
@@ -726,7 +726,28 @@ Batches of the Wave A table (hand computation of `schedule`, pending rows A-09, 
 
 Segments (ceiling 242448): A-14 = 159607 (margin 82841); H-02 = 140522 (margin 101926); T-01 would reach 255876; every other segment unchanged. Maximum 240340 (F-02, margin 2108), unchanged.
 
-New findings: RV-75 (S2). RV-76 is the next free id. Verdict: RV-72, RV-73, RV-74 closed; RV-75 open until the plan decides option (a), (b) or (c).
+New findings: RV-75 (S2). RV-76 is the next free id. Verdict: RV-72, RV-73, RV-74 closed; RV-75 open until the plan decides option (a), (b) or (c). Closed in round 15 by `c9a505c`.
+
+### Round 15 — diff `c9a505c` (A-09 after A-11)
+
+Read: plan line 87 (row A-09) and this file's A-09 row (line 85), Round 14 finding RV-75 and its batch paragraph. The diff is one phrase in one plan row. No shell in this dispatch: `Grep` and `Read` only; the caller's results are taken as given: `check_task_scope.py --current-sprint` exit 0; `--batches` = batch 1 A-11, U-03, U-01, U-02; batch 2 A-09, U-04, A-12, A-13; batch 3 A-04, A-14; batch 4 A-10; `check_sprint_refs.py --current-sprint` OK. These match the hand computation in Round 14.
+
+Round 14 closure:
+
+| ID | Verdict | Evidence |
+| :--- | :--- | :--- |
+| RV-75 | closed by `c9a505c` | The plan took option (a): row A-09 says "después de A-11, para que A-11, U-03, U-01 y U-02 quepan en un lote de cuatro (RV-75)". This file already had A-09 `Depends on` A-03, A-11, so plan and file agree and the `--batches` output has U-02 in batch 1, which is what the plan's "mismo lote" and the `make verify` exit `0` at the end of batch 1 require. The deviation flag on A-09 is removed from this file |
+
+New findings: none. Checks:
+
+| Check | Rows | Result |
+| :--- | :--- | :--- |
+| `unambiguous_action` | A-09 | The phrase names the operation (ordering), the target (A-11) and the done-criterion (four units in one batch, RV-75). No deictic, no unitless magnitude |
+| `jurisdictional_lock` | A-09 | Subject unchanged (`docs/guides/GITHUB_BROKER_SETUP_GUIDE.md`); no other claimant |
+| Segments and costs | A-09 | Unchanged: the dependency changes batches, not row order, so segment sums and the maximum 240340 (F-02, margin 2108) stand |
+| `RA-14` propagation | plan | `Grep` of `A-09` in the plan finds line 87 and the references at lines 213 and 222 and none that places A-09 before A-11 |
+
+New findings: none. RV-76 is the next free id. Verdict: RV-75 closed; round 15 is clean.
 
 ## Verification record
 
