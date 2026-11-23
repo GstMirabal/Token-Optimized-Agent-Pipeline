@@ -1,6 +1,6 @@
 # 📜 ADR-0014: The RA-13 CI gate emits a RECORD, not a block, when branch protection is not inspectable on the repository's plan
 
-**Status**: `Accepted`
+**Status**: `Superseded by ADR-0025 (D4: pr_status and merge_pr replace scripts/ci_gate.py, retired in Sprint 060)`
 **Date**: 2026-09-06
 **Triggers**: 6 (`rules/documentation_standard.md §3.1`) — an availability/reliability boundary: the condition under which the RA-13 gate fails closed versus fails open. Trigger #6 does not auto-escalate individually (`§3.2`), so this ADR is Nygard-format.
 
