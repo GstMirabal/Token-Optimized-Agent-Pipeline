@@ -144,6 +144,8 @@ gh api -X PUT "repos/$R/branches/main/protection" --input - <<'JSON'
 JSON
 ```
 
+The `context` value `ci / Lint and tests` is an example, not a nucleus value. The nucleus requires the three names `audit`, `Analyze (python)` and `CodeQL` (observed 2026-11-24).
+
 Measured state of `main` protection (ADR-0019 D7; `HARNESS_MEASUREMENT.md` rows A10-4 and B11-6):
 
 - **`enforce_admins: true`** (B11-6, `KI-059-24`). The required checks apply to the repository owner as well as to other accounts.
@@ -152,6 +154,16 @@ Measured state of `main` protection (ADR-0019 D7; `HARNESS_MEASUREMENT.md` rows 
 - **Force pushes and deletions: not allowed** (A10-4).
 
 What the protection enforces: no force-push, no branch deletion, a pull request for every change, and checks that must pass.
+
+Measured state of the GitHub App installation (ADR-0025 D4; human, 2026-11-24), each fact as the human measured it through `docs/guides/GITHUB_BROKER_SETUP_GUIDE.md`:
+
+- **App registration** (guide 3.1; observed in the GitHub settings by the human). The App is created under the owner account. Repository permissions: Contents read/write, Pull requests read/write, Metadata read-only. Every other Repository permission (Administration included) and every Organization and Account permission is at No access. The webhook is inactive. The App is installable only on the owner account and is installed on the nucleus repository only.
+- **App private key** (guide 3.2). Path `~/.config/agents-broker/keys/app_private_key.pem`, mode `600`; `openssl rsa ... -noout` exit `0`.
+- **Tag-signing key** (guide 3.3). Path `~/.config/agents-broker/keys/tag_signing`, mode `600`; its fingerprint equals the `config/allowed_signers` line `SHA256:pBu73cdpPSZX9l3ZiSyJsurn2cbGA3XCJelkvLrVSEk` (a public fingerprint, not a secret).
+- **Broker configuration** (guide 3.4). `~/.config/agents-broker/config.json` mode `600`; the shape check of guide 3.4.3 exit `0`; `required_checks` = `audit`, `Analyze (python)`, `CodeQL`, the three status checks that the `main` protection requires, as the human read them in the repository settings on 2026-11-24.
+- **Not measured.** The broker is not yet installed or registered (guide 3.5-3.6) and is not measured (unit A-10, `docs/sprints/060-core-pipeline/BROKER_MEASUREMENT.md`). No claim about the broker beyond rows M1-M4 of that file is made here (`RA-19`).
+
+Consequence for `KI-059-24`, as decided and not as measured: with ADR-0025 the agent merges without human review only through the broker's `merge_pr`, which refuses unless the head is `ai-sprint/*` or `hotfix/*`, the base is `main`, and every `required_checks` name is `success` (ADR-0025 D4). This replaces the `ADR-0019` D7 reliance on "no agent holding a token with Pull requests write" (D6, superseded by ADR-0025 section 2.2). The App holds no Administration permission, so it cannot change the `main` protection; the `gh api -X PUT` step of this phase stays a human step.
 
 ## Phase 7 — On rewriting history
 
