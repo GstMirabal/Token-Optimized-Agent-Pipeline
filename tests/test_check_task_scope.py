@@ -713,3 +713,76 @@ SCOPE_NO_BUDGET = """# Task Scope
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | X | `a.py` | read | low | `qa_agent` | ⏳ |
 """
+
+
+# Phase 4.3 round loop: `**Round result**:` / `**Human decision**:` lines.
+_ROUND_S2 = "**Round result**: opened RV-1 (S2); highest S2; next round {n}"
+_ROUND_LAST_S2 = "**Round result**: opened RV-1 (S2); highest S2; next re-plan with human"
+_ROUND_S3 = "**Round result**: opened RV-2 (S3); highest S3; next human approval"
+_HUMAN = "**Human decision**: 2026-11-24; approval"
+
+
+def _rounds(tmp_path: Path, *lines: str) -> subprocess.CompletedProcess[str]:
+    return _run("--sprint-dir", str(_scope(tmp_path, CAPABLE + "\n" + "\n\n".join(lines) + "\n")))
+
+
+def test_a_round_after_a_highest_s3_round_in_the_same_loop_is_refused(tmp_path: Path) -> None:
+    result = _rounds(tmp_path, _ROUND_S3, _ROUND_S2.format(n=3))
+    assert result.returncode == 2
+    assert "had to go to the human" in result.stderr
+
+
+def test_a_fourth_s0_s2_round_in_one_loop_is_refused(tmp_path: Path) -> None:
+    result = _rounds(
+        tmp_path, _ROUND_S2.format(n=2), _ROUND_S2.format(n=3), _ROUND_LAST_S2,
+        _ROUND_S2.format(n=5),
+    )
+    assert result.returncode == 2
+    assert "fourth consecutive round" in result.stderr
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "**Round result**: opened none; highest S3; next round 3",
+        "**Round result**: opened RV-1 (S2); highest S2; next human approval",
+        "**Round result**: opened RV-1 (S2); highest S2; next re-plan with human",
+    ],
+)
+def test_a_next_that_contradicts_the_loop_rules_is_refused(tmp_path: Path, line: str) -> None:
+    result = _rounds(tmp_path, line)
+    assert result.returncode == 2
+    assert "contradicts next" in result.stderr
+
+
+def test_a_third_consecutive_s0_s2_round_must_say_re_plan(tmp_path: Path) -> None:
+    result = _rounds(
+        tmp_path, _ROUND_S2.format(n=2), _ROUND_S2.format(n=3), _ROUND_S2.format(n=4)
+    )
+    assert result.returncode == 2
+    assert "consecutive 3" in result.stderr
+
+
+def test_a_malformed_round_result_line_is_a_finding(tmp_path: Path) -> None:
+    result = _rounds(tmp_path, "**Round result**: opened none; highest S9; next human approval")
+    assert result.returncode == 2
+    assert "malformed **Round result**" in result.stderr
+
+
+def test_a_valid_round_sequence_passes(tmp_path: Path) -> None:
+    result = _rounds(tmp_path, _ROUND_S2.format(n=2), _ROUND_S3, _HUMAN)
+    assert result.returncode == 0, result.stderr
+
+
+def test_a_round_after_a_human_decision_starts_a_new_loop(tmp_path: Path) -> None:
+    result = _rounds(
+        tmp_path, _ROUND_S3, _HUMAN, _ROUND_S2.format(n=2), _ROUND_S3,
+        "**Human decision**: 2026-11-25; re-plan",
+    )
+    assert result.returncode == 0, result.stderr
+
+
+def test_a_token_inside_a_table_row_is_not_read(tmp_path: Path) -> None:
+    row = "| Z | x **Round result**: garbage and **Human decision**: junk | y |"
+    result = _rounds(tmp_path, row, _ROUND_S3)
+    assert result.returncode == 0, result.stderr

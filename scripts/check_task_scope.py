@@ -42,12 +42,22 @@ when ``baseline_context + sum > 5 * baseline_context`` (equal passes), where
 missing or non-positive value is a finding. ``Suspend after: yes`` zeroes the
 sum after that unit is counted.
 
+Round loop (Phase 4.3 round loop, ``workflows/pipeline_workflow.md``): only lines
+that START with ``**Round result**:`` or ``**Human decision**:`` are read; a table
+row holding either token in the middle is not. A loop runs from the start of the
+file, or from a ``**Human decision**:`` line, to the next ``**Human decision**:``
+line, and consecutive rounds are counted inside one loop only. Findings: (i) a
+round with ``highest S3`` or ``none`` followed by another round, (ii) a fourth round
+after three consecutive rounds with ``highest`` S0-S2, (iii) a ``next`` that
+contradicts those rules, and a ``**Round result**:`` line that does not parse.
+Rounds without such a line are not judged.
+
 Exit codes:
     0 — pass, or skip (historical columns / non-canonical dir / no anchor or
         no ``current_sprint`` block)
     2 — a task_scope.md with no work-unit rows (empty, blank or headings only),
         a repeated unit id, a bad ``Depends on`` value, units ``--batches`` cannot schedule, an anchor that names no existing sprint directory, shape, undeclared mechanical-high row, incapable assignee, or a
-        canonical sprint directory holding no task_scope.md at all (RA-11)
+        canonical sprint directory holding no task_scope.md at all (RA-11), a round-loop finding
 """
 
 from __future__ import annotations
@@ -420,6 +430,77 @@ def schedule(units: list[Unit]) -> tuple[list[list[str]], list[str]]:
     return batches, []
 
 
+ROUND_LINE = re.compile(
+    r"^\*\*Round result\*\*: opened (?P<opened>.+?); highest (?P<highest>S[0-3]|none); "
+    r"next (?P<next>round \d+|human approval|re-plan with human)$"
+)
+HUMAN_LINE = re.compile(r"^\*\*Human decision\*\*: \d{4}-\d{2}-\d{2}; (approval|re-plan)$")
+SEVERE = frozenset({"S0", "S1", "S2"})
+
+
+def _expected_next(highest: str, streak: int) -> str:
+    """Prefix the ``next`` of a round must start with."""
+    if highest not in SEVERE:
+        return "human approval"
+    return "re-plan with human" if streak >= 3 else "round"
+
+
+def _loop_findings(rounds: list[tuple[int, str, str]]) -> list[str]:
+    """Findings (i)-(iii) for the rounds of one loop, as ``(line, highest, next)``."""
+    findings: list[str] = []
+    streak = 0
+    previous = ""
+    for line_no, highest, following in rounds:
+        if previous and previous not in SEVERE:
+            findings.append(
+                f"Line {line_no}: a round follows a round with highest "
+                f"{previous}, which had to go to the human first."
+            )
+        if streak >= 3:
+            findings.append(
+                f"Line {line_no}: a fourth consecutive round with highest S0-S2 "
+                "runs without a re-plan with the human."
+            )
+        streak = streak + 1 if highest in SEVERE else 0
+        if not following.startswith(_expected_next(highest, streak)):
+            findings.append(
+                f"Line {line_no}: highest {highest} (consecutive {streak}) "
+                f"contradicts next '{following}'."
+            )
+        previous = highest
+    return findings
+
+
+def _round_line(line_no: int, line: str) -> tuple[str, tuple[int, str, str] | str | None]:
+    """Classify one line as ``("human", error|None)``, ``("round", row|error)`` or ``("", None)``."""
+    if line.startswith("**Human decision**:"):
+        bad = None if HUMAN_LINE.match(line) else f"Line {line_no}: malformed **Human decision**: line."
+        return "human", bad
+    if not line.startswith("**Round result**:"):
+        return "", None
+    match = ROUND_LINE.match(line)
+    if match is None:
+        return "round", f"Line {line_no}: malformed **Round result**: line."
+    return "round", (line_no, match["highest"], match["next"])
+
+
+def round_findings(text: str) -> list[str]:
+    """Round-loop findings (i)-(iii) and malformed ``**Round result**:`` lines."""
+    findings: list[str] = []
+    rounds: list[tuple[int, str, str]] = []
+    for line_no, raw in enumerate(text.splitlines(), start=1):
+        kind, item = _round_line(line_no, raw.rstrip())
+        if kind == "human":
+            findings.extend(([item] if item else []) + _loop_findings(rounds))
+            rounds = []
+            continue
+        if isinstance(item, str):
+            findings.append(item)
+        if isinstance(item, tuple):
+            rounds.append(item)
+    return findings + _loop_findings(rounds)
+
+
 def collect_findings(
     text: str, sprint_id: int | None, root: Path | None = None
 ) -> list[str]:
@@ -430,6 +511,7 @@ def collect_findings(
         return [NO_WORK_ROWS]
     resolved_root = root if root is not None else agents_root()
     findings = duplicate_findings(units) + dependency_findings(units)
+    findings += round_findings(text)
     if requires_cost_columns(sprint_id, tables):
         findings += budget_findings(tables, resolved_root)
     if not requires_model_columns(sprint_id, text):
