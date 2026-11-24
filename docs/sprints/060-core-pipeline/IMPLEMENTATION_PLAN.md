@@ -241,7 +241,7 @@ Si T-02 aprueba una vía (rama 1), sus cambios de `claude/settings.hooks.json` y
 | Field | Value | Reproduce |
 | :--- | :--- | :--- |
 | Delegation | `native` | `docs/active_state.json` `delegation_mode` |
-| Work units | 111 | Count of rows in Work tables |
+| Work units | 113 | Count of rows in Work tables |
 | Subagents dispatched | 45 + gates | una dispatch por unidad; gates QA y Tester por ronda |
 | Prior session ratio | n/a en Phase 1 (`~/.claude/projects` en `denyRead`); medible por el agente tras N-04 (D16, RV-24) | `python3 scripts/session_cost.py --from-anchor --json` |
 
