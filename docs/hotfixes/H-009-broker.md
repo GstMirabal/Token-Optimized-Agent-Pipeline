@@ -26,7 +26,7 @@ broker to `main`, merged by the human with `gh`.
 
 ## 3. Fix Applied
 
-Every file except `README.md` is a byte-for-byte copy from sprint commit `8fc9cba`.
+Every file except `README.md` and `tests/test_installer.sh` is a byte-for-byte copy from sprint commit `8fc9cba`.
 
 | File | Change |
 | :--- | :--- |
@@ -36,13 +36,14 @@ Every file except `README.md` is a byte-for-byte copy from sprint commit `8fc9cb
 | `scripts/github_broker.py` | The broker, an MCP stdio server |
 | `tests/test_github_broker.py` | The tests that pin the broker's behaviour, copied with the broker |
 | `README.md` | The counted block refreshed by `python3 scripts/check_readme_counts.py --write` (one more script) |
+| `tests/test_installer.sh` | The test exports `maintenance.auto=false` and `gc.auto=0` through `GIT_CONFIG_*`. The seed `git commit` of its `nucleus_claude_only` repo spawned `git maintenance run --auto --detach`, whose detached `git repack` wrote `.git/info/refs` and `.git/objects/info/packs` while the EXIT trap `rm -rf "$WORK"` deleted the tree, so the cleanup failed in 2 of 3 runs in a fresh clone. It belongs to this hotfix because the branch check (`make verify` in a fresh clone of `hotfix/H009`) runs this test, so the hotfix cannot pass its own verification without it. Five consecutive runs in a fresh clone exit `0` and leave no `$TMPDIR/agents-installer.*`. Commit `d08c234`, `Repro: manual` (`KI-060-13`) |
 
 Branch/commit: `hotfix/H009` → the commits are the output of `git log --oneline a6bddaa..hotfix/H009`, squash-merged to `main` as a single commit, as with H-008 `c3cfdfe` (hotfixes may merge outside the sprint cycle, but never unreviewed). **Branch prefix is mandatory (`agents.md` RA-03)** — `fix/`, `feat/`, and `chore/` branch names are protocol loss even when the Conventional Commits message type is `fix`.
 
 ## 4. Verification
 
 - After each copy, `git diff 8fc9cba HEAD -- <file>` prints nothing.
-- `make verify` exits `0` on `hotfix/H009`.
+- `make verify` exits `0` in a fresh clone of `hotfix/H009`, which, like CI, has no `docs/active_state.json`.
 - After the merge, `git log origin/main --oneline -- scripts/github_broker.py` lists at least one
   commit. This is the defect check.
 - The pinning test is `tests/test_github_broker.py`, which arrives with the broker. It pins the
