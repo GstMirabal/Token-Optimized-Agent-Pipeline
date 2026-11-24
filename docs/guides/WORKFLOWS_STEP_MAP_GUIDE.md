@@ -139,6 +139,11 @@ the matrix portable across tools rather than tied to one runner's agent names.
 | 6. Execution | `Subagents` | write |
 | 7. Quality Gate | `qa_agent` → `tester_agent` | write |
 | 8. Sprint Closeout | `principal_agent` | write |
+| (a) Round scope | `Round 1 audits the plan diff. Round N+1 audits the diff of the fixes of round N plus the rows that entered the plan after round N, and nothing else.` | write |
+| (b) Close | `A round that opens no `S0`-`S2` closes the loop. Its `S3` findings go to the human with the approval request, and the human decides for each one: applied without another round, or carried to Phase 7 as `RECORD`.` | write |
+| (c) Stop | `The third consecutive round that opens an `S0`-`S2` stops the loop. `principal_agent` re-plans with the human before another round runs (the same stop as A-1, `rules/qa_and_testing.md` section 4).` | write |
+| (d) Fixed lines | `Each round ends in `task_scope.md` with one line that starts with `**Round result**:`, in the form `**Round result**: opened <ids with severity or none>; highest <S0\` | verify |
+| (e) Before reporting | `rule_validator` runs `python3 scripts/check_task_scope.py --current-sprint` and `python3 scripts/check_sprint_refs.py --current-sprint`, records both exit codes in the round record, and measures each claim about the diff with `git diff`, `git log` or `git show` instead of inferring it from the text.` | write |
 
 ### `reconciliation_workflow.md`
 
