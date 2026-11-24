@@ -14,6 +14,15 @@ AGENTS_SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # family as the TMPDIR defect in tests/test_on_push.py. Sprint 051.
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/agents-installer.XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
+# The seed `git commit` of the nucleus_claude_only repo (thousands of loose
+# objects) spawns `git maintenance run --auto --detach`, which runs a detached
+# `git repack`; repack writes .git/info/refs and .git/objects/info/packs while
+# the EXIT trap above is deleting the tree, so `rm -rf` failed with "Directory
+# not empty" in about 2 of 3 runs. `gc.auto=0` alone does not stop it; the
+# detach comes from maintenance. KI-060-13.
+export GIT_CONFIG_COUNT=2
+export GIT_CONFIG_KEY_0=maintenance.auto GIT_CONFIG_VALUE_0=false
+export GIT_CONFIG_KEY_1=gc.auto GIT_CONFIG_VALUE_1=0
 
 fail() { echo "❌ FAIL: $1" >&2; exit 1; }
 
