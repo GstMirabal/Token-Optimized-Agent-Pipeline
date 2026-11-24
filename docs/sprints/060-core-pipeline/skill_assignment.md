@@ -15,13 +15,13 @@ After writing this file, run:
 
 `rules/skills_and_integrations.md §1`:
 
-The plan has 116 Work rows. Under D17 the ladder is opened per candidate, not per
+The plan has 119 Work rows. Under D17 the ladder is opened per candidate, not per
 unit: a unit can be served by the standard library or an edit (so P1 always
 resolves it) and still belong to a recurring capability worth packaging. Section 2
-resolves the 116 units; `## Candidates` decides the 8 candidates with
+resolves the 119 units; `## Candidates` decides the 8 candidates with
 criteria (a) and (b) of D17, and records the ladder trail of each.
 
-Result for the 116 units: P1 resolves every unit with a tool already present in
+Result for the 119 units: P1 resolves every unit with a tool already present in
 `skills/`, the Python standard library, `git`/`make`/`openssl`/`ssh-keygen`/
 `venv_skillopt/bin/python`, or an edit of an existing file. The plan's Dependencies
 table adds no package. Result for the 8 candidates: P1 resolves 6 (`none`, nearest skill named in Reason); 2 go
@@ -29,7 +29,7 @@ through P1, P2 and P3 with no match and wait for the O-09 A/B evidence (`forge-p
 
 | Rung | Source | Result | Evidence |
 | :--- | :--- | :--- | :--- |
-| P1 | `skills/manifest_skills.json` | hit for 116 of 116 units (section 2) and 6 of 8 candidates; partial or no match for C1 and C2 | `skills/manifest_skills.json` lists `python-quality-auditor`, `env-shielding-auditor`, `omni-context-minimizer`, `compliance-checker`, `token-saver-auditor`, `graphify`; the five script-bearing skills have their script on disk (`graphify` is a knowledge skill without `scripts/`); `grep -rli sandbox skills/*/SKILL.md` returns 0 files; the `graphify` skill queries by natural-language question, not by symbol with edge direction |
+| P1 | `skills/manifest_skills.json` | hit for 119 of 119 units (section 2) and 6 of 8 candidates; partial or no match for C1 and C2 | `skills/manifest_skills.json` lists `python-quality-auditor`, `env-shielding-auditor`, `omni-context-minimizer`, `compliance-checker`, `token-saver-auditor`, `graphify`; the five script-bearing skills have their script on disk (`graphify` is a knowledge skill without `scripts/`); `grep -rli sandbox skills/*/SKILL.md` returns 0 files; the `graphify` skill queries by natural-language question, not by symbol with edge direction |
 | P2 | `autoskills-3rd` | reached for C1 and C2 by reading only; no match | `skills/autoskills-3rd/SKILL.md` and `package.json`: a stack scanner that writes a discovery file; `node_modules/` is absent, so running it needs `pnpm install` (section 4); its description names no graph-query or sandbox-measurement capability |
 | P3 | `https://skills.sh/` (WebSearch/WebFetch; simulated JSON allowed in tests) | reached for C1 and C2; WebSearch/WebFetch denied by `permissions.deny`, `curl` refused by the network allowlist, no result | `## Candidates`, "P3 search log" |
 | P4 | Three-File Standard at Destination | not reached | no candidate has passed the O-09 A/B; nothing was built this task |
@@ -126,6 +126,9 @@ with `<bool>` replaced by the real value. No HTTP in `make verify`.
 | Q-05 | none | N/A | P1: workflow prose edit (`workflows/pipeline_workflow.md`, Phase 4.3 rule audit round loop with its stop criterion and the fixed `**Round result**` line in `task_scope.md`; regenerated `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` in the same commit). `compliance-checker` is not assigned: it has no single-file invocation (KI-060-06, routed to S-04 by human decision 2026-11-22), so it cannot scan this edit. The unit is checked by `python3 scripts/map_workflows.py --check` (regenerated step map equals the committed guide) and `make verify`; candidate C7 |
 | Q-06 | `python-quality-auditor`, `omni-context-minimizer` | N/A | P1 hit: `scripts/check_task_scope.py` has 617 lines, above the 200-line threshold of `agents.md §2 token_saver` and `ast_skeleton`, so `omni_minimizer.py` gives its skeleton before any partial read; quality audit on the modified script and `tests/test_check_task_scope.py` (stdlib, paired test); the skill proves `ruff check` only until S-02 and S-03 land (KI-060-05, claim narrowed by S-01), so `scripts/quality_audit.py` through `make verify` carries `max_indentation` and `max_lines_per_func`; the test itself is the check of the behavior (one case per condition (i), (ii), (iii) of the plan row plus one valid case; case (i) fails at the parent commit, KI-060-14); candidate C5 |
 | Q-07 | none | N/A | P1: agent profile prose edit (`agents/rule_validator.md`: `Bash` added to the `tools:` line and a `bash_scope` row in the profile table; D18, KI-060-14). `compliance-checker` is not assigned: it has no single-file invocation (KI-060-06, routed to S-04 by human decision 2026-11-22), so it cannot scan this edit. Checked by `venv_skillopt/bin/python -m pytest tests/test_agent_profile_census.py -q` and `grep -c '^tools: Read, Glob, Grep, Write, Edit, Bash$' agents/rule_validator.md` = `1`; candidate C7 |
+| Q-08 | `python-quality-auditor`, `omni-context-minimizer` | N/A | P1 hit: `tests/test_github_broker.py` has 395 lines, above the 200-line threshold of `agents.md §2 token_saver` and `ast_skeleton`, so `omni_minimizer.py` gives its skeleton before any partial read; quality audit on the modified test file (stdlib); the skill proves `ruff check` only until S-02 and S-03 land (KI-060-05, claim narrowed by S-01), so `scripts/quality_audit.py` through `make verify` carries `max_indentation` and `max_lines_per_func`; the two added tests are the check of the behavior (the `except Exception` of `handle_tool_call` returns `isError` `true` without the exception message; the one of `reply_for_line` returns code `-32603` and the server answers the next `ping`), run by the main session in a clone under `$TMPDIR`; `scripts/github_broker.py` is not edited; candidate C5 |
+| Q-09 | none | N/A | P1: architecture document edit (`docs/architecture/GITHUB_BROKER_BLUEPRINT.md`, one status line, line 12). `compliance-checker` is not assigned: it has no single-file invocation (KI-060-06, routed to S-04 by human decision 2026-11-22), so it cannot scan this edit. Checked by `grep -c 'not yet implemented' docs/architecture/GITHUB_BROKER_BLUEPRINT.md` = `0` and `make verify` |
+| Q-10 | none | N/A | P1: hotfix record prose edit (`docs/hotfixes/H-009-broker.md`, QA1-2 note, line 29 exceptions, section 3 table and one section 4 round line, as H-007 line 42). `compliance-checker` is not assigned: it has no single-file invocation (KI-060-06, routed to S-04 by human decision 2026-11-22), so it cannot scan this edit. Checked by the record's fields against `docs/standards/templates/HOTFIX_TEMPLATE.md` and `make verify` |
 | S-01 | `compliance-checker` | N/A | P1 hit: scan of the edited sprint document; the edit narrows the `python-quality-auditor` justification row to what is measured (`ruff check`, `scripts/quality_audit.py`); a scan of a prose claim, no Python; KI-060-05 |
 | S-02 | none | N/A | P1: pinned requirements file regenerated with `pip install --dry-run --ignore-installed --report` (Python 3.13 and, with `--python-version 3.12 --only-binary=:all:`, 3.12) and sha256 hashes from the venv interpreter; checked by `pip install --dry-run --require-hashes` on `requirements-quality.txt` and `requirements-core.txt` (exit `0`); no skill applies and no Python source changes |
 | S-03 | `python-quality-auditor` | N/A | P1 hit, limited: `python-quality-auditor` is the unit's subject, so its output cannot witness its own repair. It proves only `ruff check` on the fix and its test (`tests/test_python_quality_auditor.py`, which gains `::test_missing_tool_exits_nonzero` in the same commit). Mypy, Bandit and Radon are proven by running `venv_skillopt/bin/python -m mypy`, `-m bandit` and `-m radon` directly, and only after S-02 installs them; until S-03 lands the skill exits 0 regardless (KI-060-05). The script is 61 lines, so no `omni-context-minimizer`; candidate C5 |
@@ -199,7 +202,7 @@ Applies D17 from the plan text (the template gains this table in O-06).
 The final decision per candidate is written by unit O-14 from the O-09 evidence; there C6 (`claude/settings.hooks.json`) is reconciled with the agent candidate for the same file in `agent_assignment.md` (O-13), so both files carry one decision (RV-37, RV-39). Decisions below are provisional until O-14.
 
 Notation: `P` = `docs/sprints/060-core-pipeline/IMPLEMENTATION_PLAN.md`; `E` =
-`grep -E '^\| [A-Z]-[0-9]{2} \|' P` (116 lines, `grep -c` reproduces it); `Q<n>` =
+`grep -E '^\| [A-Z]-[0-9]{2} \|' P` (119 lines, `grep -c` reproduces it); `Q<n>` =
 the same plan file of sprint `05<n>-core-pipeline`.
 
 | Candidate | Units | Criterion (a/b) | Evidence | Decision | Reason |
