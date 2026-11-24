@@ -96,7 +96,7 @@ Status values: ⏳ pending, ✅ committed (short SHA). Risk is transcribed from 
 | U-04 | `docs/decisions/ADR-0014-ci-gate-record-on-uninspectable-protection.md` | modify: the `**Status**` line becomes `Superseded by ADR-0025 (D4: pr_status and merge_pr replace scripts/ci_gate.py, retired in Sprint 060)`, no unit id; the body and `ADR-0025` do not change; after U-02; done when `grep -n 'Superseded by ADR-0025' docs/decisions/ADR-0014-ci-gate-record-on-uninspectable-protection.md` returns the `**Status**` line (human decision 2026-11-22, RV-72) | low | `doc_orchestrator` | sonnet | medium | 2798 | | U-02 | ✅ `be6034f` |
 | A-12 | `agents/devops_agent.md` | modify: GitHub operations run through the broker's MCP tools; keeps `Bash` only, no write authority (`ADR-0009`) | low | `doc_orchestrator` | sonnet | medium | 2798 | | A-11 | ✅ `9877250` |
 | A-13 | `rules/project_topology.md` | modify: `gh`/credential row now names the broker (`KI-059-21`, `-22`, `-24`) | medium | `doc_orchestrator` | sonnet | medium | 7867 | | A-11 | ✅ `02e69ae` |
-| A-14 | `workflows/repository_hardening_workflow.md` | modify: measured state of `ADR-0019` D7 and the App installation; the commit includes the regenerated `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` (RV-29) | low | `doc_orchestrator` | sonnet | medium | 2798 | yes | - | ⏳ pending |
+| A-14 | `workflows/repository_hardening_workflow.md` | modify: measured state of `ADR-0019` D7 and the App installation; the commit includes the regenerated `docs/guides/WORKFLOWS_STEP_MAP_GUIDE.md` (RV-29) | low | `doc_orchestrator` | sonnet | medium | 2798 | yes | - | ✅ `80bec22` |
 
 ### Wave S — Skill dependencies declared and fail-closed (KI-060-05)
 
