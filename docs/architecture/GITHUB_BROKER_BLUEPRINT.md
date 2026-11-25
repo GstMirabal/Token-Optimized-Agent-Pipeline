@@ -10,7 +10,7 @@
 
 arc42-lite (`rules/documentation_standard.md §5`) — Reference only. This document states current facts, verifiably; it never argues for them. Any decision behind this module's shape lives in a linked ADR, not here.
 
-Implementation status: designed, not yet implemented (Sprint 060 A-03/A-04). Every row below describes the module as designed; none is a measured result. Measurement instrument: `docs/sprints/060-core-pipeline/BROKER_MEASUREMENT.md` M1-M5 (created in A-10, extended in A-15; it does not exist when this Blueprint is written).
+Implementation status: `scripts/github_broker.py` and `tests/test_github_broker.py` are implemented. No row below is measured yet. Measurement instrument: `docs/sprints/060-core-pipeline/BROKER_MEASUREMENT.md` M1-M5, which A-10 creates and A-15 extends; it does not exist yet. `scripts/install_broker.py` exists on `ai-sprint/060` and reaches `main` with the Sprint 060 deployment.
 
 ## 1. Introduction & Goals
 The GitHub broker is a stdio MCP server (`scripts/github_broker.py`, JSON-RPC by lines, Python standard library only) that executes a closed list of GitHub operations (`push_branch`, `open_pr`, `merge_pr`, `push_tag`, `create_release`, `pr_status`) on behalf of an agent running under the sandbox. It authenticates as a GitHub App: it signs an App JWT with `openssl`, exchanges it for a one-hour installation token, and keeps that token in process memory only. A second script (`scripts/install_broker.py`) lets the human install the broker into `~/.config/agents-broker/` from a signed tag or a named `main` commit.

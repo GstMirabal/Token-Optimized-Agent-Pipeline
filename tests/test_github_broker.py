@@ -393,3 +393,44 @@ def test_protocol_survives_garbage_and_faults(broker: Any, monkeypatch: pytest.M
     assert replies[2]["result"]["isError"] is True
     assert TOKEN not in json.dumps(replies)
     assert replies[3]["result"] == {}
+
+
+class _ProbeFault(Exception):
+    """An exception type no `except` clause in the broker names."""
+
+
+def test_tool_call_fault_boundary_catches_unnamed_exception(
+    broker: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def boom(*_a: Any, **_k: Any) -> Any:
+        raise _ProbeFault(TOKEN)
+
+    monkeypatch.setattr(broker_mod, "http_json", boom)
+    result = broker_mod.handle_tool_call(broker, {"name": "pr_status", "arguments": {"number": 1}})
+    assert result["isError"] is True
+    assert TOKEN not in json.dumps(result)
+
+
+def test_message_fault_boundary_catches_unnamed_exception_and_keeps_serving(
+    broker: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    real = broker_mod.handle_message
+    calls: list[int] = []
+
+    def fail_first(*args: Any, **kwargs: Any) -> Any:
+        calls.append(1)
+        if len(calls) == 1:
+            raise _ProbeFault(TOKEN)
+        return real(*args, **kwargs)
+
+    monkeypatch.setattr(broker_mod, "handle_message", fail_first)
+    replies = run_session(
+        broker,
+        [
+            {"jsonrpc": "2.0", "id": 1, "method": "ping"},
+            {"jsonrpc": "2.0", "id": 2, "method": "ping"},
+        ],
+    )  # fmt: skip
+    assert replies[0]["error"]["code"] == -32603
+    assert TOKEN not in json.dumps(replies)
+    assert replies[1]["result"] == {}
