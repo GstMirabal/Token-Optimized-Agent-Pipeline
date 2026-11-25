@@ -26,23 +26,27 @@ broker to `main`, merged by the human with `gh`.
 
 ## 3. Fix Applied
 
-Every file except `README.md` and `tests/test_installer.sh` is a byte-for-byte copy from sprint commit `8fc9cba`.
+Every file except `README.md`, `tests/test_installer.sh`, `tests/test_github_broker.py` and `docs/architecture/GITHUB_BROKER_BLUEPRINT.md` is a byte-for-byte copy from sprint commit `8fc9cba`.
 
 | File | Change |
 | :--- | :--- |
 | `docs/decisions/ADR-0025-github-app-broker.md` | The decision, with its two `Superseded by ADR-0025` lines in `docs/decisions/ADR-0019-sandbox-regime.md` |
-| `docs/architecture/GITHUB_BROKER_BLUEPRINT.md` | The Blueprint, which precedes the code (`agents.md` §0 Traceability) |
+| `docs/architecture/GITHUB_BROKER_BLUEPRINT.md` | The Blueprint, which precedes the code (`agents.md` §0 Traceability). Q-09 (commit `f2abb6c`, Gate 1 finding `QA1-3`) replaced its status line "designed, not yet implemented" with the current fact: the broker and its test are implemented, no row is measured yet, and `scripts/install_broker.py` exists on `ai-sprint/060` and reaches `main` with the Sprint 060 deployment |
 | `docs/guides/GITHUB_BROKER_SETUP_GUIDE.md` | The `RA-16` `invoked_by:` target of the broker |
 | `scripts/github_broker.py` | The broker, an MCP stdio server |
-| `tests/test_github_broker.py` | The tests that pin the broker's behaviour, copied with the broker |
+| `tests/test_github_broker.py` | The tests that pin the broker's behaviour, copied with the broker. Q-08 (commit `6ea3eba`, `test(scripts)`, Gate 1 finding `QA1-1`) added two tests that pin the two fault boundaries of `scripts/github_broker.py` with a test-local `Exception` subclass; one mutation per boundary fails its own test; 56 passed |
 | `README.md` | The counted block refreshed by `python3 scripts/check_readme_counts.py --write` (one more script) |
 | `tests/test_installer.sh` | The test exports `maintenance.auto=false` and `gc.auto=0` through `GIT_CONFIG_*`. The seed `git commit` of its `nucleus_claude_only` repo spawned `git maintenance run --auto --detach`, whose detached `git repack` wrote `.git/info/refs` and `.git/objects/info/packs` while the EXIT trap `rm -rf "$WORK"` deleted the tree, so the cleanup failed in 2 of 3 runs in a fresh clone. It belongs to this hotfix because the branch check (`make verify` in a fresh clone of `hotfix/H009`) runs this test, so the hotfix cannot pass its own verification without it. Five consecutive runs in a fresh clone exit `0` and leave no `$TMPDIR/agents-installer.*`. Commit `d08c234`, `Repro: manual` (`KI-060-13`) |
+
+Gate 1 round 1 (`qa_agent`): `REJECTED`, class `charter`, severity `S2`, at `c24ab17`, findings `QA1-1` to `QA1-7`. `QA1-1` is fixed by Q-08, `QA1-3` by Q-09 and `QA1-2` by Q-10 (the install-script note below). `QA1-4` stays `RECORD` by human decision 2026-11-24: the `CHANGELOG.md` entry stays deferred to the Sprint 060 closeout. `QA1-5` to `QA1-7` are `S3`.
+
+`scripts/install_broker.py` and `tests/test_install_broker.py` are not on `main` until the Sprint 060 deployment. Until then the human runs `python3 scripts/install_broker.py --commit <squash SHA>` from a checkout of `ai-sprint/060`. `docs/guides/GITHUB_BROKER_SETUP_GUIDE.md` is unchanged: its text is true on `main` after the Sprint 060 deployment.
 
 Branch/commit: `hotfix/H009` → the commits are the output of `git log --oneline a6bddaa..hotfix/H009`, squash-merged to `main` as a single commit, as with H-008 `c3cfdfe` (hotfixes may merge outside the sprint cycle, but never unreviewed). **Branch prefix is mandatory (`agents.md` RA-03)** — `fix/`, `feat/`, and `chore/` branch names are protocol loss even when the Conventional Commits message type is `fix`.
 
 ## 4. Verification
 
-- After each copy, `git diff 8fc9cba HEAD -- <file>` prints nothing.
+- After each copy, `git diff 8fc9cba HEAD -- <file>` prints nothing, at the commit that made that copy. At the branch tip, `tests/test_github_broker.py` and `docs/architecture/GITHUB_BROKER_BLUEPRINT.md` differ from `8fc9cba` by Q-08 and Q-09.
 - `make verify` exits `0` in a fresh clone of `hotfix/H009`, which, like CI, has no `docs/active_state.json`.
 - After the merge, `git log origin/main --oneline -- scripts/github_broker.py` lists at least one
   commit. This is the defect check.
